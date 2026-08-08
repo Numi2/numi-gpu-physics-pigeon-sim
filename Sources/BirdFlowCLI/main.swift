@@ -1981,6 +1981,7 @@ private struct MeasuredBirdReplayArguments {
     var bodyRefinement = false
     var loadRefinement = false
     var trimSearch = false
+    var hoverControlSweep = false
     var trimIterations = 2
     var trimScreeningCycles: Float = 2
     var trimConfirmationCycles: Float = 5
@@ -2090,6 +2091,8 @@ private struct MeasuredBirdReplayArguments {
                 loadRefinement = true
             case "--trim-search":
                 trimSearch = true
+            case "--hover-control-sweep":
+                hoverControlSweep = true
             case "--trim-iterations":
                 trimOptionsCustomized = true
                 index += 1
@@ -2211,6 +2214,15 @@ private struct MeasuredBirdReplayArguments {
                 "--trim-search controls its own duration and is incompatible with --cycles, --steps, --body-substeps, free-flight, refinement, or momentum-ledger modes"
             )
         }
+        if hoverControlSweep
+            && (freeFlight || freeFlightConfirmation || bodyRefinement
+                || loadRefinement || trimSearch || momentumLedger || steps != nil
+                || bodySubsteps != 1 || preRollCycles != 0 || cyclesCustomized
+                || trimOptionsCustomized) {
+            throw CLIError.invalidArgument(
+                "--hover-control-sweep owns its fixed-body five-cycle screening duration and cannot be combined with flight, trim, refinement, or duration modes"
+            )
+        }
         if confirmationOptionsCustomized && !freeFlightConfirmation {
             throw CLIError.invalidArgument(
                 "--confirmation-*-cycles options require --free-flight-confirmation"
@@ -2262,6 +2274,9 @@ private struct MeasuredBirdReplayArguments {
       --body-refinement  Run locked 1/2/4 body-substep ladder; requires --steps
       --load-refinement  Run five-cycle prescribed 8/12/16 load ladder
       --trim-search      Search bounded body pitch/airspeed for prescribed force/moment balance
+      --hover-control-sweep
+                         Screen the declared virtual hover actuator at nine
+                         power/recovery pitch pairs; requires still air
       --trim-iterations N
                          Gauss-Newton updates for trim search (default: 2; range: 1...6)
       --trim-screening-cycles VALUE
@@ -3588,6 +3603,33 @@ private func runMeasuredBirdReplay(_ values: [String]) throws {
                     + String(report.bestCandidate.relativeTorqueResidual)
             )
             print("passed: \(report.passed)")
+            print("scientific_verdict: \(report.scientificVerdict)")
+        }
+        return
+    }
+    if arguments.hoverControlSweep {
+        let report = try MeasuredBirdReplay.runHoverControlSweep(
+            loaded,
+            chordCells: arguments.chordCells,
+            batchSize: arguments.batchSize
+        )
+        if arguments.json {
+            try printJSON(report)
+        } else {
+            print("dataset: \(report.datasetIdentifier)")
+            print("candidates: \(report.candidates.count)")
+            print(
+                "best_power_stroke_pitch_rad: "
+                    + String(report.bestCandidate.powerStrokePitchRadians)
+            )
+            print(
+                "best_recovery_stroke_pitch_rad: "
+                    + String(report.bestCandidate.recoveryStrokePitchRadians)
+            )
+            print(
+                "best_upward_force_N: "
+                    + String(report.bestCandidate.upwardForceNewtons)
+            )
             print("scientific_verdict: \(report.scientificVerdict)")
         }
         return
