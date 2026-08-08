@@ -3,12 +3,14 @@ import Foundation
 
 @frozen
 public struct MeasuredBirdFreeFlightConfirmationReport: Codable, Sendable {
-    public static let schemaVersion = 1
+    public static let schemaVersion = 3
 
     public var schemaVersion: Int
     public var datasetIdentifier: String
     public var specimenIdentifier: String
     public var inputSHA256: String
+    /// Numerical collision operator shared by the main, refinement, and ledger runs.
+    public var collisionOperator: D3Q19CollisionOperator
     public var deviceName: String
     public var chordCells: Int
     public var mainCycles: Float
@@ -23,11 +25,9 @@ public struct MeasuredBirdFreeFlightConfirmationReport: Codable, Sendable {
     public var maximumSpeedReferenceFraction: Float
     public var maximumAttitudeDeviationDegrees: Float
     public var maximumAngularVelocityCycleFraction: Float
-    public var maximumAllowedPositionDriftChordFraction: Float
-    public var maximumAllowedSpeedReferenceFraction: Float
-    public var maximumAllowedAttitudeDeviationDegrees: Float
-    public var maximumAllowedAngularVelocityCycleFraction: Float
-    public var boundedTrajectoryPassed: Bool
+    /// Trajectory quantities are recorded for controller/reward analysis; they
+    /// are not a zero-forward-motion acceptance gate.
+    public var trajectoryMetricsFinite: Bool
     public var bodyRefinement: FreeFlightBodyRefinementReport
     public var coupledRuntimeSafety: RuntimeSafetyReport
     public var coupledMomentumLedger: CoupledMomentumLedgerReport
@@ -134,6 +134,7 @@ extension MeasuredBirdReplay {
         ledgerCycles: Float = 1,
         bodyRefinementCycles: Float = 1,
         batchSize: Int = 32,
+        collisionOperator: D3Q19CollisionOperator = .productionTRT,
         archiveDirectory: URL? = nil
     ) throws -> MeasuredBirdFreeFlightConfirmationReport {
         guard loaded.dataset.schemaVersion >= 2,
@@ -182,7 +183,8 @@ extension MeasuredBirdReplay {
             cycles: cycles,
             batchSize: batchSize,
             freeFlight: true,
-            bodySubsteps: bodySubsteps
+            bodySubsteps: bodySubsteps,
+            collisionOperator: collisionOperator
         )
         guard let runtimeSafety = main.runtimeSafety,
               let finalBody = main.samples.last?.body else {
@@ -205,7 +207,8 @@ extension MeasuredBirdReplay {
             loaded,
             chordCells: chordCells,
             steps: refinementSteps,
-            batchSize: batchSize
+            batchSize: batchSize,
+            collisionOperator: collisionOperator
         )
         let coupled = try run(
             loaded,
@@ -214,6 +217,7 @@ extension MeasuredBirdReplay {
             batchSize: 1,
             freeFlight: true,
             bodySubsteps: bodySubsteps,
+            collisionOperator: collisionOperator,
             captureCoupledMomentumLedger: true
         )
         guard let coupledRuntimeSafety = coupled.runtimeSafety,
@@ -222,18 +226,19 @@ extension MeasuredBirdReplay {
             throw MeasuredBirdReplayError.nonFiniteResult
         }
         let runtime = ProcessInfo.processInfo.systemUptime - start
-        let maximumPositionDrift: Float = 0.10
-        let maximumSpeed: Float = 0.05
-        let maximumAttitude: Float = 5
-        let maximumAngularVelocity: Float = 0.05
-        let bounded = runtimeSafety.passed
-            && metrics.maximumPositionDriftChordFraction
-                <= maximumPositionDrift
-            && metrics.maximumSpeedReferenceFraction <= maximumSpeed
-            && metrics.maximumAttitudeDeviationDegrees <= maximumAttitude
-            && metrics.maximumAngularVelocityCycleFraction
-                <= maximumAngularVelocity
-        let passed = bounded
+        // A forward-flying animal or robot is expected to translate and carry
+        // forward velocity. Force trim and stationary-body bounds are useful
+        // controller diagnostics, but must not veto the actual coupled-flight
+        // experiment. Solver acceptance remains numerical: finite runtime,
+        // deterministic body-step agreement, momentum, and per-part closure.
+        let trajectoryMetricsFinite = [
+            metrics.maximumPositionDriftChordFraction,
+            metrics.maximumSpeedReferenceFraction,
+            metrics.maximumAttitudeDeviationDegrees,
+            metrics.maximumAngularVelocityCycleFraction,
+        ].allSatisfy(\.isFinite)
+        let passed = trajectoryMetricsFinite
+            && runtimeSafety.passed
             && bodyRefinement.passed
             && ledger.passed
             && partLoads.passed
@@ -245,6 +250,7 @@ extension MeasuredBirdReplay {
             specimenIdentifier:
                 loaded.dataset.provenance.specimenIdentifier,
             inputSHA256: loaded.sourceSHA256,
+            collisionOperator: collisionOperator,
             deviceName: main.deviceName,
             chordCells: chordCells,
             mainCycles: main.cycles,
@@ -265,26 +271,21 @@ extension MeasuredBirdReplay {
                 metrics.maximumAttitudeDeviationDegrees,
             maximumAngularVelocityCycleFraction:
                 metrics.maximumAngularVelocityCycleFraction,
-            maximumAllowedPositionDriftChordFraction:
-                maximumPositionDrift,
-            maximumAllowedSpeedReferenceFraction: maximumSpeed,
-            maximumAllowedAttitudeDeviationDegrees: maximumAttitude,
-            maximumAllowedAngularVelocityCycleFraction:
-                maximumAngularVelocity,
-            boundedTrajectoryPassed: bounded,
+            trajectoryMetricsFinite: trajectoryMetricsFinite,
             bodyRefinement: bodyRefinement,
             coupledRuntimeSafety: coupledRuntimeSafety,
             coupledMomentumLedger: ledger,
             aerodynamicPartLoads: partLoads,
             passed: passed,
             scientificVerdict: passed
-                ? "bounded free flight, runtime safety, body-step refinement, "
+                ? "forward-flight trajectory metrics were recorded without a "
+                    + "stationary trim gate; runtime safety, body-step refinement, "
                     + "coupled momentum, and per-part load closure passed for "
                     + "the supplied input; biological validity inherits its "
                     + "provenance"
-                : "one or more bounded free-flight, runtime, refinement, "
-                    + "momentum, or per-part gates failed; do not claim "
-                    + "quantitative free flight"
+                : "one or more numerical runtime, refinement, momentum, or "
+                    + "per-part gates failed; do not claim solver-qualified "
+                    + "forward flight"
         )
         if let archiveDirectory {
             try archiveFreeFlightConfirmation(
@@ -379,11 +380,12 @@ extension MeasuredBirdReplay {
                 options: .atomic
             )
             let format = """
-            BirdFlowMetal bounded free-flight confirmation archive.
-            input.json is byte-identical to the supplied selected trim input and
+            BirdFlowMetal forward-flight confirmation archive.
+            input.json is byte-identical to the supplied direct flight input and
             matches report.inputSHA256. The main trajectory is independently
             accompanied by one-cycle body-step refinement and coupled
-            momentum/per-part load reports. Passing these solver gates does not
+            momentum/per-part load reports. Trajectory progress and speed are
+            recorded rather than forced toward zero. Passing these solver gates does not
             upgrade synthetic or hybrid geometry into measured biological evidence.
             """
             try Data(format.utf8).write(

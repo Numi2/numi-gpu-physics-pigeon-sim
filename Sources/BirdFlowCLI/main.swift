@@ -1986,6 +1986,8 @@ private struct MeasuredBirdReplayArguments {
     var trimIterations = 2
     var trimScreeningCycles: Float = 2
     var trimConfirmationCycles: Float = 5
+    var trimPowerStrokePitchOffsetRadians: Float = 0
+    var trimRecoveryStrokePitchOffsetRadians: Float = 0
     var freeFlightConfirmation = false
     var confirmationMainCycles: Float = 5
     var confirmationLedgerCycles: Float = 1
@@ -2138,6 +2140,30 @@ private struct MeasuredBirdReplayArguments {
                     )
                 }
                 trimConfirmationCycles = value
+            case "--trim-power-stroke-pitch-offset":
+                trimOptionsCustomized = true
+                index += 1
+                guard index < values.count,
+                      let value = Float(values[index]),
+                      value.isFinite,
+                      abs(value) <= 0.5 else {
+                    throw CLIError.invalidArgument(
+                        "--trim-power-stroke-pitch-offset requires a finite value in [-0.5, 0.5]"
+                    )
+                }
+                trimPowerStrokePitchOffsetRadians = value
+            case "--trim-recovery-stroke-pitch-offset":
+                trimOptionsCustomized = true
+                index += 1
+                guard index < values.count,
+                      let value = Float(values[index]),
+                      value.isFinite,
+                      abs(value) <= 0.5 else {
+                    throw CLIError.invalidArgument(
+                        "--trim-recovery-stroke-pitch-offset requires a finite value in [-0.5, 0.5]"
+                    )
+                }
+                trimRecoveryStrokePitchOffsetRadians = value
             case "--free-flight-confirmation":
                 freeFlightConfirmation = true
             case "--confirmation-main-cycles":
@@ -2226,6 +2252,11 @@ private struct MeasuredBirdReplayArguments {
                 "--trim-search controls its own duration and is incompatible with --cycles, --steps, --body-substeps, free-flight, refinement, or momentum-ledger modes"
             )
         }
+        if trimOptionsCustomized && !trimSearch {
+            throw CLIError.invalidArgument(
+                "--trim-*-cycles and --trim-*-stroke-pitch-offset options require --trim-search"
+            )
+        }
         if hoverControlSweep
             && (freeFlight || freeFlightConfirmation || bodyRefinement
                 || loadRefinement || trimSearch || momentumLedger || steps != nil
@@ -2289,7 +2320,7 @@ private struct MeasuredBirdReplayArguments {
                          serialized with the replay and never selected implicitly
       --body-refinement  Run locked 1/2/4 body-substep ladder; requires --steps
       --load-refinement  Run five-cycle prescribed 8/12/16 load ladder
-      --trim-search      Search bounded body pitch/airspeed for prescribed force/moment balance
+      --trim-search      Optional prescribed force/moment diagnostic for controller tuning
       --hover-control-sweep
                          Screen the declared virtual hover actuator at nine
                          -0.30/0/+0.30 rad power/recovery pitch pairs;
@@ -2300,11 +2331,16 @@ private struct MeasuredBirdReplayArguments {
                          Cycles per trim candidate (default/minimum: 2)
       --trim-confirmation-cycles VALUE
                          Cycles for the selected candidate (default/minimum: 5)
+      --trim-power-stroke-pitch-offset RAD
+      --trim-recovery-stroke-pitch-offset RAD
+                         Declared bilateral phase-feathering offsets in [-0.5, 0.5];
+                         used only by --trim-search
       --free-flight-confirmation
-                         Run independent bounded-flight, 1/2/4 body-step,
-                         and coupled momentum/load closure gates
+                         Run independent forward-flight, 1/2/4 body-step,
+                         and coupled momentum/load closure gates; trajectory
+                         progress and speed are recorded, not forced toward zero
       --confirmation-main-cycles VALUE
-                         Bounded free-flight cycles (default/minimum: 5)
+                         Forward-flight cycles (default/minimum: 5)
       --confirmation-ledger-cycles VALUE
                          Coupled momentum/load audit cycles (default/minimum: 1)
       --confirmation-refinement-cycles VALUE
@@ -3479,6 +3515,7 @@ private func runMeasuredBirdReplay(_ values: [String]) throws {
             bodyRefinementCycles:
                 arguments.confirmationRefinementCycles,
             batchSize: arguments.batchSize,
+            collisionOperator: arguments.collisionOperator,
             archiveDirectory: arguments.archivePath.map {
                 URL(fileURLWithPath: $0, isDirectory: true)
             }
@@ -3489,6 +3526,7 @@ private func runMeasuredBirdReplay(_ values: [String]) throws {
             print("dataset: \(report.datasetIdentifier)")
             print("specimen: \(report.specimenIdentifier)")
             print("input_sha256: \(report.inputSHA256)")
+            print("collision_operator: \(report.collisionOperator.rawValue)")
             print("device: \(report.deviceName)")
             print("main_cycles: \(report.mainCycles)")
             print(
@@ -3539,12 +3577,14 @@ private func runMeasuredBirdReplay(_ values: [String]) throws {
             loaded,
             chordCells: arguments.chordCells,
             steps: arguments.steps!,
-            batchSize: arguments.batchSize
+            batchSize: arguments.batchSize,
+            collisionOperator: arguments.collisionOperator
         )
         if arguments.json {
             try printJSON(report)
         } else {
             print("dataset: \(report.datasetIdentifier)")
+            print("collision_operator: \(report.collisionOperator.rawValue)")
             print("steps: \(report.steps)")
             print(
                 "fine_position_chord_fraction: "
@@ -3567,12 +3607,14 @@ private func runMeasuredBirdReplay(_ values: [String]) throws {
         let report = try MeasuredBirdReplay.runLoadRefinement(
             loaded,
             cycles: max(5, arguments.cycles),
-            batchSize: arguments.batchSize
+            batchSize: arguments.batchSize,
+            collisionOperator: arguments.collisionOperator
         )
         if arguments.json {
             try printJSON(report)
         } else {
             print("dataset: \(report.datasetIdentifier)")
+            print("collision_operator: \(report.collisionOperator.rawValue)")
             print(
                 "fine_force_difference_fraction: "
                     + String(report.finePairForceDifferenceFraction)
@@ -3595,6 +3637,10 @@ private func runMeasuredBirdReplay(_ values: [String]) throws {
             iterations: arguments.trimIterations,
             batchSize: arguments.batchSize,
             collisionOperator: arguments.collisionOperator,
+            powerStrokePitchOffsetRadians:
+                arguments.trimPowerStrokePitchOffsetRadians,
+            recoveryStrokePitchOffsetRadians:
+                arguments.trimRecoveryStrokePitchOffsetRadians,
             archiveDirectory: arguments.archivePath.map {
                 URL(fileURLWithPath: $0, isDirectory: true)
             }
@@ -3604,6 +3650,12 @@ private func runMeasuredBirdReplay(_ values: [String]) throws {
         } else {
             print("dataset: \(report.datasetIdentifier)")
             print("collision_operator: \(report.collisionOperator.rawValue)")
+            print(
+                "phase_feathering_rad: power="
+                    + String(report.powerStrokePitchOffsetRadians)
+                    + ", recovery="
+                    + String(report.recoveryStrokePitchOffsetRadians)
+            )
             print("candidates: \(report.candidates.count)")
             print(
                 "best_pitch_offset_deg: "

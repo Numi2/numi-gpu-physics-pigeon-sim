@@ -37,7 +37,10 @@ public struct MeasuredBirdHoverControlSweepReport: Codable, Sendable {
     public var scientificVerdict: String
 }
 
-private func makeMeasuredBirdHoverControlCandidate(
+/// Applies an explicit bilateral phase-feathering action without replacing the
+/// authored wingbeat. Both hover screening and forward trim use this same
+/// provenance-bearing actuator transform.
+func makeMeasuredBirdPhaseFeatheringCandidate(
     _ loaded: LoadedMeasuredBirdDataset,
     powerStrokePitchRadians: Float,
     recoveryStrokePitchRadians: Float
@@ -45,7 +48,7 @@ private func makeMeasuredBirdHoverControlCandidate(
     guard powerStrokePitchRadians.isFinite,
           recoveryStrokePitchRadians.isFinite else {
         throw MeasuredBirdReplayError.invalidInput(
-            "hover control pitches must be finite"
+            "phase-feathering pitch offsets must be finite"
         )
     }
     var dataset = loaded.dataset
@@ -64,7 +67,7 @@ private func makeMeasuredBirdHoverControlCandidate(
         return adjusted
     }
     dataset.provenance.processingDescription +=
-        "; virtual hover-control screening candidate: power-stroke pitch "
+        "; virtual phase-feathering candidate: power-stroke pitch "
         + "\(powerStrokePitchRadians) rad, recovery-stroke pitch "
         + "\(recoveryStrokePitchRadians) rad"
     try dataset.validate()
@@ -137,7 +140,7 @@ extension MeasuredBirdReplay {
         var deviceName = ""
         for powerPitch in pitchLevels {
             for recoveryPitch in pitchLevels {
-                let candidate = try makeMeasuredBirdHoverControlCandidate(
+                let candidate = try makeMeasuredBirdPhaseFeatheringCandidate(
                     loaded,
                     powerStrokePitchRadians: powerPitch,
                     recoveryStrokePitchRadians: recoveryPitch

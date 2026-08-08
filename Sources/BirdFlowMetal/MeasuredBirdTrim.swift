@@ -34,6 +34,8 @@ public struct MeasuredBirdTrimSearchReport: Codable, Sendable {
     public var screeningCycles: Float
     public var confirmationCycles: Float
     public var requestedIterations: Int
+    public var powerStrokePitchOffsetRadians: Float
+    public var recoveryStrokePitchOffsetRadians: Float
     public var candidateDefinition: String
     public var pitchBoundsDegrees: SIMD2<Float>
     public var speedScaleBounds: SIMD2<Float>
@@ -254,6 +256,8 @@ extension MeasuredBirdReplay {
         iterations: Int = 2,
         batchSize: Int = 32,
         collisionOperator: D3Q19CollisionOperator = .productionTRT,
+        powerStrokePitchOffsetRadians: Float = 0,
+        recoveryStrokePitchOffsetRadians: Float = 0,
         archiveDirectory: URL? = nil
     ) throws -> MeasuredBirdTrimSearchReport {
         guard loaded.dataset.schemaVersion >= 2,
@@ -268,9 +272,13 @@ extension MeasuredBirdReplay {
               confirmationCycles.isFinite,
               confirmationCycles >= 5,
               (1...6).contains(iterations),
-              batchSize > 0 else {
+              batchSize > 0,
+              powerStrokePitchOffsetRadians.isFinite,
+              recoveryStrokePitchOffsetRadians.isFinite,
+              abs(powerStrokePitchOffsetRadians) <= 0.5,
+              abs(recoveryStrokePitchOffsetRadians) <= 0.5 else {
             throw MeasuredBirdReplayError.invalidInput(
-                "trim search requires chord cells >= 8, at least two screening cycles, at least five confirmation cycles, 1...6 iterations, and positive batch size"
+                "trim search requires valid durations, phase-feathering offsets in [-0.5, 0.5] rad, and positive batch size"
             )
         }
         guard vectorLength(
@@ -297,10 +305,15 @@ extension MeasuredBirdReplay {
             logSpeedBounds: logSpeedBounds
         ) { pitchOffset, logSpeed in
             let speedScale = Float(exp(logSpeed))
-            let candidateLoaded = try makeMeasuredBirdTrimCandidate(
+            let pitchSpeedCandidate = try makeMeasuredBirdTrimCandidate(
                 loaded,
                 pitchOffsetRadians: Float(pitchOffset),
                 speedScale: speedScale
+            )
+            let candidateLoaded = try makeMeasuredBirdPhaseFeatheringCandidate(
+                pitchSpeedCandidate,
+                powerStrokePitchRadians: powerStrokePitchOffsetRadians,
+                recoveryStrokePitchRadians: recoveryStrokePitchOffsetRadians
             )
             let replay = try run(
                 candidateLoaded,
@@ -326,11 +339,16 @@ extension MeasuredBirdReplay {
         }) else {
             throw MeasuredBirdReplayError.nonFiniteResult
         }
-        let bestLoaded = try makeMeasuredBirdTrimCandidate(
+        let bestPitchSpeed = try makeMeasuredBirdTrimCandidate(
             loaded,
             pitchOffsetRadians:
                 Float(bestCoordinate.pitchOffsetRadians),
             speedScale: Float(exp(bestCoordinate.logSpeedScale))
+        )
+        let bestLoaded = try makeMeasuredBirdPhaseFeatheringCandidate(
+            bestPitchSpeed,
+            powerStrokePitchRadians: powerStrokePitchOffsetRadians,
+            recoveryStrokePitchRadians: recoveryStrokePitchOffsetRadians
         )
         let confirmationReplay = try run(
             bestLoaded,
@@ -365,8 +383,10 @@ extension MeasuredBirdReplay {
             screeningCycles: screeningCycles,
             confirmationCycles: confirmationCycles,
             requestedIterations: iterations,
+            powerStrokePitchOffsetRadians: powerStrokePitchOffsetRadians,
+            recoveryStrokePitchOffsetRadians: recoveryStrokePitchOffsetRadians,
             candidateDefinition:
-                "bounded Gauss-Newton over body-local pitch and freestream/reference-speed scale under the serialized \(collisionOperator.rawValue) operator; Reynolds number scales with speed so physical viscosity is unchanged; measured geometry and wing kinematics are never altered",
+                "bounded Gauss-Newton over body-local pitch and freestream/reference-speed scale under the serialized \(collisionOperator.rawValue) operator, with declared bilateral phase-feathering offsets (power \(powerStrokePitchOffsetRadians) rad, recovery \(recoveryStrokePitchOffsetRadians) rad); Reynolds number scales with speed so physical viscosity is unchanged",
             pitchBoundsDegrees: SIMD2<Float>(-20, 20),
             speedScaleBounds: SIMD2<Float>(0.6, 1.4),
             candidates: candidates,

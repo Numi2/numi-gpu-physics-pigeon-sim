@@ -213,10 +213,13 @@ func measuredBirdTrimOptimizerRecoversBoundedLinearBalance() throws {
         specimenIdentifier: "fixture",
         baseInputSHA256: String(repeating: "a", count: 64),
         deviceName: "test",
+        collisionOperator: .productionTRT,
         chordCells: 8,
         screeningCycles: 2,
         confirmationCycles: 5,
         requestedIterations: 2,
+        powerStrokePitchOffsetRadians: 0,
+        recoveryStrokePitchOffsetRadians: 0,
         candidateDefinition: "test",
         pitchBoundsDegrees: SIMD2<Float>(-20, 20),
         speedScaleBounds: SIMD2<Float>(0.6, 1.4),
@@ -331,6 +334,29 @@ func measuredBirdSchema2RequiresAndAcceptsRigidWingMassContract() throws {
     #expect(
         trimCandidate.dataset.provenance.processingDescription
             .contains("BirdFlow forward-flight trim candidate")
+    )
+    let featheredCandidate = try makeMeasuredBirdPhaseFeatheringCandidate(
+        loaded,
+        powerStrokePitchRadians: 0.12,
+        recoveryStrokePitchRadians: -0.04
+    )
+    for (base, feathered) in zip(
+        loaded.dataset.kinematics.keyframes,
+        featheredCandidate.dataset.kinematics.keyframes
+    ) {
+        let expectedOffset: Float = base.phase >= 0.25 && base.phase <= 0.5
+            ? 0.12 : -0.04
+        #expect(abs(feathered.left.pitchRadians - base.left.pitchRadians
+            - expectedOffset) <= 1.0e-6)
+        #expect(abs(feathered.right.pitchRadians - base.right.pitchRadians
+            - expectedOffset) <= 1.0e-6)
+        #expect(feathered.left.pitchRateRadiansPerSecond == 0)
+        #expect(feathered.right.pitchRateRadiansPerSecond == 0)
+    }
+    #expect(featheredCandidate.sourceSHA256 != loaded.sourceSHA256)
+    #expect(
+        featheredCandidate.dataset.provenance.processingDescription
+            .contains("virtual phase-feathering candidate")
     )
     var hover = loaded
     hover.dataset.replay.farFieldVelocityMetersPerSecond = .zero

@@ -283,6 +283,8 @@ public struct FreeFlightBodyRefinementCase: Codable, Sendable {
 @frozen
 public struct FreeFlightBodyRefinementReport: Codable, Sendable {
     public var datasetIdentifier: String
+    /// Numerical collision operator shared by every body-substep case.
+    public var collisionOperator: D3Q19CollisionOperator
     public var chordCells: Int
     public var steps: Int
     public var cases: [FreeFlightBodyRefinementCase]
@@ -311,6 +313,8 @@ public struct MeasuredBirdLoadRefinementCase: Codable, Sendable {
 @frozen
 public struct MeasuredBirdLoadRefinementReport: Codable, Sendable {
     public var datasetIdentifier: String
+    /// Numerical collision operator shared by every grid case.
+    public var collisionOperator: D3Q19CollisionOperator
     public var cycles: Float
     public var cases: [MeasuredBirdLoadRefinementCase]
     public var finePairForceDifferenceFraction: Float
@@ -324,7 +328,8 @@ public enum MeasuredBirdReplay {
         _ loaded: LoadedMeasuredBirdDataset,
         chordCells: Int,
         steps: Int,
-        batchSize: Int = 32
+        batchSize: Int = 32,
+        collisionOperator: D3Q19CollisionOperator = .productionTRT
     ) throws -> FreeFlightBodyRefinementReport {
         guard steps > 0 else {
             throw MeasuredBirdReplayError.invalidInput(
@@ -339,7 +344,8 @@ public enum MeasuredBirdReplay {
                 steps: steps,
                 batchSize: batchSize,
                 freeFlight: true,
-                bodySubsteps: substeps
+                bodySubsteps: substeps,
+                collisionOperator: collisionOperator
             )
             guard let final = report.samples.last,
                   let safety = report.runtimeSafety else {
@@ -382,6 +388,7 @@ public enum MeasuredBirdReplay {
             && cases.allSatisfy(\.runtimeSafety.passed)
         return FreeFlightBodyRefinementReport(
             datasetIdentifier: loaded.dataset.datasetIdentifier,
+            collisionOperator: collisionOperator,
             chordCells: chordCells,
             steps: steps,
             cases: cases,
@@ -399,7 +406,8 @@ public enum MeasuredBirdReplay {
     public static func runLoadRefinement(
         _ loaded: LoadedMeasuredBirdDataset,
         cycles: Float = 5,
-        batchSize: Int = 32
+        batchSize: Int = 32,
+        collisionOperator: D3Q19CollisionOperator = .productionTRT
     ) throws -> MeasuredBirdLoadRefinementReport {
         guard cycles >= 5 else {
             throw MeasuredBirdReplayError.invalidInput(
@@ -428,7 +436,8 @@ public enum MeasuredBirdReplay {
                 loaded,
                 chordCells: chordCells,
                 cycles: cycles,
-                batchSize: batchSize
+                batchSize: batchSize,
+                collisionOperator: collisionOperator
             )
             let frequency = loaded.dataset.kinematics.frequencyHz
             let finalCycleIndex = max(0, Int(floor(report.cycles)) - 1)
@@ -483,6 +492,7 @@ public enum MeasuredBirdReplay {
             }
         return MeasuredBirdLoadRefinementReport(
             datasetIdentifier: loaded.dataset.datasetIdentifier,
+            collisionOperator: collisionOperator,
             cycles: cycles,
             cases: cases,
             finePairForceDifferenceFraction: forceDifference,
