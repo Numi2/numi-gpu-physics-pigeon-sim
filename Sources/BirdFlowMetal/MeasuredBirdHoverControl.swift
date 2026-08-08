@@ -50,11 +50,14 @@ private func makeMeasuredBirdHoverControlCandidate(
     var dataset = loaded.dataset
     dataset.kinematics.keyframes = dataset.kinematics.keyframes.map { keyframe in
         var adjusted = keyframe
-        let pitch = keyframe.phase >= 0.25 && keyframe.phase <= 0.5
+        let pitchOffset = keyframe.phase >= 0.25 && keyframe.phase <= 0.5
             ? powerStrokePitchRadians
             : recoveryStrokePitchRadians
-        adjusted.left.pitchRadians = pitch
-        adjusted.right.pitchRadians = pitch
+        // Preserve the authored actuator waveform. The screening action is a
+        // state-commandable feathering offset, not an accidental replacement
+        // of its phase-dependent neutral pitch.
+        adjusted.left.pitchRadians += pitchOffset
+        adjusted.right.pitchRadians += pitchOffset
         adjusted.left.pitchRateRadiansPerSecond = 0
         adjusted.right.pitchRateRadiansPerSecond = 0
         return adjusted
@@ -122,7 +125,11 @@ extension MeasuredBirdReplay {
             )
         }
 
-        let pitchLevels: [Float] = [-0.04, 0, 0.04]
+        // The controller owns a physical chord-pitch setpoint, so screen an
+        // actuator-scale range rather than perturbing a presumed biological
+        // waveform by a few milliradians.  This remains fixed-body screening:
+        // a candidate does not yet establish closed-loop flight.
+        let pitchLevels: [Float] = [-0.30, 0, 0.30]
         let gravity = abs(loaded.dataset.replay.gravityMetersPerSecondSquared.z)
         var candidates: [MeasuredBirdHoverControlCandidateReport] = []
         var deviceName = ""
@@ -175,7 +182,7 @@ extension MeasuredBirdReplay {
             deviceName: deviceName,
             chordCells: chordCells,
             cycles: cycles,
-            candidateDefinition: "3x3 declared virtual actuator sweep over power-stroke and recovery-stroke body-local chord pitch; fixed-body D3Q19 force screening only",
+            candidateDefinition: "3x3 declared virtual actuator sweep over [-0.30, 0, +0.30] rad power-stroke and recovery-stroke body-local chord-pitch offsets about the authored waveform; fixed-body D3Q19 force screening only",
             candidates: candidates,
             bestCandidate: best,
             scientificVerdict: "screening only: a selected kinematic candidate still requires attitude trim, coupled six-DOF release, and refinement before any free-flight claim"

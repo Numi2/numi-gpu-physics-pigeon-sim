@@ -1842,6 +1842,9 @@ public final class BirdFlowSimulation: @unchecked Sendable {
             maximumLatticeMach: value.metrics.x,
             minimumSpongeClearanceMeters: value.metrics.y,
             firstViolationStep: firstStep,
+            firstViolationLinearSpeedMetersPerSecond: value.state.x,
+            firstViolationRigidRotationSpeedMetersPerSecond: value.state.y,
+            firstViolationAngularSpeedRadiansPerSecond: value.state.z,
             machLimitExceeded: flags & 1 != 0,
             spongeClearanceViolated: flags & 2 != 0,
             nonFiniteStateDetected: flags & 4 != 0

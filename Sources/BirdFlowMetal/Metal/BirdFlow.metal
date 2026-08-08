@@ -73,6 +73,7 @@ struct GPUBirdParameters {
 
 struct GPURuntimeSafetyRecord {
     float4 metrics;
+    float4 state;
     uint4 event;
 };
 
@@ -6703,5 +6704,11 @@ kernel void monitorBirdRuntimeSafety(
         record[0].event = uint4(stepWords.x, stepWords.y, flags, 0u);
         record[0].metrics.z = mach;
         record[0].metrics.w = clearance;
+        record[0].state = float4(
+            relativeTranslation,
+            rigidRotation,
+            length(body.angularVelocityBody.xyz),
+            0
+        );
     }
 }

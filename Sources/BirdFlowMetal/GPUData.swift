@@ -235,11 +235,15 @@ struct GPURuntimeSafetyRecord {
     /// x=max Mach, y=min clearance, z=Mach at first event,
     /// w=clearance at first event.
     var metrics: SIMD4<Float>
+    /// First-violation decomposition: relative translation, rigid rotation,
+    /// angular speed, reserved. This makes release failures actionable.
+    var state: SIMD4<Float>
     /// x/y=first event step low/high words; z=violation flags.
     var event: SIMD4<UInt32>
 
     static let clear = GPURuntimeSafetyRecord(
         metrics: SIMD4<Float>(0, .greatestFiniteMagnitude, 0, 0),
+        state: .zero,
         event: .zero
     )
 }

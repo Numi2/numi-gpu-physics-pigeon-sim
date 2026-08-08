@@ -47,7 +47,7 @@ public enum BirdFlowError: Error, CustomStringConvertible {
             return "A Metal command buffer failed: \(message)"
         case .runtimeSafetyViolation(let report):
             let step = report.firstViolationStep.map(String.init) ?? "unknown"
-            return "Free-flight runtime validity bound failed at step \(step): maximum Mach=\(report.maximumLatticeMach), minimum sponge/domain clearance=\(report.minimumSpongeClearanceMeters) m, machExceeded=\(report.machLimitExceeded), clearanceViolated=\(report.spongeClearanceViolated), nonFinite=\(report.nonFiniteStateDetected)."
+            return "Free-flight runtime validity bound failed at step \(step): maximum Mach=\(report.maximumLatticeMach), minimum sponge/domain clearance=\(report.minimumSpongeClearanceMeters) m, firstViolationLinearSpeed=\(report.firstViolationLinearSpeedMetersPerSecond) m/s, firstViolationRigidRotationSpeed=\(report.firstViolationRigidRotationSpeedMetersPerSecond) m/s, firstViolationAngularSpeed=\(report.firstViolationAngularSpeedRadiansPerSecond) rad/s, machExceeded=\(report.machLimitExceeded), clearanceViolated=\(report.spongeClearanceViolated), nonFinite=\(report.nonFiniteStateDetected)."
         case .simulationStateInvalidated(let message):
             return "The simulation can no longer be advanced or read because a partially encoded/submitted GPU update failed: \(message)"
         }

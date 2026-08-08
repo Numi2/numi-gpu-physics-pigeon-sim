@@ -17,6 +17,9 @@ public struct RuntimeSafetyReport: Sendable, Equatable, Codable {
   public var maximumLatticeMach: Float
   public var minimumSpongeClearanceMeters: Float
   public var firstViolationStep: UInt64?
+  public var firstViolationLinearSpeedMetersPerSecond: Float
+  public var firstViolationRigidRotationSpeedMetersPerSecond: Float
+  public var firstViolationAngularSpeedRadiansPerSecond: Float
   public var machLimitExceeded: Bool
   public var spongeClearanceViolated: Bool
   public var nonFiniteStateDetected: Bool
@@ -25,6 +28,9 @@ public struct RuntimeSafetyReport: Sendable, Equatable, Codable {
     maximumLatticeMach: Float,
     minimumSpongeClearanceMeters: Float,
     firstViolationStep: UInt64?,
+    firstViolationLinearSpeedMetersPerSecond: Float,
+    firstViolationRigidRotationSpeedMetersPerSecond: Float,
+    firstViolationAngularSpeedRadiansPerSecond: Float,
     machLimitExceeded: Bool,
     spongeClearanceViolated: Bool,
     nonFiniteStateDetected: Bool
@@ -32,6 +38,9 @@ public struct RuntimeSafetyReport: Sendable, Equatable, Codable {
     self.maximumLatticeMach = maximumLatticeMach
     self.minimumSpongeClearanceMeters = minimumSpongeClearanceMeters
     self.firstViolationStep = firstViolationStep
+    self.firstViolationLinearSpeedMetersPerSecond = firstViolationLinearSpeedMetersPerSecond
+    self.firstViolationRigidRotationSpeedMetersPerSecond = firstViolationRigidRotationSpeedMetersPerSecond
+    self.firstViolationAngularSpeedRadiansPerSecond = firstViolationAngularSpeedRadiansPerSecond
     self.machLimitExceeded = machLimitExceeded
     self.spongeClearanceViolated = spongeClearanceViolated
     self.nonFiniteStateDetected = nonFiniteStateDetected

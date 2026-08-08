@@ -2276,7 +2276,8 @@ private struct MeasuredBirdReplayArguments {
       --trim-search      Search bounded body pitch/airspeed for prescribed force/moment balance
       --hover-control-sweep
                          Screen the declared virtual hover actuator at nine
-                         power/recovery pitch pairs; requires still air
+                         -0.30/0/+0.30 rad power/recovery pitch pairs;
+                         requires still air
       --trim-iterations N
                          Gauss-Newton updates for trim search (default: 2; range: 1...6)
       --trim-screening-cycles VALUE
