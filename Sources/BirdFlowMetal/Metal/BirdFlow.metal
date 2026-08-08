@@ -2905,9 +2905,11 @@ kernel void stepFluidTRT(
             float capturedDensity = 0.0f;
             float3 capturedMomentum = float3(0);
             bool positivityPreservingRecursiveRegularizedCollision =
-                uniforms.caseParameters.w < -3.5f;
+                uniforms.integration.w == 2u
+                || uniforms.caseParameters.w < -3.5f;
             bool positivityPreservingRegularizedCollision =
-                uniforms.caseParameters.w < -2.5f;
+                uniforms.integration.w >= 1u
+                || uniforms.caseParameters.w < -2.5f;
             bool symmetricPositivityLimiter =
                 uniforms.caseParameters.w < -1.5f
                 && !positivityPreservingRegularizedCollision;
@@ -3726,9 +3728,11 @@ kernel void captureSymmetricLimiterLedger(
         uniforms.latticeAndSponge.z
     );
     bool positivityPreservingRecursiveRegularizedCollision =
-        uniforms.caseParameters.w < -3.5f;
+        uniforms.integration.w == 2u
+        || uniforms.caseParameters.w < -3.5f;
     bool positivityPreservingRegularizedCollision =
-        uniforms.caseParameters.w < -2.5f;
+        uniforms.integration.w >= 1u
+        || uniforms.caseParameters.w < -2.5f;
     float unboundedPost[19];
     float treatedPost[19];
     float correctionScale = 1.0f;
@@ -6380,7 +6384,8 @@ kernel void captureIndexedPopulationStageProvenanceBeforeStep(
         wasSolid ? 1u : 0u,
         isSolid ? 1u : 0u,
         selectedSourcePart,
-        uniforms.caseParameters.w < -3.5f ? 1u : 0u
+        (uniforms.integration.w == 2u
+            || uniforms.caseParameters.w < -3.5f) ? 1u : 0u
     );
     records[target.w] = record;
 }

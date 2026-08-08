@@ -248,6 +248,9 @@ public struct MeasuredBirdReplayPhaseSample: Codable, Sendable {
 @frozen
 public struct MeasuredBirdReplayReport: Codable, Sendable {
     public var audit: MeasuredBirdReplayAudit
+    /// Explicit numerical collision model used for this replay. A successful
+    /// run under a regularized operator is not interchangeable with TRT.
+    public var collisionOperator: D3Q19CollisionOperator
     public var deviceName: String
     public var steps: Int
     public var cycles: Float
@@ -550,6 +553,7 @@ public enum MeasuredBirdReplay {
         freeFlight: Bool = false,
         bodySubsteps: Int = 1,
         preRollCycles: Float = 0,
+        collisionOperator: D3Q19CollisionOperator = .productionTRT,
         captureCoupledMomentumLedger: Bool = false,
         expectBilateralSymmetry: Bool = false,
         archiveDirectory: URL? = nil
@@ -583,7 +587,8 @@ public enum MeasuredBirdReplay {
             loaded.dataset,
             chordCells: chordCells,
             freeFlight: freeFlight,
-            bodySubsteps: bodySubsteps
+            bodySubsteps: bodySubsteps,
+            collisionOperator: collisionOperator
         )
         let audit = try audit(loaded, chordCells: chordCells)
         let requestedSteps = explicitSteps.map(Double.init)
@@ -666,6 +671,7 @@ public enum MeasuredBirdReplay {
         } / denominator
         let report = MeasuredBirdReplayReport(
             audit: audit,
+            collisionOperator: collisionOperator,
             deviceName: simulation.metalDevice.name,
             steps: steps,
             cycles: Float(steps)
@@ -721,7 +727,8 @@ public enum MeasuredBirdReplay {
         _ dataset: MeasuredBirdDataset,
         chordCells: Int,
         freeFlight: Bool = false,
-        bodySubsteps: Int = 1
+        bodySubsteps: Int = 1,
+        collisionOperator: D3Q19CollisionOperator = .productionTRT
     ) throws -> Plan {
         guard chordCells >= 8 else {
             throw MeasuredBirdReplayError.invalidInput(
@@ -774,7 +781,8 @@ public enum MeasuredBirdReplay {
             bodySubsteps: bodySubsteps,
             gravityMetersPerSecondSquared:
                 dataset.replay.gravityMetersPerSecondSquared,
-            fastMath: false
+            fastMath: false,
+            collisionOperator: collisionOperator
         )
         let bird = dataset.geometry.birdParameters(
             measuredKinematics: dataset.kinematics,

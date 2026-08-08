@@ -1978,6 +1978,7 @@ private struct MeasuredBirdReplayArguments {
     var freeFlight = false
     var bodySubsteps = 1
     var preRollCycles: Float = 0
+    var collisionOperator: D3Q19CollisionOperator = .productionTRT
     var bodyRefinement = false
     var loadRefinement = false
     var trimSearch = false
@@ -2084,6 +2085,17 @@ private struct MeasuredBirdReplayArguments {
                 }
                 preRollCycles = value
                 freeFlight = true
+            case "--collision-operator":
+                index += 1
+                guard index < values.count,
+                      let value = D3Q19CollisionOperator(
+                          rawValue: values[index]
+                      ) else {
+                    throw CLIError.invalidArgument(
+                        "--collision-operator requires production-trt, positivity-preserving-regularized-bgk, or positivity-preserving-recursive-regularized-bgk"
+                    )
+                }
+                collisionOperator = value
             case "--body-refinement":
                 bodyRefinement = true
                 freeFlight = true
@@ -2271,6 +2283,10 @@ private struct MeasuredBirdReplayArguments {
       --pre-roll-cycles V
                          Hold the body fixed while D3Q19 establishes prescribed
                          wing flow, then release the same resident state
+      --collision-operator NAME
+                         production-trt (default), positivity-preserving-regularized-bgk,
+                         or positivity-preserving-recursive-regularized-bgk;
+                         serialized with the replay and never selected implicitly
       --body-refinement  Run locked 1/2/4 body-substep ladder; requires --steps
       --load-refinement  Run five-cycle prescribed 8/12/16 load ladder
       --trim-search      Search bounded body pitch/airspeed for prescribed force/moment balance
@@ -3612,12 +3628,14 @@ private func runMeasuredBirdReplay(_ values: [String]) throws {
         let report = try MeasuredBirdReplay.runHoverControlSweep(
             loaded,
             chordCells: arguments.chordCells,
-            batchSize: arguments.batchSize
+            batchSize: arguments.batchSize,
+            collisionOperator: arguments.collisionOperator
         )
         if arguments.json {
             try printJSON(report)
         } else {
             print("dataset: \(report.datasetIdentifier)")
+            print("collision_operator: \(report.collisionOperator.rawValue)")
             print("candidates: \(report.candidates.count)")
             print(
                 "best_power_stroke_pitch_rad: "
@@ -3644,6 +3662,7 @@ private func runMeasuredBirdReplay(_ values: [String]) throws {
         freeFlight: arguments.freeFlight,
         bodySubsteps: arguments.bodySubsteps,
         preRollCycles: arguments.preRollCycles,
+        collisionOperator: arguments.collisionOperator,
         captureCoupledMomentumLedger: arguments.momentumLedger,
         expectBilateralSymmetry: arguments.expectBilateralSymmetry,
         archiveDirectory: arguments.archivePath.map {
@@ -3654,6 +3673,7 @@ private func runMeasuredBirdReplay(_ values: [String]) throws {
         try printJSON(report)
     } else {
         print("dataset: \(report.audit.datasetIdentifier)")
+        print("collision_operator: \(report.collisionOperator.rawValue)")
         print("device: \(report.deviceName)")
         print("steps: \(report.steps)")
         print("cycles: \(report.cycles)")

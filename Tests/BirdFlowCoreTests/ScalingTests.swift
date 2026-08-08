@@ -1,4 +1,5 @@
 import BirdFlowCore
+import Foundation
 import Testing
 
 @Test
@@ -134,4 +135,42 @@ func configurationRejectsDensityThatDiffersFromScaling() throws {
             spongeWidthCells: 4
         )
     }
+}
+
+@Test
+func collisionOperatorIsSerializedAndLegacyConfigurationsKeepTRT() throws {
+    let scaling = try LatticeScaling(
+        characteristicLengthMeters: 0.1,
+        characteristicLengthCells: 16,
+        referenceSpeedMetersPerSecond: 4,
+        targetReynoldsNumber: 1_000,
+        physicalAirDensity: 1.225,
+        latticeReferenceSpeed: 0.04
+    )
+    let configuration = try SimulationConfiguration(
+        grid: GridSize(x: 48, y: 48, z: 48),
+        domainOriginMeters: .zero,
+        scaling: scaling,
+        spongeWidthCells: 4,
+        collisionOperator: .positivityPreservingRecursiveRegularizedBGK
+    )
+    let encoded = try JSONEncoder().encode(configuration)
+    let restored = try JSONDecoder().decode(
+        SimulationConfiguration.self,
+        from: encoded
+    )
+    #expect(restored.collisionOperator == .positivityPreservingRecursiveRegularizedBGK)
+    #expect(restored.collisionOperator.gpuSelector == 2)
+
+    var legacy = try #require(
+        JSONSerialization.jsonObject(with: encoded) as? [String: Any]
+    )
+    legacy.removeValue(forKey: "collisionOperator")
+    let legacyData = try JSONSerialization.data(withJSONObject: legacy)
+    let decodedLegacy = try JSONDecoder().decode(
+        SimulationConfiguration.self,
+        from: legacyData
+    )
+    #expect(decodedLegacy.collisionOperator == .productionTRT)
+    #expect(decodedLegacy.collisionOperator.gpuSelector == 0)
 }

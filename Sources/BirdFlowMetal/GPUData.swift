@@ -74,7 +74,7 @@ struct GPUUniforms {
             UInt32(configuration.bodySubsteps),
             usePreStepLocalDensityForMovingWall ? 1 : 0,
             0,
-            0
+            configuration.collisionOperator.gpuSelector
         )
     }
 }

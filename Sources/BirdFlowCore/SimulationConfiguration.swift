@@ -197,6 +197,43 @@ public struct LatticeScaling: Sendable, Equatable, Codable {
 }
 
 @frozen
+public enum D3Q19CollisionOperator: String, Sendable, Equatable, Codable {
+    /// The two-relaxation-time collision operator used by existing production
+    /// runs. This remains the default so a decoded legacy configuration has
+    /// exactly the prior solver behavior.
+    case productionTRT = "production-trt"
+    /// Second-order Hermite regularization with a convex positivity scale.
+    case positivityPreservingRegularizedBGK =
+        "positivity-preserving-regularized-bgk"
+    /// Second- plus D3Q19-supported third-order Hermite regularization with a
+    /// convex positivity scale.
+    case positivityPreservingRecursiveRegularizedBGK =
+        "positivity-preserving-recursive-regularized-bgk"
+
+    /// Stable device contract for `GPUUniforms.integration.w`. Diagnostic
+    /// validation paths retain their private `caseParameters` selector; normal
+    /// simulation runs must select their collision model here so it is part of
+    /// configuration serialization and replay provenance.
+    public var gpuSelector: UInt32 {
+        switch self {
+        case .productionTRT: return 0
+        case .positivityPreservingRegularizedBGK: return 1
+        case .positivityPreservingRecursiveRegularizedBGK: return 2
+        }
+    }
+
+    /// Legacy validation selector retained for the controlled indexed-surface
+    /// suites. It is deliberately not used by ordinary simulation runs.
+    public var caseParameterW: Float {
+        switch self {
+        case .productionTRT: return -1
+        case .positivityPreservingRegularizedBGK: return -3
+        case .positivityPreservingRecursiveRegularizedBGK: return -4
+        }
+    }
+}
+
+@frozen
 public struct SimulationConfiguration: Sendable, Equatable, Codable {
     public var grid: GridSize
     public var domainOriginMeters: SIMD3<Float>
@@ -212,6 +249,9 @@ public struct SimulationConfiguration: Sendable, Equatable, Codable {
     public var bodySubsteps: Int
     public var gravityMetersPerSecondSquared: SIMD3<Float>
     public var fastMath: Bool
+    /// Declared bulk collision model. This is serialized with every replay;
+    /// changing it is a new numerical experiment, never an implicit rescue.
+    public var collisionOperator: D3Q19CollisionOperator
 
     public init(
         grid: GridSize,
@@ -224,7 +264,8 @@ public struct SimulationConfiguration: Sendable, Equatable, Codable {
         freeFlight: Bool = false,
         bodySubsteps: Int = 1,
         gravityMetersPerSecondSquared: SIMD3<Float> = SIMD3<Float>(0, 0, -9.80665),
-        fastMath: Bool = false
+        fastMath: Bool = false,
+        collisionOperator: D3Q19CollisionOperator = .productionTRT
     ) throws {
         guard physicalAirDensity > 0,
               abs(scaling.physicalAirDensity - physicalAirDensity)
@@ -257,6 +298,7 @@ public struct SimulationConfiguration: Sendable, Equatable, Codable {
         self.bodySubsteps = bodySubsteps
         self.gravityMetersPerSecondSquared = gravityMetersPerSecondSquared
         self.fastMath = fastMath
+        self.collisionOperator = collisionOperator
     }
 
     public var domainSizeMeters: SIMD3<Float> {
@@ -276,6 +318,7 @@ public struct SimulationConfiguration: Sendable, Equatable, Codable {
         case bodySubsteps
         case gravityMetersPerSecondSquared
         case fastMath
+        case collisionOperator
     }
 
     public init(from decoder: Decoder) throws {
@@ -309,7 +352,11 @@ public struct SimulationConfiguration: Sendable, Equatable, Codable {
                 SIMD3<Float>.self,
                 forKey: .gravityMetersPerSecondSquared
             ),
-            fastMath: container.decode(Bool.self, forKey: .fastMath)
+            fastMath: container.decode(Bool.self, forKey: .fastMath),
+            collisionOperator: container.decodeIfPresent(
+                D3Q19CollisionOperator.self,
+                forKey: .collisionOperator
+            ) ?? .productionTRT
         )
     }
 }

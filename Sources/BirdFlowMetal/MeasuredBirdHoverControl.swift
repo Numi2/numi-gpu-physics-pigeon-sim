@@ -30,6 +30,7 @@ public struct MeasuredBirdHoverControlSweepReport: Codable, Sendable {
     public var deviceName: String
     public var chordCells: Int
     public var cycles: Float
+    public var collisionOperator: D3Q19CollisionOperator
     public var candidateDefinition: String
     public var candidates: [MeasuredBirdHoverControlCandidateReport]
     public var bestCandidate: MeasuredBirdHoverControlCandidateReport
@@ -106,7 +107,8 @@ extension MeasuredBirdReplay {
         _ loaded: LoadedMeasuredBirdDataset,
         chordCells: Int = 12,
         cycles: Float = 5,
-        batchSize: Int = 32
+        batchSize: Int = 32,
+        collisionOperator: D3Q19CollisionOperator = .productionTRT
     ) throws -> MeasuredBirdHoverControlSweepReport {
         guard loaded.dataset.schemaVersion >= 2,
               loaded.dataset.prescribedWingDynamics != nil else {
@@ -144,7 +146,8 @@ extension MeasuredBirdReplay {
                     candidate,
                     chordCells: chordCells,
                     cycles: cycles,
-                    batchSize: batchSize
+                    batchSize: batchSize,
+                    collisionOperator: collisionOperator
                 )
                 deviceName = replay.deviceName
                 let final = try finalCycleMean(
@@ -182,7 +185,8 @@ extension MeasuredBirdReplay {
             deviceName: deviceName,
             chordCells: chordCells,
             cycles: cycles,
-            candidateDefinition: "3x3 declared virtual actuator sweep over [-0.30, 0, +0.30] rad power-stroke and recovery-stroke body-local chord-pitch offsets about the authored waveform; fixed-body D3Q19 force screening only",
+            collisionOperator: collisionOperator,
+            candidateDefinition: "3x3 declared virtual actuator sweep over [-0.30, 0, +0.30] rad power-stroke and recovery-stroke body-local chord-pitch offsets about the authored waveform; fixed-body D3Q19 force screening only under the serialized \(collisionOperator.rawValue) operator",
             candidates: candidates,
             bestCandidate: best,
             scientificVerdict: "screening only: a selected kinematic candidate still requires attitude trim, coupled six-DOF release, and refinement before any free-flight claim"

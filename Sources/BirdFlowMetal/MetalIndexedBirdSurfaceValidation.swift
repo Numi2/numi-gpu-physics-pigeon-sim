@@ -109,21 +109,9 @@ public struct MetalIndexedBirdSurfaceCouplingReport: Codable, Sendable {
     public let claimBoundary: String
 }
 
-public enum MetalIndexedBirdSurfaceCollisionOperator: String, Codable, Sendable {
-    case productionTRT = "production-trt"
-    case positivityPreservingRegularizedBGK =
-        "positivity-preserving-regularized-bgk"
-    case positivityPreservingRecursiveRegularizedBGK =
-        "positivity-preserving-recursive-regularized-bgk"
-
-    var caseParameterW: Float {
-        switch self {
-        case .productionTRT: return -1
-        case .positivityPreservingRegularizedBGK: return -3
-        case .positivityPreservingRecursiveRegularizedBGK: return -4
-        }
-    }
-}
+/// Compatibility name for the indexed-surface validation suite. The actual
+/// operator contract is now shared with ordinary D3Q19 simulations.
+public typealias MetalIndexedBirdSurfaceCollisionOperator = D3Q19CollisionOperator
 
 public enum MetalIndexedBirdSurfaceMovingWallNormalization:
     String, Codable, Sendable
