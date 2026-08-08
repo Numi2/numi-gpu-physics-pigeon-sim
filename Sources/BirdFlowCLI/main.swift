@@ -3594,6 +3594,7 @@ private func runMeasuredBirdReplay(_ values: [String]) throws {
             confirmationCycles: arguments.trimConfirmationCycles,
             iterations: arguments.trimIterations,
             batchSize: arguments.batchSize,
+            collisionOperator: arguments.collisionOperator,
             archiveDirectory: arguments.archivePath.map {
                 URL(fileURLWithPath: $0, isDirectory: true)
             }
@@ -3602,6 +3603,7 @@ private func runMeasuredBirdReplay(_ values: [String]) throws {
             try printJSON(report)
         } else {
             print("dataset: \(report.datasetIdentifier)")
+            print("collision_operator: \(report.collisionOperator.rawValue)")
             print("candidates: \(report.candidates.count)")
             print(
                 "best_pitch_offset_deg: "

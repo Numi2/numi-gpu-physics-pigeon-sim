@@ -29,6 +29,7 @@ public struct MeasuredBirdTrimSearchReport: Codable, Sendable {
     public var specimenIdentifier: String
     public var baseInputSHA256: String
     public var deviceName: String
+    public var collisionOperator: D3Q19CollisionOperator
     public var chordCells: Int
     public var screeningCycles: Float
     public var confirmationCycles: Float
@@ -252,6 +253,7 @@ extension MeasuredBirdReplay {
         confirmationCycles: Float = 5,
         iterations: Int = 2,
         batchSize: Int = 32,
+        collisionOperator: D3Q19CollisionOperator = .productionTRT,
         archiveDirectory: URL? = nil
     ) throws -> MeasuredBirdTrimSearchReport {
         guard loaded.dataset.schemaVersion >= 2,
@@ -304,7 +306,8 @@ extension MeasuredBirdReplay {
                 candidateLoaded,
                 chordCells: chordCells,
                 cycles: screeningCycles,
-                batchSize: batchSize
+                batchSize: batchSize,
+                collisionOperator: collisionOperator
             )
             deviceName = replay.deviceName
             let result = try makeTrimCandidateReport(
@@ -333,7 +336,8 @@ extension MeasuredBirdReplay {
             bestLoaded,
             chordCells: chordCells,
             cycles: confirmationCycles,
-            batchSize: batchSize
+            batchSize: batchSize,
+            collisionOperator: collisionOperator
         )
         deviceName = confirmationReplay.deviceName
         let best = try makeTrimCandidateReport(
@@ -356,12 +360,13 @@ extension MeasuredBirdReplay {
                 loaded.dataset.provenance.specimenIdentifier,
             baseInputSHA256: loaded.sourceSHA256,
             deviceName: deviceName,
+            collisionOperator: collisionOperator,
             chordCells: chordCells,
             screeningCycles: screeningCycles,
             confirmationCycles: confirmationCycles,
             requestedIterations: iterations,
             candidateDefinition:
-                "bounded Gauss-Newton over body-local pitch and freestream/reference-speed scale; Reynolds number scales with speed so physical viscosity is unchanged; measured geometry and wing kinematics are never altered",
+                "bounded Gauss-Newton over body-local pitch and freestream/reference-speed scale under the serialized \(collisionOperator.rawValue) operator; Reynolds number scales with speed so physical viscosity is unchanged; measured geometry and wing kinematics are never altered",
             pitchBoundsDegrees: SIMD2<Float>(-20, 20),
             speedScaleBounds: SIMD2<Float>(0.6, 1.4),
             candidates: candidates,
