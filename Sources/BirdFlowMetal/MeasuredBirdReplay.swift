@@ -254,6 +254,8 @@ public struct MeasuredBirdReplayReport: Codable, Sendable {
     public var batchSize: Int
     public var freeFlight: Bool
     public var bodySubsteps: Int
+    /// Prescribed moving-wall steps completed before six-DOF release.
+    public var preRollSteps: Int
     public var runtimeSeconds: Double
     public var meanForceNewtons: SIMD3<Float>
     public var meanTorqueNewtonMeters: SIMD3<Float>
@@ -547,6 +549,7 @@ public enum MeasuredBirdReplay {
         batchSize: Int = 32,
         freeFlight: Bool = false,
         bodySubsteps: Int = 1,
+        preRollCycles: Float = 0,
         captureCoupledMomentumLedger: Bool = false,
         expectBilateralSymmetry: Bool = false,
         archiveDirectory: URL? = nil
@@ -557,7 +560,9 @@ public enum MeasuredBirdReplay {
               cycles > 0,
               explicitSteps.map({ $0 > 0 }) ?? true,
               batchSize > 0,
-              (1...64).contains(bodySubsteps) else {
+              (1...64).contains(bodySubsteps),
+              preRollCycles.isFinite,
+              preRollCycles >= 0 else {
             throw MeasuredBirdReplayError.invalidInput(
                 "chord cells must be >= 8, cycles and steps positive, and batch size positive"
             )
@@ -591,12 +596,21 @@ public enum MeasuredBirdReplay {
             )
         }
         let steps = Int(requestedSteps)
+        let preRollSteps = freeFlight
+            ? Int(ceil(Double(preRollCycles) * Double(plan.stepsPerCycle)))
+            : 0
         let simulation = try BirdFlowSimulation(
             configuration: plan.configuration,
             bird: plan.bird,
             initialBodyState: plan.initialBodyState
         )
         let start = ProcessInfo.processInfo.systemUptime
+        if preRollSteps > 0 {
+            _ = try simulation.preRollPrescribedWingFlow(
+                steps: preRollSteps,
+                batchSize: batchSize
+            )
+        }
         let result: AdvanceResult
         let momentumLedger: CoupledMomentumLedgerReport?
         let partLoads: AerodynamicPartLoadReport?
@@ -662,6 +676,7 @@ public enum MeasuredBirdReplay {
                 : min(batchSize, steps),
             freeFlight: freeFlight,
             bodySubsteps: bodySubsteps,
+            preRollSteps: preRollSteps,
             runtimeSeconds: runtime,
             meanForceNewtons: meanForce,
             meanTorqueNewtonMeters: meanTorque,

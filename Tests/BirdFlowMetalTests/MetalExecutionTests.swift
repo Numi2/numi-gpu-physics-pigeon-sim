@@ -591,6 +591,32 @@ func metalFreeFlightBatchPartitionPreservesBodyState() throws {
 }
 
 @Test
+func metalFreeFlightPreRollAdvancesFluidWithoutMovingBody() throws {
+    guard MTLCreateSystemDefaultDevice() != nil else { return }
+    let testCase = try compactMetalTestCase(freeFlight: true)
+    let simulation = try BirdFlowSimulation(
+        configuration: testCase.configuration,
+        bird: testCase.bird,
+        initialBodyState: testCase.state
+    )
+    let before = try simulation.snapshot().body
+    let preRoll = try simulation.preRollPrescribedWingFlow(
+        steps: 4,
+        batchSize: 2
+    )
+    let held = try simulation.snapshot().body
+    #expect(preRoll.runtimeSafety == nil)
+    #expect(held == before)
+
+    let released = try simulation.advance(
+        steps: 1,
+        batchSize: 1,
+        fieldCapture: .disabled
+    )
+    #expect(released.runtimeSafety?.passed == true)
+}
+
+@Test
 func metalRigidBodyIntegratorMatchesCPUReferenceOneStep() throws {
     guard MTLCreateSystemDefaultDevice() != nil else { return }
     let testCase = try compactMetalTestCase(freeFlight: true)

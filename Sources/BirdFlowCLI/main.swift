@@ -1977,6 +1977,7 @@ private struct MeasuredBirdReplayArguments {
     var auditOnly = false
     var freeFlight = false
     var bodySubsteps = 1
+    var preRollCycles: Float = 0
     var bodyRefinement = false
     var loadRefinement = false
     var trimSearch = false
@@ -2070,6 +2071,18 @@ private struct MeasuredBirdReplayArguments {
                     )
                 }
                 bodySubsteps = value
+            case "--pre-roll-cycles":
+                index += 1
+                guard index < values.count,
+                      let value = Float(values[index]),
+                      value.isFinite,
+                      value >= 0 else {
+                    throw CLIError.invalidArgument(
+                        "--pre-roll-cycles requires a finite value >= 0"
+                    )
+                }
+                preRollCycles = value
+                freeFlight = true
             case "--body-refinement":
                 bodyRefinement = true
                 freeFlight = true
@@ -2193,7 +2206,7 @@ private struct MeasuredBirdReplayArguments {
             && (freeFlight || freeFlightConfirmation || bodyRefinement
                 || loadRefinement
                 || momentumLedger || steps != nil || bodySubsteps != 1
-                || cycles != 1) {
+                || preRollCycles != 0 || cycles != 1) {
             throw CLIError.invalidArgument(
                 "--trim-search controls its own duration and is incompatible with --cycles, --steps, --body-substeps, free-flight, refinement, or momentum-ledger modes"
             )
@@ -2207,7 +2220,7 @@ private struct MeasuredBirdReplayArguments {
             && (auditOnly || freeFlight || bodyRefinement || loadRefinement
                 || trimSearch || trimOptionsCustomized || momentumLedger
                 || partLoads || expectBilateralSymmetry || steps != nil
-                || bodySubsteps != 1 || cyclesCustomized) {
+                || bodySubsteps != 1 || preRollCycles != 0 || cyclesCustomized) {
             throw CLIError.invalidArgument(
                 "--free-flight-confirmation controls its own independent "
                     + "main, refinement, and ledger runs and cannot be "
@@ -2243,6 +2256,9 @@ private struct MeasuredBirdReplayArguments {
       --batch-size N     Command-buffer batch size (default: 32)
       --free-flight      Enable six-DOF motion; requires schema 2 wing inertia
       --body-substeps N  Rigid-body-only substeps per fluid step (1...64)
+      --pre-roll-cycles V
+                         Hold the body fixed while D3Q19 establishes prescribed
+                         wing flow, then release the same resident state
       --body-refinement  Run locked 1/2/4 body-substep ladder; requires --steps
       --load-refinement  Run five-cycle prescribed 8/12/16 load ladder
       --trim-search      Search bounded body pitch/airspeed for prescribed force/moment balance
@@ -3584,6 +3600,7 @@ private func runMeasuredBirdReplay(_ values: [String]) throws {
         batchSize: arguments.batchSize,
         freeFlight: arguments.freeFlight,
         bodySubsteps: arguments.bodySubsteps,
+        preRollCycles: arguments.preRollCycles,
         captureCoupledMomentumLedger: arguments.momentumLedger,
         expectBilateralSymmetry: arguments.expectBilateralSymmetry,
         archiveDirectory: arguments.archivePath.map {

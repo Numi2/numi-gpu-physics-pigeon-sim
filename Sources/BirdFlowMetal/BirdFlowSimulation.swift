@@ -691,6 +691,48 @@ public final class BirdFlowSimulation: @unchecked Sendable {
         fieldCapture: FieldCaptureMode = .required,
         recordRunSamples: Bool = false
     ) throws -> AdvanceResult {
+        try advanceInternal(
+            steps: steps,
+            batchSize: batchSize,
+            fieldCapture: fieldCapture,
+            recordRunSamples: recordRunSamples,
+            integrateFreeFlightBody: true
+        )
+    }
+
+    /// Establishes the moving-wall fluid state while holding a schema-2 body
+    /// at its registered initial state. This is a controlled release stage:
+    /// geometry, prescribed-wing momentum, D3Q19 populations, and force
+    /// reduction advance exactly as they do in free flight, but no body state
+    /// or runtime-safety ledger is advanced. A later regular `advance` call
+    /// releases the same resident fluid/body transaction into six-DOF motion.
+    @discardableResult
+    public func preRollPrescribedWingFlow(
+        steps: Int,
+        batchSize: Int = 32
+    ) throws -> AdvanceResult {
+        guard configuration.freeFlight else {
+            throw BirdFlowError.invalidAdvanceRequest(
+                steps: steps,
+                batchSize: batchSize
+            )
+        }
+        return try advanceInternal(
+            steps: steps,
+            batchSize: batchSize,
+            fieldCapture: .disabled,
+            recordRunSamples: false,
+            integrateFreeFlightBody: false
+        )
+    }
+
+    private func advanceInternal(
+        steps: Int,
+        batchSize: Int,
+        fieldCapture: FieldCaptureMode,
+        recordRunSamples: Bool,
+        integrateFreeFlightBody: Bool
+    ) throws -> AdvanceResult {
         guard steps >= 0, batchSize > 0 else {
             throw BirdFlowError.invalidAdvanceRequest(
                 steps: steps,
@@ -703,6 +745,7 @@ public final class BirdFlowSimulation: @unchecked Sendable {
             return AdvanceResult(
                 droppedFieldFrameCount: droppedFieldFrameCount,
                 runtimeSafety: configuration.freeFlight
+                    && integrateFreeFlightBody
                     ? readRuntimeSafetyReport()
                     : nil
             )
@@ -727,12 +770,13 @@ public final class BirdFlowSimulation: @unchecked Sendable {
                     captureMacroscopicFields: captureSlotIndex != nil
                         && count == remaining,
                     runSampleBaseIndex: encodedSteps,
-                    recordRunSamples: recordRunSamples
+                    recordRunSamples: recordRunSamples,
+                    integrateFreeFlightBody: integrateFreeFlightBody
                 )
                 submitted.append(commandBuffer)
                 encodedSteps += count
                 remaining -= count
-                if configuration.freeFlight {
+                if configuration.freeFlight && integrateFreeFlightBody {
                     commandBuffer.waitUntilCompleted()
                     try check(commandBuffer)
                     let safety = readRuntimeSafetyReport()
@@ -792,7 +836,7 @@ public final class BirdFlowSimulation: @unchecked Sendable {
             runSamples: recordRunSamples ? readRunSamples(count: steps) : [],
             fieldFramePublished: captureSlotIndex != nil,
             droppedFieldFrameCount: droppedFieldFrameCount,
-            runtimeSafety: configuration.freeFlight
+            runtimeSafety: configuration.freeFlight && integrateFreeFlightBody
                 ? readRuntimeSafetyReport()
                 : nil
         )
@@ -1362,7 +1406,8 @@ public final class BirdFlowSimulation: @unchecked Sendable {
         fieldSlot: ObservationSlot,
         captureMacroscopicFields: Bool,
         runSampleBaseIndex: Int,
-        recordRunSamples: Bool
+        recordRunSamples: Bool,
+        integrateFreeFlightBody: Bool
     ) throws -> MTLCommandBuffer {
         guard let commandBuffer = backend.queue.makeCommandBuffer() else {
             throw BirdFlowError.commandBufferFailed(
@@ -1410,7 +1455,7 @@ public final class BirdFlowSimulation: @unchecked Sendable {
                 fieldSlot: fieldSlot
             )
             lastLoadBuffer = try encodeReduction(commandBuffer: commandBuffer)
-            if configuration.freeFlight {
+            if configuration.freeFlight && integrateFreeFlightBody {
                 try encodeBodyIntegration(
                     commandBuffer: commandBuffer,
                     uniforms: &uniforms,
