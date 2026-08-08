@@ -98,17 +98,27 @@ public struct RunSample: Sendable, Equatable, Codable {
 
 @frozen
 public struct AdvanceResult: Sendable {
+  /// Number of accepted fluid/body transitions. A free-flight episode can end
+  /// early at the numerical boundary without invalidating the simulation.
+  public var completedSteps: Int
+  /// True when the runtime monitor ended the current free-flight episode.
+  /// This is an RL termination signal, not a host-side execution error.
+  public var terminatedByRuntimeSafety: Bool
   public var runSamples: [RunSample]
   public var fieldFramePublished: Bool
   public var droppedFieldFrameCount: UInt64
   public var runtimeSafety: RuntimeSafetyReport?
 
   public init(
+    completedSteps: Int = 0,
+    terminatedByRuntimeSafety: Bool = false,
     runSamples: [RunSample] = [],
     fieldFramePublished: Bool = false,
     droppedFieldFrameCount: UInt64 = 0,
     runtimeSafety: RuntimeSafetyReport? = nil
   ) {
+    self.completedSteps = completedSteps
+    self.terminatedByRuntimeSafety = terminatedByRuntimeSafety
     self.runSamples = runSamples
     self.fieldFramePublished = fieldFramePublished
     self.droppedFieldFrameCount = droppedFieldFrameCount

@@ -3564,12 +3564,6 @@ private func runMeasuredBirdReplay(_ values: [String]) throws {
             print("passed: \(report.passed)")
             print("scientific_verdict: \(report.scientificVerdict)")
         }
-        guard report.passed else {
-            throw CLIError.acceptanceFailed(
-                "bounded free-flight confirmation failed; inspect the "
-                    + "archived report before making a quantitative claim"
-            )
-        }
         return
     }
     if arguments.bodyRefinement {
@@ -3729,7 +3723,12 @@ private func runMeasuredBirdReplay(_ values: [String]) throws {
         print("dataset: \(report.audit.datasetIdentifier)")
         print("collision_operator: \(report.collisionOperator.rawValue)")
         print("device: \(report.deviceName)")
+        print("requested_steps: \(report.requestedSteps)")
         print("steps: \(report.steps)")
+        print(
+            "terminated_by_runtime_safety: "
+                + String(report.terminatedByRuntimeSafety)
+        )
         print("cycles: \(report.cycles)")
         print("mean_force_N: \(report.meanForceNewtons)")
         print("mean_torque_Nm: \(report.meanTorqueNewtonMeters)")

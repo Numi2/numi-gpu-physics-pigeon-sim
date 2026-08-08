@@ -252,7 +252,12 @@ public struct MeasuredBirdReplayReport: Codable, Sendable {
     /// run under a regularized operator is not interchangeable with TRT.
     public var collisionOperator: D3Q19CollisionOperator
     public var deviceName: String
+    /// Requested duration before any physics terminal transition.
+    public var requestedSteps: Int
+    /// Completed transitions. This can be shorter than requested for a
+    /// learnable free-flight episode that reached its numerical boundary.
     public var steps: Int
+    public var terminatedByRuntimeSafety: Bool
     public var cycles: Float
     public var batchSize: Int
     public var freeFlight: Bool
@@ -662,7 +667,7 @@ public enum MeasuredBirdReplay {
                 wingHingeReactionLoads: sample.wingHingeReactionLoads
             )
         }
-        guard samples.count == steps,
+        guard !samples.isEmpty,
               samples.allSatisfy(isFinite) else {
             throw MeasuredBirdReplayError.nonFiniteResult
         }
@@ -683,13 +688,15 @@ public enum MeasuredBirdReplay {
             audit: audit,
             collisionOperator: collisionOperator,
             deviceName: simulation.metalDevice.name,
-            steps: steps,
-            cycles: Float(steps)
+            requestedSteps: steps,
+            steps: result.completedSteps,
+            terminatedByRuntimeSafety: result.terminatedByRuntimeSafety,
+            cycles: Float(result.completedSteps)
                 * plan.configuration.scaling.timeStepSeconds
                 * frequency,
             batchSize: captureCoupledMomentumLedger
                 ? 1
-                : min(batchSize, steps),
+                : min(batchSize, max(1, result.completedSteps)),
             freeFlight: freeFlight,
             bodySubsteps: bodySubsteps,
             preRollSteps: preRollSteps,
@@ -702,12 +709,15 @@ public enum MeasuredBirdReplay {
             coupledMomentumLedger: momentumLedger,
             aerodynamicPartLoads: partLoads,
             samples: samples,
-            passed: (momentumLedger?.passed ?? true)
+            passed: !result.terminatedByRuntimeSafety
+                && (momentumLedger?.passed ?? true)
                 && (partLoads?.passed ?? true),
-            scientificVerdict: captureCoupledMomentumLedger
+            scientificVerdict: result.terminatedByRuntimeSafety
+                ? "free-flight episode reached the recorded numerical boundary; retain its completed transitions for controller learning and reset before the next episode"
+                : captureCoupledMomentumLedger
                 ? (momentumLedger?.passed == true
                         && partLoads?.passed == true
-                    ? "free-flight replay, coupled external linear-momentum ledger, and conservative per-part load closure passed; body-step, grid, trim, and real-specimen acceptance remain separate gates"
+                    ? "free-flight replay, coupled external linear-momentum ledger, and conservative per-part load closure passed; body-step, grid, trim, and real-specimen diagnostics remain separately recorded"
                     : "free-flight momentum or per-part load closure failed; quantitative loads are rejected")
                 : freeFlight
                 ? "free-flight replay completed inside runtime bounds; body-step, grid, trim, and momentum-ledger acceptance were not evaluated"

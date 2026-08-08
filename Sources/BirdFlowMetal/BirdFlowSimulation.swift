@@ -759,10 +759,17 @@ public final class BirdFlowSimulation: @unchecked Sendable {
 
         var remaining = steps
         var encodedSteps = 0
+        var terminatedByRuntimeSafety = false
         var submitted: [MTLCommandBuffer] = []
         do {
             while remaining > 0 {
-                let count = min(batchSize, remaining)
+                // A free-flight transition is an episode transaction. Keep
+                // it stepwise so a numerical boundary becomes a precise
+                // terminal signal rather than allowing a stale body to run
+                // through an arbitrary host batch or invalidating the run.
+                let count = configuration.freeFlight && integrateFreeFlightBody
+                    ? 1
+                    : min(batchSize, remaining)
                 let commandBuffer = try encodeBatch(
                     stepCount: count,
                     startStep: stepIndex + UInt64(encodedSteps),
@@ -781,7 +788,8 @@ public final class BirdFlowSimulation: @unchecked Sendable {
                     try check(commandBuffer)
                     let safety = readRuntimeSafetyReport()
                     if !safety.passed {
-                        throw BirdFlowError.runtimeSafetyViolation(safety)
+                        terminatedByRuntimeSafety = true
+                        break
                     }
                 }
             }
@@ -818,7 +826,7 @@ public final class BirdFlowSimulation: @unchecked Sendable {
         }
         lastCommandBuffer = nil
 
-        stepIndex += UInt64(steps)
+        stepIndex += UInt64(encodedSteps)
         timeSeconds = Float(
             Double(stepIndex) * Double(configuration.scaling.timeStepSeconds)
         )
@@ -833,7 +841,11 @@ public final class BirdFlowSimulation: @unchecked Sendable {
         }
 
         return AdvanceResult(
-            runSamples: recordRunSamples ? readRunSamples(count: steps) : [],
+            completedSteps: encodedSteps,
+            terminatedByRuntimeSafety: terminatedByRuntimeSafety,
+            runSamples: recordRunSamples
+                ? readRunSamples(count: encodedSteps)
+                : [],
             fieldFramePublished: captureSlotIndex != nil,
             droppedFieldFrameCount: droppedFieldFrameCount,
             runtimeSafety: configuration.freeFlight && integrateFreeFlightBody
@@ -1052,6 +1064,9 @@ public final class BirdFlowSimulation: @unchecked Sendable {
                 )
             )
             fluidBeforeRaw = fluidAfterRaw
+            if finalAdvance.terminatedByRuntimeSafety {
+                break
+            }
         }
 
         func rms(
@@ -1083,7 +1098,7 @@ public final class BirdFlowSimulation: @unchecked Sendable {
         let report = CoupledMomentumLedgerReport(
             schemaVersion: CoupledMomentumLedgerReport.schemaVersion,
             deviceName: metalDevice.name,
-            steps: steps,
+            steps: samples.count,
             timeStepSeconds: configuration.scaling.timeStepSeconds,
             momentumDefinition:
                 "direct population momentum + whole-bird translational momentum + prescribed-wing momentum relative to the registered body frame; external impulse = open far field + sponge + gravity",
@@ -1117,6 +1132,9 @@ public final class BirdFlowSimulation: @unchecked Sendable {
         )
         return CoupledMomentumAdvanceResult(
             advanceResult: AdvanceResult(
+                completedSteps: runSamples.count,
+                terminatedByRuntimeSafety:
+                    finalAdvance.terminatedByRuntimeSafety,
                 runSamples: runSamples,
                 fieldFramePublished: false,
                 droppedFieldFrameCount:
