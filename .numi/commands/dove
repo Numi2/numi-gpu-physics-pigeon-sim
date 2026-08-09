@@ -9,12 +9,16 @@ if [ "${1:-}" = "--help" ] || [ "${1:-}" = "-h" ]; then
     printf '%s\n' 'usage: numi dove [open|probe|robot|robot-probe|runtime-probe] [MANIFEST]'
     printf '%s\n' '       numi dove runtime-benchmark [ENVIRONMENTS] [STEPS] [MANIFEST]'
     printf '%s\n' '       numi dove authority-sweep [CANDIDATES] [STEPS] [MANIFEST]'
+    printf '%s\n' '       numi dove trim-sweep [CANDIDATES] [GENERATIONS] [STEPS] [MANIFEST]'
+    printf '%s\n' '       numi dove fatal-drop [HEIGHT] [DOWNWARD_SPEED] [STEPS] [MANIFEST]'
     printf '%s\n' 'The default manifest is ValidationInputs/deetjen-ob-f03-surface-v1/manifest.json in this workspace.'
     printf '%s\n' 'Open: drag to orbit, scroll to zoom, Space to pause, R to replay.'
-    printf '%s\n' 'Robot: the same controls, plus P to toggle the bounded demonstration controller.'
+    printf '%s\n' 'Robot: one 4.8 s environment at wall-clock 1.0x using reflected nonperiodic source traversal; toolbar controls stop, run/pause, speed, pages, and 1/4/9-environment layouts.'
     printf '%s\n' 'Runtime probe: execute the deformable surface as a transactional MetalWorld mechanics primitive.'
     printf '%s\n' 'Runtime benchmark: run the same proof at a bounded batch size (defaults: 64 environments, 32 steps).'
     printf '%s\n' 'Authority sweep: qualify signed lift plus bidirectional roll, pitch, and yaw loads (defaults: 2048 candidates, 36 steps).'
+    printf '%s\n' 'Trim sweep: optimize a static low-torque weight-supporting action through batched Metal physics (defaults: 512 candidates, 10 generations, 36 steps).'
+    printf '%s\n' 'Fatal drop: compare flight-disabled impact with measured-surface trim from the identical release (defaults: 22 m, 0 m/s, 180 steps).'
     printf '%s\n' 'Blue is the measured-outline left wing; orange is the reflected right-wing assumption.'
     printf '%s\n' 'Open/replay remains nonperiodic measured motion; authority-sweep qualifies only the authored simulator envelope, not hardware flight.'
     exit 0
@@ -24,7 +28,7 @@ dove_workspace=$(CDPATH= cd -- "$(dirname -- "$0")/../.." && pwd)
 numi_root=${NUMI_LAB_ROOT:?Run this capability through the numi dispatcher.}
 numi_build=${NUMI_BUILD_DIR:-"$numi_root/build"}
 action=${1:-open}
-if [ "$action" = "open" ] || [ "$action" = "probe" ] || [ "$action" = "robot" ] || [ "$action" = "robot-probe" ] || [ "$action" = "runtime-probe" ] || [ "$action" = "runtime-benchmark" ] || [ "$action" = "authority-sweep" ]; then
+if [ "$action" = "open" ] || [ "$action" = "probe" ] || [ "$action" = "robot" ] || [ "$action" = "robot-probe" ] || [ "$action" = "runtime-probe" ] || [ "$action" = "runtime-benchmark" ] || [ "$action" = "authority-sweep" ] || [ "$action" = "trim-sweep" ] || [ "$action" = "fatal-drop" ]; then
     if [ "$#" -gt 0 ]; then shift; fi
 else
     printf '%s\n' 'usage: numi dove [open|probe|robot|robot-probe|runtime-probe] [MANIFEST]' >&2
@@ -46,6 +50,24 @@ elif [ "$action" = "authority-sweep" ]; then
         printf '%s\n' 'usage: numi dove authority-sweep [CANDIDATES] [STEPS] [MANIFEST]' >&2
         exit 2
     fi
+elif [ "$action" = "trim-sweep" ]; then
+    trim_candidates=${1:-512}
+    trim_generations=${2:-10}
+    trim_steps=${3:-36}
+    manifest=${4:-"$dove_workspace/ValidationInputs/deetjen-ob-f03-surface-v1/manifest.json"}
+    if [ "$#" -gt 4 ]; then
+        printf '%s\n' 'usage: numi dove trim-sweep [CANDIDATES] [GENERATIONS] [STEPS] [MANIFEST]' >&2
+        exit 2
+    fi
+elif [ "$action" = "fatal-drop" ]; then
+    drop_height=${1:-22}
+    drop_speed=${2:-0}
+    drop_steps=${3:-180}
+    manifest=${4:-"$dove_workspace/ValidationInputs/deetjen-ob-f03-surface-v1/manifest.json"}
+    if [ "$#" -gt 4 ]; then
+        printf '%s\n' 'usage: numi dove fatal-drop [HEIGHT] [DOWNWARD_SPEED] [STEPS] [MANIFEST]' >&2
+        exit 2
+    fi
 else
     manifest=${1:-"$dove_workspace/ValidationInputs/deetjen-ob-f03-surface-v1/manifest.json"}
     if [ "$#" -gt 1 ]; then
@@ -55,7 +77,7 @@ else
 fi
 
 cmake -S "$numi_root" -B "$numi_build" -DCMAKE_BUILD_TYPE=Release >/dev/null
-if [ "$action" = "runtime-probe" ] || [ "$action" = "runtime-benchmark" ] || [ "$action" = "authority-sweep" ]; then
+if [ "$action" = "runtime-probe" ] || [ "$action" = "runtime-benchmark" ] || [ "$action" = "authority-sweep" ] || [ "$action" = "trim-sweep" ] || [ "$action" = "fatal-drop" ]; then
     target=metalrobo_measured_surface_robot_probe
 elif [ "$action" = "robot" ] || [ "$action" = "robot-probe" ]; then
     target=metalrobo_measured_dove_robot_lab
@@ -73,6 +95,14 @@ fi
 if [ "$action" = "authority-sweep" ]; then
     exec "$numi_build/bin/metalrobo_measured_surface_robot_probe" \
         --authority "$manifest" "$authority_candidates" "$authority_steps"
+fi
+if [ "$action" = "trim-sweep" ]; then
+    exec "$numi_build/bin/metalrobo_measured_surface_robot_probe" \
+        --trim "$manifest" "$trim_candidates" "$trim_generations" "$trim_steps"
+fi
+if [ "$action" = "fatal-drop" ]; then
+    exec "$numi_build/bin/metalrobo_measured_surface_robot_probe" \
+        --fatal-drop "$manifest" "$drop_height" "$drop_speed" "$drop_steps"
 fi
 if [ "$action" = "probe" ]; then
     exec "$numi_build/bin/metalrobo_measured_dove_lab" --probe "$manifest"
