@@ -2,13 +2,14 @@
 set -eu
 
 if [ "${1:-}" = "--numi-describe" ]; then
-    printf '%s\n' 'Open or probe the provenance-locked Deetjen measured dove in the native Numi Lab Metal viewer.'
+    printf '%s\n' 'Open or probe the provenance-locked Deetjen measured dove, including its surface-native robot form.'
     exit 0
 fi
 if [ "${1:-}" = "--help" ] || [ "${1:-}" = "-h" ]; then
-    printf '%s\n' 'usage: numi dove [open|probe] [MANIFEST]'
+    printf '%s\n' 'usage: numi dove [open|probe|robot|robot-probe] [MANIFEST]'
     printf '%s\n' 'The default manifest is ValidationInputs/deetjen-ob-f03-surface-v1/manifest.json in this workspace.'
     printf '%s\n' 'Open: drag to orbit, scroll to zoom, Space to pause, R to replay.'
+    printf '%s\n' 'Robot: the same controls, plus P to toggle the bounded demonstration controller.'
     printf '%s\n' 'Blue is the measured-outline left wing; orange is the reflected right-wing assumption.'
     printf '%s\n' 'This is a nonperiodic measured replay, not free-flight or quantitative-force acceptance.'
     exit 0
@@ -18,21 +19,32 @@ dove_workspace=$(CDPATH= cd -- "$(dirname -- "$0")/../.." && pwd)
 numi_root=${NUMI_LAB_ROOT:?Run this capability through the numi dispatcher.}
 numi_build=${NUMI_BUILD_DIR:-"$numi_root/build"}
 action=${1:-open}
-if [ "$action" = "open" ] || [ "$action" = "probe" ]; then
+if [ "$action" = "open" ] || [ "$action" = "probe" ] || [ "$action" = "robot" ] || [ "$action" = "robot-probe" ]; then
     if [ "$#" -gt 0 ]; then shift; fi
 else
-    printf '%s\n' 'usage: numi dove [open|probe] [MANIFEST]' >&2
+    printf '%s\n' 'usage: numi dove [open|probe|robot|robot-probe] [MANIFEST]' >&2
     exit 2
 fi
 manifest=${1:-"$dove_workspace/ValidationInputs/deetjen-ob-f03-surface-v1/manifest.json"}
 if [ "$#" -gt 1 ]; then
-    printf '%s\n' 'usage: numi dove [open|probe] [MANIFEST]' >&2
+    printf '%s\n' 'usage: numi dove [open|probe|robot|robot-probe] [MANIFEST]' >&2
     exit 2
 fi
 
 cmake -S "$numi_root" -B "$numi_build" -DCMAKE_BUILD_TYPE=Release >/dev/null
-cmake --build "$numi_build" --target metalrobo_measured_dove_lab -j 4 >/dev/null
+if [ "$action" = "robot" ] || [ "$action" = "robot-probe" ]; then
+    target=metalrobo_measured_dove_robot_lab
+else
+    target=metalrobo_measured_dove_lab
+fi
+cmake --build "$numi_build" --target "$target" -j 4 >/dev/null
 if [ "$action" = "probe" ]; then
     exec "$numi_build/bin/metalrobo_measured_dove_lab" --probe "$manifest"
+fi
+if [ "$action" = "robot-probe" ]; then
+    exec "$numi_build/bin/metalrobo_measured_dove_robot_lab" --probe "$manifest"
+fi
+if [ "$action" = "robot" ]; then
+    exec "$numi_build/bin/metalrobo_measured_dove_robot_lab" "$manifest"
 fi
 exec "$numi_build/bin/metalrobo_measured_dove_lab" "$manifest"
