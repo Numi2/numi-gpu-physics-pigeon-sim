@@ -1,0 +1,19 @@
+MeasuredSurface control-authority sweep PASSED
+  run fingerprint: 6556877998048357578
+  surface fingerprint: 16986278362264683070
+  candidates x steps x substeps: 2048 x 36 x 4
+  actuator contract: 24/24 lanes exercised; neutral + signed basis + bilateral recovery modes + deterministic harmonic candidates
+  mass / weight: 0.35 kg / 3.4335 N
+  lift gate: mean Fz >= 1.05 x weight
+  best lift candidate / mean Fz / weight ratio: 81 / 4.59971 N / 1.33966 [pass]
+  best lift mean torque xyz N m: 0.247975 0.0287846 0.123891
+  neutral mean force xyz N: -0.131743 -0.0346422 0.471532
+  attitude gate: bidirectional delta torque / inertia >= 12 rad/s^2
+  roll +/- candidate: 81/797, delta torque: +0.248527/-0.0525846 N m, angular accel: +138.07/-29.2137 rad/s^2 [pass]
+  pitch +/- candidate: 762/88, delta torque: +0.180136/-0.327524 N m, angular accel: +75.0567/-136.468 rad/s^2 [pass]
+  yaw +/- candidate: 91/80, delta torque: +0.16345/-0.122702 N m, angular accel: +52.7259/-39.5813 rad/s^2 [pass]
+  deterministic signed-load replay: true
+  failed environment steps: 0
+  immutable/persistent bytes: 3753645/1507328
+  checkpoint/threadgroup bytes: 753664/896
+  GPU ms / environment steps per second: 1007.59 / 73172.9
