@@ -20,7 +20,7 @@ if [ "${1:-}" = "--help" ] || [ "${1:-}" = "-h" ]; then
     printf '%s\n' 'Runtime probe: execute the deformable surface as a transactional MetalWorld mechanics primitive.'
     printf '%s\n' 'Runtime benchmark: run the same proof at a bounded batch size (defaults: 64 environments, 32 steps).'
     printf '%s\n' 'Authority sweep: qualify signed lift plus bidirectional roll, pitch, and yaw loads (defaults: 2048 candidates, 36 steps).'
-    printf '%s\n' 'Aero audit: run headless wind, scaling, symmetry, polar, dissipation, altitude-response, and cadence checks (default: 19 polar samples).'
+    printf '%s\n' 'Aero audit: run headless mesh-hole, wind, scaling, symmetry, polar, dissipation, ground-response, wingbeat, and cadence checks (default: 19 polar samples).'
     printf '%s\n' 'Trim sweep: optimize a static low-torque weight-supporting action through batched Metal physics (defaults: 512 candidates, 10 generations, 36 steps).'
     printf '%s\n' 'Fatal drop: compare flight-disabled impact with measured-surface trim from the identical release (defaults: 22 m, 0 m/s, 180 steps).'
     printf '%s\n' 'Blue is the measured-outline left wing; orange is the reflected right-wing assumption.'
