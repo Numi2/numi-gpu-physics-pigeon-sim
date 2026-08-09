@@ -7,10 +7,12 @@ if [ "${1:-}" = "--numi-describe" ]; then
 fi
 if [ "${1:-}" = "--help" ] || [ "${1:-}" = "-h" ]; then
     printf '%s\n' 'usage: numi dove [open|probe|robot|robot-probe|runtime-probe] [MANIFEST]'
+    printf '%s\n' '       numi dove runtime-benchmark [ENVIRONMENTS] [STEPS] [MANIFEST]'
     printf '%s\n' 'The default manifest is ValidationInputs/deetjen-ob-f03-surface-v1/manifest.json in this workspace.'
     printf '%s\n' 'Open: drag to orbit, scroll to zoom, Space to pause, R to replay.'
     printf '%s\n' 'Robot: the same controls, plus P to toggle the bounded demonstration controller.'
     printf '%s\n' 'Runtime probe: execute the deformable surface as a transactional MetalWorld mechanics primitive.'
+    printf '%s\n' 'Runtime benchmark: run the same proof at a bounded batch size (defaults: 64 environments, 32 steps).'
     printf '%s\n' 'Blue is the measured-outline left wing; orange is the reflected right-wing assumption.'
     printf '%s\n' 'This is a nonperiodic measured replay, not free-flight or quantitative-force acceptance.'
     exit 0
@@ -20,20 +22,30 @@ dove_workspace=$(CDPATH= cd -- "$(dirname -- "$0")/../.." && pwd)
 numi_root=${NUMI_LAB_ROOT:?Run this capability through the numi dispatcher.}
 numi_build=${NUMI_BUILD_DIR:-"$numi_root/build"}
 action=${1:-open}
-if [ "$action" = "open" ] || [ "$action" = "probe" ] || [ "$action" = "robot" ] || [ "$action" = "robot-probe" ] || [ "$action" = "runtime-probe" ]; then
+if [ "$action" = "open" ] || [ "$action" = "probe" ] || [ "$action" = "robot" ] || [ "$action" = "robot-probe" ] || [ "$action" = "runtime-probe" ] || [ "$action" = "runtime-benchmark" ]; then
     if [ "$#" -gt 0 ]; then shift; fi
 else
     printf '%s\n' 'usage: numi dove [open|probe|robot|robot-probe|runtime-probe] [MANIFEST]' >&2
     exit 2
 fi
-manifest=${1:-"$dove_workspace/ValidationInputs/deetjen-ob-f03-surface-v1/manifest.json"}
-if [ "$#" -gt 1 ]; then
-    printf '%s\n' 'usage: numi dove [open|probe|robot|robot-probe|runtime-probe] [MANIFEST]' >&2
-    exit 2
+if [ "$action" = "runtime-benchmark" ]; then
+    benchmark_environments=${1:-64}
+    benchmark_steps=${2:-32}
+    manifest=${3:-"$dove_workspace/ValidationInputs/deetjen-ob-f03-surface-v1/manifest.json"}
+    if [ "$#" -gt 3 ]; then
+        printf '%s\n' 'usage: numi dove runtime-benchmark [ENVIRONMENTS] [STEPS] [MANIFEST]' >&2
+        exit 2
+    fi
+else
+    manifest=${1:-"$dove_workspace/ValidationInputs/deetjen-ob-f03-surface-v1/manifest.json"}
+    if [ "$#" -gt 1 ]; then
+        printf '%s\n' 'usage: numi dove [open|probe|robot|robot-probe|runtime-probe] [MANIFEST]' >&2
+        exit 2
+    fi
 fi
 
 cmake -S "$numi_root" -B "$numi_build" -DCMAKE_BUILD_TYPE=Release >/dev/null
-if [ "$action" = "runtime-probe" ]; then
+if [ "$action" = "runtime-probe" ] || [ "$action" = "runtime-benchmark" ]; then
     target=metalrobo_measured_surface_robot_probe
 elif [ "$action" = "robot" ] || [ "$action" = "robot-probe" ]; then
     target=metalrobo_measured_dove_robot_lab
@@ -43,6 +55,10 @@ fi
 cmake --build "$numi_build" --target "$target" -j 4 >/dev/null
 if [ "$action" = "runtime-probe" ]; then
     exec "$numi_build/bin/metalrobo_measured_surface_robot_probe" "$manifest"
+fi
+if [ "$action" = "runtime-benchmark" ]; then
+    exec "$numi_build/bin/metalrobo_measured_surface_robot_probe" \
+        "$manifest" "$benchmark_environments" "$benchmark_steps"
 fi
 if [ "$action" = "probe" ]; then
     exec "$numi_build/bin/metalrobo_measured_dove_lab" --probe "$manifest"
