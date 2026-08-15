@@ -4,6 +4,13 @@ BirdFlowMetal's crow is a high-quality native Metal **estimated hybrid**, not a
 measured crow. Its machine-readable parameter and provenance record is
 [`american-crow-hybrid-visual-v1.json`](../ValidationInputs/american-crow-hybrid-visual-v1.json).
 
+![Estimated American-crow hybrid hero](Media/american-crow-hybrid-hero-v1.png)
+
+The hero is a generated visual interpretation, not a photograph. Its exact
+dimensions, checksum, reference roles, prompt contract, and claim boundary are
+locked in
+[`american-crow-hybrid-hero-v1.json`](../ValidationArtifacts/american-crow-hybrid-hero-v1.json).
+
 ## What is real, inferred, and artistic
 
 | Layer | Evidence | Use in the crow |
