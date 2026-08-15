@@ -8,7 +8,20 @@ import SwiftUI
 @main
 struct BirdFlowViewerApp: App {
   init() {
-    if CommandLine.arguments.contains("--capture-deetjen-through-flight") {
+    if CommandLine.arguments.contains("--capture-crow-frames") {
+      do {
+        let arguments = try CrowShowcaseCapture.Arguments(
+          commandLine: CommandLine.arguments
+        )
+        try CrowShowcaseCapture.run(arguments)
+        Foundation.exit(EXIT_SUCCESS)
+      } catch {
+        FileHandle.standardError.write(
+          Data("birdflow-viewer crow capture failed: \(error)\n".utf8)
+        )
+        Foundation.exit(EXIT_FAILURE)
+      }
+    } else if CommandLine.arguments.contains("--capture-deetjen-through-flight") {
       do {
         let arguments = try DeetjenThroughFlightObservatoryCapture.Arguments(
           commandLine: CommandLine.arguments

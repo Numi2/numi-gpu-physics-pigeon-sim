@@ -64,6 +64,19 @@ translucent wing history and wingtip ribbons remain explicitly kinematic.
 
 <p align="center"><em>Native Numi Lab presentation of the provenance-locked Deetjen surface replay from two recorded viewpoints. Cyan is the measured left wing and orange is the reflected right-wing assumption. This footage demonstrates the deformation-aware Metal viewer; it is not a new free-flight or aerodynamic-validation result.</em></p>
 
+### American crow visual study
+
+[![Generated estimated American-crow hybrid in forward flight](Docs/Media/american-crow-hybrid-hero-v1.png)](Docs/AMERICAN_CROW_MODEL.md)
+
+The American-crow study combines the locked Deetjen dove deformation scaffold,
+published crow morphometric ranges, screened public CT anatomy, current feather
+appearance measurements, and species-specific photographic references. The
+hero above is a generated appearance target—not a photograph or measured crow
+surface. A separate [native Metal wingbeat](Docs/Media/american-crow-hybrid-native-v1.mp4)
+executes the estimated geometry and material on Apple silicon. The complete
+[model and evidence boundary](Docs/AMERICAN_CROW_MODEL.md) keeps those two
+artifacts distinct from crow aerodynamic validation.
+
 [Quick start](#quick-start) · [Validation scoreboard](#validation-scoreboard) · [Native viewer](#native-metal-viewer) · [Architecture](#architecture) · [Measured data](#measured-geometry-and-kinematics) · [Scientific limits](#scientific-boundary) · [Full validation contract](Docs/VALIDATION.md)
 
 ## Why this project is interesting

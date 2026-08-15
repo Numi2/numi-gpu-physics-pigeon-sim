@@ -71,15 +71,17 @@ final class VisualizationBackend {
     fragment: String,
     colorFormat: MTLPixelFormat,
     depthFormat: MTLPixelFormat = .depth32Float,
-    blending: Bool = false
+    blending: Bool = false,
+    sampleCount: Int = 1
   ) throws -> MTLRenderPipelineState {
-    let key = "\(vertex)|\(fragment)|\(colorFormat.rawValue)|\(depthFormat.rawValue)|\(blending)"
+    let key = "\(vertex)|\(fragment)|\(colorFormat.rawValue)|\(depthFormat.rawValue)|\(blending)|\(sampleCount)"
     if let existing = renderPipelines[key] { return existing }
     let descriptor = MTLRenderPipelineDescriptor()
     descriptor.vertexFunction = library.makeFunction(name: vertex)
     descriptor.fragmentFunction = library.makeFunction(name: fragment)
     descriptor.colorAttachments[0].pixelFormat = colorFormat
     descriptor.depthAttachmentPixelFormat = depthFormat
+    descriptor.rasterSampleCount = sampleCount
     if blending {
       let attachment = descriptor.colorAttachments[0]!
       attachment.isBlendingEnabled = true

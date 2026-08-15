@@ -325,3 +325,48 @@ func measuredDoveShowcaseCaptureClosesLoop() throws {
   #expect(stepRMS.last! < 1.5 * medianStep)
   #expect(stepRMS.last! <= stepRMS.dropLast().max()!)
 }
+
+@Test("estimated American-crow capture is profile-locked and animated")
+func estimatedCrowShowcaseCaptureProducesDistinctFrames() throws {
+  guard MTLCreateSystemDefaultDevice() != nil else { return }
+  let testFile = URL(fileURLWithPath: #filePath)
+  let root = testFile.deletingLastPathComponent()
+    .deletingLastPathComponent()
+    .deletingLastPathComponent()
+  let output = FileManager.default.temporaryDirectory.appendingPathComponent(
+    "birdflow-crow-showcase-\(UUID().uuidString)",
+    isDirectory: true
+  )
+  defer { try? FileManager.default.removeItem(at: output) }
+  let arguments = try CrowShowcaseCapture.Arguments(commandLine: [
+    "birdflow-viewer",
+    "--capture-crow-frames", output.path,
+    "--capture-width", "480",
+    "--capture-height", "270",
+    "--capture-frames", "3",
+    "--capture-crow-dove-manifest",
+    root.appendingPathComponent(
+      "ValidationInputs/deetjen-ob-f03-surface-v1/manifest.json"
+    ).path,
+    "--capture-crow-profile",
+    root.appendingPathComponent(
+      "ValidationInputs/american-crow-hybrid-visual-v1.json"
+    ).path,
+  ])
+  try CrowShowcaseCapture.run(arguments)
+
+  let first = try Data(contentsOf: output.appendingPathComponent("frame-000.png"))
+  let middle = try Data(contentsOf: output.appendingPathComponent("frame-001.png"))
+  let last = try Data(contentsOf: output.appendingPathComponent("frame-002.png"))
+  #expect(first.count > 30_000)
+  #expect(middle.count > 30_000)
+  #expect(last.count > 30_000)
+  #expect(first != middle)
+  #expect(first == last)
+  guard let image = NSImage(data: middle) else {
+    Issue.record("crow capture did not encode a readable PNG")
+    return
+  }
+  #expect(Int(image.size.width) == 480)
+  #expect(Int(image.size.height) == 270)
+}

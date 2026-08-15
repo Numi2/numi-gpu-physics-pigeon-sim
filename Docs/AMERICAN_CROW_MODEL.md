@@ -27,6 +27,40 @@ wingspan, `0.174 m` tail, and `0.049 m` bill. These are useful central estimates
 not a same-specimen measurement. The display wingbeat is `4.6 Hz`; the original
 dove sequence supplies phase shape, not crow timing.
 
+## Native Metal capture
+
+The native renderer consumes both locked inputs and keeps the generated hero
+separate from executable geometry:
+
+![Executable estimated American-crow frame](Media/american-crow-hybrid-native-v1.png)
+
+[View the two-second native Metal wingbeat](Media/american-crow-hybrid-native-v1.mp4).
+Its encoding, input hashes, Apple-Metal execution record, seam check, and claim
+boundary are locked in
+[`american-crow-hybrid-native-v1.json`](../ValidationArtifacts/american-crow-hybrid-native-v1.json).
+
+```bash
+swift build -c release --product birdflow-viewer
+.build/release/birdflow-viewer \
+  --capture-crow-frames /tmp/birdflow-crow \
+  --capture-crow-dove-manifest \
+    ValidationInputs/deetjen-ob-f03-surface-v1/manifest.json \
+  --capture-crow-profile \
+    ValidationInputs/american-crow-hybrid-visual-v1.json \
+  --capture-width 1600 \
+  --capture-height 900 \
+  --capture-frames 48
+```
+
+It verifies the dove manifest SHA-256 before rendering, resamples the measured
+deformation into a bilaterally symmetrized, more laterally extended crow
+presentation pose, and builds the bird from a smooth body/head loft plus
+explicit primary, secondary, covert, contour, and tail feathers. Four-sample
+Metal rasterization and a dedicated eumelanin shader provide view-dependent
+cool sheen while keeping the bird visually black. The native result is an
+executable motion and material estimate; it is deliberately not presented as
+the photoreal appearance target established by the generated hero.
+
 ## Sources
 
 - Deetjen et al., *eLife* (2024), DOI `10.7554/eLife.89968` and Dryad DOI

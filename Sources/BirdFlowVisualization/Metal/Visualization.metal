@@ -605,6 +605,63 @@ fragment float4 showcaseDoveFragment(
     return float4(color,in.color.a);
 }
 
+fragment float4 showcaseCrowFragment(
+    RasterVertex in [[stage_in]],
+    constant CameraUniforms& camera [[buffer(0)]]) {
+    float3 normal=normalize(in.normal);
+    float3 view=normalize(camera.eyeAndWidth.xyz-in.world);
+    float material=in.color.a;
+    float3 key=normalize(float3(0.28f,-0.46f,0.84f));
+    float3 fill=normalize(float3(-0.62f,0.34f,0.52f));
+    float ndk=abs(dot(normal,key));
+    float ndf=abs(dot(normal,fill));
+    float ndv=saturate(abs(dot(normal,view)));
+    float rim=pow(1.0f-ndv,2.2f);
+    float3 halfVector=normalize(key+view);
+
+    // Eyes use the upper material band. A tight white catchlight and a warm
+    // iris keep the eye readable without lifting the surrounding plumage.
+    if(material>0.72f){
+        float specular=pow(saturate(dot(normal,halfVector)),180.0f);
+        float horizon=pow(1.0f-ndv,3.0f);
+        float3 eye=in.color.rgb*(0.13f+0.72f*ndk+0.12f*ndf);
+        eye+=float3(2.6f,2.3f,1.9f)*specular;
+        eye+=float3(0.055f,0.025f,0.010f)*horizon;
+        return float4(1.0f-exp(-eye),1.0f);
+    }
+
+    // Keratin in the bill, claws, and legs is dark graphite rather than
+    // feather black. It carries a broader, weaker highlight.
+    if(material>0.48f){
+        float specular=pow(saturate(dot(normal,halfVector)),48.0f);
+        float3 keratin=in.color.rgb*(0.24f+0.66f*ndk+0.18f*ndf);
+        keratin+=specular*float3(0.24f,0.27f,0.31f);
+        keratin+=rim*float3(0.025f,0.035f,0.050f);
+        return float4(1.0f-exp(-1.12f*keratin),1.0f);
+    }
+
+    // Eumelanin makes the body nearly black while a view-dependent thin-film
+    // band adds the restrained blue/violet sheen visible on adult crow
+    // feather regions. The spatial term breaks up a plastic-looking highlight
+    // without pretending to be a measured feather microstructure.
+    float grazing=pow(1.0f-ndv,1.55f);
+    float interference=0.5f+0.5f*cos(
+        32.0f*ndv+17.0f*in.world.x-11.0f*in.world.y+8.0f*in.world.z
+    );
+    float3 blue=float3(0.035f,0.115f,0.235f);
+    float3 violet=float3(0.145f,0.045f,0.205f);
+    float3 sheen=mix(blue,violet,interference);
+    float featherSpecular=pow(saturate(dot(normal,halfVector)),92.0f);
+    float softSpecular=pow(saturate(dot(normal,halfVector)),24.0f);
+    float diffuse=0.22f+0.62f*ndk+0.18f*ndf;
+    float3 color=in.color.rgb*diffuse;
+    color+=sheen*(0.035f+0.30f*grazing)*(0.38f+0.62f*ndk);
+    color+=float3(0.14f,0.18f,0.25f)*featherSpecular;
+    color+=float3(0.018f,0.026f,0.042f)*softSpecular;
+    color+=rim*float3(0.025f,0.055f,0.105f);
+    return float4(1.0f-exp(-1.18f*color),1.0f);
+}
+
 fragment float4 showcaseWireFragment(RasterVertex in [[stage_in]]) {
     float intensity=0.025f+0.055f*clamp(in.color.g+in.color.b,0.0f,1.0f);
     return float4(0.48f,0.88f,1.0f,intensity);
@@ -639,6 +696,32 @@ fragment float4 showcaseBackgroundFragment(
     base+=grid*float3(0.16f,0.58f,0.82f);
     base*=0.72f+0.28f*vignette;
     return float4(base,1);
+}
+
+fragment float4 showcaseCrowBackgroundFragment(
+    RasterVertex in [[stage_in]],
+    constant float4& options [[buffer(0)]]) {
+    float2 uv=in.uv;
+    float aspect=max(options.y,0.1f);
+    float2 p=uv-0.5f;
+    p.x*=aspect;
+    float horizon=smoothstep(0.18f,0.68f,uv.y);
+    float3 low=float3(0.012f,0.022f,0.038f);
+    float3 high=float3(0.055f,0.115f,0.205f);
+    float3 sky=mix(low,high,horizon);
+    float2 sunCenter=float2(-0.46f*aspect,0.22f);
+    float sun=exp(-13.0f*dot(p-sunCenter,p-sunCenter));
+    float halo=exp(-2.8f*dot(p-sunCenter,p-sunCenter));
+    sky+=sun*float3(1.08f,0.63f,0.28f)+halo*float3(0.13f,0.075f,0.045f);
+    float cloudA=sin(5.2f*p.x+0.7f*sin(9.0f*p.y));
+    float cloudB=sin(8.5f*p.x-3.7f*p.y+1.1f);
+    float cloud=smoothstep(0.72f,1.45f,cloudA+0.52f*cloudB);
+    sky+=cloud*(0.020f+0.022f*sun)*float3(0.60f,0.72f,0.82f);
+    float vignette=1.0f-smoothstep(0.42f,1.02f,length(p));
+    sky*=0.66f+0.34f*vignette;
+    float grain=fract(sin(dot(floor(uv*float2(1280.0f,720.0f)),float2(12.9898f,78.233f)))*43758.5453f);
+    sky+=(grain-0.5f)/420.0f;
+    return float4(sky,1.0f);
 }
 
 vertex RasterVertex showcasePostVertex(uint vid [[vertex_id]]) {

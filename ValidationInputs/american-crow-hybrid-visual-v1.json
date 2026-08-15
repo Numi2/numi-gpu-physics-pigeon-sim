@@ -57,7 +57,7 @@
     "bodyScaleXYZ": [2.30, 2.15, 2.20],
     "wingScaleXYZ": [2.15, 2.12, 2.12],
     "tailScaleXYZ": [2.18, 1.72, 1.72],
-    "headRadiusXYZMeters": [0.058, 0.048, 0.050],
+    "headRadiusXYZMeters": [0.052, 0.041, 0.044],
     "billLengthMeters": 0.049,
     "primaryFeatherCountPerWing": 10,
     "secondaryFeatherCountPerWing": 11,

@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 1,
+  "artifactIdentifier": "american-crow-hybrid-native-v1",
+  "evidenceClass": "executable-estimated-visualization",
+  "modelProfile": {
+    "path": "ValidationInputs/american-crow-hybrid-visual-v1.json",
+    "sha256": "3e78d54e099110386ab23d74a05a83bd3ef3b23ecef3ec14890168f754c5cf41"
+  },
+  "measuredDoveManifest": {
+    "path": "ValidationInputs/deetjen-ob-f03-surface-v1/manifest.json",
+    "sha256": "ad42148aa9ee72d994d668ba16f8b6572cb8b192b77539fe66d97586ed9e1a13",
+    "use": "temporal deformation scaffold only"
+  },
+  "video": {
+    "path": "Docs/Media/american-crow-hybrid-native-v1.mp4",
+    "sha256": "552a03b616b35518d32181caeecb27e40a45d4ceb5d62799c719cbb34ed9d69a",
+    "bytes": 218950,
+    "codec": "h264",
+    "pixelFormat": "yuv420p",
+    "pixelWidth": 1280,
+    "pixelHeight": 720,
+    "frames": 48,
+    "framesPerSecond": 24,
+    "durationSeconds": 2.0
+  },
+  "poster": {
+    "path": "Docs/Media/american-crow-hybrid-native-v1.png",
+    "sha256": "2560c4d2b9bb53066a3ac6eb7e6641aa87e278cb3ae0892a8659fd08bdc556fc",
+    "bytes": 913755,
+    "pixelWidth": 1280,
+    "pixelHeight": 720,
+    "sourceFrame": 0
+  },
+  "capture": {
+    "date": "2026-08-15",
+    "device": "Apple M4 GPU",
+    "metalSupport": "Metal 4",
+    "rasterSampleCount": 4,
+    "command": "Scripts/capture-crow-showcase.sh",
+    "seamProbe": {
+      "comparison": "unencoded frame 000 versus endpoint probe frame 048",
+      "result": "pixel-identical SHA-256"
+    }
+  },
+  "visualConstruction": [
+    "bilaterally symmetrized deformation directions derived from the measured dove loop",
+    "estimated crow body and head loft",
+    "explicit estimated primary, secondary, covert, contour, and tail feathers",
+    "view-dependent procedural eumelanin sheen"
+  ],
+  "claimBoundary": "This artifact proves that the estimated hybrid crow geometry, measured-derived presentation scaffold, and Metal material execute together on the recorded Apple GPU. It is not measured crow geometry or kinematics and provides no crow CFD, force, power, inertia, or free-flight validation."
+}
