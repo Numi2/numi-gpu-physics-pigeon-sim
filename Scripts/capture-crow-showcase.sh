@@ -48,7 +48,9 @@ ffmpeg -v error -y \
   -pix_fmt yuv420p \
   -movflags +faststart \
   "$OUTPUT"
-cp "$FRAMES/frame-000.png" "$POSTER"
+# Use a solver-surface-driven mid-downstroke as the README poster rather than
+# a separate reference image or a cosmetically selected non-executable pose.
+cp "$FRAMES/frame-030.png" "$POSTER"
 
 DIMENSIONS="$(
   ffprobe -v error -select_streams v:0 \

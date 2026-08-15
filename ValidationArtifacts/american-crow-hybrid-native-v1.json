@@ -24,8 +24,8 @@
   },
   "video": {
     "path": "Docs/Media/american-crow-hybrid-native-v1.mp4",
-    "sha256": "eadba38063f669ba7d152228f8f5a708070621ae19e62b071b31eaee80b08316",
-    "bytes": 246021,
+    "sha256": "97a2b726d709e0bd04c9df5cff13ac2fa48cb4b9f887be955d5c87e9e5417b90",
+    "bytes": 257132,
     "codec": "h264",
     "pixelFormat": "yuv420p",
     "pixelWidth": 1280,
@@ -36,11 +36,11 @@
   },
   "poster": {
     "path": "Docs/Media/american-crow-hybrid-native-v1.png",
-    "sha256": "b0d724bc9966e233965a38abc8af997ab796b393fff7b19b49de137fb11ef965",
-    "bytes": 928582,
+    "sha256": "95989e4a72358b7201e28b0b53cd7b0ee5fd07f6e0e96ab646af16b06b191c3c",
+    "bytes": 902900,
     "pixelWidth": 1280,
     "pixelHeight": 720,
-    "sourceFrame": 0
+    "sourceFrame": 30
   },
   "capture": {
     "date": "2026-08-15",
@@ -55,9 +55,10 @@
   },
   "visualConstruction": [
     "bilaterally symmetrized wing directions sampled from the exact estimated-hybrid solver-surface frames",
-    "estimated crow body and head loft",
-    "explicit estimated primary, secondary, covert, contour, and tail feathers",
-    "view-dependent procedural eumelanin sheen"
+    "slender estimated crow body and integrated head loft",
+    "volumetric tapered bill, dark eye, nostrils, and facial bristles",
+    "explicit pointed primary, secondary, covert, contour, and square-tail feathers",
+    "view-dependent procedural eumelanin microstructure and restrained cool sheen"
   ],
   "claimBoundary": "This artifact proves that the locked estimated-hybrid solver surface can drive the procedural crow presentation motion and Metal material on the recorded Apple GPU. The beauty geometry is not the solver boundary mesh. Neither geometry nor kinematics is a measured crow, and this capture provides no crow CFD, force, power, inertia, trim, or free-flight validation."
 }

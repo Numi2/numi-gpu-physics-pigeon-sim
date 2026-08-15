@@ -145,10 +145,10 @@ public enum CrowShowcaseCapture {
         : Float(frameIndex) / Float(arguments.frameCount - 1)
       let orbit = 2 * Float.pi * phase
       var camera = CameraState()
-      camera.target = SIMD3<Float>(-0.025, 0, 0.018)
-      camera.distance = 0.94 * (1 + 0.012 * cos(orbit))
-      camera.yaw = -1.08 + 0.030 * sin(orbit)
-      camera.pitch = 0.22 + 0.016 * cos(orbit)
+      camera.target = SIMD3<Float>(-0.018, 0, 0.020)
+      camera.distance = 0.86 * (1 + 0.010 * cos(orbit))
+      camera.yaw = -1.06 + 0.024 * sin(orbit)
+      camera.pitch = 0.18 + 0.012 * cos(orbit)
       let texture = try renderer.render(
         phase: phase,
         camera: camera,
@@ -720,14 +720,15 @@ private struct CrowMeshBuilder {
     appendCrowBodyLoft(center: bodyCenter, to: &vertices)
     let radiiRaw = profile.visualTransform.headRadiusXYZMeters
     let radii = SIMD3<Float>(radiiRaw[0], radiiRaw[1], radiiRaw[2])
+      * SIMD3<Float>(0.96, 0.92, 0.94)
     let breathing = 1 + 0.012 * sin(2 * Float.pi * phase)
-    let headCenter = bodyCenter + SIMD3<Float>(0.142, 0, 0.047)
+    let headCenter = bodyCenter + SIMD3<Float>(0.146, 0, 0.032)
     appendEllipsoid(
       center: headCenter,
       radii: radii * SIMD3<Float>(breathing, 1, breathing),
       latitudeCount: 18,
       longitudeCount: 30,
-      color: SIMD4<Float>(0.012, 0.016, 0.026, 0.16),
+      color: SIMD4<Float>(0.005, 0.007, 0.011, 0.16),
       to: &vertices
     )
     appendBill(center: headCenter, to: &vertices)
@@ -749,16 +750,16 @@ private struct CrowMeshBuilder {
       let radiusZ: Float
     }
     let rings: [Ring] = [
-      Ring(x: -0.178, z: 0.000, radiusY: 0.012, radiusZ: 0.020),
-      Ring(x: -0.158, z: -0.002, radiusY: 0.046, radiusZ: 0.060),
-      Ring(x: -0.112, z: -0.008, radiusY: 0.076, radiusZ: 0.087),
-      Ring(x: -0.052, z: -0.014, radiusY: 0.089, radiusZ: 0.101),
-      Ring(x: 0.010, z: -0.010, radiusY: 0.091, radiusZ: 0.104),
-      Ring(x: 0.065, z: 0.004, radiusY: 0.080, radiusZ: 0.090),
-      Ring(x: 0.104, z: 0.025, radiusY: 0.065, radiusZ: 0.074),
-      Ring(x: 0.136, z: 0.043, radiusY: 0.052, radiusZ: 0.057),
-      Ring(x: 0.164, z: 0.049, radiusY: 0.041, radiusZ: 0.046),
-      Ring(x: 0.187, z: 0.045, radiusY: 0.025, radiusZ: 0.031),
+      Ring(x: -0.180, z: 0.000, radiusY: 0.009, radiusZ: 0.014),
+      Ring(x: -0.158, z: -0.002, radiusY: 0.032, radiusZ: 0.041),
+      Ring(x: -0.116, z: -0.006, radiusY: 0.052, radiusZ: 0.059),
+      Ring(x: -0.060, z: -0.010, radiusY: 0.064, radiusZ: 0.070),
+      Ring(x: 0.002, z: -0.008, radiusY: 0.068, radiusZ: 0.073),
+      Ring(x: 0.060, z: 0.000, radiusY: 0.063, radiusZ: 0.067),
+      Ring(x: 0.108, z: 0.014, radiusY: 0.054, radiusZ: 0.057),
+      Ring(x: 0.145, z: 0.028, radiusY: 0.044, radiusZ: 0.047),
+      Ring(x: 0.174, z: 0.033, radiusY: 0.033, radiusZ: 0.037),
+      Ring(x: 0.194, z: 0.031, radiusY: 0.017, radiusZ: 0.023),
     ]
     let segments = 48
     var positions: [SIMD3<Float>] = []
@@ -797,7 +798,7 @@ private struct CrowMeshBuilder {
       normals[triangle.y] += weighted
       normals[triangle.z] += weighted
     }
-    let color = SIMD4<Float>(0.011, 0.015, 0.025, 0.10)
+    let color = SIMD4<Float>(0.006, 0.008, 0.013, 0.10)
     for triangle in triangles {
       for index in [triangle.x, triangle.y, triangle.z] {
         vertices.append(
@@ -824,8 +825,8 @@ private struct CrowMeshBuilder {
           let x = bodyCenter.x + 0.092 - 0.230 * fraction
           let longitudinal = (x - bodyCenter.x + 0.020) / 0.155
           let envelope = sqrt(max(0.10, 1 - longitudinal * longitudinal))
-          let radiusY = 0.087 * envelope
-          let radiusZ = 0.096 * envelope
+          let radiusY = 0.064 * envelope
+          let radiusZ = 0.070 * envelope
           let stagger: Float = row.isMultiple(of: 2) ? 0 : 0.007
           let root = SIMD3<Float>(
             x - stagger,
@@ -891,23 +892,52 @@ private struct CrowMeshBuilder {
     to vertices: inout [ColoredVertex]
   ) {
     let length = profile.visualTransform.billLengthMeters
-    let base = center + SIMD3<Float>(0.040, 0, 0.002)
-    let tip = base + SIMD3<Float>(length, 0, -0.004)
-    let upper = base + SIMD3<Float>(0, 0, 0.020)
-    let lower = base + SIMD3<Float>(0, 0, -0.014)
-    let left = base + SIMD3<Float>(0, 0.019, 0)
-    let right = base + SIMD3<Float>(0, -0.019, 0)
+    let base = center + SIMD3<Float>(0.038, 0, -0.001)
     let color = SIMD4<Float>(0.044, 0.050, 0.061, 0.58)
-    appendTriangle(upper, left, tip, color: color, to: &vertices)
-    appendTriangle(upper, tip, right, color: color, to: &vertices)
-    appendTriangle(lower, tip, left, color: color, to: &vertices)
-    appendTriangle(lower, right, tip, color: color, to: &vertices)
-    appendQuad(upper, right, lower, left, color: color, to: &vertices)
+    let stationCount = 9
+    let radialCount = 14
+    var positions: [SIMD3<Float>] = []
+    positions.reserveCapacity(stationCount * radialCount)
+    for station in 0..<stationCount {
+      let t = Float(station) / Float(stationCount - 1)
+      let taper = pow(max(1 - t, 0), 0.72)
+      let centerLine = base + SIMD3<Float>(
+        length * t,
+        0,
+        0.003 * (1 - t) - 0.006 * t * t
+      )
+      let halfWidth = 0.0165 * taper + 0.0008
+      let halfHeight = 0.0145 * taper + 0.0007
+      for radial in 0..<radialCount {
+        let angle = 2 * Float.pi * Float(radial) / Float(radialCount)
+        positions.append(
+          centerLine + SIMD3<Float>(
+            0,
+            cos(angle) * halfWidth,
+            sin(angle) * halfHeight
+          )
+        )
+      }
+    }
+    for station in 0..<(stationCount - 1) {
+      for radial in 0..<radialCount {
+        let next = (radial + 1) % radialCount
+        let a = station * radialCount + radial
+        let b = (station + 1) * radialCount + radial
+        let c = (station + 1) * radialCount + next
+        let d = station * radialCount + next
+        appendQuad(
+          positions[a], positions[b], positions[c], positions[d],
+          color: color,
+          to: &vertices
+        )
+      }
+    }
     let nostrilColor = SIMD4<Float>(0.002, 0.002, 0.003, 0.82)
     for side: Float in [-1, 1] {
       appendEllipsoid(
-        center: base + SIMD3<Float>(0.013, side * 0.0175, 0.008),
-        radii: SIMD3<Float>(0.0065, 0.0018, 0.0032),
+        center: base + SIMD3<Float>(0.012, side * 0.0148, 0.0065),
+        radii: SIMD3<Float>(0.0055, 0.0013, 0.0026),
         latitudeCount: 6,
         longitudeCount: 10,
         color: nostrilColor,
@@ -925,18 +955,18 @@ private struct CrowMeshBuilder {
       let eyeCenter = center + SIMD3<Float>(0.022, side * headRadii.y * 0.91, 0.011)
       appendEllipsoid(
         center: eyeCenter,
-        radii: SIMD3<Float>(0.0060, 0.0028, 0.0060),
+        radii: SIMD3<Float>(0.0048, 0.0022, 0.0048),
         latitudeCount: 12,
         longitudeCount: 18,
-        color: SIMD4<Float>(0.010, 0.006, 0.004, 0.82),
+        color: SIMD4<Float>(0.004, 0.003, 0.002, 0.82),
         to: &vertices
       )
       appendEllipsoid(
-        center: eyeCenter + SIMD3<Float>(0.0015, side * 0.0030, 0.0012),
-        radii: SIMD3<Float>(0.0025, 0.0009, 0.0025),
+        center: eyeCenter + SIMD3<Float>(0.0012, side * 0.0023, 0.0010),
+        radii: SIMD3<Float>(0.0016, 0.0006, 0.0016),
         latitudeCount: 8,
         longitudeCount: 12,
-        color: SIMD4<Float>(0.085, 0.038, 0.012, 0.82),
+        color: SIMD4<Float>(0.022, 0.010, 0.004, 0.82),
         to: &vertices
       )
     }
@@ -1034,27 +1064,6 @@ private struct CrowMeshBuilder {
       simd_cross(forward, spanDirection),
       fallback: SIMD3<Float>(0, 0, 1)
     )
-    let shoulderLeading = root + forward * 0.050
-    let elbowLeading = root + span * 0.37 + forward * 0.032
-    let wristLeading = root + span * 0.69 - forward * 0.006
-    let wristTrailing = root + span * 0.57 - forward * 0.093
-    let shoulderTrailing = root - forward * 0.104
-    let deckColor = SIMD4<Float>(0.011, 0.016, 0.029, 0.20)
-    appendTriangle(
-      shoulderLeading, elbowLeading, shoulderTrailing,
-      color: deckColor,
-      to: &vertices
-    )
-    appendTriangle(
-      elbowLeading, wristTrailing, shoulderTrailing,
-      color: deckColor,
-      to: &vertices
-    )
-    appendTriangle(
-      elbowLeading, wristLeading, wristTrailing,
-      color: deckColor,
-      to: &vertices
-    )
     let primaryCount = profile.visualTransform.primaryFeatherCountPerWing
     for index in 0..<primaryCount {
       let f = Float(index) / Float(max(primaryCount - 1, 1))
@@ -1063,14 +1072,14 @@ private struct CrowMeshBuilder {
       let featherTip = root + span * (0.72 + 0.33 * f)
         - forward * (0.145 - 0.112 * f)
         + planeNormal * (0.008 * sin(Float.pi * f))
-      let shade = 0.012 + 0.006 * f
+      let shade = 0.008 + 0.004 * f
       appendFeatherBlade(
         root: featherRoot,
         tip: featherTip,
         planeNormal: planeNormal,
         rootWidth: 0.011 + 0.004 * (1 - f),
         maximumWidth: 0.019 - 0.004 * f,
-        color: SIMD4<Float>(shade, shade * 1.28, shade * 1.78, 0.25),
+        color: SIMD4<Float>(shade, shade * 1.20, shade * 1.48, 0.25),
         sections: 9,
         camber: 0.012 * (0.4 + f),
         to: &vertices
@@ -1088,7 +1097,7 @@ private struct CrowMeshBuilder {
         planeNormal: planeNormal,
         rootWidth: 0.010,
         maximumWidth: 0.020,
-        color: SIMD4<Float>(0.012, 0.018, 0.031, 0.22),
+        color: SIMD4<Float>(0.008, 0.012, 0.019, 0.22),
         sections: 8,
         camber: 0.008,
         to: &vertices
@@ -1168,11 +1177,11 @@ private struct CrowMeshBuilder {
       let lateral = (f - 0.5) * 0.145
       let central = 1 - abs(2 * f - 1)
       let featherRoot = root + SIMD3<Float>(0, lateral * 0.24, 0.006 * central)
-      let featherTip = root + axis * (0.90 + 0.09 * central)
+      let featherTip = root + axis * (0.96 + 0.02 * central)
         + SIMD3<Float>(
-          -0.010 * central,
+          -0.002 * central,
           lateral,
-          (f - 0.5) * 0.050 - 0.006 * abs(2 * f - 1)
+          (f - 0.5) * 0.036 - 0.003 * abs(2 * f - 1)
         )
       appendFeatherBlade(
         root: featherRoot,
@@ -1210,7 +1219,7 @@ private struct CrowMeshBuilder {
     for index in 0...sections {
       let t = Float(index) / Float(sections)
       let bodyEnvelope = 0.32 + 0.68 * pow(max(sin(Float.pi * t), 0), 0.58)
-      let tipTaper = 1 - 0.90 * pow(t, 4.0)
+      let tipTaper = 1 - 0.985 * pow(t, 3.2)
       let envelope = bodyEnvelope * tipTaper
       let width = (rootWidth * (1 - t) + maximumWidth * t) * envelope
       let center = root + (tip - root) * t + normal * (camber * sin(Float.pi * t))

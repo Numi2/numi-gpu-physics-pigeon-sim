@@ -1,15 +1,14 @@
-# American-crow hybrid visual model
+# American-crow estimated simulation model
 
 BirdFlowMetal's crow is a high-quality native Metal **estimated hybrid**, not a
 measured crow. Its machine-readable parameter and provenance record is
 [`american-crow-hybrid-visual-v1.json`](../ValidationInputs/american-crow-hybrid-visual-v1.json).
 
-![Estimated American-crow hybrid hero](Media/american-crow-hybrid-hero-v2.png)
+![Native Metal American-crow simulation frame](Media/american-crow-hybrid-native-v1.png)
 
-The hero is a generated visual interpretation, not a photograph. Its exact
-dimensions, checksum, reference roles, prompt contract, and claim boundary are
-locked in
-[`american-crow-hybrid-hero-v2.json`](../ValidationArtifacts/american-crow-hybrid-hero-v2.json).
+[View the two-second native Metal wingbeat](Media/american-crow-hybrid-native-v1.mp4).
+This page shows only output from the executable renderer; reference photographs
+and generated appearance targets are not displayed or distributed.
 
 ## What is real, inferred, and artistic
 
@@ -29,14 +28,8 @@ dove sequence supplies phase shape, not crow timing.
 
 ## Native Metal capture
 
-The native renderer consumes both locked inputs and keeps the generated hero
-separate from executable geometry:
-
-![Executable estimated American-crow frame](Media/american-crow-hybrid-native-v1.png)
-
-[View the two-second native Metal wingbeat](Media/american-crow-hybrid-native-v1.mp4).
-Its encoding, input hashes, Apple-Metal execution record, seam check, and claim
-boundary are locked in
+The native renderer consumes both locked inputs. Its encoding, input hashes,
+Apple-Metal execution record, seam check, and claim boundary are locked in
 [`american-crow-hybrid-native-v1.json`](../ValidationArtifacts/american-crow-hybrid-native-v1.json).
 
 ```bash
@@ -60,8 +53,7 @@ used by the solver, and builds the beauty geometry from a smooth body/head loft
 plus explicit primary, secondary, covert, contour, and tail feathers. Four-sample
 Metal rasterization and a dedicated eumelanin shader provide view-dependent
 cool sheen while keeping the bird visually black. The native result is an
-executable motion and material estimate; it is deliberately not presented as
-the photoreal appearance target established by the generated hero.
+executable motion and material estimate, not a photograph.
 The beauty mesh and fluid boundary mesh are intentionally distinct: the former
 adds feather detail, while the latter remains the fixed-topology coupling input.
 

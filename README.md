@@ -64,16 +64,17 @@ translucent wing history and wingtip ribbons remain explicitly kinematic.
 
 <p align="center"><em>Native Numi Lab presentation of the provenance-locked Deetjen surface replay from two recorded viewpoints. Cyan is the measured left wing and orange is the reflected right-wing assumption. This footage demonstrates the deformation-aware Metal viewer; it is not a new free-flight or aerodynamic-validation result.</em></p>
 
-### American crow visual study
+### American crow simulation
 
-[![Generated estimated American-crow hybrid in forward flight](Docs/Media/american-crow-hybrid-hero-v2.png)](Docs/AMERICAN_CROW_MODEL.md)
+[![Native Metal American-crow simulation frame](Docs/Media/american-crow-hybrid-native-v1.png)](Docs/Media/american-crow-hybrid-native-v1.mp4)
 
 The American-crow study combines the locked Deetjen dove deformation scaffold,
 published crow morphometric ranges, screened public CT anatomy, current feather
-appearance measurements, and species-specific photographic references. The
-hero above is a generated appearance target—not a photograph or measured crow
-surface. A separate [native Metal wingbeat](Docs/Media/american-crow-hybrid-native-v1.mp4)
-executes the estimated geometry and material on Apple silicon. A locked
+appearance measurements, and species-specific anatomy constraints. Everything
+shown above is an executable frame from the native Metal renderer—there is no
+crow photograph or generated target image in this README. The linked
+[Metal wingbeat](Docs/Media/american-crow-hybrid-native-v1.mp4) executes the
+estimated geometry and material on Apple silicon. A locked
 `2,157`-vertex, `3,968`-triangle estimated-hybrid surface now also passes the
 live Apple-Metal geometry and production TRT moving-boundary coupling gates.
 The complete [model and evidence boundary](Docs/AMERICAN_CROW_MODEL.md) keeps
