@@ -1,0 +1,98 @@
+{
+  "schemaVersion": 1,
+  "modelIdentifier": "american-crow-hybrid-visual-v1",
+  "taxon": "Corvus brachyrhynchos",
+  "commonName": "American Crow",
+  "evidenceClass": "estimated-hybrid-visual-model",
+  "intendedUse": [
+    "native Metal visualization",
+    "species-informed silhouette and material development",
+    "presentation kinematics derived from the Deetjen dove surface sequence"
+  ],
+  "excludedClaims": [
+    "measured crow aerodynamic surface",
+    "same-specimen crow geometry or inertia",
+    "crow CFD validation",
+    "crow force, power, or free-flight prediction",
+    "measured crow wing kinematics"
+  ],
+  "doveScaffold": {
+    "datasetIdentifier": "deetjen-ob-2018-12-11-f03-complete-surface-v1",
+    "manifestPath": "ValidationInputs/deetjen-ob-f03-surface-v1/manifest.json",
+    "manifestSHA256": "ad42148aa9ee72d994d668ba16f8b6572cb8b192b77539fe66d97586ed9e1a13",
+    "sourceArticleDOI": "10.7554/eLife.89968",
+    "sourceDatasetDOI": "10.5061/dryad.wwpzgmsqs",
+    "frameCount": 144,
+    "sampleRateHertz": 1000.0,
+    "vertexCount": 2157,
+    "triangleCount": 3968,
+    "singleWingAreaSquareMeters": 0.0164165,
+    "wingRadiusMeters": 0.218591,
+    "meanChordMeters": 0.0751015,
+    "maximumProcessedPointSpeedMetersPerSecond": 25.2305,
+    "kinematicUse": "The measured-derived dove component deformation supplies only the temporal articulation scaffold. Presentation time is rescaled and the surface is allometrically remapped; it is not relabeled as measured crow motion."
+  },
+  "selectedCrowEstimate": {
+    "bodyMassKilograms": 0.45,
+    "totalLengthMeters": 0.46,
+    "wingspanMeters": 0.91,
+    "foldedWingChordMeters": 0.305,
+    "tailLengthMeters": 0.174,
+    "billLengthMeters": 0.049,
+    "tarsusLengthMeters": 0.057,
+    "presentationWingbeatFrequencyHertz": 4.6,
+    "adultPlumage": true,
+    "tailTipShape": "broad and approximately squared with individually resolved rectrices"
+  },
+  "estimateRanges": {
+    "bodyMassKilograms": [0.316, 0.62],
+    "totalLengthMeters": [0.40, 0.53],
+    "wingspanMeters": [0.85, 1.00],
+    "foldedWingChordMeters": [0.287, 0.32],
+    "tailLengthMeters": [0.166, 0.181],
+    "billLengthMeters": [0.045, 0.05],
+    "tarsusLengthMeters": [0.055, 0.059]
+  },
+  "visualTransform": {
+    "bodyScaleXYZ": [2.30, 2.15, 2.20],
+    "wingScaleXYZ": [2.15, 2.12, 2.12],
+    "tailScaleXYZ": [2.18, 1.72, 1.72],
+    "headRadiusXYZMeters": [0.058, 0.048, 0.050],
+    "billLengthMeters": 0.049,
+    "primaryFeatherCountPerWing": 10,
+    "secondaryFeatherCountPerWing": 11,
+    "tailFeatherCount": 12,
+    "contourFeatherRows": 12,
+    "plumageBaseLinearRGB": [0.006, 0.008, 0.012],
+    "plumageCoolSheenLinearRGB": [0.055, 0.105, 0.19],
+    "plumageVioletSheenLinearRGB": [0.095, 0.045, 0.16]
+  },
+  "sources": [
+    {
+      "role": "local measured articulation scaffold",
+      "citation": "Deetjen et al., eLife 2024, DOI 10.7554/eLife.89968",
+      "classification": "measured-derived dove surfaces with documented reconstruction assumptions"
+    },
+    {
+      "role": "crow skeletal anatomy and physical extent screening",
+      "citation": "ValidationArtifacts/corvid-public-source-screening.json",
+      "classification": "three public American-crow CT viewer derivatives; folded anatomy only"
+    },
+    {
+      "role": "crow burst-flight context",
+      "citation": "Jackson and Dial, Journal of Experimental Biology 214:452-461, DOI 10.1242/jeb.046789",
+      "classification": "American-crow cohort data and 250 Hz three-view kinematic method; unpublished arrays unavailable"
+    },
+    {
+      "role": "adult American-crow feather-region appearance",
+      "citation": "Yorzinski and Clark, Journal of Avian Biology 2026, DOI 10.1002/jav.03604",
+      "classification": "museum-specimen UV and visible plumage measurements"
+    },
+    {
+      "role": "flight silhouette and profile reference",
+      "citation": "Cornell Lab of Ornithology, Macaulay Library assets 59858031, 93750891, and 421209111",
+      "classification": "photographic appearance reference; no image bytes redistributed"
+    }
+  ],
+  "antiFabricationRule": "Every rendered crow is labeled estimated hybrid. Dove measurements, published crow ranges, and artistically estimated geometry/material parameters remain separately identified."
+}
