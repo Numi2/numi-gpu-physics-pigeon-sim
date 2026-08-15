@@ -1,0 +1,255 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://birdflowmetal.local/schemas/bird-reality-asset-v1.schema.json",
+  "title": "BirdFlowMetal persistent anatomy, feather, and physics/render binding asset",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion", "assetIdentifier", "taxon", "commonName",
+    "provenance", "coordinateFrame", "sourceLocks", "joints",
+    "featherMaterials", "renderLODs", "featherSeries", "physicsBinding",
+    "readiness", "excludedClaims", "antiFabricationRule"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "assetIdentifier": { "$ref": "#/$defs/nonempty" },
+    "taxon": { "$ref": "#/$defs/nonempty" },
+    "commonName": { "$ref": "#/$defs/nonempty" },
+    "provenance": { "$ref": "#/$defs/provenance" },
+    "coordinateFrame": { "$ref": "#/$defs/coordinateFrame" },
+    "sourceLocks": {
+      "type": "array", "minItems": 1,
+      "items": { "$ref": "#/$defs/sourceLock" }
+    },
+    "joints": {
+      "type": "array", "minItems": 1,
+      "items": { "$ref": "#/$defs/joint" }
+    },
+    "featherMaterials": {
+      "type": "array", "minItems": 1,
+      "items": { "$ref": "#/$defs/material" }
+    },
+    "renderLODs": {
+      "type": "array", "minItems": 1,
+      "items": { "$ref": "#/$defs/lod" }
+    },
+    "featherSeries": {
+      "type": "array", "minItems": 1,
+      "items": { "$ref": "#/$defs/featherSeries" }
+    },
+    "physicsBinding": { "$ref": "#/$defs/physicsBinding" },
+    "readiness": { "$ref": "#/$defs/readiness" },
+    "excludedClaims": {
+      "type": "array", "minItems": 1,
+      "items": { "$ref": "#/$defs/nonempty" }
+    },
+    "antiFabricationRule": { "$ref": "#/$defs/nonempty" }
+  },
+  "$defs": {
+    "nonempty": { "type": "string", "minLength": 1 },
+    "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "evidenceClass": {
+      "enum": [
+        "measured", "derived-measured", "estimated", "estimated-hybrid",
+        "procedural", "assumed"
+      ]
+    },
+    "side": { "enum": ["center", "left", "right"] },
+    "vector3": {
+      "type": "object", "additionalProperties": false,
+      "required": ["x", "y", "z"],
+      "properties": {
+        "x": { "type": "number" },
+        "y": { "type": "number" },
+        "z": { "type": "number" }
+      }
+    },
+    "unitQuaternion": {
+      "type": "object", "additionalProperties": false,
+      "required": ["x", "y", "z", "w"],
+      "properties": {
+        "x": { "type": "number" },
+        "y": { "type": "number" },
+        "z": { "type": "number" },
+        "w": { "type": "number" }
+      }
+    },
+    "positiveRange": {
+      "type": "object", "additionalProperties": false,
+      "required": ["first", "last"],
+      "properties": {
+        "first": { "type": "number", "exclusiveMinimum": 0 },
+        "last": { "type": "number", "exclusiveMinimum": 0 }
+      }
+    },
+    "provenance": {
+      "type": "object", "additionalProperties": false,
+      "required": [
+        "specimenIdentifier", "evidenceClass", "dataLicense", "citations",
+        "processingDescription"
+      ],
+      "properties": {
+        "specimenIdentifier": { "$ref": "#/$defs/nonempty" },
+        "evidenceClass": { "$ref": "#/$defs/evidenceClass" },
+        "dataLicense": { "$ref": "#/$defs/nonempty" },
+        "citations": {
+          "type": "array", "minItems": 1,
+          "items": { "$ref": "#/$defs/nonempty" }
+        },
+        "processingDescription": { "$ref": "#/$defs/nonempty" }
+      }
+    },
+    "coordinateFrame": {
+      "type": "object", "additionalProperties": false,
+      "required": [
+        "handedness", "origin", "xAxis", "yAxis", "zAxis", "lengthUnit"
+      ],
+      "properties": {
+        "handedness": { "const": "rightHanded" },
+        "origin": { "const": "centerOfMass" },
+        "xAxis": { "const": "forward" },
+        "yAxis": { "const": "left" },
+        "zAxis": { "const": "up" },
+        "lengthUnit": { "const": "meter" }
+      }
+    },
+    "sourceLock": {
+      "type": "object", "additionalProperties": false,
+      "required": ["role", "path", "sha256", "evidenceClass"],
+      "properties": {
+        "role": { "$ref": "#/$defs/nonempty" },
+        "path": { "$ref": "#/$defs/nonempty" },
+        "sha256": { "$ref": "#/$defs/sha256" },
+        "evidenceClass": { "$ref": "#/$defs/evidenceClass" }
+      }
+    },
+    "joint": {
+      "type": "object", "additionalProperties": false,
+      "required": [
+        "identifier", "role", "side", "restPositionMeters",
+        "restOrientationBodyToJoint", "evidenceClass"
+      ],
+      "properties": {
+        "identifier": { "$ref": "#/$defs/nonempty" },
+        "parentIdentifier": { "$ref": "#/$defs/nonempty" },
+        "role": { "enum": ["bodyRoot", "shoulder", "elbow", "wrist", "tailRoot"] },
+        "side": { "$ref": "#/$defs/side" },
+        "restPositionMeters": { "$ref": "#/$defs/vector3" },
+        "restOrientationBodyToJoint": { "$ref": "#/$defs/unitQuaternion" },
+        "evidenceClass": { "$ref": "#/$defs/evidenceClass" }
+      }
+    },
+    "material": {
+      "type": "object", "additionalProperties": false,
+      "required": [
+        "identifier", "model", "baseReflectanceLinearRGB",
+        "longitudinalRoughness", "azimuthalRoughness", "anisotropy",
+        "iridescenceStrength", "evidenceClass"
+      ],
+      "properties": {
+        "identifier": { "$ref": "#/$defs/nonempty" },
+        "model": { "const": "analyticFeatherBCSDFV1" },
+        "baseReflectanceLinearRGB": { "$ref": "#/$defs/vector3" },
+        "longitudinalRoughness": { "type": "number", "minimum": 0, "maximum": 1 },
+        "azimuthalRoughness": { "type": "number", "minimum": 0, "maximum": 1 },
+        "anisotropy": { "type": "number", "minimum": -1, "maximum": 1 },
+        "iridescenceStrength": { "type": "number", "minimum": 0, "maximum": 1 },
+        "evidenceClass": { "$ref": "#/$defs/evidenceClass" }
+      }
+    },
+    "lod": {
+      "type": "object", "additionalProperties": false,
+      "required": ["level", "representation", "minimumProjectedLengthPixels"],
+      "properties": {
+        "level": { "type": "integer", "minimum": 0 },
+        "representation": {
+          "enum": [
+            "referenceMicrostructure", "barbRibbons", "vaneShell",
+            "silhouetteMeshlet"
+          ]
+        },
+        "minimumProjectedLengthPixels": { "type": "number", "minimum": 0 }
+      }
+    },
+    "featherSeries": {
+      "type": "object", "additionalProperties": false,
+      "required": [
+        "identifier", "identifierPrefix", "identifierDigits", "firstOrdinal",
+        "count", "featherClass", "side", "rootJointIdentifier",
+        "rootStartMeters", "rootEndMeters", "restDirectionStart",
+        "restDirectionEnd", "lengthMeters", "maximumWidthMeters",
+        "rachisRadiusMeters", "materialIdentifier", "evidenceClass"
+      ],
+      "properties": {
+        "identifier": { "$ref": "#/$defs/nonempty" },
+        "identifierPrefix": { "$ref": "#/$defs/nonempty" },
+        "identifierDigits": { "type": "integer", "minimum": 1, "maximum": 6 },
+        "firstOrdinal": { "type": "integer", "minimum": 0 },
+        "count": { "type": "integer", "minimum": 1, "maximum": 4096 },
+        "featherClass": { "enum": ["primary", "secondary", "tail", "covert", "contour"] },
+        "side": { "$ref": "#/$defs/side" },
+        "rootJointIdentifier": { "$ref": "#/$defs/nonempty" },
+        "rootStartMeters": { "$ref": "#/$defs/vector3" },
+        "rootEndMeters": { "$ref": "#/$defs/vector3" },
+        "restDirectionStart": { "$ref": "#/$defs/vector3" },
+        "restDirectionEnd": { "$ref": "#/$defs/vector3" },
+        "lengthMeters": { "$ref": "#/$defs/positiveRange" },
+        "maximumWidthMeters": { "$ref": "#/$defs/positiveRange" },
+        "rachisRadiusMeters": { "$ref": "#/$defs/positiveRange" },
+        "materialIdentifier": { "$ref": "#/$defs/nonempty" },
+        "evidenceClass": { "$ref": "#/$defs/evidenceClass" }
+      }
+    },
+    "featherBinding": {
+      "type": "object", "additionalProperties": false,
+      "required": [
+        "seriesIdentifier", "surfacePartIdentifier", "rootVertexIndices",
+        "evidenceClass"
+      ],
+      "properties": {
+        "seriesIdentifier": { "$ref": "#/$defs/nonempty" },
+        "surfacePartIdentifier": { "type": "integer", "minimum": 1, "maximum": 4 },
+        "rootVertexIndices": {
+          "type": "array", "minItems": 1, "uniqueItems": true,
+          "items": { "type": "integer", "minimum": 0 }
+        },
+        "evidenceClass": { "$ref": "#/$defs/evidenceClass" }
+      }
+    },
+    "physicsBinding": {
+      "type": "object", "additionalProperties": false,
+      "required": [
+        "surfaceDatasetIdentifier", "surfaceManifestPath",
+        "surfaceManifestSHA256", "surfaceVertexCount", "surfaceTriangleCount",
+        "mappingRepresentation", "featherSeries"
+      ],
+      "properties": {
+        "surfaceDatasetIdentifier": { "$ref": "#/$defs/nonempty" },
+        "surfaceManifestPath": { "$ref": "#/$defs/nonempty" },
+        "surfaceManifestSHA256": { "$ref": "#/$defs/sha256" },
+        "surfaceVertexCount": { "type": "integer", "minimum": 1 },
+        "surfaceTriangleCount": { "type": "integer", "minimum": 1 },
+        "mappingRepresentation": { "const": "featherRootToSurfaceVertexV1" },
+        "featherSeries": {
+          "type": "array", "minItems": 1,
+          "items": { "$ref": "#/$defs/featherBinding" }
+        }
+      }
+    },
+    "readiness": {
+      "type": "object", "additionalProperties": false,
+      "required": [
+        "stableFeatherIdentifiersReady", "physicsRenderBindingsReady",
+        "measuredCrowGeometryReady", "measuredCrowKinematicsReady",
+        "quantitativeAerodynamicsReady"
+      ],
+      "properties": {
+        "stableFeatherIdentifiersReady": { "const": true },
+        "physicsRenderBindingsReady": { "const": true },
+        "measuredCrowGeometryReady": { "type": "boolean" },
+        "measuredCrowKinematicsReady": { "type": "boolean" },
+        "quantitativeAerodynamicsReady": { "type": "boolean" }
+      }
+    }
+  }
+}

@@ -3,6 +3,9 @@
 BirdFlowMetal's crow is a high-quality native Metal **estimated hybrid**, not a
 measured crow. Its machine-readable parameter and provenance record is
 [`american-crow-hybrid-visual-v1.json`](../ValidationInputs/american-crow-hybrid-visual-v1.json).
+The persistent anatomy, stable feather identities, rendering LOD contract, and
+physics-surface anchors are defined separately in
+[`BIRD_REALITY_ASSET.md`](BIRD_REALITY_ASSET.md).
 
 ![Native Metal American-crow simulation frame](Media/american-crow-hybrid-native-v1.png)
 

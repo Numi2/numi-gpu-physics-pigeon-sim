@@ -129,6 +129,8 @@ private struct Arguments {
         [--offset-x C --offset-y C --offset-z C --phase-offset C] [--json]
       birdflow validate direction-composition --preregistration FILE \
         [--archive FILE] [--json]
+      birdflow validate reality-asset [--input ASSET.json] \
+        [--repository-root DIRECTORY] [--json]
       birdflow validate fine-direction-census --input MANIFEST \
         --force-target TARGET --preregistration FILE --archive FILE [--json]
       birdflow validate fine-direction-phase-window --input MANIFEST \
@@ -204,6 +206,78 @@ private struct Arguments {
           --targeted-reference-length-cells 28|32 \
           [--archive FILE] [--json]
     """
+}
+
+private struct BirdRealityAssetValidationArguments {
+    var inputPath =
+        "ValidationInputs/american-crow-hybrid-reality-v1.json"
+    var repositoryRootPath = FileManager.default.currentDirectoryPath
+    var json = false
+
+    init(_ values: [String]) throws {
+        var index = 3
+        while index < values.count {
+            switch values[index] {
+            case "--input":
+                index += 1
+                guard index < values.count else {
+                    throw CLIError.invalidArgument(
+                        "--input requires a bird-reality asset JSON"
+                    )
+                }
+                inputPath = values[index]
+            case "--repository-root":
+                index += 1
+                guard index < values.count else {
+                    throw CLIError.invalidArgument(
+                        "--repository-root requires a directory"
+                    )
+                }
+                repositoryRootPath = values[index]
+            case "--json":
+                json = true
+            case "--help", "-h":
+                print(Self.help)
+                Foundation.exit(EXIT_SUCCESS)
+            default:
+                throw CLIError.invalidArgument(
+                    "Unknown bird-reality validation option: \(values[index])"
+                )
+            }
+            index += 1
+        }
+    }
+
+    static let help = """
+    birdflow validate reality-asset [options]
+
+      --input ASSET.json        Persistent bird anatomy/feather asset
+      --repository-root DIR     Root used to resolve provenance locks
+      --json                    Print the complete validation report as JSON
+
+    Validation checks source hashes, the canonical coordinate frame, joint
+    hierarchy, deterministic feather identities, material/LOD bounds, and each
+    feather root's ownership by the locked physics-surface component.
+    """
+}
+
+private struct BirdRealityAssetValidationReport: Codable {
+    let schemaVersion: Int
+    let assetIdentifier: String
+    let provenanceEvidenceClass: String
+    let jointCount: Int
+    let featherSeriesCount: Int
+    let featherCount: Int
+    let physicsSurfaceDatasetIdentifier: String
+    let physicsSurfaceManifestSHA256: String
+    let sourceLockCount: Int
+    let stableFeatherIdentifiersReady: Bool
+    let physicsRenderBindingsReady: Bool
+    let measuredCrowGeometryReady: Bool
+    let measuredCrowKinematicsReady: Bool
+    let quantitativeAerodynamicsReady: Bool
+    let passed: Bool
+    let claimBoundary: String
 }
 
 private struct DeetjenDoveSimulationArguments {
@@ -3488,6 +3562,58 @@ private func sha256Hex(_ data: Data) -> String {
     SHA256.hash(data: data)
         .map { String(format: "%02x", $0) }
         .joined()
+}
+
+private func runBirdRealityAssetValidation(_ values: [String]) throws {
+    let arguments = try BirdRealityAssetValidationArguments(values)
+    let asset = try BirdRealityAssetLoader.load(
+        assetURL: URL(fileURLWithPath: arguments.inputPath),
+        repositoryRootURL: URL(
+            fileURLWithPath: arguments.repositoryRootPath,
+            isDirectory: true
+        )
+    )
+    let report = BirdRealityAssetValidationReport(
+        schemaVersion: asset.schemaVersion,
+        assetIdentifier: asset.assetIdentifier,
+        provenanceEvidenceClass: asset.provenance.evidenceClass.rawValue,
+        jointCount: asset.joints.count,
+        featherSeriesCount: asset.featherSeries.count,
+        featherCount: asset.feathers.count,
+        physicsSurfaceDatasetIdentifier:
+            asset.physicsBinding.surfaceDatasetIdentifier,
+        physicsSurfaceManifestSHA256:
+            asset.physicsBinding.surfaceManifestSHA256,
+        sourceLockCount: asset.sourceLocks.count,
+        stableFeatherIdentifiersReady:
+            asset.readiness.stableFeatherIdentifiersReady,
+        physicsRenderBindingsReady:
+            asset.readiness.physicsRenderBindingsReady,
+        measuredCrowGeometryReady:
+            asset.readiness.measuredCrowGeometryReady,
+        measuredCrowKinematicsReady:
+            asset.readiness.measuredCrowKinematicsReady,
+        quantitativeAerodynamicsReady:
+            asset.readiness.quantitativeAerodynamicsReady,
+        passed: true,
+        claimBoundary: asset.antiFabricationRule
+    )
+    if arguments.json {
+        try printJSON(report)
+    } else {
+        print("asset: \(report.assetIdentifier)")
+        print("evidence_class: \(report.provenanceEvidenceClass)")
+        print("joints: \(report.jointCount)")
+        print("feather_series: \(report.featherSeriesCount)")
+        print("stable_feathers: \(report.featherCount)")
+        print("physics_surface: \(report.physicsSurfaceDatasetIdentifier)")
+        print("source_locks_verified: \(report.sourceLockCount)")
+        print("measured_crow_geometry_ready: \(report.measuredCrowGeometryReady)")
+        print("measured_crow_kinematics_ready: \(report.measuredCrowKinematicsReady)")
+        print("quantitative_aerodynamics_ready: \(report.quantitativeAerodynamicsReady)")
+        print("passed: \(report.passed)")
+        print("claim_boundary: \(report.claimBoundary)")
+    }
 }
 
 private func runMeasuredBirdReplay(_ values: [String]) throws {
@@ -8802,10 +8928,12 @@ private func run(_ values: [String]) throws {
     if values.count > 1, values[1] == "validate" {
         guard values.count > 2 else {
             throw CLIError.invalidArgument(
-                "Use: birdflow validate <shear-wave|moving-wall|translating-body|sphere|wing|flapping-wing|formation-flight|direction-composition|fine-direction-census|fine-direction-phase-window> [options]"
+                "Use: birdflow validate <reality-asset|shear-wave|moving-wall|translating-body|sphere|wing|flapping-wing|formation-flight|direction-composition|fine-direction-census|fine-direction-phase-window> [options]"
             )
         }
         switch values[2] {
+        case "reality-asset":
+            try runBirdRealityAssetValidation(values)
         case "shear-wave":
             try runShearWaveValidation(values)
         case "moving-wall":
@@ -8828,7 +8956,7 @@ private func run(_ values: [String]) throws {
             try runFineDirectionPhaseWindowCensus(values)
         default:
             throw CLIError.invalidArgument(
-                "Use: birdflow validate <shear-wave|moving-wall|translating-body|sphere|wing|flapping-wing|formation-flight|direction-composition|fine-direction-census|fine-direction-phase-window> [options]"
+                "Use: birdflow validate <reality-asset|shear-wave|moving-wall|translating-body|sphere|wing|flapping-wing|formation-flight|direction-composition|fine-direction-census|fine-direction-phase-window> [options]"
             )
         }
     } else if values.count > 1, values[1] == "simulate" {

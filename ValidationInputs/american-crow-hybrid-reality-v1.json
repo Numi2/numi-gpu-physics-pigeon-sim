@@ -1,0 +1,298 @@
+{
+  "schemaVersion": 1,
+  "assetIdentifier": "american-crow-estimated-hybrid-reality-v1",
+  "taxon": "Corvus brachyrhynchos",
+  "commonName": "American Crow",
+  "provenance": {
+    "specimenIdentifier": "hybrid-no-single-specimen",
+    "evidenceClass": "estimated-hybrid",
+    "dataLicense": "mixed-source-metadata-see-locked-inputs",
+    "citations": [
+      "Deetjen et al., eLife 2024, DOI 10.7554/eLife.89968",
+      "Jackson and Dial, Journal of Experimental Biology 2011, DOI 10.1242/jeb.046789",
+      "Yorzinski and Clark, Journal of Avian Biology 2026, DOI 10.1002/jav.03604"
+    ],
+    "processingDescription": "Deterministic feather inventory and render-to-physics anchors derived from the estimated American-crow presentation profile and its dove-derived fixed-topology simulation surface. No field is relabeled as a same-specimen crow measurement."
+  },
+  "coordinateFrame": {
+    "handedness": "rightHanded",
+    "origin": "centerOfMass",
+    "xAxis": "forward",
+    "yAxis": "left",
+    "zAxis": "up",
+    "lengthUnit": "meter"
+  },
+  "sourceLocks": [
+    {
+      "role": "estimated crow visual profile",
+      "path": "ValidationInputs/american-crow-hybrid-visual-v1.json",
+      "sha256": "563e600ff8da2fb7461b00228d421e05c1826d1fe025840e319e0aef4e719714",
+      "evidenceClass": "estimated-hybrid"
+    },
+    {
+      "role": "estimated crow fixed-topology physics surface",
+      "path": "ValidationInputs/american-crow-hybrid-surface-v1/manifest.json",
+      "sha256": "3154c5877b3498aa9370e215c94be9267950494149aecc88c08ee183f895bcc5",
+      "evidenceClass": "estimated-hybrid"
+    },
+    {
+      "role": "estimated crow surface generation audit",
+      "path": "ValidationArtifacts/american-crow-hybrid-surface-generation-v1.json",
+      "sha256": "c6761a920466ae27444b2fb43ac6d9debcb8a293f4874d01afd2241075d0b9b4",
+      "evidenceClass": "estimated-hybrid"
+    }
+  ],
+  "joints": [
+    {
+      "identifier": "body.root",
+      "role": "bodyRoot",
+      "side": "center",
+      "restPositionMeters": { "x": 0.0, "y": 0.0, "z": 0.0 },
+      "restOrientationBodyToJoint": { "x": 0.0, "y": 0.0, "z": 0.0, "w": 1.0 },
+      "evidenceClass": "estimated"
+    },
+    {
+      "identifier": "left.shoulder",
+      "parentIdentifier": "body.root",
+      "role": "shoulder",
+      "side": "left",
+      "restPositionMeters": { "x": 0.015, "y": 0.067, "z": 0.038 },
+      "restOrientationBodyToJoint": { "x": 0.0, "y": 0.0, "z": 0.0, "w": 1.0 },
+      "evidenceClass": "estimated"
+    },
+    {
+      "identifier": "left.elbow",
+      "parentIdentifier": "left.shoulder",
+      "role": "elbow",
+      "side": "left",
+      "restPositionMeters": { "x": 0.0, "y": 0.19, "z": 0.01 },
+      "restOrientationBodyToJoint": { "x": 0.0, "y": 0.0, "z": 0.0, "w": 1.0 },
+      "evidenceClass": "estimated"
+    },
+    {
+      "identifier": "left.wrist",
+      "parentIdentifier": "left.elbow",
+      "role": "wrist",
+      "side": "left",
+      "restPositionMeters": { "x": -0.015, "y": 0.315, "z": 0.0 },
+      "restOrientationBodyToJoint": { "x": 0.0, "y": 0.0, "z": 0.0, "w": 1.0 },
+      "evidenceClass": "estimated"
+    },
+    {
+      "identifier": "right.shoulder",
+      "parentIdentifier": "body.root",
+      "role": "shoulder",
+      "side": "right",
+      "restPositionMeters": { "x": 0.015, "y": -0.067, "z": 0.038 },
+      "restOrientationBodyToJoint": { "x": 0.0, "y": 0.0, "z": 0.0, "w": 1.0 },
+      "evidenceClass": "estimated"
+    },
+    {
+      "identifier": "right.elbow",
+      "parentIdentifier": "right.shoulder",
+      "role": "elbow",
+      "side": "right",
+      "restPositionMeters": { "x": 0.0, "y": -0.19, "z": 0.01 },
+      "restOrientationBodyToJoint": { "x": 0.0, "y": 0.0, "z": 0.0, "w": 1.0 },
+      "evidenceClass": "estimated"
+    },
+    {
+      "identifier": "right.wrist",
+      "parentIdentifier": "right.elbow",
+      "role": "wrist",
+      "side": "right",
+      "restPositionMeters": { "x": -0.015, "y": -0.315, "z": 0.0 },
+      "restOrientationBodyToJoint": { "x": 0.0, "y": 0.0, "z": 0.0, "w": 1.0 },
+      "evidenceClass": "estimated"
+    },
+    {
+      "identifier": "tail.root",
+      "parentIdentifier": "body.root",
+      "role": "tailRoot",
+      "side": "center",
+      "restPositionMeters": { "x": -0.125, "y": 0.0, "z": 0.005 },
+      "restOrientationBodyToJoint": { "x": 0.0, "y": 0.0, "z": 0.0, "w": 1.0 },
+      "evidenceClass": "estimated"
+    }
+  ],
+  "featherMaterials": [
+    {
+      "identifier": "adult.black.flight",
+      "model": "analyticFeatherBCSDFV1",
+      "baseReflectanceLinearRGB": { "x": 0.008, "y": 0.012, "z": 0.019 },
+      "longitudinalRoughness": 0.24,
+      "azimuthalRoughness": 0.44,
+      "anisotropy": 0.62,
+      "iridescenceStrength": 0.18,
+      "evidenceClass": "estimated"
+    },
+    {
+      "identifier": "adult.black.tail",
+      "model": "analyticFeatherBCSDFV1",
+      "baseReflectanceLinearRGB": { "x": 0.011, "y": 0.016, "z": 0.029 },
+      "longitudinalRoughness": 0.28,
+      "azimuthalRoughness": 0.48,
+      "anisotropy": 0.55,
+      "iridescenceStrength": 0.15,
+      "evidenceClass": "estimated"
+    }
+  ],
+  "renderLODs": [
+    { "level": 0, "representation": "referenceMicrostructure", "minimumProjectedLengthPixels": 480.0 },
+    { "level": 1, "representation": "barbRibbons", "minimumProjectedLengthPixels": 120.0 },
+    { "level": 2, "representation": "vaneShell", "minimumProjectedLengthPixels": 24.0 },
+    { "level": 3, "representation": "silhouetteMeshlet", "minimumProjectedLengthPixels": 0.0 }
+  ],
+  "featherSeries": [
+    {
+      "identifier": "left.primary",
+      "identifierPrefix": "left.primary.",
+      "identifierDigits": 2,
+      "firstOrdinal": 1,
+      "count": 10,
+      "featherClass": "primary",
+      "side": "left",
+      "rootJointIdentifier": "left.wrist",
+      "rootStartMeters": { "x": -0.005, "y": 0.255, "z": 0.008 },
+      "rootEndMeters": { "x": -0.025, "y": 0.375, "z": 0.0 },
+      "restDirectionStart": { "x": -0.3303504, "y": 0.9438584, "z": 0.0 },
+      "restDirectionEnd": { "x": -0.5144958, "y": 0.8574930, "z": 0.0 },
+      "lengthMeters": { "first": 0.155, "last": 0.205 },
+      "maximumWidthMeters": { "first": 0.020, "last": 0.015 },
+      "rachisRadiusMeters": { "first": 0.0012, "last": 0.0008 },
+      "materialIdentifier": "adult.black.flight",
+      "evidenceClass": "estimated"
+    },
+    {
+      "identifier": "right.primary",
+      "identifierPrefix": "right.primary.",
+      "identifierDigits": 2,
+      "firstOrdinal": 1,
+      "count": 10,
+      "featherClass": "primary",
+      "side": "right",
+      "rootJointIdentifier": "right.wrist",
+      "rootStartMeters": { "x": -0.005, "y": -0.255, "z": 0.008 },
+      "rootEndMeters": { "x": -0.025, "y": -0.375, "z": 0.0 },
+      "restDirectionStart": { "x": -0.3303504, "y": -0.9438584, "z": 0.0 },
+      "restDirectionEnd": { "x": -0.5144958, "y": -0.8574930, "z": 0.0 },
+      "lengthMeters": { "first": 0.155, "last": 0.205 },
+      "maximumWidthMeters": { "first": 0.020, "last": 0.015 },
+      "rachisRadiusMeters": { "first": 0.0012, "last": 0.0008 },
+      "materialIdentifier": "adult.black.flight",
+      "evidenceClass": "estimated"
+    },
+    {
+      "identifier": "left.secondary",
+      "identifierPrefix": "left.secondary.",
+      "identifierDigits": 2,
+      "firstOrdinal": 1,
+      "count": 11,
+      "featherClass": "secondary",
+      "side": "left",
+      "rootJointIdentifier": "left.elbow",
+      "rootStartMeters": { "x": 0.012, "y": 0.11, "z": 0.012 },
+      "rootEndMeters": { "x": -0.003, "y": 0.28, "z": 0.006 },
+      "restDirectionStart": { "x": -0.5734623, "y": 0.8192319, "z": 0.0 },
+      "restDirectionEnd": { "x": -0.4472136, "y": 0.8944272, "z": 0.0 },
+      "lengthMeters": { "first": 0.112, "last": 0.142 },
+      "maximumWidthMeters": { "first": 0.021, "last": 0.018 },
+      "rachisRadiusMeters": { "first": 0.0010, "last": 0.0008 },
+      "materialIdentifier": "adult.black.flight",
+      "evidenceClass": "estimated"
+    },
+    {
+      "identifier": "right.secondary",
+      "identifierPrefix": "right.secondary.",
+      "identifierDigits": 2,
+      "firstOrdinal": 1,
+      "count": 11,
+      "featherClass": "secondary",
+      "side": "right",
+      "rootJointIdentifier": "right.elbow",
+      "rootStartMeters": { "x": 0.012, "y": -0.11, "z": 0.012 },
+      "rootEndMeters": { "x": -0.003, "y": -0.28, "z": 0.006 },
+      "restDirectionStart": { "x": -0.5734623, "y": -0.8192319, "z": 0.0 },
+      "restDirectionEnd": { "x": -0.4472136, "y": -0.8944272, "z": 0.0 },
+      "lengthMeters": { "first": 0.112, "last": 0.142 },
+      "maximumWidthMeters": { "first": 0.021, "last": 0.018 },
+      "rachisRadiusMeters": { "first": 0.0010, "last": 0.0008 },
+      "materialIdentifier": "adult.black.flight",
+      "evidenceClass": "estimated"
+    },
+    {
+      "identifier": "tail.rectrix",
+      "identifierPrefix": "tail.rectrix.",
+      "identifierDigits": 2,
+      "firstOrdinal": 1,
+      "count": 12,
+      "featherClass": "tail",
+      "side": "center",
+      "rootJointIdentifier": "tail.root",
+      "rootStartMeters": { "x": -0.125, "y": -0.018, "z": 0.003 },
+      "rootEndMeters": { "x": -0.125, "y": 0.018, "z": 0.003 },
+      "restDirectionStart": { "x": -0.9922779, "y": -0.1240347, "z": 0.0 },
+      "restDirectionEnd": { "x": -0.9922779, "y": 0.1240347, "z": 0.0 },
+      "lengthMeters": { "first": 0.166, "last": 0.166 },
+      "maximumWidthMeters": { "first": 0.019, "last": 0.019 },
+      "rachisRadiusMeters": { "first": 0.0009, "last": 0.0009 },
+      "materialIdentifier": "adult.black.tail",
+      "evidenceClass": "estimated"
+    }
+  ],
+  "physicsBinding": {
+    "surfaceDatasetIdentifier": "american-crow-estimated-hybrid-complete-surface-v1",
+    "surfaceManifestPath": "ValidationInputs/american-crow-hybrid-surface-v1/manifest.json",
+    "surfaceManifestSHA256": "3154c5877b3498aa9370e215c94be9267950494149aecc88c08ee183f895bcc5",
+    "surfaceVertexCount": 2157,
+    "surfaceTriangleCount": 3968,
+    "mappingRepresentation": "featherRootToSurfaceVertexV1",
+    "featherSeries": [
+      {
+        "seriesIdentifier": "left.primary",
+        "surfacePartIdentifier": 2,
+        "rootVertexIndices": [1654, 1663, 1672, 1681, 1690, 1699, 1708, 1717, 1726, 1735],
+        "evidenceClass": "estimated"
+      },
+      {
+        "seriesIdentifier": "right.primary",
+        "surfacePartIdentifier": 3,
+        "rootVertexIndices": [1951, 1960, 1969, 1978, 1987, 1996, 2005, 2014, 2023, 2032],
+        "evidenceClass": "estimated"
+      },
+      {
+        "seriesIdentifier": "left.secondary",
+        "surfacePartIdentifier": 2,
+        "rootVertexIndices": [1555, 1564, 1573, 1582, 1591, 1600, 1609, 1618, 1627, 1636, 1645],
+        "evidenceClass": "estimated"
+      },
+      {
+        "seriesIdentifier": "right.secondary",
+        "surfacePartIdentifier": 3,
+        "rootVertexIndices": [1852, 1861, 1870, 1879, 1888, 1897, 1906, 1915, 1924, 1933, 1942],
+        "evidenceClass": "estimated"
+      },
+      {
+        "seriesIdentifier": "tail.rectrix",
+        "surfacePartIdentifier": 4,
+        "rootVertexIndices": [2040, 2041, 2042, 2043, 2044, 2045, 2046, 2047, 2048, 2049, 2050, 2051],
+        "evidenceClass": "estimated"
+      }
+    ]
+  },
+  "readiness": {
+    "stableFeatherIdentifiersReady": true,
+    "physicsRenderBindingsReady": true,
+    "measuredCrowGeometryReady": false,
+    "measuredCrowKinematicsReady": false,
+    "quantitativeAerodynamicsReady": false
+  },
+  "excludedClaims": [
+    "measured crow skeleton or feather placement",
+    "measured crow kinematics",
+    "feather-resolved aerodynamic boundary",
+    "quantitative crow force, power, or free-flight prediction",
+    "measured feather BCSDF"
+  ],
+  "antiFabricationRule": "Stable IDs and physics anchors make the estimated model reproducible; they do not promote estimated morphology, motion, material, or anchoring to measurement."
+}
