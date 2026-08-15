@@ -16202,7 +16202,20 @@ public enum MetalIndexedBirdSurfaceValidator {
             ))
         }
 
-        let fractionalProbeIntervals = [0, 33, 89, 126, 142]
+        let fractionalProbeIntervals: [Int]
+        if dataset.frameCount == 144 {
+            // Preserve the source-registered Deetjen milestone contract.
+            fractionalProbeIntervals = [0, 33, 89, 126, 142]
+        } else {
+            let lastInterval = dataset.frameCount - 2
+            fractionalProbeIntervals = Array(Set([
+                0,
+                lastInterval / 4,
+                lastInterval / 2,
+                3 * lastInterval / 4,
+                lastInterval,
+            ])).sorted()
+        }
         let fractionalProbeTimes = fractionalProbeIntervals.map { frame in
             0.5 * (
                 dataset.frameTimesSeconds[frame]

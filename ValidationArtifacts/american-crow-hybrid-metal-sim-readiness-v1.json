@@ -1,0 +1,1377 @@
+{
+  "claimBoundary" : "This readiness gate proves that the fixed estimated-hybrid crow surface executes through the live Apple-Metal geometry, moving-boundary, topology, and TRT fluid-coupling path. It does not establish measured crow geometry or kinematics, developed-flow convergence, aerodynamic accuracy, force prediction, mass properties, trim, or free flight.",
+  "coupling" : {
+    "acceptanceDefinition" : "production aerodynamic impulse + independently reduced before\/after fluid momentum change; the diagnostic persistent-link split is reported but is not used for acceptance",
+    "allValuesFinite" : true,
+    "cellSizeMeters" : 0.014999999664723873,
+    "claimBoundary" : "This short periodic, zero-sponge gate closes the accepted indexed surface against the production interpolated link, conservative topology-force, and TRT fluid path. It is an integration\/impulse test, not a developed-flow or experimental-force comparison.",
+    "componentSolidCellCounts" : [
+      1196,
+      541,
+      555,
+      173
+    ],
+    "datasetIdentifier" : "american-crow-estimated-hybrid-complete-surface-v1",
+    "deviceName" : "Apple M4",
+    "fluidKernel" : "stepFluidTRT",
+    "forceEstimator" : "conservative-moving-domain-mode-6",
+    "geometryKernels" : [
+      "prepareIndexedBirdSurface",
+      "clearMeasuredWingSurface",
+      "rasterizeIndexedBirdSurface",
+      "resolveIndexedBirdSurfaceForFlow"
+    ],
+    "gridX" : 59,
+    "gridY" : 70,
+    "gridZ" : 50,
+    "linkKernel" : "buildMeasuredWingSurfaceLinks",
+    "manifestSHA256" : "8006199110a57583e881be832f370c0bc60f148165e835067c68677af1b66da0",
+    "maximumAllowedRelativeRMSBoundaryClosureResidual" : 0.005,
+    "maximumBoundaryClosureResidualKilogramMetersPerSecond" : 2.8924224495716523e-08,
+    "maximumRelativeBoundaryClosureResidual" : 3.578267985877081e-05,
+    "maximumTopologyCounterMismatchCells" : 0,
+    "maximumWallMach" : 0.06928203199767094,
+    "maximumWallSpeedLattice" : 0.03999999910593033,
+    "newlyCoveredCellEvents" : 25,
+    "newlyUncoveredCellEvents" : 25,
+    "passed" : true,
+    "periodicBoundaries" : true,
+    "persistentBoundaryLinkEvents" : 136861,
+    "relativeRMSBoundaryClosureResidual" : 4.283423891285264e-06,
+    "runtimeSeconds" : 0.032344937324523926,
+    "samples" : [
+      {
+        "aerodynamicImpulse" : [
+          -0.0017551961817673795,
+          -0.0003819202775530439,
+          -0.007231910925149521
+        ],
+        "boundaryClosureResidual" : [
+          -2.3311986726854556e-09,
+          1.904018569654116e-09,
+          6.358205192381894e-09
+        ],
+        "diagnosticPersistentLinkImpulseToFluid" : [
+          0.0029548271454625276,
+          0.0029889117140640964,
+          0.007038677683280311
+        ],
+        "farFieldImpulseToFluid" : [
+          0,
+          0,
+          0
+        ],
+        "fluidBoundaryImpulse" : [
+          0.0017551938505687068,
+          0.00038192218157161357,
+          0.007231917283354713
+        ],
+        "fluidMomentumAfter" : [
+          0.0017551938505687068,
+          0.00038192218157161357,
+          0.007231917283354713
+        ],
+        "fluidMomentumBefore" : [
+          0,
+          0,
+          0
+        ],
+        "newlyCoveredCellCount" : 7,
+        "newlyUncoveredCellCount" : 3,
+        "persistentBoundaryLinkCount" : 17065,
+        "remainingImpulseAfterDiagnosticLinks" : [
+          -0.0011996332948938208,
+          -0.002606989532492483,
+          0.00019323960007440206
+        ],
+        "sourceLedgerTransitionCellCount" : 10,
+        "sourceTimeSeconds" : 2.4729435608605854e-05,
+        "spongeImpulseToFluid" : [
+          0,
+          0,
+          0
+        ],
+        "step" : 1
+      },
+      {
+        "aerodynamicImpulse" : [
+          0.00012582679538974267,
+          4.126311378526565e-05,
+          0.0031813187268658893
+        ],
+        "boundaryClosureResidual" : [
+          -2.875696142367115e-09,
+          -8.959499958887014e-10,
+          2.5701152596771526e-08
+        ],
+        "diagnosticPersistentLinkImpulseToFluid" : [
+          0.0008944708830451075,
+          -0.0025042860000913133,
+          -0.004368431842376256
+        ],
+        "farFieldImpulseToFluid" : [
+          0,
+          0,
+          0
+        ],
+        "fluidBoundaryImpulse" : [
+          -0.00012582967108588504,
+          -4.126400973526154e-05,
+          -0.0031812930257132926
+        ],
+        "fluidMomentumAfter" : [
+          0.0016293641794828217,
+          0.00034065817183635204,
+          0.00405062425764142
+        ],
+        "fluidMomentumBefore" : [
+          0.0017551938505687068,
+          0.00038192218157161357,
+          0.007231917283354713
+        ],
+        "newlyCoveredCellCount" : 3,
+        "newlyUncoveredCellCount" : 5,
+        "persistentBoundaryLinkCount" : 17095,
+        "remainingImpulseAfterDiagnosticLinks" : [
+          -0.0010203005541309924,
+          0.0024630219903560516,
+          0.0011871388166629637
+        ],
+        "sourceLedgerTransitionCellCount" : 8,
+        "sourceTimeSeconds" : 4.945887121721171e-05,
+        "spongeImpulseToFluid" : [
+          0,
+          0,
+          0
+        ],
+        "step" : 2
+      },
+      {
+        "aerodynamicImpulse" : [
+          -0.001721799406510155,
+          -0.00041813395234636605,
+          -0.004819049146139287
+        ],
+        "boundaryClosureResidual" : [
+          9.96531815400381e-10,
+          -1.806696167997411e-10,
+          1.633274072671692e-08
+        ],
+        "diagnosticPersistentLinkImpulseToFluid" : [
+          0.0018226611289401996,
+          0.0014121928039128664,
+          0.002771301798744327
+        ],
+        "farFieldImpulseToFluid" : [
+          0,
+          0,
+          0
+        ],
+        "fluidBoundaryImpulse" : [
+          0.0017218004030419704,
+          0.00041813377167674925,
+          0.004819065478880014
+        ],
+        "fluidMomentumAfter" : [
+          0.003351164582524792,
+          0.0007587919435131013,
+          0.008869689736521434
+        ],
+        "fluidMomentumBefore" : [
+          0.0016293641794828217,
+          0.00034065817183635204,
+          0.00405062425764142
+        ],
+        "newlyCoveredCellCount" : 5,
+        "newlyUncoveredCellCount" : 2,
+        "persistentBoundaryLinkCount" : 17102,
+        "remainingImpulseAfterDiagnosticLinks" : [
+          -0.00010086072589822925,
+          -0.0009940590322361172,
+          0.0020477636801356867
+        ],
+        "sourceLedgerTransitionCellCount" : 7,
+        "sourceTimeSeconds" : 7.418830500682816e-05,
+        "spongeImpulseToFluid" : [
+          0,
+          0,
+          0
+        ],
+        "step" : 3
+      },
+      {
+        "aerodynamicImpulse" : [
+          -0.0005860250041449175,
+          -0.00010726009693872579,
+          0.0010471702450811637
+        ],
+        "boundaryClosureResidual" : [
+          -2.652592997250819e-09,
+          3.199488820258313e-09,
+          -5.5721315703888274e-09
+        ],
+        "diagnosticPersistentLinkImpulseToFluid" : [
+          0.0013599547152003978,
+          0.00019371401369356714,
+          -0.001441139721939611
+        ],
+        "farFieldImpulseToFluid" : [
+          0,
+          0,
+          0
+        ],
+        "fluidBoundaryImpulse" : [
+          0.0005860223515519202,
+          0.00010726329642754605,
+          -0.0010471758172127341
+        ],
+        "fluidMomentumAfter" : [
+          0.003937186934076712,
+          0.0008660552399406473,
+          0.0078225139193087
+        ],
+        "fluidMomentumBefore" : [
+          0.003351164582524792,
+          0.0007587919435131013,
+          0.008869689736521434
+        ],
+        "newlyCoveredCellCount" : 5,
+        "newlyUncoveredCellCount" : 7,
+        "persistentBoundaryLinkCount" : 17054,
+        "remainingImpulseAfterDiagnosticLinks" : [
+          -0.0007739323636484776,
+          -8.645071726602109e-05,
+          0.00039396390472687696
+        ],
+        "sourceLedgerTransitionCellCount" : 12,
+        "sourceTimeSeconds" : 9.891774243442342e-05,
+        "spongeImpulseToFluid" : [
+          0,
+          0,
+          0
+        ],
+        "step" : 4
+      },
+      {
+        "aerodynamicImpulse" : [
+          -0.0013202005945377598,
+          -0.000280082196914673,
+          -0.0034849818269850896
+        ],
+        "boundaryClosureResidual" : [
+          -1.6918153510070422e-09,
+          5.112377898840517e-09,
+          -1.366745218736587e-09
+        ],
+        "diagnosticPersistentLinkImpulseToFluid" : [
+          0.0024871033928321857,
+          -0.0014160655955431796,
+          0.005004743501799165
+        ],
+        "farFieldImpulseToFluid" : [
+          0,
+          0,
+          0
+        ],
+        "fluidBoundaryImpulse" : [
+          0.0013201989027224088,
+          0.00028008730929257185,
+          0.003484980460239871
+        ],
+        "fluidMomentumAfter" : [
+          0.005257385836799121,
+          0.0011461425492332192,
+          0.011307494379548571
+        ],
+        "fluidMomentumBefore" : [
+          0.003937186934076712,
+          0.0008660552399406473,
+          0.0078225139193087
+        ],
+        "newlyCoveredCellCount" : 1,
+        "newlyUncoveredCellCount" : 2,
+        "persistentBoundaryLinkCount" : 17135,
+        "remainingImpulseAfterDiagnosticLinks" : [
+          -0.0011669044901097768,
+          0.0016961529048357515,
+          -0.0015197630415592937
+        ],
+        "sourceLedgerTransitionCellCount" : 3,
+        "sourceTimeSeconds" : 0.00012364717258606106,
+        "spongeImpulseToFluid" : [
+          0,
+          0,
+          0
+        ],
+        "step" : 5
+      },
+      {
+        "aerodynamicImpulse" : [
+          -0.0005981393560354278,
+          -0.0001472097330296844,
+          0.0005234085268395194
+        ],
+        "boundaryClosureResidual" : [
+          -3.838639453176973e-09,
+          -1.0095587741872428e-08,
+          2.683197193598108e-08
+        ],
+        "diagnosticPersistentLinkImpulseToFluid" : [
+          0.0007982909649773217,
+          -0.0012669266948169317,
+          0.00011463629172878001
+        ],
+        "farFieldImpulseToFluid" : [
+          0,
+          0,
+          0
+        ],
+        "fluidBoundaryImpulse" : [
+          0.0005981355173959747,
+          0.00014719963744194253,
+          -0.0005233816948675835
+        ],
+        "fluidMomentumAfter" : [
+          0.005855521354195096,
+          0.0012933421866751617,
+          0.010784112684680987
+        ],
+        "fluidMomentumBefore" : [
+          0.005257385836799121,
+          0.0011461425492332192,
+          0.011307494379548571
+        ],
+        "newlyCoveredCellCount" : 2,
+        "newlyUncoveredCellCount" : 1,
+        "persistentBoundaryLinkCount" : 17143,
+        "remainingImpulseAfterDiagnosticLinks" : [
+          -0.00020015544758134702,
+          0.0014141263322588742,
+          -0.0006380179865963635
+        ],
+        "sourceLedgerTransitionCellCount" : 3,
+        "sourceTimeSeconds" : 0.00014837661001365632,
+        "spongeImpulseToFluid" : [
+          0,
+          0,
+          0
+        ],
+        "step" : 6
+      },
+      {
+        "aerodynamicImpulse" : [
+          -0.0010777192259881357,
+          -0.00032353926701383234,
+          -0.002894017142981875
+        ],
+        "boundaryClosureResidual" : [
+          -2.7880017678186264e-09,
+          -8.926602536579037e-10,
+          -1.3309067407180075e-09
+        ],
+        "diagnosticPersistentLinkImpulseToFluid" : [
+          0.001741155819796072,
+          -4.4891724268329e-05,
+          0.0031566271781156585
+        ],
+        "farFieldImpulseToFluid" : [
+          0,
+          0,
+          0
+        ],
+        "fluidBoundaryImpulse" : [
+          0.001077716437986368,
+          0.0003235383743535787,
+          0.0028940158120751344
+        ],
+        "fluidMomentumAfter" : [
+          0.006933237792181464,
+          0.0016168805610287404,
+          0.013678128496756122
+        ],
+        "fluidMomentumBefore" : [
+          0.005855521354195096,
+          0.0012933421866751617,
+          0.010784112684680987
+        ],
+        "newlyCoveredCellCount" : 0,
+        "newlyUncoveredCellCount" : 1,
+        "persistentBoundaryLinkCount" : 17161,
+        "remainingImpulseAfterDiagnosticLinks" : [
+          -0.0006634393818097041,
+          0.00036843009862190767,
+          -0.0002626113660405241
+        ],
+        "sourceLedgerTransitionCellCount" : 1,
+        "sourceTimeSeconds" : 0.00017310604744125158,
+        "spongeImpulseToFluid" : [
+          0,
+          0,
+          0
+        ],
+        "step" : 7
+      },
+      {
+        "aerodynamicImpulse" : [
+          -0.0007760317902745714,
+          -0.0002100081359811823,
+          -5.466618035110393e-05
+        ],
+        "boundaryClosureResidual" : [
+          -1.415368914951809e-09,
+          -5.921362971781849e-09,
+          -1.4902815021963778e-08
+        ],
+        "diagnosticPersistentLinkImpulseToFluid" : [
+          0.0015565510844783015,
+          -0.0008896477389269183,
+          -0.0012576685520853273
+        ],
+        "farFieldImpulseToFluid" : [
+          0,
+          0,
+          0
+        ],
+        "fluidBoundaryImpulse" : [
+          0.0007760303749056565,
+          0.0002100022146182105,
+          5.465127753608197e-05
+        ],
+        "fluidMomentumAfter" : [
+          0.00770926816708712,
+          0.001826882775646951,
+          0.013732779774292204
+        ],
+        "fluidMomentumBefore" : [
+          0.006933237792181464,
+          0.0016168805610287404,
+          0.013678128496756122
+        ],
+        "newlyCoveredCellCount" : 2,
+        "newlyUncoveredCellCount" : 4,
+        "persistentBoundaryLinkCount" : 17106,
+        "remainingImpulseAfterDiagnosticLinks" : [
+          -0.000780520709572645,
+          0.0010996499535451288,
+          0.0013123198296214093
+        ],
+        "sourceLedgerTransitionCellCount" : 6,
+        "sourceTimeSeconds" : 0.00019783548486884683,
+        "spongeImpulseToFluid" : [
+          0,
+          0,
+          0
+        ],
+        "step" : 8
+      }
+    ],
+    "schemaVersion" : 1,
+    "spongeStrength" : 0,
+    "steps" : 8,
+    "timeStepSeconds" : 2.4729435608605854e-05
+  },
+  "datasetIdentifier" : "american-crow-estimated-hybrid-complete-surface-v1",
+  "geometry" : {
+    "allComponentsPresentEveryFrame" : true,
+    "allValuesFinite" : true,
+    "cellSizeMeters" : 0.014999999664723873,
+    "claimBoundary" : "This geometry-only gate closes indexed loading, non-periodic interpolation, component occupancy, rasterization, and wall velocity. It executes no fluid collision or force accumulation and implies no aerodynamic agreement.",
+    "cpuRasterMilestoneFrames" : [
+      0,
+      12,
+      24,
+      36,
+      48
+    ],
+    "datasetIdentifier" : "american-crow-estimated-hybrid-complete-surface-v1",
+    "deviceName" : "Apple M4",
+    "fluidCollisionExecuted" : false,
+    "forceAccumulationExecuted" : false,
+    "fractionalInterpolationProbeTimesSeconds" : [
+      0.002264492679387331,
+      0.0520833320915699,
+      0.10643115639686584,
+      0.16077899932861328,
+      0.21512681245803833
+    ],
+    "frameAudits" : [
+      {
+        "componentSolidCellCounts" : [
+          1196,
+          545,
+          547,
+          177
+        ],
+        "cpuMaskMismatchCellCount" : 0,
+        "cpuRasterCompared" : true,
+        "frameIndex" : 0,
+        "maximumCPUSignedDistanceDifferenceCells" : 1.5154480934143066e-05,
+        "maximumCPUWallVelocityDifferenceLattice" : 1.457480749422757e-07,
+        "maximumLatticeWallSpeed" : 0.01571737229824066,
+        "maximumPreparedPositionErrorMeters" : 0,
+        "maximumPreparedVelocityErrorMetersPerSecond" : 5.331201577973843e-07,
+        "occupancySHA256" : "ab72d273ad94cd03597a8b22ce0e1fd2dcd37f6bb26afd93e62a921497d7e3ce",
+        "solidCellCount" : 2465,
+        "sourceFrameNumber" : 0,
+        "timeSeconds" : 0
+      },
+      {
+        "componentSolidCellCounts" : [
+          1187,
+          549,
+          591,
+          166
+        ],
+        "cpuRasterCompared" : false,
+        "frameIndex" : 1,
+        "maximumLatticeWallSpeed" : 0.013682407326996326,
+        "maximumPreparedPositionErrorMeters" : 0,
+        "maximumPreparedVelocityErrorMetersPerSecond" : 4.915124804938387e-07,
+        "occupancySHA256" : "8f5858851fb85fd5c106dd6a532a50d99b43473762f7ae8c51b946b1b5b29ef4",
+        "solidCellCount" : 2493,
+        "sourceFrameNumber" : 1,
+        "timeSeconds" : 0.004528985358774662
+      },
+      {
+        "componentSolidCellCounts" : [
+          1195,
+          606,
+          629,
+          162
+        ],
+        "cpuRasterCompared" : false,
+        "frameIndex" : 2,
+        "maximumLatticeWallSpeed" : 0.013710036873817444,
+        "maximumPreparedPositionErrorMeters" : 0,
+        "maximumPreparedVelocityErrorMetersPerSecond" : 4.76837158203125e-07,
+        "occupancySHA256" : "634252bb5682c862b057c13a2e4fa44784f94b6af98c4e5a60e39d01d662b597",
+        "solidCellCount" : 2592,
+        "sourceFrameNumber" : 2,
+        "timeSeconds" : 0.009057970717549324
+      },
+      {
+        "componentSolidCellCounts" : [
+          1200,
+          640,
+          671,
+          155
+        ],
+        "cpuRasterCompared" : false,
+        "frameIndex" : 3,
+        "maximumLatticeWallSpeed" : 0.012439426966011524,
+        "maximumPreparedPositionErrorMeters" : 0,
+        "maximumPreparedVelocityErrorMetersPerSecond" : 5.331201577973843e-07,
+        "occupancySHA256" : "1227c3947438ad89b78c054db7a63568512aef64fa53414f62d50c73ca442493",
+        "solidCellCount" : 2666,
+        "sourceFrameNumber" : 3,
+        "timeSeconds" : 0.013586956076323986
+      },
+      {
+        "componentSolidCellCounts" : [
+          1197,
+          674,
+          684,
+          155
+        ],
+        "cpuRasterCompared" : false,
+        "frameIndex" : 4,
+        "maximumLatticeWallSpeed" : 0.01010192558169365,
+        "maximumPreparedPositionErrorMeters" : 0,
+        "maximumPreparedVelocityErrorMetersPerSecond" : 4.915124804938387e-07,
+        "occupancySHA256" : "2206b9a67043768199b35ffec1eb3c9405d87a4a765c366d96334d642a7e1e4a",
+        "solidCellCount" : 2710,
+        "sourceFrameNumber" : 4,
+        "timeSeconds" : 0.018115941435098648
+      },
+      {
+        "componentSolidCellCounts" : [
+          1179,
+          683,
+          711,
+          143
+        ],
+        "cpuRasterCompared" : false,
+        "frameIndex" : 5,
+        "maximumLatticeWallSpeed" : 0.010933749377727509,
+        "maximumPreparedPositionErrorMeters" : 0,
+        "maximumPreparedVelocityErrorMetersPerSecond" : 4.915124804938387e-07,
+        "occupancySHA256" : "08d3190cf18b095e3d2256b1c9c1e67d4a00278ad909c28946b3635f064cbeba",
+        "solidCellCount" : 2716,
+        "sourceFrameNumber" : 5,
+        "timeSeconds" : 0.022644927725195885
+      },
+      {
+        "componentSolidCellCounts" : [
+          1178,
+          715,
+          708,
+          134
+        ],
+        "cpuRasterCompared" : false,
+        "frameIndex" : 6,
+        "maximumLatticeWallSpeed" : 0.014222833327949047,
+        "maximumPreparedPositionErrorMeters" : 0,
+        "maximumPreparedVelocityErrorMetersPerSecond" : 5.331201577973843e-07,
+        "occupancySHA256" : "184f1fef89a697befec2a6f8390879d7d37c683558a289881aa885c88942cfcc",
+        "solidCellCount" : 2735,
+        "sourceFrameNumber" : 6,
+        "timeSeconds" : 0.027173912152647972
+      },
+      {
+        "componentSolidCellCounts" : [
+          1191,
+          738,
+          716,
+          124
+        ],
+        "cpuRasterCompared" : false,
+        "frameIndex" : 7,
+        "maximumLatticeWallSpeed" : 0.016622046008706093,
+        "maximumPreparedPositionErrorMeters" : 0,
+        "maximumPreparedVelocityErrorMetersPerSecond" : 5.331201577973843e-07,
+        "occupancySHA256" : "a5124466888b51015f96709962517702235c45938a79d50a05a6ee3d1bea1e13",
+        "solidCellCount" : 2769,
+        "sourceFrameNumber" : 7,
+        "timeSeconds" : 0.03170289844274521
+      },
+      {
+        "componentSolidCellCounts" : [
+          1215,
+          732,
+          714,
+          123
+        ],
+        "cpuRasterCompared" : false,
+        "frameIndex" : 8,
+        "maximumLatticeWallSpeed" : 0.018762145191431046,
+        "maximumPreparedPositionErrorMeters" : 0,
+        "maximumPreparedVelocityErrorMetersPerSecond" : 5.331201577973843e-07,
+        "occupancySHA256" : "a094fca7d35a6e761db0e93c89104625a3c34c679999f03ac2d47ae702f610ce",
+        "solidCellCount" : 2784,
+        "sourceFrameNumber" : 8,
+        "timeSeconds" : 0.036231882870197296
+      },
+      {
+        "componentSolidCellCounts" : [
+          1222,
+          747,
+          750,
+          121
+        ],
+        "cpuRasterCompared" : false,
+        "frameIndex" : 9,
+        "maximumLatticeWallSpeed" : 0.02009756676852703,
+        "maximumPreparedPositionErrorMeters" : 0,
+        "maximumPreparedVelocityErrorMetersPerSecond" : 7.152557373046875e-07,
+        "occupancySHA256" : "29d05b5185a5a9d4fc597680d639a51788b80fd6ec2fc5cf200fa0d97c739003",
+        "solidCellCount" : 2840,
+        "sourceFrameNumber" : 9,
+        "timeSeconds" : 0.04076087102293968
+      },
+      {
+        "componentSolidCellCounts" : [
+          1223,
+          766,
+          757,
+          121
+        ],
+        "cpuRasterCompared" : false,
+        "frameIndex" : 10,
+        "maximumLatticeWallSpeed" : 0.02199184149503708,
+        "maximumPreparedPositionErrorMeters" : 0,
+        "maximumPreparedVelocityErrorMetersPerSecond" : 6.743495646333031e-07,
+        "occupancySHA256" : "f16bbe7c3d3b1325680eec3c98c132b7b566b046b7f13070f5d3daab75ac0dba",
+        "solidCellCount" : 2867,
+        "sourceFrameNumber" : 10,
+        "timeSeconds" : 0.04528985545039177
+      },
+      {
+        "componentSolidCellCounts" : [
+          1224,
+          797,
+          809,
+          132
+        ],
+        "cpuRasterCompared" : false,
+        "frameIndex" : 11,
+        "maximumLatticeWallSpeed" : 0.02284630574285984,
+        "maximumPreparedPositionErrorMeters" : 0,
+        "maximumPreparedVelocityErrorMetersPerSecond" : 6.743495646333031e-07,
+        "occupancySHA256" : "f9866292f98e40090145b234a3cc344238bbd8fcc3fb67b619b75abd9d0a7dd2",
+        "solidCellCount" : 2962,
+        "sourceFrameNumber" : 11,
+        "timeSeconds" : 0.04981883987784386
+      },
+      {
+        "componentSolidCellCounts" : [
+          1213,
+          816,
+          810,
+          148
+        ],
+        "cpuMaskMismatchCellCount" : 0,
+        "cpuRasterCompared" : true,
+        "frameIndex" : 12,
+        "maximumCPUSignedDistanceDifferenceCells" : 1.621246337890625e-05,
+        "maximumCPUWallVelocityDifferenceLattice" : 2.350355089220102e-06,
+        "maximumLatticeWallSpeed" : 0.024242695420980453,
+        "maximumPreparedPositionErrorMeters" : 0,
+        "maximumPreparedVelocityErrorMetersPerSecond" : 1.0662403155947686e-06,
+        "occupancySHA256" : "e42688cd2fc03852a5a0b317911b22f8fb9b85b58261e1960e5f5c4b2900a4f1",
+        "solidCellCount" : 2987,
+        "sourceFrameNumber" : 12,
+        "timeSeconds" : 0.054347824305295944
+      },
+      {
+        "componentSolidCellCounts" : [
+          1219,
+          820,
+          820,
+          164
+        ],
+        "cpuRasterCompared" : false,
+        "frameIndex" : 13,
+        "maximumLatticeWallSpeed" : 0.02462920919060707,
+        "maximumPreparedPositionErrorMeters" : 0,
+        "maximumPreparedVelocityErrorMetersPerSecond" : 9.5367431640625e-07,
+        "occupancySHA256" : "4c3e3b8a376e73f2198fd69d3a2eb63457403dcb1e46aa497732265dac5b0b75",
+        "solidCellCount" : 3023,
+        "sourceFrameNumber" : 13,
+        "timeSeconds" : 0.05887681245803833
+      },
+      {
+        "componentSolidCellCounts" : [
+          1214,
+          807,
+          812,
+          186
+        ],
+        "cpuRasterCompared" : false,
+        "frameIndex" : 14,
+        "maximumLatticeWallSpeed" : 0.023536771535873413,
+        "maximumPreparedPositionErrorMeters" : 0,
+        "maximumPreparedVelocityErrorMetersPerSecond" : 9.5367431640625e-07,
+        "occupancySHA256" : "a2713ba28f5a6ce000f236663c216fac0e7d0e45793621112e0016ae87f542f5",
+        "solidCellCount" : 3019,
+        "sourceFrameNumber" : 14,
+        "timeSeconds" : 0.06340579688549042
+      },
+      {
+        "componentSolidCellCounts" : [
+          1213,
+          793,
+          815,
+          195
+        ],
+        "cpuRasterCompared" : false,
+        "frameIndex" : 15,
+        "maximumLatticeWallSpeed" : 0.025545308366417885,
+        "maximumPreparedPositionErrorMeters" : 0,
+        "maximumPreparedVelocityErrorMetersPerSecond" : 1.0662403155947686e-06,
+        "occupancySHA256" : "0aa4b4de4995bf7a27387a748c56c8593552bbbc6a40bc659ef6c32b042c7b64",
+        "solidCellCount" : 3016,
+        "sourceFrameNumber" : 15,
+        "timeSeconds" : 0.0679347813129425
+      },
+      {
+        "componentSolidCellCounts" : [
+          1213,
+          800,
+          831,
+          201
+        ],
+        "cpuRasterCompared" : false,
+        "frameIndex" : 16,
+        "maximumLatticeWallSpeed" : 0.030687112361192703,
+        "maximumPreparedPositionErrorMeters" : 0,
+        "maximumPreparedVelocityErrorMetersPerSecond" : 1.0662403155947686e-06,
+        "occupancySHA256" : "bd1245d348c0c83a9d3f1d67980e4c1ea78cf78aa73b394979c83108a9b7c949",
+        "solidCellCount" : 3045,
+        "sourceFrameNumber" : 16,
+        "timeSeconds" : 0.07246376574039459
+      },
+      {
+        "componentSolidCellCounts" : [
+          1211,
+          869,
+          882,
+          215
+        ],
+        "cpuRasterCompared" : false,
+        "frameIndex" : 17,
+        "maximumLatticeWallSpeed" : 0.03233184292912483,
+        "maximumPreparedPositionErrorMeters" : 0,
+        "maximumPreparedVelocityErrorMetersPerSecond" : 1.0925712103926344e-06,
+        "occupancySHA256" : "3996d7e225bed5e885fa024d3200d38599bee2ed5d712db9d9e9a2a956d29119",
+        "solidCellCount" : 3177,
+        "sourceFrameNumber" : 17,
+        "timeSeconds" : 0.07699275016784668
+      },
+      {
+        "componentSolidCellCounts" : [
+          1218,
+          842,
+          845,
+          206
+        ],
+        "cpuRasterCompared" : false,
+        "frameIndex" : 18,
+        "maximumLatticeWallSpeed" : 0.032440491020679474,
+        "maximumPreparedPositionErrorMeters" : 0,
+        "maximumPreparedVelocityErrorMetersPerSecond" : 1.0662403155947686e-06,
+        "occupancySHA256" : "4cd385bc006436cd64e29bda8e422d0822835d9cb417e3e6d1e5e1e20157c0c1",
+        "solidCellCount" : 3111,
+        "sourceFrameNumber" : 18,
+        "timeSeconds" : 0.08152174204587936
+      },
+      {
+        "componentSolidCellCounts" : [
+          1216,
+          853,
+          853,
+          203
+        ],
+        "cpuRasterCompared" : false,
+        "frameIndex" : 19,
+        "maximumLatticeWallSpeed" : 0.02812342904508114,
+        "maximumPreparedPositionErrorMeters" : 0,
+        "maximumPreparedVelocityErrorMetersPerSecond" : 1.0662403155947686e-06,
+        "occupancySHA256" : "f01bed29156103dd0435f667f2785684965e9c8557569987751cfa9a48f6b229",
+        "solidCellCount" : 3125,
+        "sourceFrameNumber" : 19,
+        "timeSeconds" : 0.08605072647333145
+      },
+      {
+        "componentSolidCellCounts" : [
+          1207,
+          865,
+          868,
+          183
+        ],
+        "cpuRasterCompared" : false,
+        "frameIndex" : 20,
+        "maximumLatticeWallSpeed" : 0.023571139201521873,
+        "maximumPreparedPositionErrorMeters" : 0,
+        "maximumPreparedVelocityErrorMetersPerSecond" : 9.5367431640625e-07,
+        "occupancySHA256" : "963672b81a0c4c38dff66e309da9a7a12a71899243e18a80630529abd95c125f",
+        "solidCellCount" : 3123,
+        "sourceFrameNumber" : 20,
+        "timeSeconds" : 0.09057971090078354
+      },
+      {
+        "componentSolidCellCounts" : [
+          1212,
+          868,
+          875,
+          169
+        ],
+        "cpuRasterCompared" : false,
+        "frameIndex" : 21,
+        "maximumLatticeWallSpeed" : 0.022943424060940742,
+        "maximumPreparedPositionErrorMeters" : 0,
+        "maximumPreparedVelocityErrorMetersPerSecond" : 9.5367431640625e-07,
+        "occupancySHA256" : "c9013d024d4fef931786462e136b5fda152f60c5f6b50a209d412b2876e6520a",
+        "solidCellCount" : 3124,
+        "sourceFrameNumber" : 21,
+        "timeSeconds" : 0.09510869532823563
+      },
+      {
+        "componentSolidCellCounts" : [
+          1210,
+          876,
+          859,
+          160
+        ],
+        "cpuRasterCompared" : false,
+        "frameIndex" : 22,
+        "maximumLatticeWallSpeed" : 0.01917875185608864,
+        "maximumPreparedPositionErrorMeters" : 0,
+        "maximumPreparedVelocityErrorMetersPerSecond" : 5.331201577973843e-07,
+        "occupancySHA256" : "2af7ead6006607a279fd75aa98086b3908a23b99b5cc17f3c5172a4d3e4bdfa8",
+        "solidCellCount" : 3105,
+        "sourceFrameNumber" : 22,
+        "timeSeconds" : 0.09963767975568771
+      },
+      {
+        "componentSolidCellCounts" : [
+          1199,
+          895,
+          881,
+          156
+        ],
+        "cpuRasterCompared" : false,
+        "frameIndex" : 23,
+        "maximumLatticeWallSpeed" : 0.013139341026544571,
+        "maximumPreparedPositionErrorMeters" : 0,
+        "maximumPreparedVelocityErrorMetersPerSecond" : 5.840038852511498e-07,
+        "occupancySHA256" : "f1461a6d9505f8136e32169f359c613346567bee18cd448c2c66b9965227d4f6",
+        "solidCellCount" : 3131,
+        "sourceFrameNumber" : 23,
+        "timeSeconds" : 0.1041666641831398
+      },
+      {
+        "componentSolidCellCounts" : [
+          1188,
+          894,
+          907,
+          165
+        ],
+        "cpuMaskMismatchCellCount" : 0,
+        "cpuRasterCompared" : true,
+        "frameIndex" : 24,
+        "maximumCPUSignedDistanceDifferenceCells" : 1.52587890625e-05,
+        "maximumCPUWallVelocityDifferenceLattice" : 1.8370823227087385e-06,
+        "maximumLatticeWallSpeed" : 0.011651494540274143,
+        "maximumPreparedPositionErrorMeters" : 0,
+        "maximumPreparedVelocityErrorMetersPerSecond" : 4.915124804938387e-07,
+        "occupancySHA256" : "882a62bf1aeb61ab1f135e310ad073e625fde9aee0808e614ddb6025d8d6d747",
+        "solidCellCount" : 3154,
+        "sourceFrameNumber" : 24,
+        "timeSeconds" : 0.10869564861059189
+      },
+      {
+        "componentSolidCellCounts" : [
+          1177,
+          856,
+          861,
+          162
+        ],
+        "cpuRasterCompared" : false,
+        "frameIndex" : 25,
+        "maximumLatticeWallSpeed" : 0.010639676824212074,
+        "maximumPreparedPositionErrorMeters" : 0,
+        "maximumPreparedVelocityErrorMetersPerSecond" : 4.76837158203125e-07,
+        "occupancySHA256" : "fbbe32acd18fdc01d19e0c4977fde2a9733abdb225277160434f835c1a211fdb",
+        "solidCellCount" : 3056,
+        "sourceFrameNumber" : 25,
+        "timeSeconds" : 0.11322464048862457
+      },
+      {
+        "componentSolidCellCounts" : [
+          1161,
+          794,
+          801,
+          160
+        ],
+        "cpuRasterCompared" : false,
+        "frameIndex" : 26,
+        "maximumLatticeWallSpeed" : 0.01779075339436531,
+        "maximumPreparedPositionErrorMeters" : 0,
+        "maximumPreparedVelocityErrorMetersPerSecond" : 5.331201577973843e-07,
+        "occupancySHA256" : "4df34b88e37be1cf11315524998b32959c19f08790e7b716059aff40d14ed574",
+        "solidCellCount" : 2916,
+        "sourceFrameNumber" : 26,
+        "timeSeconds" : 0.11775362491607666
+      },
+      {
+        "componentSolidCellCounts" : [
+          1158,
+          753,
+          767,
+          159
+        ],
+        "cpuRasterCompared" : false,
+        "frameIndex" : 27,
+        "maximumLatticeWallSpeed" : 0.01988367922604084,
+        "maximumPreparedPositionErrorMeters" : 0,
+        "maximumPreparedVelocityErrorMetersPerSecond" : 4.76837158203125e-07,
+        "occupancySHA256" : "ad95e8cde94f9aa3c64ce913a015ecf2f4d11c1794004a9284e67188f84c993b",
+        "solidCellCount" : 2837,
+        "sourceFrameNumber" : 27,
+        "timeSeconds" : 0.12228260934352875
+      },
+      {
+        "componentSolidCellCounts" : [
+          1171,
+          715,
+          708,
+          149
+        ],
+        "cpuRasterCompared" : false,
+        "frameIndex" : 28,
+        "maximumLatticeWallSpeed" : 0.025928441435098648,
+        "maximumPreparedPositionErrorMeters" : 0,
+        "maximumPreparedVelocityErrorMetersPerSecond" : 1.0662403155947686e-06,
+        "occupancySHA256" : "daad4c3f3cc9f853e6037919f600f1d6cbde7146614c95425bbc489ede1f0ab5",
+        "solidCellCount" : 2743,
+        "sourceFrameNumber" : 28,
+        "timeSeconds" : 0.12681159377098083
+      },
+      {
+        "componentSolidCellCounts" : [
+          1172,
+          717,
+          742,
+          155
+        ],
+        "cpuRasterCompared" : false,
+        "frameIndex" : 29,
+        "maximumLatticeWallSpeed" : 0.029974505305290222,
+        "maximumPreparedPositionErrorMeters" : 0,
+        "maximumPreparedVelocityErrorMetersPerSecond" : 1.0662403155947686e-06,
+        "occupancySHA256" : "77ef439153fcce5118e1b5e47f809da22eca9ecb97fba5a418e1ab63b9dcad9c",
+        "solidCellCount" : 2786,
+        "sourceFrameNumber" : 29,
+        "timeSeconds" : 0.13134057819843292
+      },
+      {
+        "componentSolidCellCounts" : [
+          1176,
+          681,
+          706,
+          142
+        ],
+        "cpuRasterCompared" : false,
+        "frameIndex" : 30,
+        "maximumLatticeWallSpeed" : 0.025201424956321716,
+        "maximumPreparedPositionErrorMeters" : 0,
+        "maximumPreparedVelocityErrorMetersPerSecond" : 9.555351425660774e-07,
+        "occupancySHA256" : "3fac5d9d240e01ebc4895108cd6dcf25cd19871ae7f5677adf790b8ee0077942",
+        "solidCellCount" : 2705,
+        "sourceFrameNumber" : 30,
+        "timeSeconds" : 0.135869562625885
+      },
+      {
+        "componentSolidCellCounts" : [
+          1169,
+          690,
+          689,
+          144
+        ],
+        "cpuRasterCompared" : false,
+        "frameIndex" : 31,
+        "maximumLatticeWallSpeed" : 0.02726432867348194,
+        "maximumPreparedPositionErrorMeters" : 0,
+        "maximumPreparedVelocityErrorMetersPerSecond" : 9.53790731728077e-07,
+        "occupancySHA256" : "2d6131d46d49676a8434154024db8822d26ba19c5558d351856270ffaf732e17",
+        "solidCellCount" : 2692,
+        "sourceFrameNumber" : 31,
+        "timeSeconds" : 0.1403985470533371
+      },
+      {
+        "componentSolidCellCounts" : [
+          1187,
+          636,
+          650,
+          143
+        ],
+        "cpuRasterCompared" : false,
+        "frameIndex" : 32,
+        "maximumLatticeWallSpeed" : 0.027251990512013435,
+        "maximumPreparedPositionErrorMeters" : 0,
+        "maximumPreparedVelocityErrorMetersPerSecond" : 1.0662403155947686e-06,
+        "occupancySHA256" : "f6bb25287770837a7cd23ca405a99f5bd4f648c2288d4707e20ed3f2847659c4",
+        "solidCellCount" : 2616,
+        "sourceFrameNumber" : 32,
+        "timeSeconds" : 0.14492753148078918
+      },
+      {
+        "componentSolidCellCounts" : [
+          1195,
+          614,
+          626,
+          137
+        ],
+        "cpuRasterCompared" : false,
+        "frameIndex" : 33,
+        "maximumLatticeWallSpeed" : 0.029559966176748276,
+        "maximumPreparedPositionErrorMeters" : 0,
+        "maximumPreparedVelocityErrorMetersPerSecond" : 9.830249609876773e-07,
+        "occupancySHA256" : "783a2e0b404962a78b0953de12c262978e88baf65c493f4274d8f1e20137f597",
+        "solidCellCount" : 2572,
+        "sourceFrameNumber" : 33,
+        "timeSeconds" : 0.14945651590824127
+      },
+      {
+        "componentSolidCellCounts" : [
+          1196,
+          621,
+          618,
+          139
+        ],
+        "cpuRasterCompared" : false,
+        "frameIndex" : 34,
+        "maximumLatticeWallSpeed" : 0.03999999910593033,
+        "maximumPreparedPositionErrorMeters" : 0,
+        "maximumPreparedVelocityErrorMetersPerSecond" : 1.0662403155947686e-06,
+        "occupancySHA256" : "beb3db75b075af394133ef547145a5682220a24d1a70917e0fe2ca6018cbce4f",
+        "solidCellCount" : 2574,
+        "sourceFrameNumber" : 34,
+        "timeSeconds" : 0.15398550033569336
+      },
+      {
+        "componentSolidCellCounts" : [
+          1199,
+          644,
+          644,
+          139
+        ],
+        "cpuRasterCompared" : false,
+        "frameIndex" : 35,
+        "maximumLatticeWallSpeed" : 0.031577352434396744,
+        "maximumPreparedPositionErrorMeters" : 0,
+        "maximumPreparedVelocityErrorMetersPerSecond" : 1.0662403155947686e-06,
+        "occupancySHA256" : "259eb6002e98bcec61a949e6bdf42b9c854c6ef9511ba112106210760ff9df63",
+        "solidCellCount" : 2626,
+        "sourceFrameNumber" : 35,
+        "timeSeconds" : 0.15851449966430664
+      },
+      {
+        "componentSolidCellCounts" : [
+          1203,
+          631,
+          632,
+          136
+        ],
+        "cpuMaskMismatchCellCount" : 0,
+        "cpuRasterCompared" : true,
+        "frameIndex" : 36,
+        "maximumCPUSignedDistanceDifferenceCells" : 1.2874603271484375e-05,
+        "maximumCPUWallVelocityDifferenceLattice" : 6.020879936841084e-07,
+        "maximumLatticeWallSpeed" : 0.0251926276832819,
+        "maximumPreparedPositionErrorMeters" : 0,
+        "maximumPreparedVelocityErrorMetersPerSecond" : 9.5367431640625e-07,
+        "occupancySHA256" : "41e6d90007c39b69f7eb872ef44f6b6929f25b3286afc238e2f29f7ca385d9bb",
+        "solidCellCount" : 2602,
+        "sourceFrameNumber" : 36,
+        "timeSeconds" : 0.16304348409175873
+      },
+      {
+        "componentSolidCellCounts" : [
+          1189,
+          612,
+          618,
+          135
+        ],
+        "cpuRasterCompared" : false,
+        "frameIndex" : 37,
+        "maximumLatticeWallSpeed" : 0.024534519761800766,
+        "maximumPreparedPositionErrorMeters" : 0,
+        "maximumPreparedVelocityErrorMetersPerSecond" : 9.5367431640625e-07,
+        "occupancySHA256" : "74c13adeb58310d446c7abff558bae12a83bc76d230cbf831804ff364fcfda8f",
+        "solidCellCount" : 2554,
+        "sourceFrameNumber" : 37,
+        "timeSeconds" : 0.16757246851921082
+      },
+      {
+        "componentSolidCellCounts" : [
+          1186,
+          597,
+          582,
+          122
+        ],
+        "cpuRasterCompared" : false,
+        "frameIndex" : 38,
+        "maximumLatticeWallSpeed" : 0.023003214970231056,
+        "maximumPreparedPositionErrorMeters" : 0,
+        "maximumPreparedVelocityErrorMetersPerSecond" : 1.0662403155947686e-06,
+        "occupancySHA256" : "83efd8803f809c9b63d321636547040c71b4495d0ea4cbf2a85982c7b7f1a1a4",
+        "solidCellCount" : 2487,
+        "sourceFrameNumber" : 38,
+        "timeSeconds" : 0.1721014529466629
+      },
+      {
+        "componentSolidCellCounts" : [
+          1200,
+          579,
+          549,
+          131
+        ],
+        "cpuRasterCompared" : false,
+        "frameIndex" : 39,
+        "maximumLatticeWallSpeed" : 0.02081448584794998,
+        "maximumPreparedPositionErrorMeters" : 0,
+        "maximumPreparedVelocityErrorMetersPerSecond" : 9.830249609876773e-07,
+        "occupancySHA256" : "bac056742c5afea228df9fd0314668a66b86413190b1ada7d7a5efde785678a2",
+        "solidCellCount" : 2459,
+        "sourceFrameNumber" : 39,
+        "timeSeconds" : 0.176630437374115
+      },
+      {
+        "componentSolidCellCounts" : [
+          1176,
+          594,
+          591,
+          133
+        ],
+        "cpuRasterCompared" : false,
+        "frameIndex" : 40,
+        "maximumLatticeWallSpeed" : 0.020276222378015518,
+        "maximumPreparedPositionErrorMeters" : 0,
+        "maximumPreparedVelocityErrorMetersPerSecond" : 6.743495646333031e-07,
+        "occupancySHA256" : "457db23053f89d88ee93f43af08b8c9c9df8128569c7480b255c38c39a7008bb",
+        "solidCellCount" : 2494,
+        "sourceFrameNumber" : 40,
+        "timeSeconds" : 0.18115942180156708
+      },
+      {
+        "componentSolidCellCounts" : [
+          1183,
+          610,
+          609,
+          139
+        ],
+        "cpuRasterCompared" : false,
+        "frameIndex" : 41,
+        "maximumLatticeWallSpeed" : 0.01900043897330761,
+        "maximumPreparedPositionErrorMeters" : 0,
+        "maximumPreparedVelocityErrorMetersPerSecond" : 6.743495646333031e-07,
+        "occupancySHA256" : "0c3945404fcc9347f3ff5117213dcb089f66c09c45404a0a3e85038bdb0b3f18",
+        "solidCellCount" : 2541,
+        "sourceFrameNumber" : 41,
+        "timeSeconds" : 0.18568840622901917
+      },
+      {
+        "componentSolidCellCounts" : [
+          1193,
+          644,
+          654,
+          136
+        ],
+        "cpuRasterCompared" : false,
+        "frameIndex" : 42,
+        "maximumLatticeWallSpeed" : 0.01124492846429348,
+        "maximumPreparedPositionErrorMeters" : 0,
+        "maximumPreparedVelocityErrorMetersPerSecond" : 4.76837158203125e-07,
+        "occupancySHA256" : "55221b7011a5fb9742e5acfd01281633aada4c4e6411b941f54ef5fecec96993",
+        "solidCellCount" : 2627,
+        "sourceFrameNumber" : 42,
+        "timeSeconds" : 0.19021739065647125
+      },
+      {
+        "componentSolidCellCounts" : [
+          1173,
+          697,
+          673,
+          140
+        ],
+        "cpuRasterCompared" : false,
+        "frameIndex" : 43,
+        "maximumLatticeWallSpeed" : 0.01097072847187519,
+        "maximumPreparedPositionErrorMeters" : 0,
+        "maximumPreparedVelocityErrorMetersPerSecond" : 4.76837158203125e-07,
+        "occupancySHA256" : "e0967e85cded1f5cc114e7622412d87c325451b14c5f40478fd01ee98c69c2e5",
+        "solidCellCount" : 2683,
+        "sourceFrameNumber" : 43,
+        "timeSeconds" : 0.19474637508392334
+      },
+      {
+        "componentSolidCellCounts" : [
+          1172,
+          675,
+          673,
+          145
+        ],
+        "cpuRasterCompared" : false,
+        "frameIndex" : 44,
+        "maximumLatticeWallSpeed" : 0.014561093412339687,
+        "maximumPreparedPositionErrorMeters" : 0,
+        "maximumPreparedVelocityErrorMetersPerSecond" : 4.805480102731963e-07,
+        "occupancySHA256" : "43fa33f8de4712bd2563fc6c5f5eadbdea6377df2f409cdc8aa06af27508a64f",
+        "solidCellCount" : 2665,
+        "sourceFrameNumber" : 44,
+        "timeSeconds" : 0.19927535951137543
+      },
+      {
+        "componentSolidCellCounts" : [
+          1171,
+          619,
+          593,
+          155
+        ],
+        "cpuRasterCompared" : false,
+        "frameIndex" : 45,
+        "maximumLatticeWallSpeed" : 0.014139154925942421,
+        "maximumPreparedPositionErrorMeters" : 0,
+        "maximumPreparedVelocityErrorMetersPerSecond" : 4.76837158203125e-07,
+        "occupancySHA256" : "63d342fd1c85db014d191fd09e26a0b30c22ac870bac6c57daf523444436bbc5",
+        "solidCellCount" : 2538,
+        "sourceFrameNumber" : 45,
+        "timeSeconds" : 0.20380434393882751
+      },
+      {
+        "componentSolidCellCounts" : [
+          1189,
+          569,
+          582,
+          169
+        ],
+        "cpuRasterCompared" : false,
+        "frameIndex" : 46,
+        "maximumLatticeWallSpeed" : 0.008304662071168423,
+        "maximumPreparedPositionErrorMeters" : 0,
+        "maximumPreparedVelocityErrorMetersPerSecond" : 3.424026147058612e-07,
+        "occupancySHA256" : "2b3ba799a54eeccba1e36415bb787819643e66b24c01cf9d1c92251420d1b226",
+        "solidCellCount" : 2509,
+        "sourceFrameNumber" : 46,
+        "timeSeconds" : 0.2083333283662796
+      },
+      {
+        "componentSolidCellCounts" : [
+          1180,
+          531,
+          555,
+          179
+        ],
+        "cpuRasterCompared" : false,
+        "frameIndex" : 47,
+        "maximumLatticeWallSpeed" : 0.013543322682380676,
+        "maximumPreparedPositionErrorMeters" : 0,
+        "maximumPreparedVelocityErrorMetersPerSecond" : 5.331201577973843e-07,
+        "occupancySHA256" : "9181893b9285ee4bbb44440a61dc1e7cd94692f60b893f860151de8b54fe1b61",
+        "solidCellCount" : 2445,
+        "sourceFrameNumber" : 47,
+        "timeSeconds" : 0.2128623127937317
+      },
+      {
+        "componentSolidCellCounts" : [
+          1196,
+          545,
+          547,
+          177
+        ],
+        "cpuMaskMismatchCellCount" : 0,
+        "cpuRasterCompared" : true,
+        "frameIndex" : 48,
+        "maximumCPUSignedDistanceDifferenceCells" : 1.5154480934143066e-05,
+        "maximumCPUWallVelocityDifferenceLattice" : 2.7162340643371863e-07,
+        "maximumLatticeWallSpeed" : 0.013510116375982761,
+        "maximumPreparedPositionErrorMeters" : 6.984919309616089e-10,
+        "maximumPreparedVelocityErrorMetersPerSecond" : 5.331201577973843e-07,
+        "occupancySHA256" : "ab72d273ad94cd03597a8b22ce0e1fd2dcd37f6bb26afd93e62a921497d7e3ce",
+        "solidCellCount" : 2465,
+        "sourceFrameNumber" : 48,
+        "timeSeconds" : 0.21739129722118378
+      }
+    ],
+    "frameCount" : 49,
+    "geometryKernelSequence" : [
+      "prepareIndexedBirdSurface",
+      "clearMeasuredWingSurface",
+      "rasterizeIndexedBirdSurface",
+      "resolveIndexedBirdSurface"
+    ],
+    "gridX" : 59,
+    "gridY" : 70,
+    "gridZ" : 50,
+    "halfThicknessCells" : 0.75,
+    "manifestSHA256" : "8006199110a57583e881be832f370c0bc60f148165e835067c68677af1b66da0",
+    "maximumCPUMaskMismatchCellCount" : 0,
+    "maximumCPUSignedDistanceDifferenceCells" : 1.621246337890625e-05,
+    "maximumCPUWallVelocityDifferenceLattice" : 2.350355089220102e-06,
+    "maximumPreparedPositionErrorMeters" : 3.332000986233652e-08,
+    "maximumPreparedVelocityErrorMetersPerSecond" : 1.0925712103926344e-06,
+    "passed" : true,
+    "runtimeSeconds" : 0.21685504913330078,
+    "schemaVersion" : 2,
+    "scientificTier" : "estimated-hybrid-complete-surface",
+    "sourceMuscleModelSHA256" : "499378e2beebce224fd178732a8ff0ecae920eab9d024d82b8dc3b695cfce1a1",
+    "sourceSurfaceSHA256" : "985700b8904813dbdf62fc8339d5bc034f75a0862414b584313a23778c00f789",
+    "triangleCount" : 3968,
+    "vertexCount" : 2157
+  },
+  "manifestSHA256" : "8006199110a57583e881be832f370c0bc60f148165e835067c68677af1b66da0",
+  "passed" : true,
+  "schemaVersion" : 1,
+  "scientificTier" : "estimated-hybrid-complete-surface"
+}

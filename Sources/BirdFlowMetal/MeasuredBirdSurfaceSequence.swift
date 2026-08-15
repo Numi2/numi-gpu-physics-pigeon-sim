@@ -55,6 +55,7 @@ public struct MeasuredBirdSurfaceSequence: Sendable {
     public let trianglePartIdentifiers: [UInt8]
     public let components: [MeasuredBirdSurfaceComponent]
     public let completeBirdSurfaceReady: Bool
+    public let metalReplayReady: Bool
     public let quantitativeForceAcceptanceReady: Bool
 
     public var frameCount: Int { frameTimesSeconds.count }
@@ -291,8 +292,12 @@ public enum MeasuredBirdSurfaceSequenceLoader {
         guard wire.schemaVersion == 1 else {
             throw invalid("schemaVersion must be 1")
         }
-        guard wire.scientificTier == "derived-measured-complete-surface" else {
-            throw invalid("scientificTier is not a complete derived surface")
+        let supportedScientificTiers: Set<String> = [
+            "derived-measured-complete-surface",
+            "estimated-hybrid-complete-surface",
+        ]
+        guard supportedScientificTiers.contains(wire.scientificTier) else {
+            throw invalid("scientificTier is not a supported complete surface")
         }
         guard wire.coordinateFrame.units == "meters" else {
             throw invalid("coordinate units must be meters")
@@ -427,6 +432,7 @@ public enum MeasuredBirdSurfaceSequenceLoader {
             trianglePartIdentifiers: partIdentifiers,
             components: components,
             completeBirdSurfaceReady: wire.readiness.completeBirdSurfaceReady,
+            metalReplayReady: wire.readiness.metalReplayReady,
             quantitativeForceAcceptanceReady:
                 wire.readiness.quantitativeForceAcceptanceReady
         )

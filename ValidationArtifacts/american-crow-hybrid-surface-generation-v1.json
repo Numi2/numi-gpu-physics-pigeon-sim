@@ -1,0 +1,56 @@
+{
+  "artifactIdentifier": "american-crow-hybrid-surface-generation-v1",
+  "checks": {
+    "bilateralWingVertexParity": true,
+    "finitePositions": true,
+    "fixedTopology": true,
+    "pixelIndependentEndpointClosure": true,
+    "quantitativeForceAcceptanceReady": false,
+    "sourceLocks": true,
+    "triangleBudget": true
+  },
+  "claimBoundary": "This artifact creates a fixed, GPU-addressable estimated-hybrid crow surface from the locked dove articulation scaffold and explicit crow morphology estimates. It does not establish measured crow geometry, measured crow kinematics, aerodynamic accuracy, force prediction, mass properties, or free flight.",
+  "counts": {
+    "frames": 49,
+    "positionBytes": 1268316,
+    "triangleBytes": 23808,
+    "triangles": 3968,
+    "verticesPerFrame": 2157
+  },
+  "crowProfileSHA256": "6f6015037ae1f206a8035ed2b222445ffadb475afb2e9fe6486c37ec5df69fb2",
+  "evidenceClass": "estimated-hybrid-simulation-input",
+  "generatedBy": "Scripts/build-american-crow-surface.py",
+  "geometry": {
+    "allFrameMaximumMeters": [
+      0.31739679087349043,
+      0.45524223607033487,
+      0.41575602737972794
+    ],
+    "allFrameMinimumMeters": [
+      -0.4294513866022074,
+      -0.45524223607033487,
+      -0.19295496153777422
+    ],
+    "frameZeroMaximumMeters": [
+      0.14390951719010617,
+      0.08359301173128188,
+      0.3028372623892159
+    ],
+    "frameZeroMinimumMeters": [
+      -0.35619997837567474,
+      -0.08359301173128188,
+      -0.16063512022939305
+    ],
+    "maximumAdjacentPointSpeedMetersPerSecond": 24.26265901893223
+  },
+  "manifestPath": "ValidationInputs/american-crow-hybrid-surface-v1/manifest.json",
+  "manifestSHA256": "8006199110a57583e881be832f370c0bc60f148165e835067c68677af1b66da0",
+  "schemaVersion": 1,
+  "sourceDoveManifestSHA256": "ad42148aa9ee72d994d668ba16f8b6572cb8b192b77539fe66d97586ed9e1a13",
+  "timing": {
+    "endpointMaximumAbsolutePositionErrorMeters": 0.0,
+    "periodSeconds": 0.2173913043478261,
+    "sampleRateHertz": 220.79999999999998,
+    "selectedWingbeatFrequencyHertz": 4.6
+  }
+}

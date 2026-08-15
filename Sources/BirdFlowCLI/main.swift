@@ -181,6 +181,11 @@ private struct Arguments {
       birdflow simulate deetjen-dove [--input MANIFEST.json] \
         [--force-target TARGET.json] [--archive FILE] [--json]
 
+    Estimated American-crow simulation readiness:
+      birdflow simulate american-crow [--input MANIFEST.json] \
+        [--cell-size-meters M] [--half-thickness-cells V] \
+        [--geometry-only] [--archive FILE] [--json]
+
       Targeted D28/D32 moving-boundary component replay:
         birdflow replay measured-bird-surface --input MANIFEST.json \
           --force-target TARGET.json \
@@ -265,6 +270,99 @@ private struct DeetjenDoveSimulationArguments {
     sequence with measured-derived body translation preserved. The D8 RR3
     profile is an engineering simulation, not a free-flight prediction.
     """
+}
+
+private struct AmericanCrowSimulationArguments {
+    var inputPath =
+        "ValidationInputs/american-crow-hybrid-surface-v1/manifest.json"
+    var archivePath: String?
+    var cellSizeMeters: Float = 0.015
+    var halfThicknessCells: Float = 0.75
+    var geometryOnly = false
+    var json = false
+
+    init(_ values: [String]) throws {
+        var index = 3
+        while index < values.count {
+            switch values[index] {
+            case "--input":
+                index += 1
+                guard index < values.count else {
+                    throw CLIError.invalidArgument(
+                        "--input requires an American-crow surface manifest"
+                    )
+                }
+                inputPath = values[index]
+            case "--archive":
+                index += 1
+                guard index < values.count else {
+                    throw CLIError.invalidArgument(
+                        "--archive requires an output JSON path"
+                    )
+                }
+                archivePath = values[index]
+            case "--cell-size-meters":
+                index += 1
+                guard index < values.count,
+                      let value = Float(values[index]),
+                      value.isFinite,
+                      value > 0 else {
+                    throw CLIError.invalidArgument(
+                        "--cell-size-meters requires a positive value"
+                    )
+                }
+                cellSizeMeters = value
+            case "--half-thickness-cells":
+                index += 1
+                guard index < values.count,
+                      let value = Float(values[index]),
+                      (0.5...2).contains(value) else {
+                    throw CLIError.invalidArgument(
+                        "--half-thickness-cells requires a value in [0.5, 2]"
+                    )
+                }
+                halfThicknessCells = value
+            case "--geometry-only":
+                geometryOnly = true
+            case "--json":
+                json = true
+            case "--help", "-h":
+                print(Self.help)
+                Foundation.exit(EXIT_SUCCESS)
+            default:
+                throw CLIError.invalidArgument(
+                    "Unknown American-crow simulation option: \(values[index])"
+                )
+            }
+            index += 1
+        }
+    }
+
+    static let help = """
+    birdflow simulate american-crow [options]
+
+      --input MANIFEST.json     Estimated-hybrid crow indexed surface
+      --cell-size-meters M      Geometry/coupling grid spacing (default: 0.015)
+      --half-thickness-cells V  Numerical sheet half-thickness (default: 0.75)
+      --geometry-only           Skip the production fluid-coupling gate
+      --archive FILE            Write the complete readiness report
+      --json                    Print the complete report as JSON
+
+    The default runs all-frame Metal geometry parity followed by the production
+    TRT moving-boundary coupling gate. It establishes executable simulation
+    plumbing only; the hybrid crow is not measured-crow aerodynamic evidence.
+    """
+}
+
+private struct AmericanCrowSimulationReadinessReport: Codable {
+    let schemaVersion: Int
+    let datasetIdentifier: String
+    let scientificTier: String
+    let manifestSHA256: String
+    let geometry: MetalIndexedBirdSurfaceReplayReport
+    let coupling: MetalIndexedBirdSurfaceCouplingReport?
+    let passed: Bool
+    let claimBoundary: String
 }
 
 private struct MeasuredBirdSurfaceReplayArguments {
@@ -3807,6 +3905,91 @@ private func runDeetjenDoveSimulation(_ values: [String]) throws {
         )
         print("passed: \(report.passed)")
         print("scientific boundary: \(report.claimBoundary)")
+    }
+}
+
+private func runAmericanCrowSimulation(_ values: [String]) throws {
+    let arguments = try AmericanCrowSimulationArguments(values)
+    let surface = try MeasuredBirdSurfaceSequenceLoader.load(
+        manifestURL: URL(fileURLWithPath: arguments.inputPath)
+    )
+    guard surface.scientificTier == "estimated-hybrid-complete-surface",
+          surface.completeBirdSurfaceReady,
+          surface.metalReplayReady,
+          !surface.quantitativeForceAcceptanceReady else {
+        throw CLIError.invalidArgument(
+            "american-crow simulation requires an explicitly estimated-hybrid, Metal-ready, non-quantitative surface"
+        )
+    }
+    let last = surface.frameCount - 1
+    let milestones = Array(Set([
+        0, last / 4, last / 2, 3 * last / 4, last,
+    ])).sorted()
+    let geometry = try MetalIndexedBirdSurfaceValidator.audit(
+        surface,
+        cellSizeMeters: arguments.cellSizeMeters,
+        halfThicknessCells: arguments.halfThicknessCells,
+        cpuRasterMilestoneFrames: milestones
+    )
+    let coupling = arguments.geometryOnly
+        ? nil
+        : try MetalIndexedBirdSurfaceCouplingValidator.audit(
+            surface,
+            cellSizeMeters: arguments.cellSizeMeters,
+            halfThicknessCells: arguments.halfThicknessCells
+        )
+    let passed = geometry.passed && (coupling?.passed ?? true)
+    let report = AmericanCrowSimulationReadinessReport(
+        schemaVersion: 1,
+        datasetIdentifier: surface.datasetIdentifier,
+        scientificTier: surface.scientificTier,
+        manifestSHA256: surface.manifestSHA256,
+        geometry: geometry,
+        coupling: coupling,
+        passed: passed,
+        claimBoundary: (
+            "This readiness gate proves that the fixed estimated-hybrid crow "
+                + "surface executes through the live Apple-Metal geometry, "
+                + "moving-boundary, topology, and TRT fluid-coupling path. It "
+                + "does not establish measured crow geometry or kinematics, "
+                + "developed-flow convergence, aerodynamic accuracy, force "
+                + "prediction, mass properties, trim, or free flight."
+        )
+    )
+    if let archivePath = arguments.archivePath {
+        try writeJSON(report, to: archivePath)
+    }
+    if arguments.json {
+        try printJSON(report)
+    } else {
+        print("American crow estimated-hybrid simulation readiness")
+        print("dataset: \(report.datasetIdentifier)")
+        print("device: \(geometry.deviceName)")
+        print(
+            "surface: \(geometry.frameCount) frames, "
+                + "\(geometry.vertexCount) vertices, "
+                + "\(geometry.triangleCount) triangles"
+        )
+        print(
+            "grid: \(geometry.gridX)x\(geometry.gridY)x\(geometry.gridZ), "
+                + "CPU/GPU mask mismatches: "
+                + "\(geometry.maximumCPUMaskMismatchCellCount)"
+        )
+        if let coupling {
+            print(
+                "fluid: \(coupling.steps) TRT steps, closure RMS "
+                    + String(coupling.relativeRMSBoundaryClosureResidual)
+            )
+        } else {
+            print("fluid: skipped by --geometry-only")
+        }
+        print("passed: \(report.passed)")
+        print("scientific boundary: \(report.claimBoundary)")
+    }
+    guard report.passed else {
+        throw CLIError.acceptanceFailed(
+            "American-crow simulation readiness exceeded a Metal integration gate"
+        )
     }
 }
 
@@ -8651,15 +8834,17 @@ private func run(_ values: [String]) throws {
     } else if values.count > 1, values[1] == "simulate" {
         guard values.count > 2 else {
             throw CLIError.invalidArgument(
-                "Use: birdflow simulate deetjen-dove [options]"
+                "Use: birdflow simulate <deetjen-dove|american-crow> [options]"
             )
         }
         switch values[2] {
         case "deetjen-dove":
             try runDeetjenDoveSimulation(values)
+        case "american-crow":
+            try runAmericanCrowSimulation(values)
         default:
             throw CLIError.invalidArgument(
-                "Use: birdflow simulate deetjen-dove [options]"
+                "Use: birdflow simulate <deetjen-dove|american-crow> [options]"
             )
         }
     } else if values.count > 1, values[1] == "replay" {

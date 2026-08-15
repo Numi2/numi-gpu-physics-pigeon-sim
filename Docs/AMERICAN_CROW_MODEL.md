@@ -61,6 +61,47 @@ cool sheen while keeping the bird visually black. The native result is an
 executable motion and material estimate; it is deliberately not presented as
 the photoreal appearance target established by the generated hero.
 
+## Apple-GPU simulation surface
+
+The solver-facing crow is a separate fixed-topology asset generated from the
+same profile:
+
+- `49` frames over one estimated `4.6 Hz` presentation cycle;
+- `2,157` vertices and `3,968` triangles in canonical body, left-wing,
+  right-wing, and tail ranges;
+- exact endpoint closure and bilaterally symmetrized wing vertices;
+- `uint16` indexing below the live Metal `4,096`-triangle identifier limit;
+- locked profile, dove-scaffold, position-stream, triangle-stream, and manifest
+  SHA-256 values.
+
+Regenerate it deterministically with:
+
+```bash
+./Scripts/build-american-crow-surface.py
+```
+
+Exercise the live Apple-GPU path with:
+
+```bash
+swift build -c release --product birdflow
+.build/release/birdflow simulate american-crow \
+  --archive ValidationArtifacts/american-crow-hybrid-metal-sim-readiness-v1.json
+```
+
+The committed Apple M4 run passed all-frame indexed preparation and
+rasterization, exact CPU/GPU occupancy at five milestone frames, and the
+production moving-boundary/TRT coupling gate. Its `8` fluid steps produced
+`25` newly covered and `25` newly uncovered events, zero topology-counter
+mismatch, wall Mach `0.0693`, and a relative RMS impulse-closure residual of
+`4.28e-6`. This makes the asset executable simulation plumbing, not calibrated
+crow aerodynamics: developed flow, grid convergence, force accuracy, mass
+properties, trim, and free flight remain open.
+
+The generation record is
+[`american-crow-hybrid-surface-generation-v1.json`](../ValidationArtifacts/american-crow-hybrid-surface-generation-v1.json),
+and the owning live-Metal result is
+[`american-crow-hybrid-metal-sim-readiness-v1.json`](../ValidationArtifacts/american-crow-hybrid-metal-sim-readiness-v1.json).
+
 ## Sources
 
 - Deetjen et al., *eLife* (2024), DOI `10.7554/eLife.89968` and Dryad DOI

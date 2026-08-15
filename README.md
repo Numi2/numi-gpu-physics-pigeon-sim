@@ -73,9 +73,12 @@ published crow morphometric ranges, screened public CT anatomy, current feather
 appearance measurements, and species-specific photographic references. The
 hero above is a generated appearance target—not a photograph or measured crow
 surface. A separate [native Metal wingbeat](Docs/Media/american-crow-hybrid-native-v1.mp4)
-executes the estimated geometry and material on Apple silicon. The complete
-[model and evidence boundary](Docs/AMERICAN_CROW_MODEL.md) keeps those two
-artifacts distinct from crow aerodynamic validation.
+executes the estimated geometry and material on Apple silicon. A locked
+`2,157`-vertex, `3,968`-triangle estimated-hybrid surface now also passes the
+live Apple-Metal geometry and production TRT moving-boundary coupling gates.
+The complete [model and evidence boundary](Docs/AMERICAN_CROW_MODEL.md) keeps
+the generated hero, executable render, and solver surface distinct from crow
+aerodynamic validation.
 
 [Quick start](#quick-start) · [Validation scoreboard](#validation-scoreboard) · [Native viewer](#native-metal-viewer) · [Architecture](#architecture) · [Measured data](#measured-geometry-and-kinematics) · [Scientific limits](#scientific-boundary) · [Full validation contract](Docs/VALIDATION.md)
 

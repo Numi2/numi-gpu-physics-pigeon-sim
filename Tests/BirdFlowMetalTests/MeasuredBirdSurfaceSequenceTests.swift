@@ -23,6 +23,13 @@ private var measuredBirdForceTargetURL: URL {
         )
 }
 
+private var estimatedCrowSurfaceManifestURL: URL {
+    repositoryRootURL
+        .appendingPathComponent(
+            "ValidationInputs/american-crow-hybrid-surface-v1/manifest.json"
+        )
+}
+
 @Test
 func measuredBirdSurfaceLoaderLocksIndexedNonperiodicContract() throws {
     let dataset = try MeasuredBirdSurfaceSequenceLoader.load(
@@ -44,6 +51,7 @@ func measuredBirdSurfaceLoaderLocksIndexedNonperiodicContract() throws {
     #expect(dataset.components.map(\.partIdentifier) == [1, 2, 3, 4])
     #expect(dataset.trianglePartIdentifiers.count == 3_968)
     #expect(dataset.completeBirdSurfaceReady)
+    #expect(!dataset.metalReplayReady)
     #expect(!dataset.quantitativeForceAcceptanceReady)
     #expect(
         dataset.manifestSHA256
@@ -65,6 +73,28 @@ func measuredBirdSurfaceLoaderLocksIndexedNonperiodicContract() throws {
         #expect(state.velocityMetersPerSecond.y.isFinite)
         #expect(state.velocityMetersPerSecond.z.isFinite)
     }
+}
+
+@Test
+func estimatedCrowSurfaceLoaderPreservesHybridBoundaryAndSimContract() throws {
+    let dataset = try MeasuredBirdSurfaceSequenceLoader.load(
+        manifestURL: estimatedCrowSurfaceManifestURL
+    )
+    #expect(
+        dataset.datasetIdentifier
+            == "american-crow-estimated-hybrid-complete-surface-v1"
+    )
+    #expect(dataset.scientificTier == "estimated-hybrid-complete-surface")
+    #expect(dataset.frameCount == 49)
+    #expect(dataset.vertexCount == 2_157)
+    #expect(dataset.triangleCount == 3_968)
+    #expect(dataset.components.map(\.partIdentifier) == [1, 2, 3, 4])
+    #expect(dataset.components.allSatisfy { $0.evidenceClass.contains("estimated") })
+    #expect(dataset.completeBirdSurfaceReady)
+    #expect(dataset.metalReplayReady)
+    #expect(!dataset.quantitativeForceAcceptanceReady)
+    #expect(dataset.maximumPointSpeedMetersPerSecond < 25)
+    #expect(dataset.vertex(frame: 0, index: 0) == dataset.vertex(frame: 48, index: 0))
 }
 
 @Test
@@ -3415,6 +3445,28 @@ func sourceViscosityArtifactsRetainLockedD16AndD28Boundaries() throws {
                 $0.componentSolidCellCounts.count == 4
                     && $0.componentSolidCellCounts.allSatisfy { $0 > 0 }
             })
+    }
+
+    @Test
+    func estimatedCrowSurfaceClosesLiveMetalGeometryPath() throws {
+        let dataset = try MeasuredBirdSurfaceSequenceLoader.load(
+            manifestURL: estimatedCrowSurfaceManifestURL
+        )
+        let report = try MetalIndexedBirdSurfaceValidator.audit(
+            dataset,
+            cellSizeMeters: 0.015,
+            halfThicknessCells: 0.75,
+            cpuRasterMilestoneFrames: [0, 12, 24, 36, 48]
+        )
+        #expect(report.passed)
+        #expect(report.deviceName.contains("Apple"))
+        #expect(report.scientificTier == "estimated-hybrid-complete-surface")
+        #expect(report.frameAudits.count == 49)
+        #expect(report.maximumCPUMaskMismatchCellCount == 0)
+        #expect(report.allComponentsPresentEveryFrame)
+        #expect(report.allValuesFinite)
+        #expect(!report.fluidCollisionExecuted)
+        #expect(!report.forceAccumulationExecuted)
     }
 
     @Test
