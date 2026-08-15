@@ -66,7 +66,7 @@ translucent wing history and wingtip ribbons remain explicitly kinematic.
 
 ### American crow visual study
 
-[![Generated estimated American-crow hybrid in forward flight](Docs/Media/american-crow-hybrid-hero-v1.png)](Docs/AMERICAN_CROW_MODEL.md)
+[![Generated estimated American-crow hybrid in forward flight](Docs/Media/american-crow-hybrid-hero-v2.png)](Docs/AMERICAN_CROW_MODEL.md)
 
 The American-crow study combines the locked Deetjen dove deformation scaffold,
 published crow morphometric ranges, screened public CT anatomy, current feather

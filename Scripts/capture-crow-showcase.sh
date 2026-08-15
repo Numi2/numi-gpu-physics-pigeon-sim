@@ -4,7 +4,8 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 OUTPUT="${1:-$ROOT/Docs/Media/american-crow-hybrid-native-v1.mp4}"
 POSTER="${2:-$ROOT/Docs/Media/american-crow-hybrid-native-v1.png}"
-MANIFEST="$ROOT/ValidationInputs/deetjen-ob-f03-surface-v1/manifest.json"
+MANIFEST="$ROOT/ValidationInputs/american-crow-hybrid-surface-v1/manifest.json"
+GENERATION_AUDIT="$ROOT/ValidationArtifacts/american-crow-hybrid-surface-generation-v1.json"
 PROFILE="$ROOT/ValidationInputs/american-crow-hybrid-visual-v1.json"
 
 if ! command -v ffmpeg >/dev/null 2>&1; then
@@ -30,7 +31,8 @@ swift build -c release --product birdflow-viewer
 # the first 48 frames, avoiding a duplicated endpoint pause at the loop wrap.
 .build/release/birdflow-viewer \
   --capture-crow-frames "$FRAMES" \
-  --capture-crow-dove-manifest "$MANIFEST" \
+  --capture-crow-surface-manifest "$MANIFEST" \
+  --capture-crow-surface-generation-audit "$GENERATION_AUDIT" \
   --capture-crow-profile "$PROFILE" \
   --capture-width 1280 \
   --capture-height 720 \

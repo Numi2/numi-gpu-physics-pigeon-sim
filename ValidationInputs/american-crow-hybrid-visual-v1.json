@@ -77,6 +77,11 @@
     "bilateralWingSymmetrization": true,
     "surfaceThicknessTreatment": "solver raster half-thickness in lattice cells; not a measured feather thickness"
   },
+  "simulationSurface": {
+    "datasetIdentifier": "american-crow-estimated-hybrid-complete-surface-v1",
+    "manifestPath": "ValidationInputs/american-crow-hybrid-surface-v1/manifest.json",
+    "generationAuditPath": "ValidationArtifacts/american-crow-hybrid-surface-generation-v1.json"
+  },
   "sources": [
     {
       "role": "local measured articulation scaffold",

@@ -4,7 +4,18 @@
   "evidenceClass": "executable-estimated-visualization",
   "modelProfile": {
     "path": "ValidationInputs/american-crow-hybrid-visual-v1.json",
-    "sha256": "6f6015037ae1f206a8035ed2b222445ffadb475afb2e9fe6486c37ec5df69fb2"
+    "sha256": "563e600ff8da2fb7461b00228d421e05c1826d1fe025840e319e0aef4e719714"
+  },
+  "simulationSurface": {
+    "path": "ValidationInputs/american-crow-hybrid-surface-v1/manifest.json",
+    "sha256": "3154c5877b3498aa9370e215c94be9267950494149aecc88c08ee183f895bcc5",
+    "datasetIdentifier": "american-crow-estimated-hybrid-complete-surface-v1",
+    "scientificTier": "estimated-hybrid-complete-surface",
+    "use": "phase sampling and solver-surface-derived bilateral wing direction"
+  },
+  "surfaceGenerationAudit": {
+    "path": "ValidationArtifacts/american-crow-hybrid-surface-generation-v1.json",
+    "sha256": "c6761a920466ae27444b2fb43ac6d9debcb8a293f4874d01afd2241075d0b9b4"
   },
   "measuredDoveManifest": {
     "path": "ValidationInputs/deetjen-ob-f03-surface-v1/manifest.json",
@@ -13,8 +24,8 @@
   },
   "video": {
     "path": "Docs/Media/american-crow-hybrid-native-v1.mp4",
-    "sha256": "552a03b616b35518d32181caeecb27e40a45d4ceb5d62799c719cbb34ed9d69a",
-    "bytes": 218950,
+    "sha256": "eadba38063f669ba7d152228f8f5a708070621ae19e62b071b31eaee80b08316",
+    "bytes": 246021,
     "codec": "h264",
     "pixelFormat": "yuv420p",
     "pixelWidth": 1280,
@@ -25,8 +36,8 @@
   },
   "poster": {
     "path": "Docs/Media/american-crow-hybrid-native-v1.png",
-    "sha256": "2560c4d2b9bb53066a3ac6eb7e6641aa87e278cb3ae0892a8659fd08bdc556fc",
-    "bytes": 913755,
+    "sha256": "b0d724bc9966e233965a38abc8af997ab796b393fff7b19b49de137fb11ef965",
+    "bytes": 928582,
     "pixelWidth": 1280,
     "pixelHeight": 720,
     "sourceFrame": 0
@@ -43,10 +54,10 @@
     }
   },
   "visualConstruction": [
-    "bilaterally symmetrized deformation directions derived from the measured dove loop",
+    "bilaterally symmetrized wing directions sampled from the exact estimated-hybrid solver-surface frames",
     "estimated crow body and head loft",
     "explicit estimated primary, secondary, covert, contour, and tail feathers",
     "view-dependent procedural eumelanin sheen"
   ],
-  "claimBoundary": "This artifact proves that the estimated hybrid crow geometry, measured-derived presentation scaffold, and Metal material execute together on the recorded Apple GPU. It is not measured crow geometry or kinematics and provides no crow CFD, force, power, inertia, or free-flight validation."
+  "claimBoundary": "This artifact proves that the locked estimated-hybrid solver surface can drive the procedural crow presentation motion and Metal material on the recorded Apple GPU. The beauty geometry is not the solver boundary mesh. Neither geometry nor kinematics is a measured crow, and this capture provides no crow CFD, force, power, inertia, trim, or free-flight validation."
 }

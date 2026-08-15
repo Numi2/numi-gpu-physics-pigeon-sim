@@ -344,9 +344,13 @@ func estimatedCrowShowcaseCaptureProducesDistinctFrames() throws {
     "--capture-width", "480",
     "--capture-height", "270",
     "--capture-frames", "3",
-    "--capture-crow-dove-manifest",
+    "--capture-crow-surface-manifest",
     root.appendingPathComponent(
-      "ValidationInputs/deetjen-ob-f03-surface-v1/manifest.json"
+      "ValidationInputs/american-crow-hybrid-surface-v1/manifest.json"
+    ).path,
+    "--capture-crow-surface-generation-audit",
+    root.appendingPathComponent(
+      "ValidationArtifacts/american-crow-hybrid-surface-generation-v1.json"
     ).path,
     "--capture-crow-profile",
     root.appendingPathComponent(

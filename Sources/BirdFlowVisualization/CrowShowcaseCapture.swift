@@ -1,6 +1,7 @@
 import AppKit
 import BirdFlowMetal
 import CoreText
+import CryptoKit
 import Foundation
 import Metal
 import simd
@@ -17,7 +18,8 @@ public enum CrowShowcaseCapture {
     let width: Int
     let height: Int
     let frameCount: Int
-    let doveManifestURL: URL
+    let surfaceManifestURL: URL
+    let surfaceGenerationAuditURL: URL
     let crowProfileURL: URL
 
     public init(commandLine: [String]) throws {
@@ -48,9 +50,16 @@ public enum CrowShowcaseCapture {
       guard frameCount >= 2 else {
         throw CaptureError.invalidArguments("--capture-frames must be at least 2")
       }
-      doveManifestURL = URL(
-        fileURLWithPath: try value(after: "--capture-crow-dove-manifest")
-          ?? "ValidationInputs/deetjen-ob-f03-surface-v1/manifest.json"
+      surfaceManifestURL = URL(
+        fileURLWithPath:
+          try value(after: "--capture-crow-surface-manifest")
+          ?? value(after: "--capture-crow-dove-manifest")
+          ?? "ValidationInputs/american-crow-hybrid-surface-v1/manifest.json"
+      )
+      surfaceGenerationAuditURL = URL(
+        fileURLWithPath:
+          try value(after: "--capture-crow-surface-generation-audit")
+          ?? "ValidationArtifacts/american-crow-hybrid-surface-generation-v1.json"
       )
       crowProfileURL = URL(
         fileURLWithPath: try value(after: "--capture-crow-profile")
@@ -79,28 +88,51 @@ public enum CrowShowcaseCapture {
     let profile = try JSONDecoder().decode(CrowVisualProfile.self, from: profileData)
     try profile.validate()
     let dataset = try MeasuredBirdSurfaceSequenceLoader.load(
-      manifestURL: arguments.doveManifestURL
+      manifestURL: arguments.surfaceManifestURL
     )
-    guard dataset.datasetIdentifier == profile.doveScaffold.datasetIdentifier else {
-      throw CaptureError.invalidProfile(
-        "crow profile dove dataset does not match the loaded surface"
+    let motion: any CrowShowcaseMotion
+    if dataset.scientificTier == "estimated-hybrid-complete-surface" {
+      let auditData = try Data(contentsOf: arguments.surfaceGenerationAuditURL)
+      let audit = try JSONDecoder().decode(
+        CrowSurfaceGenerationAudit.self,
+        from: auditData
       )
-    }
-    guard dataset.manifestSHA256 == profile.doveScaffold.manifestSHA256 else {
-      throw CaptureError.invalidProfile(
-        "crow profile dove manifest SHA-256 does not match the loaded surface"
-      )
+      let generationChecksPassed = audit.checks
+        .filter { $0.key != "quantitativeForceAcceptanceReady" }
+        .allSatisfy { $0.value }
+      guard dataset.datasetIdentifier == profile.simulationSurface.datasetIdentifier,
+        dataset.manifestSHA256 == audit.manifestSHA256,
+        sha256(profileData) == audit.crowProfileSHA256,
+        dataset.completeBirdSurfaceReady,
+        dataset.metalReplayReady,
+        !dataset.quantitativeForceAcceptanceReady,
+        generationChecksPassed,
+        audit.checks["quantitativeForceAcceptanceReady"] == false
+      else {
+        throw CaptureError.invalidProfile(
+          "estimated crow surface does not match its profile and generation locks"
+        )
+      }
+      motion = EstimatedCrowSurfaceMotion(dataset: dataset)
+    } else {
+      guard dataset.datasetIdentifier == profile.doveScaffold.datasetIdentifier,
+        dataset.manifestSHA256 == profile.doveScaffold.manifestSHA256
+      else {
+        throw CaptureError.invalidProfile(
+          "crow profile dove dataset does not match the loaded surface"
+        )
+      }
+      motion = MeasuredDovePresentationLoop(dataset: dataset)
     }
     guard let device = MTLCreateSystemDefaultDevice() else {
       throw CaptureError.metalUnavailable
     }
 
-    let loop = MeasuredDovePresentationLoop(dataset: dataset)
     let renderer = try CrowShowcaseRenderer(
       device: device,
       dataset: dataset,
       profile: profile,
-      loop: loop
+      motion: motion
     )
     try FileManager.default.createDirectory(
       at: arguments.outputDirectory,
@@ -114,9 +146,9 @@ public enum CrowShowcaseCapture {
       let orbit = 2 * Float.pi * phase
       var camera = CameraState()
       camera.target = SIMD3<Float>(-0.025, 0, 0.018)
-      camera.distance = 1.08 * (1 + 0.014 * cos(orbit))
-      camera.yaw = -1.22 + 0.035 * sin(orbit)
-      camera.pitch = 0.30 + 0.020 * cos(orbit)
+      camera.distance = 0.94 * (1 + 0.012 * cos(orbit))
+      camera.yaw = -1.08 + 0.030 * sin(orbit)
+      camera.pitch = 0.22 + 0.016 * cos(orbit)
       let texture = try renderer.render(
         phase: phase,
         camera: camera,
@@ -134,7 +166,7 @@ public enum CrowShowcaseCapture {
           height: arguments.height,
           profile: profile,
           phase: phase,
-          sourceFrame: loop.sourceFrameCoordinate(phase: phase)
+          sourceDescription: motion.sourceDescription(phase: phase)
         )
       }
       let output = arguments.outputDirectory.appendingPathComponent(
@@ -143,9 +175,7 @@ public enum CrowShowcaseCapture {
       try png.write(to: output, options: .atomic)
       print(
         "captured estimated American crow \(frameIndex + 1)/\(arguments.frameCount) "
-          + (loop.sourceFrameCoordinate(phase: phase).map {
-            "dove_source_frame=\(String(format: "%.2f", $0))"
-          } ?? "presentation_closure=true")
+          + motion.sourceDescription(phase: phase)
       )
     }
   }
@@ -156,7 +186,7 @@ public enum CrowShowcaseCapture {
     height: Int,
     profile: CrowVisualProfile,
     phase: Float,
-    sourceFrame: Float?
+    sourceDescription: String
   ) {
     graphics.saveGState()
     graphics.textMatrix = .identity
@@ -200,11 +230,8 @@ public enum CrowShowcaseCapture {
       color: cool,
       graphics: graphics
     )
-    let source = sourceFrame.map {
-      "Deetjen dove deformation scaffold / source frame \(String(format: "%.1f", $0))"
-    } ?? "Deetjen dove deformation scaffold / Hermite presentation closure"
     drawText(
-      source,
+      sourceDescription,
       at: CGPoint(x: margin, y: 31 * scale),
       font: labelFont,
       color: muted,
@@ -242,6 +269,57 @@ public enum CrowShowcaseCapture {
     graphics.textPosition = position
     CTLineDraw(line, graphics)
   }
+
+  private static func sha256(_ data: Data) -> String {
+    SHA256.hash(data: data)
+      .map { String(format: "%02x", $0) }
+      .joined()
+  }
+}
+
+private protocol CrowShowcaseMotion: MeasuredDoveMotion {
+  func sourceDescription(phase: Float) -> String
+}
+
+extension MeasuredDovePresentationLoop: CrowShowcaseMotion {
+  func sourceDescription(phase: Float) -> String {
+    sourceFrameCoordinate(phase: phase).map {
+      "Deetjen dove deformation scaffold / source frame \(String(format: "%.1f", $0))"
+    } ?? "Deetjen dove deformation scaffold / Hermite presentation closure"
+  }
+}
+
+private struct EstimatedCrowSurfaceMotion: CrowShowcaseMotion {
+  let dataset: MeasuredBirdSurfaceSequence
+
+  func point(phase: Float, vertexIndex: Int) -> DoveLoopPoint {
+    let time = wrappedPhase(phase) * dataset.frameTimesSeconds.last!
+    let state = dataset.state(timeSeconds: time, vertexIndex: vertexIndex)
+    return DoveLoopPoint(
+      position: state.positionMeters,
+      velocity: state.velocityMetersPerSecond
+    )
+  }
+
+  func phase(offsetBy seconds: Float, from phase: Float) -> Float {
+    wrappedPhase(phase + seconds / dataset.frameTimesSeconds.last!)
+  }
+
+  func sourceDescription(phase: Float) -> String {
+    let coordinate = wrappedPhase(phase) * Float(dataset.frameCount - 1)
+    return "Estimated-hybrid solver surface / frame \(String(format: "%.1f", coordinate))"
+  }
+
+  private func wrappedPhase(_ phase: Float) -> Float {
+    let remainder = phase.truncatingRemainder(dividingBy: 1)
+    return remainder >= 0 ? remainder : remainder + 1
+  }
+}
+
+private struct CrowSurfaceGenerationAudit: Decodable {
+  let manifestSHA256: String
+  let crowProfileSHA256: String
+  let checks: [String: Bool]
 }
 
 private struct CrowVisualProfile: Decodable {
@@ -276,6 +354,12 @@ private struct CrowVisualProfile: Decodable {
     let plumageVioletSheenLinearRGB: [Float]
   }
 
+  struct SimulationSurface: Decodable {
+    let datasetIdentifier: String
+    let manifestPath: String
+    let generationAuditPath: String
+  }
+
   let schemaVersion: Int
   let modelIdentifier: String
   let taxon: String
@@ -284,6 +368,7 @@ private struct CrowVisualProfile: Decodable {
   let doveScaffold: DoveScaffold
   let selectedCrowEstimate: SelectedEstimate
   let visualTransform: VisualTransform
+  let simulationSurface: SimulationSurface
   let antiFabricationRule: String
 
   func validate() throws {
@@ -293,7 +378,11 @@ private struct CrowVisualProfile: Decodable {
       evidenceClass == "estimated-hybrid-visual-model",
       excludedClaims.count >= 5,
       !antiFabricationRule.isEmpty,
-      doveScaffold.manifestSHA256.count == 64
+      doveScaffold.manifestSHA256.count == 64,
+      simulationSurface.datasetIdentifier
+        == "american-crow-estimated-hybrid-complete-surface-v1",
+      !simulationSurface.manifestPath.isEmpty,
+      !simulationSurface.generationAuditPath.isEmpty
     else {
       throw CrowShowcaseCapture.CaptureError.invalidProfile(
         "crow profile identity or evidence boundary is invalid"
@@ -341,10 +430,14 @@ private final class CrowShowcaseRenderer {
     device: MTLDevice,
     dataset: MeasuredBirdSurfaceSequence,
     profile: CrowVisualProfile,
-    loop: MeasuredDovePresentationLoop
+    motion: any CrowShowcaseMotion
   ) throws {
     backend = try VisualizationBackend(device: device)
-    meshBuilder = CrowMeshBuilder(dataset: dataset, profile: profile, loop: loop)
+    meshBuilder = CrowMeshBuilder(
+      dataset: dataset,
+      profile: profile,
+      motion: motion
+    )
     sampleCount = device.supportsTextureSampleCount(4) ? 4 : 1
     surfacePipeline = try backend.render(
       vertex: "coloredSurfaceVertex",
@@ -493,22 +586,25 @@ private final class CrowShowcaseRenderer {
 private struct CrowMeshBuilder {
   private let dataset: MeasuredBirdSurfaceSequence
   private let profile: CrowVisualProfile
-  private let loop: MeasuredDovePresentationLoop
+  private let motion: any CrowShowcaseMotion
+  private let surfaceIsEstimatedCrow: Bool
   private let referenceBodyCenter: SIMD3<Float>
   private let vertexPartIdentifiers: [UInt8]
 
   init(
     dataset: MeasuredBirdSurfaceSequence,
     profile: CrowVisualProfile,
-    loop: MeasuredDovePresentationLoop
+    motion: any CrowShowcaseMotion
   ) {
     self.dataset = dataset
     self.profile = profile
-    self.loop = loop
+    self.motion = motion
+    surfaceIsEstimatedCrow =
+      dataset.scientificTier == "estimated-hybrid-complete-surface"
     let body = dataset.components.first { $0.partIdentifier == 1 }!
     var center = SIMD3<Float>.zero
     for index in body.vertexOffset..<(body.vertexOffset + body.vertexCount) {
-      center += loop.point(phase: 0, vertexIndex: index).position
+      center += motion.point(phase: 0, vertexIndex: index).position
     }
     referenceBodyCenter = center / Float(body.vertexCount)
     var parts = [UInt8](repeating: 0, count: dataset.vertexCount)
@@ -558,8 +654,9 @@ private struct CrowMeshBuilder {
   }
 
   private func transformedPoint(phase: Float, vertexIndex: Int) -> SIMD3<Float> {
-    let point = loop.point(phase: phase, vertexIndex: vertexIndex).position
+    let point = motion.point(phase: phase, vertexIndex: vertexIndex).position
       - referenceBodyCenter
+    if surfaceIsEstimatedCrow { return point }
     let transform = profile.visualTransform
     let rawScale: [Float]
     switch vertexPartIdentifiers[vertexIndex] {
@@ -636,6 +733,7 @@ private struct CrowMeshBuilder {
     appendBill(center: headCenter, to: &vertices)
     appendEyes(center: headCenter, headRadii: radii, to: &vertices)
     appendFacialBristles(center: headCenter, to: &vertices)
+    appendHeadContourFeathers(center: headCenter, radii: radii, to: &vertices)
     appendBodyContourFeathers(bodyCenter: bodyCenter, to: &vertices)
     _ = bodyBounds
   }
@@ -699,7 +797,7 @@ private struct CrowMeshBuilder {
       normals[triangle.y] += weighted
       normals[triangle.z] += weighted
     }
-    let color = SIMD4<Float>(0.016, 0.021, 0.034, 0.12)
+    let color = SIMD4<Float>(0.011, 0.015, 0.025, 0.10)
     for triangle in triangles {
       for index in [triangle.x, triangle.y, triangle.z] {
         vertices.append(
@@ -717,29 +815,70 @@ private struct CrowMeshBuilder {
     bodyCenter: SIMD3<Float>,
     to vertices: inout [ColoredVertex]
   ) {
-    let color = SIMD4<Float>(0.014, 0.019, 0.032, 0.12)
+    let color = SIMD4<Float>(0.012, 0.017, 0.029, 0.17)
     for side: Float in [-1, 1] {
-      for row in 0..<5 {
-        let zFraction = Float(row) / 4
-        let z = bodyCenter.z - 0.048 + 0.098 * zFraction
-        for column in 0..<6 {
-          let xFraction = Float(column) / 5
-          let x = bodyCenter.x + 0.082 - 0.185 * xFraction
-          let stagger: Float = row.isMultiple(of: 2) ? 0 : 0.010
+      for row in 0..<7 {
+        let angle = -0.92 + 1.84 * Float(row) / 6
+        for column in 0..<9 {
+          let fraction = Float(column) / 8
+          let x = bodyCenter.x + 0.092 - 0.230 * fraction
+          let longitudinal = (x - bodyCenter.x + 0.020) / 0.155
+          let envelope = sqrt(max(0.10, 1 - longitudinal * longitudinal))
+          let radiusY = 0.087 * envelope
+          let radiusZ = 0.096 * envelope
+          let stagger: Float = row.isMultiple(of: 2) ? 0 : 0.007
           let root = SIMD3<Float>(
             x - stagger,
-            bodyCenter.y + side * (0.087 + 0.003 * sin(Float.pi * zFraction)),
-            z
+            bodyCenter.y + side * radiusY * cos(angle),
+            bodyCenter.z - 0.008 + radiusZ * sin(angle)
           )
           appendFeatherBlade(
             root: root,
-            tip: root + SIMD3<Float>(-0.034, 0, -0.006),
-            planeNormal: SIMD3<Float>(0, side, 0.16),
-            rootWidth: 0.0055,
-            maximumWidth: 0.0090,
+            tip: root + SIMD3<Float>(-0.027 - 0.007 * fraction, 0, -0.004),
+            planeNormal: safeNormalize(
+              SIMD3<Float>(0, side * cos(angle), sin(angle)),
+              fallback: SIMD3<Float>(0, side, 0)
+            ),
+            rootWidth: 0.0042,
+            maximumWidth: 0.0072,
+            color: color,
+            sections: 6,
+            camber: 0.0018,
+            to: &vertices
+          )
+        }
+      }
+    }
+  }
+
+  private func appendHeadContourFeathers(
+    center: SIMD3<Float>,
+    radii: SIMD3<Float>,
+    to vertices: inout [ColoredVertex]
+  ) {
+    let color = SIMD4<Float>(0.010, 0.014, 0.024, 0.18)
+    for side: Float in [-1, 1] {
+      for row in 0..<4 {
+        let angle = -0.62 + 1.24 * Float(row) / 3
+        for column in 0..<5 {
+          let fraction = Float(column) / 4
+          let root = center + SIMD3<Float>(
+            0.025 - 0.054 * fraction,
+            side * radii.y * 0.98 * cos(angle),
+            radii.z * 0.78 * sin(angle)
+          )
+          appendFeatherBlade(
+            root: root,
+            tip: root + SIMD3<Float>(-0.014 - 0.006 * fraction, 0, -0.0015),
+            planeNormal: safeNormalize(
+              SIMD3<Float>(0.12, side * cos(angle), sin(angle)),
+              fallback: SIMD3<Float>(0, side, 0)
+            ),
+            rootWidth: 0.0024,
+            maximumWidth: 0.0041,
             color: color,
             sections: 5,
-            camber: 0.0025,
+            camber: 0.001,
             to: &vertices
           )
         }
@@ -900,7 +1039,7 @@ private struct CrowMeshBuilder {
     let wristLeading = root + span * 0.69 - forward * 0.006
     let wristTrailing = root + span * 0.57 - forward * 0.093
     let shoulderTrailing = root - forward * 0.104
-    let deckColor = SIMD4<Float>(0.013, 0.018, 0.031, 0.14)
+    let deckColor = SIMD4<Float>(0.011, 0.016, 0.029, 0.20)
     appendTriangle(
       shoulderLeading, elbowLeading, shoulderTrailing,
       color: deckColor,
@@ -931,7 +1070,7 @@ private struct CrowMeshBuilder {
         planeNormal: planeNormal,
         rootWidth: 0.011 + 0.004 * (1 - f),
         maximumWidth: 0.019 - 0.004 * f,
-        color: SIMD4<Float>(shade, shade * 1.28, shade * 1.78, 0.12),
+        color: SIMD4<Float>(shade, shade * 1.28, shade * 1.78, 0.25),
         sections: 9,
         camber: 0.012 * (0.4 + f),
         to: &vertices
@@ -949,7 +1088,7 @@ private struct CrowMeshBuilder {
         planeNormal: planeNormal,
         rootWidth: 0.010,
         maximumWidth: 0.020,
-        color: SIMD4<Float>(0.014, 0.019, 0.032, 0.12),
+        color: SIMD4<Float>(0.012, 0.018, 0.031, 0.22),
         sections: 8,
         camber: 0.008,
         to: &vertices
@@ -959,10 +1098,10 @@ private struct CrowMeshBuilder {
       for index in 0..<9 {
         let f = Float(index) / 8
         let rowFraction = Float(row) / 2
-        let featherRoot = root + span * (0.035 + 0.055 * f + 0.025 * rowFraction)
-          + forward * (0.018 - 0.010 * rowFraction)
-        let featherTip = root + span * (0.25 + 0.36 * f)
-          - forward * (0.020 + 0.042 * rowFraction)
+        let featherRoot = root + span * (0.07 + 0.48 * f + 0.018 * rowFraction)
+          + forward * (0.030 - 0.012 * rowFraction)
+        let featherTip = root + span * (0.16 + 0.50 * f)
+          - forward * (0.028 + 0.030 * rowFraction)
           + planeNormal * (0.006 * (1 - rowFraction))
         appendFeatherBlade(
           root: featherRoot,
@@ -974,7 +1113,7 @@ private struct CrowMeshBuilder {
             0.014 + 0.003 * rowFraction,
             0.019 + 0.004 * rowFraction,
             0.032 + 0.006 * rowFraction,
-            0.12
+            0.18
           ),
           sections: 7,
           camber: 0.007,
@@ -1041,7 +1180,7 @@ private struct CrowMeshBuilder {
         planeNormal: SIMD3<Float>(0, -1, 0.12),
         rootWidth: 0.012,
         maximumWidth: 0.021,
-        color: SIMD4<Float>(0.013, 0.017, 0.029, 0.12),
+        color: SIMD4<Float>(0.011, 0.016, 0.029, 0.23),
         sections: 9,
         camber: 0.006,
         to: &vertices
@@ -1070,7 +1209,9 @@ private struct CrowMeshBuilder {
     var right: [SIMD3<Float>] = []
     for index in 0...sections {
       let t = Float(index) / Float(sections)
-      let envelope = 0.34 + 0.66 * pow(max(sin(Float.pi * t), 0), 0.58)
+      let bodyEnvelope = 0.32 + 0.68 * pow(max(sin(Float.pi * t), 0), 0.58)
+      let tipTaper = 1 - 0.90 * pow(t, 4.0)
+      let envelope = bodyEnvelope * tipTaper
       let width = (rootWidth * (1 - t) + maximumWidth * t) * envelope
       let center = root + (tip - root) * t + normal * (camber * sin(Float.pi * t))
       left.append(center - widthAxis * width)

@@ -25,7 +25,7 @@
     "gridY" : 70,
     "gridZ" : 50,
     "linkKernel" : "buildMeasuredWingSurfaceLinks",
-    "manifestSHA256" : "8006199110a57583e881be832f370c0bc60f148165e835067c68677af1b66da0",
+    "manifestSHA256" : "3154c5877b3498aa9370e215c94be9267950494149aecc88c08ee183f895bcc5",
     "maximumAllowedRelativeRMSBoundaryClosureResidual" : 0.005,
     "maximumBoundaryClosureResidualKilogramMetersPerSecond" : 2.8924224495716523e-08,
     "maximumRelativeBoundaryClosureResidual" : 3.578267985877081e-05,
@@ -38,7 +38,7 @@
     "periodicBoundaries" : true,
     "persistentBoundaryLinkEvents" : 136861,
     "relativeRMSBoundaryClosureResidual" : 4.283423891285264e-06,
-    "runtimeSeconds" : 0.032344937324523926,
+    "runtimeSeconds" : 0.032359957695007324,
     "samples" : [
       {
         "aerodynamicImpulse" : [
@@ -1355,14 +1355,14 @@
     "gridY" : 70,
     "gridZ" : 50,
     "halfThicknessCells" : 0.75,
-    "manifestSHA256" : "8006199110a57583e881be832f370c0bc60f148165e835067c68677af1b66da0",
+    "manifestSHA256" : "3154c5877b3498aa9370e215c94be9267950494149aecc88c08ee183f895bcc5",
     "maximumCPUMaskMismatchCellCount" : 0,
     "maximumCPUSignedDistanceDifferenceCells" : 1.621246337890625e-05,
     "maximumCPUWallVelocityDifferenceLattice" : 2.350355089220102e-06,
     "maximumPreparedPositionErrorMeters" : 3.332000986233652e-08,
     "maximumPreparedVelocityErrorMetersPerSecond" : 1.0925712103926344e-06,
     "passed" : true,
-    "runtimeSeconds" : 0.21685504913330078,
+    "runtimeSeconds" : 0.19397497177124023,
     "schemaVersion" : 2,
     "scientificTier" : "estimated-hybrid-complete-surface",
     "sourceMuscleModelSHA256" : "499378e2beebce224fd178732a8ff0ecae920eab9d024d82b8dc3b695cfce1a1",
@@ -1370,7 +1370,7 @@
     "triangleCount" : 3968,
     "vertexCount" : 2157
   },
-  "manifestSHA256" : "8006199110a57583e881be832f370c0bc60f148165e835067c68677af1b66da0",
+  "manifestSHA256" : "3154c5877b3498aa9370e215c94be9267950494149aecc88c08ee183f895bcc5",
   "passed" : true,
   "schemaVersion" : 1,
   "scientificTier" : "estimated-hybrid-complete-surface"

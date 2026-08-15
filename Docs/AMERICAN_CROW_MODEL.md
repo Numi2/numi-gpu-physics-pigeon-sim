@@ -4,12 +4,12 @@ BirdFlowMetal's crow is a high-quality native Metal **estimated hybrid**, not a
 measured crow. Its machine-readable parameter and provenance record is
 [`american-crow-hybrid-visual-v1.json`](../ValidationInputs/american-crow-hybrid-visual-v1.json).
 
-![Estimated American-crow hybrid hero](Media/american-crow-hybrid-hero-v1.png)
+![Estimated American-crow hybrid hero](Media/american-crow-hybrid-hero-v2.png)
 
 The hero is a generated visual interpretation, not a photograph. Its exact
 dimensions, checksum, reference roles, prompt contract, and claim boundary are
 locked in
-[`american-crow-hybrid-hero-v1.json`](../ValidationArtifacts/american-crow-hybrid-hero-v1.json).
+[`american-crow-hybrid-hero-v2.json`](../ValidationArtifacts/american-crow-hybrid-hero-v2.json).
 
 ## What is real, inferred, and artistic
 
@@ -43,8 +43,10 @@ boundary are locked in
 swift build -c release --product birdflow-viewer
 .build/release/birdflow-viewer \
   --capture-crow-frames /tmp/birdflow-crow \
-  --capture-crow-dove-manifest \
-    ValidationInputs/deetjen-ob-f03-surface-v1/manifest.json \
+  --capture-crow-surface-manifest \
+    ValidationInputs/american-crow-hybrid-surface-v1/manifest.json \
+  --capture-crow-surface-generation-audit \
+    ValidationArtifacts/american-crow-hybrid-surface-generation-v1.json \
   --capture-crow-profile \
     ValidationInputs/american-crow-hybrid-visual-v1.json \
   --capture-width 1600 \
@@ -52,14 +54,16 @@ swift build -c release --product birdflow-viewer
   --capture-frames 48
 ```
 
-It verifies the dove manifest SHA-256 before rendering, resamples the measured
-deformation into a bilaterally symmetrized, more laterally extended crow
-presentation pose, and builds the bird from a smooth body/head loft plus
-explicit primary, secondary, covert, contour, and tail feathers. Four-sample
+It verifies the crow-surface manifest and generating profile SHA-256 before
+rendering, samples phase and bilateral wing direction from the same surface
+used by the solver, and builds the beauty geometry from a smooth body/head loft
+plus explicit primary, secondary, covert, contour, and tail feathers. Four-sample
 Metal rasterization and a dedicated eumelanin shader provide view-dependent
 cool sheen while keeping the bird visually black. The native result is an
 executable motion and material estimate; it is deliberately not presented as
 the photoreal appearance target established by the generated hero.
+The beauty mesh and fluid boundary mesh are intentionally distinct: the former
+adds feather detail, while the latter remains the fixed-topology coupling input.
 
 ## Apple-GPU simulation surface
 

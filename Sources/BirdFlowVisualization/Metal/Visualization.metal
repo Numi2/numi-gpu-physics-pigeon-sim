@@ -613,8 +613,10 @@ fragment float4 showcaseCrowFragment(
     float material=in.color.a;
     float3 key=normalize(float3(0.28f,-0.46f,0.84f));
     float3 fill=normalize(float3(-0.62f,0.34f,0.52f));
+    float3 sun=normalize(float3(-0.74f,-0.34f,0.58f));
     float ndk=abs(dot(normal,key));
     float ndf=abs(dot(normal,fill));
+    float nds=saturate(dot(normal,sun));
     float ndv=saturate(abs(dot(normal,view)));
     float rim=pow(1.0f-ndv,2.2f);
     float3 halfVector=normalize(key+view);
@@ -651,15 +653,21 @@ fragment float4 showcaseCrowFragment(
     float3 blue=float3(0.035f,0.115f,0.235f);
     float3 violet=float3(0.145f,0.045f,0.205f);
     float3 sheen=mix(blue,violet,interference);
+    float flightFeather=smoothstep(0.19f,0.25f,material);
+    float barbPhase=520.0f*in.world.x+390.0f*in.world.y-270.0f*in.world.z;
+    float barb=0.5f+0.5f*sin(barbPhase);
+    float barbMicro=flightFeather*(0.010f+0.018f*barb)*grazing;
     float featherSpecular=pow(saturate(dot(normal,halfVector)),92.0f);
     float softSpecular=pow(saturate(dot(normal,halfVector)),24.0f);
-    float diffuse=0.22f+0.62f*ndk+0.18f*ndf;
+    float diffuse=0.34f+0.68f*ndk+0.20f*ndf+0.16f*nds;
     float3 color=in.color.rgb*diffuse;
-    color+=sheen*(0.035f+0.30f*grazing)*(0.38f+0.62f*ndk);
-    color+=float3(0.14f,0.18f,0.25f)*featherSpecular;
-    color+=float3(0.018f,0.026f,0.042f)*softSpecular;
-    color+=rim*float3(0.025f,0.055f,0.105f);
-    return float4(1.0f-exp(-1.18f*color),1.0f);
+    color+=sheen*(0.055f+0.36f*grazing)*(0.42f+0.58f*ndk);
+    color+=barbMicro*mix(float3(0.035f,0.070f,0.11f),sheen,0.45f);
+    color+=float3(0.18f,0.22f,0.29f)*featherSpecular;
+    color+=float3(0.024f,0.034f,0.052f)*softSpecular;
+    color+=nds*float3(0.026f,0.016f,0.010f);
+    color+=rim*float3(0.036f,0.075f,0.135f);
+    return float4(1.0f-exp(-1.48f*color),1.0f);
 }
 
 fragment float4 showcaseWireFragment(RasterVertex in [[stage_in]]) {

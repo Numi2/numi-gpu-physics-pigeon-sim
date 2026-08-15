@@ -17,7 +17,7 @@
     "triangles": 3968,
     "verticesPerFrame": 2157
   },
-  "crowProfileSHA256": "6f6015037ae1f206a8035ed2b222445ffadb475afb2e9fe6486c37ec5df69fb2",
+  "crowProfileSHA256": "563e600ff8da2fb7461b00228d421e05c1826d1fe025840e319e0aef4e719714",
   "evidenceClass": "estimated-hybrid-simulation-input",
   "generatedBy": "Scripts/build-american-crow-surface.py",
   "geometry": {
@@ -44,7 +44,7 @@
     "maximumAdjacentPointSpeedMetersPerSecond": 24.26265901893223
   },
   "manifestPath": "ValidationInputs/american-crow-hybrid-surface-v1/manifest.json",
-  "manifestSHA256": "8006199110a57583e881be832f370c0bc60f148165e835067c68677af1b66da0",
+  "manifestSHA256": "3154c5877b3498aa9370e215c94be9267950494149aecc88c08ee183f895bcc5",
   "schemaVersion": 1,
   "sourceDoveManifestSHA256": "ad42148aa9ee72d994d668ba16f8b6572cb8b192b77539fe66d97586ed9e1a13",
   "timing": {

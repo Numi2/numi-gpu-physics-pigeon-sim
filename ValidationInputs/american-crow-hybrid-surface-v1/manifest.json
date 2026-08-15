@@ -152,7 +152,7 @@
     "articleDOI": "10.7554/eLife.89968",
     "datasetDOI": "10.5061/dryad.wwpzgmsqs",
     "hybridProfile": "ValidationInputs/american-crow-hybrid-visual-v1.json",
-    "hybridProfileSHA256": "6f6015037ae1f206a8035ed2b222445ffadb475afb2e9fe6486c37ec5df69fb2",
+    "hybridProfileSHA256": "563e600ff8da2fb7461b00228d421e05c1826d1fe025840e319e0aef4e719714",
     "interpretation": "Measured-derived dove articulation scaffold plus estimated American-crow morphology; not measured crow geometry or kinematics.",
     "license": "CC0-1.0",
     "muscleModelSHA256": "499378e2beebce224fd178732a8ff0ecae920eab9d024d82b8dc3b695cfce1a1",
