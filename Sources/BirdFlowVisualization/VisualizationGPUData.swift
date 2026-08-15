@@ -154,3 +154,27 @@ struct DrawPrimitivesIndirectArguments {
   var vertexStart: UInt32
   var baseInstance: UInt32
 }
+
+/// Immutable per-feather metadata uploaded once from `BirdRealityAsset`.
+/// Four-vector packing is mirrored exactly in Visualization.metal.
+struct CrowFeatherRootBindingGPU {
+  var sourceAndIdentity: SIMD4<UInt32>
+  var restDirectionAndLength: SIMD4<Float>
+  var widthRachisAndPadding: SIMD4<Float>
+}
+
+/// Current and previous render-time correspondence produced by Metal.
+/// The previous position is required for deformation motion vectors rather
+/// than camera-only temporal reconstruction.
+struct CrowFeatherRootStateGPU: Equatable {
+  var currentPositionAndLength: SIMD4<Float>
+  var previousPositionAndWidth: SIMD4<Float>
+  var restDirectionAndRachis: SIMD4<Float>
+  var identity: SIMD4<UInt32>
+}
+
+struct CrowFeatherDeformationUniforms {
+  var frameIndices: SIMD4<UInt32>
+  var counts: SIMD4<UInt32>
+  var interpolation: SIMD4<Float>
+}

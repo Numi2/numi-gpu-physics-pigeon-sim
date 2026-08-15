@@ -8,6 +8,25 @@ struct TracerState { float4 positionAndAge; float4 velocityAndSpeed; };
 struct SliceProbeOutput { float4 worldAndScalar; float4 velocity; float4 vorticity; };
 struct CameraUniforms { float4x4 viewProjection; float4 eyeAndWidth; };
 
+struct CrowFeatherRootBindingGPU {
+    uint4 sourceAndIdentity;
+    float4 restDirectionAndLength;
+    float4 widthRachisAndPadding;
+};
+
+struct CrowFeatherRootStateGPU {
+    float4 currentPositionAndLength;
+    float4 previousPositionAndWidth;
+    float4 restDirectionAndRachis;
+    uint4 identity;
+};
+
+struct CrowFeatherDeformationUniforms {
+    uint4 frameIndices;
+    uint4 counts;
+    float4 interpolation;
+};
+
 struct VisualizationUniforms {
     uint4 grid;
     uint4 flags;
@@ -53,6 +72,51 @@ inline uint3 unflatten(uint index, uint3 size) {
     uint remainder = index - z * xy;
     uint y = remainder / size.x;
     return uint3(remainder - y * size.x, y, z);
+}
+
+kernel void deformCrowFeatherRoots(
+    device const float4* sourcePoints [[buffer(0)]],
+    device const CrowFeatherRootBindingGPU* bindings [[buffer(1)]],
+    device CrowFeatherRootStateGPU* output [[buffer(2)]],
+    constant CrowFeatherDeformationUniforms& uniforms [[buffer(3)]],
+    uint featherIndex [[thread_position_in_grid]]) {
+    uint featherCount=uniforms.counts.y;
+    if(featherIndex>=featherCount){return;}
+    CrowFeatherRootBindingGPU binding=bindings[featherIndex];
+    uint vertexCount=uniforms.counts.x;
+    uint vertexIndex=binding.sourceAndIdentity.x;
+    uint currentFirst=uniforms.frameIndices.x*vertexCount+vertexIndex;
+    uint currentSecond=uniforms.frameIndices.y*vertexCount+vertexIndex;
+    uint previousFirst=uniforms.frameIndices.z*vertexCount+vertexIndex;
+    uint previousSecond=uniforms.frameIndices.w*vertexCount+vertexIndex;
+    float3 current=mix(
+        sourcePoints[currentFirst].xyz,
+        sourcePoints[currentSecond].xyz,
+        uniforms.interpolation.x
+    );
+    float3 previous=mix(
+        sourcePoints[previousFirst].xyz,
+        sourcePoints[previousSecond].xyz,
+        uniforms.interpolation.y
+    );
+    CrowFeatherRootStateGPU state;
+    state.currentPositionAndLength=float4(
+        current,binding.restDirectionAndLength.w
+    );
+    state.previousPositionAndWidth=float4(
+        previous,binding.widthRachisAndPadding.x
+    );
+    state.restDirectionAndRachis=float4(
+        binding.restDirectionAndLength.xyz,
+        binding.widthRachisAndPadding.y
+    );
+    state.identity=uint4(
+        featherIndex,
+        binding.sourceAndIdentity.y,
+        binding.sourceAndIdentity.z,
+        binding.sourceAndIdentity.w
+    );
+    output[featherIndex]=state;
 }
 
 inline float4 quaternionConjugate(float4 q) { return float4(-q.xyz, q.w); }

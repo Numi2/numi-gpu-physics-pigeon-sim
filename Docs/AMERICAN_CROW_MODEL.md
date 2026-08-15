@@ -45,18 +45,23 @@ swift build -c release --product birdflow-viewer
     ValidationArtifacts/american-crow-hybrid-surface-generation-v1.json \
   --capture-crow-profile \
     ValidationInputs/american-crow-hybrid-visual-v1.json \
+  --capture-crow-reality-asset \
+    ValidationInputs/american-crow-hybrid-reality-v1.json \
   --capture-width 1600 \
   --capture-height 900 \
   --capture-frames 48
 ```
 
-It verifies the crow-surface manifest and generating profile SHA-256 before
-rendering, samples phase and bilateral wing direction from the same surface
-used by the solver, and builds the beauty geometry from a smooth body/head loft
-plus explicit primary, secondary, covert, contour, and tail feathers. Four-sample
-Metal rasterization and a dedicated eumelanin shader provide view-dependent
-cool sheen while keeping the bird visually black. The native result is an
-executable motion and material estimate, not a photograph.
+It verifies the reality asset, crow-surface manifest, generating profile, and
+their SHA-256 locks before rendering. A retained Metal compute pass evaluates
+current and previous positions for all `54` persistent flight/tail feather roots
+from the same surface used by the solver. The current beauty geometry is built
+from a smooth body/head loft plus explicit primary, secondary, covert, contour,
+and tail feathers; its persistent-feather counts and morphology come from the
+asset, while its vertices remain CPU-generated procedural estimates. Four-sample
+Metal rasterization and a dedicated eumelanin shader provide view-dependent cool
+sheen while keeping the bird visually black. The native result is an executable
+motion and material estimate, not a photograph.
 The beauty mesh and fluid boundary mesh are intentionally distinct: the former
 adds feather detail, while the latter remains the fixed-topology coupling input.
 

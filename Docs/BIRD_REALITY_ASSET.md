@@ -51,10 +51,23 @@ anchors remain explicitly estimated. Its readiness flags therefore reject
 measured crow geometry, measured crow kinematics, and quantitative crow
 aerodynamics.
 
-## Next implementation boundary
+## Live renderer boundary
 
-The next renderer milestone consumes this asset in persistent private Metal
-buffers. A compute pass will produce current and previous feather-root states
-from the locked surface/joint mapping, followed by HDR albedo, normal, material,
-identity, depth, and deformation-motion-vector outputs. That is the prerequisite
-for temporal reconstruction, MetalFX, ray tracing, and neural appearance models.
+The estimated-crow capture now loads and validates this asset before rendering.
+Its feather inventory and dimensions drive the current beauty mesh, while a
+Metal compute pass evaluates all `54` locked surface anchors into retained,
+triple-buffered private storage. Each output record carries current and previous
+root position, morphology, surface ownership, class, side, inventory index, and
+a deterministic stable-ID hash. The immutable surface sequence and feather
+bindings are uploaded once rather than rebuilt per frame.
+
+The GPU pass is qualified against an independent CPU interpolation path at
+multiple phases, including frame-to-frame motion and exact identity parity. It
+establishes temporal correspondence; it does **not** yet deform the beauty-mesh
+vertices. Those vertices remain CPU-generated procedural estimates whose
+primary, secondary, and tail counts, lengths, and widths come from this asset.
+
+The next renderer milestone is retained GPU feather-template deformation plus
+HDR albedo, normal, material, identity, depth, and deformation-motion-vector
+outputs. Those buffers are prerequisites for temporal reconstruction, MetalFX,
+ray tracing, and neural appearance models.

@@ -94,6 +94,7 @@ REQUIRED_KERNELS = {
 }
 
 REQUIRED_VISUALIZATION_KERNELS = {
+    "deformCrowFeatherRoots",
     "samplePressureSurface",
     "renderFlowSlice",
     "deriveFlowDiagnostics",

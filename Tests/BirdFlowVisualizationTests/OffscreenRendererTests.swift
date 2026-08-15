@@ -356,6 +356,10 @@ func estimatedCrowShowcaseCaptureProducesDistinctFrames() throws {
     root.appendingPathComponent(
       "ValidationInputs/american-crow-hybrid-visual-v1.json"
     ).path,
+    "--capture-crow-reality-asset",
+    root.appendingPathComponent(
+      "ValidationInputs/american-crow-hybrid-reality-v1.json"
+    ).path,
   ])
   try CrowShowcaseCapture.run(arguments)
 

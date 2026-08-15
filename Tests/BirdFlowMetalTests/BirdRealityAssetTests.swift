@@ -30,6 +30,7 @@ func birdRealityAssetLocksStableFeathersToPhysicsSurface() throws {
   #expect(asset.featherSeries.count == 5)
   #expect(asset.feathers.count == 54)
   #expect(Set(asset.stableFeatherIdentifiers).count == 54)
+  #expect(Set(asset.stableFeatherIdentifierHashes).count == 54)
   #expect(asset.stableFeatherIdentifiers.first == "left.primary.01")
   #expect(asset.stableFeatherIdentifiers.last == "tail.rectrix.12")
   #expect(asset.feathers.allSatisfy { $0.physicsRootVertexIndex < 2_157 })

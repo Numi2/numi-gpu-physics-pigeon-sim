@@ -526,6 +526,12 @@ public struct BirdRealityAsset: Codable, Sendable, Equatable {
   public var stableFeatherIdentifiers: [String] {
     feathers.map(\.identifier)
   }
+
+  /// Stable UTF-8 FNV-1a identifiers for GPU records. The loader rejects the
+  /// extremely unlikely collision so shaders never use process-random hashes.
+  public var stableFeatherIdentifierHashes: [UInt32] {
+    stableFeatherIdentifiers.map(stableIdentifierHash)
+  }
 }
 
 public enum BirdRealityAssetLoader {
@@ -740,6 +746,10 @@ public enum BirdRealityAssetLoader {
     guard Set(generatedIdentifiers).count == generatedIdentifiers.count else {
       throw invalid("generated feather identifiers must be globally unique")
     }
+    let generatedHashes = generatedIdentifiers.map(stableIdentifierHash)
+    guard Set(generatedHashes).count == generatedHashes.count else {
+      throw invalid("generated feather identifier GPU hashes must be unique")
+    }
 
     let physics = asset.physicsBinding
     guard !physics.surfaceDatasetIdentifier.isEmpty,
@@ -878,4 +888,10 @@ private func normalized(_ vector: SIMD3<Float>) -> SIMD3<Float> {
     vector.x * vector.x + vector.y * vector.y + vector.z * vector.z
   )
   return magnitude > 0 ? vector / magnitude : .zero
+}
+
+private func stableIdentifierHash(_ identifier: String) -> UInt32 {
+  identifier.utf8.reduce(UInt32(2_166_136_261)) { hash, byte in
+    (hash ^ UInt32(byte)) &* 16_777_619
+  }
 }
