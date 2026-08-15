@@ -55,6 +55,15 @@ actual read-back CFD field on 26 archived body-following transverse planes at
 includes positive Q. Interpolation between archived planes is presentation-only;
 translucent wing history and wingtip ribbons remain explicitly kinematic.
 
+### Numi Lab dove replay
+
+<p align="center">
+  <img src="Docs/Media/numi-lab-measured-dove-replay.gif" width="49%" alt="Native Numi Lab replay of the measured Deetjen dove">
+  <img src="Docs/Media/numi-lab-measured-dove-orbit.gif" width="49%" alt="Orbiting native Numi Lab view of the measured Deetjen dove">
+</p>
+
+<p align="center"><em>Native Numi Lab presentation of the provenance-locked Deetjen surface replay from two recorded viewpoints. Cyan is the measured left wing and orange is the reflected right-wing assumption. This footage demonstrates the deformation-aware Metal viewer; it is not a new free-flight or aerodynamic-validation result.</em></p>
+
 [Quick start](#quick-start) · [Validation scoreboard](#validation-scoreboard) · [Native viewer](#native-metal-viewer) · [Architecture](#architecture) · [Measured data](#measured-geometry-and-kinematics) · [Scientific limits](#scientific-boundary) · [Full validation contract](Docs/VALIDATION.md)
 
 ## Why this project is interesting
