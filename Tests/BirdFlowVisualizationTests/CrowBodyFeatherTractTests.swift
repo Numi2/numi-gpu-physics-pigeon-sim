@@ -19,7 +19,7 @@ func crowBodyFeatherTractsOverlapNeckAndCoverWingRoots() {
   let cervical = samples.filter { $0.region == .cervical }
   let mantle = samples.filter { $0.region == .mantle }
   let scapular = samples.filter { $0.region == .scapular }
-  #expect(cervical.count == 182)
+  #expect(cervical.count == 238)
   #expect(mantle.count == 720)
   #expect(scapular.count == 768)
   #expect(Set(cervical.map(\.surfaceFeatherClass)) == Set([5, 6]))
@@ -32,6 +32,19 @@ func crowBodyFeatherTractsOverlapNeckAndCoverWingRoots() {
       cervicalAngle: 0.75
     ) == 5
   )
+
+  #expect(CrowBodyFeatherTracts.cervicalMaximumAngleRadians > 1.50)
+  for side: Float in [-1, 1] {
+    for column in 0..<CrowBodyFeatherTracts.cervicalColumnCount {
+      let dorsalRoot = CrowBodyFeatherTracts.cervicalRootSurface(
+        side: side,
+        row: CrowBodyFeatherTracts.cervicalRowCount - 1,
+        column: column
+      )
+      #expect(abs(dorsalRoot.y) < 0.0035)
+      #expect(dorsalRoot.z > 0.075)
+    }
+  }
   #expect(
     CrowBodyFeatherTracts.surfaceFeatherClass(
       for: .cervical,
@@ -215,18 +228,18 @@ func crowBodyFeatherTractsOverlapNeckAndCoverWingRoots() {
   let low = CrowBodyFeatherTracts.visibleSamples(projectedPixelsPerMeter: 800)
   let medium = CrowBodyFeatherTracts.visibleSamples(projectedPixelsPerMeter: 1_000)
   let full = CrowBodyFeatherTracts.visibleSamples(projectedPixelsPerMeter: 1_600)
-  #expect(low.filter { $0.region == .cervical }.count == 56)
-  #expect(medium.filter { $0.region == .cervical }.count == 92)
-  #expect(full.filter { $0.region == .cervical }.count == 182)
+  #expect(low.filter { $0.region == .cervical }.count == 136)
+  #expect(medium.filter { $0.region == .cervical }.count == 120)
+  #expect(full.filter { $0.region == .cervical }.count == 238)
   #expect(low.filter { $0.region == .mantle }.count == 192)
   #expect(medium.filter { $0.region == .mantle }.count == 360)
   #expect(full.filter { $0.region == .mantle }.count == 720)
   #expect(low.filter { $0.region == .scapular }.count == 192)
   #expect(medium.filter { $0.region == .scapular }.count == 384)
   #expect(full.filter { $0.region == .scapular }.count == 768)
-  #expect(low.count == 440)
-  #expect(medium.count == 836)
-  #expect(full.count == 1_670)
+  #expect(low.count == 520)
+  #expect(medium.count == 864)
+  #expect(full.count == 1_726)
 }
 
 @Test("quiet head motion bends the cervical tract without moving the mantle")

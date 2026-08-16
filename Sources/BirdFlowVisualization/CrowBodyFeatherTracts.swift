@@ -35,9 +35,11 @@ struct CrowBodyFeatherTractSample: Equatable {
 }
 
 enum CrowBodyFeatherTracts {
-  static let cervicalRowCount = 13
+  static let cervicalRowCount = 17
   static let cervicalColumnCount = 7
   static let cervicalShellClearanceMeters: Float = 0.0012
+  static let cervicalMinimumAngleRadians: Float = -1.05
+  static let cervicalMaximumAngleRadians: Float = 1.54
   static let mantleRowCount = 15
   static let mantleColumnCount = 24
   static let scapularRowCount = 16
@@ -55,7 +57,10 @@ enum CrowBodyFeatherTracts {
       }
     }
     return complete.filter {
-      $0.row.isMultiple(of: 2) && $0.column.isMultiple(of: 2)
+      if $0.region == .cervical {
+        return $0.column.isMultiple(of: 2)
+      }
+      return $0.row.isMultiple(of: 2) && $0.column.isMultiple(of: 2)
     }
   }
 
@@ -84,9 +89,10 @@ enum CrowBodyFeatherTracts {
         let rowFraction = Float(row) / Float(cervicalRowCount - 1)
         for column in 0..<cervicalColumnCount {
           let axial = Float(column) / Float(cervicalColumnCount - 1)
-          let rowStep = 2.10 / Float(cervicalRowCount - 1)
+          let angularSpan = cervicalMaximumAngleRadians - cervicalMinimumAngleRadians
+          let rowStep = angularSpan / Float(cervicalRowCount - 1)
           let angle =
-            -1.05 + 2.10 * rowFraction
+            cervicalMinimumAngleRadians + angularSpan * rowFraction
             + 0.20 * rowStep * sin(Float(column) * 2.399_963 + side * 0.71)
             + 0.04 * rowStep
             * sin(Float(row) * 1.173 + Float(column) * 0.83 + side * 1.31)
@@ -214,9 +220,10 @@ enum CrowBodyFeatherTracts {
     column: Int
   ) -> Float {
     let rowFraction = Float(row) / Float(cervicalRowCount - 1)
-    let rowStep = 2.10 / Float(cervicalRowCount - 1)
+    let angularSpan = cervicalMaximumAngleRadians - cervicalMinimumAngleRadians
+    let rowStep = angularSpan / Float(cervicalRowCount - 1)
     return
-      -1.05 + 2.10 * rowFraction
+      cervicalMinimumAngleRadians + angularSpan * rowFraction
       + 0.20 * rowStep * sin(Float(column) * 2.399_963 + side * 0.71)
       + 0.04 * rowStep
       * sin(Float(row) * 1.173 + Float(column) * 0.83 + side * 1.31)
