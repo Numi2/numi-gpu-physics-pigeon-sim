@@ -166,6 +166,13 @@ func bodyContourTractsBreakTransverseRows() {
   let second = CrowBodyContourShingles.samples()
   #expect(first == second)
   #expect(Set(first.map(\.region)) == Set(CrowBodyContourRegion.allCases))
+  #expect(Set(first.map(\.surfaceFeatherClass)) == Set([5, 6, 7]))
+  #expect(
+    first.allSatisfy {
+      $0.surfaceFeatherClass
+        == CrowBodyContourShingles.surfaceFeatherClass(for: $0.region)
+    }
+  )
 
   for axialIndex in 0..<CrowBodyContourShingles.axialCount {
     let course = first.filter { $0.axialIndex == axialIndex }

@@ -8,6 +8,7 @@ enum CrowBodyContourRegion: UInt8, CaseIterable {
 
 struct CrowBodyContourShingle: Equatable {
   let region: CrowBodyContourRegion
+  let surfaceFeatherClass: UInt32
   let radialIndex: Int
   let axialIndex: Int
   let rootThetaRadians: Float
@@ -175,6 +176,7 @@ enum CrowBodyContourShingles {
         result.append(
           CrowBodyContourShingle(
             region: region,
+            surfaceFeatherClass: surfaceFeatherClass(for: region),
             radialIndex: radialIndex,
             axialIndex: axialIndex,
             rootThetaRadians: rootTheta,
@@ -330,6 +332,19 @@ enum CrowBodyContourShingles {
     if vertical > 0.36 { return .dorsal }
     if vertical < -0.38 { return .ventral }
     return .flank
+  }
+
+  static func surfaceFeatherClass(
+    for region: CrowBodyContourRegion
+  ) -> UInt32 {
+    switch region {
+    case .dorsal:
+      return 5
+    case .flank:
+      return 6
+    case .ventral:
+      return 7
+    }
   }
 
   private static func regionLength(_ region: CrowBodyContourRegion) -> Float {

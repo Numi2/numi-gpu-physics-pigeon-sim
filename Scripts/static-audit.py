@@ -26,6 +26,9 @@ SWIFT_FILES = (
 CORE = ROOT / "Sources/BirdFlowCore/D3Q19.swift"
 GPU_DATA = ROOT / "Sources/BirdFlowMetal/GPUData.swift"
 VIS_SHADER = ROOT / "Sources/BirdFlowVisualization/Metal/Visualization.metal"
+BODY_CONTOUR = (
+    ROOT / "Sources/BirdFlowVisualization/CrowBodyContourShingles.swift"
+)
 VISUALIZATION_FILES = tuple(
     (ROOT / "Sources/BirdFlowVisualization").glob("*.swift")
 )
@@ -156,6 +159,7 @@ def main() -> int:
     core = CORE.read_text(encoding="utf-8")
     gpu_data = GPU_DATA.read_text(encoding="utf-8")
     visualization_shader = VIS_SHADER.read_text(encoding="utf-8")
+    body_contour = BODY_CONTOUR.read_text(encoding="utf-8")
     visualization_swift = "\n".join(
         path.read_text(encoding="utf-8") for path in VISUALIZATION_FILES
     )
@@ -297,6 +301,31 @@ def main() -> int:
         fail("visualization shader declares a writable solver field binding")
     if visualization_shader.count("{") != visualization_shader.count("}"):
         fail("visualization Metal source has unbalanced braces")
+
+    body_class_body = extract_braced_body(
+        body_contour,
+        "static func surfaceFeatherClass(",
+    )
+    body_classes = {
+        region: int(identifier)
+        for region, identifier in re.findall(
+            r"case\s+\.(dorsal|flank|ventral):\s*return\s+(\d+)",
+            body_class_body,
+        )
+    }
+    expected_body_classes = {"dorsal": 5, "flank": 6, "ventral": 7}
+    if body_classes != expected_body_classes:
+        fail(
+            "Swift body-feather material classes differ: "
+            f"expected={expected_body_classes}, actual={body_classes}"
+        )
+    for region, identifier in expected_body_classes.items():
+        marker = f"{region}BodyVane=featherClass=={identifier}u"
+        if marker not in visualization_shader:
+            fail(
+                "Metal body-feather material class is missing or mismatched: "
+                f"{marker}"
+            )
 
     solver_sources = "\n".join(
         path.read_text(encoding="utf-8")

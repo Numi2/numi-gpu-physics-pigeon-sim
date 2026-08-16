@@ -1410,15 +1410,22 @@ inline float3 showcaseCrowLinearRadiance(
     float secondaryVane=featherClass==2u?persistentVane:0.0f;
     float rectrixVane=featherClass==3u?persistentVane:0.0f;
     float greaterCovertVane=featherClass==4u?persistentVane:0.0f;
+    float dorsalBodyVane=featherClass==5u?persistentVane:0.0f;
+    float flankBodyVane=featherClass==6u?persistentVane:0.0f;
+    float ventralBodyVane=featherClass==7u?persistentVane:0.0f;
     // Folded secondaries present the broadest continuous grazing area. Give
     // their rough vanes less additive thin-film energy than narrow exposed
     // primaries, so a rear camera reads overlapping black feathers rather
-    // than a row of silver paddles. CPU body plumage retains the base scale.
+    // than a row of silver paddles. Body contour classes then step down from
+    // structured dorsal sheen to the softer ventral response.
     float classSheenScale=1.0f;
     classSheenScale=mix(classSheenScale,0.82f,primaryVane);
     classSheenScale=mix(classSheenScale,0.46f,secondaryVane);
     classSheenScale=mix(classSheenScale,0.70f,rectrixVane);
     classSheenScale=mix(classSheenScale,0.64f,greaterCovertVane);
+    classSheenScale=mix(classSheenScale,0.99f,dorsalBodyVane);
+    classSheenScale=mix(classSheenScale,0.97f,flankBodyVane);
+    classSheenScale=mix(classSheenScale,0.94f,ventralBodyVane);
     float3 featherAxis=crowFeatherAxis(
         world,normal,featherCoordinates
     );
@@ -1427,6 +1434,9 @@ inline float3 showcaseCrowLinearRadiance(
         mix(0.52f,1.0f,flightFeather),
         vaneCoordinates
     );
+    vaneAnisotropy=mix(vaneAnisotropy,0.519f,dorsalBodyVane);
+    vaneAnisotropy=mix(vaneAnisotropy,0.50f,flankBodyVane);
+    vaneAnisotropy=mix(vaneAnisotropy,0.48f,ventralBodyVane);
     float longitudinalRoughness=mix(0.34f,0.25f,flightFeather);
     float transverseRoughness=mix(0.12f,0.075f,flightFeather);
     longitudinalRoughness=mix(longitudinalRoughness,0.215f,primaryVane);
@@ -1435,6 +1445,12 @@ inline float3 showcaseCrowLinearRadiance(
     transverseRoughness=mix(transverseRoughness,0.065f,primaryVane);
     transverseRoughness=mix(transverseRoughness,0.090f,secondaryVane);
     transverseRoughness=mix(transverseRoughness,0.075f,rectrixVane);
+    longitudinalRoughness=mix(longitudinalRoughness,0.333f,dorsalBodyVane);
+    longitudinalRoughness=mix(longitudinalRoughness,0.340f,flankBodyVane);
+    longitudinalRoughness=mix(longitudinalRoughness,0.350f,ventralBodyVane);
+    transverseRoughness=mix(transverseRoughness,0.118f,dorsalBodyVane);
+    transverseRoughness=mix(transverseRoughness,0.122f,flankBodyVane);
+    transverseRoughness=mix(transverseRoughness,0.126f,ventralBodyVane);
     float anisotropicSpecular=featherMaterial*vaneAnisotropy
         *crowFeatherAnisotropicLobe(
         normal,featherAxis,halfVector,
@@ -1449,6 +1465,9 @@ inline float3 showcaseCrowLinearRadiance(
     float barbFrequency=178.0f;
     barbFrequency=mix(barbFrequency,214.0f,primaryVane);
     barbFrequency=mix(barbFrequency,190.0f,secondaryVane);
+    barbFrequency=mix(barbFrequency,180.0f,dorsalBodyVane);
+    barbFrequency=mix(barbFrequency,176.0f,flankBodyVane);
+    barbFrequency=mix(barbFrequency,172.0f,ventralBodyVane);
     float localBarbs=0.5f+0.5f*sin(
         barbFrequency*axial+23.0f*abs(signedWidth)+7.0f*signedWidth
     );
@@ -1489,6 +1508,9 @@ inline float3 showcaseCrowLinearRadiance(
     classSharpScale=mix(classSharpScale,0.60f,secondaryVane);
     classSharpScale=mix(classSharpScale,0.72f,rectrixVane);
     classSharpScale=mix(classSharpScale,0.48f,greaterCovertVane);
+    classSharpScale=mix(classSharpScale,0.98f,dorsalBodyVane);
+    classSharpScale=mix(classSharpScale,0.94f,flankBodyVane);
+    classSharpScale=mix(classSharpScale,0.88f,ventralBodyVane);
     color+=sharpTint*featherSpecular*mix(0.30f,1.0f,flightFeather)
         *classSharpScale;
     color+=softTint*softSpecular;

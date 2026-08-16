@@ -1847,6 +1847,7 @@ private struct CrowMeshBuilder {
         edgeRippleAmplitude: shingle.edgeRippleAmplitude,
         edgeRipplePhase: shingle.edgeRipplePhase,
         axialStartFraction: shingle.pennaceousStartFraction,
+        surfaceFeatherClass: shingle.surfaceFeatherClass,
         lodLengthMeters: shingle.referenceLengthMeters,
         projectedPixelsPerMeter: projectedPixelsPerMeter,
         to: &vertices
