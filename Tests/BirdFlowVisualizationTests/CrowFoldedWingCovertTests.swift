@@ -57,6 +57,22 @@ func foldedWingCovertsFormSymmetricBodySeatedShell() {
     CrowFoldedWingCoverts.visibleSamples(projectedPixelsPerMeter: 1_000)
       .allSatisfy { $0.materialVariation == 0 }
   )
+  let rowFlows = (0..<CrowFoldedWingCoverts.rowCount).flatMap { row in
+    (0..<CrowFoldedWingCoverts.columnCount).map {
+      CrowFoldedWingCoverts.rootRowFlowSteps(row: row, column: $0)
+    }
+  }
+  let crownRolls = (0..<CrowFoldedWingCoverts.rowCount).flatMap { row in
+    (0..<CrowFoldedWingCoverts.columnCount).map {
+      CrowFoldedWingCoverts.crownRollSlope(row: row, column: $0)
+    }
+  }
+  #expect(rowFlows.allSatisfy { abs($0) < 0.23 })
+  #expect(rowFlows.max()! - rowFlows.min()! > 0.40)
+  #expect(Set(rowFlows.map { Int(($0 * 100_000).rounded()) }).count > 330)
+  #expect(crownRolls.allSatisfy { abs($0) < 0.081 })
+  #expect(crownRolls.max()! - crownRolls.min()! > 0.145)
+  #expect(Set(crownRolls.map { Int(($0 * 100_000).rounded()) }).count > 320)
 
   for sample in samples {
     #expect(
@@ -83,6 +99,9 @@ func foldedWingCovertsFormSymmetricBodySeatedShell() {
     #expect(abs(pair.0.rootOffset.y + pair.1.rootOffset.y) < 1e-7)
     #expect(abs(pair.0.rootOffset.z - pair.1.rootOffset.z) < 1e-7)
     #expect(abs(pair.0.tipOffset.y + pair.1.tipOffset.y) < 1e-7)
+    #expect(abs(pair.0.planeNormal.x - pair.1.planeNormal.x) < 1e-7)
+    #expect(abs(pair.0.planeNormal.y + pair.1.planeNormal.y) < 1e-7)
+    #expect(abs(pair.0.planeNormal.z - pair.1.planeNormal.z) < 1e-7)
   }
 
   for side: Float in [-1, 1] {

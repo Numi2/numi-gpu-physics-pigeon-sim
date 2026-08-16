@@ -70,7 +70,7 @@ enum CrowFoldedWingCoverts {
               0,
               baseRowFraction
                 + (row == 0 || row == rowCount - 1
-                  ? 0 : 0.10 * rowStep * rootIdentity)
+                  ? 0 : rowStep * rootRowFlowSteps(row: row, column: column))
             )
           )
           let theta = 0.94 - 1.02 * rowFraction
@@ -131,6 +131,23 @@ enum CrowFoldedWingCoverts {
                 rowCount: rowCount
               )
           )
+          let centerline = normalized(
+            tip - root,
+            fallback: SIMD3<Float>(-1, 0, 0)
+          )
+          let basePlaneNormal = normalized(
+            rootNormal + tipNormal,
+            fallback: rootNormal
+          )
+          let crownAxis = normalized(
+            simd_cross(basePlaneNormal, centerline),
+            fallback: SIMD3<Float>(0, side, 0)
+          )
+          let planeNormal = normalized(
+            basePlaneNormal
+              + side * crownRollSlope(row: row, column: column) * crownAxis,
+            fallback: basePlaneNormal
+          )
           result.append(
             CrowFoldedWingCovertSample(
               side: side,
@@ -139,7 +156,7 @@ enum CrowFoldedWingCoverts {
               rootSurfaceOffset: rootSurface,
               rootOffset: root,
               tipOffset: tip,
-              planeNormal: normalized(rootNormal + tipNormal, fallback: rootNormal),
+              planeNormal: planeNormal,
               rootWidthMeters: 0.52 * localWidth,
               maximumWidthMeters:
                 localWidth * (1 + 0.08 * axial) * (1 + 0.04 * shapeIdentity)
@@ -268,6 +285,32 @@ enum CrowFoldedWingCoverts {
     let boundedRow = min(max(row, 0), rowCount - 1)
     let stratum = 0.049 * Float(boundedRow / 2)
     return boundedRow.isMultiple(of: 2) ? stratum : 0.48 + stratum
+  }
+
+  /// Smooth tract drift plus a smaller stable identity term breaks the exact
+  /// transverse root lattice. Both fields stay below one quarter interval so
+  /// neighboring roots cannot swap or collapse the imbricated shell.
+  static func rootRowFlowSteps(row: Int, column: Int) -> Float {
+    let smooth = 0.15 * sin(Float(row) * 1.17 + Float(column) * 0.61 + 0.43)
+    let identity = identityVariation(
+      row: row,
+      column: column,
+      salt: 0x27D4_EB2F
+    )
+    return smooth + 0.075 * identity
+  }
+
+  /// Small mirrored crown roll prevents a whole covert course from meeting
+  /// the half vector simultaneously. This changes presentation normals and
+  /// camber only; the body-seated root and surface-bound tip remain exact.
+  static func crownRollSlope(row: Int, column: Int) -> Float {
+    let smooth = 0.055 * sin(Float(row) * 0.89 + Float(column) * 0.47 + 0.71)
+    let identity = identityVariation(
+      row: row,
+      column: column,
+      salt: 0xD3A2_646C
+    )
+    return smooth + 0.025 * identity
   }
 
   private static func normalized(
