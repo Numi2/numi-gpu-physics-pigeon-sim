@@ -37,8 +37,12 @@ struct CrowBodyContourShingle: Equatable {
 /// follows local circumferential spacing and every feather extends beyond the
 /// following axial root, creating a roof-tile shell instead of isolated leaves.
 enum CrowBodyContourShingles {
-  static let radialCount = 56
-  static let axialCount = 48
+  // Presentation density is deliberately sized for future-device compute:
+  // enough independent vanes that the standing body reads as plumage rather
+  // than a coarse roof-tile proxy at 720p, while every root remains owned by
+  // the same anatomical loft.
+  static let radialCount = 80
+  static let axialCount = 64
   static let shellClearanceMeters: Float = 0.0012
 
   private static let frontX: Float = 0.110
@@ -107,7 +111,7 @@ enum CrowBodyContourShingles {
         let widthVariation =
           1 + 0.075 * sin(morphologyPhase + 0.83) + 0.045 * widthIdentity
         let nominalMaximumWidth = max(
-          0.0048,
+          0.0052,
           regionWidthScale(region) * widthVariation * 1.38 * circumferentialSpacing
         )
         let posterior = max(0, min(1, (frontX - rootX) / (frontX - backX)))
@@ -400,7 +404,10 @@ enum CrowBodyContourShingles {
     let edgeRipple =
       1
       + feather.edgeRippleAmplitude
-      * sin(3 * Float.pi * t + feather.edgeRipplePhase) * rippleEnvelope
+      * sin(
+        2 * Float.pi * feather.edgeRippleCycles * t
+          + feather.edgeRipplePhase
+      ) * rippleEnvelope
     let sideScale = 1 + feather.vaneAsymmetry * min(max(signedWidth, -1), 1)
     return
       (feather.rootWidthMeters * (1 - t)

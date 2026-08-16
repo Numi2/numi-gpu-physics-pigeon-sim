@@ -10,6 +10,7 @@ func crowBodyContourShinglesOverlapAroundAndAlongLoft() {
     samples.count
       == CrowBodyContourShingles.radialCount * CrowBodyContourShingles.axialCount
   )
+  #expect(samples.count >= 5_000)
 
   for radialIndex in 0..<CrowBodyContourShingles.radialCount {
     let row =
