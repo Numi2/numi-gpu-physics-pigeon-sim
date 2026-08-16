@@ -81,12 +81,15 @@ and continue over the rump before extrapolating caudally. This seals the
 scapular, axillary, and pelvic wing-body boundaries from front and rear cameras
 without hiding a discontinuity through framing.
 
-The `576` estimated body contour feathers now separate a concealed proximal
+The `1,440` estimated body contour feathers now separate a concealed proximal
 plumulaceous zone from the distal pennaceous vane that owns the visible shell.
-Only the distal `49-62%` is emitted as a continuous vane; deterministic
-identity variation breaks aligned transverse rows while axial and
-circumferential overlap remain explicit gates. Paired downy barbs are retained
-as output-coverage-driven geometry for close future renders and omitted when
+Only the distal `56-64%` is emitted as a continuous vane. Thirty-six axial
+courses and forty circumferential tracts replace the broad `24 x 24` plates;
+identity-stable tract phase plus bounded root-angle jitter on the live
+loft break aligned transverse and longitudinal rows. The smaller `0.45 mm`
+shell clearance, flatter transverse crown, and narrower vane aspect keep axial
+and circumferential overlap explicit. Paired downy barbs are retained as
+output-coverage-driven geometry for close future renders and omitted when
 subpixel. This two-zone organization follows observed contour-feather
 morphology ([Ng et al. 2014](https://pmc.ncbi.nlm.nih.gov/articles/PMC4202321/))
 and the layered optical role of hidden bases beneath exposed tips

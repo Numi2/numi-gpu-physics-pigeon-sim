@@ -758,7 +758,8 @@ private final class CrowShowcaseRenderer {
     // flight, the same long rest vanes can cross when the inherited dove
     // surface reaches its steep downstroke; the live topology-bound beauty
     // wing below owns that silhouette instead.
-    featherGeometryDeformer = try presentation == .standing
+    featherGeometryDeformer =
+      try presentation == .standing
       ? realityAsset.map {
         try CrowFeatherGeometryDeformer(
           backend: createdBackend,
@@ -1517,23 +1518,27 @@ private struct CrowMeshBuilder {
         // this branch is explicitly presentation-retargeted in the overlay.
         let localIndex = vertexIndex - wing.vertexOffset
         let chordIndex = localIndex % 9
-        point = motion.point(phase: 0.25, vertexIndex: vertexIndex).position
+        point =
+          motion.point(phase: 0.25, vertexIndex: vertexIndex).position
           - referenceBodyCenter
-        let shoulder = motion.point(
-          phase: 0.25,
-          vertexIndex: wing.vertexOffset + chordIndex
-        ).position - referenceBodyCenter
+        let shoulder =
+          motion.point(
+            phase: 0.25,
+            vertexIndex: wing.vertexOffset + chordIndex
+          ).position - referenceBodyCenter
         let relative = point - shoulder
         let wrappedPhase = phase - floor(phase)
         let side: Float = partIdentifier == 2 ? 1 : -1
         let flapAngle = side * 0.54 * cos(2 * Float.pi * wrappedPhase)
         let cosine = cos(flapAngle)
         let sine = sin(flapAngle)
-        point = shoulder + SIMD3<Float>(
-          relative.x,
-          cosine * relative.y - sine * relative.z,
-          sine * relative.y + cosine * relative.z
-        )
+        point =
+          shoulder
+          + SIMD3<Float>(
+            relative.x,
+            cosine * relative.y - sine * relative.z,
+            sine * relative.y + cosine * relative.z
+          )
       }
       return point
     }
@@ -1758,7 +1763,7 @@ private struct CrowMeshBuilder {
         color: color,
         sections: 7,
         camber: shingle.camberMeters,
-        transverseCamberRatio: 0.04,
+        transverseCamberRatio: 0.025,
         axialStartFraction: shingle.pennaceousStartFraction,
         lodLengthMeters: simd_distance(shingle.rootOffset, shingle.tipOffset),
         projectedPixelsPerMeter: projectedPixelsPerMeter,
@@ -2426,9 +2431,11 @@ private struct CrowMeshBuilder {
     to vertices: inout [ColoredVertex]
   ) {
     let partIdentifier: UInt8 = left ? 2 : 3
-    guard let wing = dataset.components.first(where: {
-      $0.partIdentifier == partIdentifier
-    }), wing.vertexCount == 9 * 33 else { return }
+    guard
+      let wing = dataset.components.first(where: {
+        $0.partIdentifier == partIdentifier
+      }), wing.vertexCount == 9 * 33
+    else { return }
     let chordCount = 9
     let spanCount = 33
     func point(span: Int, chord: Int) -> SIMD3<Float> {
@@ -2465,7 +2472,8 @@ private struct CrowMeshBuilder {
           fallback: SIMD3<Float>(0, 0, 1)
         )
         let isTrailingCourse = chord == 6
-        let surfaceTip = root
+        let surfaceTip =
+          root
           + (isTrailingCourse ? 1.92 : 1.16) * chordVector
           + 0.34 * spanVector
         let spacing = max(simd_length(spanVector), 0.012)

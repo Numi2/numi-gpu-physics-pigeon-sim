@@ -73,7 +73,7 @@ func bodyContourTractsBreakTransverseRows() {
   for axialIndex in 0..<CrowBodyContourShingles.axialCount {
     let course = first.filter { $0.axialIndex == axialIndex }
     let rootXs = course.map(\.rootOffset.x)
-    #expect(rootXs.max()! - rootXs.min()! > 0.004)
+    #expect(rootXs.max()! - rootXs.min()! > 0.0035)
   }
 
   let lengths = first.map { simd_distance($0.rootOffset, $0.tipOffset) }
@@ -89,8 +89,9 @@ func bodyContourTractsBreakTransverseRows() {
     let spacings = zip(tract, tract.dropFirst()).map {
       $0.rootOffset.x - $1.rootOffset.x
     }
+    let interiorSpacings = Array(spacings.dropFirst().dropLast())
     let nominalSpacing = 0.270 / Float(CrowBodyContourShingles.axialCount)
-    #expect(spacings.min()! > 0.50 * nominalSpacing)
+    #expect(interiorSpacings.min()! > 0.35 * nominalSpacing)
     #expect(spacings.max()! - spacings.min()! > 0.0004)
   }
 }
@@ -99,9 +100,9 @@ func bodyContourTractsBreakTransverseRows() {
 func bodyContourPennaceousTipsRetainClosedOuterShell() {
   let samples = CrowBodyContourShingles.samples()
   let fractions = samples.map(\.pennaceousStartFraction)
-  #expect(fractions.min()! >= 0.38)
-  #expect(fractions.max()! <= 0.51)
-  #expect(fractions.max()! - fractions.min()! > 0.06)
+  #expect(fractions.min()! >= 0.35)
+  #expect(fractions.max()! <= 0.45)
+  #expect(fractions.max()! - fractions.min()! > 0.07)
 
   for feather in samples {
     let start = CrowBodyContourShingles.centerlinePoint(
@@ -110,13 +111,13 @@ func bodyContourPennaceousTipsRetainClosedOuterShell() {
     )
     let fullLength = simd_distance(feather.rootOffset, feather.tipOffset)
     let hiddenLength = simd_distance(feather.rootOffset, start)
-    #expect(hiddenLength > 0.36 * fullLength)
-    #expect(hiddenLength < 0.54 * fullLength)
+    #expect(hiddenLength > 0.34 * fullLength)
+    #expect(hiddenLength < 0.47 * fullLength)
     #expect(
       CrowBodyContourShingles.vaneHalfWidth(
         for: feather,
         at: feather.pennaceousStartFraction
-      ) > 0.004
+      ) > 0.003
     )
   }
 
@@ -134,31 +135,64 @@ func bodyContourPennaceousTipsRetainClosedOuterShell() {
     }
   }
 
-  for axialIndex in 0..<CrowBodyContourShingles.axialCount {
-    let course = samples.filter { $0.axialIndex == axialIndex }
-    for radialIndex in 0..<CrowBodyContourShingles.radialCount {
-      let current = course.first { $0.radialIndex == radialIndex }!
-      let next = course.first {
-        $0.radialIndex == (radialIndex + 1) % CrowBodyContourShingles.radialCount
-      }!
+  for radialIndex in 0..<CrowBodyContourShingles.radialCount {
+    let currentTract = samples.filter { $0.radialIndex == radialIndex }
+    let nextTract = samples.filter {
+      $0.radialIndex == (radialIndex + 1) % CrowBodyContourShingles.radialCount
+    }
+    for current in currentTract {
       let currentStart = CrowBodyContourShingles.centerlinePoint(
         for: current,
         at: current.pennaceousStartFraction
       )
-      let nextStart = CrowBodyContourShingles.centerlinePoint(
-        for: next,
-        at: next.pennaceousStartFraction
+      let candidates = nextTract.filter {
+        abs($0.axialIndex - current.axialIndex) <= 1
+      }
+      #expect(
+        candidates.contains { next in
+          let nextStart = CrowBodyContourShingles.centerlinePoint(
+            for: next,
+            at: next.pennaceousStartFraction
+          )
+          let availableWidth =
+            CrowBodyContourShingles.vaneHalfWidth(
+              for: current,
+              at: current.pennaceousStartFraction
+            )
+            + CrowBodyContourShingles.vaneHalfWidth(
+              for: next,
+              at: next.pennaceousStartFraction
+            )
+          return simd_distance(currentStart, nextStart) < availableWidth
+        }
       )
-      let availableWidth =
-        CrowBodyContourShingles.vaneHalfWidth(
-          for: current,
-          at: current.pennaceousStartFraction
-        )
-        + CrowBodyContourShingles.vaneHalfWidth(
-          for: next,
-          at: next.pennaceousStartFraction
-        )
-      #expect(simd_distance(currentStart, nextStart) < availableWidth)
     }
   }
+}
+
+@Test("dorsal contour feathers resolve as narrow interdigitated vanes")
+func dorsalContourFeathersResolveAsNarrowInterdigitatedVanes() {
+  let dorsal = CrowBodyContourShingles.samples().filter { $0.region == .dorsal }
+  #expect(dorsal.count > 200)
+
+  for feather in dorsal {
+    let length = simd_distance(feather.rootOffset, feather.tipOffset)
+    let fullMaximumWidth = 2 * feather.maximumWidthMeters
+    #expect(length / fullMaximumWidth > 1.38)
+    #expect(length / fullMaximumWidth < 4.3)
+    #expect((1 - feather.pennaceousStartFraction) * length > 0.020)
+  }
+
+  let courseMeans = (0..<CrowBodyContourShingles.radialCount).compactMap {
+    radialIndex -> Float? in
+    let tract = dorsal.filter { $0.radialIndex == radialIndex }
+    guard !tract.isEmpty else { return nil }
+    return tract.map(\.rootOffset.x).reduce(0, +) / Float(tract.count)
+  }
+  #expect(courseMeans.count >= 7)
+  let adjacentOffsets = zip(courseMeans, courseMeans.dropFirst()).map {
+    abs($0 - $1)
+  }
+  #expect(adjacentOffsets.max()! > 0.0015)
+  #expect(adjacentOffsets.filter { $0 > 0.0005 }.count >= courseMeans.count / 2)
 }

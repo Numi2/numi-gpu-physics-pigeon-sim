@@ -26,9 +26,9 @@ struct CrowBodyContourShingle: Equatable {
 /// follows local circumferential spacing and every feather extends beyond the
 /// following axial root, creating a roof-tile shell instead of isolated leaves.
 enum CrowBodyContourShingles {
-  static let radialCount = 24
-  static let axialCount = 24
-  static let shellClearanceMeters: Float = 0.0008
+  static let radialCount = 40
+  static let axialCount = 36
+  static let shellClearanceMeters: Float = 0.00045
 
   private static let frontX: Float = 0.110
   private static let backX: Float = -0.160
@@ -39,7 +39,12 @@ enum CrowBodyContourShingles {
     for radialIndex in 0..<radialCount {
       let theta = 2 * Float.pi * Float(radialIndex) / Float(radialCount)
       let region = region(for: theta)
-      let tractPhase = axialTractPhase(theta: theta)
+      let tractIdentity = identityVariation(
+        radialIndex: radialIndex,
+        axialIndex: 0,
+        salt: 0x6D2B_79F5
+      )
+      let tractPhase = axialTractPhase(theta: theta) + 0.30 * tractIdentity
       for axialIndex in 0..<axialCount {
         let morphologyPhase = Float(axialIndex) * 2.399_963 + theta * 3.17
         let axialIdentity = identityVariation(
@@ -56,25 +61,27 @@ enum CrowBodyContourShingles {
           lower: 0.012,
           upper: 0.988
         )
+        let rootTheta =
+          theta + 0.014 * axialIdentity + 0.006 * sin(morphologyPhase + 0.40)
         let rootX = mix(frontX, backX, axial)
         let rootRing = CrowBodyAnatomy.interpolatedRing(atX: rootX)
         let rootNormal = CrowBodyAnatomy.surfaceNormal(
           atX: rootX,
-          theta: theta
+          theta: rootTheta
         )
         let rootShell = CrowBodyAnatomy.surfacePoint(
           ring: rootRing,
-          theta: theta
+          theta: rootTheta
         )
         let halfAngularSpacing = Float.pi / Float(radialCount)
         let circumferentialSpacing = simd_distance(
           CrowBodyAnatomy.surfacePoint(
             ring: rootRing,
-            theta: theta - halfAngularSpacing
+            theta: rootTheta - halfAngularSpacing
           ),
           CrowBodyAnatomy.surfacePoint(
             ring: rootRing,
-            theta: theta + halfAngularSpacing
+            theta: rootTheta + halfAngularSpacing
           )
         )
         let widthIdentity = identityVariation(
@@ -86,7 +93,7 @@ enum CrowBodyContourShingles {
           1 + 0.075 * sin(morphologyPhase + 0.83) + 0.045 * widthIdentity
         let maximumWidth = max(
           0.0042,
-          regionWidthScale(region) * widthVariation * 1.06 * circumferentialSpacing
+          regionWidthScale(region) * widthVariation * 1.24 * circumferentialSpacing
         )
         let posterior = max(0, min(1, (frontX - rootX) / (frontX - backX)))
         let lengthIdentity = identityVariation(
@@ -107,7 +114,7 @@ enum CrowBodyContourShingles {
           salt: 0x7E95_761E
         )
         let tipTheta =
-          theta - 0.038 * cos(theta) * (0.35 + 0.65 * posterior)
+          rootTheta - 0.038 * cos(rootTheta) * (0.35 + 0.65 * posterior)
           + 0.012 * tipIdentity
         let tipNormal = CrowBodyAnatomy.surfaceNormal(
           atX: tipX,
@@ -135,8 +142,8 @@ enum CrowBodyContourShingles {
               * maximumWidth,
             pennaceousStartFraction: clamp(
               regionPennaceousStart(region) + 0.020 * tipIdentity,
-              lower: 0.38,
-              upper: 0.51
+              lower: 0.34,
+              upper: 0.47
             )
           )
         )
@@ -162,7 +169,7 @@ enum CrowBodyContourShingles {
 
   private static func regionLength(_ region: CrowBodyContourRegion) -> Float {
     switch region {
-    case .dorsal: 0.036
+    case .dorsal: 0.040
     case .flank: 0.034
     case .ventral: 0.032
     }
@@ -178,9 +185,9 @@ enum CrowBodyContourShingles {
 
   private static func regionPennaceousStart(_ region: CrowBodyContourRegion) -> Float {
     switch region {
-    case .dorsal: 0.47
-    case .flank: 0.44
-    case .ventral: 0.41
+    case .dorsal: 0.42
+    case .flank: 0.40
+    case .ventral: 0.38
     }
   }
 
