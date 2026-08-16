@@ -104,4 +104,32 @@ func standingCrowFeatherRootsMatchMetalReference() throws {
   #expect(localRoots.map { abs($0.y) }.max()! < 0.07)
   #expect(localRoots.map(\.x).min()! > -0.14)
   #expect(Set(moving.map { $0.identity.y }).count == 54)
+
+  for featherClass: UInt32 in [1, 2] {
+    let leftFront = CrowFoldedWingAnatomy.pose(
+      featherClass: featherClass,
+      side: 1,
+      fraction: 0
+    )
+    let leftRear = CrowFoldedWingAnatomy.pose(
+      featherClass: featherClass,
+      side: 1,
+      fraction: 1
+    )
+    let rightRear = CrowFoldedWingAnatomy.pose(
+      featherClass: featherClass,
+      side: -1,
+      fraction: 1
+    )
+    #expect(leftRear.rootOffset.x < leftFront.rootOffset.x)
+    #expect(leftRear.rootOffset.y > leftFront.rootOffset.y)
+    #expect(leftRear.rootOffset.z < leftFront.rootOffset.z)
+    #expect(leftRear.direction.y < leftFront.direction.y)
+    #expect(leftRear.direction.z < leftFront.direction.z)
+    #expect(abs(leftRear.rootOffset.x - rightRear.rootOffset.x) < 1e-7)
+    #expect(abs(leftRear.rootOffset.y + rightRear.rootOffset.y) < 1e-7)
+    #expect(abs(leftRear.direction.y + rightRear.direction.y) < 1e-7)
+    #expect(abs(simd_length(leftRear.direction) - 1) < 1e-6)
+    #expect(abs(simd_length(leftRear.normal) - 1) < 1e-6)
+  }
 }

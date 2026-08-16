@@ -180,49 +180,15 @@ final class CrowStandingFeatherRootDeformer: CrowFeatherRootDeforming {
     let featherClass = binding.orderCountClassSide.z
     let sideCode = binding.orderCountClassSide.w
     let side: Float = sideCode == 1 ? 1 : (sideCode == 2 ? -1 : 0)
-    let root: SIMD3<Float>
-    let direction: SIMD3<Float>
-    let normal: SIMD3<Float>
-    switch featherClass {
-    case 1:
-      root =
-        center
-        + SIMD3<Float>(
-          0.040 - 0.150 * fraction,
-          side * (0.057 + 0.002 * fraction),
-          0.025 - 0.025 * fraction
-        )
-      direction = safeNormalize(
-        SIMD3<Float>(-0.997, -side * (0.008 + 0.018 * fraction), -0.028),
-        fallback: SIMD3<Float>(-1, 0, 0)
-      )
-      normal = SIMD3<Float>(0.04, side, 0.08)
-    case 2:
-      root =
-        center
-        + SIMD3<Float>(
-          0.085 - 0.170 * fraction,
-          side * (0.056 + 0.0015 * fraction),
-          0.037 - 0.028 * fraction
-        )
-      direction = safeNormalize(
-        SIMD3<Float>(-0.998, -side * 0.010, -0.022),
-        fallback: SIMD3<Float>(-1, 0, 0)
-      )
-      normal = SIMD3<Float>(0.03, side, 0.07)
-    default:
-      let lateral = (fraction - 0.5) * 0.082
-      root = center + SIMD3<Float>(-0.138, lateral * 0.18, -0.002)
-      direction = safeNormalize(
-        SIMD3<Float>(-0.999, lateral * 0.20, -0.018),
-        fallback: SIMD3<Float>(-1, 0, 0)
-      )
-      normal = SIMD3<Float>(0, 0.04 * side, 1)
-    }
+    let folded = CrowFoldedWingAnatomy.pose(
+      featherClass: featherClass,
+      side: side,
+      fraction: fraction
+    )
     return (
-      root,
-      direction,
-      safeNormalize(normal, fallback: SIMD3<Float>(0, 0, 1))
+      center + folded.rootOffset,
+      folded.direction,
+      folded.normal
     )
   }
 

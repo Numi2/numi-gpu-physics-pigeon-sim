@@ -44,6 +44,12 @@ transition, deeper sternum, feathered upper legs, and thicker scaled toes. These
 are qualitative anatomy corrections; they do not change the fixed-topology
 solver surface, prescribed motion, or aerodynamic claims.
 
+Within that compact envelope, persistent primary and secondary roots occupy
+separate lateral layers and fan gradually inward and downward toward the rear.
+The retained feather lengths and stable identities do not change; only the
+estimated grounded rest pose prevents all vanes from collapsing into one
+planar flank slab.
+
 Sparse diagnostic captures can set `--capture-crow-camera-yaw` in radians so a
 geometry milestone is checked from a new view without changing the release
 camera or multiplying appearance-only review frames.
