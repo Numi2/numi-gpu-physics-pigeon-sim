@@ -14,8 +14,10 @@ struct CrowBodyContourShingle: Equatable {
   let tipThetaRadians: Float
   let rootSurfaceOffset: SIMD3<Float>
   let tipSurfaceOffset: SIMD3<Float>
+  let tipSurfaceNormal: SIMD3<Float>
   let rootOffset: SIMD3<Float>
   let tipOffset: SIMD3<Float>
+  let referenceLengthMeters: Float
   let planeNormal: SIMD3<Float>
   let rootWidthMeters: Float
   let maximumWidthMeters: Float
@@ -40,7 +42,9 @@ enum CrowBodyContourShingles {
   private static let frontX: Float = 0.110
   private static let backX: Float = -0.160
 
-  static func samples() -> [CrowBodyContourShingle] {
+  static func samples(
+    standingPhase: Float? = nil
+  ) -> [CrowBodyContourShingle] {
     var result: [CrowBodyContourShingle] = []
     result.reserveCapacity(radialCount * axialCount)
     for radialIndex in 0..<radialCount {
@@ -154,6 +158,22 @@ enum CrowBodyContourShingles {
           atX: tipX,
           theta: tipTheta
         )
+        let referenceRoot = rootShell + shellClearanceMeters * rootNormal
+        let referenceTip = tipShell + shellClearanceMeters * tipNormal
+        let complianceIdentity = identityVariation(
+          radialIndex: radialIndex,
+          axialIndex: axialIndex,
+          salt: 0xD1B5_4A35
+        )
+        let tipCompliance = standingPhase.map {
+          standingTipComplianceMeters(
+            region: region,
+            rootTheta: rootTheta,
+            posterior: posterior,
+            identity: complianceIdentity,
+            phase: $0
+          )
+        } ?? 0
         result.append(
           CrowBodyContourShingle(
             region: region,
@@ -163,8 +183,10 @@ enum CrowBodyContourShingles {
             tipThetaRadians: tipTheta,
             rootSurfaceOffset: rootShell,
             tipSurfaceOffset: tipShell,
-            rootOffset: rootShell + shellClearanceMeters * rootNormal,
-            tipOffset: tipShell + shellClearanceMeters * tipNormal,
+            tipSurfaceNormal: tipNormal,
+            rootOffset: referenceRoot,
+            tipOffset: referenceTip + tipCompliance * tipNormal,
+            referenceLengthMeters: simd_distance(referenceRoot, referenceTip),
             planeNormal: normalized(
               rootNormal + tipNormal,
               fallback: rootNormal
@@ -237,6 +259,39 @@ enum CrowBodyContourShingles {
     let axialScale = 0.55 + 0.45 * clamp(posterior, lower: 0, upper: 1)
     let caudoventralFlow = -strength * cos(rootTheta) * axialScale
     return caudoventralFlow + 0.010 * min(max(identity, -1), 1)
+  }
+
+  /// Quiet-standing vane compliance. Roots remain exactly body seated; only
+  /// tips lift or settle along their owning surface normal. Subtracting the
+  /// regional rest value makes phase zero and phase one bitwise equivalent.
+  static func standingTipComplianceMeters(
+    region: CrowBodyContourRegion,
+    rootTheta: Float,
+    posterior: Float,
+    identity: Float,
+    phase: Float
+  ) -> Float {
+    let wrapped = phase - floor(phase)
+    guard wrapped > 1e-7 else { return 0 }
+    let amplitude: Float
+    let regionalDelay: Float
+    switch region {
+    case .dorsal:
+      amplitude = 0.00018
+      regionalDelay = 0.15
+    case .flank:
+      amplitude = 0.00026
+      regionalDelay = 0.52
+    case .ventral:
+      amplitude = 0.00030
+      regionalDelay = 0.82
+    }
+    let identityDelay = 0.12 * min(max(identity, -1), 1)
+    let delay = regionalDelay + identityDelay + 0.04 * cos(rootTheta)
+    let angle = 2 * Float.pi * wrapped
+    let response = sin(angle + delay) - sin(delay)
+    let axialScale = 0.72 + 0.28 * clamp(posterior, lower: 0, upper: 1)
+    return amplitude * axialScale * response
   }
 
   private static func region(for theta: Float) -> CrowBodyContourRegion {

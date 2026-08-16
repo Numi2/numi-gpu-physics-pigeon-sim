@@ -17,8 +17,7 @@ enum CrowBodyContourUnderlayer {
     projectedPixelsPerMeter: Float
   ) -> [CrowBodyContourUnderlayerSegment] {
     let projectedLength =
-      simd_distance(feather.rootOffset, feather.tipOffset)
-      * projectedPixelsPerMeter
+      feather.referenceLengthMeters * projectedPixelsPerMeter
     let pairCount: Int
     if projectedLength >= 480 {
       pairCount = 10

@@ -44,9 +44,8 @@ enum CrowFeatherMesostructure {
     frame: Frame,
     projectedPixelsPerMeter: Float
   ) -> [CrowFeatherMesostructureSegment] {
-    let length = simd_distance(frame.root, frame.tip)
     let tessellation = CrowFeatherCoverageLOD.tessellation(
-      lengthMeters: length,
+      lengthMeters: frame.referenceLengthMeters,
       projectedPixelsPerMeter: projectedPixelsPerMeter,
       baseAxialSections: 7
     )
@@ -78,6 +77,7 @@ enum CrowFeatherMesostructure {
   private struct Frame {
     let root: SIMD3<Float>
     let tip: SIMD3<Float>
+    let referenceLengthMeters: Float
     let direction: SIMD3<Float>
     let normal: SIMD3<Float>
     let widthAxis: SIMD3<Float>
@@ -95,6 +95,7 @@ enum CrowFeatherMesostructure {
     init(feather: CrowBodyContourShingle) {
       root = feather.rootOffset
       tip = feather.tipOffset
+      referenceLengthMeters = feather.referenceLengthMeters
       direction = normalized(
         feather.tipOffset - feather.rootOffset,
         fallback: SIMD3<Float>(-1, 0, 0)
@@ -123,6 +124,7 @@ enum CrowFeatherMesostructure {
     init(feather: CrowBodyFeatherTractSample) {
       root = feather.rootOffset
       tip = feather.tipOffset
+      referenceLengthMeters = simd_distance(feather.rootOffset, feather.tipOffset)
       direction = normalized(
         feather.tipOffset - feather.rootOffset,
         fallback: SIMD3<Float>(-1, 0, 0)

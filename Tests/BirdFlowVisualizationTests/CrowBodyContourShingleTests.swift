@@ -95,6 +95,71 @@ func bodyContourFeathersFollowRegionalSurfaceTangents() {
   #expect(samples.allSatisfy { abs($0.tipThetaRadians - $0.rootThetaRadians) < 0.12 })
 }
 
+@Test("standing body contour compliance is root locked and loop closed")
+func standingBodyContourComplianceIsRootLockedAndLoopClosed() {
+  let reference = CrowBodyContourShingles.samples(standingPhase: 0)
+  let loop = CrowBodyContourShingles.samples(standingPhase: 1)
+  let quarter = CrowBodyContourShingles.samples(standingPhase: 0.25)
+  let half = CrowBodyContourShingles.samples(standingPhase: 0.50)
+  let late = CrowBodyContourShingles.samples(standingPhase: 0.78)
+  #expect(reference == loop)
+
+  for posed in [quarter, half, late] {
+    #expect(posed.count == reference.count)
+    for (base, feather) in zip(reference, posed) {
+      #expect(feather.rootOffset == base.rootOffset)
+      #expect(feather.referenceLengthMeters == base.referenceLengthMeters)
+      let displacement = simd_distance(feather.tipOffset, base.tipOffset)
+      #expect(displacement < 0.00061)
+      let tipClearance = simd_distance(feather.tipOffset, feather.tipSurfaceOffset)
+      #expect(tipClearance > 0.00059)
+      #expect(tipClearance < 0.00181)
+    }
+  }
+
+  let cycleMotion = reference.indices.map { index in
+    [quarter, half, late].map {
+      simd_distance(reference[index].tipOffset, $0[index].tipOffset)
+    }.max()!
+  }
+  #expect(cycleMotion.max()! > 0.00040)
+  #expect(cycleMotion.filter { $0 > 0.00020 }.count > reference.count / 2)
+  #expect(quarter != half && half != late && quarter != late)
+  for posed in [quarter, half, late] {
+    expectClosedBodyContourShell(posed)
+  }
+}
+
+@Test("standing body contour compliance preserves resolution topology")
+func standingBodyContourCompliancePreservesResolutionTopology() {
+  let reference = CrowBodyContourShingles.samples(standingPhase: 0)
+  let posed = CrowBodyContourShingles.samples(standingPhase: 0.63)
+  for index in stride(from: 0, to: reference.count, by: 97) {
+    for pixelsPerMeter: Float in [700, 1_600, 4_800, 14_000] {
+      #expect(
+        CrowBodyContourUnderlayer.segments(
+          for: reference[index],
+          projectedPixelsPerMeter: pixelsPerMeter
+        ).count
+          == CrowBodyContourUnderlayer.segments(
+            for: posed[index],
+            projectedPixelsPerMeter: pixelsPerMeter
+          ).count
+      )
+      #expect(
+        CrowFeatherMesostructure.segments(
+          for: reference[index],
+          projectedPixelsPerMeter: pixelsPerMeter
+        ).map(\.kind)
+          == CrowFeatherMesostructure.segments(
+            for: posed[index],
+            projectedPixelsPerMeter: pixelsPerMeter
+          ).map(\.kind)
+      )
+    }
+  }
+}
+
 @Test("body contour tracts break transverse rows with bounded deterministic variation")
 func bodyContourTractsBreakTransverseRows() {
   let first = CrowBodyContourShingles.samples()
@@ -185,6 +250,12 @@ func bodyContourPennaceousTipsRetainClosedOuterShell() {
     )
   }
 
+  expectClosedBodyContourShell(samples)
+}
+
+private func expectClosedBodyContourShell(
+  _ samples: [CrowBodyContourShingle]
+) {
   for radialIndex in 0..<CrowBodyContourShingles.radialCount {
     let tract =
       samples

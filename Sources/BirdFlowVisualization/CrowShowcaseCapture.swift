@@ -1673,6 +1673,7 @@ private struct CrowMeshBuilder {
     }
     appendBodyContourFeathers(
       bodyCenter: posedBodyCenter,
+      standingPhase: standingPose == nil ? nil : phase,
       projectedPixelsPerMeter: projectedPixelsPerMeter,
       to: &vertices
     )
@@ -1820,10 +1821,11 @@ private struct CrowMeshBuilder {
 
   private func appendBodyContourFeathers(
     bodyCenter: SIMD3<Float>,
+    standingPhase: Float?,
     projectedPixelsPerMeter: Float,
     to vertices: inout [ColoredVertex]
   ) {
-    for shingle in CrowBodyContourShingles.samples() {
+    for shingle in CrowBodyContourShingles.samples(standingPhase: standingPhase) {
       let materialScale = 1 + 0.10 * shingle.materialVariation
       let color = SIMD4<Float>(
         0.006 * materialScale,
@@ -1845,7 +1847,7 @@ private struct CrowMeshBuilder {
         edgeRippleAmplitude: shingle.edgeRippleAmplitude,
         edgeRipplePhase: shingle.edgeRipplePhase,
         axialStartFraction: shingle.pennaceousStartFraction,
-        lodLengthMeters: simd_distance(shingle.rootOffset, shingle.tipOffset),
+        lodLengthMeters: shingle.referenceLengthMeters,
         projectedPixelsPerMeter: projectedPixelsPerMeter,
         to: &vertices
       )
