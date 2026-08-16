@@ -1573,7 +1573,11 @@ private struct CrowMeshBuilder {
         projectedPixelsPerMeter: projectedPixelsPerMeter,
         to: &vertices
       )
-      appendStandingLegsAndFeet(standingPose, to: &vertices)
+      appendStandingLegsAndFeet(
+        standingPose,
+        projectedPixelsPerMeter: projectedPixelsPerMeter,
+        to: &vertices
+      )
       appendStandingSupport(height: standingPose.supportHeight, to: &vertices)
     }
     _ = bodyBounds
@@ -1902,6 +1906,7 @@ private struct CrowMeshBuilder {
 
   private func appendStandingLegsAndFeet(
     _ pose: CrowStandingPoseSample,
+    projectedPixelsPerMeter: Float,
     to vertices: inout [ColoredVertex]
   ) {
     let featheredLeg = SIMD4<Float>(0.010, 0.014, 0.022, 0.16)
@@ -1911,12 +1916,28 @@ private struct CrowMeshBuilder {
       appendTaperedTube(
         from: foot.hip,
         to: foot.hock,
-        startRadius: 0.0145,
-        endRadius: 0.0075,
+        startRadius: 0.0090,
+        endRadius: 0.0048,
         color: featheredLeg,
         radialSegments: 12,
         to: &vertices
       )
+      for feather in CrowLegPlumage.samples(hip: foot.hip, hock: foot.hock) {
+        appendFeatherBlade(
+          root: feather.root,
+          tip: feather.tip,
+          planeNormal: feather.planeNormal,
+          rootWidth: feather.rootWidthMeters,
+          maximumWidth: feather.maximumWidthMeters,
+          color: featheredLeg,
+          sections: 6,
+          camber: feather.camberMeters,
+          transverseCamberRatio: 0.08,
+          lodLengthMeters: simd_distance(feather.root, feather.tip),
+          projectedPixelsPerMeter: projectedPixelsPerMeter,
+          to: &vertices
+        )
+      }
       appendTaperedTube(
         from: foot.hock,
         to: foot.ankle,
