@@ -11,7 +11,7 @@ func crowCruralPlumageOverlapsLegAndCrossesHockBoundary() {
   let legLength = simd_distance(hip, hock)
   let samples = CrowLegPlumage.samples(hip: hip, hock: hock)
   #expect(samples.count == CrowLegPlumage.radialCount * CrowLegPlumage.stationCount)
-  #expect(samples.count == 98)
+  #expect(samples.count == 162)
   #expect(CrowLegPlumage.surfaceFeatherClass == 7)
   #expect(
     CrowLegPlumage.visibleSamples(
@@ -32,7 +32,7 @@ func crowCruralPlumageOverlapsLegAndCrossesHockBoundary() {
       hip: hip,
       hock: hock,
       projectedPixelsPerMeter: 1_600
-    ).count == 98
+    ).count == 162
   )
   #expect(samples.map(\.materialVariation).min()! < -0.90)
   #expect(samples.map(\.materialVariation).max()! > 0.90)
@@ -44,6 +44,31 @@ func crowCruralPlumageOverlapsLegAndCrossesHockBoundary() {
   #expect(samples.allSatisfy { $0.edgeRipplePhase <= 2 * Float.pi })
   #expect(samples.allSatisfy { $0.edgeRippleCycles >= 1.25 })
   #expect(samples.allSatisfy { $0.edgeRippleCycles <= 1.90 })
+  #expect(samples.allSatisfy {
+    $0.rootEnvelopeRatio == CrowLegPlumage.visibleRootEnvelopeRatio
+  })
+  let standingCameraPixelsPerMeter = [Float(0.498), Float(0.502)].map {
+    CrowFeatherCoverageLOD.projectedPixelsPerMeter(
+      viewportHeight: 720,
+      cameraDistanceMeters: $0
+    )
+  }
+  #expect(
+    samples.allSatisfy { sample in
+      Set(
+        standingCameraPixelsPerMeter.map {
+          CrowFeatherCoverageLOD.tessellation(
+            lengthMeters: max(
+              simd_distance(sample.root, sample.tip),
+              CrowLegPlumage.minimumLODTessellationLengthMeters
+            ),
+            projectedPixelsPerMeter: $0,
+            baseAxialSections: 8
+          ).tier
+        }
+      ).count == 1
+    }
+  )
   #expect(CrowLegPlumage.proximalUnderlayerRadiusMeters == 0.014)
   #expect(CrowLegPlumage.distalUnderlayerRadiusMeters == 0.0065)
   let firstRootRadius =
@@ -85,10 +110,12 @@ func crowCruralPlumageOverlapsLegAndCrossesHockBoundary() {
   let distalProjection = samples.map { simd_dot($0.tip - hip, axis) }.max()!
   #expect(distalProjection > legLength + 0.003)
   #expect(distalProjection < legLength + 0.007)
-  let distalCourseProjections = samples.filter { $0.stationIndex == 6 }.map {
+  let distalCourseProjections = samples.filter {
+    $0.stationIndex == CrowLegPlumage.stationCount - 1
+  }.map {
     simd_dot($0.tip - hip, axis)
   }
-  #expect(distalCourseProjections.max()! - distalCourseProjections.min()! > 0.001)
+  #expect(distalCourseProjections.max()! - distalCourseProjections.min()! > 0.003)
   #expect(
     samples.allSatisfy {
       simd_dot($0.tip - $0.root, axis) > 0

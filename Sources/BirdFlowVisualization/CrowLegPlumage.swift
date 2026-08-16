@@ -13,6 +13,7 @@ struct CrowLegPlumageFeather: Equatable {
   let edgeRippleAmplitude: Float
   let edgeRipplePhase: Float
   let edgeRippleCycles: Float
+  let rootEnvelopeRatio: Float
   let materialVariation: Float
   let bodyMaterialBlend: Float
 }
@@ -23,10 +24,12 @@ struct CrowLegPlumageFeather: Equatable {
 /// visible silhouette. Staggered feather rows overlap axially and wrap around
 /// the limb; their distal tips cross the hock to break the artificial cuff.
 enum CrowLegPlumage {
-  static let radialCount = 14
-  static let stationCount = 7
+  static let radialCount = 18
+  static let stationCount = 9
   static let proximalUnderlayerRadiusMeters: Float = 0.014
   static let distalUnderlayerRadiusMeters: Float = 0.0065
+  static let visibleRootEnvelopeRatio: Float = 0.70
+  static let minimumLODTessellationLengthMeters: Float = 0.018
   static let surfaceFeatherClass: UInt32 = 7
 
   static func visibleSamples(
@@ -85,13 +88,17 @@ enum CrowLegPlumage {
           + 0.08 * (2 * Float.pi / Float(radialCount)) * shapeIdentity
         let radial = cos(theta) * first + sin(theta) * second
         let rootFraction = min(
-          0.82,
-          0.025 + 0.13 * (Float(stationIndex) + stagger)
+          0.84,
+          0.025 + 0.095 * (Float(stationIndex) + stagger)
+        )
+        let distalFringeWeight = smootherstep(
+          min(max((rootFraction - 0.55) / 0.27, 0), 1)
         )
         let tipFraction = min(
           1.13,
           rootFraction
-            + 0.31 * (1 + 0.055 * shapeIdentity + 0.035 * tipIdentity)
+            + 0.30 * (1 + 0.055 * shapeIdentity + 0.025 * tipIdentity)
+            + 0.028 * distalFringeWeight * tipIdentity
         )
         let rootRadius = radius(at: rootFraction)
         let tipRadius = radius(at: tipFraction)
@@ -116,6 +123,7 @@ enum CrowLegPlumage {
             edgeRippleAmplitude: 0.012 + 0.018 * (0.5 + 0.5 * edgeIdentity),
             edgeRipplePhase: Float.pi * (edgeIdentity + 1),
             edgeRippleCycles: 1.25 + 0.65 * (0.5 + 0.5 * cycleIdentity),
+            rootEnvelopeRatio: visibleRootEnvelopeRatio,
             materialVariation: materialIdentity,
             bodyMaterialBlend:
               0.62 - 0.47 * Float(stationIndex) / Float(stationCount - 1)
@@ -172,6 +180,7 @@ enum CrowLegPlumage {
             edgeRippleAmplitude: 0,
             edgeRipplePhase: 0,
             edgeRippleCycles: 0,
+            rootEnvelopeRatio: 0.58,
             materialVariation: 0,
             bodyMaterialBlend: 0
           )
@@ -179,6 +188,10 @@ enum CrowLegPlumage {
       }
     }
     return result
+  }
+
+  private static func smootherstep(_ value: Float) -> Float {
+    value * value * value * (value * (value * 6 - 15) + 10)
   }
 
   private static func radius(at fraction: Float) -> Float {

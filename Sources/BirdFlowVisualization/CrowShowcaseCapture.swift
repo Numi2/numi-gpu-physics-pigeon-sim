@@ -2592,15 +2592,19 @@ private struct CrowMeshBuilder {
           rootWidth: feather.rootWidthMeters,
           maximumWidth: feather.maximumWidthMeters,
           color: color,
-          sections: 6,
+          sections: 8,
           camber: feather.camberMeters,
           transverseCamberRatio: 0.08,
           vaneAsymmetry: feather.vaneAsymmetry,
           edgeRippleAmplitude: feather.edgeRippleAmplitude,
           edgeRipplePhase: feather.edgeRipplePhase,
           edgeRippleCycles: feather.edgeRippleCycles,
+          rootEnvelopeRatio: feather.rootEnvelopeRatio,
           surfaceFeatherClass: CrowLegPlumage.surfaceFeatherClass,
-          lodLengthMeters: simd_distance(feather.root, feather.tip),
+          lodLengthMeters: max(
+            simd_distance(feather.root, feather.tip),
+            CrowLegPlumage.minimumLODTessellationLengthMeters
+          ),
           projectedPixelsPerMeter: projectedPixelsPerMeter,
           to: &vertices
         )
