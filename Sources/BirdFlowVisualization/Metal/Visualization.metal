@@ -433,6 +433,36 @@ inline float4 crowRectrixVaneProfile(uint packedIdentity) {
     );
 }
 
+inline float3 crowRectrixEdgeMicrostructure(
+    float axial,
+    float signedWidth,
+    float4 rectrix) {
+    axial=clamp(axial,0.0f,1.0f);
+    float sine=max(sin(M_PI_F*axial),0.0f);
+    float cosine=cos(M_PI_F*axial);
+    float sinePower=pow(sine,0.9f);
+    float distalBias=0.35f+0.65f*axial;
+    float envelope=sinePower*distalBias;
+    float envelopeDerivative=0.9f*pow(max(sine,1.0e-6f),-0.1f)
+        *M_PI_F*cosine*distalBias+0.65f*sinePower;
+    float phase=0.55f+3.2f*rectrix.x+0.45f*signedWidth*rectrix.y;
+    float firstAngle=10.0f*M_PI_F*axial+phase;
+    float secondAngle=22.0f*M_PI_F*axial-0.7f*phase;
+    float wave=0.68f*sin(firstAngle)+0.32f*sin(secondAngle);
+    float waveAxialDerivative=0.68f*10.0f*M_PI_F*cos(firstAngle)
+        +0.32f*22.0f*M_PI_F*cos(secondAngle);
+    float phaseSignedWidthDerivative=0.45f*rectrix.y;
+    float waveSignedWidthDerivative=0.68f*cos(firstAngle)
+        *phaseSignedWidthDerivative
+        -0.32f*0.7f*cos(secondAngle)*phaseSignedWidthDerivative;
+    float amplitude=0.018f+0.008f*rectrix.x;
+    return float3(
+        1.0f+amplitude*envelope*wave,
+        amplitude*(envelopeDerivative*wave+envelope*waveAxialDerivative),
+        amplitude*envelope*waveSignedWidthDerivative
+    );
+}
+
 inline float crowFeatherCrownRatio(uint packedIdentity) {
     uint featherClass=packedIdentity&255u;
     if(featherClass==3u){
@@ -463,7 +493,9 @@ inline float3 crowFeatherPosition(
         *crowFeatherWidthEnvelope(axial);
     float4 rectrix=crowRectrixVaneProfile(packedIdentity);
     float sideScale=1.0f-rectrix.z*signedWidth*rectrix.y;
-    float width=symmetricWidth*sideScale;
+    float edgeModulation=(packedIdentity&255u)==3u
+        ?crowRectrixEdgeMicrostructure(axial,signedWidth,rectrix).x:1.0f;
+    float width=symmetricWidth*sideScale*edgeModulation;
     float camberEnvelope=sin(M_PI_F*axial)
         *(1.0f+rectrix.w*(2.0f*axial-1.0f));
     float3 center=root+tangent*(lengthMeters*axial)
@@ -507,9 +539,18 @@ inline float3 crowFeatherNormal(
         +baseWidth*bodyEnvelope*tipDerivative;
     float4 rectrix=crowRectrixVaneProfile(packedIdentity);
     float sideScale=1.0f-rectrix.z*signedWidth*rectrix.y;
-    float width=symmetricWidth*sideScale;
-    float widthDerivative=symmetricWidthDerivative*sideScale;
-    float widthSignedDerivative=-symmetricWidth*rectrix.z*rectrix.y;
+    float3 edgeMicrostructure=(packedIdentity&255u)==3u
+        ?crowRectrixEdgeMicrostructure(sampledAxial,signedWidth,rectrix)
+        :float3(1.0f,0.0f,0.0f);
+    float width=symmetricWidth*sideScale*edgeMicrostructure.x;
+    float widthDerivative=sideScale*(
+        symmetricWidthDerivative*edgeMicrostructure.x
+        +symmetricWidth*edgeMicrostructure.y
+    );
+    float widthSignedDerivative=symmetricWidth*(
+        -rectrix.z*rectrix.y*edgeMicrostructure.x
+        +sideScale*edgeMicrostructure.z
+    );
     float crownEnvelope=pow(sine,0.65f);
     float crownDerivative=0.65f*pow(sine,-0.35f)*sineDerivative;
     float transverseEnvelope=max(0.0f,1.0f-signedWidth*signedWidth);

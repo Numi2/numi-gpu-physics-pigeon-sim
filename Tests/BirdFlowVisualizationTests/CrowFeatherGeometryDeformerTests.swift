@@ -37,7 +37,7 @@ func crowFeatherTemplateGPUDeformationMatchesCPUReference() throws {
   #expect(MemoryLayout<CrowFeatherTemplateVertexGPU>.stride == 16)
   #expect(MemoryLayout<CrowFeatherVertexGPU>.stride == 96)
   #expect(MemoryLayout<CrowFeatherGeometryUniforms>.stride == 32)
-  #expect(geometryDeformer.vertexCount == 54 * 24 * 6 * 6)
+  #expect(geometryDeformer.vertexCount == 54 * 48 * 8 * 6)
 
   let body = surface.components.first { $0.partIdentifier == 1 }!
   var referenceBodyCenter = SIMD3<Float>.zero
@@ -169,8 +169,8 @@ func crowFeatherTemplateGPUDeformationMatchesCPUReference() throws {
       point(axial: 13.0 / 24.0, signedWidth: 0)
       - point(axial: 11.0 / 24.0, signedWidth: 0)
     let widthTangent =
-      point(axial: 0.5, signedWidth: 1.0 / 3.0)
-      - point(axial: 0.5, signedWidth: -1.0 / 3.0)
+      point(axial: 0.5, signedWidth: 0.25)
+      - point(axial: 0.5, signedWidth: -0.25)
     let finiteDifferenceNormal = simd_normalize(simd_cross(axialTangent, widthTangent))
     let analyticNormal = SIMD3<Float>(
       centerVertex.normal.x,

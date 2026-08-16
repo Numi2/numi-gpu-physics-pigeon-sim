@@ -16,8 +16,8 @@ struct CrowFeatherGeometryFrame {
 /// feed mesh shaders or ray-tracing geometry without changing asset identity.
 final class CrowFeatherGeometryDeformer {
   private static let bufferedFrameCount = 3
-  private static let sectionCount = 24
-  private static let widthSectionCount = 6
+  private static let sectionCount = 48
+  private static let widthSectionCount = 8
 
   private let backend: VisualizationBackend
   private let pipeline: MTLComputePipelineState
@@ -243,7 +243,15 @@ final class CrowFeatherGeometryDeformer {
       1
       - (rectrix?.vaneAsymmetry ?? 0) * signedWidth
       * (rectrix?.outerSignedWidth ?? 0)
-    let width = baseWidth * sideScale
+    let edgeModulation =
+      rectrix.map {
+        CrowRectrixVaneAnatomy.edgeModulation(
+          axial: axial,
+          signedWidth: signedWidth,
+          profile: $0
+        )
+      } ?? 1
+    let width = baseWidth * sideScale * edgeModulation
     let camberEnvelope =
       rectrix.map {
         CrowRectrixVaneAnatomy.camberEnvelope(axial: axial, profile: $0)
@@ -297,9 +305,39 @@ final class CrowFeatherGeometryDeformer {
     let asymmetry = rectrix?.vaneAsymmetry ?? 0
     let outerSignedWidth = rectrix?.outerSignedWidth ?? 0
     let sideScale = 1 - asymmetry * signedWidth * outerSignedWidth
-    let width = symmetricWidth * sideScale
-    let widthDerivative = symmetricWidthDerivative * sideScale
-    let widthSignedDerivative = -symmetricWidth * asymmetry * outerSignedWidth
+    let edgeModulation =
+      rectrix.map {
+        CrowRectrixVaneAnatomy.edgeModulation(
+          axial: sampledAxial,
+          signedWidth: signedWidth,
+          profile: $0
+        )
+      } ?? 1
+    let edgeAxialDerivative =
+      rectrix.map {
+        CrowRectrixVaneAnatomy.edgeModulationAxialDerivative(
+          axial: sampledAxial,
+          signedWidth: signedWidth,
+          profile: $0
+        )
+      } ?? 0
+    let edgeSignedWidthDerivative =
+      rectrix.map {
+        CrowRectrixVaneAnatomy.edgeModulationSignedWidthDerivative(
+          axial: sampledAxial,
+          signedWidth: signedWidth,
+          profile: $0
+        )
+      } ?? 0
+    let width = symmetricWidth * sideScale * edgeModulation
+    let widthDerivative =
+      sideScale
+      * (symmetricWidthDerivative * edgeModulation
+        + symmetricWidth * edgeAxialDerivative)
+    let widthSignedDerivative =
+      symmetricWidth
+      * (-asymmetry * outerSignedWidth * edgeModulation
+        + sideScale * edgeSignedWidthDerivative)
     let crownEnvelope = pow(sine, 0.65)
     let crownDerivative = 0.65 * pow(sine, -0.35) * sineDerivative
     let transverseEnvelope = max(0, 1 - signedWidth * signedWidth)

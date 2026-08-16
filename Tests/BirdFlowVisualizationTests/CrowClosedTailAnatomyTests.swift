@@ -99,6 +99,79 @@ func rectrixPairsRetainIdentitySpecificAsymmetricVaneProfiles() {
   }
 }
 
+@Test("rectrix edge microstructure is paired, bounded, and analytically differentiable")
+func rectrixEdgeMicrostructureIsPairedBoundedAndDifferentiable() {
+  let count = CrowClosedTailAnatomy.rectrixCount
+  var modulationRange: ClosedRange<Float> = 1...1
+  for order in 0..<count {
+    let profile = CrowRectrixVaneAnatomy.profile(order: order, count: count)
+    let counterpart = CrowRectrixVaneAnatomy.profile(
+      order: count - 1 - order,
+      count: count
+    )
+    for signedWidth: Float in [-1, -0.5, 0.5, 1] {
+      #expect(
+        abs(
+          CrowRectrixVaneAnatomy.edgeModulation(
+            axial: 0,
+            signedWidth: signedWidth,
+            profile: profile
+          ) - 1
+        ) < 1e-7
+      )
+      #expect(
+        abs(
+          CrowRectrixVaneAnatomy.edgeModulation(
+            axial: 1,
+            signedWidth: signedWidth,
+            profile: profile
+          ) - 1
+        ) < 1e-6
+      )
+      for axial: Float in stride(from: 0.04, through: 0.96, by: 0.02) {
+        let modulation = CrowRectrixVaneAnatomy.edgeModulation(
+          axial: axial,
+          signedWidth: signedWidth,
+          profile: profile
+        )
+        modulationRange = ClosedRange(
+          uncheckedBounds: (
+            min(modulationRange.lowerBound, modulation),
+            max(modulationRange.upperBound, modulation)
+          )
+        )
+        #expect(modulation > 0.965 && modulation < 1.035)
+        let mirrored = CrowRectrixVaneAnatomy.edgeModulation(
+          axial: axial,
+          signedWidth: -signedWidth,
+          profile: counterpart
+        )
+        #expect(abs(modulation - mirrored) < 1e-6)
+
+        let epsilon: Float = 1e-4
+        let finiteDifference =
+          (CrowRectrixVaneAnatomy.edgeModulation(
+            axial: axial + epsilon,
+            signedWidth: signedWidth,
+            profile: profile
+          )
+            - CrowRectrixVaneAnatomy.edgeModulation(
+              axial: axial - epsilon,
+              signedWidth: signedWidth,
+              profile: profile
+            )) / (2 * epsilon)
+        let analytic = CrowRectrixVaneAnatomy.edgeModulationAxialDerivative(
+          axial: axial,
+          signedWidth: signedWidth,
+          profile: profile
+        )
+        #expect(abs(finiteDifference - analytic) < 0.003)
+      }
+    }
+  }
+  #expect(modulationRange.upperBound - modulationRange.lowerBound > 0.035)
+}
+
 @Test("identity-specific rectrix vanes preserve the closed-tail envelope")
 func identitySpecificRectrixVanesPreserveClosedTailEnvelope() {
   let count = CrowClosedTailAnatomy.rectrixCount

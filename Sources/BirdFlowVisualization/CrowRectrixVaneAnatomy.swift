@@ -124,6 +124,58 @@ enum CrowRectrixVaneAnatomy {
     let base = maximumWidthMeters * (0.55 + 0.45 * axial) * widthEnvelope(axial: axial)
     let sideScale = 1 - profile.vaneAsymmetry * signedWidth * profile.outerSignedWidth
     return base * sideScale
+      * edgeModulation(
+        axial: axial,
+        signedWidth: signedWidth,
+        profile: profile
+      )
+  }
+
+  /// Bounded paired irregularity along the exposed rectrix vane margins.
+  ///
+  /// The two sides of a feather receive different phases, while bilateral
+  /// counterparts mirror because `outerSignedWidth` reverses with side. The
+  /// envelope vanishes at shaft and tip, preserving both attachment and the
+  /// locked closed-tail length.
+  static func edgeModulation(
+    axial rawAxial: Float,
+    signedWidth: Float,
+    profile: CrowRectrixVaneProfile
+  ) -> Float {
+    let terms = edgeTerms(
+      axial: rawAxial,
+      signedWidth: signedWidth,
+      profile: profile
+    )
+    return 1 + terms.amplitude * terms.envelope * terms.wave
+  }
+
+  static func edgeModulationAxialDerivative(
+    axial rawAxial: Float,
+    signedWidth: Float,
+    profile: CrowRectrixVaneProfile
+  ) -> Float {
+    let terms = edgeTerms(
+      axial: rawAxial,
+      signedWidth: signedWidth,
+      profile: profile
+    )
+    return terms.amplitude
+      * (terms.envelopeDerivative * terms.wave
+        + terms.envelope * terms.waveAxialDerivative)
+  }
+
+  static func edgeModulationSignedWidthDerivative(
+    axial rawAxial: Float,
+    signedWidth: Float,
+    profile: CrowRectrixVaneProfile
+  ) -> Float {
+    let terms = edgeTerms(
+      axial: rawAxial,
+      signedWidth: signedWidth,
+      profile: profile
+    )
+    return terms.amplitude * terms.envelope * terms.waveSignedWidthDerivative
   }
 
   static func camberEnvelope(
@@ -132,5 +184,50 @@ enum CrowRectrixVaneAnatomy {
   ) -> Float {
     let axial = min(max(rawAxial, 0), 1)
     return sin(Float.pi * axial) * (1 + profile.camberSkew * (2 * axial - 1))
+  }
+
+  private static func edgeTerms(
+    axial rawAxial: Float,
+    signedWidth: Float,
+    profile: CrowRectrixVaneProfile
+  ) -> (
+    amplitude: Float,
+    envelope: Float,
+    envelopeDerivative: Float,
+    wave: Float,
+    waveAxialDerivative: Float,
+    waveSignedWidthDerivative: Float
+  ) {
+    let axial = min(max(rawAxial, 0), 1)
+    let sine = max(sin(Float.pi * axial), 0)
+    let cosine = cos(Float.pi * axial)
+    let sinePower = pow(sine, 0.9)
+    let distalBias = 0.35 + 0.65 * axial
+    let envelope = sinePower * distalBias
+    let safeSine = max(sine, 1e-6)
+    let envelopeDerivative =
+      0.9 * pow(safeSine, -0.1) * Float.pi * cosine * distalBias
+      + 0.65 * sinePower
+    let phase =
+      0.55 + 3.2 * profile.radialFraction
+      + 0.45 * signedWidth * profile.outerSignedWidth
+    let firstAngle = 10 * Float.pi * axial + phase
+    let secondAngle = 22 * Float.pi * axial - 0.7 * phase
+    let wave = 0.68 * sin(firstAngle) + 0.32 * sin(secondAngle)
+    let waveAxialDerivative =
+      0.68 * 10 * Float.pi * cos(firstAngle)
+      + 0.32 * 22 * Float.pi * cos(secondAngle)
+    let phaseSignedWidthDerivative = 0.45 * profile.outerSignedWidth
+    let waveSignedWidthDerivative =
+      0.68 * cos(firstAngle) * phaseSignedWidthDerivative
+      - 0.32 * 0.7 * cos(secondAngle) * phaseSignedWidthDerivative
+    return (
+      amplitude: 0.018 + 0.008 * profile.radialFraction,
+      envelope: envelope,
+      envelopeDerivative: envelopeDerivative,
+      wave: wave,
+      waveAxialDerivative: waveAxialDerivative,
+      waveSignedWidthDerivative: waveSignedWidthDerivative
+    )
   }
 }
