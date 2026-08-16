@@ -37,8 +37,9 @@ func standingCrowFeatherRootsMatchMetalReference() throws {
     referenceBodyCenter: bodyCenter
   )
   #expect(MemoryLayout<CrowStandingFeatherBindingGPU>.stride == 48)
+  #expect(MemoryLayout<ColoredVertex>.stride == 64)
   #expect(MemoryLayout<CrowStandingFeatherUniforms>.stride == 32)
-  #expect(MemoryLayout<CrowSurfaceTemporalVertexGPU>.stride == 80)
+  #expect(MemoryLayout<CrowSurfaceTemporalVertexGPU>.stride == 96)
   #expect(MemoryLayout<CrowTemporalCameraUniforms>.stride == 160)
   #expect(deformer.featherCount == 54)
 

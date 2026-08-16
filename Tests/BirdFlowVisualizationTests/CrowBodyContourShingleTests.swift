@@ -154,14 +154,39 @@ func bodyContourPennaceousTipsRetainClosedOuterShell() {
             for: next,
             at: next.pennaceousStartFraction
           )
+          func signedWidth(
+            feather: CrowBodyContourShingle,
+            from start: SIMD3<Float>,
+            toward target: SIMD3<Float>
+          ) -> Float {
+            let direction = simd_normalize(feather.tipOffset - feather.rootOffset)
+            let normal = simd_normalize(
+              feather.planeNormal
+                - direction * simd_dot(feather.planeNormal, direction)
+            )
+            let widthAxis = simd_normalize(simd_cross(normal, direction))
+            return simd_dot(target - start, widthAxis) >= 0 ? 1 : -1
+          }
+          let currentSignedWidth = signedWidth(
+            feather: current,
+            from: currentStart,
+            toward: nextStart
+          )
+          let nextSignedWidth = signedWidth(
+            feather: next,
+            from: nextStart,
+            toward: currentStart
+          )
           let availableWidth =
             CrowBodyContourShingles.vaneHalfWidth(
               for: current,
-              at: current.pennaceousStartFraction
+              at: current.pennaceousStartFraction,
+              signedWidth: currentSignedWidth
             )
             + CrowBodyContourShingles.vaneHalfWidth(
               for: next,
-              at: next.pennaceousStartFraction
+              at: next.pennaceousStartFraction,
+              signedWidth: nextSignedWidth
             )
           return simd_distance(currentStart, nextStart) < availableWidth
         }
@@ -195,4 +220,31 @@ func dorsalContourFeathersResolveAsNarrowInterdigitatedVanes() {
   }
   #expect(adjacentOffsets.max()! > 0.0015)
   #expect(adjacentOffsets.filter { $0 > 0.0005 }.count >= courseMeans.count / 2)
+
+  let asymmetries = dorsal.map(\.vaneAsymmetry)
+  let rippleAmplitudes = dorsal.map(\.edgeRippleAmplitude)
+  let materialVariations = dorsal.map(\.materialVariation)
+  #expect(asymmetries.min()! < -0.040)
+  #expect(asymmetries.max()! > 0.040)
+  #expect(rippleAmplitudes.min()! >= 0.012)
+  #expect(rippleAmplitudes.max()! <= 0.0301)
+  #expect(materialVariations.min()! < -0.90)
+  #expect(materialVariations.max()! > 0.90)
+
+  for feather in dorsal {
+    for axial: Float in [feather.pennaceousStartFraction, 0.65, 0.84] {
+      let negative = CrowBodyContourShingles.vaneHalfWidth(
+        for: feather,
+        at: axial,
+        signedWidth: -1
+      )
+      let positive = CrowBodyContourShingles.vaneHalfWidth(
+        for: feather,
+        at: axial,
+        signedWidth: 1
+      )
+      #expect(negative > 0 && positive > 0)
+      #expect(abs(negative - positive) / max(negative, positive) < 0.09)
+    }
+  }
 }

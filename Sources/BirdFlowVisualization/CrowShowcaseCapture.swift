@@ -901,6 +901,7 @@ private final class CrowShowcaseRenderer {
         previousPosition: pair.1.position,
         normal: pair.0.normal,
         albedoAndMaterial: pair.0.color,
+        parameters: pair.0.parameters,
         identity: SIMD4<UInt32>(
           UInt32.max,
           UInt32(index / 3 + 1),
@@ -1752,8 +1753,14 @@ private struct CrowMeshBuilder {
     projectedPixelsPerMeter: Float,
     to vertices: inout [ColoredVertex]
   ) {
-    let color = SIMD4<Float>(0.006, 0.009, 0.016, 0.14)
     for shingle in CrowBodyContourShingles.samples() {
+      let materialScale = 1 + 0.10 * shingle.materialVariation
+      let color = SIMD4<Float>(
+        0.006 * materialScale,
+        0.009 * (1 + 0.075 * shingle.materialVariation),
+        0.016 * (1 + 0.055 * shingle.materialVariation),
+        0.14 + 0.012 * shingle.materialVariation
+      )
       appendFeatherBlade(
         root: bodyCenter + shingle.rootOffset,
         tip: bodyCenter + shingle.tipOffset,
@@ -1764,6 +1771,9 @@ private struct CrowMeshBuilder {
         sections: 7,
         camber: shingle.camberMeters,
         transverseCamberRatio: 0.025,
+        vaneAsymmetry: shingle.vaneAsymmetry,
+        edgeRippleAmplitude: shingle.edgeRippleAmplitude,
+        edgeRipplePhase: shingle.edgeRipplePhase,
         axialStartFraction: shingle.pennaceousStartFraction,
         lodLengthMeters: simd_distance(shingle.rootOffset, shingle.tipOffset),
         projectedPixelsPerMeter: projectedPixelsPerMeter,
@@ -2565,6 +2575,9 @@ private struct CrowMeshBuilder {
     sections: Int,
     camber: Float = 0,
     transverseCamberRatio: Float = 0.18,
+    vaneAsymmetry: Float = 0,
+    edgeRippleAmplitude: Float = 0,
+    edgeRipplePhase: Float = 0,
     axialStartFraction: Float = 0,
     lodLengthMeters: Float? = nil,
     projectedPixelsPerMeter: Float,
@@ -2581,43 +2594,74 @@ private struct CrowMeshBuilder {
       projectedPixelsPerMeter: projectedPixelsPerMeter,
       baseAxialSections: sections
     )
-    func crossSection(at index: Int) -> [SIMD3<Float>] {
+    typealias BladePoint = (position: SIMD3<Float>, parameters: SIMD4<Float>)
+    func crossSection(at index: Int) -> [BladePoint] {
       let localFraction = Float(index) / Float(tessellation.axialSections)
       let startFraction = min(max(axialStartFraction, 0), 0.95)
       let t = startFraction + (1 - startFraction) * localFraction
       let bodyEnvelope = 0.32 + 0.68 * pow(max(sin(Float.pi * t), 0), 0.58)
       let tipTaper = 1 - 0.985 * pow(t, 3.2)
       let envelope = bodyEnvelope * tipTaper
-      let width = (rootWidth * (1 - t) + maximumWidth * t) * envelope
+      let rippleEnvelope = pow(max(sin(Float.pi * t), 0), 2)
+      let edgeRipple =
+        1
+        + edgeRippleAmplitude * sin(3 * Float.pi * t + edgeRipplePhase)
+        * rippleEnvelope
+      let width = (rootWidth * (1 - t) + maximumWidth * t) * envelope * edgeRipple
       let center = root + (tip - root) * t + normal * (camber * sin(Float.pi * t))
-      var result: [SIMD3<Float>] = []
+      var result: [BladePoint] = []
       result.reserveCapacity(tessellation.widthSections + 1)
       for widthIndex in 0...tessellation.widthSections {
         let fraction = Float(widthIndex) / Float(tessellation.widthSections)
         let signedWidth = 2 * fraction - 1
         let transverseEnvelope = max(0, 1 - signedWidth * signedWidth)
+        let localWidth = width * (1 + vaneAsymmetry * signedWidth)
         result.append(
-          center + widthAxis * (signedWidth * width)
-            + normal * (width * transverseCamberRatio * transverseEnvelope)
+          (
+            center + widthAxis * (signedWidth * localWidth)
+              + normal * (localWidth * transverseCamberRatio * transverseEnvelope),
+            SIMD4<Float>(t, signedWidth, 1, 0)
+          )
         )
       }
       return result
     }
 
-    var previous = crossSection(at: 0)
-    for index in 0..<tessellation.axialSections {
-      let current = crossSection(at: index + 1)
-      for widthIndex in 0..<tessellation.widthSections {
-        appendQuad(
-          previous[widthIndex],
-          previous[widthIndex + 1],
-          current[widthIndex + 1],
-          current[widthIndex],
+    let grid = (0...tessellation.axialSections).map(crossSection)
+    func smoothNormal(axialIndex: Int, widthIndex: Int) -> SIMD3<Float> {
+      let axialFirst = grid[max(0, axialIndex - 1)][widthIndex].position
+      let axialSecond = grid[min(tessellation.axialSections, axialIndex + 1)][widthIndex]
+        .position
+      let widthFirst = grid[axialIndex][max(0, widthIndex - 1)].position
+      let widthSecond = grid[axialIndex][min(tessellation.widthSections, widthIndex + 1)]
+        .position
+      var resolved = safeNormalize(
+        simd_cross(axialSecond - axialFirst, widthSecond - widthFirst),
+        fallback: normal
+      )
+      if simd_dot(resolved, normal) < 0 { resolved = -resolved }
+      return resolved
+    }
+    func appendPoint(axialIndex: Int, widthIndex: Int) {
+      let point = grid[axialIndex][widthIndex]
+      vertices.append(
+        vertex(
+          point.position,
+          normal: smoothNormal(axialIndex: axialIndex, widthIndex: widthIndex),
           color: color,
-          to: &vertices
+          parameters: point.parameters
         )
+      )
+    }
+    for index in 0..<tessellation.axialSections {
+      for widthIndex in 0..<tessellation.widthSections {
+        appendPoint(axialIndex: index, widthIndex: widthIndex)
+        appendPoint(axialIndex: index, widthIndex: widthIndex + 1)
+        appendPoint(axialIndex: index + 1, widthIndex: widthIndex + 1)
+        appendPoint(axialIndex: index, widthIndex: widthIndex)
+        appendPoint(axialIndex: index + 1, widthIndex: widthIndex + 1)
+        appendPoint(axialIndex: index + 1, widthIndex: widthIndex)
       }
-      previous = current
     }
   }
 
@@ -2724,12 +2768,14 @@ private struct CrowMeshBuilder {
   private func vertex(
     _ position: SIMD3<Float>,
     normal: SIMD3<Float>,
-    color: SIMD4<Float>
+    color: SIMD4<Float>,
+    parameters: SIMD4<Float> = .zero
   ) -> ColoredVertex {
     ColoredVertex(
       position: SIMD4<Float>(position, 1),
       normal: SIMD4<Float>(normal, 0),
-      color: color
+      color: color,
+      parameters: parameters
     )
   }
 }

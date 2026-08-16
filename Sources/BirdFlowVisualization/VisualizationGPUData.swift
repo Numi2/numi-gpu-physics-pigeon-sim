@@ -225,6 +225,7 @@ struct CrowSurfaceTemporalVertexGPU {
   var previousPosition: SIMD4<Float>
   var normal: SIMD4<Float>
   var albedoAndMaterial: SIMD4<Float>
+  var parameters: SIMD4<Float>
   var identity: SIMD4<UInt32>
 }
 

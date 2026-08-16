@@ -2,7 +2,12 @@
 using namespace metal;
 
 struct SurfaceVertex { float4 position; float4 normal; };
-struct ColoredVertex { float4 position; float4 normal; float4 color; };
+struct ColoredVertex {
+    float4 position;
+    float4 normal;
+    float4 color;
+    float4 parameters;
+};
 struct IsoVertex { float4 position; float4 normal; };
 struct TracerState { float4 positionAndAge; float4 velocityAndSpeed; };
 struct SliceProbeOutput { float4 worldAndScalar; float4 velocity; float4 vorticity; };
@@ -63,6 +68,7 @@ struct CrowSurfaceTemporalVertexGPU {
     float4 previousPosition;
     float4 normal;
     float4 albedoAndMaterial;
+    float4 parameters;
     uint4 identity;
 };
 
@@ -724,6 +730,7 @@ kernel void samplePressureSurface(
     output[gid].position = surface.position;
     output[gid].normal = surface.normal;
     output[gid].color = float4(divergingMap(displayed / u.scalesAndRanges.w), 1);
+    output[gid].parameters = float4(0);
 }
 
 kernel void renderFlowSlice(
@@ -1075,7 +1082,8 @@ vertex RasterVertex coloredSurfaceVertex(
     uint vid [[vertex_id]]) {
     ColoredVertex source=vertices[vid]; RasterVertex out;
     out.position=camera.viewProjection*source.position;out.world=source.position.xyz;
-    out.normal=normalize(source.normal.xyz);out.color=source.color;out.uv=float2(0);return out;
+    out.normal=normalize(source.normal.xyz);out.color=source.color;
+    out.uv=source.parameters.xy;return out;
 }
 
 vertex RasterVertex crowFeatherVertex(
@@ -1102,7 +1110,7 @@ vertex CrowRasterVertex crowSurfaceAOVVertex(
     out.world=source.position.xyz;
     out.normal=normalize(source.normal.xyz);
     out.albedoAndMaterial=source.albedoAndMaterial;
-    out.featherCoordinates=float2(0);
+    out.featherCoordinates=source.parameters.xy;
     out.identity=source.identity;
     return out;
 }
@@ -1272,12 +1280,19 @@ inline float3 showcaseCrowLinearRadiance(
     float3 sheen=mix(blue,violet,interference);
     float flightFeather=smoothstep(0.19f,0.25f,material);
     float featherMaterial=1.0f-smoothstep(0.46f,0.50f,material);
-    float persistentVane=flightFeather*step(1.0e-5f,
+    float vaneCoordinates=step(1.0e-5f,
         abs(featherCoordinates.x)+abs(featherCoordinates.y));
+    float persistentVane=featherMaterial*vaneCoordinates;
     float3 featherAxis=crowFeatherAxis(
         world,normal,featherCoordinates
     );
-    float anisotropicSpecular=featherMaterial*crowFeatherAnisotropicLobe(
+    float vaneAnisotropy=mix(
+        0.18f,
+        mix(0.52f,1.0f,flightFeather),
+        vaneCoordinates
+    );
+    float anisotropicSpecular=featherMaterial*vaneAnisotropy
+        *crowFeatherAnisotropicLobe(
         normal,featherAxis,halfVector,
         mix(0.34f,0.25f,flightFeather),
         mix(0.12f,0.075f,flightFeather)
@@ -1294,8 +1309,11 @@ inline float3 showcaseCrowLinearRadiance(
     float barbPhase=520.0f*world.x+390.0f*world.y-270.0f*world.z;
     float barb=0.5f+0.5f*sin(barbPhase);
     float barbSignal=mix(barb,localBarbs,persistentVane);
-    float barbMicro=flightFeather*(0.010f+0.018f*barbSignal)*grazing;
-    float vaneEdge=persistentVane*smoothstep(0.78f,0.98f,abs(signedWidth));
+    float barbMicro=persistentVane
+        *mix(0.006f+0.010f*barbSignal,0.010f+0.018f*barbSignal,flightFeather)
+        *grazing*mix(0.25f,1.0f,flightFeather);
+    float vaneEdge=persistentVane*smoothstep(0.78f,0.98f,abs(signedWidth))
+        *mix(0.35f,1.0f,flightFeather);
     float featherSpecular=pow(saturate(dot(normal,halfVector)),92.0f);
     float softSpecular=pow(saturate(dot(normal,halfVector)),24.0f);
     float diffuse=0.28f+0.62f*ndk+0.16f*ndf+0.10f*nds;
@@ -1314,12 +1332,13 @@ inline float3 showcaseCrowLinearRadiance(
         float3(0.006f,0.009f,0.014f),
         flightFeather
     );
-    color+=sharpTint*featherSpecular;
+    color+=sharpTint*featherSpecular*mix(0.55f,1.0f,flightFeather);
     color+=softTint*softSpecular;
     color+=anisotropicSpecular
         *mix(float3(0.020f,0.030f,0.046f),float3(0.012f,0.020f,0.034f),flightFeather);
     color*=1.0f-0.055f*persistentVane*(1.0f-localBarbs);
-    color+=rachis*(0.012f+0.025f*ndk)*float3(0.42f,0.56f,0.74f);
+    color+=rachis*mix(0.20f,1.0f,flightFeather)
+        *(0.012f+0.025f*ndk)*float3(0.42f,0.56f,0.74f);
     color+=vaneEdge*grazing*float3(0.010f,0.022f,0.042f);
     // Adult crow plumage should remain neutral-black under the warm key. A
     // direct copper lobe overwhelms the very low eumelanin albedo and makes

@@ -18,6 +18,10 @@ struct CrowBodyContourShingle: Equatable {
   let maximumWidthMeters: Float
   let camberMeters: Float
   let pennaceousStartFraction: Float
+  let vaneAsymmetry: Float
+  let edgeRippleAmplitude: Float
+  let edgeRipplePhase: Float
+  let materialVariation: Float
 }
 
 /// Dense, imbricated contour coverage over the asymmetric body loft.
@@ -113,6 +117,21 @@ enum CrowBodyContourShingles {
           axialIndex: axialIndex,
           salt: 0x7E95_761E
         )
+        let vaneIdentity = identityVariation(
+          radialIndex: radialIndex,
+          axialIndex: axialIndex,
+          salt: 0xB529_7A4D
+        )
+        let edgeIdentity = identityVariation(
+          radialIndex: radialIndex,
+          axialIndex: axialIndex,
+          salt: 0x68E3_1DA4
+        )
+        let materialIdentity = identityVariation(
+          radialIndex: radialIndex,
+          axialIndex: axialIndex,
+          salt: 0x1B56_C4E9
+        )
         let tipTheta =
           rootTheta - 0.038 * cos(rootTheta) * (0.35 + 0.65 * posterior)
           + 0.012 * tipIdentity
@@ -144,7 +163,11 @@ enum CrowBodyContourShingles {
               regionPennaceousStart(region) + 0.020 * tipIdentity,
               lower: 0.34,
               upper: 0.47
-            )
+            ),
+            vaneAsymmetry: 0.045 * vaneIdentity,
+            edgeRippleAmplitude: 0.012 + 0.018 * (0.5 + 0.5 * edgeIdentity),
+            edgeRipplePhase: Float.pi * (edgeIdentity + 1),
+            materialVariation: materialIdentity
           )
         )
       }
@@ -203,14 +226,22 @@ enum CrowBodyContourShingles {
 
   static func vaneHalfWidth(
     for feather: CrowBodyContourShingle,
-    at fraction: Float
+    at fraction: Float,
+    signedWidth: Float = 0
   ) -> Float {
     let t = clamp(fraction, lower: 0, upper: 1)
     let bodyEnvelope = 0.32 + 0.68 * pow(max(sin(Float.pi * t), 0), 0.58)
     let tipTaper = 1 - 0.985 * pow(t, 3.2)
+    let rippleEnvelope = pow(max(sin(Float.pi * t), 0), 2)
+    let edgeRipple =
+      1
+      + feather.edgeRippleAmplitude
+      * sin(3 * Float.pi * t + feather.edgeRipplePhase) * rippleEnvelope
+    let sideScale = 1 + feather.vaneAsymmetry * min(max(signedWidth, -1), 1)
     return
       (feather.rootWidthMeters * (1 - t)
       + feather.maximumWidthMeters * t) * bodyEnvelope * tipTaper
+      * edgeRipple * sideScale
   }
 
   /// Stable identity noise prevents periodic courses without allowing temporal

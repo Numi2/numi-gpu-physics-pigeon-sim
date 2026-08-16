@@ -12,6 +12,19 @@ struct ColoredVertex {
   var position: SIMD4<Float>
   var normal: SIMD4<Float>
   var color: SIMD4<Float>
+  var parameters: SIMD4<Float>
+
+  init(
+    position: SIMD4<Float>,
+    normal: SIMD4<Float>,
+    color: SIMD4<Float>,
+    parameters: SIMD4<Float> = .zero
+  ) {
+    self.position = position
+    self.normal = normal
+    self.color = color
+    self.parameters = parameters
+  }
 }
 
 enum BirdSurfaceMesh {

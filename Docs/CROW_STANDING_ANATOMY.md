@@ -90,12 +90,26 @@ loft break aligned transverse and longitudinal rows. The smaller `0.45 mm`
 shell clearance, flatter transverse crown, and narrower vane aspect keep axial
 and circumferential overlap explicit. Paired downy barbs are retained as
 output-coverage-driven geometry for close future renders and omitted when
-subpixel. This two-zone organization follows observed contour-feather
+subpixel. Each visible vane now carries its own axial/width coordinates through
+the temporal AOV path, so smooth geometric normals drive the highlight along
+the rachis instead of the former flat-quad fallback direction. Bounded stable
+inner/outer asymmetry (`+/-4.5%`), `1.2-3.0%` edge undulation, and low-amplitude
+eumelanin color variation break cloned silhouettes without weakening the
+directional adjacent-tract overlap gate. These optical and edge values are
+presentation estimates, not measured crow microstructure. This two-zone
+organization follows observed contour-feather
 morphology ([Ng et al. 2014](https://pmc.ncbi.nlm.nih.gov/articles/PMC4202321/))
 and the layered optical role of hidden bases beneath exposed tips
 ([Eliason et al. 2025](https://pmc.ncbi.nlm.nih.gov/articles/PMC12285719/)); the
 zone fractions are bounded presentation estimates, not American-crow
 measurements.
+
+Body-vane barb, rachis, and edge energy is attenuated independently from the
+larger remiges when it becomes unresolved by the half-resolution temporal
+input. The retained native-versus-`2x` gate requires full-frame display RMSE
+below `0.01`, foreground gradient-energy retention above `0.74`, and bird
+silhouette intersection-over-union above `0.94`; these remain output contracts,
+not evidence that the presentation geometry is measured.
 
 The twelve retained rectrices form a closed standing stack: their bases remain
 buried beneath the rump shell, their root and distal lateral spans are each
