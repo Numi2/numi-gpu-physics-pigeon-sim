@@ -63,7 +63,15 @@ final class CrowFeatherRootDeformer {
 
     let feathers = asset.feathers
     let hashes = asset.stableFeatherIdentifierHashes
+    let groupedCounts = Dictionary(grouping: feathers) {
+      "\($0.featherClass.rawValue):\($0.side.rawValue)"
+    }.mapValues(\.count)
+    var orders: [String: Int] = [:]
     bindings = try zip(feathers, hashes).map { feather, hash in
+      let key = "\(feather.featherClass.rawValue):\(feather.side.rawValue)"
+      let order = orders[key, default: 0]
+      orders[key] = order + 1
+      let count = groupedCounts[key] ?? 1
       let surfaceFrame = try Self.surfaceFrameBinding(
         feather: feather,
         dataset: dataset
@@ -77,7 +85,11 @@ final class CrowFeatherRootDeformer {
         ),
         ownershipAndIdentity: SIMD4<UInt32>(
           UInt32(feather.physicsSurfacePartIdentifier),
-          Self.packedIdentity(feather),
+          CrowPersistentFeatherIdentity.packed(
+            feather: feather,
+            order: order,
+            count: count
+          ),
           UInt32(surfaceFrame.partChord),
           0
         ),
@@ -86,9 +98,19 @@ final class CrowFeatherRootDeformer {
           feather.lengthMeters
         ),
         widthRachisAndPadding: SIMD4<Float>(
-          feather.maximumWidthMeters,
+          CrowRectrixVaneAnatomy.maximumWidthMeters(
+            assetWidthMeters: feather.maximumWidthMeters,
+            featherClass: feather.featherClass,
+            order: order,
+            count: count
+          ),
           feather.rachisRadiusMeters,
-          Self.camberMeters(feather),
+          CrowRectrixVaneAnatomy.camberMeters(
+            lengthMeters: feather.lengthMeters,
+            featherClass: feather.featherClass,
+            order: order,
+            count: count
+          ),
           0
         )
       )
@@ -202,7 +224,7 @@ final class CrowFeatherRootDeformer {
           ),
           previousPositionAndWidth: SIMD4<Float>(
             previous.root,
-            feather.maximumWidthMeters
+            binding.widthRachisAndPadding.x
           ),
           currentDirectionAndRachis: SIMD4<Float>(
             current.direction,
@@ -210,7 +232,7 @@ final class CrowFeatherRootDeformer {
           ),
           previousDirectionAndCamber: SIMD4<Float>(
             previous.direction,
-            Self.camberMeters(feather)
+            binding.widthRachisAndPadding.z
           ),
           currentNormalAndPadding: SIMD4<Float>(current.normal, 0),
           previousNormalAndPadding: SIMD4<Float>(previous.normal, 0),
@@ -218,7 +240,7 @@ final class CrowFeatherRootDeformer {
             UInt32(index),
             hash,
             UInt32(feather.physicsSurfacePartIdentifier),
-            Self.packedIdentity(feather)
+            binding.ownershipAndIdentity.y
           )
         )
       }
@@ -312,9 +334,11 @@ final class CrowFeatherRootDeformer {
     localDirection: SIMD3<Float>
   ) {
     let rootIndex = feather.physicsRootVertexIndex
-    guard let component = dataset.components.first(where: {
-      $0.partIdentifier == feather.physicsSurfacePartIdentifier
-    }) else {
+    guard
+      let component = dataset.components.first(where: {
+        $0.partIdentifier == feather.physicsSurfacePartIdentifier
+      })
+    else {
       throw VisualizationError.pipeline(
         "feather \(feather.identifier) has no owning surface component"
       )
@@ -326,18 +350,20 @@ final class CrowFeatherRootDeformer {
     }
     bodyCenter /= Float(body.vertexCount)
     let partIndices = component.vertexOffset..<(component.vertexOffset + component.vertexCount)
-    guard let partRoot = partIndices.min(by: {
-      simd_distance_squared(dataset.vertex(frame: 0, index: $0), bodyCenter)
-        < simd_distance_squared(dataset.vertex(frame: 0, index: $1), bodyCenter)
-    }),
+    guard
+      let partRoot = partIndices.min(by: {
+        simd_distance_squared(dataset.vertex(frame: 0, index: $0), bodyCenter)
+          < simd_distance_squared(dataset.vertex(frame: 0, index: $1), bodyCenter)
+      }),
       let partTip = partIndices.max(by: {
         simd_distance_squared(
           dataset.vertex(frame: 0, index: $0),
           dataset.vertex(frame: 0, index: partRoot)
-        ) < simd_distance_squared(
-          dataset.vertex(frame: 0, index: $1),
-          dataset.vertex(frame: 0, index: partRoot)
         )
+          < simd_distance_squared(
+            dataset.vertex(frame: 0, index: $1),
+            dataset.vertex(frame: 0, index: partRoot)
+          )
       })
     else {
       throw VisualizationError.pipeline(
@@ -347,26 +373,33 @@ final class CrowFeatherRootDeformer {
     let partAxis = safeNormalize(
       dataset.vertex(frame: 0, index: partTip)
         - dataset.vertex(frame: 0, index: partRoot),
-      fallback: SIMD3<Float>(0, sideCode(feather.side) == 2 ? -1 : 1, 0)
+      fallback: SIMD3<Float>(
+        0,
+        CrowPersistentFeatherIdentity.sideCode(feather.side) == 2 ? -1 : 1,
+        0
+      )
     )
-    let partChord = partIndices.max(by: {
-      let first = dataset.vertex(frame: 0, index: $0)
-        - dataset.vertex(frame: 0, index: partRoot)
-      let second = dataset.vertex(frame: 0, index: $1)
-        - dataset.vertex(frame: 0, index: partRoot)
-      let firstPerpendicular = first - partAxis * simd_dot(first, partAxis)
-      let secondPerpendicular = second - partAxis * simd_dot(second, partAxis)
-      return simd_length_squared(firstPerpendicular)
-        < simd_length_squared(secondPerpendicular)
-    }) ?? partRoot
+    let partChord =
+      partIndices.max(by: {
+        let first =
+          dataset.vertex(frame: 0, index: $0)
+          - dataset.vertex(frame: 0, index: partRoot)
+        let second =
+          dataset.vertex(frame: 0, index: $1)
+          - dataset.vertex(frame: 0, index: partRoot)
+        let firstPerpendicular = first - partAxis * simd_dot(first, partAxis)
+        let secondPerpendicular = second - partAxis * simd_dot(second, partAxis)
+        return simd_length_squared(firstPerpendicular)
+          < simd_length_squared(secondPerpendicular)
+      }) ?? partRoot
     let root = dataset.vertex(frame: 0, index: rootIndex)
     let basis = frameBasis(
       root: root,
       partRoot: dataset.vertex(frame: 0, index: partRoot),
       partTip: dataset.vertex(frame: 0, index: partTip),
       partChord: dataset.vertex(frame: 0, index: partChord),
-      featherClass: classCode(feather.featherClass),
-      side: sideCode(feather.side)
+      featherClass: CrowPersistentFeatherIdentity.classCode(feather.featherClass),
+      side: CrowPersistentFeatherIdentity.sideCode(feather.side)
     )
     let direction = safeNormalize(
       feather.restDirection,
@@ -431,40 +464,6 @@ final class CrowFeatherRootDeformer {
   ) -> SIMD3<Float> {
     let magnitude = simd_length(value)
     return magnitude > 1e-12 ? value / magnitude : fallback
-  }
-
-  private static func camberMeters(_ feather: BirdRealityFeather) -> Float {
-    let scale: Float
-    switch feather.featherClass {
-    case .primary: scale = 0.045
-    case .secondary: scale = 0.040
-    case .tail: scale = 0.030
-    case .covert: scale = 0.025
-    case .contour: scale = 0.020
-    }
-    return feather.lengthMeters * scale
-  }
-
-  private static func packedIdentity(_ feather: BirdRealityFeather) -> UInt32 {
-    classCode(feather.featherClass) | (sideCode(feather.side) << 8)
-  }
-
-  private static func classCode(_ featherClass: BirdRealityFeatherClass) -> UInt32 {
-    switch featherClass {
-    case .primary: return 1
-    case .secondary: return 2
-    case .tail: return 3
-    case .covert: return 4
-    case .contour: return 5
-    }
-  }
-
-  private static func sideCode(_ side: BirdRealitySide) -> UInt32 {
-    switch side {
-    case .center: return 0
-    case .left: return 1
-    case .right: return 2
-    }
   }
 
   private static func sharedBuffer<T>(

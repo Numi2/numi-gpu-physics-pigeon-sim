@@ -46,3 +46,106 @@ func closedRectricesOverlapInMedialToLateralTent() {
   #expect(tipDepths.max()! - tipDepths.min()! > 0.005)
   #expect(tipDepths.max()! - tipDepths.min()! < 0.0061)
 }
+
+@Test("rectrix pairs retain identity-specific asymmetric vane profiles")
+func rectrixPairsRetainIdentitySpecificAsymmetricVaneProfiles() {
+  let count = CrowClosedTailAnatomy.rectrixCount
+  let profiles = (0..<count).map {
+    CrowRectrixVaneAnatomy.profile(order: $0, count: count)
+  }
+  let widths = profiles.map { 0.019 * $0.maximumWidthScale }
+  let cambers = profiles.map {
+    CrowClosedTailAnatomy.rectrixLengthMeters * $0.camberLengthScale
+  }
+
+  #expect(Set(widths).count == 6)
+  #expect(Set(cambers).count == 6)
+  #expect(widths.max()! - widths.min()! > 0.0009)
+  #expect(widths.max()! - widths.min()! < 0.0011)
+  #expect(cambers.max()! - cambers.min()! > 0.0009)
+  #expect(cambers.max()! - cambers.min()! < 0.0012)
+
+  for pairIndex in 0..<(count / 2) {
+    let right = profiles[pairIndex]
+    let left = profiles[count - 1 - pairIndex]
+    #expect(abs(right.radialFraction - left.radialFraction) < 1e-7)
+    #expect(abs(right.maximumWidthScale - left.maximumWidthScale) < 1e-7)
+    #expect(abs(right.camberLengthScale - left.camberLengthScale) < 1e-7)
+    #expect(abs(right.vaneAsymmetry - left.vaneAsymmetry) < 1e-7)
+    #expect(abs(right.outerSignedWidth + left.outerSignedWidth) < 1e-7)
+
+    let maximumWidth = widths[pairIndex]
+    let outer = CrowRectrixVaneAnatomy.halfWidthMeters(
+      maximumWidthMeters: maximumWidth,
+      axial: 0.55,
+      signedWidth: right.outerSignedWidth,
+      profile: right
+    )
+    let inner = CrowRectrixVaneAnatomy.halfWidthMeters(
+      maximumWidthMeters: maximumWidth,
+      axial: 0.55,
+      signedWidth: -right.outerSignedWidth,
+      profile: right
+    )
+    #expect(inner > outer)
+    #expect((inner - outer) / maximumWidth > 0.03)
+    #expect((inner - outer) / maximumWidth < 0.14)
+  }
+
+  for profile in profiles {
+    #expect(abs(CrowRectrixVaneAnatomy.camberEnvelope(axial: 0, profile: profile)) < 1e-7)
+    #expect(abs(CrowRectrixVaneAnatomy.camberEnvelope(axial: 1, profile: profile)) < 1e-6)
+    #expect(CrowRectrixVaneAnatomy.camberEnvelope(axial: 0.5, profile: profile) > 0.99)
+  }
+}
+
+@Test("identity-specific rectrix vanes preserve the closed-tail envelope")
+func identitySpecificRectrixVanesPreserveClosedTailEnvelope() {
+  let count = CrowClosedTailAnatomy.rectrixCount
+  let poses = (0..<count).map {
+    CrowClosedTailAnatomy.pose(fraction: Float($0) / Float(count - 1))
+  }
+
+  for axial: Float in [0.20, 0.45, 0.70, 0.88] {
+    let intervals = poses.enumerated().map { order, pose -> ClosedRange<Float> in
+      let profile = CrowRectrixVaneAnatomy.profile(order: order, count: count)
+      let maximumWidth = 0.019 * profile.maximumWidthScale
+      let camber = CrowClosedTailAnatomy.rectrixLengthMeters * profile.camberLengthScale
+      let orthogonalNormal = simd_normalize(
+        pose.normal - pose.direction * simd_dot(pose.normal, pose.direction)
+      )
+      let widthAxis = simd_normalize(simd_cross(orthogonalNormal, pose.direction))
+      let center =
+        pose.rootOffset
+        + pose.direction * (CrowClosedTailAnatomy.rectrixLengthMeters * axial)
+        + orthogonalNormal
+        * (camber
+          * CrowRectrixVaneAnatomy.camberEnvelope(axial: axial, profile: profile))
+      let negative =
+        center
+        - widthAxis
+        * CrowRectrixVaneAnatomy.halfWidthMeters(
+          maximumWidthMeters: maximumWidth,
+          axial: axial,
+          signedWidth: -1,
+          profile: profile
+        )
+      let positive =
+        center
+        + widthAxis
+        * CrowRectrixVaneAnatomy.halfWidthMeters(
+          maximumWidthMeters: maximumWidth,
+          axial: axial,
+          signedWidth: 1,
+          profile: profile
+        )
+      return min(negative.y, positive.y)...max(negative.y, positive.y)
+    }
+    for pair in zip(intervals, intervals.dropFirst()) {
+      let overlap =
+        min(pair.0.upperBound, pair.1.upperBound)
+        - max(pair.0.lowerBound, pair.1.lowerBound)
+      #expect(overlap > 0.001)
+    }
+  }
+}

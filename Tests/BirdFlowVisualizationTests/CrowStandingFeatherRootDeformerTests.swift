@@ -105,6 +105,25 @@ func standingCrowFeatherRootsMatchMetalReference() throws {
   #expect(localRoots.map(\.x).min()! > -0.158)
   #expect(Set(moving.map { $0.identity.y }).count == 54)
 
+  let rectrices =
+    moving
+    .filter { $0.identity.w & 255 == 3 }
+    .sorted { (($0.identity.w >> 16) & 255) < (($1.identity.w >> 16) & 255) }
+  #expect(rectrices.count == 12)
+  #expect(
+    rectrices.enumerated().allSatisfy { order, rectrix in
+      ((rectrix.identity.w >> 16) & 255) == UInt32(order)
+        && ((rectrix.identity.w >> 24) & 255) == 12
+    })
+  let rectrixWidths = rectrices.map(\.previousPositionAndWidth.w)
+  let rectrixCambers = rectrices.map(\.previousDirectionAndCamber.w)
+  #expect(rectrixWidths.max()! - rectrixWidths.min()! > 0.0009)
+  #expect(rectrixCambers.max()! - rectrixCambers.min()! > 0.0009)
+  for pairIndex in 0..<6 {
+    #expect(abs(rectrixWidths[pairIndex] - rectrixWidths[11 - pairIndex]) < 1e-7)
+    #expect(abs(rectrixCambers[pairIndex] - rectrixCambers[11 - pairIndex]) < 1e-7)
+  }
+
   for featherClass: UInt32 in [1, 2] {
     for sideCode: UInt32 in [1, 2] {
       let tips = moving.compactMap { state -> SIMD3<Float>? in
@@ -184,17 +203,24 @@ func standingCrowFeatherRootsMatchMetalReference() throws {
       let tailAxial = simd_dot(primaryTip - tailRoot, tailDirection) / tailLength
       guard tailAxial > 0.15 && tailAxial < 0.92 else { continue }
       evaluatedPrimaryCount += 1
-      let bodyEnvelope =
-        0.32 + 0.68 * pow(max(sin(Float.pi * tailAxial), 0), 0.58)
-      let tipTaper = 1 - 0.985 * pow(tailAxial, 3.2)
-      let tailHalfWidth =
-        lateralRectrix.previousPositionAndWidth.w
-        * (0.55 + 0.45 * tailAxial) * bodyEnvelope * tipTaper
+      let rectrixProfile = CrowRectrixVaneAnatomy.profile(
+        packedIdentity: lateralRectrix.identity.w
+      )!
+      let outwardSignedWidth: Float = side * tailWidthAxis.y >= 0 ? 1 : -1
+      let tailHalfWidth = CrowRectrixVaneAnatomy.halfWidthMeters(
+        maximumWidthMeters: lateralRectrix.previousPositionAndWidth.w,
+        axial: tailAxial,
+        signedWidth: outwardSignedWidth,
+        profile: rectrixProfile
+      )
       let tailCenter =
         tailRoot + tailLength * tailAxial * tailDirection
         + orthogonalTailNormal
         * (lateralRectrix.previousDirectionAndCamber.w
-          * sin(Float.pi * tailAxial))
+          * CrowRectrixVaneAnatomy.camberEnvelope(
+            axial: tailAxial,
+            profile: rectrixProfile
+          ))
       let lateralTailEdge =
         side * tailCenter.y + abs(tailWidthAxis.y) * tailHalfWidth
       #expect(side * primaryTip.y < lateralTailEdge - 0.0005)

@@ -37,7 +37,7 @@ func crowFeatherTemplateGPUDeformationMatchesCPUReference() throws {
   #expect(MemoryLayout<CrowFeatherTemplateVertexGPU>.stride == 16)
   #expect(MemoryLayout<CrowFeatherVertexGPU>.stride == 96)
   #expect(MemoryLayout<CrowFeatherGeometryUniforms>.stride == 32)
-  #expect(geometryDeformer.vertexCount == 54 * 12 * 4 * 6)
+  #expect(geometryDeformer.vertexCount == 54 * 24 * 6 * 6)
 
   let body = surface.components.first { $0.partIdentifier == 1 }!
   var referenceBodyCenter = SIMD3<Float>.zero
@@ -151,6 +151,34 @@ func crowFeatherTemplateGPUDeformationMatchesCPUReference() throws {
       abs(simd_length(SIMD3<Float>($0.normal.x, $0.normal.y, $0.normal.z)) - 1) < 2e-5
     }
   )
+
+  for rectrix in movingRoots.filter({ $0.identity.w & 255 == 3 }) {
+    let vertices = movingVertices.filter { $0.identity.x == rectrix.identity.x }
+    func point(axial: Float, signedWidth: Float) -> SIMD3<Float> {
+      let vertex = vertices.first {
+        abs($0.parameters.x - axial) < 1e-7
+          && abs($0.parameters.y - signedWidth) < 1e-7
+      }!
+      return SIMD3<Float>(vertex.position.x, vertex.position.y, vertex.position.z)
+    }
+    let centerVertex = vertices.first {
+      abs($0.parameters.x - 0.5) < 1e-7
+        && abs($0.parameters.y) < 1e-7
+    }!
+    let axialTangent =
+      point(axial: 13.0 / 24.0, signedWidth: 0)
+      - point(axial: 11.0 / 24.0, signedWidth: 0)
+    let widthTangent =
+      point(axial: 0.5, signedWidth: 1.0 / 3.0)
+      - point(axial: 0.5, signedWidth: -1.0 / 3.0)
+    let finiteDifferenceNormal = simd_normalize(simd_cross(axialTangent, widthTangent))
+    let analyticNormal = SIMD3<Float>(
+      centerVertex.normal.x,
+      centerVertex.normal.y,
+      centerVertex.normal.z
+    )
+    #expect(abs(simd_dot(finiteDifferenceNormal, analyticNormal)) > 0.998)
+  }
 
   let firstFeather = movingVertices.filter { $0.identity.x == 0 }
   func midVaneVertex(signedWidth: Float) -> CrowFeatherVertexGPU {

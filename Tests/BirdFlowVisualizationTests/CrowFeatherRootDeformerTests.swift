@@ -111,7 +111,7 @@ func crowFeatherRootGPUDeformationMatchesCPUReference() throws {
     }
   )
   for packedIdentity in [UInt32(1 | (1 << 8)), UInt32(1 | (2 << 8))] {
-    let primaries = movingFrame.filter { $0.identity.w == packedIdentity }
+    let primaries = movingFrame.filter { ($0.identity.w & 0xffff) == packedIdentity }
     #expect(primaries.count == 10)
     let referenceNormal = SIMD3<Float>(
       primaries[0].currentNormalAndPadding.x,

@@ -40,24 +40,39 @@ final class CrowStandingFeatherRootDeformer: CrowFeatherRootDeforming {
       let key = "\(feather.featherClass.rawValue):\(feather.side.rawValue)"
       let order = orders[key, default: 0]
       orders[key] = order + 1
+      let count = groupedCounts[key] ?? 1
       return CrowStandingFeatherBindingGPU(
         identity: SIMD4<UInt32>(
           UInt32(index),
           hash,
           UInt32(feather.physicsSurfacePartIdentifier),
-          Self.packedIdentity(feather)
+          CrowPersistentFeatherIdentity.packed(
+            feather: feather,
+            order: order,
+            count: count
+          )
         ),
         orderCountClassSide: SIMD4<UInt32>(
           UInt32(order),
-          UInt32(groupedCounts[key] ?? 1),
-          Self.classCode(feather.featherClass),
-          Self.sideCode(feather.side)
+          UInt32(count),
+          CrowPersistentFeatherIdentity.classCode(feather.featherClass),
+          CrowPersistentFeatherIdentity.sideCode(feather.side)
         ),
         morphology: SIMD4<Float>(
           feather.lengthMeters,
-          feather.maximumWidthMeters,
+          CrowRectrixVaneAnatomy.maximumWidthMeters(
+            assetWidthMeters: feather.maximumWidthMeters,
+            featherClass: feather.featherClass,
+            order: order,
+            count: count
+          ),
           feather.rachisRadiusMeters,
-          Self.camberMeters(feather)
+          CrowRectrixVaneAnatomy.camberMeters(
+            lengthMeters: feather.lengthMeters,
+            featherClass: feather.featherClass,
+            order: order,
+            count: count
+          )
         )
       )
     }
@@ -203,40 +218,6 @@ final class CrowStandingFeatherRootDeformer: CrowFeatherRootDeforming {
   ) -> SIMD3<Float> {
     let length = simd_length(value)
     return length > 1e-12 ? value / length : fallback
-  }
-
-  private static func camberMeters(_ feather: BirdRealityFeather) -> Float {
-    let scale: Float
-    switch feather.featherClass {
-    case .primary: scale = 0.045
-    case .secondary: scale = 0.040
-    case .tail: scale = 0.030
-    case .covert: scale = 0.025
-    case .contour: scale = 0.020
-    }
-    return feather.lengthMeters * scale
-  }
-
-  private static func packedIdentity(_ feather: BirdRealityFeather) -> UInt32 {
-    classCode(feather.featherClass) | (sideCode(feather.side) << 8)
-  }
-
-  private static func classCode(_ featherClass: BirdRealityFeatherClass) -> UInt32 {
-    switch featherClass {
-    case .primary: return 1
-    case .secondary: return 2
-    case .tail: return 3
-    case .covert: return 4
-    case .contour: return 5
-    }
-  }
-
-  private static func sideCode(_ side: BirdRealitySide) -> UInt32 {
-    switch side {
-    case .center: return 0
-    case .left: return 1
-    case .right: return 2
-    }
   }
 
   private static func sharedBuffer<T>(

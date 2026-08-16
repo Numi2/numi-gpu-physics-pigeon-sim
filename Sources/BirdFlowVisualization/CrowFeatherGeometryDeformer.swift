@@ -16,8 +16,8 @@ struct CrowFeatherGeometryFrame {
 /// feed mesh shaders or ray-tracing geometry without changing asset identity.
 final class CrowFeatherGeometryDeformer {
   private static let bufferedFrameCount = 3
-  private static let sectionCount = 12
-  private static let widthSectionCount = 4
+  private static let sectionCount = 24
+  private static let widthSectionCount = 6
 
   private let backend: VisualizationBackend
   private let pipeline: MTLComputePipelineState
@@ -128,7 +128,8 @@ final class CrowFeatherGeometryDeformer {
         let lengthMeters = root.currentPositionAndLength.w
         let maximumWidthMeters = root.previousPositionAndWidth.w
         let camberMeters = root.previousDirectionAndCamber.w
-        let featherClass = root.identity.w & 255
+        let packedIdentity = root.identity.w
+        let featherClass = packedIdentity & 255
         let material: Float =
           featherClass == 1 ? 0.25 : (featherClass == 2 ? 0.22 : 0.23)
         let shade = 0.0075 + 0.00045 * Float(root.identity.x % 11)
@@ -145,7 +146,7 @@ final class CrowFeatherGeometryDeformer {
               camberMeters: camberMeters,
               axial: axial,
               signedWidth: signedWidth,
-              featherClass: featherClass
+              packedIdentity: packedIdentity
             ) + renderOffset,
             1
           ),
@@ -158,7 +159,7 @@ final class CrowFeatherGeometryDeformer {
               camberMeters: camberMeters,
               axial: axial,
               signedWidth: signedWidth,
-              featherClass: featherClass
+              packedIdentity: packedIdentity
             ),
             0
           ),
@@ -173,7 +174,7 @@ final class CrowFeatherGeometryDeformer {
               camberMeters: camberMeters,
               axial: axial,
               signedWidth: signedWidth,
-              featherClass: featherClass
+              packedIdentity: packedIdentity
             ) + renderOffset,
             1
           ),
@@ -221,7 +222,7 @@ final class CrowFeatherGeometryDeformer {
     camberMeters: Float,
     axial: Float,
     signedWidth: Float,
-    featherClass: UInt32
+    packedIdentity: UInt32
   ) -> SIMD3<Float> {
     let tangent = safeNormalize(direction, fallback: SIMD3<Float>(1, 0, 0))
     let orthogonalNormal = safeNormalize(
@@ -234,16 +235,26 @@ final class CrowFeatherGeometryDeformer {
     )
     let bodyEnvelope = 0.32 + 0.68 * pow(max(sin(Float.pi * axial), 0), 0.58)
     let tipTaper = 1 - 0.985 * pow(axial, 3.2)
-    let width =
+    let baseWidth =
       (0.55 * maximumWidthMeters * (1 - axial)
         + maximumWidthMeters * axial) * bodyEnvelope * tipTaper
+    let rectrix = CrowRectrixVaneAnatomy.profile(packedIdentity: packedIdentity)
+    let sideScale =
+      1
+      - (rectrix?.vaneAsymmetry ?? 0) * signedWidth
+      * (rectrix?.outerSignedWidth ?? 0)
+    let width = baseWidth * sideScale
+    let camberEnvelope =
+      rectrix.map {
+        CrowRectrixVaneAnatomy.camberEnvelope(axial: axial, profile: $0)
+      } ?? sin(Float.pi * axial)
     let center =
       root + tangent * (lengthMeters * axial)
-      + orthogonalNormal * (camberMeters * sin(Float.pi * axial))
+      + orthogonalNormal * (camberMeters * camberEnvelope)
     let transverseEnvelope = max(0, 1 - signedWidth * signedWidth)
     let crownEnvelope = pow(max(sin(Float.pi * axial), 0), 0.65)
     let crown =
-      crownRatio(featherClass: featherClass) * width
+      crownRatio(packedIdentity: packedIdentity) * width
       * transverseEnvelope * crownEnvelope
     return center + widthAxis * (signedWidth * width) + orthogonalNormal * crown
   }
@@ -256,7 +267,7 @@ final class CrowFeatherGeometryDeformer {
     camberMeters: Float,
     axial: Float,
     signedWidth: Float,
-    featherClass: UInt32
+    packedIdentity: UInt32
   ) -> SIMD3<Float> {
     let tangent = safeNormalize(direction, fallback: SIMD3<Float>(1, 0, 0))
     let orthogonalNormal = safeNormalize(
@@ -277,26 +288,39 @@ final class CrowFeatherGeometryDeformer {
     let tipDerivative = -0.985 * 3.2 * pow(sampledAxial, 2.2)
     let baseWidth = maximumWidthMeters * (0.55 + 0.45 * sampledAxial)
     let baseWidthDerivative = 0.45 * maximumWidthMeters
-    let width = baseWidth * bodyEnvelope * tipTaper
-    let widthDerivative =
+    let symmetricWidth = baseWidth * bodyEnvelope * tipTaper
+    let symmetricWidthDerivative =
       baseWidthDerivative * bodyEnvelope * tipTaper
       + baseWidth * bodyDerivative * tipTaper
       + baseWidth * bodyEnvelope * tipDerivative
+    let rectrix = CrowRectrixVaneAnatomy.profile(packedIdentity: packedIdentity)
+    let asymmetry = rectrix?.vaneAsymmetry ?? 0
+    let outerSignedWidth = rectrix?.outerSignedWidth ?? 0
+    let sideScale = 1 - asymmetry * signedWidth * outerSignedWidth
+    let width = symmetricWidth * sideScale
+    let widthDerivative = symmetricWidthDerivative * sideScale
+    let widthSignedDerivative = -symmetricWidth * asymmetry * outerSignedWidth
     let crownEnvelope = pow(sine, 0.65)
     let crownDerivative = 0.65 * pow(sine, -0.35) * sineDerivative
     let transverseEnvelope = max(0, 1 - signedWidth * signedWidth)
-    let crownRatio = crownRatio(featherClass: featherClass)
+    let crownRatio = crownRatio(packedIdentity: packedIdentity)
+    let camberSkew = rectrix?.camberSkew ?? 0
+    let camberDerivative =
+      sineDerivative * (1 + camberSkew * (2 * sampledAxial - 1))
+      + sine * 2 * camberSkew
     let axialTangent =
       tangent * lengthMeters
-      + orthogonalNormal * (camberMeters * Float.pi * cosine)
+      + orthogonalNormal * (camberMeters * camberDerivative)
       + widthAxis * (signedWidth * widthDerivative)
       + orthogonalNormal
       * (crownRatio * transverseEnvelope
         * (widthDerivative * crownEnvelope + width * crownDerivative))
     let widthTangent =
-      widthAxis * width
+      widthAxis * (width + signedWidth * widthSignedDerivative)
       + orthogonalNormal
-      * (crownRatio * width * (-2 * signedWidth) * crownEnvelope)
+      * (crownRatio * crownEnvelope
+        * (widthSignedDerivative * transverseEnvelope
+          + width * (-2 * signedWidth)))
     var result = safeNormalize(
       simd_cross(axialTangent, widthTangent),
       fallback: surfaceNormal
@@ -305,7 +329,11 @@ final class CrowFeatherGeometryDeformer {
     return result
   }
 
-  private static func crownRatio(featherClass: UInt32) -> Float {
+  private static func crownRatio(packedIdentity: UInt32) -> Float {
+    if let rectrix = CrowRectrixVaneAnatomy.profile(packedIdentity: packedIdentity) {
+      return rectrix.crownRatio
+    }
+    let featherClass = packedIdentity & 255
     switch featherClass {
     case 1: return 0.13
     case 2: return 0.16

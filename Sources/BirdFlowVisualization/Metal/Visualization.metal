@@ -411,8 +411,29 @@ inline float crowFeatherWidthEnvelope(float axial) {
     return body*(1.0f-0.985f*pow(axial,3.2f));
 }
 
-inline float crowFeatherCrownRatio(uint featherClass) {
-    return featherClass==1u?0.13f:(featherClass==2u?0.16f:0.11f);
+inline float4 crowRectrixVaneProfile(uint packedIdentity) {
+    if((packedIdentity&255u)!=3u){return float4(0);}
+    uint order=(packedIdentity>>16u)&255u;
+    uint count=max((packedIdentity>>24u)&255u,1u);
+    float fraction=float(min(order,count-1u))/float(max(count-1u,1u));
+    float centered=2.0f*fraction-1.0f;
+    float radialFraction=abs(centered);
+    float side=centered>=0.0f?1.0f:-1.0f;
+    return float4(
+        radialFraction,
+        -side,
+        0.025f+0.045f*radialFraction,
+        -0.050f+0.100f*radialFraction
+    );
+}
+
+inline float crowFeatherCrownRatio(uint packedIdentity) {
+    uint featherClass=packedIdentity&255u;
+    if(featherClass==3u){
+        float radialFraction=crowRectrixVaneProfile(packedIdentity).x;
+        return 0.105f+0.020f*(1.0f-radialFraction);
+    }
+    return featherClass==1u?0.13f:(featherClass==2u?0.16f:0.14f);
 }
 
 inline float3 crowFeatherPosition(
@@ -424,7 +445,7 @@ inline float3 crowFeatherPosition(
     float camberMeters,
     float axial,
     float signedWidth,
-    uint featherClass) {
+    uint packedIdentity) {
     float3 tangent=safeNormalizeCrow(direction,float3(1,0,0));
     float3 orthogonalNormal=safeNormalizeCrow(
         surfaceNormal-tangent*dot(surfaceNormal,tangent),surfaceNormal
@@ -432,13 +453,18 @@ inline float3 crowFeatherPosition(
     float3 widthAxis=safeNormalizeCrow(
         cross(orthogonalNormal,tangent),float3(0,1,0)
     );
-    float width=mix(0.55f*maximumWidthMeters,maximumWidthMeters,axial)
+    float symmetricWidth=mix(0.55f*maximumWidthMeters,maximumWidthMeters,axial)
         *crowFeatherWidthEnvelope(axial);
+    float4 rectrix=crowRectrixVaneProfile(packedIdentity);
+    float sideScale=1.0f-rectrix.z*signedWidth*rectrix.y;
+    float width=symmetricWidth*sideScale;
+    float camberEnvelope=sin(M_PI_F*axial)
+        *(1.0f+rectrix.w*(2.0f*axial-1.0f));
     float3 center=root+tangent*(lengthMeters*axial)
-        +orthogonalNormal*(camberMeters*sin(M_PI_F*axial));
+        +orthogonalNormal*(camberMeters*camberEnvelope);
     float transverseEnvelope=max(0.0f,1.0f-signedWidth*signedWidth);
     float crownEnvelope=pow(max(sin(M_PI_F*axial),0.0f),0.65f);
-    float crown=crowFeatherCrownRatio(featherClass)*width
+    float crown=crowFeatherCrownRatio(packedIdentity)*width
         *transverseEnvelope*crownEnvelope;
     return center+widthAxis*(signedWidth*width)+orthogonalNormal*crown;
 }
@@ -451,7 +477,7 @@ inline float3 crowFeatherNormal(
     float camberMeters,
     float axial,
     float signedWidth,
-    uint featherClass) {
+    uint packedIdentity) {
     float3 tangent=safeNormalizeCrow(direction,float3(1,0,0));
     float3 orthogonalNormal=safeNormalizeCrow(
         surfaceNormal-tangent*dot(surfaceNormal,tangent),surfaceNormal
@@ -469,22 +495,31 @@ inline float3 crowFeatherNormal(
     float tipDerivative=-0.985f*3.2f*pow(sampledAxial,2.2f);
     float baseWidth=maximumWidthMeters*(0.55f+0.45f*sampledAxial);
     float baseWidthDerivative=0.45f*maximumWidthMeters;
-    float width=baseWidth*bodyEnvelope*tipTaper;
-    float widthDerivative=baseWidthDerivative*bodyEnvelope*tipTaper
+    float symmetricWidth=baseWidth*bodyEnvelope*tipTaper;
+    float symmetricWidthDerivative=baseWidthDerivative*bodyEnvelope*tipTaper
         +baseWidth*bodyDerivative*tipTaper
         +baseWidth*bodyEnvelope*tipDerivative;
+    float4 rectrix=crowRectrixVaneProfile(packedIdentity);
+    float sideScale=1.0f-rectrix.z*signedWidth*rectrix.y;
+    float width=symmetricWidth*sideScale;
+    float widthDerivative=symmetricWidthDerivative*sideScale;
+    float widthSignedDerivative=-symmetricWidth*rectrix.z*rectrix.y;
     float crownEnvelope=pow(sine,0.65f);
     float crownDerivative=0.65f*pow(sine,-0.35f)*sineDerivative;
     float transverseEnvelope=max(0.0f,1.0f-signedWidth*signedWidth);
-    float crownRatio=crowFeatherCrownRatio(featherClass);
+    float crownRatio=crowFeatherCrownRatio(packedIdentity);
+    float camberDerivative=sineDerivative
+        *(1.0f+rectrix.w*(2.0f*sampledAxial-1.0f))
+        +sine*2.0f*rectrix.w;
     float3 axialTangent=tangent*lengthMeters
-        +orthogonalNormal*(camberMeters*M_PI_F*cosine)
+        +orthogonalNormal*(camberMeters*camberDerivative)
         +widthAxis*(signedWidth*widthDerivative)
         +orthogonalNormal*(crownRatio*transverseEnvelope
             *(widthDerivative*crownEnvelope+width*crownDerivative));
-    float3 widthTangent=widthAxis*width
-        +orthogonalNormal*(crownRatio*width*(-2.0f*signedWidth)
-            *crownEnvelope);
+    float3 widthTangent=widthAxis*(width+signedWidth*widthSignedDerivative)
+        +orthogonalNormal*(crownRatio*crownEnvelope
+            *(widthSignedDerivative*transverseEnvelope
+                +width*(-2.0f*signedWidth)));
     float3 result=safeNormalizeCrow(
         cross(axialTangent,widthTangent),surfaceNormal
     );
@@ -511,21 +546,22 @@ kernel void deformCrowFeatherTemplates(
     float lengthMeters=root.currentPositionAndLength.w;
     float maximumWidthMeters=root.previousPositionAndWidth.w;
     float camberMeters=root.previousDirectionAndCamber.w;
-    uint featherClass=root.identity.w&255u;
+    uint packedIdentity=root.identity.w;
+    uint featherClass=packedIdentity&255u;
     float3 current=crowFeatherPosition(
         root.currentPositionAndLength.xyz,currentDirection,currentNormal,
         lengthMeters,maximumWidthMeters,camberMeters,parameter.x,parameter.y,
-        featherClass
+        packedIdentity
     )+uniforms.renderOffsetAndPadding.xyz;
     float3 previous=crowFeatherPosition(
         root.previousPositionAndWidth.xyz,previousDirection,previousNormal,
         lengthMeters,maximumWidthMeters,camberMeters,parameter.x,parameter.y,
-        featherClass
+        packedIdentity
     )+uniforms.renderOffsetAndPadding.xyz;
     float3 deformedNormal=crowFeatherNormal(
         currentDirection,currentNormal,
         lengthMeters,maximumWidthMeters,camberMeters,parameter.x,parameter.y,
-        featherClass
+        packedIdentity
     );
     float material=featherClass==1u?0.25f:(featherClass==2u?0.22f:0.23f);
     float shade=0.0075f+0.00045f*float(root.identity.x%11u);

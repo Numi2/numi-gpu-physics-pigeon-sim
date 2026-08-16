@@ -44,11 +44,11 @@ Standing feather motion is a separate retained Metal path:
 ```text
 54 stable feather IDs
         |
-class + side + order + morphology
+class + side + order/count + morphology
         |
 poseStandingCrowFeatherRoots (current and previous phase)
         |
-shared 12-section vane expansion
+shared 24 x 6-section vane expansion
         |
 ordinary triangle raster fallback
 ```
@@ -99,10 +99,21 @@ buried beneath the rump shell, their root and distal lateral spans are each
 `12 mm`, and their distal envelope descends `25-31 mm` below the body center.
 Within each side, every medial rectrix lies above its lateral neighbour and the
 two sides form a shallow tent, avoiding both a coplanar sheet and an open fan.
+The six mirrored pairs now retain explicit order/count metadata through the
+Metal geometry pass. Pair-specific presentation profiles vary maximum vane
+half-width from `18.4-19.4 mm` and longitudinal camber from `4.48-5.54 mm`;
+the outer half-vane is `2.9-7.0%` narrower than its inner counterpart and each
+pair shifts its camber peak slightly along the rachis. A multi-station coverage
+gate evaluates the resulting asymmetric edge positions rather than the former
+symmetric envelope, so the added feather identities cannot reopen the closed
+tail. The denser `24 x 6` canonical surface resolves the curvature and crown as
+geometry while remaining a conventional triangle fallback for future mesh or
+ray-tracing paths.
 This ordering follows the general folded-tail overlap described by
 [Clark (2010)](https://academic.oup.com/auk/article/127/1/44/5148514); only the
-ordering transfers here, while the dimensions remain estimated rather than
-crow measurements. Full asset length and identity remain unchanged.
+ordering transfers here. All vane asymmetry, width, crown, and camber values are
+bounded estimates rather than American-crow measurements. Full asset length,
+stable ID/hash, and solver geometry remain unchanged.
 
 The cranial surface is not transported as a detached rigid shell during quiet
 standing. Points buried in the trunk-facing nape remain body-anchored, a cubic
