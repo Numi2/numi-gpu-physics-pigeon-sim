@@ -10,7 +10,10 @@ struct CrowBodyContourShingle: Equatable {
   let region: CrowBodyContourRegion
   let radialIndex: Int
   let axialIndex: Int
+  let rootThetaRadians: Float
+  let tipThetaRadians: Float
   let rootSurfaceOffset: SIMD3<Float>
+  let tipSurfaceOffset: SIMD3<Float>
   let rootOffset: SIMD3<Float>
   let tipOffset: SIMD3<Float>
   let planeNormal: SIMD3<Float>
@@ -137,9 +140,12 @@ enum CrowBodyContourShingles {
           axialIndex: axialIndex,
           salt: 0x1B56_C4E9
         )
-        let tipTheta =
-          rootTheta - 0.038 * cos(rootTheta) * (0.35 + 0.65 * posterior)
-          + 0.012 * tipIdentity
+        let tipTheta = rootTheta + tipAngularFlowRadians(
+          region: region,
+          rootTheta: rootTheta,
+          posterior: posterior,
+          identity: tipIdentity
+        )
         let tipNormal = CrowBodyAnatomy.surfaceNormal(
           atX: tipX,
           theta: tipTheta
@@ -153,7 +159,10 @@ enum CrowBodyContourShingles {
             region: region,
             radialIndex: radialIndex,
             axialIndex: axialIndex,
+            rootThetaRadians: rootTheta,
+            tipThetaRadians: tipTheta,
             rootSurfaceOffset: rootShell,
+            tipSurfaceOffset: tipShell,
             rootOffset: rootShell + shellClearanceMeters * rootNormal,
             tipOffset: tipShell + shellClearanceMeters * tipNormal,
             planeNormal: normalized(
@@ -205,6 +214,29 @@ enum CrowBodyContourShingles {
       salt: 0x94D0_49BB
     )
     return 0.13 * primary + 0.075 * secondary + 0.035 * identity
+  }
+
+  /// Surface-tangent feather flow in anatomical regions. Flank feathers sweep
+  /// caudoventrally, while dorsal and ventral midline fields remain primarily
+  /// caudal. The endpoint is resampled from the owning loft at this angle.
+  static func tipAngularFlowRadians(
+    region: CrowBodyContourRegion,
+    rootTheta: Float,
+    posterior: Float,
+    identity: Float
+  ) -> Float {
+    let strength: Float
+    switch region {
+    case .dorsal:
+      strength = 0.035
+    case .flank:
+      strength = 0.105
+    case .ventral:
+      strength = 0.055
+    }
+    let axialScale = 0.55 + 0.45 * clamp(posterior, lower: 0, upper: 1)
+    let caudoventralFlow = -strength * cos(rootTheta) * axialScale
+    return caudoventralFlow + 0.010 * min(max(identity, -1), 1)
   }
 
   private static func region(for theta: Float) -> CrowBodyContourRegion {

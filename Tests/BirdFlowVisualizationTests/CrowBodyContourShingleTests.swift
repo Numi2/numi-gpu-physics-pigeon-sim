@@ -58,9 +58,41 @@ func crowBodyContourShinglesOverlapAroundAndAlongLoft() {
 func bodyContourRootsFollowAsymmetricLoft() {
   let samples = CrowBodyContourShingles.samples()
   for sample in samples {
-    let clearance = simd_distance(sample.rootOffset, sample.rootSurfaceOffset)
-    #expect(abs(clearance - CrowBodyContourShingles.shellClearanceMeters) < 1e-6)
+    let rootClearance = simd_distance(sample.rootOffset, sample.rootSurfaceOffset)
+    let tipClearance = simd_distance(sample.tipOffset, sample.tipSurfaceOffset)
+    #expect(abs(rootClearance - CrowBodyContourShingles.shellClearanceMeters) < 1e-6)
+    #expect(abs(tipClearance - CrowBodyContourShingles.shellClearanceMeters) < 1e-6)
   }
+}
+
+@Test("body contour feathers follow region-specific surface tangent fields")
+func bodyContourFeathersFollowRegionalSurfaceTangents() {
+  let samples = CrowBodyContourShingles.samples()
+  let flank = samples.filter {
+    $0.region == .flank && abs(cos($0.rootThetaRadians)) > 0.75
+  }
+  let dorsalMidline = samples.filter {
+    $0.region == .dorsal && abs(cos($0.rootThetaRadians)) < 0.30
+  }
+  let ventralMidline = samples.filter {
+    $0.region == .ventral && abs(cos($0.rootThetaRadians)) < 0.30
+  }
+  #expect(flank.count > 400)
+  #expect(dorsalMidline.count > 100)
+  #expect(ventralMidline.count > 100)
+
+  let flankFlows = flank.map { $0.tipThetaRadians - $0.rootThetaRadians }
+  let dorsalFlows = dorsalMidline.map { abs($0.tipThetaRadians - $0.rootThetaRadians) }
+  let ventralFlows = ventralMidline.map { abs($0.tipThetaRadians - $0.rootThetaRadians) }
+  #expect(
+    zip(flank, flankFlows).allSatisfy {
+      $0.1 * cos($0.0.rootThetaRadians) < -0.025
+    }
+  )
+  #expect(flankFlows.map { abs($0) }.reduce(0, +) / Float(flankFlows.count) > 0.060)
+  #expect(dorsalFlows.max()! < 0.021)
+  #expect(ventralFlows.max()! < 0.027)
+  #expect(samples.allSatisfy { abs($0.tipThetaRadians - $0.rootThetaRadians) < 0.12 })
 }
 
 @Test("body contour tracts break transverse rows with bounded deterministic variation")
