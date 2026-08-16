@@ -192,6 +192,44 @@ func bodyContourTractsBreakTransverseRows() {
     #expect(spacings.max()! - spacings.min()! > 0.0004)
   }
 
+  let courseFields = (0..<CrowBodyContourShingles.radialCount).map { radialIndex in
+    let theta = 2 * Float.pi * Float(radialIndex) / Float(CrowBodyContourShingles.radialCount)
+    let region = CrowBodyContourShingles.region(for: theta)
+    return (
+      radialIndex: radialIndex,
+      region: region,
+      stagger: CrowBodyContourShingles.axialCourseStaggerSteps(
+        radialIndex: radialIndex,
+        region: region
+      ),
+      phase: CrowBodyContourShingles.axialCoursePhaseSteps(
+        radialIndex: radialIndex,
+        theta: theta
+      )
+    )
+  }
+  let dorsalStaggers = courseFields.filter { $0.region == .dorsal }.map(\.stagger)
+  let flankStaggers = courseFields.filter { $0.region == .flank }.map(\.stagger)
+  let ventralStaggers = courseFields.filter { $0.region == .ventral }.map(\.stagger)
+  #expect(dorsalStaggers.max()! - dorsalStaggers.min()! > 0.28)
+  #expect(flankStaggers.max()! - flankStaggers.min()! > 0.58)
+  #expect(ventralStaggers.max()! - ventralStaggers.min()! > 0.78)
+  #expect(courseFields.allSatisfy { abs($0.stagger) < 0.55 })
+  let ventralAdjacentPhaseDifferences = zip(courseFields, courseFields.dropFirst())
+    .filter { $0.0.region == .ventral && $0.1.region == .ventral }
+    .map { abs($0.1.phase - $0.0.phase) }
+  #expect(ventralAdjacentPhaseDifferences.count > 8)
+  #expect(
+    ventralAdjacentPhaseDifferences.filter { $0 > 0.24 }.count
+      > ventralAdjacentPhaseDifferences.count / 2
+  )
+  let quantizedVentralPhases = Set(
+    courseFields.filter { $0.region == .ventral }.map {
+      Int(($0.phase * 10_000).rounded())
+    }
+  )
+  #expect(quantizedVentralPhases.count == ventralStaggers.count)
+
   for axialIndex in 0..<CrowBodyContourShingles.axialCount {
     let angularOffsets = (0..<CrowBodyContourShingles.radialCount).map {
       CrowBodyContourShingles.rootAngularFlowSteps(

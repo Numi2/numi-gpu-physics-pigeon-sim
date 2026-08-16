@@ -49,12 +49,10 @@ enum CrowBodyContourShingles {
     result.reserveCapacity(radialCount * axialCount)
     for radialIndex in 0..<radialCount {
       let theta = 2 * Float.pi * Float(radialIndex) / Float(radialCount)
-      let tractIdentity = identityVariation(
+      let tractPhase = axialCoursePhaseSteps(
         radialIndex: radialIndex,
-        axialIndex: 0,
-        salt: 0x6D2B_79F5
+        theta: theta
       )
-      let tractPhase = axialTractPhase(theta: theta) + 0.20 * tractIdentity
       for axialIndex in 0..<axialCount {
         let morphologyPhase = Float(axialIndex) * 2.399_963 + theta * 3.17
         let axialIdentity = identityVariation(
@@ -211,11 +209,44 @@ enum CrowBodyContourShingles {
     return result
   }
 
-  /// A periodic, low-frequency phase field makes neighbouring feather tracts
-  /// interdigitate without turning the body into aligned transverse hoops.
-  private static func axialTractPhase(theta: Float) -> Float {
-    0.40 * sin(2 * theta + 0.61)
+  /// Smooth anatomical flow plus finite low-discrepancy course staggering.
+  /// The ventral shell receives the strongest breakup because transverse rows
+  /// are most visible head-on; the dorsal field retains quieter organization.
+  static func axialCoursePhaseSteps(
+    radialIndex: Int,
+    theta: Float
+  ) -> Float {
+    let region = region(for: theta)
+    let smoothFlow =
+      0.40 * sin(2 * theta + 0.61)
       + 0.20 * sin(5 * theta - 0.27)
+    return smoothFlow + axialCourseStaggerSteps(
+      radialIndex: radialIndex,
+      region: region
+    )
+  }
+
+  static func axialCourseStaggerSteps(
+    radialIndex: Int,
+    region: CrowBodyContourRegion
+  ) -> Float {
+    let amplitude: Float
+    switch region {
+    case .dorsal:
+      amplitude = 0.36
+    case .flank:
+      amplitude = 0.72
+    case .ventral:
+      amplitude = 0.94
+    }
+    let goldenPhase = Float(radialIndex) * 0.618_034 + 0.37
+    let lowDiscrepancy = goldenPhase - floor(goldenPhase) - 0.5
+    let identity = identityVariation(
+      radialIndex: radialIndex,
+      axialIndex: 0,
+      salt: 0x6D2B_79F5
+    )
+    return amplitude * lowDiscrepancy + 0.075 * identity
   }
 
   /// A bounded aperiodic phase field prevents the dense shell from resolving
@@ -294,7 +325,7 @@ enum CrowBodyContourShingles {
     return amplitude * axialScale * response
   }
 
-  private static func region(for theta: Float) -> CrowBodyContourRegion {
+  static func region(for theta: Float) -> CrowBodyContourRegion {
     let vertical = sin(theta)
     if vertical > 0.36 { return .dorsal }
     if vertical < -0.38 { return .ventral }
