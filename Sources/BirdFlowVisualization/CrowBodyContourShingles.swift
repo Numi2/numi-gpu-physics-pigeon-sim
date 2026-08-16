@@ -42,7 +42,6 @@ enum CrowBodyContourShingles {
     result.reserveCapacity(radialCount * axialCount)
     for radialIndex in 0..<radialCount {
       let theta = 2 * Float.pi * Float(radialIndex) / Float(radialCount)
-      let region = region(for: theta)
       let tractIdentity = identityVariation(
         radialIndex: radialIndex,
         axialIndex: 0,
@@ -66,8 +65,12 @@ enum CrowBodyContourShingles {
           lower: 0.012,
           upper: 0.988
         )
-        let rootTheta =
-          theta + 0.014 * axialIdentity + 0.006 * sin(morphologyPhase + 0.40)
+        let angularStep = 2 * Float.pi / Float(radialCount)
+        let rootTheta = theta + angularStep * rootAngularFlowSteps(
+          radialIndex: radialIndex,
+          axialIndex: axialIndex
+        )
+        let region = region(for: rootTheta)
         let rootX = mix(frontX, backX, axial)
         let rootRing = CrowBodyAnatomy.interpolatedRing(atX: rootX)
         let rootNormal = CrowBodyAnatomy.surfaceNormal(
@@ -78,7 +81,7 @@ enum CrowBodyContourShingles {
           ring: rootRing,
           theta: rootTheta
         )
-        let halfAngularSpacing = Float.pi / Float(radialCount)
+        let halfAngularSpacing = 0.5 * angularStep
         let circumferentialSpacing = simd_distance(
           CrowBodyAnatomy.surfacePoint(
             ring: rootRing,
@@ -182,6 +185,26 @@ enum CrowBodyContourShingles {
   private static func axialTractPhase(theta: Float) -> Float {
     0.40 * sin(2 * theta + 0.61)
       + 0.20 * sin(5 * theta - 0.27)
+  }
+
+  /// A bounded aperiodic phase field prevents the dense shell from resolving
+  /// into straight radial lanes. The smooth terms bend each tract across the
+  /// body while a smaller stable identity term breaks local lattice cadence.
+  /// Keeping the offset below one quarter of a course preserves root order.
+  static func rootAngularFlowSteps(
+    radialIndex: Int,
+    axialIndex: Int
+  ) -> Float {
+    let radial = Float(radialIndex)
+    let axial = Float(axialIndex)
+    let primary = sin(radial * 2.399_963 + axial * 1.618_034 + 0.41)
+    let secondary = sin(radial * 0.754_878 - axial * 2.414_214 - 0.73)
+    let identity = identityVariation(
+      radialIndex: radialIndex,
+      axialIndex: axialIndex,
+      salt: 0x94D0_49BB
+    )
+    return 0.13 * primary + 0.075 * secondary + 0.035 * identity
   }
 
   private static func region(for theta: Float) -> CrowBodyContourRegion {

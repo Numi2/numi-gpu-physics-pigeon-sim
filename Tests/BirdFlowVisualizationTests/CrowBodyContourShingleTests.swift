@@ -94,6 +94,38 @@ func bodyContourTractsBreakTransverseRows() {
     #expect(interiorSpacings.min()! > 0.35 * nominalSpacing)
     #expect(spacings.max()! - spacings.min()! > 0.0004)
   }
+
+  for axialIndex in 0..<CrowBodyContourShingles.axialCount {
+    let angularOffsets = (0..<CrowBodyContourShingles.radialCount).map {
+      CrowBodyContourShingles.rootAngularFlowSteps(
+        radialIndex: $0,
+        axialIndex: axialIndex
+      )
+    }
+    #expect(angularOffsets.allSatisfy { abs($0) < 0.25 })
+    #expect(angularOffsets.max()! - angularOffsets.min()! > 0.32)
+    let quantized = Set(angularOffsets.map { Int(($0 * 10_000).rounded()) })
+    #expect(quantized.count > CrowBodyContourShingles.radialCount * 9 / 10)
+    for radialIndex in 0..<CrowBodyContourShingles.radialCount {
+      let nextIndex = (radialIndex + 1) % CrowBodyContourShingles.radialCount
+      let orderedGapSteps = 1 + angularOffsets[nextIndex] - angularOffsets[radialIndex]
+      #expect(orderedGapSteps > 0.50)
+      #expect(orderedGapSteps < 1.50)
+    }
+  }
+
+  for radialIndex in 0..<CrowBodyContourShingles.radialCount {
+    let angularOffsets = (0..<CrowBodyContourShingles.axialCount).map {
+      CrowBodyContourShingles.rootAngularFlowSteps(
+        radialIndex: radialIndex,
+        axialIndex: $0
+      )
+    }
+    #expect(angularOffsets.max()! - angularOffsets.min()! > 0.30)
+    let deltas = zip(angularOffsets, angularOffsets.dropFirst()).map { $1 - $0 }
+    #expect(deltas.contains { $0 > 0.08 })
+    #expect(deltas.contains { $0 < -0.08 })
+  }
 }
 
 @Test("body contour pennaceous tips retain a closed irregular outer shell")
