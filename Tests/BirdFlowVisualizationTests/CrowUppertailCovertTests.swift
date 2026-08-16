@@ -10,6 +10,7 @@ func uppertailCovertsCloseDorsalPelvicToRectrixShell() {
   #expect(samples.count == CrowUppertailCoverts.rowCount * CrowUppertailCoverts.columnCount)
   #expect(samples.count == 216)
   #expect(CrowUppertailCoverts.surfaceFeatherClass == 5)
+  #expect(CrowUppertailCoverts.rectrixDorsalClearanceMeters == 0.016)
   #expect(CrowUppertailCoverts.visibleSamples(projectedPixelsPerMeter: 1_000).isEmpty)
   #expect(
     CrowUppertailCoverts.visibleSamples(projectedPixelsPerMeter: 1_600).count
@@ -51,6 +52,9 @@ func uppertailCovertsCloseDorsalPelvicToRectrixShell() {
     )
     let rectrixOverlapPoint = tail.rootOffset + 0.032 * tail.direction
     #expect(simd_distance(posterior.tipOffset, rectrixOverlapPoint) < 0.018)
+    #expect(
+      simd_dot(posterior.tipOffset - rectrixOverlapPoint, tail.normal) > 0.008
+    )
   }
 }
 

@@ -21,6 +21,7 @@ enum CrowUppertailCoverts {
   static let rowCount = 27
   static let columnCount = 8
   static let shellClearanceMeters: Float = 0.00078
+  static let rectrixDorsalClearanceMeters: Float = 0.016
   static let surfaceFeatherClass: UInt32 = 5
 
   static func visibleSamples(
@@ -72,12 +73,18 @@ enum CrowUppertailCoverts {
         let rootNormal = CrowBodyAnatomy.surfaceNormal(atX: rootX, theta: theta)
         let root = rootSurface + shellClearanceMeters * rootNormal
         let rectrixOverlap = 0.020 + 0.013 * axial
-        let target = tail.rootOffset + rectrixOverlap * tail.direction
+        let rectrixOverlapPoint = tail.rootOffset + rectrixOverlap * tail.direction
+        let target =
+          rectrixOverlapPoint
+          + rectrixDorsalClearanceMeters * axial * axial * tail.normal
         let towardTarget = normalized(target - root, fallback: tail.direction)
         let localLength =
           (0.034 + 0.018 * axial + 0.0025 * (1 - abs(2 * rowFraction - 1)))
           * (1 + 0.050 * shapeIdentity)
-        let targetLength = simd_distance(root, target) + 0.0015 * shapeIdentity
+        // Preserve the established covert length while steering its distal
+        // centerline above the rectrix root stack.
+        let targetLength =
+          simd_distance(root, rectrixOverlapPoint) + 0.0015 * shapeIdentity
         let length = mix(localLength, targetLength, axial * axial * axial)
         let tip = root + length * towardTarget
         let halfAngularStep = 0.5 * thetaSpan / Float(rowCount - 1)
