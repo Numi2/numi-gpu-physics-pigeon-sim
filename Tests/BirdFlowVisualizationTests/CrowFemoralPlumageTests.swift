@@ -22,6 +22,7 @@ func femoralPlumageBridgesBodyLoftAndUpperCruralTract() {
   )
   #expect(left.count == CrowFemoralPlumage.rowCount * CrowFemoralPlumage.courseCount)
   #expect(left.count == 108)
+  #expect(CrowFemoralPlumage.surfaceFeatherClass == 7)
   #expect(left.count == right.count)
   #expect(
     CrowFemoralPlumage.visibleSamples(

@@ -12,6 +12,7 @@ func crowCruralPlumageOverlapsLegAndCrossesHockBoundary() {
   let samples = CrowLegPlumage.samples(hip: hip, hock: hock)
   #expect(samples.count == CrowLegPlumage.radialCount * CrowLegPlumage.stationCount)
   #expect(samples.count == 98)
+  #expect(CrowLegPlumage.surfaceFeatherClass == 7)
   #expect(
     CrowLegPlumage.visibleSamples(
       hip: hip,

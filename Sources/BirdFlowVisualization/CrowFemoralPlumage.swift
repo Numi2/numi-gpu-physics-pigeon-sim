@@ -24,6 +24,7 @@ enum CrowFemoralPlumage {
   static let rowCount = 9
   static let courseCount = 12
   static let shellClearanceMeters: Float = 0.0009
+  static let surfaceFeatherClass: UInt32 = 7
 
   static func visibleSamples(
     bodyCenter: SIMD3<Float>,

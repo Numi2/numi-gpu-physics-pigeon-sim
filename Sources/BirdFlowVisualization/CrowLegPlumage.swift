@@ -27,6 +27,7 @@ enum CrowLegPlumage {
   static let stationCount = 7
   static let proximalUnderlayerRadiusMeters: Float = 0.014
   static let distalUnderlayerRadiusMeters: Float = 0.0065
+  static let surfaceFeatherClass: UInt32 = 7
 
   static func visibleSamples(
     hip: SIMD3<Float>,

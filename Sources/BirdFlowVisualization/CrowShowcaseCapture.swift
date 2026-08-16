@@ -2603,6 +2603,7 @@ private struct CrowMeshBuilder {
           sections: 7,
           camber: feather.camberMeters,
           transverseCamberRatio: 0.12,
+          surfaceFeatherClass: CrowFemoralPlumage.surfaceFeatherClass,
           lodLengthMeters: simd_distance(feather.root, feather.tip),
           projectedPixelsPerMeter: projectedPixelsPerMeter,
           to: &vertices
@@ -2632,6 +2633,7 @@ private struct CrowMeshBuilder {
           edgeRippleAmplitude: feather.edgeRippleAmplitude,
           edgeRipplePhase: feather.edgeRipplePhase,
           edgeRippleCycles: feather.edgeRippleCycles,
+          surfaceFeatherClass: CrowLegPlumage.surfaceFeatherClass,
           lodLengthMeters: simd_distance(feather.root, feather.tip),
           projectedPixelsPerMeter: projectedPixelsPerMeter,
           to: &vertices
