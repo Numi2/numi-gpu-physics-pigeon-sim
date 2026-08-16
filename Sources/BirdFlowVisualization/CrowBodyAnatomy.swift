@@ -40,4 +40,30 @@ enum CrowBodyAnatomy {
   ) -> Float {
     sine >= 0 ? ring.dorsalRadius : ring.ventralRadius
   }
+
+  static func interpolatedRing(atX x: Float) -> CrowBodyLoftRing {
+    guard let first = loftRings.first, let last = loftRings.last else {
+      preconditionFailure("crow body loft requires at least one ring")
+    }
+    if x <= first.x { return first }
+    if x >= last.x { return last }
+    for index in 0..<(loftRings.count - 1) {
+      let lower = loftRings[index]
+      let upper = loftRings[index + 1]
+      guard x <= upper.x else { continue }
+      let blend = (x - lower.x) / (upper.x - lower.x)
+      return CrowBodyLoftRing(
+        x: x,
+        z: mix(lower.z, upper.z, blend),
+        halfWidth: mix(lower.halfWidth, upper.halfWidth, blend),
+        dorsalRadius: mix(lower.dorsalRadius, upper.dorsalRadius, blend),
+        ventralRadius: mix(lower.ventralRadius, upper.ventralRadius, blend)
+      )
+    }
+    return last
+  }
+
+  private static func mix(_ first: Float, _ second: Float, _ blend: Float) -> Float {
+    first + blend * (second - first)
+  }
 }

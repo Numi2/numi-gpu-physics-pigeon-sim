@@ -1643,48 +1643,21 @@ private struct CrowMeshBuilder {
     to vertices: inout [ColoredVertex]
   ) {
     let color = SIMD4<Float>(0.006, 0.009, 0.016, 0.14)
-    for side: Float in [-1, 1] {
-      for row in 0..<7 {
-        let rowFraction = Float(row) / 6
-        let angle = -0.95 + 1.90 * rowFraction
-        for column in 0..<12 {
-          let fraction = Float(column) / 11
-          let x = bodyCenter.x + 0.105 - 0.250 * fraction
-          let longitudinal = (x - bodyCenter.x + 0.018) / 0.165
-          let envelope = sqrt(max(0.08, 1 - longitudinal * longitudinal))
-          let radiusY = 0.058 * envelope
-          let verticalRadius: Float = sin(angle) >= 0 ? 0.053 : 0.061
-          let radiusZ = verticalRadius * envelope
-          let stagger: Float = row.isMultiple(of: 2) ? 0 : 0.004
-          let root = SIMD3<Float>(
-            x - stagger,
-            bodyCenter.y + side * radiusY * cos(angle),
-            bodyCenter.z - 0.003 + radiusZ * sin(angle)
-          )
-          let ventralSweep = max(0, -sin(angle))
-          appendFeatherBlade(
-            root: root,
-            tip: root
-              + SIMD3<Float>(
-                -0.020 - 0.008 * fraction,
-                -side * 0.0012 * sin(Float.pi * fraction),
-                -0.0015 - 0.0035 * ventralSweep
-              ),
-            planeNormal: safeNormalize(
-              SIMD3<Float>(0, side * cos(angle), sin(angle)),
-              fallback: SIMD3<Float>(0, side, 0)
-            ),
-            rootWidth: 0.0034,
-            maximumWidth: 0.0058,
-            color: color,
-            sections: 6,
-            camber: 0.0014,
-            transverseCamberRatio: 0.22,
-            projectedPixelsPerMeter: projectedPixelsPerMeter,
-            to: &vertices
-          )
-        }
-      }
+    for shingle in CrowBodyContourShingles.samples() {
+      appendFeatherBlade(
+        root: bodyCenter + shingle.rootOffset,
+        tip: bodyCenter + shingle.tipOffset,
+        planeNormal: shingle.planeNormal,
+        rootWidth: shingle.rootWidthMeters,
+        maximumWidth: shingle.maximumWidthMeters,
+        color: color,
+        sections: 7,
+        camber: shingle.camberMeters,
+        transverseCamberRatio: 0.04,
+        lodLengthMeters: simd_distance(shingle.rootOffset, shingle.tipOffset),
+        projectedPixelsPerMeter: projectedPixelsPerMeter,
+        to: &vertices
+      )
     }
   }
 
