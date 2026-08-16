@@ -38,7 +38,7 @@ enum CrowBodyFeatherTracts {
   static let cervicalRowCount = 13
   static let cervicalColumnCount = 7
   static let cervicalShellClearanceMeters: Float = 0.0012
-  static let mantleRowCount = 11
+  static let mantleRowCount = 15
   static let mantleColumnCount = 24
   static let scapularRowCount = 12
   static let scapularColumnCount = 24
@@ -299,7 +299,7 @@ enum CrowBodyFeatherTracts {
           )
           let length =
             (0.025 + 0.010 * axial + 0.003 * course)
-            * (1 + 0.045 * shapeIdentity + 0.018 * courseIdentity)
+            * (1 + 0.070 * shapeIdentity + 0.032 * courseIdentity)
           let tip =
             root
             + SIMD3<Float>(
@@ -324,14 +324,16 @@ enum CrowBodyFeatherTracts {
                 ),
                 fallback: SIMD3<Float>(0, 0, 1)
               ),
-              rootWidthMeters: 0.0031 * (1 + 0.035 * rootIdentity),
-              maximumWidthMeters: (0.0054 + 0.0010 * course) * (1 + 0.045 * shapeIdentity),
-              camberMeters: (0.00135 + 0.00030 * course) * (1 + 0.09 * rootIdentity),
+              rootWidthMeters: 0.0024 * (1 + 0.035 * rootIdentity),
+              maximumWidthMeters: (0.0040 + 0.00065 * course)
+                * (1 + 0.055 * shapeIdentity),
+              camberMeters: (0.00110 + 0.00025 * course)
+                * (1 + 0.09 * rootIdentity),
               vaneAsymmetry: 0.052 * shapeIdentity,
               edgeRippleAmplitude: 0.012 + 0.018 * (0.5 + 0.5 * edgeIdentity),
               edgeRipplePhase: Float.pi * (edgeIdentity + 1),
               edgeRippleCycles: 1.35 + 0.65 * (0.5 + 0.5 * cycleIdentity),
-              rootEnvelopeRatio: 0.68 - 0.06 * course,
+              rootEnvelopeRatio: 0.62 - 0.06 * course,
               pennaceousStartFraction: 0,
               materialVariation: materialIdentity,
               headCoupling: 0

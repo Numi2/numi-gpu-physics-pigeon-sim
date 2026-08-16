@@ -15,7 +15,7 @@ func crowVentralTractsCoverBreastAndAbdomenAtFullResolution() {
         + CrowVentralFeatherTracts.abdominalRowCount
         * CrowVentralFeatherTracts.abdominalColumnCount)
   )
-  #expect(samples.count == 1_064)
+  #expect(samples.count == 1_304)
   #expect(
     CrowVentralFeatherTracts.visibleSamples(projectedPixelsPerMeter: 1_000).isEmpty
   )
@@ -23,7 +23,7 @@ func crowVentralTractsCoverBreastAndAbdomenAtFullResolution() {
     CrowVentralFeatherTracts.visibleSamples(projectedPixelsPerMeter: 1_600).count
       == samples.count
   )
-  #expect(samples.filter { $0.region == .pectoral }.count == 624)
+  #expect(samples.filter { $0.region == .pectoral }.count == 864)
   #expect(samples.filter { $0.region == .abdominal }.count == 440)
   #expect(samples.allSatisfy { $0.surfaceFeatherClass == 7 })
   #expect(
@@ -84,8 +84,15 @@ func crowVentralTractsCoverBreastAndAbdomenAtFullResolution() {
   #expect(crownRolls.allSatisfy { abs($0) < 0.066 })
   #expect(crownRolls.max()! - crownRolls.min()! > 0.115)
   #expect(Set(crownRolls.map { Int(($0 * 100_000).rounded()) }).count > 510)
-  #expect(samples.map(\.rootEnvelopeRatio).min()! >= 0.56)
-  #expect(samples.map(\.rootEnvelopeRatio).max()! <= 0.661)
+  #expect(samples.map(\.rootEnvelopeRatio).min()! >= 0.53)
+  #expect(samples.map(\.rootEnvelopeRatio).max()! <= 0.621)
+  let pectoral = samples.filter { $0.region == .pectoral }
+  #expect(
+    pectoral.allSatisfy {
+      2 * $0.maximumWidthMeters
+        / simd_distance($0.rootOffset, $0.tipOffset) < 0.40
+    }
+  )
 
   let anteriorPectoralRoots = samples.filter {
     $0.region == .pectoral && $0.column == 0

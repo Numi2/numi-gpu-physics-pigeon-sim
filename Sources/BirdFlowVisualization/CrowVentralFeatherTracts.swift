@@ -34,7 +34,7 @@ struct CrowVentralFeatherTractSample: Equatable {
 /// and overlap the proximal femoral field; they are an explicit future-compute
 /// layer rather than a displacement or texture painted over the trunk.
 enum CrowVentralFeatherTracts {
-  static let pectoralRowCount = 13
+  static let pectoralRowCount = 18
   static let pectoralColumnCount = 24
   static let abdominalRowCount = 10
   static let abdominalColumnCount = 22
@@ -127,6 +127,12 @@ enum CrowVentralFeatherTracts {
             column: column,
             salt: 0xD3A2_646C
           )
+          let lengthIdentity = identityVariation(
+            region: region,
+            row: row,
+            column: column,
+            salt: 0x7E95_761E
+          )
           let rowStep = 1 / Float(rowCount - 1)
           let rowFraction = clamp(
             baseRowFraction
@@ -159,7 +165,7 @@ enum CrowVentralFeatherTracts {
           let root = rootSurface + shellClearanceMeters * rootNormal
           let length =
             (baseLengthMeters + 0.010 * axial + 0.003 * rowFraction)
-            * (1 + 0.055 * shapeIdentity)
+            * (1 + 0.070 * shapeIdentity + 0.035 * lengthIdentity)
           let tipX = max(
             rootX - length,
             CrowBodyAnatomy.loftRings.first!.x
@@ -181,9 +187,10 @@ enum CrowVentralFeatherTracts {
               side: side
             )
           )
+          let minimumHalfWidth: Float = region == .pectoral ? 0.0044 : 0.0052
           let maximumWidth =
-            max(0.0062, 0.86 * circumferentialSpacing)
-            * (1 + 0.045 * shapeIdentity)
+            max(minimumHalfWidth, 0.88 * circumferentialSpacing)
+            * (1 + 0.055 * shapeIdentity)
           let centerline = normalized(
             tip - root,
             fallback: SIMD3<Float>(-1, 0, 0)
@@ -223,11 +230,11 @@ enum CrowVentralFeatherTracts {
                 : (region == .pectoral && column == 1
                   ? 0.66 * maximumWidth : 0.54 * maximumWidth),
               maximumWidthMeters: maximumWidth,
-              camberMeters: (0.00115 + 0.00045 * axial)
+              camberMeters: (0.00095 + 0.00035 * axial)
                 * (1 + 0.08 * rootIdentity),
               rootEnvelopeRatio:
                 region == .pectoral
-                ? 0.66 - 0.08 * axial
+                ? 0.60 - 0.07 * axial
                 : 0.62 - 0.06 * axial,
               pennaceousStartFraction:
                 region == .pectoral && column == 0
