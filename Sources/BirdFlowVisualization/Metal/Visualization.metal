@@ -170,25 +170,41 @@ inline CrowSurfaceFrame crowSurfaceFrame(
     uint firstFrame,
     uint secondFrame,
     float blend,
-    uint3 indices) {
+    uint3 indices,
+    uint featherClass,
+    uint side) {
     CrowSurfaceFrame frame;
     frame.root=crowSurfacePoint(
         points,vertexCount,firstFrame,secondFrame,blend,indices.x
     );
-    float3 first=crowSurfacePoint(
+    float3 partRoot=crowSurfacePoint(
         points,vertexCount,firstFrame,secondFrame,blend,indices.y
     );
-    float3 second=crowSurfacePoint(
+    float3 partTip=crowSurfacePoint(
         points,vertexCount,firstFrame,secondFrame,blend,indices.z
     );
-    float3 firstEdge=first-frame.root;
-    frame.tangent=safeNormalizeCrow(firstEdge,float3(1,0,0));
-    frame.normal=safeNormalizeCrow(
-        cross(firstEdge,second-frame.root),float3(0,0,1)
+    float3 partAxis=safeNormalizeCrow(
+        partTip-partRoot,
+        featherClass==3u?float3(-1,0,0):float3(0,side==2u?-1.0f:1.0f,0)
     );
-    frame.bitangent=safeNormalizeCrow(
-        cross(frame.normal,frame.tangent),float3(0,1,0)
-    );
+    if(featherClass==3u){
+        frame.tangent=partAxis;
+        frame.bitangent=safeNormalizeCrow(
+            float3(0,1,0)-frame.tangent*frame.tangent.y,float3(0,1,0)
+        );
+        frame.normal=safeNormalizeCrow(
+            -cross(frame.tangent,frame.bitangent),float3(0,0,1)
+        );
+    }else{
+        frame.bitangent=partAxis;
+        frame.tangent=safeNormalizeCrow(
+            float3(1,0,0)-frame.bitangent*frame.bitangent.x,float3(1,0,0)
+        );
+        float mirror=side==2u?-1.0f:1.0f;
+        frame.normal=safeNormalizeCrow(
+            mirror*cross(frame.tangent,frame.bitangent),float3(0,0,1)
+        );
+    }
     return frame;
 }
 
@@ -214,15 +230,18 @@ kernel void deformCrowFeatherRoots(
     CrowFeatherRootBindingGPU binding=bindings[featherIndex];
     uint vertexCount=uniforms.counts.x;
     uint3 indices=binding.sourceIndicesAndHash.xyz;
+    uint packedIdentity=binding.ownershipAndIdentity.y;
+    uint featherClass=packedIdentity&255u;
+    uint side=(packedIdentity>>8u)&255u;
     CrowSurfaceFrame current=crowSurfaceFrame(
         sourcePoints,vertexCount,
         uniforms.frameIndices.x,uniforms.frameIndices.y,
-        uniforms.interpolation.x,indices
+        uniforms.interpolation.x,indices,featherClass,side
     );
     CrowSurfaceFrame previous=crowSurfaceFrame(
         sourcePoints,vertexCount,
         uniforms.frameIndices.z,uniforms.frameIndices.w,
-        uniforms.interpolation.y,indices
+        uniforms.interpolation.y,indices,featherClass,side
     );
     float3 localDirection=binding.localDirectionAndLength.xyz;
     CrowFeatherRootStateGPU state;
@@ -354,6 +373,10 @@ inline float crowFeatherWidthEnvelope(float axial) {
     return body*(1.0f-0.985f*pow(axial,3.2f));
 }
 
+inline float crowFeatherCrownRatio(uint featherClass) {
+    return featherClass==1u?0.13f:(featherClass==2u?0.16f:0.11f);
+}
+
 inline float3 crowFeatherPosition(
     float3 root,
     float3 direction,
@@ -362,15 +385,72 @@ inline float3 crowFeatherPosition(
     float maximumWidthMeters,
     float camberMeters,
     float axial,
-    float signedWidth) {
+    float signedWidth,
+    uint featherClass) {
+    float3 tangent=safeNormalizeCrow(direction,float3(1,0,0));
+    float3 orthogonalNormal=safeNormalizeCrow(
+        surfaceNormal-tangent*dot(surfaceNormal,tangent),surfaceNormal
+    );
     float3 widthAxis=safeNormalizeCrow(
-        cross(surfaceNormal,direction),float3(0,1,0)
+        cross(orthogonalNormal,tangent),float3(0,1,0)
     );
     float width=mix(0.55f*maximumWidthMeters,maximumWidthMeters,axial)
         *crowFeatherWidthEnvelope(axial);
-    float3 center=root+direction*(lengthMeters*axial)
-        +surfaceNormal*(camberMeters*sin(M_PI_F*axial));
-    return center+widthAxis*(signedWidth*width);
+    float3 center=root+tangent*(lengthMeters*axial)
+        +orthogonalNormal*(camberMeters*sin(M_PI_F*axial));
+    float transverseEnvelope=max(0.0f,1.0f-signedWidth*signedWidth);
+    float crownEnvelope=pow(max(sin(M_PI_F*axial),0.0f),0.65f);
+    float crown=crowFeatherCrownRatio(featherClass)*width
+        *transverseEnvelope*crownEnvelope;
+    return center+widthAxis*(signedWidth*width)+orthogonalNormal*crown;
+}
+
+inline float3 crowFeatherNormal(
+    float3 direction,
+    float3 surfaceNormal,
+    float lengthMeters,
+    float maximumWidthMeters,
+    float camberMeters,
+    float axial,
+    float signedWidth,
+    uint featherClass) {
+    float3 tangent=safeNormalizeCrow(direction,float3(1,0,0));
+    float3 orthogonalNormal=safeNormalizeCrow(
+        surfaceNormal-tangent*dot(surfaceNormal,tangent),surfaceNormal
+    );
+    float3 widthAxis=safeNormalizeCrow(
+        cross(orthogonalNormal,tangent),float3(0,1,0)
+    );
+    float sampledAxial=clamp(axial,1.0e-4f,1.0f-1.0e-4f);
+    float sine=max(sin(M_PI_F*sampledAxial),1.0e-5f);
+    float cosine=cos(M_PI_F*sampledAxial);
+    float sineDerivative=M_PI_F*cosine;
+    float bodyEnvelope=0.32f+0.68f*pow(sine,0.58f);
+    float bodyDerivative=0.68f*0.58f*pow(sine,-0.42f)*sineDerivative;
+    float tipTaper=1.0f-0.985f*pow(sampledAxial,3.2f);
+    float tipDerivative=-0.985f*3.2f*pow(sampledAxial,2.2f);
+    float baseWidth=maximumWidthMeters*(0.55f+0.45f*sampledAxial);
+    float baseWidthDerivative=0.45f*maximumWidthMeters;
+    float width=baseWidth*bodyEnvelope*tipTaper;
+    float widthDerivative=baseWidthDerivative*bodyEnvelope*tipTaper
+        +baseWidth*bodyDerivative*tipTaper
+        +baseWidth*bodyEnvelope*tipDerivative;
+    float crownEnvelope=pow(sine,0.65f);
+    float crownDerivative=0.65f*pow(sine,-0.35f)*sineDerivative;
+    float transverseEnvelope=max(0.0f,1.0f-signedWidth*signedWidth);
+    float crownRatio=crowFeatherCrownRatio(featherClass);
+    float3 axialTangent=tangent*lengthMeters
+        +orthogonalNormal*(camberMeters*M_PI_F*cosine)
+        +widthAxis*(signedWidth*widthDerivative)
+        +orthogonalNormal*(crownRatio*transverseEnvelope
+            *(widthDerivative*crownEnvelope+width*crownDerivative));
+    float3 widthTangent=widthAxis*width
+        +orthogonalNormal*(crownRatio*width*(-2.0f*signedWidth)
+            *crownEnvelope);
+    float3 result=safeNormalizeCrow(
+        cross(axialTangent,widthTangent),surfaceNormal
+    );
+    return dot(result,surfaceNormal)<0.0f?-result:result;
 }
 
 kernel void deformCrowFeatherTemplates(
@@ -393,20 +473,27 @@ kernel void deformCrowFeatherTemplates(
     float lengthMeters=root.currentPositionAndLength.w;
     float maximumWidthMeters=root.previousPositionAndWidth.w;
     float camberMeters=root.previousDirectionAndCamber.w;
+    uint featherClass=root.identity.w&255u;
     float3 current=crowFeatherPosition(
         root.currentPositionAndLength.xyz,currentDirection,currentNormal,
-        lengthMeters,maximumWidthMeters,camberMeters,parameter.x,parameter.y
+        lengthMeters,maximumWidthMeters,camberMeters,parameter.x,parameter.y,
+        featherClass
     )+uniforms.renderOffsetAndPadding.xyz;
     float3 previous=crowFeatherPosition(
         root.previousPositionAndWidth.xyz,previousDirection,previousNormal,
-        lengthMeters,maximumWidthMeters,camberMeters,parameter.x,parameter.y
+        lengthMeters,maximumWidthMeters,camberMeters,parameter.x,parameter.y,
+        featherClass
     )+uniforms.renderOffsetAndPadding.xyz;
-    uint featherClass=root.identity.w&255u;
+    float3 deformedNormal=crowFeatherNormal(
+        currentDirection,currentNormal,
+        lengthMeters,maximumWidthMeters,camberMeters,parameter.x,parameter.y,
+        featherClass
+    );
     float material=featherClass==1u?0.25f:(featherClass==2u?0.22f:0.23f);
     float shade=0.0075f+0.00045f*float(root.identity.x%11u);
     CrowFeatherVertexGPU result;
     result.position=float4(current,1);
-    result.normal=float4(currentNormal,0);
+    result.normal=float4(deformedNormal,0);
     result.color=float4(shade,shade*1.28f,shade*1.72f,material);
     result.previousPosition=float4(previous,1);
     result.identity=root.identity;

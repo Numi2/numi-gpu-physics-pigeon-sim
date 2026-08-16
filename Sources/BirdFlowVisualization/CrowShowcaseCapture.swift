@@ -263,7 +263,11 @@ public enum CrowShowcaseCapture {
         isLoopProbe
         ? Float.zero
         : Float(frameIndex) / Float(arguments.frameCount - 1)
-      let orbit = 2 * Float.pi * phase
+      // Keep the loop probe bit-identical to frame zero. Evaluating sin/cos at
+      // 2π leaves a small floating-point camera offset that becomes visible at
+      // feather edges and also turns a failed Data equality diagnostic into an
+      // expensive byte-wise diff in Swift Testing.
+      let orbit = isLoopProbe ? Float.zero : 2 * Float.pi * phase
       var camera = CameraState()
       if arguments.presentation == .standing {
         camera.target = SIMD3<Float>(0.015, 0, -0.055)
@@ -272,7 +276,7 @@ public enum CrowShowcaseCapture {
         camera.pitch = 0.075 + 0.006 * cos(orbit)
       } else {
         camera.target = SIMD3<Float>(-0.018, 0, 0.020)
-        camera.distance = 1.05 * (1 + 0.010 * cos(orbit))
+        camera.distance = 0.96 * (1 + 0.010 * cos(orbit))
         camera.yaw = -1.06 + 0.024 * sin(orbit)
         camera.pitch = 0.18 + 0.012 * cos(orbit)
       }
@@ -1407,18 +1411,11 @@ private struct CrowMeshBuilder {
       transformedPoint(phase: phase, vertexIndex: $0)
     }
     var vertices: [ColoredVertex] = []
-    vertices.reserveCapacity(48_000)
+    vertices.reserveCapacity(presentation == .wingbeat ? 240_000 : 100_000)
     let bodyIndices = componentIndices(partIdentifier: 1)
     let bodyPoints = bodyIndices.map { states[$0] }
     let bodyCenter = presentation == .standing ? SIMD3<Float>.zero : average(bodyPoints)
     let bodyBounds = bounds(bodyPoints)
-    if !persistentFeathers.isEmpty && presentation == .wingbeat {
-      appendMeasuredScaffold(
-        states,
-        includedPartIdentifiers: [2, 3, 4],
-        to: &vertices
-      )
-    }
     appendCrowAnatomy(
       bodyCenter: bodyCenter,
       bodyBounds: bodyBounds,
@@ -2162,31 +2159,32 @@ private struct CrowMeshBuilder {
         )
       }
     }
-    for row in 0..<3 {
-      for index in 0..<9 {
-        let f = Float(index) / 8
-        let rowFraction = Float(row) / 2
+    for row in 0..<6 {
+      for index in 0..<14 {
+        let f = Float(index) / 13
+        let rowFraction = Float(row) / 5
         let featherRoot =
-          root + span * (0.07 + 0.48 * f + 0.018 * rowFraction)
-          + forward * (0.030 - 0.012 * rowFraction)
+          root + span * (0.025 + 0.80 * f + 0.012 * rowFraction)
+          + forward * (0.038 - 0.012 * rowFraction)
         let featherTip =
-          root + span * (0.16 + 0.50 * f)
-          - forward * (0.028 + 0.030 * rowFraction)
-          + planeNormal * (0.006 * (1 - rowFraction))
+          featherRoot + spanDirection * (0.012 + 0.024 * f)
+          - forward
+            * (0.078 + 0.035 * rowFraction + 0.010 * sin(Float.pi * f))
+          + planeNormal * (0.008 * (1 - rowFraction))
         appendFeatherBlade(
           root: featherRoot,
           tip: featherTip,
           planeNormal: planeNormal,
-          rootWidth: 0.010,
-          maximumWidth: 0.018 - 0.003 * rowFraction,
+          rootWidth: 0.011,
+          maximumWidth: 0.020 - 0.003 * rowFraction,
           color: SIMD4<Float>(
-            0.014 + 0.003 * rowFraction,
-            0.019 + 0.004 * rowFraction,
-            0.032 + 0.006 * rowFraction,
+            0.009 + 0.002 * rowFraction,
+            0.013 + 0.003 * rowFraction,
+            0.023 + 0.004 * rowFraction,
             0.18
           ),
-          sections: 7,
-          camber: 0.007,
+          sections: 8,
+          camber: 0.006 + 0.002 * rowFraction,
           transverseCamberRatio: 0.20,
           lodLengthMeters: 0.12,
           projectedPixelsPerMeter: projectedPixelsPerMeter,
@@ -2305,39 +2303,41 @@ private struct CrowMeshBuilder {
       projectedPixelsPerMeter: projectedPixelsPerMeter,
       baseAxialSections: sections
     )
-    var points = [[SIMD3<Float>]]()
-    points.reserveCapacity(tessellation.axialSections + 1)
-    for index in 0...tessellation.axialSections {
+    func crossSection(at index: Int) -> [SIMD3<Float>] {
       let t = Float(index) / Float(tessellation.axialSections)
       let bodyEnvelope = 0.32 + 0.68 * pow(max(sin(Float.pi * t), 0), 0.58)
       let tipTaper = 1 - 0.985 * pow(t, 3.2)
       let envelope = bodyEnvelope * tipTaper
       let width = (rootWidth * (1 - t) + maximumWidth * t) * envelope
       let center = root + (tip - root) * t + normal * (camber * sin(Float.pi * t))
-      var crossSection: [SIMD3<Float>] = []
-      crossSection.reserveCapacity(tessellation.widthSections + 1)
+      var result: [SIMD3<Float>] = []
+      result.reserveCapacity(tessellation.widthSections + 1)
       for widthIndex in 0...tessellation.widthSections {
         let fraction = Float(widthIndex) / Float(tessellation.widthSections)
         let signedWidth = 2 * fraction - 1
         let transverseEnvelope = max(0, 1 - signedWidth * signedWidth)
-        crossSection.append(
+        result.append(
           center + widthAxis * (signedWidth * width)
             + normal * (width * transverseCamberRatio * transverseEnvelope)
         )
       }
-      points.append(crossSection)
+      return result
     }
+
+    var previous = crossSection(at: 0)
     for index in 0..<tessellation.axialSections {
+      let current = crossSection(at: index + 1)
       for widthIndex in 0..<tessellation.widthSections {
         appendQuad(
-          points[index][widthIndex],
-          points[index][widthIndex + 1],
-          points[index + 1][widthIndex + 1],
-          points[index + 1][widthIndex],
+          previous[widthIndex],
+          previous[widthIndex + 1],
+          current[widthIndex + 1],
+          current[widthIndex],
           color: color,
           to: &vertices
         )
       }
+      previous = current
     }
   }
 

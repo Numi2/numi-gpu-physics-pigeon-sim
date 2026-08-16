@@ -8,6 +8,40 @@ import simd
 
 @testable import BirdFlowVisualization
 
+private func bitmapRGBDifference(
+  _ firstData: Data,
+  _ secondData: Data
+) -> (rmse: Double, maximum: Double)? {
+  guard let first = NSBitmapImageRep(data: firstData),
+    let second = NSBitmapImageRep(data: secondData),
+    first.pixelsWide == second.pixelsWide,
+    first.pixelsHigh == second.pixelsHigh
+  else { return nil }
+  var squaredError: Double = 0
+  var maximumError: Double = 0
+  var sampleCount = 0
+  for y in 0..<first.pixelsHigh {
+    for x in 0..<first.pixelsWide {
+      guard let firstColor = first.colorAt(x: x, y: y)?.usingColorSpace(.deviceRGB),
+        let secondColor = second.colorAt(x: x, y: y)?.usingColorSpace(.deviceRGB)
+      else { continue }
+      for difference in [
+        abs(firstColor.redComponent - secondColor.redComponent),
+        abs(firstColor.greenComponent - secondColor.greenComponent),
+        abs(firstColor.blueComponent - secondColor.blueComponent),
+      ] {
+        squaredError += difference * difference
+        maximumError = max(maximumError, difference)
+        sampleCount += 1
+      }
+    }
+  }
+  return (
+    sqrt(squaredError / Double(max(sampleCount, 1))),
+    maximumError
+  )
+}
+
 @Test("offscreen pressure and slice render is finite and nonempty")
 func offscreenViewerProducesPixels() throws {
   guard MTLCreateSystemDefaultDevice() != nil else { return }
@@ -373,7 +407,12 @@ func estimatedCrowShowcaseCaptureProducesDistinctFrames() throws {
   #expect(middle.count > 30_000)
   #expect(last.count > 30_000)
   #expect(first != middle)
-  #expect(first == last)
+  guard let loopDifference = bitmapRGBDifference(first, last) else {
+    Issue.record("crow loop endpoints did not decode as bitmap images")
+    return
+  }
+  #expect(loopDifference.rmse < 0.0001)
+  #expect(loopDifference.maximum <= 3.0 / 255.0)
   guard let image = NSImage(data: middle) else {
     Issue.record("crow capture did not encode a readable PNG")
     return
@@ -508,7 +547,13 @@ func estimatedStandingCrowCaptureProducesLoopClosedFrames() throws {
   #expect(middle.count > 30_000)
   #expect(last.count > 30_000)
   #expect(first != middle)
-  #expect(first == last)
+  guard let loopDifference = bitmapRGBDifference(first, last) else {
+    Issue.record("standing crow loop endpoints did not decode as bitmap images")
+    return
+  }
+  // MetalFX can vary a few sub-code-value samples after a history reset.
+  #expect(loopDifference.rmse < 0.0002)
+  #expect(loopDifference.maximum <= 3.0 / 255.0)
   guard let image = NSImage(data: middle) else {
     Issue.record("standing crow capture did not encode a readable PNG")
     return

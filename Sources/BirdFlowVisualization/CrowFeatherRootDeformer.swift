@@ -24,10 +24,11 @@ protocol CrowFeatherRootDeforming: AnyObject {
 
 /// Retained Metal state for the persistent feather inventory.
 ///
-/// Each feather is attached to an oriented triangle on the fixed-topology
-/// surface. The kernel transports its estimated rest direction through the
-/// triangle's current and previous tangent frames, retaining exact identity
-/// while avoiding a per-frame CPU transform upload.
+/// Each feather root is attached to an exact vertex on the fixed-topology
+/// surface. Its direction is transported through a coherent part frame defined
+/// by the shoulder-to-tip axis (or tail base-to-tip axis), rather than by the
+/// orientation of one tiny surface triangle. The latter is too noisy under a
+/// large wing stroke and can make adjacent vanes rotate independently.
 final class CrowFeatherRootDeformer {
   private static let bufferedFrameCount = 3
 
@@ -70,8 +71,8 @@ final class CrowFeatherRootDeformer {
       return CrowFeatherRootBindingGPU(
         sourceIndicesAndHash: SIMD4<UInt32>(
           UInt32(feather.physicsRootVertexIndex),
-          UInt32(surfaceFrame.firstNeighbor),
-          UInt32(surfaceFrame.secondNeighbor),
+          UInt32(surfaceFrame.partRoot),
+          UInt32(surfaceFrame.partTip),
           hash
         ),
         ownershipAndIdentity: SIMD4<UInt32>(
@@ -232,15 +233,22 @@ final class CrowFeatherRootDeformer {
       timeSeconds: timeSeconds,
       vertexIndex: Int(indices.x)
     ).positionMeters
-    let first = dataset.state(
+    let partRoot = dataset.state(
       timeSeconds: timeSeconds,
       vertexIndex: Int(indices.y)
     ).positionMeters
-    let second = dataset.state(
+    let partTip = dataset.state(
       timeSeconds: timeSeconds,
       vertexIndex: Int(indices.z)
     ).positionMeters
-    let basis = Self.frameBasis(root: root, first: first, second: second)
+    let packedIdentity = binding.ownershipAndIdentity.y
+    let basis = Self.frameBasis(
+      root: root,
+      partRoot: partRoot,
+      partTip: partTip,
+      featherClass: packedIdentity & 255,
+      side: (packedIdentity >> 8) & 255
+    )
     let local = SIMD3<Float>(
       binding.localDirectionAndLength.x,
       binding.localDirectionAndLength.y,
@@ -293,51 +301,58 @@ final class CrowFeatherRootDeformer {
     feather: BirdRealityFeather,
     dataset: MeasuredBirdSurfaceSequence
   ) throws -> (
-    firstNeighbor: Int,
-    secondNeighbor: Int,
+    partRoot: Int,
+    partTip: Int,
     localDirection: SIMD3<Float>
   ) {
     let rootIndex = feather.physicsRootVertexIndex
-    var selected: (first: Int, second: Int, areaSquared: Float)?
-    for triangleIndex in 0..<dataset.triangleCount
-    where dataset.trianglePartIdentifiers[triangleIndex]
-      == feather.physicsSurfacePartIdentifier
-    {
-      let triangle = dataset.triangle(triangleIndex)
-      let indices = [Int(triangle.x), Int(triangle.y), Int(triangle.z)]
-      guard let corner = indices.firstIndex(of: rootIndex) else { continue }
-      let first = indices[(corner + 1) % 3]
-      let second = indices[(corner + 2) % 3]
-      let root = dataset.vertex(frame: 0, index: rootIndex)
-      let edgeA = dataset.vertex(frame: 0, index: first) - root
-      let edgeB = dataset.vertex(frame: 0, index: second) - root
-      let areaSquared = simd_length_squared(simd_cross(edgeA, edgeB))
-      if let current = selected {
-        if areaSquared > current.areaSquared {
-          selected = (first, second, areaSquared)
-        }
-      } else {
-        selected = (first, second, areaSquared)
-      }
-    }
-    guard let selected, selected.areaSquared > 1e-16 else {
+    guard let component = dataset.components.first(where: {
+      $0.partIdentifier == feather.physicsSurfacePartIdentifier
+    }) else {
       throw VisualizationError.pipeline(
-        "feather \(feather.identifier) has no nondegenerate surface frame"
+        "feather \(feather.identifier) has no owning surface component"
+      )
+    }
+    let body = dataset.components.first { $0.partIdentifier == 1 }!
+    var bodyCenter = SIMD3<Float>.zero
+    for index in body.vertexOffset..<(body.vertexOffset + body.vertexCount) {
+      bodyCenter += dataset.vertex(frame: 0, index: index)
+    }
+    bodyCenter /= Float(body.vertexCount)
+    let partIndices = component.vertexOffset..<(component.vertexOffset + component.vertexCount)
+    guard let partRoot = partIndices.min(by: {
+      simd_distance_squared(dataset.vertex(frame: 0, index: $0), bodyCenter)
+        < simd_distance_squared(dataset.vertex(frame: 0, index: $1), bodyCenter)
+    }),
+      let partTip = partIndices.max(by: {
+        simd_distance_squared(
+          dataset.vertex(frame: 0, index: $0),
+          dataset.vertex(frame: 0, index: partRoot)
+        ) < simd_distance_squared(
+          dataset.vertex(frame: 0, index: $1),
+          dataset.vertex(frame: 0, index: partRoot)
+        )
+      })
+    else {
+      throw VisualizationError.pipeline(
+        "feather \(feather.identifier) has no coherent part frame"
       )
     }
     let root = dataset.vertex(frame: 0, index: rootIndex)
     let basis = frameBasis(
       root: root,
-      first: dataset.vertex(frame: 0, index: selected.first),
-      second: dataset.vertex(frame: 0, index: selected.second)
+      partRoot: dataset.vertex(frame: 0, index: partRoot),
+      partTip: dataset.vertex(frame: 0, index: partTip),
+      featherClass: classCode(feather.featherClass),
+      side: sideCode(feather.side)
     )
     let direction = safeNormalize(
       feather.restDirection,
       fallback: basis.tangent
     )
     return (
-      selected.first,
-      selected.second,
+      partRoot,
+      partTip,
       SIMD3<Float>(
         simd_dot(direction, basis.tangent),
         simd_dot(direction, basis.bitangent),
@@ -348,19 +363,41 @@ final class CrowFeatherRootDeformer {
 
   private static func frameBasis(
     root: SIMD3<Float>,
-    first: SIMD3<Float>,
-    second: SIMD3<Float>
+    partRoot: SIMD3<Float>,
+    partTip: SIMD3<Float>,
+    featherClass: UInt32,
+    side: UInt32
   ) -> (tangent: SIMD3<Float>, bitangent: SIMD3<Float>, normal: SIMD3<Float>) {
-    let tangent = safeNormalize(first - root, fallback: SIMD3<Float>(1, 0, 0))
+    _ = root
+    let partAxis = safeNormalize(
+      partTip - partRoot,
+      fallback: featherClass == 3
+        ? SIMD3<Float>(-1, 0, 0)
+        : SIMD3<Float>(0, side == 2 ? -1 : 1, 0)
+    )
+    if featherClass == 3 {
+      let tangent = partAxis
+      let bitangent = safeNormalize(
+        SIMD3<Float>(0, 1, 0) - tangent * tangent.y,
+        fallback: SIMD3<Float>(0, 1, 0)
+      )
+      let normal = safeNormalize(
+        -simd_cross(tangent, bitangent),
+        fallback: SIMD3<Float>(0, 0, 1)
+      )
+      return (tangent, bitangent, normal)
+    }
+    let bitangent = partAxis
+    let tangent = safeNormalize(
+      SIMD3<Float>(1, 0, 0) - bitangent * bitangent.x,
+      fallback: SIMD3<Float>(1, 0, 0)
+    )
+    let mirror: Float = side == 2 ? -1 : 1
     let normal = safeNormalize(
-      simd_cross(first - root, second - root),
+      mirror * simd_cross(tangent, bitangent),
       fallback: SIMD3<Float>(0, 0, 1)
     )
-    return (
-      tangent,
-      safeNormalize(simd_cross(normal, tangent), fallback: SIMD3<Float>(0, 1, 0)),
-      normal
-    )
+    return (tangent, bitangent, normal)
   }
 
   private static func safeNormalize(

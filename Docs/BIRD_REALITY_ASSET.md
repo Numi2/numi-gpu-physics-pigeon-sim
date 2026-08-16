@@ -109,3 +109,12 @@ coordinates for a narrow rachis response, vane-edge transmission, and aligned
 barb modulation; the pattern therefore follows each feather through motion
 instead of swimming in screen or world space. These are analytic appearance
 cues, not measured barb geometry or microscopy-derived material calibration.
+
+The persistent template is subdivided into four transverse bands as well as
+twelve axial sections. A class-dependent crown bends the vane away from its
+edge chord, while the existing rachis camber bends its centerline. Swift and
+Metal compute surface normals from matched axial and transverse derivatives;
+the qualification gate requires more than two final-output pixels of crown
+depth in the canonical edge-on view. This prevents a flight feather from
+collapsing into a single needle-width line without claiming physical feather
+thickness or measured microstructure.

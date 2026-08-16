@@ -37,7 +37,7 @@ func crowFeatherTemplateGPUDeformationMatchesCPUReference() throws {
   #expect(MemoryLayout<CrowFeatherTemplateVertexGPU>.stride == 16)
   #expect(MemoryLayout<CrowFeatherVertexGPU>.stride == 96)
   #expect(MemoryLayout<CrowFeatherGeometryUniforms>.stride == 32)
-  #expect(geometryDeformer.vertexCount == 54 * 12 * 6)
+  #expect(geometryDeformer.vertexCount == 54 * 12 * 4 * 6)
 
   let body = surface.components.first { $0.partIdentifier == 1 }!
   var referenceBodyCenter = SIMD3<Float>.zero
@@ -144,7 +144,54 @@ func crowFeatherTemplateGPUDeformationMatchesCPUReference() throws {
   #expect(Set(movingVertices.map { $0.identity.y }).count == 54)
   #expect(movingVertices.allSatisfy { $0.parameters.x >= 0 && $0.parameters.x <= 1 })
   #expect(movingVertices.contains { $0.parameters.y == -1 })
+  #expect(movingVertices.contains { $0.parameters.y == 0 })
   #expect(movingVertices.contains { $0.parameters.y == 1 })
+  #expect(
+    movingVertices.allSatisfy {
+      abs(simd_length(SIMD3<Float>($0.normal.x, $0.normal.y, $0.normal.z)) - 1) < 2e-5
+    }
+  )
+
+  let firstFeather = movingVertices.filter { $0.identity.x == 0 }
+  func midVaneVertex(signedWidth: Float) -> CrowFeatherVertexGPU {
+    firstFeather.first {
+      abs($0.parameters.x - 0.5) < 1e-7
+        && abs($0.parameters.y - signedWidth) < 1e-7
+    }!
+  }
+  let left = midVaneVertex(signedWidth: -1)
+  let center = midVaneVertex(signedWidth: 0)
+  let right = midVaneVertex(signedWidth: 1)
+  let leftPosition = SIMD3<Float>(left.position.x, left.position.y, left.position.z)
+  let centerPosition = SIMD3<Float>(center.position.x, center.position.y, center.position.z)
+  let rightPosition = SIMD3<Float>(right.position.x, right.position.y, right.position.z)
+  let edgeMidpoint = 0.5 * (leftPosition + rightPosition)
+  let firstRootNormal = SIMD3<Float>(
+    movingRoots[0].currentNormalAndPadding.x,
+    movingRoots[0].currentNormalAndPadding.y,
+    movingRoots[0].currentNormalAndPadding.z
+  )
+  let firstRootDirection = SIMD3<Float>(
+    movingRoots[0].currentDirectionAndRachis.x,
+    movingRoots[0].currentDirectionAndRachis.y,
+    movingRoots[0].currentDirectionAndRachis.z
+  )
+  let orthogonalRootNormal = simd_normalize(
+    firstRootNormal - firstRootDirection * simd_dot(firstRootNormal, firstRootDirection)
+  )
+  let crownDepth = simd_dot(centerPosition - edgeMidpoint, orthogonalRootNormal)
+  let projectedPixelsPerMeter = CrowFeatherCoverageLOD.projectedPixelsPerMeter(
+    viewportHeight: 720,
+    cameraDistanceMeters: 0.55
+  )
+  #expect(crownDepth > 0.0015)
+  #expect(crownDepth * projectedPixelsPerMeter > 2.0)
+  #expect(simd_distance(leftPosition, rightPosition) > 0.025)
+  let leftNormal = SIMD3<Float>(left.normal.x, left.normal.y, left.normal.z)
+  let centerNormal = SIMD3<Float>(center.normal.x, center.normal.y, center.normal.z)
+  let rightNormal = SIMD3<Float>(right.normal.x, right.normal.y, right.normal.z)
+  #expect(simd_distance(leftNormal, centerNormal) > 0.10)
+  #expect(simd_distance(rightNormal, centerNormal) > 0.10)
   #expect(
     movingVertices.contains {
       simd_length(

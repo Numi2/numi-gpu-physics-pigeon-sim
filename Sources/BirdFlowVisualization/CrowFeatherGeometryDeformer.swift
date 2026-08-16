@@ -17,6 +17,7 @@ struct CrowFeatherGeometryFrame {
 final class CrowFeatherGeometryDeformer {
   private static let bufferedFrameCount = 3
   private static let sectionCount = 12
+  private static let widthSectionCount = 4
 
   private let backend: VisualizationBackend
   private let pipeline: MTLComputePipelineState
@@ -131,32 +132,48 @@ final class CrowFeatherGeometryDeformer {
         let material: Float =
           featherClass == 1 ? 0.25 : (featherClass == 2 ? 0.22 : 0.23)
         let shade = 0.0075 + 0.00045 * Float(root.identity.x % 11)
+        let currentRoot = Self.xyz(root.currentPositionAndLength)
+        let previousRoot = Self.xyz(root.previousPositionAndWidth)
         return CrowFeatherVertexGPU(
           position: SIMD4<Float>(
             Self.position(
-              root: Self.xyz(root.currentPositionAndLength),
+              root: currentRoot,
               direction: currentDirection,
               surfaceNormal: currentNormal,
               lengthMeters: lengthMeters,
               maximumWidthMeters: maximumWidthMeters,
               camberMeters: camberMeters,
               axial: axial,
-              signedWidth: signedWidth
+              signedWidth: signedWidth,
+              featherClass: featherClass
             ) + renderOffset,
             1
           ),
-          normal: SIMD4<Float>(currentNormal, 0),
+          normal: SIMD4<Float>(
+            Self.normal(
+              direction: currentDirection,
+              surfaceNormal: currentNormal,
+              lengthMeters: lengthMeters,
+              maximumWidthMeters: maximumWidthMeters,
+              camberMeters: camberMeters,
+              axial: axial,
+              signedWidth: signedWidth,
+              featherClass: featherClass
+            ),
+            0
+          ),
           color: SIMD4<Float>(shade, shade * 1.28, shade * 1.72, material),
           previousPosition: SIMD4<Float>(
             Self.position(
-              root: Self.xyz(root.previousPositionAndWidth),
+              root: previousRoot,
               direction: previousDirection,
               surfaceNormal: previousNormal,
               lengthMeters: lengthMeters,
               maximumWidthMeters: maximumWidthMeters,
               camberMeters: camberMeters,
               axial: axial,
-              signedWidth: signedWidth
+              signedWidth: signedWidth,
+              featherClass: featherClass
             ) + renderOffset,
             1
           ),
@@ -169,23 +186,27 @@ final class CrowFeatherGeometryDeformer {
 
   private static func makeTemplateVertices() -> [CrowFeatherTemplateVertexGPU] {
     var result: [CrowFeatherTemplateVertexGPU] = []
-    result.reserveCapacity(sectionCount * 6)
+    result.reserveCapacity(sectionCount * widthSectionCount * 6)
     for section in 0..<sectionCount {
       let first = Float(section) / Float(sectionCount)
       let second = Float(section + 1) / Float(sectionCount)
-      for parameter in [
-        SIMD2<Float>(first, -1),
-        SIMD2<Float>(first, 1),
-        SIMD2<Float>(second, 1),
-        SIMD2<Float>(first, -1),
-        SIMD2<Float>(second, 1),
-        SIMD2<Float>(second, -1),
-      ] {
-        result.append(
-          CrowFeatherTemplateVertexGPU(
-            parameters: SIMD4<Float>(parameter.x, parameter.y, 0, 0)
+      for widthSection in 0..<widthSectionCount {
+        let left = -1 + 2 * Float(widthSection) / Float(widthSectionCount)
+        let right = -1 + 2 * Float(widthSection + 1) / Float(widthSectionCount)
+        for parameter in [
+          SIMD2<Float>(first, left),
+          SIMD2<Float>(first, right),
+          SIMD2<Float>(second, right),
+          SIMD2<Float>(first, left),
+          SIMD2<Float>(second, right),
+          SIMD2<Float>(second, left),
+        ] {
+          result.append(
+            CrowFeatherTemplateVertexGPU(
+              parameters: SIMD4<Float>(parameter.x, parameter.y, 0, 0)
+            )
           )
-        )
+        }
       }
     }
     return result
@@ -199,10 +220,16 @@ final class CrowFeatherGeometryDeformer {
     maximumWidthMeters: Float,
     camberMeters: Float,
     axial: Float,
-    signedWidth: Float
+    signedWidth: Float,
+    featherClass: UInt32
   ) -> SIMD3<Float> {
+    let tangent = safeNormalize(direction, fallback: SIMD3<Float>(1, 0, 0))
+    let orthogonalNormal = safeNormalize(
+      surfaceNormal - tangent * simd_dot(surfaceNormal, tangent),
+      fallback: surfaceNormal
+    )
     let widthAxis = safeNormalize(
-      simd_cross(surfaceNormal, direction),
+      simd_cross(orthogonalNormal, tangent),
       fallback: SIMD3<Float>(0, 1, 0)
     )
     let bodyEnvelope = 0.32 + 0.68 * pow(max(sin(Float.pi * axial), 0), 0.58)
@@ -211,9 +238,80 @@ final class CrowFeatherGeometryDeformer {
       (0.55 * maximumWidthMeters * (1 - axial)
         + maximumWidthMeters * axial) * bodyEnvelope * tipTaper
     let center =
-      root + direction * (lengthMeters * axial)
-      + surfaceNormal * (camberMeters * sin(Float.pi * axial))
-    return center + widthAxis * (signedWidth * width)
+      root + tangent * (lengthMeters * axial)
+      + orthogonalNormal * (camberMeters * sin(Float.pi * axial))
+    let transverseEnvelope = max(0, 1 - signedWidth * signedWidth)
+    let crownEnvelope = pow(max(sin(Float.pi * axial), 0), 0.65)
+    let crown =
+      crownRatio(featherClass: featherClass) * width
+      * transverseEnvelope * crownEnvelope
+    return center + widthAxis * (signedWidth * width) + orthogonalNormal * crown
+  }
+
+  private static func normal(
+    direction: SIMD3<Float>,
+    surfaceNormal: SIMD3<Float>,
+    lengthMeters: Float,
+    maximumWidthMeters: Float,
+    camberMeters: Float,
+    axial: Float,
+    signedWidth: Float,
+    featherClass: UInt32
+  ) -> SIMD3<Float> {
+    let tangent = safeNormalize(direction, fallback: SIMD3<Float>(1, 0, 0))
+    let orthogonalNormal = safeNormalize(
+      surfaceNormal - tangent * simd_dot(surfaceNormal, tangent),
+      fallback: surfaceNormal
+    )
+    let widthAxis = safeNormalize(
+      simd_cross(orthogonalNormal, tangent),
+      fallback: SIMD3<Float>(0, 1, 0)
+    )
+    let sampledAxial = min(max(axial, 1e-4), 1 - 1e-4)
+    let sine = max(sin(Float.pi * sampledAxial), 1e-5)
+    let cosine = cos(Float.pi * sampledAxial)
+    let sineDerivative = Float.pi * cosine
+    let bodyEnvelope = 0.32 + 0.68 * pow(sine, 0.58)
+    let bodyDerivative = 0.68 * 0.58 * pow(sine, -0.42) * sineDerivative
+    let tipTaper = 1 - 0.985 * pow(sampledAxial, 3.2)
+    let tipDerivative = -0.985 * 3.2 * pow(sampledAxial, 2.2)
+    let baseWidth = maximumWidthMeters * (0.55 + 0.45 * sampledAxial)
+    let baseWidthDerivative = 0.45 * maximumWidthMeters
+    let width = baseWidth * bodyEnvelope * tipTaper
+    let widthDerivative =
+      baseWidthDerivative * bodyEnvelope * tipTaper
+      + baseWidth * bodyDerivative * tipTaper
+      + baseWidth * bodyEnvelope * tipDerivative
+    let crownEnvelope = pow(sine, 0.65)
+    let crownDerivative = 0.65 * pow(sine, -0.35) * sineDerivative
+    let transverseEnvelope = max(0, 1 - signedWidth * signedWidth)
+    let crownRatio = crownRatio(featherClass: featherClass)
+    let axialTangent =
+      tangent * lengthMeters
+      + orthogonalNormal * (camberMeters * Float.pi * cosine)
+      + widthAxis * (signedWidth * widthDerivative)
+      + orthogonalNormal
+      * (crownRatio * transverseEnvelope
+        * (widthDerivative * crownEnvelope + width * crownDerivative))
+    let widthTangent =
+      widthAxis * width
+      + orthogonalNormal
+      * (crownRatio * width * (-2 * signedWidth) * crownEnvelope)
+    var result = safeNormalize(
+      simd_cross(axialTangent, widthTangent),
+      fallback: surfaceNormal
+    )
+    if simd_dot(result, surfaceNormal) < 0 { result = -result }
+    return result
+  }
+
+  private static func crownRatio(featherClass: UInt32) -> Float {
+    switch featherClass {
+    case 1: return 0.13
+    case 2: return 0.16
+    case 3: return 0.11
+    default: return 0.14
+    }
   }
 
   private static func safeNormalize(

@@ -110,4 +110,38 @@ func crowFeatherRootGPUDeformationMatchesCPUReference() throws {
           )) - 1) < 1e-6
     }
   )
+  for packedIdentity in [UInt32(1 | (1 << 8)), UInt32(1 | (2 << 8))] {
+    let primaries = movingFrame.filter { $0.identity.w == packedIdentity }
+    #expect(primaries.count == 10)
+    let referenceNormal = SIMD3<Float>(
+      primaries[0].currentNormalAndPadding.x,
+      primaries[0].currentNormalAndPadding.y,
+      primaries[0].currentNormalAndPadding.z
+    )
+    #expect(
+      primaries.allSatisfy {
+        simd_distance(
+          SIMD3<Float>(
+            $0.currentNormalAndPadding.x,
+            $0.currentNormalAndPadding.y,
+            $0.currentNormalAndPadding.z
+          ),
+          referenceNormal
+        ) < 1e-5
+      }
+    )
+    for (first, second) in zip(primaries, primaries.dropFirst()) {
+      let firstDirection = SIMD3<Float>(
+        first.currentDirectionAndRachis.x,
+        first.currentDirectionAndRachis.y,
+        first.currentDirectionAndRachis.z
+      )
+      let secondDirection = SIMD3<Float>(
+        second.currentDirectionAndRachis.x,
+        second.currentDirectionAndRachis.y,
+        second.currentDirectionAndRachis.z
+      )
+      #expect(simd_dot(firstDirection, secondDirection) > 0.97)
+    }
+  }
 }
