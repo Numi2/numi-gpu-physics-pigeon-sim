@@ -37,7 +37,10 @@ func crowFeatherTemplateGPUDeformationMatchesCPUReference() throws {
   #expect(MemoryLayout<CrowFeatherTemplateVertexGPU>.stride == 16)
   #expect(MemoryLayout<CrowFeatherVertexGPU>.stride == 96)
   #expect(MemoryLayout<CrowFeatherGeometryUniforms>.stride == 32)
-  #expect(geometryDeformer.vertexCount == 54 * 48 * 8 * 6)
+  #expect(
+    geometryDeformer.vertexCount
+      == 54 * (48 * 8 * 6 + 24 * 6 + 20 * 2 * 6)
+  )
 
   let body = surface.components.first { $0.partIdentifier == 1 }!
   var referenceBodyCenter = SIMD3<Float>.zero
@@ -46,16 +49,16 @@ func crowFeatherTemplateGPUDeformationMatchesCPUReference() throws {
   }
   referenceBodyCenter /= Float(body.vertexCount)
   let renderOffset = -referenceBodyCenter
-  let phases: [(Float, Float)] = [
-    (0, 0),
-    (0.271, 0.249),
-    (0.503, 0.481),
-    (0.997, 0.975),
+  let phases: [(Float, Float, Float)] = [
+    (0, 0, 0),
+    (0.271, 0.249, 1_600),
+    (0.503, 0.481, 0),
+    (0.997, 0.975, 0),
   ]
   var maximumRadialExtent: Float = 0
   var maximumBilateralSpan: Float = 0
 
-  for (current, previous) in phases {
+  for (current, previous, projectedPixelsPerMeter) in phases {
     guard let commandBuffer = backend.queue.makeCommandBuffer() else {
       Issue.record("unable to allocate crow feather geometry command buffer")
       return
@@ -68,6 +71,7 @@ func crowFeatherTemplateGPUDeformationMatchesCPUReference() throws {
     let geometryFrame = try geometryDeformer.encode(
       rootFrame: rootFrame,
       renderOffset: renderOffset,
+      projectedPixelsPerMeter: projectedPixelsPerMeter,
       commandBuffer: commandBuffer,
       auditReadback: true
     )
@@ -81,7 +85,8 @@ func crowFeatherTemplateGPUDeformationMatchesCPUReference() throws {
         currentPhase: current,
         previousPhase: previous
       ),
-      renderOffset: renderOffset
+      renderOffset: renderOffset,
+      projectedPixelsPerMeter: projectedPixelsPerMeter
     )
     let expectedPositions = expected.map {
       SIMD3<Float>($0.position.x, $0.position.y, $0.position.z)
@@ -140,6 +145,29 @@ func crowFeatherTemplateGPUDeformationMatchesCPUReference() throws {
   let movingVertices = geometryDeformer.referenceVertices(
     roots: movingRoots,
     renderOffset: renderOffset
+  )
+  let resolvedVertices = geometryDeformer.referenceVertices(
+    roots: movingRoots,
+    renderOffset: renderOffset,
+    projectedPixelsPerMeter: 1_600
+  )
+  let resolvedRemexDetail = resolvedVertices.filter {
+    let featherClass = $0.identity.w & 255
+    return (featherClass == 1 || featherClass == 2) && $0.parameters.w > 0.5
+  }
+  #expect(resolvedRemexDetail.count == 42 * (24 * 6 + 20 * 2 * 6))
+  #expect(resolvedRemexDetail.contains { abs($0.parameters.w - 1) < 1e-7 })
+  #expect(resolvedRemexDetail.contains { abs($0.parameters.w - 2) < 1e-7 })
+  let firstResolvedRachis = resolvedRemexDetail.filter {
+    $0.identity.x == 0 && abs($0.parameters.w - 1) < 1e-7
+  }
+  let rachisSpan = firstResolvedRachis.map {
+    SIMD3<Float>($0.position.x, $0.position.y, $0.position.z)
+  }
+  #expect(rachisSpan.count == 24 * 6)
+  #expect(
+    simd_distance(rachisSpan.min(by: { $0.x < $1.x })!, rachisSpan.max(by: { $0.x < $1.x })!)
+      > 0.10
   )
   #expect(Set(movingVertices.map { $0.identity.y }).count == 54)
   #expect(movingVertices.allSatisfy { $0.parameters.x >= 0 && $0.parameters.x <= 1 })

@@ -1063,6 +1063,7 @@ private final class CrowShowcaseRenderer {
       featherFrame = try featherGeometryDeformer.encode(
         rootFrame: rootFrame,
         renderOffset: featherRenderOffset,
+        projectedPixelsPerMeter: projectedPixelsPerMeter,
         commandBuffer: commandBuffer
       )
     } else {

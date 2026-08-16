@@ -18,6 +18,15 @@ final class CrowFeatherGeometryDeformer {
   private static let bufferedFrameCount = 3
   private static let sectionCount = 48
   private static let widthSectionCount = 8
+  private static let rachisSectionCount = 24
+  private static let barbPairCount = 20
+  private static let fullDetailPixelsPerMeter: Float = 1_400
+
+  private enum TemplateKind: Float {
+    case vane = 0
+    case rachis = 1
+    case barb = 2
+  }
 
   private let backend: VisualizationBackend
   private let pipeline: MTLComputePipelineState
@@ -52,6 +61,7 @@ final class CrowFeatherGeometryDeformer {
   func encode(
     rootFrame: CrowFeatherRootFrame,
     renderOffset: SIMD3<Float>,
+    projectedPixelsPerMeter: Float = 0,
     commandBuffer: MTLCommandBuffer,
     auditReadback: Bool = false
   ) throws -> CrowFeatherGeometryFrame {
@@ -65,7 +75,10 @@ final class CrowFeatherGeometryDeformer {
         UInt32(vertexCount),
         0
       ),
-      renderOffsetAndPadding: SIMD4<Float>(renderOffset, 0)
+      renderOffsetAndDetailScale: SIMD4<Float>(
+        renderOffset,
+        projectedPixelsPerMeter >= Self.fullDetailPixelsPerMeter ? 1 : 0
+      )
     )
     guard let encoder = commandBuffer.makeComputeCommandEncoder() else {
       throw VisualizationError.pipeline("crow feather geometry compute encoder")
@@ -115,12 +128,17 @@ final class CrowFeatherGeometryDeformer {
 
   func referenceVertices(
     roots: [CrowFeatherRootStateGPU],
-    renderOffset: SIMD3<Float>
+    renderOffset: SIMD3<Float>,
+    projectedPixelsPerMeter: Float = 0
   ) -> [CrowFeatherVertexGPU] {
-    roots.flatMap { root in
+    let detailScale: Float =
+      projectedPixelsPerMeter >= Self.fullDetailPixelsPerMeter ? 1 : 0
+    return roots.flatMap { root in
       templateVertices.map { template in
         let axial = template.parameters.x
         let signedWidth = template.parameters.y
+        let detailKind = template.parameters.z
+        let ribbonSide = template.parameters.w
         let currentDirection = Self.xyz(root.currentDirectionAndRachis)
         let previousDirection = Self.xyz(root.previousDirectionAndCamber)
         let currentNormal = Self.xyz(root.currentNormalAndPadding)
@@ -135,51 +153,81 @@ final class CrowFeatherGeometryDeformer {
         let shade = 0.0075 + 0.00045 * Float(root.identity.x % 11)
         let currentRoot = Self.xyz(root.currentPositionAndLength)
         let previousRoot = Self.xyz(root.previousPositionAndWidth)
+        let detailEnabled =
+          detailKind == TemplateKind.vane.rawValue
+          || (detailScale > 0 && (featherClass == 1 || featherClass == 2))
+        let currentPosition = detailEnabled
+          ? Self.detailPosition(
+            root: currentRoot,
+            direction: currentDirection,
+            surfaceNormal: currentNormal,
+            lengthMeters: lengthMeters,
+            maximumWidthMeters: maximumWidthMeters,
+            camberMeters: camberMeters,
+            rachisRadiusMeters: root.currentDirectionAndRachis.w,
+            axial: axial,
+            signedWidth: signedWidth,
+            detailKind: detailKind,
+            ribbonSide: ribbonSide,
+            packedIdentity: packedIdentity
+          )
+          : currentRoot
+        let previousPosition = detailEnabled
+          ? Self.detailPosition(
+            root: previousRoot,
+            direction: previousDirection,
+            surfaceNormal: previousNormal,
+            lengthMeters: lengthMeters,
+            maximumWidthMeters: maximumWidthMeters,
+            camberMeters: camberMeters,
+            rachisRadiusMeters: root.currentDirectionAndRachis.w,
+            axial: axial,
+            signedWidth: signedWidth,
+            detailKind: detailKind,
+            ribbonSide: ribbonSide,
+            packedIdentity: packedIdentity
+          )
+          : previousRoot
+        let deformedNormal = detailEnabled
+          ? Self.detailNormal(
+            direction: currentDirection,
+            surfaceNormal: currentNormal,
+            lengthMeters: lengthMeters,
+            maximumWidthMeters: maximumWidthMeters,
+            camberMeters: camberMeters,
+            axial: axial,
+            signedWidth: signedWidth,
+            detailKind: detailKind,
+            ribbonSide: ribbonSide,
+            packedIdentity: packedIdentity
+          )
+          : currentNormal
+        let detailShadeScale: Float =
+          detailKind == TemplateKind.rachis.rawValue ? 1.18
+          : (detailKind == TemplateKind.barb.rawValue ? 1.08 : 1)
         return CrowFeatherVertexGPU(
           position: SIMD4<Float>(
-            Self.position(
-              root: currentRoot,
-              direction: currentDirection,
-              surfaceNormal: currentNormal,
-              lengthMeters: lengthMeters,
-              maximumWidthMeters: maximumWidthMeters,
-              camberMeters: camberMeters,
-              axial: axial,
-              signedWidth: signedWidth,
-              packedIdentity: packedIdentity
-            ) + renderOffset,
+            currentPosition + renderOffset,
             1
           ),
-          normal: SIMD4<Float>(
-            Self.normal(
-              direction: currentDirection,
-              surfaceNormal: currentNormal,
-              lengthMeters: lengthMeters,
-              maximumWidthMeters: maximumWidthMeters,
-              camberMeters: camberMeters,
-              axial: axial,
-              signedWidth: signedWidth,
-              packedIdentity: packedIdentity
-            ),
-            0
+          normal: SIMD4<Float>(deformedNormal, 0),
+          color: SIMD4<Float>(
+            shade * detailShadeScale,
+            shade * 1.28 * detailShadeScale,
+            shade * 1.72 * detailShadeScale,
+            material
           ),
-          color: SIMD4<Float>(shade, shade * 1.28, shade * 1.72, material),
           previousPosition: SIMD4<Float>(
-            Self.position(
-              root: previousRoot,
-              direction: previousDirection,
-              surfaceNormal: previousNormal,
-              lengthMeters: lengthMeters,
-              maximumWidthMeters: maximumWidthMeters,
-              camberMeters: camberMeters,
-              axial: axial,
-              signedWidth: signedWidth,
-              packedIdentity: packedIdentity
-            ) + renderOffset,
+            previousPosition + renderOffset,
             1
           ),
           identity: root.identity,
-          parameters: SIMD4<Float>(axial, signedWidth, Float(featherClass), 0)
+          parameters: SIMD4<Float>(
+            axial,
+            signedWidth,
+            Float(featherClass),
+            detailKind
+          )
         )
       }
     }
@@ -187,7 +235,11 @@ final class CrowFeatherGeometryDeformer {
 
   private static func makeTemplateVertices() -> [CrowFeatherTemplateVertexGPU] {
     var result: [CrowFeatherTemplateVertexGPU] = []
-    result.reserveCapacity(sectionCount * widthSectionCount * 6)
+    result.reserveCapacity(
+      sectionCount * widthSectionCount * 6
+        + rachisSectionCount * 6
+        + barbPairCount * 2 * 6
+    )
     for section in 0..<sectionCount {
       let first = Float(section) / Float(sectionCount)
       let second = Float(section + 1) / Float(sectionCount)
@@ -210,7 +262,167 @@ final class CrowFeatherGeometryDeformer {
         }
       }
     }
+    for section in 0..<rachisSectionCount {
+      let first = 0.035 + 0.93 * Float(section) / Float(rachisSectionCount)
+      let second = 0.035 + 0.93 * Float(section + 1) / Float(rachisSectionCount)
+      appendRibbon(
+        first: SIMD2<Float>(first, 0),
+        second: SIMD2<Float>(second, 0),
+        kind: .rachis,
+        to: &result
+      )
+    }
+    for pair in 0..<barbPairCount {
+      let fraction = Float(pair + 1) / Float(barbPairCount + 1)
+      let firstAxial = 0.10 + 0.76 * fraction
+      let secondAxial = min(0.95, firstAxial + 0.045 + 0.020 * fraction)
+      for side: Float in [-1, 1] {
+        appendRibbon(
+          first: SIMD2<Float>(firstAxial, side * 0.025),
+          second: SIMD2<Float>(secondAxial, side * 0.94),
+          kind: .barb,
+          to: &result
+        )
+      }
+    }
     return result
+  }
+
+  private static func appendRibbon(
+    first: SIMD2<Float>,
+    second: SIMD2<Float>,
+    kind: TemplateKind,
+    to result: inout [CrowFeatherTemplateVertexGPU]
+  ) {
+    for parameter in [
+      SIMD3<Float>(first.x, first.y, -1),
+      SIMD3<Float>(first.x, first.y, 1),
+      SIMD3<Float>(second.x, second.y, 1),
+      SIMD3<Float>(first.x, first.y, -1),
+      SIMD3<Float>(second.x, second.y, 1),
+      SIMD3<Float>(second.x, second.y, -1),
+    ] {
+      result.append(
+        CrowFeatherTemplateVertexGPU(
+          parameters: SIMD4<Float>(
+            parameter.x,
+            parameter.y,
+            kind.rawValue,
+            parameter.z
+          )
+        )
+      )
+    }
+  }
+
+  private static func detailPosition(
+    root: SIMD3<Float>,
+    direction: SIMD3<Float>,
+    surfaceNormal: SIMD3<Float>,
+    lengthMeters: Float,
+    maximumWidthMeters: Float,
+    camberMeters: Float,
+    rachisRadiusMeters: Float,
+    axial: Float,
+    signedWidth: Float,
+    detailKind: Float,
+    ribbonSide: Float,
+    packedIdentity: UInt32
+  ) -> SIMD3<Float> {
+    let base = position(
+      root: root,
+      direction: direction,
+      surfaceNormal: surfaceNormal,
+      lengthMeters: lengthMeters,
+      maximumWidthMeters: maximumWidthMeters,
+      camberMeters: camberMeters,
+      axial: axial,
+      signedWidth: signedWidth,
+      packedIdentity: packedIdentity
+    )
+    guard detailKind != TemplateKind.vane.rawValue else { return base }
+    let tangent = safeNormalize(direction, fallback: SIMD3<Float>(1, 0, 0))
+    let baseNormal = normal(
+      direction: direction,
+      surfaceNormal: surfaceNormal,
+      lengthMeters: lengthMeters,
+      maximumWidthMeters: maximumWidthMeters,
+      camberMeters: camberMeters,
+      axial: axial,
+      signedWidth: signedWidth,
+      packedIdentity: packedIdentity
+    )
+    let widthAxis = safeNormalize(
+      simd_cross(baseNormal, tangent),
+      fallback: SIMD3<Float>(0, 1, 0)
+    )
+    if detailKind == TemplateKind.rachis.rawValue {
+      let halfWidth = max(
+        0.00011,
+        rachisRadiusMeters * (0.96 - 0.72 * axial)
+      )
+      return base + baseNormal * (0.34 * halfWidth)
+        + widthAxis * (ribbonSide * halfWidth)
+    }
+    let barbDirection = safeNormalize(
+      widthAxis * (signedWidth < 0 ? -1 : 1) + tangent * 0.16,
+      fallback: widthAxis
+    )
+    let ribbonAxis = safeNormalize(
+      simd_cross(baseNormal, barbDirection),
+      fallback: tangent
+    )
+    let halfWidth = 0.00010 * (1 - 0.28 * axial)
+    return base + baseNormal * 0.00010
+      + ribbonAxis * (ribbonSide * halfWidth)
+  }
+
+  private static func detailNormal(
+    direction: SIMD3<Float>,
+    surfaceNormal: SIMD3<Float>,
+    lengthMeters: Float,
+    maximumWidthMeters: Float,
+    camberMeters: Float,
+    axial: Float,
+    signedWidth: Float,
+    detailKind: Float,
+    ribbonSide: Float,
+    packedIdentity: UInt32
+  ) -> SIMD3<Float> {
+    let baseNormal = normal(
+      direction: direction,
+      surfaceNormal: surfaceNormal,
+      lengthMeters: lengthMeters,
+      maximumWidthMeters: maximumWidthMeters,
+      camberMeters: camberMeters,
+      axial: axial,
+      signedWidth: signedWidth,
+      packedIdentity: packedIdentity
+    )
+    guard detailKind != TemplateKind.vane.rawValue else { return baseNormal }
+    let tangent = safeNormalize(direction, fallback: SIMD3<Float>(1, 0, 0))
+    let widthAxis = safeNormalize(
+      simd_cross(baseNormal, tangent),
+      fallback: SIMD3<Float>(0, 1, 0)
+    )
+    if detailKind == TemplateKind.rachis.rawValue {
+      return safeNormalize(
+        baseNormal - widthAxis * (0.38 * ribbonSide),
+        fallback: baseNormal
+      )
+    }
+    let barbDirection = safeNormalize(
+      widthAxis * (signedWidth < 0 ? -1 : 1) + tangent * 0.16,
+      fallback: widthAxis
+    )
+    let ribbonAxis = safeNormalize(
+      simd_cross(baseNormal, barbDirection),
+      fallback: tangent
+    )
+    return safeNormalize(
+      baseNormal - ribbonAxis * (0.24 * ribbonSide),
+      fallback: baseNormal
+    )
   }
 
   private static func position(

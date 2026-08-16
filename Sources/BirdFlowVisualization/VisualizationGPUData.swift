@@ -195,8 +195,9 @@ struct CrowStandingFeatherUniforms {
   var referenceBodyCenter: SIMD4<Float>
 }
 
-/// One canonical vane-template vertex. The same retained template is expanded
-/// for every feather; x is axial fraction and y is signed half-width.
+/// One canonical feather-template vertex. The same retained template is
+/// expanded for every feather. X is axial fraction, y is signed vane width,
+/// z classifies vane/rachis/barb geometry, and w is the ribbon-side coordinate.
 struct CrowFeatherTemplateVertexGPU {
   var parameters: SIMD4<Float>
 }
@@ -215,7 +216,7 @@ struct CrowFeatherVertexGPU: Equatable {
 
 struct CrowFeatherGeometryUniforms {
   var counts: SIMD4<UInt32>
-  var renderOffsetAndPadding: SIMD4<Float>
+  var renderOffsetAndDetailScale: SIMD4<Float>
 }
 
 /// Procedural crow geometry paired across two frames for true deformation
