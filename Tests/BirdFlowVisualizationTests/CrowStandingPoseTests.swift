@@ -12,6 +12,20 @@ func standingCrowPoseKeepsContactsPlanted() {
   for sample in samples {
     #expect(sample.leftFoot.digitTips.count == 4)
     #expect(sample.rightFoot.digitTips.count == 4)
+    for foot in [sample.leftFoot, sample.rightFoot] {
+      let orderedDigits = foot.digits.sorted { $0.digitNumber < $1.digitNumber }
+      #expect(orderedDigits.map(\.phalangealSegmentCount) == [2, 3, 4, 5])
+      #expect(orderedDigits.map(\.digitNumber) == [1, 2, 3, 4])
+      for digit in orderedDigits {
+        #expect(digit.nodes.first == foot.ankle)
+        #expect(digit.nodes.allSatisfy { $0.z >= sample.supportHeight })
+        #expect(
+          zip(digit.nodes, digit.nodes.dropFirst()).allSatisfy {
+            simd_distance($0, $1) > 0.002
+          }
+        )
+      }
+    }
     for tip in sample.leftFoot.digitTips + sample.rightFoot.digitTips {
       #expect(abs(tip.z - sample.supportHeight) < 1e-7)
     }
@@ -53,4 +67,21 @@ func standingCrowPoseKeepsContactsPlanted() {
   }.max()!
   #expect(ankleTravel > 0)
   #expect(ankleTravel < 0.0015)
+
+  for digitIndex in 0..<4 {
+    let leftTipTravel = samples.map {
+      simd_distance(
+        $0.leftFoot.digitTips[digitIndex],
+        samples[0].leftFoot.digitTips[digitIndex]
+      )
+    }.max()!
+    let rightTipTravel = samples.map {
+      simd_distance(
+        $0.rightFoot.digitTips[digitIndex],
+        samples[0].rightFoot.digitTips[digitIndex]
+      )
+    }.max()!
+    #expect(leftTipTravel < 1e-8)
+    #expect(rightTipTravel < 1e-8)
+  }
 }

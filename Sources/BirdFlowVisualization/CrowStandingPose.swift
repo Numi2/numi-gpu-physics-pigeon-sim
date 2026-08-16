@@ -1,12 +1,21 @@
 import Foundation
 import simd
 
+struct CrowStandingDigitPose: Equatable {
+  let digitNumber: Int
+  let nodes: [SIMD3<Float>]
+
+  var phalangealSegmentCount: Int { max(0, nodes.count - 1) }
+  var tip: SIMD3<Float> { nodes.last! }
+}
+
 struct CrowStandingFootPose: Equatable {
   let hip: SIMD3<Float>
   let hock: SIMD3<Float>
   let ankle: SIMD3<Float>
-  let digitJoints: [SIMD3<Float>]
-  let digitTips: [SIMD3<Float>]
+  let digits: [CrowStandingDigitPose]
+
+  var digitTips: [SIMD3<Float>] { digits.map(\.tip) }
 }
 
 struct CrowStandingNeckPose: Equatable {
@@ -71,6 +80,7 @@ enum CrowStandingPose {
   static let supportHeightRelativeToBodyCenter: Float = -0.172
   static let footHalfSeparationMeters: Float = 0.039
   static let tarsusLengthMeters: Float = 0.057
+  static let phalangealSegmentCounts = [2, 3, 4, 5]
 
   static func sample(
     phase: Float,
@@ -143,54 +153,88 @@ enum CrowStandingPose {
     let hock = ankle + tarsusLengthMeters * tarsusDirection
 
     // Digits II-IV point forward with increasing then decreasing length;
-    // digit I (hallux) opposes them behind the ankle. The distal contacts stay
-    // fixed over the loop while the proximal joints flex by sub-millimetres.
+    // digit I (hallux) opposes them behind the ankle. Each chain retains the
+    // avian 2-3-4-5 phalangeal pattern. Distal contacts stay fixed over the
+    // loop while the intervening joints flex by sub-millimetres.
     let forwardLengths: [Float] = [0.031, 0.043, 0.035]
     let lateralFractions: [Float] = [-0.58, 0, 0.68]
-    var joints: [SIMD3<Float>] = []
-    var tips: [SIMD3<Float>] = []
+    var digits: [CrowStandingDigitPose] = []
     for index in 0..<3 {
       let length = forwardLengths[index]
       let lateral = side * lateralFractions[index] * 0.020
-      joints.append(
-        ankle
-          + SIMD3<Float>(
-            0.52 * length,
-            0.52 * lateral,
-            -0.002 + 0.0006 * sin(counterPhase + Float(index))
-          )
-      )
-      tips.append(
+      let tip =
         referenceBodyCenter
           + SIMD3<Float>(
             0.002 + length,
             side * footHalfSeparationMeters + lateral,
             supportHeight - referenceBodyCenter.z
           )
+      digits.append(
+        digit(
+          number: index + 2,
+          segmentCount: phalangealSegmentCounts[index + 1],
+          ankle: ankle,
+          tip: tip,
+          supportHeight: supportHeight,
+          flexionPhase: counterPhase + Float(index)
+        )
       )
     }
-    joints.append(
-      ankle
-        + SIMD3<Float>(
-          -0.014,
-          side * 0.0025,
-          -0.0015 + 0.0005 * cos(counterPhase)
-        )
-    )
-    tips.append(
+    let halluxTip =
       referenceBodyCenter
         + SIMD3<Float>(
           -0.025,
           side * (footHalfSeparationMeters + 0.0035),
           supportHeight - referenceBodyCenter.z
         )
+    digits.append(
+      digit(
+        number: 1,
+        segmentCount: phalangealSegmentCounts[0],
+        ankle: ankle,
+        tip: halluxTip,
+        supportHeight: supportHeight,
+        flexionPhase: counterPhase + 0.7
+      )
     )
     return CrowStandingFootPose(
       hip: hip,
       hock: hock,
       ankle: ankle,
-      digitJoints: joints,
-      digitTips: tips
+      digits: digits
     )
+  }
+
+  private static func digit(
+    number: Int,
+    segmentCount: Int,
+    ankle: SIMD3<Float>,
+    tip: SIMD3<Float>,
+    supportHeight: Float,
+    flexionPhase: Float
+  ) -> CrowStandingDigitPose {
+    precondition(segmentCount > 0)
+    let weights = (0..<segmentCount).map { pow(0.78, Float($0)) }
+    let totalWeight = weights.reduce(0, +)
+    var nodes: [SIMD3<Float>] = [ankle]
+    nodes.reserveCapacity(segmentCount + 1)
+    var accumulated: Float = 0
+    for segmentIndex in 0..<segmentCount {
+      accumulated += weights[segmentIndex]
+      let fraction = accumulated / totalWeight
+      if segmentIndex == segmentCount - 1 {
+        nodes.append(tip)
+        continue
+      }
+      var node = ankle + fraction * (tip - ankle)
+      let plantarArch =
+        0.006 * pow(max(1 - fraction, 0), 2.1)
+        + 0.0012 * sin(Float.pi * fraction)
+        + 0.00025 * sin(flexionPhase + Float(segmentIndex))
+          * sin(Float.pi * fraction)
+      node.z = supportHeight + max(plantarArch, 0.0016)
+      nodes.append(node)
+    }
+    return CrowStandingDigitPose(digitNumber: number, nodes: nodes)
   }
 }

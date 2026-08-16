@@ -33,6 +33,12 @@ visible support so contact can be inspected rather than inferred from floating
 geometry. The hock-to-ankle segment is constrained to the selected `57 mm`
 tarsus estimate rather than inheriting the former tube endpoint spacing.
 
+Digits I-IV retain the avian `2-3-4-5` phalangeal pattern. Every segment has a
+tapered elliptical surface, each interphalangeal station carries a flattened
+plantar pad whose lower surface meets the support, and a two-section claw
+continues the distal tangent. These are estimated contact shapes; no tendon
+force or measured joint-center claim is implied.
+
 Standing feather motion is a separate retained Metal path:
 
 ```text

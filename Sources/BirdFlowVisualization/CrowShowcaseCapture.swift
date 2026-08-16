@@ -544,6 +544,7 @@ private struct CrowStandingReference: Decodable {
     let maximumAnkleTravelMeters: Float
     let forwardToeCountPerFoot: Int
     let rearToeCountPerFoot: Int
+    let phalangealSegmentsDigitsIThroughIV: [Int]
   }
 
   let schemaVersion: Int
@@ -576,7 +577,9 @@ private struct CrowStandingReference: Decodable {
       poseParameters.maximumBodySwayMeters <= 0.003,
       poseParameters.maximumAnkleTravelMeters <= 0.0015,
       poseParameters.forwardToeCountPerFoot == 3,
-      poseParameters.rearToeCountPerFoot == 1
+      poseParameters.rearToeCountPerFoot == 1,
+      poseParameters.phalangealSegmentsDigitsIThroughIV
+        == CrowStandingPose.phalangealSegmentCounts
     else {
       throw CrowShowcaseCapture.CaptureError.invalidProfile(
         "standing crow reference contract is invalid"
@@ -2068,37 +2071,15 @@ private struct CrowMeshBuilder {
           scuteColor: SIMD4<Float>(0.052, 0.057, 0.064, 0.62)
         )
       )
-      for digit in 0..<4 {
-        let joint = foot.digitJoints[digit]
-        let tip = foot.digitTips[digit]
-        appendTaperedTube(
-          from: foot.ankle,
-          to: joint,
-          startRadius: 0.0035,
-          endRadius: 0.0027,
-          color: keratin,
-          radialSegments: 8,
-          to: &vertices
-        )
-        appendTaperedTube(
-          from: joint,
-          to: tip,
-          startRadius: 0.0027,
-          endRadius: 0.0018,
-          color: keratin,
-          radialSegments: 8,
-          to: &vertices
-        )
-        let direction = safeNormalize(tip - joint, fallback: SIMD3<Float>(1, 0, 0))
-        let clawTip = tip + direction * 0.005 + SIMD3<Float>(0, 0, -0.0022)
-        appendTaperedTube(
-          from: tip,
-          to: clawTip,
-          startRadius: 0.0014,
-          endRadius: 0.00025,
-          color: claw,
-          radialSegments: 7,
-          to: &vertices
+      for digit in foot.digits {
+        vertices.append(
+          contentsOf: CrowFootAnatomy.vertices(
+            digit: digit,
+            supportHeight: pose.supportHeight,
+            keratinColor: keratin,
+            padColor: SIMD4<Float>(0.036, 0.040, 0.047, 0.62),
+            clawColor: claw
+          )
         )
       }
     }
