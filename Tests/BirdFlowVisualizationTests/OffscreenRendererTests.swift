@@ -463,6 +463,7 @@ func estimatedCrowBodyLoftPreservesAnatomicalRegions() {
 @Test("estimated crow cranium bridges nape, crown, and bill")
 func estimatedCrowCraniumBridgesNapeCrownAndBill() {
   let rings = CrowCranialAnatomy.loftRings
+  let sampled = CrowCranialAnatomy.sampledLoftRings()
   #expect(rings.count >= 7)
   #expect(
     zip(rings, rings.dropFirst()).allSatisfy {
@@ -473,6 +474,24 @@ func estimatedCrowCraniumBridgesNapeCrownAndBill() {
   #expect(rings.first!.halfWidthFraction > 0.5)
   #expect(rings[2].dorsalRadiusFraction > 1)
   #expect(rings.last!.halfWidthFraction < 0.3)
+  #expect(
+    sampled.count
+      == (rings.count - 1) * CrowCranialAnatomy.renderSubdivisionsPerInterval + 1
+  )
+  #expect(sampled.first == rings.first)
+  #expect(sampled.last == rings.last)
+  #expect(
+    zip(sampled, sampled.dropFirst()).allSatisfy {
+      $0.axialFraction < $1.axialFraction
+        && $1.axialFraction - $0.axialFraction < 0.11
+    }
+  )
+  #expect(
+    sampled.allSatisfy {
+      $0.halfWidthFraction > 0 && $0.dorsalRadiusFraction > 0
+        && $0.ventralRadiusFraction > 0
+    }
+  )
 
   let radii = SIMD3<Float>(0.045, 0.033, 0.039)
   let vertices = CrowCranialAnatomy.vertices(
@@ -481,7 +500,7 @@ func estimatedCrowCraniumBridgesNapeCrownAndBill() {
     breathingScale: 1,
     color: SIMD4<Float>(0.006, 0.008, 0.013, 0.10)
   )
-  #expect(vertices.count == (rings.count - 1) * 48 * 6)
+  #expect(vertices.count == (sampled.count - 1) * 48 * 6)
   #expect(
     vertices.allSatisfy {
       let normal = SIMD3<Float>($0.normal.x, $0.normal.y, $0.normal.z)

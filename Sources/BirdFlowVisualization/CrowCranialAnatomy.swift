@@ -15,6 +15,8 @@ struct CrowCranialLoftRing: Equatable {
 }
 
 enum CrowCranialAnatomy {
+  static let renderSubdivisionsPerInterval = 4
+
   static let loftRings: [CrowCranialLoftRing] = [
     .init(
       axialFraction: -1.05,
@@ -67,6 +69,70 @@ enum CrowCranialAnatomy {
     ),
   ]
 
+  static func sampledLoftRings(
+    subdivisionsPerInterval: Int = renderSubdivisionsPerInterval
+  ) -> [CrowCranialLoftRing] {
+    precondition(subdivisionsPerInterval > 0)
+    guard loftRings.count > 1 else { return loftRings }
+    var result: [CrowCranialLoftRing] = []
+    result.reserveCapacity(
+      (loftRings.count - 1) * subdivisionsPerInterval + 1
+    )
+    for interval in 0..<(loftRings.count - 1) {
+      let first = loftRings[max(interval - 1, 0)]
+      let start = loftRings[interval]
+      let end = loftRings[interval + 1]
+      let last = loftRings[min(interval + 2, loftRings.count - 1)]
+      for subdivision in 0..<subdivisionsPerInterval {
+        let t = Float(subdivision) / Float(subdivisionsPerInterval)
+        result.append(
+          CrowCranialLoftRing(
+            axialFraction: mix(start.axialFraction, end.axialFraction, t),
+            verticalFraction: catmullRom(
+              first.verticalFraction,
+              start.verticalFraction,
+              end.verticalFraction,
+              last.verticalFraction,
+              t
+            ),
+            halfWidthFraction: max(
+              0.05,
+              catmullRom(
+                first.halfWidthFraction,
+                start.halfWidthFraction,
+                end.halfWidthFraction,
+                last.halfWidthFraction,
+                t
+              )
+            ),
+            dorsalRadiusFraction: max(
+              0.05,
+              catmullRom(
+                first.dorsalRadiusFraction,
+                start.dorsalRadiusFraction,
+                end.dorsalRadiusFraction,
+                last.dorsalRadiusFraction,
+                t
+              )
+            ),
+            ventralRadiusFraction: max(
+              0.05,
+              catmullRom(
+                first.ventralRadiusFraction,
+                start.ventralRadiusFraction,
+                end.ventralRadiusFraction,
+                last.ventralRadiusFraction,
+                t
+              )
+            )
+          )
+        )
+      }
+    }
+    result.append(loftRings.last!)
+    return result
+  }
+
   static func vertices(
     center: SIMD3<Float>,
     radii: SIMD3<Float>,
@@ -75,7 +141,7 @@ enum CrowCranialAnatomy {
   ) -> [ColoredVertex] {
     let effectiveRadii = radii * SIMD3<Float>(breathingScale, 1, breathingScale)
     let segments = 48
-    let rings = loftRings
+    let rings = sampledLoftRings()
     var positions: [SIMD3<Float>] = []
     positions.reserveCapacity(rings.count * segments)
     for ring in rings {
@@ -139,5 +205,25 @@ enum CrowCranialAnatomy {
       }
     }
     return result
+  }
+
+  private static func mix(_ first: Float, _ second: Float, _ t: Float) -> Float {
+    first + t * (second - first)
+  }
+
+  private static func catmullRom(
+    _ first: Float,
+    _ start: Float,
+    _ end: Float,
+    _ last: Float,
+    _ t: Float
+  ) -> Float {
+    let t2 = t * t
+    let t3 = t2 * t
+    return 0.5
+      * (2 * start
+        + (-first + end) * t
+        + (2 * first - 5 * start + 4 * end - last) * t2
+        + (-first + 3 * start - 3 * end + last) * t3)
   }
 }
