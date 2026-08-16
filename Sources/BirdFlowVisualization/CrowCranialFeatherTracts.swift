@@ -19,6 +19,7 @@ struct CrowCranialFeatherSample: Equatable {
   let maximumWidthMeters: Float
   let camberMeters: Float
   let materialVariation: Float
+  let surfaceFeatherClass: UInt32
 }
 
 /// Small overlapping contour tracts attached to the estimated cranial loft.
@@ -201,9 +202,25 @@ enum CrowCranialFeatherTracts {
         maximumWidthMeters: width,
         camberMeters: (0.00055 + (region == .nape ? 0.00020 : 0))
           * (1 + 0.08 * materialIdentity),
-        materialVariation: materialIdentity
+        materialVariation: materialIdentity,
+        surfaceFeatherClass: surfaceFeatherClass(for: region)
       )
     )
+  }
+
+  /// Cranial contour vanes continue the corresponding body-material response
+  /// across the head instead of falling back to the generic feather class.
+  static func surfaceFeatherClass(
+    for region: CrowCranialFeatherRegion
+  ) -> UInt32 {
+    switch region {
+    case .nape, .crown:
+      return 5
+    case .cheek:
+      return 6
+    case .throat:
+      return 7
+    }
   }
 
   private static func region(

@@ -17,6 +17,24 @@ func crowCranialContourTractsRemainAttachedAndRegionallyBounded() {
   #expect(samples.filter { $0.region == .crown }.count == 73)
   #expect(samples.filter { $0.region == .cheek }.count == 21)
   #expect(samples.filter { $0.region == .throat }.count == 84)
+  #expect(
+    samples.allSatisfy {
+      $0.surfaceFeatherClass
+        == CrowCranialFeatherTracts.surfaceFeatherClass(for: $0.region)
+    }
+  )
+  #expect(
+    samples.filter { $0.region == .nape || $0.region == .crown }
+      .allSatisfy { $0.surfaceFeatherClass == 5 }
+  )
+  #expect(
+    samples.filter { $0.region == .cheek }
+      .allSatisfy { $0.surfaceFeatherClass == 6 }
+  )
+  #expect(
+    samples.filter { $0.region == .throat }
+      .allSatisfy { $0.surfaceFeatherClass == 7 }
+  )
   #expect(samples.filter { $0.region == .nape }.allSatisfy { $0.root.x < center.x })
   #expect(samples.allSatisfy { $0.root.x < center.x + 0.038 })
   #expect(
