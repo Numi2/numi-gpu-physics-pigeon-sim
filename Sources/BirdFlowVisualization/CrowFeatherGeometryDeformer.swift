@@ -160,7 +160,8 @@ final class CrowFeatherGeometryDeformer {
             ) + renderOffset,
             1
           ),
-          identity: root.identity
+          identity: root.identity,
+          parameters: SIMD4<Float>(axial, signedWidth, Float(featherClass), 0)
         )
       }
     }

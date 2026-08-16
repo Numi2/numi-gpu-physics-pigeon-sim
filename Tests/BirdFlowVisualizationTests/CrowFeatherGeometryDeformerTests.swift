@@ -35,7 +35,7 @@ func crowFeatherTemplateGPUDeformationMatchesCPUReference() throws {
   )
 
   #expect(MemoryLayout<CrowFeatherTemplateVertexGPU>.stride == 16)
-  #expect(MemoryLayout<CrowFeatherVertexGPU>.stride == 80)
+  #expect(MemoryLayout<CrowFeatherVertexGPU>.stride == 96)
   #expect(MemoryLayout<CrowFeatherGeometryUniforms>.stride == 32)
   #expect(geometryDeformer.vertexCount == 54 * 12 * 6)
 
@@ -100,6 +100,7 @@ func crowFeatherTemplateGPUDeformationMatchesCPUReference() throws {
     var maximumNormalDifference: Float = 0
     var maximumColorDifference: Float = 0
     var maximumPreviousPositionDifference: Float = 0
+    var maximumParameterDifference: Float = 0
     for (gpu, cpu) in zip(actual, expected) {
       maximumPositionDifference = max(
         maximumPositionDifference,
@@ -117,12 +118,17 @@ func crowFeatherTemplateGPUDeformationMatchesCPUReference() throws {
         maximumPreviousPositionDifference,
         simd_length(gpu.previousPosition - cpu.previousPosition)
       )
+      maximumParameterDifference = max(
+        maximumParameterDifference,
+        simd_length(gpu.parameters - cpu.parameters)
+      )
       #expect(gpu.identity == cpu.identity)
     }
     #expect(maximumPositionDifference < 3e-6)
     #expect(maximumNormalDifference < 1e-5)
     #expect(maximumColorDifference < 2e-7)
     #expect(maximumPreviousPositionDifference < 3e-6)
+    #expect(maximumParameterDifference < 2e-7)
   }
   #expect(maximumRadialExtent < 0.75)
   #expect(maximumBilateralSpan < 1.10)
@@ -136,6 +142,9 @@ func crowFeatherTemplateGPUDeformationMatchesCPUReference() throws {
     renderOffset: renderOffset
   )
   #expect(Set(movingVertices.map { $0.identity.y }).count == 54)
+  #expect(movingVertices.allSatisfy { $0.parameters.x >= 0 && $0.parameters.x <= 1 })
+  #expect(movingVertices.contains { $0.parameters.y == -1 })
+  #expect(movingVertices.contains { $0.parameters.y == 1 })
   #expect(
     movingVertices.contains {
       simd_length(

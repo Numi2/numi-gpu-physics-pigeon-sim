@@ -50,6 +50,7 @@ struct CrowFeatherVertexGPU {
     float4 color;
     float4 previousPosition;
     uint4 identity;
+    float4 parameters;
 };
 
 struct CrowFeatherGeometryUniforms {
@@ -113,6 +114,7 @@ struct CrowRasterVertex {
     float3 world;
     float3 normal;
     float4 albedoAndMaterial;
+    float2 featherCoordinates;
     uint4 identity [[flat]];
 };
 
@@ -398,6 +400,7 @@ kernel void deformCrowFeatherTemplates(
     result.color=float4(shade,shade*1.28f,shade*1.72f,material);
     result.previousPosition=float4(previous,1);
     result.identity=root.identity;
+    result.parameters=float4(parameter,float(featherClass),0);
     output[outputIndex]=result;
 }
 
@@ -913,7 +916,7 @@ vertex RasterVertex crowFeatherVertex(
     out.world=source.position.xyz;
     out.normal=normalize(source.normal.xyz);
     out.color=source.color;
-    out.uv=float2(0);
+    out.uv=source.parameters.xy;
     return out;
 }
 
@@ -928,6 +931,7 @@ vertex CrowRasterVertex crowSurfaceAOVVertex(
     out.world=source.position.xyz;
     out.normal=normalize(source.normal.xyz);
     out.albedoAndMaterial=source.albedoAndMaterial;
+    out.featherCoordinates=float2(0);
     out.identity=source.identity;
     return out;
 }
@@ -943,6 +947,7 @@ vertex CrowRasterVertex crowFeatherAOVVertex(
     out.world=source.position.xyz;
     out.normal=normalize(source.normal.xyz);
     out.albedoAndMaterial=source.color;
+    out.featherCoordinates=source.parameters.xy;
     out.identity=source.identity;
     return out;
 }
@@ -998,7 +1003,8 @@ inline float3 showcaseCrowLinearRadiance(
     float3 world,
     float3 normalInput,
     float4 albedoAndMaterial,
-    float3 eyePosition) {
+    float3 eyePosition,
+    float2 featherCoordinates) {
     float3 normal=normalize(normalInput);
     float3 view=normalize(eyePosition-world);
     float material=albedoAndMaterial.a;
@@ -1055,9 +1061,22 @@ inline float3 showcaseCrowLinearRadiance(
     float3 violet=float3(0.065f,0.035f,0.075f);
     float3 sheen=mix(blue,violet,interference);
     float flightFeather=smoothstep(0.19f,0.25f,material);
+    float persistentVane=flightFeather*step(1.0e-5f,
+        abs(featherCoordinates.x)+abs(featherCoordinates.y));
+    float axial=saturate(featherCoordinates.x);
+    float signedWidth=clamp(featherCoordinates.y,-1.0f,1.0f);
+    float rachis=persistentVane
+        *smoothstep(0.035f,0.16f,axial)
+        *(1.0f-smoothstep(0.80f,0.985f,axial))
+        *exp2(-42.0f*abs(signedWidth));
+    float localBarbs=0.5f+0.5f*sin(
+        178.0f*axial+23.0f*abs(signedWidth)+7.0f*signedWidth
+    );
     float barbPhase=520.0f*world.x+390.0f*world.y-270.0f*world.z;
     float barb=0.5f+0.5f*sin(barbPhase);
-    float barbMicro=flightFeather*(0.010f+0.018f*barb)*grazing;
+    float barbSignal=mix(barb,localBarbs,persistentVane);
+    float barbMicro=flightFeather*(0.010f+0.018f*barbSignal)*grazing;
+    float vaneEdge=persistentVane*smoothstep(0.78f,0.98f,abs(signedWidth));
     float featherSpecular=pow(saturate(dot(normal,halfVector)),92.0f);
     float softSpecular=pow(saturate(dot(normal,halfVector)),24.0f);
     float diffuse=0.46f+0.72f*ndk+0.22f*ndf+0.13f*nds;
@@ -1077,6 +1096,9 @@ inline float3 showcaseCrowLinearRadiance(
     );
     color+=sharpTint*featherSpecular;
     color+=softTint*softSpecular;
+    color*=1.0f-0.055f*persistentVane*(1.0f-localBarbs);
+    color+=rachis*(0.012f+0.025f*ndk)*float3(0.42f,0.56f,0.74f);
+    color+=vaneEdge*grazing*float3(0.010f,0.022f,0.042f);
     color+=nds*float3(0.026f,0.016f,0.010f);
     color+=rim*float3(0.018f,0.032f,0.050f);
     return 1.82f*color;
@@ -1086,7 +1108,7 @@ fragment float4 showcaseCrowFragment(
     RasterVertex in [[stage_in]],
     constant CameraUniforms& camera [[buffer(0)]]) {
     float3 radiance=showcaseCrowLinearRadiance(
-        in.world,in.normal,in.color,camera.eyeAndWidth.xyz
+        in.world,in.normal,in.color,camera.eyeAndWidth.xyz,in.uv
     );
     return float4(1.0f-exp(-radiance),1.0f);
 }
@@ -1096,7 +1118,8 @@ fragment CrowAOVOutput showcaseCrowAOVFragment(
     constant CrowTemporalCameraUniforms& camera [[buffer(0)]]) {
     float3 normal=normalize(in.normal);
     float3 radiance=showcaseCrowLinearRadiance(
-        in.world,normal,in.albedoAndMaterial,camera.eyeAndWidth.xyz
+        in.world,normal,in.albedoAndMaterial,camera.eyeAndWidth.xyz,
+        in.featherCoordinates
     );
     float inversePreviousW=1.0f/in.previousClipPosition.w;
     float2 previousNDC=in.previousClipPosition.xy*inversePreviousW;

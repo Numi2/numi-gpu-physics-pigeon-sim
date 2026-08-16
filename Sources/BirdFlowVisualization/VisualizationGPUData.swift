@@ -209,6 +209,8 @@ struct CrowFeatherVertexGPU: Equatable {
   var color: SIMD4<Float>
   var previousPosition: SIMD4<Float>
   var identity: SIMD4<UInt32>
+  /// Axial vane fraction, signed half-width, feather class, reserved.
+  var parameters: SIMD4<Float>
 }
 
 struct CrowFeatherGeometryUniforms {

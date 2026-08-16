@@ -102,3 +102,10 @@ microstructure, barb ribbons, vane shells, and silhouette strips. Final-output
 coverage keeps native and MetalFX frames on the same topology, while quantized
 tiers prevent the quiet standing orbit from rebuilding different vertex counts
 between current and previous temporal samples.
+
+Persistent GPU vanes also retain their template-local axial and signed-width
+coordinates through deformation. The Metal material pass uses those stable
+coordinates for a narrow rachis response, vane-edge transmission, and aligned
+barb modulation; the pattern therefore follows each feather through motion
+instead of swimming in screen or world space. These are analytic appearance
+cues, not measured barb geometry or microscopy-derived material calibration.
