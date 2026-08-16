@@ -8,7 +8,7 @@ func uppertailCovertsCloseDorsalPelvicToRectrixShell() {
   let samples = CrowUppertailCoverts.samples()
   #expect(samples == CrowUppertailCoverts.samples())
   #expect(samples.count == CrowUppertailCoverts.rowCount * CrowUppertailCoverts.columnCount)
-  #expect(samples.count == 216)
+  #expect(samples.count == 270)
   #expect(CrowUppertailCoverts.surfaceFeatherClass == 5)
   #expect(CrowUppertailCoverts.rectrixDorsalClearanceMeters == 0.016)
   #expect(CrowUppertailCoverts.visibleSamples(projectedPixelsPerMeter: 1_000).isEmpty)
@@ -18,6 +18,36 @@ func uppertailCovertsCloseDorsalPelvicToRectrixShell() {
   )
   #expect(samples.map(\.materialVariation).min()! < -0.90)
   #expect(samples.map(\.materialVariation).max()! > 0.90)
+  #expect(samples.map(\.vaneAsymmetry).min()! < -0.032)
+  #expect(samples.map(\.vaneAsymmetry).max()! > 0.032)
+  #expect(samples.allSatisfy { $0.edgeRippleAmplitude >= 0.008 })
+  #expect(samples.allSatisfy { $0.edgeRippleAmplitude <= 0.020 })
+  #expect(samples.allSatisfy { $0.rootEnvelopeRatio == 0.64 })
+  #expect(samples.allSatisfy { $0.pennaceousStartFraction == 0 })
+  let courseStaggers = (0..<CrowUppertailCoverts.rowCount).map {
+    CrowUppertailCoverts.courseStaggerMeters(row: $0)
+  }
+  #expect(courseStaggers.min()! < -0.0027)
+  #expect(courseStaggers.max()! > 0.0027)
+  #expect(Set(courseStaggers.map { Int(($0 * 1_000_000).rounded()) }).count == 27)
+  #expect(
+    CrowUppertailCoverts.insertionWidthScale(
+      rowFraction: 0.5,
+      axialFraction: 1
+    ) == 1.38
+  )
+  #expect(
+    CrowUppertailCoverts.insertionWidthScale(
+      rowFraction: 0,
+      axialFraction: 1
+    ) == 1
+  )
+  #expect(
+    CrowUppertailCoverts.insertionWidthScale(
+      rowFraction: 0.5,
+      axialFraction: 0
+    ) == 1
+  )
 
   for sample in samples {
     #expect(
@@ -50,7 +80,8 @@ func uppertailCovertsCloseDorsalPelvicToRectrixShell() {
     let tail = CrowClosedTailAnatomy.pose(
       fraction: Float(row) / Float(CrowUppertailCoverts.rowCount - 1)
     )
-    let rectrixOverlapPoint = tail.rootOffset + 0.032 * tail.direction
+    let rectrixOverlapPoint = tail.rootOffset
+      + CrowUppertailCoverts.rectrixOverlapMeters(axialFraction: 1) * tail.direction
     #expect(simd_distance(posterior.tipOffset, rectrixOverlapPoint) < 0.018)
     #expect(
       simd_dot(posterior.tipOffset - rectrixOverlapPoint, tail.normal) > 0.008

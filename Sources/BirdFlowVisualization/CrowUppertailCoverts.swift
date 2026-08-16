@@ -10,6 +10,12 @@ struct CrowUppertailCovertSample: Equatable {
   let rootWidthMeters: Float
   let maximumWidthMeters: Float
   let camberMeters: Float
+  let vaneAsymmetry: Float
+  let edgeRippleAmplitude: Float
+  let edgeRipplePhase: Float
+  let edgeRippleCycles: Float
+  let rootEnvelopeRatio: Float
+  let pennaceousStartFraction: Float
   let materialVariation: Float
 }
 
@@ -19,9 +25,10 @@ struct CrowUppertailCovertSample: Equatable {
 /// insertion at oblique rear views.
 enum CrowUppertailCoverts {
   static let rowCount = 27
-  static let columnCount = 8
+  static let columnCount = 10
   static let shellClearanceMeters: Float = 0.00078
   static let rectrixDorsalClearanceMeters: Float = 0.016
+  static let visibleRootEnvelopeRatio: Float = 0.64
   static let surfaceFeatherClass: UInt32 = 5
 
   static func visibleSamples(
@@ -56,6 +63,21 @@ enum CrowUppertailCoverts {
           column: column,
           salt: 0xD3A2_646C
         )
+        let vaneIdentity = identityVariation(
+          row: row,
+          column: column,
+          salt: 0xB529_7A4D
+        )
+        let edgeIdentity = identityVariation(
+          row: row,
+          column: column,
+          salt: 0x68E3_1DA4
+        )
+        let cycleIdentity = identityVariation(
+          row: row,
+          column: column,
+          salt: 0x9E37_79B9
+        )
         let rowStep = 1 / Float(rowCount - 1)
         let rowFraction = min(
           1,
@@ -67,12 +89,12 @@ enum CrowUppertailCoverts {
           )
         )
         let theta = thetaStart + thetaSpan * rowFraction
-        let stagger: Float = row.isMultiple(of: 2) || column == 0 ? 0 : 0.0034
+        let stagger = column == 0 ? 0 : courseStaggerMeters(row: row)
         let rootX = -0.060 - 0.102 * axial - stagger
         let rootSurface = CrowBodyAnatomy.surfacePoint(atX: rootX, theta: theta)
         let rootNormal = CrowBodyAnatomy.surfaceNormal(atX: rootX, theta: theta)
         let root = rootSurface + shellClearanceMeters * rootNormal
-        let rectrixOverlap = 0.020 + 0.013 * axial
+        let rectrixOverlap = rectrixOverlapMeters(axialFraction: axial)
         let rectrixOverlapPoint = tail.rootOffset + rectrixOverlap * tail.direction
         let target =
           rectrixOverlapPoint
@@ -101,6 +123,7 @@ enum CrowUppertailCoverts {
         let maximumWidth =
           max(0.0049, 0.94 * circumferentialSpacing)
           * (1 + 0.042 * shapeIdentity)
+          * insertionWidthScale(rowFraction: rowFraction, axialFraction: axial)
         result.append(
           CrowUppertailCovertSample(
             row: row,
@@ -112,16 +135,50 @@ enum CrowUppertailCoverts {
               0.86 * rootNormal + 0.14 * tail.normal,
               fallback: rootNormal
             ),
-            rootWidthMeters: 0.62 * maximumWidth,
+            rootWidthMeters: 0.68 * maximumWidth,
             maximumWidthMeters: maximumWidth,
             camberMeters: (0.0012 + 0.00055 * axial)
               * (1 + 0.075 * rootIdentity),
+            vaneAsymmetry: 0.035 * vaneIdentity,
+            edgeRippleAmplitude:
+              0.008 + 0.012 * (0.5 + 0.5 * edgeIdentity),
+            edgeRipplePhase: Float.pi * (edgeIdentity + 1),
+            edgeRippleCycles: 1.20 + 0.70 * (0.5 + 0.5 * cycleIdentity),
+            rootEnvelopeRatio: visibleRootEnvelopeRatio,
+            pennaceousStartFraction: 0,
             materialVariation: materialIdentity
           )
         )
       }
     }
     return result
+  }
+
+  static func courseStaggerMeters(row: Int) -> Float {
+    0.00285 * sin(2.399_963 * Float(row) + 0.41)
+  }
+
+  static func rectrixOverlapMeters(axialFraction: Float) -> Float {
+    0.020 + 0.030 * min(max(axialFraction, 0), 1)
+  }
+
+  /// Medial posterior coverts broaden over the rectrix insertion where their
+  /// tapered tips otherwise reveal the smooth pelvic loft to rear cameras.
+  static func insertionWidthScale(
+    rowFraction: Float,
+    axialFraction: Float
+  ) -> Float {
+    let medial = smootherstep(
+      min(max((1 - abs(2 * rowFraction - 1) - 0.35) / 0.65, 0), 1)
+    )
+    let posterior = smootherstep(
+      min(max((axialFraction - 0.55) / 0.45, 0), 1)
+    )
+    return 1 + 0.38 * medial * posterior
+  }
+
+  private static func smootherstep(_ value: Float) -> Float {
+    value * value * value * (value * (value * 6 - 15) + 10)
   }
 
   private static func normalized(

@@ -8,7 +8,7 @@ func undertailCovertsFormBodySeatedRectrixRootShell() {
   let samples = CrowUndertailCoverts.samples()
   #expect(samples == CrowUndertailCoverts.samples())
   #expect(samples.count == CrowUndertailCoverts.rowCount * CrowUndertailCoverts.columnCount)
-  #expect(samples.count == 91)
+  #expect(samples.count == 243)
   #expect(CrowUndertailCoverts.surfaceFeatherClass == 7)
   #expect(CrowUndertailCoverts.visibleSamples(projectedPixelsPerMeter: 1_000).isEmpty)
   #expect(
@@ -17,6 +17,18 @@ func undertailCovertsFormBodySeatedRectrixRootShell() {
   )
   #expect(samples.map(\.materialVariation).min()! < -0.90)
   #expect(samples.map(\.materialVariation).max()! > 0.90)
+  #expect(samples.map(\.vaneAsymmetry).min()! < -0.032)
+  #expect(samples.map(\.vaneAsymmetry).max()! > 0.032)
+  #expect(samples.allSatisfy { $0.edgeRippleAmplitude >= 0.009 })
+  #expect(samples.allSatisfy { $0.edgeRippleAmplitude <= 0.022 })
+  #expect(samples.allSatisfy { $0.rootEnvelopeRatio == 0.72 })
+  #expect(samples.allSatisfy { $0.pennaceousStartFraction == 0 })
+  let courseStaggers = (0..<CrowUndertailCoverts.rowCount).map {
+    CrowUndertailCoverts.courseStaggerMeters(row: $0)
+  }
+  #expect(courseStaggers.min()! < -0.0028)
+  #expect(courseStaggers.max()! > 0.0028)
+  #expect(Set(courseStaggers.map { Int(($0 * 1_000_000).rounded()) }).count == 27)
 
   for sample in samples {
     #expect(

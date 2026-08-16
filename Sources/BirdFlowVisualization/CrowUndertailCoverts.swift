@@ -10,6 +10,12 @@ struct CrowUndertailCovertSample: Equatable {
   let rootWidthMeters: Float
   let maximumWidthMeters: Float
   let camberMeters: Float
+  let vaneAsymmetry: Float
+  let edgeRippleAmplitude: Float
+  let edgeRipplePhase: Float
+  let edgeRippleCycles: Float
+  let rootEnvelopeRatio: Float
+  let pennaceousStartFraction: Float
   let materialVariation: Float
 }
 
@@ -19,9 +25,10 @@ struct CrowUndertailCovertSample: Equatable {
 /// body-seated shell covers only their otherwise exposed root fan, converging
 /// from the broader ventral pelvis onto identity-matched rectrix centerlines.
 enum CrowUndertailCoverts {
-  static let rowCount = 13
-  static let columnCount = 7
+  static let rowCount = 27
+  static let columnCount = 9
   static let shellClearanceMeters: Float = 0.00075
+  static let visibleRootEnvelopeRatio: Float = 0.72
   static let surfaceFeatherClass: UInt32 = 7
 
   static func visibleSamples(
@@ -34,8 +41,8 @@ enum CrowUndertailCoverts {
   static func samples() -> [CrowUndertailCovertSample] {
     var result: [CrowUndertailCovertSample] = []
     result.reserveCapacity(rowCount * columnCount)
-    let thetaStart = -2.12 as Float
-    let thetaSpan = 1.10 as Float
+    let thetaStart = -Float.pi + 0.12
+    let thetaSpan = Float.pi - 0.24
     for row in 0..<rowCount {
       let baseRowFraction = Float(row) / Float(rowCount - 1)
       let tail = CrowClosedTailAnatomy.pose(fraction: baseRowFraction)
@@ -56,6 +63,21 @@ enum CrowUndertailCoverts {
           column: column,
           salt: 0xC2B2_AE35
         )
+        let vaneIdentity = identityVariation(
+          row: row,
+          column: column,
+          salt: 0xB529_7A4D
+        )
+        let edgeIdentity = identityVariation(
+          row: row,
+          column: column,
+          salt: 0x68E3_1DA4
+        )
+        let cycleIdentity = identityVariation(
+          row: row,
+          column: column,
+          salt: 0x1656_67B1
+        )
         let rowStep = 1 / Float(rowCount - 1)
         let rowFraction = min(
           1,
@@ -67,7 +89,7 @@ enum CrowUndertailCoverts {
           )
         )
         let theta = thetaStart + thetaSpan * rowFraction
-        let stagger: Float = row.isMultiple(of: 2) || column == 0 ? 0 : 0.0038
+        let stagger = column == 0 ? 0 : courseStaggerMeters(row: row)
         let rootX = -0.058 - 0.100 * axial - stagger
         let rootSurface = CrowBodyAnatomy.surfacePoint(atX: rootX, theta: theta)
         let rootNormal = CrowBodyAnatomy.surfaceNormal(atX: rootX, theta: theta)
@@ -76,7 +98,9 @@ enum CrowUndertailCoverts {
         let target = tail.rootOffset + rectrixOverlap * tail.direction
         let towardTarget = normalized(target - root, fallback: tail.direction)
         let length =
-          (0.032 + 0.014 * axial + 0.002 * (1 - abs(2 * rowFraction - 1)))
+          (0.032 + 0.014 * axial
+            + 0.002 * (1 - abs(2 * rowFraction - 1))
+            - 0.0006 * abs(2 * rowFraction - 1))
           * (1 + 0.055 * shapeIdentity)
         let tip = root + length * towardTarget
         let halfAngularStep = 0.5 * thetaSpan / Float(rowCount - 1)
@@ -104,16 +128,27 @@ enum CrowUndertailCoverts {
               0.84 * rootNormal + 0.16 * tail.normal,
               fallback: rootNormal
             ),
-            rootWidthMeters: 0.58 * maximumWidth,
+            rootWidthMeters: 0.66 * maximumWidth,
             maximumWidthMeters: maximumWidth,
             camberMeters: (0.0011 + 0.0005 * axial)
               * (1 + 0.08 * rootIdentity),
+            vaneAsymmetry: 0.035 * vaneIdentity,
+            edgeRippleAmplitude:
+              0.009 + 0.013 * (0.5 + 0.5 * edgeIdentity),
+            edgeRipplePhase: Float.pi * (edgeIdentity + 1),
+            edgeRippleCycles: 1.20 + 0.70 * (0.5 + 0.5 * cycleIdentity),
+            rootEnvelopeRatio: visibleRootEnvelopeRatio,
+            pennaceousStartFraction: 0,
             materialVariation: materialIdentity
           )
         )
       }
     }
     return result
+  }
+
+  static func courseStaggerMeters(row: Int) -> Float {
+    0.00295 * sin(2.399_963 * Float(row) + 0.83)
   }
 
   private static func normalized(
