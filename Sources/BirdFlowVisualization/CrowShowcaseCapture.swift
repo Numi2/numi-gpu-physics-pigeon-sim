@@ -1585,6 +1585,15 @@ private struct CrowMeshBuilder {
         to: &vertices
       )
     }
+    if presentation == .standing {
+      appendStandingCranialFeatherTracts(
+        center: headCenter,
+        radii: radii,
+        breathingScale: breathing,
+        projectedPixelsPerMeter: projectedPixelsPerMeter,
+        to: &vertices
+      )
+    }
     if let neckPose = standingPose?.neckPose {
       transformHeadVertices(
         in: headVertexStart..<vertices.count,
@@ -1782,6 +1791,37 @@ private struct CrowMeshBuilder {
           )
         }
       }
+    }
+  }
+
+  private func appendStandingCranialFeatherTracts(
+    center: SIMD3<Float>,
+    radii: SIMD3<Float>,
+    breathingScale: Float,
+    projectedPixelsPerMeter: Float,
+    to vertices: inout [ColoredVertex]
+  ) {
+    let color = SIMD4<Float>(0.006, 0.009, 0.015, 0.14)
+    for sample in CrowCranialFeatherTracts.visibleSamples(
+      center: center,
+      radii: radii,
+      breathingScale: breathingScale,
+      projectedPixelsPerMeter: projectedPixelsPerMeter
+    ) {
+      appendFeatherBlade(
+        root: sample.root,
+        tip: sample.tip,
+        planeNormal: sample.planeNormal,
+        rootWidth: sample.rootWidthMeters,
+        maximumWidth: sample.maximumWidthMeters,
+        color: color,
+        sections: sample.region == .nape ? 6 : 5,
+        camber: sample.camberMeters,
+        transverseCamberRatio: 0.18,
+        lodLengthMeters: simd_distance(sample.root, sample.tip),
+        projectedPixelsPerMeter: projectedPixelsPerMeter,
+        to: &vertices
+      )
     }
   }
 

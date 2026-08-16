@@ -147,17 +147,13 @@ enum CrowCranialAnatomy {
     for ring in rings {
       for segment in 0..<segments {
         let theta = 2 * Float.pi * Float(segment) / Float(segments)
-        let sine = sin(theta)
-        let verticalFraction =
-          sine >= 0 ? ring.dorsalRadiusFraction : ring.ventralRadiusFraction
         positions.append(
-          center
-            + SIMD3<Float>(
-              effectiveRadii.x * ring.axialFraction,
-              effectiveRadii.y * ring.halfWidthFraction * cos(theta),
-              effectiveRadii.z
-                * (ring.verticalFraction + verticalFraction * sine)
-            )
+          surfacePoint(
+            center: center,
+            effectiveRadii: effectiveRadii,
+            ring: ring,
+            theta: theta
+          )
         )
       }
     }
@@ -205,6 +201,24 @@ enum CrowCranialAnatomy {
       }
     }
     return result
+  }
+
+  static func surfacePoint(
+    center: SIMD3<Float>,
+    effectiveRadii: SIMD3<Float>,
+    ring: CrowCranialLoftRing,
+    theta: Float
+  ) -> SIMD3<Float> {
+    let sine = sin(theta)
+    let verticalFraction =
+      sine >= 0 ? ring.dorsalRadiusFraction : ring.ventralRadiusFraction
+    return center
+      + SIMD3<Float>(
+        effectiveRadii.x * ring.axialFraction,
+        effectiveRadii.y * ring.halfWidthFraction * cos(theta),
+        effectiveRadii.z
+          * (ring.verticalFraction + verticalFraction * sine)
+      )
   }
 
   private static func mix(_ first: Float, _ second: Float, _ t: Float) -> Float {

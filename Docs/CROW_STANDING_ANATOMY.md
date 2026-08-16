@@ -74,6 +74,14 @@ they overlap the cranial loft. Those body vertices enter the same coupling field
 as the nape, so the visible transition cannot collapse into a narrow static
 collar while the head moves.
 
+Standing crown, cheek, throat, and nape contour tracts are rooted directly on
+the breathing cranial loft. Fifty-four compact overlapping vanes break the
+analytic head silhouette while staying behind the orbit and bill base; the same
+graded head-neck transform transports their roots, tips, and normals.
+Final-output coverage selects deterministic `27`, `36`, or `54`-tract tiers so
+subpixel vanes do not alias at current output sizes while future high-resolution
+renders retain the complete cranial inventory.
+
 Run the presentation with:
 
 ```bash
