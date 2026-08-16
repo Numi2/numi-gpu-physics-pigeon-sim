@@ -661,7 +661,7 @@ func estimatedStandingCrowCaptureProducesLoopClosedFrames() throws {
     CrowShowcaseAOVAuditReport.self,
     from: Data(contentsOf: aovAuditURL)
   )
-  #expect(audit.schemaVersion == 2)
+  #expect(audit.schemaVersion == 3)
   #expect(audit.formats["hdrColor"] == "rgba16Float")
   #expect(audit.formats["normalCoverage"] == "rgba16Float")
   #expect(audit.formats["deviceDepth"] == "depth32Float")
@@ -692,6 +692,12 @@ func estimatedStandingCrowCaptureProducesLoopClosedFrames() throws {
   #expect(audit.frames.allSatisfy { $0.activeIdentityPixelCount > 500 })
   #expect(audit.frames.allSatisfy { $0.fullyCoveredAOVPixelCount > 500 })
   #expect(audit.frames.allSatisfy { $0.visibleFeatherIdentityCount > 0 })
+  #expect(
+    audit.frames.allSatisfy {
+      $0.enclosedBirdSilhouetteHolePixelCount
+        >= $0.largestEnclosedBirdSilhouetteHolePixelCount
+    }
+  )
   #expect(audit.frames.allSatisfy { $0.maximumNormalUnitError < 0.002 })
   #expect(audit.frames.allSatisfy { $0.minimumFullyCoveredDepthMeters > 0.1 })
   #expect(audit.frames.allSatisfy { $0.maximumFullyCoveredDepthMeters < 2.0 })

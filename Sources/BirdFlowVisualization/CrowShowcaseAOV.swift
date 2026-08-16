@@ -55,6 +55,7 @@ struct CrowShowcaseFrame {
     var supportYTotal: Float = 0
     var supportPixelCount = 0
     var featherHashes: Set<UInt32> = []
+    var birdMask = [Bool](repeating: false, count: pixelCount)
 
     for pixel in 0..<pixelCount {
       let hdrOffset = pixel * 4
@@ -83,6 +84,7 @@ struct CrowShowcaseFrame {
       let id2 = identity[identityOffset + 2]
       let id3 = identity[identityOffset + 3]
       let active = id0 != 0 || id1 != 0 || id2 != 0 || id3 != 0
+      birdMask[pixel] = Self.birdIdentity(identity, offset: identityOffset)
       if active {
         activeIdentityPixelCount += 1
         if id0 != UInt32.max { featherHashes.insert(id1) }
@@ -124,6 +126,11 @@ struct CrowShowcaseFrame {
     }
     if !minimumFullyCoveredDepthMeters.isFinite { minimumFullyCoveredDepthMeters = 0 }
     if !minimumFullyCoveredDeviceDepth.isFinite { minimumFullyCoveredDeviceDepth = 0 }
+    let silhouetteHoles = Self.silhouetteHoles(
+      birdMask: birdMask,
+      width: width,
+      height: height
+    )
     let parity = nativeReference.map {
       Self.displayError(
         displayTexture,
@@ -155,6 +162,10 @@ struct CrowShowcaseFrame {
       activeIdentityPixelCount: activeIdentityPixelCount,
       fullyCoveredAOVPixelCount: fullyCoveredAOVPixelCount,
       visibleFeatherIdentityCount: featherHashes.count,
+      enclosedBirdSilhouetteHolePixelCount: silhouetteHoles.pixelCount,
+      enclosedBirdSilhouetteHoleComponentCount: silhouetteHoles.componentCount,
+      largestEnclosedBirdSilhouetteHolePixelCount:
+        silhouetteHoles.largestComponentPixelCount,
       movingFullyCoveredPixelCount: movingActivePixelCount,
       maximumHDRComponent: maximumHDRComponent,
       maximumMotionPixels: maximumMotionPixels,
@@ -276,6 +287,109 @@ struct CrowShowcaseFrame {
     return active && !support
   }
 
+  /// Finds background components enclosed by the bird identity silhouette.
+  /// Eight-connected exterior flooding is deliberately conservative: a
+  /// diagonal path to open background is not reported as an anatomical hole.
+  static func silhouetteHoles(
+    birdMask: [Bool],
+    width: Int,
+    height: Int
+  ) -> CrowSilhouetteHoleAudit {
+    precondition(width >= 0 && height >= 0 && birdMask.count == width * height)
+    guard width > 0, height > 0 else { return .zero }
+    let birdPixels = birdMask.indices.filter { birdMask[$0] }
+    guard let first = birdPixels.first else { return .zero }
+    var minimumX = first % width
+    var maximumX = minimumX
+    var minimumY = first / width
+    var maximumY = minimumY
+    for pixel in birdPixels.dropFirst() {
+      let x = pixel % width
+      let y = pixel / width
+      minimumX = min(minimumX, x)
+      maximumX = max(maximumX, x)
+      minimumY = min(minimumY, y)
+      maximumY = max(maximumY, y)
+    }
+
+    var exterior = [Bool](repeating: false, count: birdMask.count)
+    var queue: [Int] = []
+    func enqueueExterior(_ x: Int, _ y: Int) {
+      let pixel = y * width + x
+      guard !birdMask[pixel], !exterior[pixel] else { return }
+      exterior[pixel] = true
+      queue.append(pixel)
+    }
+    for x in minimumX...maximumX {
+      enqueueExterior(x, minimumY)
+      enqueueExterior(x, maximumY)
+    }
+    for y in minimumY...maximumY {
+      enqueueExterior(minimumX, y)
+      enqueueExterior(maximumX, y)
+    }
+    var head = 0
+    while head < queue.count {
+      let pixel = queue[head]
+      head += 1
+      let x = pixel % width
+      let y = pixel / width
+      for offsetY in -1...1 {
+        for offsetX in -1...1 where offsetX != 0 || offsetY != 0 {
+          let neighborX = x + offsetX
+          let neighborY = y + offsetY
+          guard neighborX >= minimumX, neighborX <= maximumX,
+            neighborY >= minimumY, neighborY <= maximumY
+          else { continue }
+          enqueueExterior(neighborX, neighborY)
+        }
+      }
+    }
+
+    var visited = exterior
+    var total = 0
+    var components = 0
+    var largest = 0
+    for y in minimumY...maximumY {
+      for x in minimumX...maximumX {
+        let start = y * width + x
+        guard !birdMask[start], !visited[start] else { continue }
+        components += 1
+        var componentQueue = [start]
+        visited[start] = true
+        var componentHead = 0
+        var componentSize = 0
+        while componentHead < componentQueue.count {
+          let pixel = componentQueue[componentHead]
+          componentHead += 1
+          componentSize += 1
+          let pixelX = pixel % width
+          let pixelY = pixel / width
+          for offsetY in -1...1 {
+            for offsetX in -1...1 where offsetX != 0 || offsetY != 0 {
+              let neighborX = pixelX + offsetX
+              let neighborY = pixelY + offsetY
+              guard neighborX >= minimumX, neighborX <= maximumX,
+                neighborY >= minimumY, neighborY <= maximumY
+              else { continue }
+              let neighbor = neighborY * width + neighborX
+              guard !birdMask[neighbor], !visited[neighbor] else { continue }
+              visited[neighbor] = true
+              componentQueue.append(neighbor)
+            }
+          }
+        }
+        total += componentSize
+        largest = max(largest, componentSize)
+      }
+    }
+    return CrowSilhouetteHoleAudit(
+      pixelCount: total,
+      componentCount: components,
+      largestComponentPixelCount: largest
+    )
+  }
+
   private static func halfValues(
     texture: MTLTexture,
     componentCount: Int
@@ -338,6 +452,18 @@ struct CrowShowcaseFrame {
   }
 }
 
+struct CrowSilhouetteHoleAudit: Equatable {
+  let pixelCount: Int
+  let componentCount: Int
+  let largestComponentPixelCount: Int
+
+  static let zero = CrowSilhouetteHoleAudit(
+    pixelCount: 0,
+    componentCount: 0,
+    largestComponentPixelCount: 0
+  )
+}
+
 struct CrowShowcaseAOVFrameAudit: Codable, Equatable {
   let frameIndex: Int
   let width: Int
@@ -360,6 +486,9 @@ struct CrowShowcaseAOVFrameAudit: Codable, Equatable {
   let activeIdentityPixelCount: Int
   let fullyCoveredAOVPixelCount: Int
   let visibleFeatherIdentityCount: Int
+  let enclosedBirdSilhouetteHolePixelCount: Int
+  let enclosedBirdSilhouetteHoleComponentCount: Int
+  let largestEnclosedBirdSilhouetteHolePixelCount: Int
   let movingFullyCoveredPixelCount: Int
   let maximumHDRComponent: Float
   let maximumMotionPixels: Float
@@ -386,7 +515,7 @@ struct CrowShowcaseAOVAuditReport: Codable, Equatable {
   let frames: [CrowShowcaseAOVFrameAudit]
 
   init(frames: [CrowShowcaseAOVFrameAudit]) {
-    schemaVersion = 2
+    schemaVersion = 3
     colorSpace = "scene-linear extended range; display output is tone mapped separately"
     motionConvention =
       "current pixel to previous pixel in upper-left-origin pixel units; MetalFX scale 1"
