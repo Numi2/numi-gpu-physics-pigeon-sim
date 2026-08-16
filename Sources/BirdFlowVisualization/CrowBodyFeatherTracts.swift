@@ -34,10 +34,10 @@ struct CrowBodyFeatherTractSample: Equatable {
 enum CrowBodyFeatherTracts {
   static let cervicalRowCount = 11
   static let cervicalColumnCount = 7
-  static let mantleRowCount = 5
-  static let mantleColumnCount = 12
-  static let scapularRowCount = 7
-  static let scapularColumnCount = 14
+  static let mantleRowCount = 7
+  static let mantleColumnCount = 18
+  static let scapularRowCount = 10
+  static let scapularColumnCount = 20
 
   static func visibleSamples(
     neckPose: CrowStandingNeckPose? = nil,
@@ -225,7 +225,7 @@ enum CrowBodyFeatherTracts {
               0,
               baseAxial
                 + (column == 0 || column == mantleColumnCount - 1
-                  ? 0 : 0.10 * axialStep * rootIdentity)
+                  ? 0 : 0.08 * axialStep * rootIdentity)
             )
           )
           let rowStep = 1 / Float(mantleRowCount - 1)
@@ -245,7 +245,7 @@ enum CrowBodyFeatherTracts {
             salt: 0xD3A2_646C
           )
           let staggerFraction: Float =
-            (row.isMultiple(of: 2) ? 0 : 0.5) + 0.075 * rowPhase
+            (row.isMultiple(of: 2) ? 0 : 0.60) + 0.075 * rowPhase
           let stagger = staggerFraction * 0.154 / Float(mantleColumnCount - 1)
           let root = SIMD3<Float>(
             0.074 - 0.154 * axial - stagger,
@@ -253,7 +253,7 @@ enum CrowBodyFeatherTracts {
             0.056 - 0.010 * course - 0.010 * axial + 0.0007 * shapeIdentity
           )
           let length =
-            (0.032 + 0.014 * axial + 0.004 * course)
+            (0.025 + 0.010 * axial + 0.003 * course)
             * (1 + 0.055 * shapeIdentity)
           let tip =
             root
@@ -278,9 +278,9 @@ enum CrowBodyFeatherTracts {
                 ),
                 fallback: SIMD3<Float>(0, 0, 1)
               ),
-              rootWidthMeters: 0.0038 * (1 + 0.035 * rootIdentity),
-              maximumWidthMeters: (0.0067 + 0.0012 * course) * (1 + 0.045 * shapeIdentity),
-              camberMeters: (0.00155 + 0.00035 * course) * (1 + 0.09 * rootIdentity),
+              rootWidthMeters: 0.0031 * (1 + 0.035 * rootIdentity),
+              maximumWidthMeters: (0.0054 + 0.0010 * course) * (1 + 0.045 * shapeIdentity),
+              camberMeters: (0.00135 + 0.00030 * course) * (1 + 0.09 * rootIdentity),
               vaneAsymmetry: 0.052 * shapeIdentity,
               edgeRippleAmplitude: 0.012 + 0.018 * (0.5 + 0.5 * edgeIdentity),
               edgeRipplePhase: Float.pi * (edgeIdentity + 1),
@@ -339,7 +339,7 @@ enum CrowBodyFeatherTracts {
               0,
               baseAxial
                 + (column == 0 || column == scapularColumnCount - 1
-                  ? 0 : 0.10 * axialStep * rootIdentity)
+                  ? 0 : 0.08 * axialStep * rootIdentity)
             )
           )
           let rowStep = 1 / Float(scapularRowCount - 1)
@@ -359,7 +359,7 @@ enum CrowBodyFeatherTracts {
             salt: 0x9E37_79B9
           )
           let staggerFraction: Float =
-            (row.isMultiple(of: 2) ? 0 : 0.5) + 0.075 * rowPhase
+            (row.isMultiple(of: 2) ? 0 : 0.60) + 0.075 * rowPhase
           let stagger = staggerFraction * 0.164 / Float(scapularColumnCount - 1)
           let root = SIMD3<Float>(
             0.080 - 0.164 * axial - stagger,
@@ -367,7 +367,7 @@ enum CrowBodyFeatherTracts {
             0.048 - 0.025 * course - 0.009 * axial + 0.0008 * shapeIdentity
           )
           let length =
-            (0.036 + 0.018 * axial + 0.006 * course)
+            (0.028 + 0.013 * axial + 0.004 * course)
             * (1 + 0.06 * shapeIdentity)
           let tip =
             root
@@ -392,9 +392,9 @@ enum CrowBodyFeatherTracts {
                 ),
                 fallback: SIMD3<Float>(0, side, 0)
               ),
-              rootWidthMeters: 0.0045 * (1 + 0.04 * rootIdentity),
-              maximumWidthMeters: (0.0078 + 0.0015 * course) * (1 + 0.05 * shapeIdentity),
-              camberMeters: (0.0019 + 0.00055 * course) * (1 + 0.10 * rootIdentity),
+              rootWidthMeters: 0.0033 * (1 + 0.04 * rootIdentity),
+              maximumWidthMeters: (0.0057 + 0.0011 * course) * (1 + 0.05 * shapeIdentity),
+              camberMeters: (0.00155 + 0.00040 * course) * (1 + 0.10 * rootIdentity),
               vaneAsymmetry: 0.060 * shapeIdentity,
               edgeRippleAmplitude: 0.014 + 0.020 * (0.5 + 0.5 * edgeIdentity),
               edgeRipplePhase: Float.pi * (edgeIdentity + 1),
