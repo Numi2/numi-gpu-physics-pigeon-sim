@@ -10,7 +10,7 @@ func crowBodyContourShinglesOverlapAroundAndAlongLoft() {
     samples.count
       == CrowBodyContourShingles.radialCount * CrowBodyContourShingles.axialCount
   )
-  #expect(samples.count >= 5_000)
+  #expect(samples.count == 6_912)
 
   for radialIndex in 0..<CrowBodyContourShingles.radialCount {
     let row =
@@ -384,7 +384,7 @@ private func expectClosedBodyContourShell(
 @Test("dorsal contour feathers resolve as narrow interdigitated vanes")
 func dorsalContourFeathersResolveAsNarrowInterdigitatedVanes() {
   let dorsal = CrowBodyContourShingles.samples().filter { $0.region == .dorsal }
-  #expect(dorsal.count > 200)
+  #expect(dorsal.count > 2_000)
 
   for feather in dorsal {
     let length = simd_distance(feather.rootOffset, feather.tipOffset)
@@ -411,16 +411,21 @@ func dorsalContourFeathersResolveAsNarrowInterdigitatedVanes() {
   let rippleAmplitudes = dorsal.map(\.edgeRippleAmplitude)
   let materialVariations = dorsal.map(\.materialVariation)
   let transverseCamberRatios = dorsal.map(\.transverseCamberRatio)
+  let longitudinalCamberRatios = dorsal.map {
+    $0.camberMeters / $0.maximumWidthMeters
+  }
   #expect(asymmetries.min()! < -0.040)
   #expect(asymmetries.max()! > 0.040)
   #expect(rippleAmplitudes.min()! >= 0.012)
   #expect(rippleAmplitudes.max()! <= 0.0301)
   #expect(materialVariations.min()! < -0.90)
   #expect(materialVariations.max()! > 0.90)
-  #expect(transverseCamberRatios.min()! >= 0.015)
-  #expect(transverseCamberRatios.max()! <= 0.0351)
-  #expect(transverseCamberRatios.min()! < 0.0151)
-  #expect(transverseCamberRatios.max()! > 0.0349)
+  #expect(transverseCamberRatios.min()! >= 0.090)
+  #expect(transverseCamberRatios.max()! <= 0.1301)
+  #expect(transverseCamberRatios.max()! - transverseCamberRatios.min()! > 0.039)
+  #expect(longitudinalCamberRatios.min()! >= 0.160)
+  #expect(longitudinalCamberRatios.max()! <= 0.2401)
+  #expect(longitudinalCamberRatios.max()! - longitudinalCamberRatios.min()! > 0.079)
 
   for feather in dorsal {
     for axial: Float in [feather.pennaceousStartFraction, 0.65, 0.84] {

@@ -42,8 +42,8 @@ enum CrowBodyContourShingles {
   // enough independent vanes that the standing body reads as plumage rather
   // than a coarse roof-tile proxy at 720p, while every root remains owned by
   // the same anatomical loft.
-  static let radialCount = 80
-  static let axialCount = 64
+  static let radialCount = 96
+  static let axialCount = 72
   static let shellClearanceMeters: Float = 0.0012
 
   private static let frontX: Float = 0.110
@@ -111,8 +111,9 @@ enum CrowBodyContourShingles {
         )
         let widthVariation =
           1 + 0.075 * sin(morphologyPhase + 0.83) + 0.045 * widthIdentity
+        let minimumHalfWidth: Float = 0.0050
         let nominalMaximumWidth = max(
-          0.0052,
+          minimumHalfWidth,
           regionWidthScale(region) * widthVariation * 1.38 * circumferentialSpacing
         )
         let posterior = max(0, min(1, (frontX - rootX) / (frontX - backX)))
@@ -209,10 +210,12 @@ enum CrowBodyContourShingles {
             ),
             rootWidthMeters: (0.57 + 0.035 * cos(morphologyPhase)) * maximumWidth,
             maximumWidthMeters: maximumWidth,
-            camberMeters: (0.022 + 0.009 * (0.5 + 0.5 * sin(morphologyPhase + 1.6)))
-              * maximumWidth,
+            camberMeters: longitudinalCamberScale(
+              region: region,
+              morphologyPhase: morphologyPhase
+            ) * maximumWidth,
             transverseCamberRatio: regionTransverseCamberRatio(region)
-              + 0.010 * crownIdentity,
+              + transverseCamberVariation(region) * crownIdentity,
             pennaceousStartFraction: clamp(
               regionPennaceousStart(region) + 0.020 * tipIdentity,
               lower: 0.34,
@@ -254,7 +257,7 @@ enum CrowBodyContourShingles {
     let amplitude: Float
     switch region {
     case .dorsal:
-      amplitude = 0.36
+      amplitude = 0.42
     case .flank:
       amplitude = 0.72
     case .ventral:
@@ -394,9 +397,32 @@ enum CrowBodyContourShingles {
     _ region: CrowBodyContourRegion
   ) -> Float {
     switch region {
-    case .dorsal: 0.025
+    case .dorsal: 0.110
     case .flank: 0.030
     case .ventral: 0.035
+    }
+  }
+
+  private static func transverseCamberVariation(
+    _ region: CrowBodyContourRegion
+  ) -> Float {
+    region == .dorsal ? 0.020 : 0.010
+  }
+
+  /// Dorsal vanes need enough individual crown to survive dense imbrication.
+  /// The former two-to-three-percent rise merged thousands of contour feathers
+  /// into one smooth saddle at high rear camera angles. Flank and ventral
+  /// courses retain their quieter established profile.
+  private static func longitudinalCamberScale(
+    region: CrowBodyContourRegion,
+    morphologyPhase: Float
+  ) -> Float {
+    let variation = 0.5 + 0.5 * sin(morphologyPhase + 1.6)
+    switch region {
+    case .dorsal:
+      return 0.160 + 0.080 * variation
+    case .flank, .ventral:
+      return 0.022 + 0.009 * variation
     }
   }
 
