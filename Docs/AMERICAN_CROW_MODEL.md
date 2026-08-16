@@ -50,25 +50,27 @@ The retained feather lengths and stable identities do not change; only the
 estimated grounded rest pose prevents all vanes from collapsing into one
 planar flank slab.
 
-The flight presentation draws the fixed-topology wing and tail surface as a
-dark underlayer beneath the retained feather inventory. That live surface owns
-deformation and every persistent root, closes sub-feather gaps, and makes the
-attachment boundary inspectable; it is not asserted to be a literal smooth
-crow skin or resolved plumage surface.
+The flight presentation draws the complete fixed-topology wing surface as a
+dark gap-closing layer and closes the tail with asset-length rectrices. The
+solver sequence's lower reversal sweeps the
+distal dove-derived surface forward of the bill, so the beauty pass explicitly
+samples one topology state and articulates it about the fixed shoulder row. This
+presentation retarget does not alter the solver surface, prescribed simulation
+motion, or any aerodynamic result, and the frame overlay names the distinction.
 
-Four staggered covert rows are sampled from each wing's fixed `9 x 33`
-topology. Both ends of every blade follow current surface vertices, and adjacent
-rows overlap chordwise and spanwise, so the retained outer flight feathers read
-as one articulated wing instead of a detached comb. The coverts remain
-estimated presentation geometry and do not enter the moving-boundary, force,
-or power calculation.
+Three broad covert courses are sampled from each wing's fixed `9 x 33`
+topology. Both ends of every blade follow current presentation-surface vertices,
+the trailing course extends beyond the sheet, and adjacent blades overlap
+chordwise and spanwise. This replaces the crossed persistent-vane comb that was
+visible at the steep stroke reversal. The coverts remain estimated presentation
+geometry and do not enter the moving-boundary, force, or power calculation.
 
 Persistent flight-feather roots remain attached to their exact fixed-topology
-surface vertices. Vane direction now uses one shoulder-to-tip span plus a fixed
-topology chord anchor per wing (and one base-to-tip frame for the tail),
-evaluated independently for current and previous phases on Metal. This removes
-triangle-scale rotational noise and world-axis drift during large strokes; it
-does not change the solver surface or assert measured crow kinematics.
+solver vertices and continue to evaluate current and previous phases on Metal.
+Their long vane shells are retained for standing and diagnostic deformation,
+but the wingbeat beauty pass uses the topology-bound courses above because the
+asset rest directions cross under the source's large stroke. This does not
+assert measured crow kinematics.
 
 Sparse diagnostic captures can set `--capture-crow-camera-yaw` in radians so a
 geometry milestone is checked from a new view without changing the release
@@ -109,13 +111,13 @@ swift build -c release --product birdflow-viewer
 
 It verifies the reality asset, crow-surface manifest, generating profile, and
 their SHA-256 locks before rendering. One retained Metal pass evaluates current
-and previous part frames for all `54` persistent flight/tail feather roots; a
-second expands a shared twelve-by-four-section vane template into `15,552`
-renderable vertices. Current and previous positions plus stable feather IDs
-stay GPU-side. The fixed-topology wing/tail surface supplies root positions and
-a dark gap-closing underlayer, while the smooth body/head, topology-bound
-coverts, and contour feathers remain procedural estimates. Four-sample Metal
-rasterization and a dedicated
+and previous part frames for all `54` persistent flight/tail feather roots.
+Standing expands those roots through the shared twelve-by-four-section vane
+template into `15,552` renderable vertices; wingbeat keeps the root-state path
+but renders the coherent topology-bound wing courses and asset-length tail
+rectrices instead. The fixed-topology wing surface supplies a dark gap-closing
+layer, while the smooth body/head, coverts, and contour feathers
+remain procedural estimates. Four-sample Metal rasterization and a dedicated
 eumelanin shader provide view-dependent cool sheen while keeping the bird
 neutral-black instead of allowing the warm key light to dominate its very low
 albedo. The native result is an executable motion and material estimate, not a

@@ -273,13 +273,16 @@ public enum CrowShowcaseCapture {
       if arguments.presentation == .standing {
         camera.target = SIMD3<Float>(0.015, 0, -0.055)
         camera.distance = 0.50 * (1 + 0.004 * cos(orbit))
-        camera.yaw = 0.36 + 0.012 * sin(orbit)
+        camera.yaw = 1.18 + 0.018 * sin(orbit)
         camera.pitch = 0.075 + 0.006 * cos(orbit)
       } else {
         camera.target = SIMD3<Float>(-0.018, 0, 0.020)
         camera.distance = 0.96 * (1 + 0.010 * cos(orbit))
-        camera.yaw = -1.06 + 0.30 * sin(orbit)
-        camera.pitch = 0.18 + 0.08 * (1 - cos(orbit))
+        camera.yaw = -0.50 + 0.06 * sin(orbit)
+        // Follow the wing plane through the stroke: the inherited surface is
+        // nearly vertical at both stroke reversals, so a fixed low elevation
+        // turns the lower reversal into a foreshortened pile of geometry.
+        camera.pitch = 0.30 + 0.035 * cos(orbit)
       }
       if let cameraYawRadians = arguments.cameraYawRadians {
         camera.yaw = cameraYawRadians
@@ -312,7 +315,7 @@ public enum CrowShowcaseCapture {
           presentation: arguments.presentation,
           sourceDescription: arguments.presentation == .standing
             ? "Estimated grounded pose / qualitative public-video anatomy reference"
-            : motion.sourceDescription(phase: phase)
+            : "Estimated-hybrid solver topology / presentation-retargeted wing articulation"
         )
       }
       let png: Data
@@ -741,12 +744,18 @@ private final class CrowShowcaseRenderer {
     } else {
       featherRootDeformer = nil
     }
-    featherGeometryDeformer = try realityAsset.map {
-      try CrowFeatherGeometryDeformer(
-        backend: createdBackend,
-        featherCount: $0.feathers.count
-      )
-    }
+    // The standing presentation renders the persistent asset inventory.  In
+    // flight, the same long rest vanes can cross when the inherited dove
+    // surface reaches its steep downstroke; the live topology-bound beauty
+    // wing below owns that silhouette instead.
+    featherGeometryDeformer = try presentation == .standing
+      ? realityAsset.map {
+        try CrowFeatherGeometryDeformer(
+          backend: createdBackend,
+          featherCount: $0.feathers.count
+        )
+      }
+      : nil
     featherRenderOffset = createdMeshBuilder.featherRenderOffset
     let createdSampleCount = device.supportsTextureSampleCount(4) ? 4 : 1
     sampleCount = createdSampleCount
@@ -1450,7 +1459,9 @@ private struct CrowMeshBuilder {
     if presentation == .wingbeat {
       appendMeasuredScaffold(
         states,
-        includedPartIdentifiers: [2, 3, 4],
+        // The complete live surface closes the wing from shoulder to trailing
+        // edge. Topology-bound feather courses articulate its appearance.
+        includedPartIdentifiers: [2, 3],
         to: &vertices
       )
       appendWingFeathers(
@@ -1478,10 +1489,44 @@ private struct CrowMeshBuilder {
   }
 
   private func transformedPoint(phase: Float, vertexIndex: Int) -> SIMD3<Float> {
-    let point =
+    var point =
       motion.point(phase: phase, vertexIndex: vertexIndex).position
       - referenceBodyCenter
-    if surfaceIsEstimatedCrow { return point }
+    if surfaceIsEstimatedCrow {
+      let partIdentifier = vertexPartIdentifiers[vertexIndex]
+      if presentation == .wingbeat,
+        partIdentifier == 2 || partIdentifier == 3,
+        let wing = dataset.components.first(where: {
+          $0.partIdentifier == partIdentifier
+        })
+      {
+        // The source lower reversal folds and sweeps forward like its dove
+        // scaffold, which is not a credible crow beauty silhouette. Retain one
+        // live topology state as the wing shape and articulate it about the
+        // fixed shoulder row. Solver motion remains available independently;
+        // this branch is explicitly presentation-retargeted in the overlay.
+        let localIndex = vertexIndex - wing.vertexOffset
+        let chordIndex = localIndex % 9
+        point = motion.point(phase: 0.25, vertexIndex: vertexIndex).position
+          - referenceBodyCenter
+        let shoulder = motion.point(
+          phase: 0.25,
+          vertexIndex: wing.vertexOffset + chordIndex
+        ).position - referenceBodyCenter
+        let relative = point - shoulder
+        let wrappedPhase = phase - floor(phase)
+        let side: Float = partIdentifier == 2 ? 1 : -1
+        let flapAngle = side * 0.54 * cos(2 * Float.pi * wrappedPhase)
+        let cosine = cos(flapAngle)
+        let sine = sin(flapAngle)
+        point = shoulder + SIMD3<Float>(
+          relative.x,
+          cosine * relative.y - sine * relative.z,
+          sine * relative.y + cosine * relative.z
+        )
+      }
+      return point
+    }
     let transform = profile.visualTransform
     let rawScale: [Float]
     switch vertexPartIdentifiers[vertexIndex] {
@@ -1558,9 +1603,9 @@ private struct CrowMeshBuilder {
     let radiiRaw = profile.visualTransform.headRadiusXYZMeters
     let radii =
       SIMD3<Float>(radiiRaw[0], radiiRaw[1], radiiRaw[2])
-      * SIMD3<Float>(0.86, 0.80, 0.88)
+      * SIMD3<Float>(0.80, 0.76, 0.76)
     let breathing = 1 + 0.012 * sin(2 * Float.pi * phase)
-    let headCenter = posedBodyCenter + SIMD3<Float>(0.164, 0, 0.052)
+    let headCenter = posedBodyCenter + SIMD3<Float>(0.158, 0, 0.052)
     let headVertexStart = vertices.count
     vertices.append(
       contentsOf: CrowCranialAnatomy.vertices(
@@ -1577,14 +1622,12 @@ private struct CrowMeshBuilder {
       projectedPixelsPerMeter: projectedPixelsPerMeter,
       to: &vertices
     )
-    if presentation == .wingbeat {
-      appendHeadContourFeathers(
-        center: headCenter,
-        radii: radii,
-        projectedPixelsPerMeter: projectedPixelsPerMeter,
-        to: &vertices
-      )
-    }
+    appendHeadContourFeathers(
+      center: headCenter,
+      radii: radii,
+      projectedPixelsPerMeter: projectedPixelsPerMeter,
+      to: &vertices
+    )
     if presentation == .standing {
       appendStandingCranialFeatherTracts(
         center: headCenter,
@@ -1949,8 +1992,8 @@ private struct CrowMeshBuilder {
     let nostrilColor = SIMD4<Float>(0.002, 0.002, 0.003, 0.68)
     for side: Float in [-1, 1] {
       appendEllipsoid(
-        center: base + SIMD3<Float>(0.012, side * 0.0148, 0.0065),
-        radii: SIMD3<Float>(0.0055, 0.0013, 0.0026),
+        center: base + SIMD3<Float>(0.011, side * 0.0122, 0.0045),
+        radii: SIMD3<Float>(0.0034, 0.0008, 0.0017),
         latitudeCount: 6,
         longitudeCount: 10,
         color: nostrilColor,
@@ -1992,28 +2035,28 @@ private struct CrowMeshBuilder {
   ) {
     let color = SIMD4<Float>(0.003, 0.004, 0.006, 0.12)
     for side: Float in [-1, 1] {
-      for index in 0..<6 {
-        let fraction = Float(index) / 5
+      for index in 0..<4 {
+        let fraction = Float(index) / 3
         let root =
           center
           + SIMD3<Float>(
-            0.031 + 0.008 * fraction,
-            side * (0.014 + 0.016 * fraction),
-            0.016 - 0.024 * fraction
+            0.031 + 0.005 * fraction,
+            side * (0.011 + 0.009 * fraction),
+            0.011 - 0.012 * fraction
           )
         let tip =
           root
           + SIMD3<Float>(
-            0.012 + 0.006 * fraction,
-            side * 0.004,
-            0.002 - 0.004 * fraction
+            0.007 + 0.004 * fraction,
+            side * 0.002,
+            0.001 - 0.002 * fraction
           )
         appendFeatherBlade(
           root: root,
           tip: tip,
           planeNormal: SIMD3<Float>(0, side, 0.1),
-          rootWidth: 0.0012,
-          maximumWidth: 0.0018,
+          rootWidth: 0.0008,
+          maximumWidth: 0.0012,
           color: color,
           sections: 4,
           projectedPixelsPerMeter: projectedPixelsPerMeter,
@@ -2348,13 +2391,22 @@ private struct CrowMeshBuilder {
     func point(span: Int, chord: Int) -> SIMD3<Float> {
       states[wing.vertexOffset + span * chordCount + chord]
     }
-    for chord in stride(from: 0, through: 6, by: 2) {
+    // Three broad, overlapping courses read as plumage while remaining sparse
+    // enough to stay coherent when a wing is nearly edge-on.
+    for chord in [0, 3, 6] {
       let rowFraction = Float(chord) / 8
       for span in stride(from: 1, through: spanCount - 3, by: 2) {
         let root = point(span: span, chord: chord)
-        let chordTarget = point(span: span, chord: min(chord + 3, 8))
+        let chordTarget = point(span: span, chord: min(chord + 2, 8))
         let spanTarget = point(span: span + 2, chord: chord)
-        let chordVector = chordTarget - root
+        let sampledChordVector = chordTarget - root
+        let chordVector =
+          simd_length(sampledChordVector) >= 0.018
+          ? sampledChordVector
+          : safeNormalize(
+            sampledChordVector,
+            fallback: SIMD3<Float>(-1, 0, 0)
+          ) * 0.018
         let spanVector = spanTarget - root
         let chordDirection = safeNormalize(
           chordVector,
@@ -2369,14 +2421,18 @@ private struct CrowMeshBuilder {
           normalSign * simd_cross(chordDirection, spanDirection),
           fallback: SIMD3<Float>(0, 0, 1)
         )
-        let tip = root + 1.16 * chordVector + 0.34 * spanVector + normal * 0.0025
+        let isTrailingCourse = chord == 6
+        let surfaceTip = root
+          + (isTrailingCourse ? 1.92 : 1.16) * chordVector
+          + 0.34 * spanVector
         let spacing = max(simd_length(spanVector), 0.012)
+        let dorsalNormal = normal.z >= 0 ? normal : -normal
         appendFeatherBlade(
-          root: root + normal * 0.0015,
-          tip: tip,
-          planeNormal: normal,
-          rootWidth: 0.34 * spacing,
-          maximumWidth: 0.58 * spacing,
+          root: root + dorsalNormal * 0.0015,
+          tip: surfaceTip + dorsalNormal * 0.0025,
+          planeNormal: dorsalNormal,
+          rootWidth: (isTrailingCourse ? 0.44 : 0.38) * spacing,
+          maximumWidth: (isTrailingCourse ? 0.78 : 0.66) * spacing,
           color: SIMD4<Float>(
             0.008 + 0.002 * rowFraction,
             0.012 + 0.003 * rowFraction,
@@ -2408,7 +2464,6 @@ private struct CrowMeshBuilder {
     let assetRectrices = persistentFeathers.filter {
       $0.featherClass == .tail
     }
-    if !assetRectrices.isEmpty { return }
     let count =
       assetRectrices.isEmpty
       ? profile.visualTransform.tailFeatherCount

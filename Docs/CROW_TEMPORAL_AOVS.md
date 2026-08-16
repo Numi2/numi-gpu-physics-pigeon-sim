@@ -99,13 +99,13 @@ lighting, and perceptual quality.
 
 The audit also records command-buffer GPU duration and renderer-owned target
 bytes for both paths. These are same-device comparative measurements, not total
-process residency or a cross-device performance claim. In the release Apple M4
-standing qualification at 1280×720 with `2x` reconstruction, frames `1...47`
-had median GPU durations of `3.67 ms` temporal versus `3.86 ms` native. Tracked
-render targets were `56.47 MiB` versus `186.33 MiB`; MetalFX-internal storage is
-not included. The worst visual gates over all 49 audit frames were `0.00403`
-whole-frame RMSE, `0.0109` bird-foreground RMSE, `0.978` silhouette IoU, and
-`0.822` foreground gradient-energy retention.
+process residency or a cross-device performance claim. In the 2026-08-16
+release Apple M4 standing qualification at 1280×720 with `2x` reconstruction,
+frames `1...47` had median GPU durations of `2.454 ms` temporal versus
+`3.499 ms` native. Tracked render targets were `56.47 MiB` versus `186.33 MiB`;
+MetalFX-internal storage is not included. The worst visual gates over all 49
+audit frames were `0.00579` whole-frame RMSE, `0.0142` bird-foreground RMSE,
+`0.9748` silhouette IoU, and `0.7510` foreground gradient-energy retention.
 
 The same `2x` setting is **not promoted for wingbeat**. In its 49-frame Apple M4
 probe, motion reached roughly `61.7 px`, minimum gradient retention fell to

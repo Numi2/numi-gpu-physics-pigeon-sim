@@ -1229,19 +1229,19 @@ inline float3 showcaseCrowLinearRadiance(
     float vaneEdge=persistentVane*smoothstep(0.78f,0.98f,abs(signedWidth));
     float featherSpecular=pow(saturate(dot(normal,halfVector)),92.0f);
     float softSpecular=pow(saturate(dot(normal,halfVector)),24.0f);
-    float diffuse=0.46f+0.72f*ndk+0.22f*ndf+0.13f*nds;
+    float diffuse=0.28f+0.62f*ndk+0.16f*ndf+0.10f*nds;
     float flightDarkening=mix(1.0f,0.58f,flightFeather);
     float3 color=albedoAndMaterial.rgb*diffuse*flightDarkening;
-    color+=sheen*(0.018f+0.095f*grazing)*(0.42f+0.58f*ndk)
+    color+=sheen*(0.022f+0.125f*grazing)*(0.36f+0.64f*ndk)
         *flightDarkening*(0.72f+0.28f*anisotropicSpecular);
     color+=barbMicro*mix(float3(0.035f,0.070f,0.11f),sheen,0.45f);
     float3 sharpTint=mix(
-        float3(0.14f,0.17f,0.22f),
+        float3(0.075f,0.095f,0.125f),
         float3(0.030f,0.038f,0.050f),
         flightFeather
     );
     float3 softTint=mix(
-        float3(0.020f,0.028f,0.042f),
+        float3(0.014f,0.021f,0.034f),
         float3(0.006f,0.009f,0.014f),
         flightFeather
     );
@@ -1257,8 +1257,8 @@ inline float3 showcaseCrowLinearRadiance(
     // broad body regions read brown, so only a restrained cool sky return is
     // added here; blue/violet structure stays view-dependent in `sheen`.
     color+=nds*float3(0.004f,0.006f,0.010f);
-    color+=rim*float3(0.018f,0.032f,0.050f);
-    return 1.82f*color;
+    color+=rim*float3(0.022f,0.040f,0.065f);
+    return 1.68f*color;
 }
 
 fragment float4 showcaseCrowFragment(
