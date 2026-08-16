@@ -11,6 +11,12 @@ struct CrowFoldedWingCovertSample: Equatable {
   let rootWidthMeters: Float
   let maximumWidthMeters: Float
   let camberMeters: Float
+  let vaneAsymmetry: Float
+  let edgeRippleAmplitude: Float
+  let edgeRipplePhase: Float
+  let edgeRippleCycles: Float
+  let rootEnvelopeRatio: Float
+  let pennaceousStartFraction: Float
   let materialVariation: Float
 }
 
@@ -21,8 +27,8 @@ struct CrowFoldedWingCovertSample: Equatable {
 /// and axillary seams from arbitrary cameras while retaining explicit feather
 /// identities that can move to mesh shaders on future hardware.
 enum CrowFoldedWingCoverts {
-  static let rowCount = 12
-  static let columnCount = 28
+  static let rowCount = 14
+  static let columnCount = 34
   static let shellClearanceMeters: Float = 0.0012
   static let surfaceFeatherClass: UInt32 = 4
 
@@ -30,7 +36,8 @@ enum CrowFoldedWingCoverts {
   /// and lengths remain unchanged, preserving distinct vane silhouettes.
   static func outerCourseWidthScale(row: Int, column: Int) -> Float {
     guard row == rowCount - 1 else { return 1 }
-    let posteriorOverlap = max(0, 1 - Float(abs(column - 13)) / 3)
+    let posteriorCenter = columnCount / 2
+    let posteriorOverlap = max(0, 1 - Float(abs(column - posteriorCenter)) / 4)
     return 1.30 + 0.15 * posteriorOverlap
   }
 
@@ -62,6 +69,21 @@ enum CrowFoldedWingCoverts {
             row: row,
             column: column,
             salt: 0xC2B2_AE35
+          )
+          let vaneIdentity = identityVariation(
+            row: row,
+            column: column,
+            salt: 0xB529_7A4D
+          )
+          let edgeIdentity = identityVariation(
+            row: row,
+            column: column,
+            salt: 0x68E3_1DA4
+          )
+          let cycleIdentity = identityVariation(
+            row: row,
+            column: column,
+            salt: 0x1656_67B1
           )
           let rowStep = 1 / Float(rowCount - 1)
           let rowFraction = min(
@@ -148,6 +170,9 @@ enum CrowFoldedWingCoverts {
               + side * crownRollSlope(row: row, column: column) * crownAxis,
             fallback: basePlaneNormal
           )
+          let axillaryOverlap = smootherstep(
+            min(max((rowFraction - 0.68) / 0.32, 0), 1)
+          )
           result.append(
             CrowFoldedWingCovertSample(
               side: side,
@@ -157,12 +182,19 @@ enum CrowFoldedWingCoverts {
               rootOffset: root,
               tipOffset: tip,
               planeNormal: planeNormal,
-              rootWidthMeters: 0.52 * localWidth,
+              rootWidthMeters: (0.60 + 0.08 * axillaryOverlap) * localWidth,
               maximumWidthMeters:
                 localWidth * (1 + 0.08 * axial) * (1 + 0.04 * shapeIdentity)
                 * outerCourseWidthScale(row: row, column: column),
               camberMeters: (0.00155 + 0.00055 * rowFraction)
                 * (1 + 0.09 * rootIdentity),
+              vaneAsymmetry: 0.035 * vaneIdentity,
+              edgeRippleAmplitude:
+                0.008 + 0.012 * (0.5 + 0.5 * edgeIdentity),
+              edgeRipplePhase: Float.pi * (edgeIdentity + 1),
+              edgeRippleCycles: 1.20 + 0.70 * (0.5 + 0.5 * cycleIdentity),
+              rootEnvelopeRatio: 0.48 + 0.26 * axillaryOverlap,
+              pennaceousStartFraction: 0,
               materialVariation: materialIdentity
             )
           )
@@ -238,6 +270,12 @@ enum CrowFoldedWingCoverts {
               rootWidthMeters: 0.58 * localWidth,
               maximumWidthMeters: localWidth * (1 + 0.10 * axial),
               camberMeters: 0.0018 + 0.0007 * rowFraction,
+              vaneAsymmetry: 0,
+              edgeRippleAmplitude: 0,
+              edgeRipplePhase: 0,
+              edgeRippleCycles: 0,
+              rootEnvelopeRatio: 0.58,
+              pennaceousStartFraction: 0,
               materialVariation: 0
             )
           )
@@ -277,14 +315,18 @@ enum CrowFoldedWingCoverts {
     )
   }
 
-  /// Interleaved axial strata give all twelve covert rows distinct starts while
+  /// Interleaved axial strata give every covert row a distinct start while
   /// reserving at least 0.40 of a root interval between neighboring phases.
   /// This leaves room for stable per-feather jitter without collapsing the
   /// established three-millimetre cross-course separation.
   static func courseStaggerFraction(row: Int) -> Float {
     let boundedRow = min(max(row, 0), rowCount - 1)
-    let stratum = 0.049 * Float(boundedRow / 2)
-    return boundedRow.isMultiple(of: 2) ? stratum : 0.48 + stratum
+    let stratum = 0.025 * Float(boundedRow / 2)
+    return boundedRow.isMultiple(of: 2) ? stratum : 0.55 + stratum
+  }
+
+  private static func smootherstep(_ value: Float) -> Float {
+    value * value * value * (value * (value * 6 - 15) + 10)
   }
 
   /// Smooth tract drift plus a smaller stable identity term breaks the exact

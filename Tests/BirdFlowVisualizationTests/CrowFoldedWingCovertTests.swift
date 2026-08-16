@@ -11,9 +11,9 @@ func foldedWingCovertsFormSymmetricBodySeatedShell() {
     samples.count
       == 2 * CrowFoldedWingCoverts.rowCount * CrowFoldedWingCoverts.columnCount
   )
-  #expect(samples.count == 672)
+  #expect(samples.count == 952)
   #expect(CrowFoldedWingCoverts.surfaceFeatherClass == 4)
-  #expect(CrowFoldedWingCoverts.outerCourseWidthScale(row: 0, column: 13) == 1)
+  #expect(CrowFoldedWingCoverts.outerCourseWidthScale(row: 0, column: 17) == 1)
   #expect(abs(
     CrowFoldedWingCoverts.outerCourseWidthScale(
       row: CrowFoldedWingCoverts.rowCount - 1,
@@ -23,7 +23,7 @@ func foldedWingCovertsFormSymmetricBodySeatedShell() {
   #expect(abs(
     CrowFoldedWingCoverts.outerCourseWidthScale(
       row: CrowFoldedWingCoverts.rowCount - 1,
-      column: 13
+      column: 17
     ) - 1.45) < 1e-6
   )
   #expect(
@@ -36,18 +36,35 @@ func foldedWingCovertsFormSymmetricBodySeatedShell() {
   )
   #expect(
     CrowFoldedWingCoverts.visibleSamples(projectedPixelsPerMeter: 1_600).count
-      == 672
+      == 952
   )
   #expect(samples.map(\.materialVariation).min()! < -0.90)
   #expect(samples.map(\.materialVariation).max()! > 0.90)
+  #expect(samples.map(\.vaneAsymmetry).min()! < -0.032)
+  #expect(samples.map(\.vaneAsymmetry).max()! > 0.032)
+  #expect(samples.allSatisfy { $0.edgeRippleAmplitude >= 0.008 })
+  #expect(samples.allSatisfy { $0.edgeRippleAmplitude <= 0.020 })
+  #expect(samples.allSatisfy { $0.edgeRipplePhase >= 0 })
+  #expect(samples.allSatisfy { $0.edgeRipplePhase <= 2 * Float.pi })
+  #expect(samples.allSatisfy { $0.edgeRippleCycles >= 1.20 })
+  #expect(samples.allSatisfy { $0.edgeRippleCycles <= 1.90 })
+  #expect(samples.allSatisfy { $0.pennaceousStartFraction == 0 })
+  let axillaryCourse = samples.filter { $0.row == CrowFoldedWingCoverts.rowCount - 1 }
+  #expect(axillaryCourse.allSatisfy { $0.rootEnvelopeRatio == 0.74 })
+  #expect(axillaryCourse.allSatisfy {
+    $0.rootWidthMeters / $0.maximumWidthMeters > 0.42
+  })
   #expect(samples.map(\.maximumWidthMeters).max()! < 0.024)
   let courseStaggers = (0..<CrowFoldedWingCoverts.rowCount).map {
     CrowFoldedWingCoverts.courseStaggerFraction(row: $0)
   }
   #expect(courseStaggers.first == 0)
   #expect(courseStaggers.allSatisfy { $0 >= 0 && $0 < 0.73 })
-  #expect(Set(courseStaggers.map { Int(($0 * 10_000).rounded()) }).count == 12)
-  #expect(courseStaggers.max()! - courseStaggers.min()! > 0.71)
+  #expect(
+    Set(courseStaggers.map { Int(($0 * 10_000).rounded()) }).count
+      == CrowFoldedWingCoverts.rowCount
+  )
+  #expect(courseStaggers.max()! - courseStaggers.min()! > 0.68)
   #expect(
     zip(courseStaggers, courseStaggers.dropFirst()).allSatisfy {
       abs($0 - $1) > 0.399
