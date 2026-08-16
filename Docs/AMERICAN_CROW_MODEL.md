@@ -30,12 +30,12 @@ not a same-specimen measurement. The display wingbeat is `4.6 Hz`; the original
 dove sequence supplies phase shape, not crow timing.
 
 The standing presentation uses an asymmetric axial body loft whose final neck
-stations taper fully inside a rounded cranium shell. Separate dorsal and ventral
-envelopes form the mantle, shoulder, breast/sternum, and pelvic taper, while the
-contained neck junction avoids exposing an intersection seam. Overlapping
-contour and folded-wing covert rows then break up the analytic surface. These
-remain estimated presentation geometry; they are not inferred skeletal
-landmarks or a measured body scan.
+stations overlap a seven-station cranial loft. Separate dorsal and ventral
+envelopes form the mantle, shoulder, breast/sternum, nape, raised crown, bill
+transition, and pelvic taper, while the contained neck junction avoids exposing
+an intersection seam. Overlapping contour and folded-wing covert rows then
+break up the analytic surface. These remain estimated presentation geometry;
+they are not inferred skeletal landmarks or a measured body scan.
 
 The grounded silhouette keeps the folded primaries, secondaries, and rectrices
 in compact, nearly parallel stacks instead of fanning a flight pose downward.
