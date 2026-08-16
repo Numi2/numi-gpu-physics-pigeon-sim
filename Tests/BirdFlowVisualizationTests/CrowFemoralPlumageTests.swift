@@ -29,7 +29,7 @@ func femoralPlumageBridgesBodyLoftAndUpperCruralTract() {
       hip: leftHip,
       hock: leftHock,
       projectedPixelsPerMeter: 800
-    ).count == 20
+    ).count == 35
   )
   #expect(
     CrowFemoralPlumage.visibleSamples(
@@ -37,7 +37,7 @@ func femoralPlumageBridgesBodyLoftAndUpperCruralTract() {
       hip: leftHip,
       hock: leftHock,
       projectedPixelsPerMeter: 1_000
-    ).count == 30
+    ).count == 35
   )
   #expect(
     CrowFemoralPlumage.visibleSamples(

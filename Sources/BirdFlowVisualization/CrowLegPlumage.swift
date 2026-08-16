@@ -25,16 +25,8 @@ enum CrowLegPlumage {
     hock: SIMD3<Float>,
     projectedPixelsPerMeter: Float
   ) -> [CrowLegPlumageFeather] {
-    let complete = samples(hip: hip, hock: hock)
-    if projectedPixelsPerMeter >= 1_400 { return complete }
-    if projectedPixelsPerMeter >= 900 {
-      return complete.filter {
-        $0.radialIndex.isMultiple(of: 2) && $0.stationIndex.isMultiple(of: 2)
-      }
-    }
-    return complete.filter {
-      $0.radialIndex.isMultiple(of: 2) && $0.stationIndex.isMultiple(of: 3)
-    }
+    if projectedPixelsPerMeter >= 1_400 { return samples(hip: hip, hock: hock) }
+    return coarseSamples(hip: hip, hock: hock)
   }
 
   static func samples(
@@ -90,6 +82,55 @@ enum CrowLegPlumage {
             rootWidthMeters: 0.54 * maximumWidth,
             maximumWidthMeters: maximumWidth,
             camberMeters: 0.00040 * (1 + 0.10 * shapeIdentity)
+          )
+        )
+      }
+    }
+    return result
+  }
+
+  private static func coarseSamples(
+    hip: SIMD3<Float>,
+    hock: SIMD3<Float>
+  ) -> [CrowLegPlumageFeather] {
+    let coarseRadialCount = 10
+    let coarseStationCount = 5
+    let axis = normalized(hock - hip, fallback: SIMD3<Float>(0, 0, -1))
+    let helper: SIMD3<Float> =
+      abs(axis.z) < 0.82
+      ? SIMD3<Float>(0, 0, 1)
+      : SIMD3<Float>(0, 1, 0)
+    let first = normalized(simd_cross(axis, helper), fallback: SIMD3<Float>(1, 0, 0))
+    let second = normalized(simd_cross(axis, first), fallback: SIMD3<Float>(0, 1, 0))
+    var result: [CrowLegPlumageFeather] = []
+    result.reserveCapacity(coarseRadialCount * coarseStationCount)
+    for radialIndex in 0..<coarseRadialCount {
+      let theta = 2 * Float.pi * Float(radialIndex) / Float(coarseRadialCount)
+      let radial = cos(theta) * first + sin(theta) * second
+      let stagger: Float = radialIndex.isMultiple(of: 2) ? 0 : 0.5
+      for stationIndex in 0..<coarseStationCount {
+        let rootFraction = min(
+          0.78,
+          0.03 + 0.18 * (Float(stationIndex) + stagger)
+        )
+        let tipFraction = min(1.10, rootFraction + 0.34)
+        let rootRadius = radius(at: rootFraction)
+        let tipRadius = radius(at: tipFraction)
+        let root = mix(hip, hock, rootFraction) + rootRadius * radial
+        let tip = mix(hip, hock, tipFraction) + tipRadius * radial
+        let circumferentialSpacing =
+          2 * Float.pi * rootRadius / Float(coarseRadialCount)
+        let maximumWidth = max(0.0024, 0.68 * circumferentialSpacing)
+        result.append(
+          CrowLegPlumageFeather(
+            radialIndex: radialIndex,
+            stationIndex: stationIndex,
+            root: root,
+            tip: tip,
+            planeNormal: radial,
+            rootWidthMeters: 0.58 * maximumWidth,
+            maximumWidthMeters: maximumWidth,
+            camberMeters: 0.00045
           )
         )
       }

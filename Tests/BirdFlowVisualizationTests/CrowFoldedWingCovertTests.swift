@@ -14,11 +14,11 @@ func foldedWingCovertsFormSymmetricBodySeatedShell() {
   #expect(samples.count == 360)
   #expect(
     CrowFoldedWingCoverts.visibleSamples(projectedPixelsPerMeter: 800).count
-      == 42
+      == 130
   )
   #expect(
     CrowFoldedWingCoverts.visibleSamples(projectedPixelsPerMeter: 1_000).count
-      == 100
+      == 130
   )
   #expect(
     CrowFoldedWingCoverts.visibleSamples(projectedPixelsPerMeter: 1_600).count

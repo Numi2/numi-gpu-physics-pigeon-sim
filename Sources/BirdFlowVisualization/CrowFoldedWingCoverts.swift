@@ -27,16 +27,8 @@ enum CrowFoldedWingCoverts {
   static func visibleSamples(
     projectedPixelsPerMeter: Float
   ) -> [CrowFoldedWingCovertSample] {
-    let complete = samples()
-    if projectedPixelsPerMeter >= 1_400 { return complete }
-    if projectedPixelsPerMeter >= 900 {
-      return complete.filter {
-        $0.row.isMultiple(of: 2) && $0.column.isMultiple(of: 2)
-      }
-    }
-    return complete.filter {
-      $0.row.isMultiple(of: 3) && $0.column.isMultiple(of: 3)
-    }
+    if projectedPixelsPerMeter >= 1_400 { return samples() }
+    return coarseSamples()
   }
 
   static func samples() -> [CrowFoldedWingCovertSample] {
@@ -118,7 +110,12 @@ enum CrowFoldedWingCoverts {
           }
           let localWidth = max(
             0.0062,
-            0.78 * circumferentialSpacing(x: rootX, theta: theta)
+            0.78
+              * circumferentialSpacing(
+                x: rootX,
+                theta: theta,
+                rowCount: rowCount
+              )
           )
           result.append(
             CrowFoldedWingCovertSample(
@@ -134,6 +131,78 @@ enum CrowFoldedWingCoverts {
                 localWidth * (1 + 0.08 * axial) * (1 + 0.04 * shapeIdentity),
               camberMeters: (0.00155 + 0.00055 * rowFraction)
                 * (1 + 0.09 * rootIdentity)
+            )
+          )
+        }
+      }
+    }
+    return result
+  }
+
+  private static func coarseSamples() -> [CrowFoldedWingCovertSample] {
+    let coarseRowCount = 5
+    let coarseColumnCount = 13
+    var result: [CrowFoldedWingCovertSample] = []
+    result.reserveCapacity(2 * coarseRowCount * coarseColumnCount)
+    for side: Float in [-1, 1] {
+      for row in 0..<coarseRowCount {
+        let rowFraction = Float(row) / Float(coarseRowCount - 1)
+        let theta = 0.92 - 0.98 * rowFraction
+        for column in 0..<coarseColumnCount {
+          let axial = Float(column) / Float(coarseColumnCount - 1)
+          let stagger: Float = row.isMultiple(of: 2) ? 0 : 0.0045
+          let rootX = 0.092 - 0.224 * axial - stagger
+          let rootSurface = mirroredSurfacePoint(
+            x: rootX,
+            theta: theta,
+            side: side
+          )
+          let rootNormal = mirroredSurfaceNormal(
+            x: rootX,
+            theta: theta,
+            side: side
+          )
+          let clearance = shellClearanceMeters + 0.00025 * rowFraction
+          let root = rootSurface + clearance * rootNormal
+          let nominalLength = 0.038 + 0.044 * axial + 0.007 * rowFraction
+          let tipX = rootX - nominalLength
+          let tipTheta = theta - 0.055 - 0.025 * axial
+          let clampedTipX = max(tipX, CrowBodyAnatomy.loftRings.first!.x)
+          let tipSurface = mirroredSurfacePoint(
+            x: clampedTipX,
+            theta: tipTheta,
+            side: side
+          )
+          let tipNormal = mirroredSurfaceNormal(
+            x: clampedTipX,
+            theta: tipTheta,
+            side: side
+          )
+          var tip = tipSurface + clearance * tipNormal
+          if tipX < clampedTipX {
+            tip += SIMD3<Float>(tipX - clampedTipX, 0, 0.16 * (tipX - clampedTipX))
+          }
+          let localWidth = max(
+            0.0085,
+            0.88
+              * circumferentialSpacing(
+                x: rootX,
+                theta: theta,
+                rowCount: coarseRowCount
+              )
+          )
+          result.append(
+            CrowFoldedWingCovertSample(
+              side: side,
+              row: row,
+              column: column,
+              rootSurfaceOffset: rootSurface,
+              rootOffset: root,
+              tipOffset: tip,
+              planeNormal: normalized(rootNormal + tipNormal, fallback: rootNormal),
+              rootWidthMeters: 0.58 * localWidth,
+              maximumWidthMeters: localWidth * (1 + 0.10 * axial),
+              camberMeters: 0.0018 + 0.0007 * rowFraction
             )
           )
         }
@@ -160,7 +229,11 @@ enum CrowFoldedWingCoverts {
     return SIMD3<Float>(normal.x, side * normal.y, normal.z)
   }
 
-  private static func circumferentialSpacing(x: Float, theta: Float) -> Float {
+  private static func circumferentialSpacing(
+    x: Float,
+    theta: Float,
+    rowCount: Int
+  ) -> Float {
     let halfStep = 0.5 * Float.pi / Float(rowCount + 2)
     return simd_distance(
       CrowBodyAnatomy.surfacePoint(atX: x, theta: theta - halfStep),

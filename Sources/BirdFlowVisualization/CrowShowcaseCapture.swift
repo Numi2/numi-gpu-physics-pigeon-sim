@@ -2172,10 +2172,12 @@ private struct CrowMeshBuilder {
     projectedPixelsPerMeter: Float,
     to vertices: inout [ColoredVertex]
   ) {
-    for sample in CrowFoldedWingCoverts.visibleSamples(
+    let visibleSamples = CrowFoldedWingCoverts.visibleSamples(
       projectedPixelsPerMeter: projectedPixelsPerMeter
-    ) {
-      let rowFraction = Float(sample.row) / Float(CrowFoldedWingCoverts.rowCount - 1)
+    )
+    let rowDenominator = Float(max(visibleSamples.map(\.row).max() ?? 0, 1))
+    for sample in visibleSamples {
+      let rowFraction = Float(sample.row) / rowDenominator
       appendFeatherBlade(
         root: bodyCenter + sample.rootOffset,
         tip: bodyCenter + sample.tipOffset,
@@ -2232,10 +2234,7 @@ private struct CrowMeshBuilder {
           sections: 7,
           camber: feather.camberMeters,
           transverseCamberRatio: 0.12,
-          // The articulated hip/hock distance changes subtly with the standing
-          // sway. Use the presentation feather's fixed coverage contract so a
-          // threshold crossing cannot change current/previous topology.
-          lodLengthMeters: 0.030,
+          lodLengthMeters: simd_distance(feather.root, feather.tip),
           projectedPixelsPerMeter: projectedPixelsPerMeter,
           to: &vertices
         )
@@ -2255,7 +2254,7 @@ private struct CrowMeshBuilder {
           sections: 6,
           camber: feather.camberMeters,
           transverseCamberRatio: 0.08,
-          lodLengthMeters: 0.030,
+          lodLengthMeters: simd_distance(feather.root, feather.tip),
           projectedPixelsPerMeter: projectedPixelsPerMeter,
           to: &vertices
         )

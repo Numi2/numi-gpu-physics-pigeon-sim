@@ -29,16 +29,10 @@ enum CrowFemoralPlumage {
     hock: SIMD3<Float>,
     projectedPixelsPerMeter: Float
   ) -> [CrowFemoralPlumageFeather] {
-    let complete = samples(bodyCenter: bodyCenter, hip: hip, hock: hock)
-    if projectedPixelsPerMeter >= 1_400 { return complete }
-    if projectedPixelsPerMeter >= 900 {
-      return complete.filter {
-        $0.row.isMultiple(of: 2) && $0.course.isMultiple(of: 2)
-      }
+    if projectedPixelsPerMeter >= 1_400 {
+      return samples(bodyCenter: bodyCenter, hip: hip, hock: hock)
     }
-    return complete.filter {
-      $0.row.isMultiple(of: 2) && $0.course.isMultiple(of: 3)
-    }
+    return coarseSamples(bodyCenter: bodyCenter, hip: hip, hock: hock)
   }
 
   static func samples(
@@ -143,6 +137,59 @@ enum CrowFemoralPlumage {
             maximumWidthMeters: maximumWidth * (1 + 0.04 * shapeIdentity),
             camberMeters: (0.00085 + 0.00030 * courseFraction)
               * (1 + 0.08 * rootIdentity)
+          )
+        )
+      }
+    }
+    return result
+  }
+
+  private static func coarseSamples(
+    bodyCenter: SIMD3<Float>,
+    hip: SIMD3<Float>,
+    hock: SIMD3<Float>
+  ) -> [CrowFemoralPlumageFeather] {
+    let coarseRowCount = 5
+    let coarseCourseCount = 7
+    let side: Float = hip.y >= bodyCenter.y ? 1 : -1
+    let legAxis = normalized(hock - hip, fallback: SIMD3<Float>(0, 0, -1))
+    var result: [CrowFemoralPlumageFeather] = []
+    result.reserveCapacity(coarseRowCount * coarseCourseCount)
+    for row in 0..<coarseRowCount {
+      let theta = -1.18 + 0.17 * Float(row)
+      for course in 0..<coarseCourseCount {
+        let courseFraction = Float(course) / Float(coarseCourseCount - 1)
+        let stagger: Float = row.isMultiple(of: 2) ? 0 : 0.004
+        let rootX = -0.070 + 0.075 * courseFraction - stagger
+        let localSurface = mirroredSurfacePoint(x: rootX, theta: theta, side: side)
+        let localNormal = mirroredSurfaceNormal(x: rootX, theta: theta, side: side)
+        let rootSurface = bodyCenter + localSurface
+        let root = rootSurface + shellClearanceMeters * localNormal
+        let rootRelativeToHip = rootSurface - hip
+        let radial = normalized(
+          rootRelativeToHip
+            - legAxis * simd_dot(rootRelativeToHip, legAxis),
+          fallback: SIMD3<Float>(0, side, 0)
+        )
+        let tipFraction =
+          0.105 + 0.165 * courseFraction
+          + (row.isMultiple(of: 2) ? 0 : 0.012)
+        let tipRadius = 0.0132 - 0.0015 * courseFraction
+        let tip = mix(hip, hock, tipFraction) + tipRadius * radial
+        let length = simd_distance(root, tip)
+        let maximumWidth = min(0.011, max(0.006, 0.30 * length))
+        result.append(
+          CrowFemoralPlumageFeather(
+            side: side,
+            row: row,
+            course: course,
+            rootSurface: rootSurface,
+            root: root,
+            tip: tip,
+            planeNormal: normalized(localNormal + radial, fallback: localNormal),
+            rootWidthMeters: 0.56 * maximumWidth,
+            maximumWidthMeters: maximumWidth,
+            camberMeters: 0.0012 + 0.0004 * courseFraction
           )
         )
       }

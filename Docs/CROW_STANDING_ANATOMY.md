@@ -206,10 +206,10 @@ raising its inventory from `130` broad panels to `360` narrower coverts. Every
 root remains on the asymmetric body loft, every axial and circumferential
 neighbour overlaps, and bounded course, length, tip-sweep, width, and camber
 variation prevents a regular tiled plate from replacing the former sparse grid.
-Final-output coverage selects low/medium/full combined tiers of `42`/`100`/`360`
-folded coverts, `20`/`30`/`108` femoral vanes per side, and `21`/`28`/`98`
-crural vanes per side. The full `1280 x 720` standing view retains every identity;
-smaller temporally reconstructed outputs do not alias subpixel feather fields.
+Final-output coverage keeps the proven coarse `130` folded-coverts plus `35`
+femoral and `50` crural vanes per side below `1400 px/m`, then switches to all
+`360`, `108`, and `98` identities at full density. The full `1280 x 720`
+standing view clears that gate and retains every high-quality identity.
 
 Run the presentation with:
 

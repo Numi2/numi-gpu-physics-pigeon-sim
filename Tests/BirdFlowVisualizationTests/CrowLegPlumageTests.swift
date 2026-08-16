@@ -17,14 +17,14 @@ func crowCruralPlumageOverlapsLegAndCrossesHockBoundary() {
       hip: hip,
       hock: hock,
       projectedPixelsPerMeter: 800
-    ).count == 21
+    ).count == 50
   )
   #expect(
     CrowLegPlumage.visibleSamples(
       hip: hip,
       hock: hock,
       projectedPixelsPerMeter: 1_000
-    ).count == 28
+    ).count == 50
   )
   #expect(
     CrowLegPlumage.visibleSamples(
