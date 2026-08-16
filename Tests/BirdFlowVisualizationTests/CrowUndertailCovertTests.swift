@@ -9,6 +9,7 @@ func undertailCovertsFormBodySeatedRectrixRootShell() {
   #expect(samples == CrowUndertailCoverts.samples())
   #expect(samples.count == CrowUndertailCoverts.rowCount * CrowUndertailCoverts.columnCount)
   #expect(samples.count == 91)
+  #expect(CrowUndertailCoverts.surfaceFeatherClass == 7)
   #expect(CrowUndertailCoverts.visibleSamples(projectedPixelsPerMeter: 1_000).isEmpty)
   #expect(
     CrowUndertailCoverts.visibleSamples(projectedPixelsPerMeter: 1_600).count

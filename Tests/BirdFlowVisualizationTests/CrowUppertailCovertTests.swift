@@ -9,6 +9,7 @@ func uppertailCovertsCloseDorsalPelvicToRectrixShell() {
   #expect(samples == CrowUppertailCoverts.samples())
   #expect(samples.count == CrowUppertailCoverts.rowCount * CrowUppertailCoverts.columnCount)
   #expect(samples.count == 216)
+  #expect(CrowUppertailCoverts.surfaceFeatherClass == 5)
   #expect(CrowUppertailCoverts.visibleSamples(projectedPixelsPerMeter: 1_000).isEmpty)
   #expect(
     CrowUppertailCoverts.visibleSamples(projectedPixelsPerMeter: 1_600).count

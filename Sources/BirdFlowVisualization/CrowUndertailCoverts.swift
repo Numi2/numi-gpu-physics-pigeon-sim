@@ -22,6 +22,7 @@ enum CrowUndertailCoverts {
   static let rowCount = 13
   static let columnCount = 7
   static let shellClearanceMeters: Float = 0.00075
+  static let surfaceFeatherClass: UInt32 = 7
 
   static func visibleSamples(
     projectedPixelsPerMeter: Float
