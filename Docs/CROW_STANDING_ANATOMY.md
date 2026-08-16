@@ -63,6 +63,19 @@ shoulder-to-pelvis series, but lateral fanning is reduced so the folded tips do
 not split into separated decks when viewed from behind. This is estimated
 presentation anatomy and does not enter the solver.
 
+Five imbricated covert courses per side are sampled from the live asymmetric
+body loft rather than a rectangular lateral grid. Their `130` stable roots sit
+`1.2-1.45 mm` above that same trunk surface, overlap the following axial root,
+and continue over the rump before extrapolating caudally. This seals the
+scapular, axillary, and pelvic wing-body boundaries from front and rear cameras
+without hiding a discontinuity through framing.
+
+The twelve retained rectrices form a closed standing stack: their bases remain
+buried beneath the rump shell, their root and distal lateral spans are each
+`12 mm`, and their distal envelope descends `55 mm` below the body center. Full
+asset length and identity remain unchanged. The compact stack is an estimated
+quiet-pose articulation, not measured tail kinematics.
+
 The cranial surface is not transported as a detached rigid shell during quiet
 standing. Points buried in the trunk-facing nape remain body-anchored, a cubic
 coupling field deforms the visible neck, and the field reaches rigid-head motion

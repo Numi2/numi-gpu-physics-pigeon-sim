@@ -23,50 +23,80 @@ enum CrowFoldedWingAnatomy {
     let normal: SIMD3<Float>
     switch featherClass {
     case 1:
+      let length = 0.155 + 0.050 * fraction
       rootOffset = SIMD3<Float>(
-        0.035 - 0.130 * fraction,
-        side * (0.054 + 0.012 * fraction),
-        0.030 - 0.035 * fraction
+        0.040 - 0.132 * fraction,
+        side * 0.050,
+        0.032 - 0.024 * fraction
       )
+      let lateralDirection = side * (0.026 + 0.003 * fraction - 0.050) / length
+      let verticalDirection = (-0.018 - 0.010 * fraction - rootOffset.z) / length
       direction = safeNormalize(
         SIMD3<Float>(
-          -0.989,
-          -side * (0.0375 + 0.0575 * fraction),
-          -0.1375 - 0.0125 * fraction
+          -sqrt(
+            max(
+              0,
+              1 - lateralDirection * lateralDirection
+                - verticalDirection * verticalDirection)),
+          lateralDirection,
+          verticalDirection
         ),
         fallback: SIMD3<Float>(-1, 0, 0)
       )
       normal = safeNormalize(
-        SIMD3<Float>(0.030, side, 0.160 + 0.120 * fraction),
+        SIMD3<Float>(0.030, side, 0.20 + 0.08 * fraction),
         fallback: SIMD3<Float>(0, side, 0)
       )
     case 2:
+      let length = 0.112 + 0.030 * fraction
       rootOffset = SIMD3<Float>(
         0.082 - 0.142 * fraction,
-        side * (0.053 + 0.009 * fraction),
-        0.040 - 0.035 * fraction
+        side * 0.047,
+        0.044 - 0.024 * fraction
       )
+      let lateralDirection = side * (0.031 + 0.003 * fraction - 0.047) / length
+      let verticalDirection = (-0.012 * fraction - rootOffset.z) / length
       direction = safeNormalize(
         SIMD3<Float>(
-          -0.992,
-          -side * (0.030 + 0.0365 * fraction),
-          -0.105 - 0.035 * fraction
+          -sqrt(
+            max(
+              0,
+              1 - lateralDirection * lateralDirection
+                - verticalDirection * verticalDirection)),
+          lateralDirection,
+          verticalDirection
         ),
         fallback: SIMD3<Float>(-1, 0, 0)
       )
       normal = safeNormalize(
-        SIMD3<Float>(0.025, side, 0.140 + 0.100 * fraction),
+        SIMD3<Float>(0.025, side, 0.24 + 0.06 * fraction),
         fallback: SIMD3<Float>(0, side, 0)
       )
     default:
-      let lateral = (fraction - 0.5) * 0.082
-      rootOffset = SIMD3<Float>(-0.138, lateral * 0.18, -0.002)
+      let lateral = (fraction - 0.5) * 0.012
+      rootOffset = SIMD3<Float>(
+        -0.154 + 0.003 * abs(2 * fraction - 1),
+        lateral,
+        0.006 - 0.003 * abs(2 * fraction - 1)
+      )
+      let length: Float = 0.166
+      let targetLateral = (fraction - 0.5) * 0.012
+      let lateralDirection = (targetLateral - lateral) / length
+      let verticalDirection = (-0.055 - rootOffset.z) / length
       direction = safeNormalize(
-        SIMD3<Float>(-0.999, lateral * 0.20, -0.018),
+        SIMD3<Float>(
+          -sqrt(
+            max(
+              0,
+              1 - lateralDirection * lateralDirection
+                - verticalDirection * verticalDirection)),
+          lateralDirection,
+          verticalDirection
+        ),
         fallback: SIMD3<Float>(-1, 0, 0)
       )
       normal = safeNormalize(
-        SIMD3<Float>(0, 0.04 * side, 1),
+        SIMD3<Float>(0.04, 0.20 * lateral, 1),
         fallback: SIMD3<Float>(0, 0, 1)
       )
     }

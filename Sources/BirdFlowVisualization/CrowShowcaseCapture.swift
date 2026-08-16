@@ -2071,44 +2071,27 @@ private struct CrowMeshBuilder {
     projectedPixelsPerMeter: Float,
     to vertices: inout [ColoredVertex]
   ) {
-    for side: Float in [-1, 1] {
-      for row in 0..<4 {
-        let rowFraction = Float(row) / 3
-        for index in 0..<12 {
-          let fraction = Float(index) / 11
-          let root =
-            bodyCenter
-            + SIMD3<Float>(
-              0.096 - 0.226 * fraction - 0.007 * rowFraction,
-              side * (0.056 + 0.002 * rowFraction),
-              0.031 - 0.054 * fraction - 0.006 * rowFraction
-            )
-          let length = 0.040 + 0.040 * fraction + 0.010 * rowFraction
-          appendFeatherBlade(
-            root: root,
-            tip: root
-              + SIMD3<Float>(
-                -length,
-                -side * (0.0015 + 0.002 * rowFraction),
-                -0.006 - 0.005 * rowFraction
-              ),
-            planeNormal: SIMD3<Float>(0.06, side, 0.12),
-            rootWidth: 0.0075,
-            maximumWidth: 0.0125 + 0.002 * fraction,
-            color: SIMD4<Float>(
-              0.006 + 0.001 * rowFraction,
-              0.009 + 0.002 * rowFraction,
-              0.016 + 0.003 * rowFraction,
-              0.17
-            ),
-            sections: 8,
-            camber: 0.0022 + 0.0008 * rowFraction,
-            transverseCamberRatio: 0.26,
-            projectedPixelsPerMeter: projectedPixelsPerMeter,
-            to: &vertices
-          )
-        }
-      }
+    for sample in CrowFoldedWingCoverts.samples() {
+      let rowFraction = Float(sample.row) / Float(CrowFoldedWingCoverts.rowCount - 1)
+      appendFeatherBlade(
+        root: bodyCenter + sample.rootOffset,
+        tip: bodyCenter + sample.tipOffset,
+        planeNormal: sample.planeNormal,
+        rootWidth: sample.rootWidthMeters,
+        maximumWidth: sample.maximumWidthMeters,
+        color: SIMD4<Float>(
+          0.006 + 0.001 * rowFraction,
+          0.009 + 0.002 * rowFraction,
+          0.016 + 0.003 * rowFraction,
+          0.17
+        ),
+        sections: 8,
+        camber: sample.camberMeters,
+        transverseCamberRatio: 0.26,
+        lodLengthMeters: simd_distance(sample.rootOffset, sample.tipOffset),
+        projectedPixelsPerMeter: projectedPixelsPerMeter,
+        to: &vertices
+      )
     }
   }
 

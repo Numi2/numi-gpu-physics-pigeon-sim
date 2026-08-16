@@ -102,7 +102,7 @@ func standingCrowFeatherRootsMatchMetalReference() throws {
     ) - bodyCenter
   }
   #expect(localRoots.map { abs($0.y) }.max()! < 0.07)
-  #expect(localRoots.map(\.x).min()! > -0.14)
+  #expect(localRoots.map(\.x).min()! > -0.158)
   #expect(Set(moving.map { $0.identity.y }).count == 54)
 
   for featherClass: UInt32 in [1, 2] {
@@ -147,7 +147,7 @@ func standingCrowFeatherRootsMatchMetalReference() throws {
       fraction: 1
     )
     #expect(leftRear.rootOffset.x < leftFront.rootOffset.x)
-    #expect(leftRear.rootOffset.y > leftFront.rootOffset.y)
+    #expect(abs(leftRear.rootOffset.y - leftFront.rootOffset.y) < 1e-7)
     #expect(leftRear.rootOffset.z < leftFront.rootOffset.z)
     #expect(leftRear.direction.y < 0 && leftFront.direction.y < 0)
     #expect(leftRear.direction.z < 0 && leftFront.direction.z < 0)
@@ -164,4 +164,26 @@ func standingCrowFeatherRootsMatchMetalReference() throws {
     #expect(abs(frontTip.y - rearTip.y) < 0.004)
     #expect(abs(frontTip.z - rearTip.z) < 0.046)
   }
+
+  let centerTail = CrowFoldedWingAnatomy.pose(
+    featherClass: 3,
+    side: 0,
+    fraction: 0.5
+  )
+  let edgeTail = CrowFoldedWingAnatomy.pose(
+    featherClass: 3,
+    side: 0,
+    fraction: 0
+  )
+  #expect(centerTail.rootOffset.z > 0.005)
+  #expect(edgeTail.rootOffset.z >= 0.003)
+  #expect(abs(edgeTail.rootOffset.y) >= 0.0059)
+  #expect(centerTail.direction.z < 0)
+  let tailLength: Float = 0.166
+  let centerTailTip = centerTail.rootOffset + tailLength * centerTail.direction
+  let edgeTailTip = edgeTail.rootOffset + tailLength * edgeTail.direction
+  #expect(abs(centerTailTip.y) < 1e-6)
+  #expect(abs(edgeTailTip.y) <= 0.0061)
+  #expect(abs(centerTailTip.z + 0.055) < 1e-5)
+  #expect(abs(edgeTailTip.z + 0.055) < 1e-5)
 }

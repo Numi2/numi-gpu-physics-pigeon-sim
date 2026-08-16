@@ -50,6 +50,12 @@ The retained feather lengths and stable identities do not change; only the
 estimated grounded rest pose prevents all vanes from collapsing into one
 planar flank slab.
 
+Grounded coverts are seated directly on the asymmetric trunk loft in five
+overlapping courses per side. Rectrix bases remain inside the rump coverage and
+the standing tail closes to a narrow caudal stack. These all-angle attachment
+constraints were qualified from simulated front and near-rear cameras; no
+reference image is rendered or stored.
+
 The flight presentation draws the complete fixed-topology wing surface as a
 dark gap-closing layer and closes the tail with asset-length rectrices. The
 solver sequence's lower reversal sweeps the
