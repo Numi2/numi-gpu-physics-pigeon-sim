@@ -1678,6 +1678,11 @@ private struct CrowMeshBuilder {
       projectedPixelsPerMeter: projectedPixelsPerMeter,
       to: &vertices
     )
+    appendVentralFeatherTracts(
+      bodyCenter: posedBodyCenter,
+      projectedPixelsPerMeter: projectedPixelsPerMeter,
+      to: &vertices
+    )
     if let standingPose {
       appendFoldedWingCoverts(
         bodyCenter: posedBodyCenter,
@@ -1995,6 +2000,39 @@ private struct CrowMeshBuilder {
         sections: sample.region == .cervical ? 6 : 8,
         camber: sample.camberMeters,
         transverseCamberRatio: sample.region == .cervical ? 0.24 : 0.28,
+        lodLengthMeters: simd_distance(sample.rootOffset, sample.tipOffset),
+        projectedPixelsPerMeter: projectedPixelsPerMeter,
+        to: &vertices
+      )
+    }
+  }
+
+  private func appendVentralFeatherTracts(
+    bodyCenter: SIMD3<Float>,
+    projectedPixelsPerMeter: Float,
+    to vertices: inout [ColoredVertex]
+  ) {
+    for sample in CrowVentralFeatherTracts.visibleSamples(
+      projectedPixelsPerMeter: projectedPixelsPerMeter
+    ) {
+      let material = sample.materialVariation
+      let color = SIMD4<Float>(
+        0.006 * (1 + 0.08 * material),
+        0.009 * (1 + 0.06 * material),
+        0.016 * (1 + 0.04 * material),
+        0.15 + 0.008 * material
+      )
+      appendFeatherBlade(
+        root: bodyCenter + sample.rootOffset,
+        tip: bodyCenter + sample.tipOffset,
+        planeNormal: sample.planeNormal,
+        rootWidth: sample.rootWidthMeters,
+        maximumWidth: sample.maximumWidthMeters,
+        color: color,
+        sections: 7,
+        camber: sample.camberMeters,
+        transverseCamberRatio: 0.10,
+        axialStartFraction: sample.pennaceousStartFraction,
         lodLengthMeters: simd_distance(sample.rootOffset, sample.tipOffset),
         projectedPixelsPerMeter: projectedPixelsPerMeter,
         to: &vertices
