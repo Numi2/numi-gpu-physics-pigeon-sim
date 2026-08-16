@@ -12,18 +12,23 @@ func crowBodyFeatherTractsOverlapNeckAndCoverWingRoots() {
       * CrowBodyFeatherTracts.cervicalColumnCount
       + CrowBodyFeatherTracts.mantleRowCount
       * CrowBodyFeatherTracts.mantleColumnCount
+      + CrowBodyFeatherTracts.humeralRowCount
+      * CrowBodyFeatherTracts.humeralColumnCount
       + CrowBodyFeatherTracts.scapularRowCount
       * CrowBodyFeatherTracts.scapularColumnCount)
   #expect(samples.count == expectedCount)
 
   let cervical = samples.filter { $0.region == .cervical }
   let mantle = samples.filter { $0.region == .mantle }
+  let humeral = samples.filter { $0.region == .humeral }
   let scapular = samples.filter { $0.region == .scapular }
   #expect(cervical.count == 480)
-  #expect(mantle.count == 720)
-  #expect(scapular.count == 768)
+  #expect(mantle.count == 960)
+  #expect(humeral.count == 144)
+  #expect(scapular.count == 1_056)
   #expect(Set(cervical.map(\.surfaceFeatherClass)) == Set([5, 6]))
   #expect(mantle.allSatisfy { $0.surfaceFeatherClass == 5 })
+  #expect(humeral.allSatisfy { $0.surfaceFeatherClass == 6 })
   #expect(scapular.allSatisfy { $0.surfaceFeatherClass == 6 })
   #expect(samples.allSatisfy { $0.surfaceFeatherClass == 5 || $0.surfaceFeatherClass == 6 })
   #expect(
@@ -142,6 +147,8 @@ func crowBodyFeatherTractsOverlapNeckAndCoverWingRoots() {
   )
   #expect(mantle.map(\.rootEnvelopeRatio).min()! >= 0.56)
   #expect(mantle.map(\.rootEnvelopeRatio).max()! <= 0.621)
+  #expect(humeral.map(\.rootEnvelopeRatio).min()! >= 0.64)
+  #expect(humeral.map(\.rootEnvelopeRatio).max()! <= 0.681)
   #expect(scapular.map(\.rootEnvelopeRatio).min()! >= 0.59)
   #expect(scapular.map(\.rootEnvelopeRatio).max()! <= 0.641)
   #expect(samples.allSatisfy { $0.pennaceousStartFraction == 0 })
@@ -201,6 +208,45 @@ func crowBodyFeatherTractsOverlapNeckAndCoverWingRoots() {
     cervical.map(\.rootWidthMeters).max()!
       - cervical.map(\.rootWidthMeters).min()! > 0.00028
   )
+
+  for side: Float in [-1, 1] {
+    let sideMantle = mantle.filter { $0.side == side }
+    let sideScapular = scapular.filter { $0.side == side }
+    let sideHumeral = humeral.filter { $0.side == side }
+    for feather in sideHumeral {
+      #expect(
+        sideMantle.map { simd_distance($0.rootOffset, feather.rootOffset) }.min()!
+          < 0.012
+      )
+      #expect(
+        sideScapular.map { simd_distance($0.rootOffset, feather.rootOffset) }.min()!
+          < 0.012
+      )
+    }
+    for row in 0..<CrowBodyFeatherTracts.humeralRowCount {
+      let course = sideHumeral
+        .filter { $0.row == row }
+        .sorted { $0.column < $1.column }
+      #expect(course.count == CrowBodyFeatherTracts.humeralColumnCount)
+      for pair in zip(course, course.dropFirst()) {
+        #expect(
+          simd_distance(pair.0.rootOffset, pair.1.rootOffset)
+            < simd_distance(pair.0.rootOffset, pair.0.tipOffset)
+        )
+      }
+    }
+    for column in 0..<CrowBodyFeatherTracts.humeralColumnCount {
+      let crossCourse = sideHumeral
+        .filter { $0.column == column }
+        .sorted { $0.row < $1.row }
+      for pair in zip(crossCourse, crossCourse.dropFirst()) {
+        #expect(
+          simd_distance(pair.0.rootOffset, pair.1.rootOffset)
+            < pair.0.maximumWidthMeters + pair.1.maximumWidthMeters
+        )
+      }
+    }
+  }
 
   for region in [CrowBodyFeatherTractRegion.mantle, .scapular] {
     let regionSamples = samples.filter { $0.region == region }
@@ -270,15 +316,18 @@ func crowBodyFeatherTractsOverlapNeckAndCoverWingRoots() {
   #expect(low.filter { $0.region == .cervical }.count == 240)
   #expect(medium.filter { $0.region == .cervical }.count == 240)
   #expect(full.filter { $0.region == .cervical }.count == 480)
-  #expect(low.filter { $0.region == .mantle }.count == 192)
-  #expect(medium.filter { $0.region == .mantle }.count == 360)
-  #expect(full.filter { $0.region == .mantle }.count == 720)
-  #expect(low.filter { $0.region == .scapular }.count == 192)
-  #expect(medium.filter { $0.region == .scapular }.count == 384)
-  #expect(full.filter { $0.region == .scapular }.count == 768)
-  #expect(low.count == 624)
-  #expect(medium.count == 984)
-  #expect(full.count == 1_968)
+  #expect(low.filter { $0.region == .mantle }.count == 240)
+  #expect(medium.filter { $0.region == .mantle }.count == 480)
+  #expect(full.filter { $0.region == .mantle }.count == 960)
+  #expect(low.filter { $0.region == .humeral }.count == 48)
+  #expect(medium.filter { $0.region == .humeral }.count == 72)
+  #expect(full.filter { $0.region == .humeral }.count == 144)
+  #expect(low.filter { $0.region == .scapular }.count == 264)
+  #expect(medium.filter { $0.region == .scapular }.count == 528)
+  #expect(full.filter { $0.region == .scapular }.count == 1_056)
+  #expect(low.count == 792)
+  #expect(medium.count == 1_320)
+  #expect(full.count == 2_640)
 }
 
 @Test("quiet head motion bends the cervical tract without moving the mantle")

@@ -3,6 +3,7 @@ import simd
 enum CrowBodyFeatherTractRegion: UInt8, CaseIterable {
   case cervical
   case mantle
+  case humeral
   case scapular
 }
 
@@ -40,9 +41,11 @@ enum CrowBodyFeatherTracts {
   static let cervicalShellClearanceMeters: Float = 0.0012
   static let cervicalMinimumAngleRadians: Float = -1.05
   static let cervicalMaximumAngleRadians: Float = 1.54
-  static let mantleRowCount = 15
+  static let mantleRowCount = 20
   static let mantleColumnCount = 24
-  static let scapularRowCount = 16
+  static let humeralRowCount = 3
+  static let humeralColumnCount = 24
+  static let scapularRowCount = 22
   static let scapularColumnCount = 24
 
   static func visibleSamples(
@@ -72,10 +75,12 @@ enum CrowBodyFeatherTracts {
       2
         * (cervicalRowCount * cervicalColumnCount
           + mantleRowCount * mantleColumnCount
+          + humeralRowCount * humeralColumnCount
           + scapularRowCount * scapularColumnCount)
     )
     appendCervical(neckPose: neckPose, to: &result)
     appendMantle(to: &result)
+    appendHumeral(to: &result)
     appendScapular(to: &result)
     return result
   }
@@ -406,6 +411,122 @@ enum CrowBodyFeatherTracts {
     }
   }
 
+  /// Three interdigitated humeral courses bridge the dorsal mantle and lateral
+  /// scapular fields. Their roots occupy the anatomical transition instead of
+  /// asking two differently oriented vane planes to meet edge-to-edge.
+  private static func appendHumeral(
+    to result: inout [CrowBodyFeatherTractSample]
+  ) {
+    for side: Float in [-1, 1] {
+      for row in 0..<humeralRowCount {
+        let course = Float(row) / Float(humeralRowCount - 1)
+        for column in 0..<humeralColumnCount {
+          let baseAxial = Float(column) / Float(humeralColumnCount - 1)
+          let rootIdentity = identityVariation(
+            side: side,
+            row: row,
+            column: column,
+            salt: 0xA511_E9B3
+          )
+          let shapeIdentity = identityVariation(
+            side: side,
+            row: row,
+            column: column,
+            salt: 0x63D8_3595
+          )
+          let materialIdentity = identityVariation(
+            side: side,
+            row: row,
+            column: column,
+            salt: 0xC2B2_AE35
+          )
+          let vaneIdentity = identityVariation(
+            side: side,
+            row: row,
+            column: column,
+            salt: 0xB529_7A4D
+          )
+          let edgeIdentity = identityVariation(
+            side: side,
+            row: row,
+            column: column,
+            salt: 0x68E3_1DA4
+          )
+          let cycleIdentity = identityVariation(
+            side: side,
+            row: row,
+            column: column,
+            salt: 0xD3A2_646C
+          )
+          let axialStep = 1 / Float(humeralColumnCount - 1)
+          let axial = min(
+            1,
+            max(
+              0,
+              baseAxial
+                + (column == 0 || column == humeralColumnCount - 1
+                  ? 0 : 0.025 * axialStep * rootIdentity)
+            )
+          )
+          let stagger = tractStaggerFraction(
+            region: .humeral,
+            side: side,
+            row: row
+          ) * 0.160 / Float(humeralColumnCount - 1)
+          let root = SIMD3<Float>(
+            0.078 - 0.160 * axial - stagger,
+            side * (0.0395 + 0.0035 * course + 0.00045 * rootIdentity),
+            0.0480 - 0.0030 * course - 0.0095 * axial
+              + 0.00055 * shapeIdentity
+          )
+          let length =
+            (0.030 + 0.009 * axial + 0.002 * course)
+            * (1 + 0.055 * shapeIdentity)
+          let tip =
+            root
+            + SIMD3<Float>(
+              -length,
+              side * (0.0006 * (0.5 - course) + 0.0007 * rootIdentity),
+              -0.0038 - 0.0015 * axial + 0.0005 * shapeIdentity
+            )
+          result.append(
+            CrowBodyFeatherTractSample(
+              region: .humeral,
+              surfaceFeatherClass: surfaceFeatherClass(for: .humeral),
+              side: side,
+              row: row,
+              column: column,
+              rootOffset: root,
+              tipOffset: tip,
+              planeNormal: normalized(
+                SIMD3<Float>(
+                  0.09,
+                  side * (0.42 + 0.18 * course + 0.04 * rootIdentity),
+                  0.92 - 0.18 * course + 0.035 * shapeIdentity
+                ),
+                fallback: SIMD3<Float>(0, side, 1)
+              ),
+              rootWidthMeters: 0.0031 * (1 + 0.045 * rootIdentity),
+              maximumWidthMeters: (0.0048 + 0.0005 * course)
+                * (1 + 0.050 * shapeIdentity),
+              camberMeters: (0.00115 + 0.00020 * course)
+                * (1 + 0.08 * rootIdentity),
+              vaneAsymmetry: 0.055 * vaneIdentity,
+              edgeRippleAmplitude:
+                0.013 + 0.018 * (0.5 + 0.5 * edgeIdentity),
+              edgeRipplePhase: Float.pi * (edgeIdentity + 1),
+              edgeRippleCycles: 1.35 + 0.65 * (0.5 + 0.5 * cycleIdentity),
+              rootEnvelopeRatio: 0.68 - 0.04 * course,
+              pennaceousStartFraction: 0,
+              materialVariation: materialIdentity,
+              headCoupling: 0
+            )
+          )
+        }
+      }
+    }
+  }
+
   private static func appendScapular(
     to result: inout [CrowBodyFeatherTractSample]
   ) {
@@ -537,7 +658,7 @@ enum CrowBodyFeatherTracts {
       return sin(cervicalAngle) > 0.28 ? 5 : 6
     case .mantle:
       return 5
-    case .scapular:
+    case .humeral, .scapular:
       return 6
     }
   }
@@ -560,6 +681,9 @@ enum CrowBodyFeatherTracts {
     case .mantle:
       sideOffset = side < 0 ? 0.04 : 0
       salt = 0xD3A2_646C
+    case .humeral:
+      sideOffset = side < 0 ? 0.02 : 0
+      salt = 0x1656_67B1
     case .scapular:
       sideOffset = side < 0 ? 0.03 : 0
       salt = 0x9E37_79B9
