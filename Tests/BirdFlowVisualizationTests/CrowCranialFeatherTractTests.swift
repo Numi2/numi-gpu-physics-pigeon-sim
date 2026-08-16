@@ -12,11 +12,12 @@ func crowCranialContourTractsRemainAttachedAndRegionallyBounded() {
     radii: radii,
     breathingScale: 1.01
   )
-  #expect(samples.count == 587)
+  #expect(samples.count == 711)
   #expect(samples.filter { $0.region == .nape }.count == 224)
-  #expect(samples.filter { $0.region == .crown }.count == 148)
-  #expect(samples.filter { $0.region == .cheek }.count == 48)
-  #expect(samples.filter { $0.region == .throat }.count == 167)
+  #expect(samples.filter { $0.region == .crown }.count == 89)
+  #expect(samples.filter { $0.region == .forehead }.count == 115)
+  #expect(samples.filter { $0.region == .cheek }.count == 58)
+  #expect(samples.filter { $0.region == .throat }.count == 225)
   #expect(
     samples.allSatisfy {
       $0.surfaceFeatherClass
@@ -24,19 +25,19 @@ func crowCranialContourTractsRemainAttachedAndRegionallyBounded() {
     }
   )
   #expect(
-    samples.filter { $0.region == .nape || $0.region == .crown }
-      .allSatisfy { $0.surfaceFeatherClass == 5 }
+    samples.filter { $0.region == .nape || $0.region == .crown || $0.region == .cheek }
+      .allSatisfy { $0.surfaceFeatherClass == 8 }
   )
   #expect(
-    samples.filter { $0.region == .cheek }
-      .allSatisfy { $0.surfaceFeatherClass == 6 }
+    samples.filter { $0.region == .forehead }
+      .allSatisfy { $0.surfaceFeatherClass == 9 }
   )
   #expect(
     samples.filter { $0.region == .throat }
-      .allSatisfy { $0.surfaceFeatherClass == 7 }
+      .allSatisfy { $0.surfaceFeatherClass == 10 }
   )
   #expect(samples.filter { $0.region == .nape }.allSatisfy { $0.root.x < center.x })
-  #expect(samples.allSatisfy { $0.root.x < center.x + 0.038 })
+  #expect(samples.allSatisfy { $0.root.x < center.x + 0.047 })
   #expect(
     samples.allSatisfy {
       let length = simd_distance($0.root, $0.tip)
@@ -50,7 +51,7 @@ func crowCranialContourTractsRemainAttachedAndRegionallyBounded() {
   #expect(
     rings.count
       == CrowCranialAnatomy.sampledLoftRings().filter {
-        $0.axialFraction <= 0.84
+        $0.axialFraction <= CrowCranialFeatherTracts.anteriorLoftLimit
       }.count
   )
   for sample in samples {
@@ -65,7 +66,10 @@ func crowCranialContourTractsRemainAttachedAndRegionallyBounded() {
     #expect(abs(simd_distance(sample.root, surface) - 0.00030) < 1e-6)
     #expect(simd_dot(sample.root - surface, sample.planeNormal) > 0.00029)
     if ring.axialFraction > 0.55 {
-      #expect(abs(sin(theta)) >= 0.50)
+      #expect(
+        abs(sin(theta))
+          >= CrowCranialFeatherTracts.billBaseApertureSineThreshold
+      )
     }
     if ring.axialFraction >= 0.02 && ring.axialFraction <= 0.62 {
       func angularDistance(_ first: Float, _ second: Float) -> Float {
@@ -160,8 +164,49 @@ func crowCranialContourTractsRemainAttachedAndRegionallyBounded() {
   )
   #expect(low.count == 152)
   #expect(medium.count == 291)
-  #expect(full.count == 587)
+  #expect(full.count == 711)
+  #expect(Set(low.map(\.surfaceFeatherClass)).isSubset(of: Set([5, 6, 7])))
+  #expect(Set(medium.map(\.surfaceFeatherClass)).isSubset(of: Set([5, 6, 7])))
+  #expect(Set(full.map(\.surfaceFeatherClass)) == Set([8, 9, 10]))
   #expect(low.count < medium.count && medium.count < full.count)
+  let coarseRings = CrowCranialFeatherTracts.coarseAxialRings
+  let terminalIndex = coarseRings.count - 1
+  let terminalSamples = medium.filter { $0.axialIndex == terminalIndex }
+  #expect(!terminalSamples.isEmpty)
+  for sample in terminalSamples {
+    let ring = coarseRings[terminalIndex]
+    let previousRing = coarseRings[terminalIndex - 1]
+    let angularStep = Float.pi / Float(CrowCranialFeatherTracts.angularCount)
+    let effectiveRadii = radii
+    let angularTangent =
+      CrowCranialAnatomy.surfacePoint(
+        center: center,
+        effectiveRadii: effectiveRadii,
+        ring: ring,
+        theta: sample.thetaRadians + angularStep
+      )
+      - CrowCranialAnatomy.surfacePoint(
+        center: center,
+        effectiveRadii: effectiveRadii,
+        ring: ring,
+        theta: sample.thetaRadians - angularStep
+      )
+    let axialTangent =
+      CrowCranialAnatomy.surfacePoint(
+        center: center,
+        effectiveRadii: effectiveRadii,
+        ring: ring,
+        theta: sample.thetaRadians
+      )
+      - CrowCranialAnatomy.surfacePoint(
+        center: center,
+        effectiveRadii: effectiveRadii,
+        ring: previousRing,
+        theta: sample.thetaRadians
+      )
+    let expectedNormal = simd_normalize(simd_cross(angularTangent, axialTangent))
+    #expect(simd_distance(sample.planeNormal, expectedNormal) < 1e-6)
+  }
   for region in CrowCranialFeatherRegion.allCases {
     #expect(low.contains { $0.region == region })
     #expect(medium.contains { $0.region == region })

@@ -1435,7 +1435,13 @@ inline float3 showcaseCrowLinearRadiance(
     float dorsalBodyVane=featherClass==5u?persistentVane:0.0f;
     float flankBodyVane=featherClass==6u?persistentVane:0.0f;
     float ventralBodyVane=featherClass==7u?persistentVane:0.0f;
-    float bodyContourVane=max(dorsalBodyVane,max(flankBodyVane,ventralBodyVane));
+    float headNeckVane=featherClass==8u?persistentVane:0.0f;
+    float foreheadVane=featherClass==9u?persistentVane:0.0f;
+    float gularVane=featherClass==10u?persistentVane:0.0f;
+    float bodyContourVane=max(
+        max(dorsalBodyVane,max(flankBodyVane,ventralBodyVane)),
+        max(headNeckVane,max(foreheadVane,gularVane))
+    );
     // American-crow dorsal body, tail, and wings form one optical region at
     // natural-viewing discrimination, so do not assign unrelated material
     // energy to those geometric classes. Ventral contour classes retain a
@@ -1448,6 +1454,9 @@ inline float3 showcaseCrowLinearRadiance(
     classSheenScale=mix(classSheenScale,0.72f,dorsalBodyVane);
     classSheenScale=mix(classSheenScale,0.67f,flankBodyVane);
     classSheenScale=mix(classSheenScale,0.62f,ventralBodyVane);
+    classSheenScale=mix(classSheenScale,0.60f,headNeckVane);
+    classSheenScale=mix(classSheenScale,0.38f,foreheadVane);
+    classSheenScale=mix(classSheenScale,0.52f,gularVane);
     float3 featherAxis=crowFeatherAxis(
         world,normal,featherCoordinates.xy
     );
@@ -1459,6 +1468,9 @@ inline float3 showcaseCrowLinearRadiance(
     vaneAnisotropy=mix(vaneAnisotropy,0.519f,dorsalBodyVane);
     vaneAnisotropy=mix(vaneAnisotropy,0.50f,flankBodyVane);
     vaneAnisotropy=mix(vaneAnisotropy,0.48f,ventralBodyVane);
+    vaneAnisotropy=mix(vaneAnisotropy,0.40f,headNeckVane);
+    vaneAnisotropy=mix(vaneAnisotropy,0.32f,foreheadVane);
+    vaneAnisotropy=mix(vaneAnisotropy,0.36f,gularVane);
     float longitudinalRoughness=mix(0.34f,0.25f,flightFeather);
     float transverseRoughness=mix(0.12f,0.075f,flightFeather);
     longitudinalRoughness=mix(longitudinalRoughness,0.215f,primaryVane);
@@ -1470,9 +1482,15 @@ inline float3 showcaseCrowLinearRadiance(
     longitudinalRoughness=mix(longitudinalRoughness,0.333f,dorsalBodyVane);
     longitudinalRoughness=mix(longitudinalRoughness,0.340f,flankBodyVane);
     longitudinalRoughness=mix(longitudinalRoughness,0.350f,ventralBodyVane);
+    longitudinalRoughness=mix(longitudinalRoughness,0.360f,headNeckVane);
+    longitudinalRoughness=mix(longitudinalRoughness,0.390f,foreheadVane);
+    longitudinalRoughness=mix(longitudinalRoughness,0.370f,gularVane);
     transverseRoughness=mix(transverseRoughness,0.118f,dorsalBodyVane);
     transverseRoughness=mix(transverseRoughness,0.122f,flankBodyVane);
     transverseRoughness=mix(transverseRoughness,0.126f,ventralBodyVane);
+    transverseRoughness=mix(transverseRoughness,0.132f,headNeckVane);
+    transverseRoughness=mix(transverseRoughness,0.145f,foreheadVane);
+    transverseRoughness=mix(transverseRoughness,0.138f,gularVane);
     float anisotropicSpecular=featherMaterial*vaneAnisotropy
         *crowFeatherAnisotropicLobe(
         normal,featherAxis,halfVector,
@@ -1488,6 +1506,9 @@ inline float3 showcaseCrowLinearRadiance(
     barbFrequency=mix(barbFrequency,180.0f,dorsalBodyVane);
     barbFrequency=mix(barbFrequency,176.0f,flankBodyVane);
     barbFrequency=mix(barbFrequency,172.0f,ventralBodyVane);
+    barbFrequency=mix(barbFrequency,176.0f,headNeckVane);
+    barbFrequency=mix(barbFrequency,170.0f,foreheadVane);
+    barbFrequency=mix(barbFrequency,168.0f,gularVane);
     float localBarbAngle=
         barbFrequency*axial+23.0f*abs(signedWidth)+7.0f*signedWidth
             +featherCoordinates.z;
@@ -1518,6 +1539,7 @@ inline float3 showcaseCrowLinearRadiance(
     float diffuse=0.28f+0.62f*ndk+0.16f*ndf+0.10f*nds;
     float flightDarkening=mix(1.0f,0.58f,flightFeather);
     float3 color=albedoAndMaterial.rgb*diffuse*flightDarkening;
+    color*=mix(1.0f,0.82f,foreheadVane);
     color+=sheen*(0.022f+0.125f*grazing)*(0.36f+0.64f*ndk)
         *flightDarkening*(0.72f+0.28f*anisotropicSpecular)
         *classSheenScale;
@@ -1545,6 +1567,9 @@ inline float3 showcaseCrowLinearRadiance(
     classSharpScale=mix(classSharpScale,0.98f,dorsalBodyVane);
     classSharpScale=mix(classSharpScale,0.94f,flankBodyVane);
     classSharpScale=mix(classSharpScale,0.88f,ventralBodyVane);
+    classSharpScale=mix(classSharpScale,0.60f,headNeckVane);
+    classSharpScale=mix(classSharpScale,0.38f,foreheadVane);
+    classSharpScale=mix(classSharpScale,0.52f,gularVane);
     color+=sharpTint*featherSpecular*mix(0.30f,1.0f,flightFeather)
         *classSharpScale;
     color+=softTint*softSpecular;

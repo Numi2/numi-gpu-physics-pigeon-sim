@@ -3,6 +3,7 @@ import simd
 enum CrowCranialFeatherRegion: UInt8, CaseIterable {
   case nape
   case crown
+  case forehead
   case cheek
   case throat
 }
@@ -32,12 +33,20 @@ enum CrowCranialFeatherTracts {
   static let angularCount = 32
   static let fullDensityPixelsPerMeter: Float = 1_400
   static let mediumDensityPixelsPerMeter: Float = 900
+  static let billBaseApertureSineThreshold: Float = 0.28
+  static let coarseBillBaseApertureSineThreshold: Float = 0.50
+  static let coarseAnteriorLoftLimit: Float = 0.84
+  static let anteriorLoftLimit: Float = 1.02
 
   static var axialRings: [CrowCranialLoftRing] {
     CrowCranialAnatomy.sampledLoftRings()
       .enumerated()
-      .filter { $0.element.axialFraction <= 0.84 }
+      .filter { $0.element.axialFraction <= anteriorLoftLimit }
       .map(\.element)
+  }
+
+  static var coarseAxialRings: [CrowCranialLoftRing] {
+    axialRings.filter { $0.axialFraction <= coarseAnteriorLoftLimit }
   }
 
   static func visibleSamples(
@@ -46,20 +55,28 @@ enum CrowCranialFeatherTracts {
     breathingScale: Float,
     projectedPixelsPerMeter: Float
   ) -> [CrowCranialFeatherSample] {
-    let complete = samples(
+    if projectedPixelsPerMeter >= fullDensityPixelsPerMeter {
+      return samples(
+        center: center,
+        radii: radii,
+        breathingScale: breathingScale
+      )
+    }
+    let coarse = samples(
       center: center,
       radii: radii,
-      breathingScale: breathingScale
-    )
-    if projectedPixelsPerMeter >= fullDensityPixelsPerMeter {
-      return complete
+      breathingScale: breathingScale,
+      rings: coarseAxialRings,
+      billBaseApertureSineThreshold: coarseBillBaseApertureSineThreshold
+    ).map {
+      sample($0, surfaceFeatherClass: coarseSurfaceFeatherClass(for: $0.region))
     }
     if projectedPixelsPerMeter >= mediumDensityPixelsPerMeter {
-      return complete.filter {
+      return coarse.filter {
         ($0.axialIndex + $0.angularIndex).isMultiple(of: 2)
       }
     }
-    return complete.filter {
+    return coarse.filter {
       $0.axialIndex.isMultiple(of: 2)
         && $0.angularIndex.isMultiple(of: 2)
     }
@@ -70,8 +87,23 @@ enum CrowCranialFeatherTracts {
     radii: SIMD3<Float>,
     breathingScale: Float
   ) -> [CrowCranialFeatherSample] {
+    samples(
+      center: center,
+      radii: radii,
+      breathingScale: breathingScale,
+      rings: axialRings,
+      billBaseApertureSineThreshold: billBaseApertureSineThreshold
+    )
+  }
+
+  private static func samples(
+    center: SIMD3<Float>,
+    radii: SIMD3<Float>,
+    breathingScale: Float,
+    rings: [CrowCranialLoftRing],
+    billBaseApertureSineThreshold: Float
+  ) -> [CrowCranialFeatherSample] {
     let effectiveRadii = radii * SIMD3<Float>(breathingScale, 1, breathingScale)
-    let rings = axialRings
     var result: [CrowCranialFeatherSample] = []
     result.reserveCapacity(rings.count * angularCount)
 
@@ -90,7 +122,11 @@ enum CrowCranialFeatherTracts {
           salt: 0x9E37_79B9
         )
         let theta = baseTheta + angularStep * (phase + 0.10 * angularIdentity)
-        if ring.axialFraction > 0.55, abs(sin(theta)) < 0.50 { continue }
+        if ring.axialFraction > 0.55,
+          abs(sin(theta)) < billBaseApertureSineThreshold
+        {
+          continue
+        }
         append(
           axialIndex: axialIndex,
           angularIndex: angularIndex,
@@ -210,19 +246,53 @@ enum CrowCranialFeatherTracts {
     )
   }
 
-  /// Cranial contour vanes continue the corresponding body-material response
-  /// across the head instead of falling back to the generic feather class.
+  /// Cranial contour vanes own optical regions distinct from the trunk. This
+  /// preserves the measured head/body separation and the low-luminance dorsal
+  /// forehead instead of forcing every short cranial vane through body bands.
   static func surfaceFeatherClass(
     for region: CrowCranialFeatherRegion
   ) -> UInt32 {
     switch region {
-    case .nape, .crown:
-      return 5
-    case .cheek:
-      return 6
+    case .nape, .crown, .cheek:
+      return 8
+    case .forehead:
+      return 9
     case .throat:
-      return 7
+      return 10
     }
+  }
+
+  /// Below full output density, preserve broad head/body material bands; the
+  /// finer regional separation would be subpixel and destabilize temporal
+  /// reconstruction rather than add resolvable optical information.
+  static func coarseSurfaceFeatherClass(
+    for region: CrowCranialFeatherRegion
+  ) -> UInt32 {
+    switch region {
+    case .nape, .crown, .forehead: return 5
+    case .cheek: return 6
+    case .throat: return 7
+    }
+  }
+
+  private static func sample(
+    _ source: CrowCranialFeatherSample,
+    surfaceFeatherClass: UInt32
+  ) -> CrowCranialFeatherSample {
+    CrowCranialFeatherSample(
+      region: source.region,
+      axialIndex: source.axialIndex,
+      angularIndex: source.angularIndex,
+      thetaRadians: source.thetaRadians,
+      root: source.root,
+      tip: source.tip,
+      planeNormal: source.planeNormal,
+      rootWidthMeters: source.rootWidthMeters,
+      maximumWidthMeters: source.maximumWidthMeters,
+      camberMeters: source.camberMeters,
+      materialVariation: source.materialVariation,
+      surfaceFeatherClass: surfaceFeatherClass
+    )
   }
 
   private static func region(
@@ -230,6 +300,7 @@ enum CrowCranialFeatherTracts {
     theta: Float
   ) -> CrowCranialFeatherRegion {
     if ring.axialFraction < -0.45 { return .nape }
+    if ring.axialFraction >= 0.40, sin(theta) > 0.35 { return .forehead }
     if sin(theta) > 0.35 { return .crown }
     if sin(theta) < -0.35 { return .throat }
     return .cheek
@@ -242,7 +313,7 @@ enum CrowCranialFeatherTracts {
     switch region {
     case .nape:
       return 0.0145 + 0.0015 * min(max((-ring.axialFraction - 0.45) / 0.60, 0), 1)
-    case .crown: return 0.012
+    case .crown, .forehead: return 0.012
     case .cheek: return 0.0115
     case .throat: return 0.013
     }
