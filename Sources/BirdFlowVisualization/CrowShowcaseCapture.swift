@@ -2941,9 +2941,17 @@ private struct CrowMeshBuilder {
             spanIndex: span
           )
           : 0
+        let proximalChordExtension =
+          isTrailingCourse
+          ? CrowFlightWingBodyIntegration.covertProximalChordExtension(
+            spanIndex: span
+          )
+          : 0
         let surfaceTip =
           root
-          + (isTrailingCourse ? 1.92 + distalChordExtension : 1.16)
+          + (isTrailingCourse
+            ? 1.92 + proximalChordExtension + distalChordExtension
+            : 1.16)
             * chordVector
           + tipSpanFraction * spanVector
         let spacing = max(simd_length(spanVector), 0.012)

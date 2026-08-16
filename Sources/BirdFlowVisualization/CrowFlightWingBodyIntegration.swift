@@ -42,6 +42,14 @@ enum CrowFlightWingBodyIntegration {
     return 0.36 * smootherstep(progress)
   }
 
+  /// Proximal trailing coverts bridge the body-seated scaffold boundary, then
+  /// recover their established chord length before free articulation.
+  static func covertProximalChordExtension(spanIndex: Int) -> Float {
+    let lastProximalStation = 8
+    let progress = clamp(Float(spanIndex) / Float(lastProximalStation))
+    return 1.08 * (1 - smootherstep(progress))
+  }
+
   /// Staggers visible vane tips while every root remains on its exact live
   /// topology station. Course phases are interleaved rather than alternating.
   static func covertTipSpanFraction(chordIndex: Int, spanIndex: Int) -> Float {
