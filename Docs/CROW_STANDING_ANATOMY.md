@@ -189,7 +189,14 @@ adjacent widths overlap around the live neck envelope, their axial reach remains
 longer than root spacing, and head coupling still rises from the anchored
 shoulder end to the cranial end without moving mantle or scapular tracts. These
 densities and dimensions are presentation estimates, not measured crow feather
-counts.
+counts. The shoulder shell now carries `120` mantle and `196` scapular vanes in
+staggered five-by-twelve and seven-by-fourteen tracts instead of the former
+`48` and `72` broad accents. Identity-stable root phase, course position, length,
+tip sweep, camber, width, and eumelanin variation break synchronized rows while
+adjacent roots remain covered circumferentially and axially. Deterministic
+low/medium/full output tiers retain `140`, `236`, or `470` combined cervical,
+mantle, and scapular vanes. Throat tips also receive bounded tangential sweep so
+the ventral cranial shell does not collapse into a single geometric fan.
 
 Run the presentation with:
 

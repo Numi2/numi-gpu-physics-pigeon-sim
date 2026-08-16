@@ -20,8 +20,8 @@ func crowBodyFeatherTractsOverlapNeckAndCoverWingRoots() {
   let mantle = samples.filter { $0.region == .mantle }
   let scapular = samples.filter { $0.region == .scapular }
   #expect(cervical.count == 154)
-  #expect(mantle.count == 48)
-  #expect(scapular.count == 72)
+  #expect(mantle.count == 120)
+  #expect(scapular.count == 196)
 
   for side: Float in [-1, 1] {
     let wingRoot = SIMD3<Float>(0.015, side * 0.067, 0.038)
@@ -35,7 +35,8 @@ func crowBodyFeatherTractsOverlapNeckAndCoverWingRoots() {
 
   for side: Float in [-1, 1] {
     for column in 0..<CrowBodyFeatherTracts.cervicalColumnCount {
-      let course = cervical
+      let course =
+        cervical
         .filter { $0.side == side && $0.column == column }
         .sorted { $0.row < $1.row }
       for pair in zip(course, course.dropFirst()) {
@@ -69,6 +70,49 @@ func crowBodyFeatherTractsOverlapNeckAndCoverWingRoots() {
         && abs(simd_length($0.planeNormal) - 1) < 1e-5
     }
   )
+  #expect(samples.map(\.materialVariation).min()! < -0.90)
+  #expect(samples.map(\.materialVariation).max()! > 0.90)
+
+  for region in [CrowBodyFeatherTractRegion.mantle, .scapular] {
+    let regionSamples = samples.filter { $0.region == region }
+    let rowCount =
+      region == .mantle
+      ? CrowBodyFeatherTracts.mantleRowCount
+      : CrowBodyFeatherTracts.scapularRowCount
+    let columnCount =
+      region == .mantle
+      ? CrowBodyFeatherTracts.mantleColumnCount
+      : CrowBodyFeatherTracts.scapularColumnCount
+    for side: Float in [-1, 1] {
+      for column in 0..<columnCount {
+        let course =
+          regionSamples
+          .filter { $0.side == side && $0.column == column }
+          .sorted { $0.row < $1.row }
+        #expect(course.count == rowCount)
+        for pair in zip(course, course.dropFirst()) {
+          #expect(
+            simd_distance(pair.0.rootOffset, pair.1.rootOffset)
+              < pair.0.maximumWidthMeters + pair.1.maximumWidthMeters
+          )
+          #expect(abs(pair.0.rootOffset.x - pair.1.rootOffset.x) > 0.004)
+        }
+      }
+      for row in 0..<rowCount {
+        let course =
+          regionSamples
+          .filter { $0.side == side && $0.row == row }
+          .sorted { $0.column < $1.column }
+        #expect(course.count == columnCount)
+        for pair in zip(course, course.dropFirst()) {
+          #expect(
+            simd_distance(pair.0.rootOffset, pair.1.rootOffset)
+              < simd_distance(pair.0.rootOffset, pair.0.tipOffset)
+          )
+        }
+      }
+    }
+  }
 
   let low = CrowBodyFeatherTracts.visibleSamples(projectedPixelsPerMeter: 800)
   let medium = CrowBodyFeatherTracts.visibleSamples(projectedPixelsPerMeter: 1_000)
@@ -76,12 +120,15 @@ func crowBodyFeatherTractsOverlapNeckAndCoverWingRoots() {
   #expect(low.filter { $0.region == .cervical }.count == 48)
   #expect(medium.filter { $0.region == .cervical }.count == 78)
   #expect(full.filter { $0.region == .cervical }.count == 154)
-  #expect(
-    [low, medium, full].allSatisfy {
-      $0.filter { $0.region == .mantle }.count == mantle.count
-        && $0.filter { $0.region == .scapular }.count == scapular.count
-    }
-  )
+  #expect(low.filter { $0.region == .mantle }.count == 36)
+  #expect(medium.filter { $0.region == .mantle }.count == 60)
+  #expect(full.filter { $0.region == .mantle }.count == 120)
+  #expect(low.filter { $0.region == .scapular }.count == 56)
+  #expect(medium.filter { $0.region == .scapular }.count == 98)
+  #expect(full.filter { $0.region == .scapular }.count == 196)
+  #expect(low.count == 140)
+  #expect(medium.count == 236)
+  #expect(full.count == 470)
 }
 
 @Test("quiet head motion bends the cervical tract without moving the mantle")

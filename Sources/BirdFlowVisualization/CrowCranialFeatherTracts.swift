@@ -165,11 +165,17 @@ enum CrowCranialFeatherTracts {
       angularIndex: angularIndex,
       salt: 0xC2B2_AE35
     )
+    let directionIdentity = identityVariation(
+      axialIndex: axialIndex,
+      angularIndex: angularIndex,
+      salt: 0x27D4_EB2F
+    )
     let length = axialLength(region: region, ring: ring) * (1 + 0.04 * lengthIdentity)
     let direction = normalized(
       -axialTangent
+        + (region == .throat ? 0.085 : 0.035) * directionIdentity * angularTangent
         + SIMD3<Float>(0, 0, region == .throat ? -0.16 : -0.035)
-          * simd_length(axialTangent),
+        * simd_length(axialTangent),
       fallback: SIMD3<Float>(-1, 0, 0)
     )
     let root = surface + 0.00030 * normal
@@ -193,8 +199,7 @@ enum CrowCranialFeatherTracts {
         planeNormal: normal,
         rootWidthMeters: 0.55 * width,
         maximumWidthMeters: width,
-        camberMeters:
-          (0.00055 + (region == .nape ? 0.00020 : 0))
+        camberMeters: (0.00055 + (region == .nape ? 0.00020 : 0))
           * (1 + 0.08 * materialIdentity),
         materialVariation: materialIdentity
       )

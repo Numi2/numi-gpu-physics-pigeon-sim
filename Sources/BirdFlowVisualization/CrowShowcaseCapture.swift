@@ -1955,24 +1955,30 @@ private struct CrowMeshBuilder {
       neckPose: neckPose,
       projectedPixelsPerMeter: projectedPixelsPerMeter
     ) {
+      let material = sample.materialVariation
       let color: SIMD4<Float>
       switch sample.region {
       case .cervical:
-        let variation = sin(
-          Float(sample.row + 1) * 12.9898
-            + Float(sample.column + 1) * 78.233
-            + sample.side * 1.371
-        )
         color = SIMD4<Float>(
-          0.006 * (1 + 0.07 * variation),
-          0.009 * (1 + 0.05 * variation),
-          0.016 * (1 + 0.035 * variation),
+          0.006 * (1 + 0.07 * material),
+          0.009 * (1 + 0.05 * material),
+          0.016 * (1 + 0.035 * material),
           0.14
         )
       case .mantle:
-        color = SIMD4<Float>(0.0065, 0.010, 0.018, 0.16)
+        color = SIMD4<Float>(
+          0.0065 * (1 + 0.09 * material),
+          0.010 * (1 + 0.07 * material),
+          0.018 * (1 + 0.045 * material),
+          0.16
+        )
       case .scapular:
-        color = SIMD4<Float>(0.007, 0.011, 0.020, 0.18)
+        color = SIMD4<Float>(
+          0.007 * (1 + 0.10 * material),
+          0.011 * (1 + 0.075 * material),
+          0.020 * (1 + 0.05 * material),
+          0.18
+        )
       }
       appendFeatherBlade(
         root: bodyCenter + sample.rootOffset,

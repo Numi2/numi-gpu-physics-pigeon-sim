@@ -62,13 +62,21 @@ func crowCranialContourTractsRemainAttachedAndRegionallyBounded() {
   #expect(samples.map(\.materialVariation).min()! < -0.90)
   #expect(samples.map(\.materialVariation).max()! > 0.90)
 
+  let throatDirections =
+    samples
+    .filter { $0.region == .throat }
+    .map { simd_normalize($0.tip - $0.root) }
+  let lateralComponents = throatDirections.map(\.y)
+  #expect(lateralComponents.min()! < -0.10)
+  #expect(lateralComponents.max()! > 0.10)
+
   for axialIndex in rings.indices {
-    let course = samples
+    let course =
+      samples
       .filter { $0.axialIndex == axialIndex }
       .sorted { $0.angularIndex < $1.angularIndex }
     for pair in zip(course, course.dropFirst())
-      where pair.1.angularIndex == pair.0.angularIndex + 1
-    {
+    where pair.1.angularIndex == pair.0.angularIndex + 1 {
       #expect(
         simd_distance(pair.0.root, pair.1.root)
           < pair.0.maximumWidthMeters + pair.1.maximumWidthMeters
