@@ -406,7 +406,52 @@ func estimatedCrowBodyLoftPreservesAnatomicalRegions() {
   let neck = CrowBodyAnatomy.neckRingRange.map { rings[$0] }
   #expect(zip(neck, neck.dropFirst()).allSatisfy { $0.halfWidth > $1.halfWidth })
   #expect(zip(neck, neck.dropFirst()).allSatisfy { $0.dorsalRadius > $1.dorsalRadius })
-  #expect(rings.last!.x - rings.first!.x < 0.37)
+  #expect(rings.last!.x - rings.first!.x < 0.41)
+}
+
+@Test("crow feather tessellation follows final-output coverage tiers")
+func crowFeatherTessellationFollowsProjectedCoverage() {
+  let pixelsPerMeter = CrowFeatherCoverageLOD.projectedPixelsPerMeter(
+    viewportHeight: 720,
+    cameraDistanceMeters: 0.55
+  )
+  #expect(pixelsPerMeter > 1_400)
+  #expect(pixelsPerMeter < 1_500)
+
+  let silhouette = CrowFeatherCoverageLOD.tessellation(
+    lengthMeters: 12 / pixelsPerMeter,
+    projectedPixelsPerMeter: pixelsPerMeter,
+    baseAxialSections: 6
+  )
+  let vaneShell = CrowFeatherCoverageLOD.tessellation(
+    lengthMeters: 48 / pixelsPerMeter,
+    projectedPixelsPerMeter: pixelsPerMeter,
+    baseAxialSections: 6
+  )
+  let barbRibbon = CrowFeatherCoverageLOD.tessellation(
+    lengthMeters: 180 / pixelsPerMeter,
+    projectedPixelsPerMeter: pixelsPerMeter,
+    baseAxialSections: 6
+  )
+  let microstructureThreshold = CrowFeatherCoverageLOD.tessellation(
+    lengthMeters: 520 / pixelsPerMeter,
+    projectedPixelsPerMeter: pixelsPerMeter,
+    baseAxialSections: 6
+  )
+
+  let tiers: [Int] = [
+    silhouette.tier, vaneShell.tier, barbRibbon.tier, microstructureThreshold.tier,
+  ]
+  #expect(tiers == [3, 2, 1, 0])
+  #expect(silhouette.widthSections == 1)
+  #expect(vaneShell.widthSections == 3)
+  #expect(barbRibbon.widthSections == 5)
+  #expect(microstructureThreshold.widthSections == 7)
+  #expect(
+    silhouette.axialSections < vaneShell.axialSections
+      && vaneShell.axialSections < barbRibbon.axialSections
+      && barbRibbon.axialSections < microstructureThreshold.axialSections
+  )
 }
 
 @Test("estimated standing crow capture keeps the reference private and moves subtly")

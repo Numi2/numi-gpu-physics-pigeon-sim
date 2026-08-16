@@ -188,33 +188,33 @@ final class CrowStandingFeatherRootDeformer: CrowFeatherRootDeforming {
       root =
         center
         + SIMD3<Float>(
-          0.015 - 0.105 * fraction,
-          side * (0.054 + 0.003 * fraction),
-          0.012 - 0.060 * fraction
+          0.040 - 0.150 * fraction,
+          side * (0.057 + 0.002 * fraction),
+          0.025 - 0.025 * fraction
         )
       direction = safeNormalize(
-        SIMD3<Float>(-0.99, -side * (0.025 + 0.045 * fraction), -0.08),
+        SIMD3<Float>(-0.997, -side * (0.008 + 0.018 * fraction), -0.028),
         fallback: SIMD3<Float>(-1, 0, 0)
       )
-      normal = SIMD3<Float>(0.06, side, 0.10)
+      normal = SIMD3<Float>(0.04, side, 0.08)
     case 2:
       root =
         center
         + SIMD3<Float>(
-          0.074 - 0.175 * fraction,
-          side * (0.055 + 0.002 * fraction),
-          0.024 - 0.045 * fraction
+          0.085 - 0.170 * fraction,
+          side * (0.056 + 0.0015 * fraction),
+          0.037 - 0.028 * fraction
         )
       direction = safeNormalize(
-        SIMD3<Float>(-0.995, -side * 0.025, -0.065),
+        SIMD3<Float>(-0.998, -side * 0.010, -0.022),
         fallback: SIMD3<Float>(-1, 0, 0)
       )
-      normal = SIMD3<Float>(0.04, side, 0.08)
+      normal = SIMD3<Float>(0.03, side, 0.07)
     default:
       let lateral = (fraction - 0.5) * 0.082
-      root = center + SIMD3<Float>(-0.125, lateral * 0.30, -0.005)
+      root = center + SIMD3<Float>(-0.138, lateral * 0.18, -0.002)
       direction = safeNormalize(
-        SIMD3<Float>(-0.995, lateral * 0.32, -0.055),
+        SIMD3<Float>(-0.999, lateral * 0.20, -0.018),
         fallback: SIMD3<Float>(-1, 0, 0)
       )
       normal = SIMD3<Float>(0, 0.04 * side, 1)

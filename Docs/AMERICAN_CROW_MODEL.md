@@ -29,16 +29,33 @@ wingspan, `0.174 m` tail, and `0.049 m` bill. These are useful central estimates
 not a same-specimen measurement. The display wingbeat is `4.6 Hz`; the original
 dove sequence supplies phase shape, not crow timing.
 
-The standing presentation uses an asymmetric axial body loft rather than an
-ellipsoid: separate dorsal and ventral envelopes form the mantle, shoulder,
-breast/sternum, pelvic taper, and narrowing neck transition. Overlapping contour
-and folded-wing covert rows then break up the analytic surface. These remain
-estimated presentation geometry; they are not inferred skeletal landmarks or a
-measured body scan.
+The standing presentation uses an asymmetric axial body loft whose final neck
+stations taper fully inside a rounded cranium shell. Separate dorsal and ventral
+envelopes form the mantle, shoulder, breast/sternum, and pelvic taper, while the
+contained neck junction avoids exposing an intersection seam. Overlapping
+contour and folded-wing covert rows then break up the analytic surface. These
+remain estimated presentation geometry; they are not inferred skeletal
+landmarks or a measured body scan.
+
+The grounded silhouette keeps the folded primaries, secondaries, and rectrices
+in compact, nearly parallel stacks instead of fanning a flight pose downward.
+The body envelope is intentionally horizontal, with a distinct elevated neck
+transition, deeper sternum, feathered upper legs, and thicker scaled toes. These
+are qualitative anatomy corrections; they do not change the fixed-topology
+solver surface, prescribed motion, or aerodynamic claims.
 
 Sparse diagnostic captures can set `--capture-crow-camera-yaw` in radians so a
 geometry milestone is checked from a new view without changing the release
 camera or multiplying appearance-only review frames.
+
+Procedural contour and folded-wing feathers select quantized tessellation from
+their projected length at the final output resolution. The four asset LOD
+thresholds drive silhouette, curved vane-shell, denser ribbon, and
+microstructure-preparation tiers. Vane-shell and finer geometry subdivides
+across the width and crowns the vane instead of rendering a single planar card;
+current and previous temporal geometry share one tier for stable motion vectors.
+The highest tier is denser shell topology only: explicit barbs and barbules are
+not yet synthesized.
 
 ## Native Metal capture
 

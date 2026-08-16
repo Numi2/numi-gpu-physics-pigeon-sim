@@ -94,3 +94,11 @@ render remains the parity oracle. Exact formats, conventions, and audit fields
 are documented in
 [`CROW_TEMPORAL_AOVS.md`](CROW_TEMPORAL_AOVS.md). The longer architecture is
 recorded in [`BIRD_REALITY_ROADMAP.md`](BIRD_REALITY_ROADMAP.md).
+
+Procedural contour and covert vanes select a quantized tessellation tier from
+their projected length in final-output pixels. The four retained asset
+thresholds (`480`, `120`, `24`, and below `24 px`) map to curved reference
+microstructure, barb ribbons, vane shells, and silhouette strips. Final-output
+coverage keeps native and MetalFX frames on the same topology, while quantized
+tiers prevent the quiet standing orbit from rebuilding different vertex counts
+between current and previous temporal samples.

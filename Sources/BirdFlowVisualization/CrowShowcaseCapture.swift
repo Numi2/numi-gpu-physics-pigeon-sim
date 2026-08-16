@@ -841,8 +841,18 @@ private final class CrowShowcaseRenderer {
       upscaler = nil
     }
     let priorPhase = historyReset ? phase : (previousPhase ?? phase)
-    let vertices = meshBuilder.vertices(phase: phase)
-    let previousVertices = meshBuilder.vertices(phase: priorPhase)
+    let projectedPixelsPerMeter = CrowFeatherCoverageLOD.projectedPixelsPerMeter(
+      viewportHeight: outputHeight,
+      cameraDistanceMeters: camera.distance
+    )
+    let vertices = meshBuilder.vertices(
+      phase: phase,
+      projectedPixelsPerMeter: projectedPixelsPerMeter
+    )
+    let previousVertices = meshBuilder.vertices(
+      phase: priorPhase,
+      projectedPixelsPerMeter: projectedPixelsPerMeter
+    )
     guard vertices.count == previousVertices.count else {
       throw VisualizationError.pipeline("crow temporal surface topology")
     }
@@ -1389,7 +1399,10 @@ private struct CrowMeshBuilder {
     vertexPartIdentifiers = parts
   }
 
-  func vertices(phase: Float) -> [ColoredVertex] {
+  func vertices(
+    phase: Float,
+    projectedPixelsPerMeter: Float
+  ) -> [ColoredVertex] {
     let states = (0..<dataset.vertexCount).map {
       transformedPoint(phase: phase, vertexIndex: $0)
     }
@@ -1410,6 +1423,7 @@ private struct CrowMeshBuilder {
       bodyCenter: bodyCenter,
       bodyBounds: bodyBounds,
       phase: phase,
+      projectedPixelsPerMeter: projectedPixelsPerMeter,
       to: &vertices
     )
     if presentation == .wingbeat {
@@ -1417,17 +1431,20 @@ private struct CrowMeshBuilder {
         states: states,
         bodyCenter: bodyCenter,
         left: true,
+        projectedPixelsPerMeter: projectedPixelsPerMeter,
         to: &vertices
       )
       appendWingFeathers(
         states: states,
         bodyCenter: bodyCenter,
         left: false,
+        projectedPixelsPerMeter: projectedPixelsPerMeter,
         to: &vertices
       )
       appendTailFeathers(
         states: states,
         bodyCenter: bodyCenter,
+        projectedPixelsPerMeter: projectedPixelsPerMeter,
         to: &vertices
       )
     }
@@ -1499,6 +1516,7 @@ private struct CrowMeshBuilder {
     bodyCenter: SIMD3<Float>,
     bodyBounds: (minimum: SIMD3<Float>, maximum: SIMD3<Float>),
     phase: Float,
+    projectedPixelsPerMeter: Float,
     to vertices: inout [ColoredVertex]
   ) {
     let standingPose =
@@ -1513,28 +1531,45 @@ private struct CrowMeshBuilder {
     let radiiRaw = profile.visualTransform.headRadiusXYZMeters
     let radii =
       SIMD3<Float>(radiiRaw[0], radiiRaw[1], radiiRaw[2])
-      * SIMD3<Float>(0.96, 0.92, 0.94)
+      * SIMD3<Float>(0.92, 0.90, 0.92)
     let breathing = 1 + 0.012 * sin(2 * Float.pi * phase)
     let headCenter =
-      posedBodyCenter + SIMD3<Float>(0.146, 0, 0.032)
+      posedBodyCenter + SIMD3<Float>(0.164, 0, 0.052)
       + (standingPose?.headOffset ?? .zero)
     appendEllipsoid(
       center: headCenter,
       radii: radii * SIMD3<Float>(breathing, 1, breathing),
       latitudeCount: 18,
       longitudeCount: 30,
-      color: SIMD4<Float>(0.005, 0.007, 0.011, 0.16),
+      color: SIMD4<Float>(0.006, 0.008, 0.013, 0.10),
       to: &vertices
     )
     appendBill(center: headCenter, to: &vertices)
     appendEyes(center: headCenter, headRadii: radii, to: &vertices)
     if presentation == .wingbeat {
-      appendFacialBristles(center: headCenter, to: &vertices)
-      appendHeadContourFeathers(center: headCenter, radii: radii, to: &vertices)
+      appendFacialBristles(
+        center: headCenter,
+        projectedPixelsPerMeter: projectedPixelsPerMeter,
+        to: &vertices
+      )
+      appendHeadContourFeathers(
+        center: headCenter,
+        radii: radii,
+        projectedPixelsPerMeter: projectedPixelsPerMeter,
+        to: &vertices
+      )
     }
-    appendBodyContourFeathers(bodyCenter: posedBodyCenter, to: &vertices)
+    appendBodyContourFeathers(
+      bodyCenter: posedBodyCenter,
+      projectedPixelsPerMeter: projectedPixelsPerMeter,
+      to: &vertices
+    )
     if let standingPose {
-      appendFoldedWingCoverts(bodyCenter: posedBodyCenter, to: &vertices)
+      appendFoldedWingCoverts(
+        bodyCenter: posedBodyCenter,
+        projectedPixelsPerMeter: projectedPixelsPerMeter,
+        to: &vertices
+      )
       appendStandingLegsAndFeet(standingPose, to: &vertices)
       appendStandingSupport(height: standingPose.supportHeight, to: &vertices)
     }
@@ -1601,22 +1636,23 @@ private struct CrowMeshBuilder {
 
   private func appendBodyContourFeathers(
     bodyCenter: SIMD3<Float>,
+    projectedPixelsPerMeter: Float,
     to vertices: inout [ColoredVertex]
   ) {
-    let color = SIMD4<Float>(0.012, 0.017, 0.029, 0.17)
+    let color = SIMD4<Float>(0.009, 0.013, 0.023, 0.15)
     for side: Float in [-1, 1] {
-      for row in 0..<9 {
-        let rowFraction = Float(row) / 8
-        let angle = -1.02 + 2.04 * rowFraction
-        for column in 0..<10 {
-          let fraction = Float(column) / 9
+      for row in 0..<7 {
+        let rowFraction = Float(row) / 6
+        let angle = -0.95 + 1.90 * rowFraction
+        for column in 0..<12 {
+          let fraction = Float(column) / 11
           let x = bodyCenter.x + 0.105 - 0.250 * fraction
           let longitudinal = (x - bodyCenter.x + 0.018) / 0.165
           let envelope = sqrt(max(0.08, 1 - longitudinal * longitudinal))
-          let radiusY = 0.061 * envelope
-          let verticalRadius: Float = sin(angle) >= 0 ? 0.058 : 0.066
+          let radiusY = 0.058 * envelope
+          let verticalRadius: Float = sin(angle) >= 0 ? 0.053 : 0.061
           let radiusZ = verticalRadius * envelope
-          let stagger: Float = row.isMultiple(of: 2) ? 0 : 0.006
+          let stagger: Float = row.isMultiple(of: 2) ? 0 : 0.004
           let root = SIMD3<Float>(
             x - stagger,
             bodyCenter.y + side * radiusY * cos(angle),
@@ -1627,19 +1663,21 @@ private struct CrowMeshBuilder {
             root: root,
             tip: root
               + SIMD3<Float>(
-                -0.025 - 0.010 * fraction,
-                -side * 0.0015 * sin(Float.pi * fraction),
-                -0.002 - 0.005 * ventralSweep
+                -0.020 - 0.008 * fraction,
+                -side * 0.0012 * sin(Float.pi * fraction),
+                -0.0015 - 0.0035 * ventralSweep
               ),
             planeNormal: safeNormalize(
               SIMD3<Float>(0, side * cos(angle), sin(angle)),
               fallback: SIMD3<Float>(0, side, 0)
             ),
-            rootWidth: 0.0042,
-            maximumWidth: 0.0072,
+            rootWidth: 0.0034,
+            maximumWidth: 0.0058,
             color: color,
             sections: 6,
-            camber: 0.0018,
+            camber: 0.0014,
+            transverseCamberRatio: 0.22,
+            projectedPixelsPerMeter: projectedPixelsPerMeter,
             to: &vertices
           )
         }
@@ -1650,6 +1688,7 @@ private struct CrowMeshBuilder {
   private func appendHeadContourFeathers(
     center: SIMD3<Float>,
     radii: SIMD3<Float>,
+    projectedPixelsPerMeter: Float,
     to vertices: inout [ColoredVertex]
   ) {
     let color = SIMD4<Float>(0.010, 0.014, 0.024, 0.18)
@@ -1677,6 +1716,8 @@ private struct CrowMeshBuilder {
             color: color,
             sections: 5,
             camber: 0.001,
+            transverseCamberRatio: 0.20,
+            projectedPixelsPerMeter: projectedPixelsPerMeter,
             to: &vertices
           )
         }
@@ -1774,6 +1815,7 @@ private struct CrowMeshBuilder {
 
   private func appendFacialBristles(
     center: SIMD3<Float>,
+    projectedPixelsPerMeter: Float,
     to vertices: inout [ColoredVertex]
   ) {
     let color = SIMD4<Float>(0.003, 0.004, 0.006, 0.12)
@@ -1802,6 +1844,7 @@ private struct CrowMeshBuilder {
           maximumWidth: 0.0018,
           color: color,
           sections: 4,
+          projectedPixelsPerMeter: projectedPixelsPerMeter,
           to: &vertices
         )
       }
@@ -1810,40 +1853,43 @@ private struct CrowMeshBuilder {
 
   private func appendFoldedWingCoverts(
     bodyCenter: SIMD3<Float>,
+    projectedPixelsPerMeter: Float,
     to vertices: inout [ColoredVertex]
   ) {
     for side: Float in [-1, 1] {
-      for row in 0..<5 {
-        let rowFraction = Float(row) / 4
-        for index in 0..<10 {
-          let fraction = Float(index) / 9
+      for row in 0..<4 {
+        let rowFraction = Float(row) / 3
+        for index in 0..<12 {
+          let fraction = Float(index) / 11
           let root =
             bodyCenter
             + SIMD3<Float>(
-              0.092 - 0.218 * fraction - 0.008 * rowFraction,
-              side * (0.058 + 0.004 * rowFraction),
-              0.034 - 0.068 * fraction - 0.008 * rowFraction
+              0.096 - 0.226 * fraction - 0.007 * rowFraction,
+              side * (0.056 + 0.002 * rowFraction),
+              0.031 - 0.054 * fraction - 0.006 * rowFraction
             )
-          let length = 0.040 + 0.035 * fraction + 0.012 * rowFraction
+          let length = 0.040 + 0.040 * fraction + 0.010 * rowFraction
           appendFeatherBlade(
             root: root,
             tip: root
               + SIMD3<Float>(
                 -length,
-                -side * (0.002 + 0.003 * rowFraction),
-                -0.008 - 0.007 * rowFraction
+                -side * (0.0015 + 0.002 * rowFraction),
+                -0.006 - 0.005 * rowFraction
               ),
-            planeNormal: SIMD3<Float>(0.08, side, 0.14),
-            rootWidth: 0.0060,
-            maximumWidth: 0.0105 + 0.003 * fraction,
+            planeNormal: SIMD3<Float>(0.06, side, 0.12),
+            rootWidth: 0.0075,
+            maximumWidth: 0.0125 + 0.002 * fraction,
             color: SIMD4<Float>(
               0.010 + 0.002 * rowFraction,
               0.015 + 0.003 * rowFraction,
               0.026 + 0.005 * rowFraction,
               0.19
             ),
-            sections: 7,
-            camber: 0.0025 + 0.001 * rowFraction,
+            sections: 8,
+            camber: 0.0022 + 0.0008 * rowFraction,
+            transverseCamberRatio: 0.26,
+            projectedPixelsPerMeter: projectedPixelsPerMeter,
             to: &vertices
           )
         }
@@ -1862,8 +1908,8 @@ private struct CrowMeshBuilder {
       appendTaperedTube(
         from: foot.hip,
         to: foot.hock,
-        startRadius: 0.012,
-        endRadius: 0.0065,
+        startRadius: 0.0145,
+        endRadius: 0.0075,
         color: featheredLeg,
         radialSegments: 12,
         to: &vertices
@@ -1871,8 +1917,8 @@ private struct CrowMeshBuilder {
       appendTaperedTube(
         from: foot.hock,
         to: foot.ankle,
-        startRadius: 0.0042,
-        endRadius: 0.0033,
+        startRadius: 0.0052,
+        endRadius: 0.0041,
         color: keratin,
         radialSegments: 10,
         to: &vertices
@@ -1889,8 +1935,8 @@ private struct CrowMeshBuilder {
             foot.ankle - foot.hock,
             fallback: SIMD3<Float>(0, 0, -1)
           ) * 0.0008,
-          startRadius: 0.0040,
-          endRadius: 0.0040,
+          startRadius: 0.0049,
+          endRadius: 0.0049,
           color: SIMD4<Float>(0.050, 0.054, 0.061, 0.60),
           radialSegments: 10,
           to: &vertices
@@ -1902,8 +1948,8 @@ private struct CrowMeshBuilder {
         appendTaperedTube(
           from: foot.ankle,
           to: joint,
-          startRadius: 0.0030,
-          endRadius: 0.0025,
+          startRadius: 0.0035,
+          endRadius: 0.0027,
           color: keratin,
           radialSegments: 8,
           to: &vertices
@@ -1911,8 +1957,8 @@ private struct CrowMeshBuilder {
         appendTaperedTube(
           from: joint,
           to: tip,
-          startRadius: 0.0025,
-          endRadius: 0.0016,
+          startRadius: 0.0027,
+          endRadius: 0.0018,
           color: keratin,
           radialSegments: 8,
           to: &vertices
@@ -2012,6 +2058,7 @@ private struct CrowMeshBuilder {
     states: [SIMD3<Float>],
     bodyCenter: SIMD3<Float>,
     left: Bool,
+    projectedPixelsPerMeter: Float,
     to vertices: inout [ColoredVertex]
   ) {
     let part: UInt8 = left ? 2 : 3
@@ -2072,6 +2119,9 @@ private struct CrowMeshBuilder {
           color: SIMD4<Float>(shade, shade * 1.20, shade * 1.48, 0.25),
           sections: 9,
           camber: 0.012 * (0.4 + f),
+          transverseCamberRatio: 0.16,
+          lodLengthMeters: assetFeather?.lengthMeters ?? 0.205,
+          projectedPixelsPerMeter: projectedPixelsPerMeter,
           to: &vertices
         )
       }
@@ -2106,6 +2156,8 @@ private struct CrowMeshBuilder {
           color: SIMD4<Float>(0.008, 0.012, 0.019, 0.22),
           sections: 8,
           camber: 0.008,
+          lodLengthMeters: assetFeather?.lengthMeters ?? 0.142,
+          projectedPixelsPerMeter: projectedPixelsPerMeter,
           to: &vertices
         )
       }
@@ -2135,6 +2187,9 @@ private struct CrowMeshBuilder {
           ),
           sections: 7,
           camber: 0.007,
+          transverseCamberRatio: 0.20,
+          lodLengthMeters: 0.12,
+          projectedPixelsPerMeter: projectedPixelsPerMeter,
           to: &vertices
         )
       }
@@ -2175,6 +2230,7 @@ private struct CrowMeshBuilder {
   private func appendTailFeathers(
     states: [SIMD3<Float>],
     bodyCenter: SIMD3<Float>,
+    projectedPixelsPerMeter: Float,
     to vertices: inout [ColoredVertex]
   ) {
     _ = states
@@ -2217,6 +2273,8 @@ private struct CrowMeshBuilder {
         color: SIMD4<Float>(0.011, 0.016, 0.029, 0.23),
         sections: 9,
         camber: 0.006,
+        lodLengthMeters: assetFeather?.lengthMeters ?? 0.19,
+        projectedPixelsPerMeter: projectedPixelsPerMeter,
         to: &vertices
       )
     }
@@ -2231,6 +2289,9 @@ private struct CrowMeshBuilder {
     color: SIMD4<Float>,
     sections: Int,
     camber: Float = 0,
+    transverseCamberRatio: Float = 0.18,
+    lodLengthMeters: Float? = nil,
+    projectedPixelsPerMeter: Float,
     to vertices: inout [ColoredVertex]
   ) {
     let direction = safeNormalize(tip - root, fallback: SIMD3<Float>(1, 0, 0))
@@ -2239,24 +2300,44 @@ private struct CrowMeshBuilder {
       simd_cross(normal, direction),
       fallback: SIMD3<Float>(0, 1, 0)
     )
-    var left: [SIMD3<Float>] = []
-    var right: [SIMD3<Float>] = []
-    for index in 0...sections {
-      let t = Float(index) / Float(sections)
+    let tessellation = CrowFeatherCoverageLOD.tessellation(
+      lengthMeters: lodLengthMeters ?? simd_distance(root, tip),
+      projectedPixelsPerMeter: projectedPixelsPerMeter,
+      baseAxialSections: sections
+    )
+    var points = [[SIMD3<Float>]]()
+    points.reserveCapacity(tessellation.axialSections + 1)
+    for index in 0...tessellation.axialSections {
+      let t = Float(index) / Float(tessellation.axialSections)
       let bodyEnvelope = 0.32 + 0.68 * pow(max(sin(Float.pi * t), 0), 0.58)
       let tipTaper = 1 - 0.985 * pow(t, 3.2)
       let envelope = bodyEnvelope * tipTaper
       let width = (rootWidth * (1 - t) + maximumWidth * t) * envelope
       let center = root + (tip - root) * t + normal * (camber * sin(Float.pi * t))
-      left.append(center - widthAxis * width)
-      right.append(center + widthAxis * width)
+      var crossSection: [SIMD3<Float>] = []
+      crossSection.reserveCapacity(tessellation.widthSections + 1)
+      for widthIndex in 0...tessellation.widthSections {
+        let fraction = Float(widthIndex) / Float(tessellation.widthSections)
+        let signedWidth = 2 * fraction - 1
+        let transverseEnvelope = max(0, 1 - signedWidth * signedWidth)
+        crossSection.append(
+          center + widthAxis * (signedWidth * width)
+            + normal * (width * transverseCamberRatio * transverseEnvelope)
+        )
+      }
+      points.append(crossSection)
     }
-    for index in 0..<sections {
-      appendQuad(
-        left[index], right[index], right[index + 1], left[index + 1],
-        color: color,
-        to: &vertices
-      )
+    for index in 0..<tessellation.axialSections {
+      for widthIndex in 0..<tessellation.widthSections {
+        appendQuad(
+          points[index][widthIndex],
+          points[index][widthIndex + 1],
+          points[index + 1][widthIndex + 1],
+          points[index + 1][widthIndex],
+          color: color,
+          to: &vertices
+        )
+      }
     }
   }
 

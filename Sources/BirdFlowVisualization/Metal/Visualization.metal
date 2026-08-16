@@ -274,35 +274,35 @@ inline CrowStandingRootPose crowStandingRootPose(
     CrowStandingRootPose result;
     if(featherClass==1u){
         result.root=center+float3(
-            0.015f-0.105f*fraction,
-            side*(0.054f+0.003f*fraction),
-            0.012f-0.060f*fraction
+            0.040f-0.150f*fraction,
+            side*(0.057f+0.002f*fraction),
+            0.025f-0.025f*fraction
         );
         result.direction=safeNormalizeCrow(
-            float3(-0.99f,-side*(0.025f+0.045f*fraction),-0.08f),
-            float3(-1,0,0)
-        );
-        result.normal=safeNormalizeCrow(
-            float3(0.06f,side,0.10f),float3(0,0,1)
-        );
-    }else if(featherClass==2u){
-        result.root=center+float3(
-            0.074f-0.175f*fraction,
-            side*(0.055f+0.002f*fraction),
-            0.024f-0.045f*fraction
-        );
-        result.direction=safeNormalizeCrow(
-            float3(-0.995f,-side*0.025f,-0.065f),
+            float3(-0.997f,-side*(0.008f+0.018f*fraction),-0.028f),
             float3(-1,0,0)
         );
         result.normal=safeNormalizeCrow(
             float3(0.04f,side,0.08f),float3(0,0,1)
         );
+    }else if(featherClass==2u){
+        result.root=center+float3(
+            0.085f-0.170f*fraction,
+            side*(0.056f+0.0015f*fraction),
+            0.037f-0.028f*fraction
+        );
+        result.direction=safeNormalizeCrow(
+            float3(-0.998f,-side*0.010f,-0.022f),
+            float3(-1,0,0)
+        );
+        result.normal=safeNormalizeCrow(
+            float3(0.03f,side,0.07f),float3(0,0,1)
+        );
     }else{
         float lateral=(fraction-0.5f)*0.082f;
-        result.root=center+float3(-0.125f,lateral*0.30f,-0.005f);
+        result.root=center+float3(-0.138f,lateral*0.18f,-0.002f);
         result.direction=safeNormalizeCrow(
-            float3(-0.995f,lateral*0.32f,-0.055f),
+            float3(-0.999f,lateral*0.20f,-0.018f),
             float3(-1,0,0)
         );
         result.normal=safeNormalizeCrow(
