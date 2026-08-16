@@ -31,6 +31,7 @@ public enum CrowShowcaseCapture {
     let aovAuditURL: URL?
     let temporalScale: Float
     let cameraYawRadians: Float?
+    let cameraPitchRadians: Float?
     let presentation: CrowShowcasePresentation
 
     public init(commandLine: [String]) throws {
@@ -77,12 +78,18 @@ public enum CrowShowcaseCapture {
         default: 1
       )
       cameraYawRadians = try finiteFloat(after: "--capture-crow-camera-yaw")
+      cameraPitchRadians = try finiteFloat(after: "--capture-crow-camera-pitch")
       guard frameCount >= 2 else {
         throw CaptureError.invalidArguments("--capture-frames must be at least 2")
       }
       guard temporalScale >= 1 else {
         throw CaptureError.invalidArguments(
           "--capture-crow-temporal-scale must be at least 1"
+        )
+      }
+      guard cameraPitchRadians.map({ abs($0) < 1.4 }) ?? true else {
+        throw CaptureError.invalidArguments(
+          "--capture-crow-camera-pitch must be between -1.4 and 1.4 radians"
         )
       }
       surfaceManifestURL = URL(
@@ -286,6 +293,9 @@ public enum CrowShowcaseCapture {
       }
       if let cameraYawRadians = arguments.cameraYawRadians {
         camera.yaw = cameraYawRadians
+      }
+      if let cameraPitchRadians = arguments.cameraPitchRadians {
+        camera.pitch = cameraPitchRadians
       }
       let rendered = try renderer.render(
         phase: phase,

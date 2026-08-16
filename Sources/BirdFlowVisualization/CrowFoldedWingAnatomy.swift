@@ -29,8 +29,9 @@ enum CrowFoldedWingAnatomy {
         side * 0.050,
         0.032 - 0.024 * fraction
       )
-      let lateralDirection = side * (0.026 + 0.003 * fraction - 0.050) / length
-      let verticalDirection = (-0.018 - 0.010 * fraction - rootOffset.z) / length
+      let lateralDirection = side * (0.009 + 0.001 * fraction - 0.050) / length
+      let tipHeight = -0.068 * fraction * fraction + 0.062 * fraction - 0.018
+      let verticalDirection = (tipHeight - rootOffset.z) / length
       direction = safeNormalize(
         SIMD3<Float>(
           -sqrt(

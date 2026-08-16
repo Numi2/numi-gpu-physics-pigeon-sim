@@ -440,6 +440,28 @@ func estimatedCrowShowcaseCaptureProducesDistinctFrames() throws {
   #expect(audit.frames.allSatisfy { $0.nativeFullFrameDisplayRMSE == nil })
 }
 
+@Test("Crow capture accepts bounded simulated camera overrides")
+func CrowCaptureAcceptsBoundedCameraOverrides() throws {
+  let arguments = try CrowShowcaseCapture.Arguments(commandLine: [
+    "birdflow-viewer",
+    "--capture-crow-frames", "/tmp/crow-camera-override-test",
+    "--capture-frames", "2",
+    "--capture-crow-camera-yaw", "-2.35",
+    "--capture-crow-camera-pitch", "-0.31",
+  ])
+  #expect(arguments.cameraYawRadians == -2.35)
+  #expect(arguments.cameraPitchRadians == -0.31)
+
+  #expect(throws: CrowShowcaseCapture.CaptureError.self) {
+    _ = try CrowShowcaseCapture.Arguments(commandLine: [
+      "birdflow-viewer",
+      "--capture-crow-frames", "/tmp/crow-camera-override-test",
+      "--capture-frames", "2",
+      "--capture-crow-camera-pitch", "1.41",
+    ])
+  }
+}
+
 @Test("estimated crow body loft preserves asymmetric anatomical regions")
 func estimatedCrowBodyLoftPreservesAnatomicalRegions() {
   let rings = CrowBodyAnatomy.loftRings

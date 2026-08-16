@@ -63,6 +63,17 @@ shoulder-to-pelvis series, but lateral fanning is reduced so the folded tips do
 not split into separated decks when viewed from behind. This is estimated
 presentation anatomy and does not enter the solver.
 
+The longest primary centerlines now converge to `9-10 mm` from the sagittal
+plane where their tapered tips enter the lateral rectrix envelope. A retained
+geometry gate evaluates the primary tip against the live lateral-tail vane
+width at the same axial station, preventing the background-visible
+primary-to-tail slit exposed by an underside-rear camera. These are estimated
+standing-presentation coordinates; persistent identities, asset lengths, and
+the solver surface are unchanged. The general partially stacked organization
+of folded primaries follows the folded-wing observations of
+[Egbert and Belthoff (2003)](https://academic.oup.com/condor/article/105/4/825/5563457);
+their House Finch dimensions do not transfer to this crow estimate.
+
 Five imbricated covert courses per side are sampled from the live asymmetric
 body loft rather than a rectangular lateral grid. Their `130` stable roots sit
 `1.2-1.45 mm` above that same trunk surface, overlap the following axial root,

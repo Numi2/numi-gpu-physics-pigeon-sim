@@ -130,6 +130,79 @@ func standingCrowFeatherRootsMatchMetalReference() throws {
     }
   }
 
+  for sideCode: UInt32 in [1, 2] {
+    let side: Float = sideCode == 1 ? 1 : -1
+    let primaries =
+      moving
+      .filter {
+        $0.identity.w & 255 == 1
+          && ($0.identity.w >> 8) & 255 == sideCode
+      }
+    let lateralRectrix =
+      moving
+      .filter { $0.identity.w & 255 == 3 }
+      .max {
+        side * $0.currentPositionAndLength.y
+          < side * $1.currentPositionAndLength.y
+      }!
+    let tailRoot = SIMD3<Float>(
+      lateralRectrix.currentPositionAndLength.x,
+      lateralRectrix.currentPositionAndLength.y,
+      lateralRectrix.currentPositionAndLength.z
+    )
+    let tailDirection = SIMD3<Float>(
+      lateralRectrix.currentDirectionAndRachis.x,
+      lateralRectrix.currentDirectionAndRachis.y,
+      lateralRectrix.currentDirectionAndRachis.z
+    )
+    let tailNormal = SIMD3<Float>(
+      lateralRectrix.currentNormalAndPadding.x,
+      lateralRectrix.currentNormalAndPadding.y,
+      lateralRectrix.currentNormalAndPadding.z
+    )
+    let tailLength = lateralRectrix.currentPositionAndLength.w
+    let orthogonalTailNormal = simd_normalize(
+      tailNormal - tailDirection * simd_dot(tailNormal, tailDirection)
+    )
+    let tailWidthAxis = simd_normalize(
+      simd_cross(orthogonalTailNormal, tailDirection)
+    )
+    var evaluatedPrimaryCount = 0
+    for primary in primaries {
+      let primaryRoot = SIMD3<Float>(
+        primary.currentPositionAndLength.x,
+        primary.currentPositionAndLength.y,
+        primary.currentPositionAndLength.z
+      )
+      let primaryDirection = SIMD3<Float>(
+        primary.currentDirectionAndRachis.x,
+        primary.currentDirectionAndRachis.y,
+        primary.currentDirectionAndRachis.z
+      )
+      let primaryTip =
+        primaryRoot + primary.currentPositionAndLength.w * primaryDirection
+      let tailAxial = simd_dot(primaryTip - tailRoot, tailDirection) / tailLength
+      guard tailAxial > 0.15 && tailAxial < 0.92 else { continue }
+      evaluatedPrimaryCount += 1
+      let bodyEnvelope =
+        0.32 + 0.68 * pow(max(sin(Float.pi * tailAxial), 0), 0.58)
+      let tipTaper = 1 - 0.985 * pow(tailAxial, 3.2)
+      let tailHalfWidth =
+        lateralRectrix.previousPositionAndWidth.w
+        * (0.55 + 0.45 * tailAxial) * bodyEnvelope * tipTaper
+      let tailCenter =
+        tailRoot + tailLength * tailAxial * tailDirection
+        + orthogonalTailNormal
+        * (lateralRectrix.previousDirectionAndCamber.w
+          * sin(Float.pi * tailAxial))
+      let lateralTailEdge =
+        side * tailCenter.y + abs(tailWidthAxis.y) * tailHalfWidth
+      #expect(side * primaryTip.y < lateralTailEdge - 0.0005)
+      #expect(abs(primaryTip.z - tailCenter.z) < 0.0045)
+    }
+    #expect(evaluatedPrimaryCount >= 6)
+  }
+
   for featherClass: UInt32 in [1, 2] {
     let leftFront = CrowFoldedWingAnatomy.pose(
       featherClass: featherClass,
