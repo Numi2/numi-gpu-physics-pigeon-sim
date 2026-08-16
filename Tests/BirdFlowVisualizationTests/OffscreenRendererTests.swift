@@ -1,12 +1,24 @@
 import AppKit
 import BirdFlowCore
 import BirdFlowMetal
+import ImageIO
 import Metal
 import MetalFX
 import Testing
 import simd
 
 @testable import BirdFlowVisualization
+
+private func imagePixelDimensions(_ data: Data) -> (width: Int, height: Int)? {
+  guard
+    let source = CGImageSourceCreateWithData(data as CFData, nil),
+    let properties = CGImageSourceCopyPropertiesAtIndex(source, 0, nil)
+      as? [CFString: Any],
+    let width = properties[kCGImagePropertyPixelWidth] as? NSNumber,
+    let height = properties[kCGImagePropertyPixelHeight] as? NSNumber
+  else { return nil }
+  return (width.intValue, height.intValue)
+}
 
 private func bitmapRGBDifference(
   _ firstData: Data,
@@ -413,12 +425,12 @@ func estimatedCrowShowcaseCaptureProducesDistinctFrames() throws {
   }
   #expect(loopDifference.rmse < 0.0001)
   #expect(loopDifference.maximum <= 3.0 / 255.0)
-  guard let image = NSImage(data: middle) else {
-    Issue.record("crow capture did not encode a readable PNG")
+  guard let dimensions = imagePixelDimensions(middle) else {
+    Issue.record("crow capture did not encode PNG dimensions")
     return
   }
-  #expect(Int(image.size.width) == 480)
-  #expect(Int(image.size.height) == 270)
+  #expect(dimensions.width == 480)
+  #expect(dimensions.height == 270)
   let audit = try JSONDecoder().decode(
     CrowShowcaseAOVAuditReport.self,
     from: Data(contentsOf: aovAuditURL)
@@ -554,12 +566,12 @@ func estimatedStandingCrowCaptureProducesLoopClosedFrames() throws {
   // MetalFX can vary a few sub-code-value samples after a history reset.
   #expect(loopDifference.rmse < 0.0002)
   #expect(loopDifference.maximum <= 3.0 / 255.0)
-  guard let image = NSImage(data: middle) else {
-    Issue.record("standing crow capture did not encode a readable PNG")
+  guard let dimensions = imagePixelDimensions(middle) else {
+    Issue.record("standing crow capture did not encode PNG dimensions")
     return
   }
-  #expect(Int(image.size.width) == 480)
-  #expect(Int(image.size.height) == 360)
+  #expect(dimensions.width == 480)
+  #expect(dimensions.height == 360)
 
   let audit = try JSONDecoder().decode(
     CrowShowcaseAOVAuditReport.self,
