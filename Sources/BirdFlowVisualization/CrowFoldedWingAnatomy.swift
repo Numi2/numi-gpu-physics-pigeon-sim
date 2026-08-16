@@ -12,6 +12,8 @@ struct CrowFoldedFeatherPose: Equatable {
 /// flank. This avoids collapsing every vane into one planar slab while keeping
 /// the retained feather lengths and stable identities from the reality asset.
 enum CrowFoldedWingAnatomy {
+  static let primaryRootLateralOffsetMeters: Float = 0.042
+
   static func pose(
     featherClass: UInt32,
     side: Float,
@@ -26,11 +28,13 @@ enum CrowFoldedWingAnatomy {
       let length = 0.155 + 0.050 * fraction
       rootOffset = SIMD3<Float>(
         0.040 - 0.132 * fraction,
-        side * 0.050,
+        side * primaryRootLateralOffsetMeters,
         0.032 - 0.024 * fraction
       )
       let lateralDirection =
-        side * (primaryTipLateralOffsetMeters(fraction: fraction) - 0.050)
+        side
+        * (primaryTipLateralOffsetMeters(fraction: fraction)
+          - primaryRootLateralOffsetMeters)
         / length
       let tipHeight = -0.068 * fraction * fraction + 0.062 * fraction - 0.018
       let verticalDirection = (tipHeight - rootOffset.z) / length
@@ -95,12 +99,11 @@ enum CrowFoldedWingAnatomy {
     )
   }
 
-  /// Posterior primaries settle progressively farther over the outer rectrix.
-  /// The cubic onset leaves the anterior fan nearly unchanged while closing
-  /// the tapered distal seam visible from low rear cameras.
+  /// Primaries settle medially over the outer rectrix, with posterior vanes
+  /// carrying a little farther inward to preserve overlap through their taper.
   static func primaryTipLateralOffsetMeters(fraction rawFraction: Float) -> Float {
     let fraction = min(max(rawFraction, 0), 1)
-    return 0.009 + 0.001 * fraction - 0.003 * fraction * fraction * fraction
+    return 0.003 + 0.001 * fraction - 0.003 * fraction * fraction * fraction
   }
 
   private static func safeNormalize(
