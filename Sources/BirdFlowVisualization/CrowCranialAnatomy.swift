@@ -16,6 +16,8 @@ struct CrowCranialLoftRing: Equatable {
 
 enum CrowCranialAnatomy {
   static let renderSubdivisionsPerInterval = 4
+  static let showcaseCenterOffsetMeters = SIMD3<Float>(0.158, 0, 0.052)
+  static let showcaseRadiusScale = SIMD3<Float>(0.80, 0.76, 0.76)
 
   static let loftRings: [CrowCranialLoftRing] = [
     .init(

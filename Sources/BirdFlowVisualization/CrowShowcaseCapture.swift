@@ -1628,9 +1628,9 @@ private struct CrowMeshBuilder {
     let radiiRaw = profile.visualTransform.headRadiusXYZMeters
     let radii =
       SIMD3<Float>(radiiRaw[0], radiiRaw[1], radiiRaw[2])
-      * SIMD3<Float>(0.80, 0.76, 0.76)
+      * CrowCranialAnatomy.showcaseRadiusScale
     let breathing = 1 + 0.012 * sin(2 * Float.pi * phase)
-    let headCenter = posedBodyCenter + SIMD3<Float>(0.158, 0, 0.052)
+    let headCenter = posedBodyCenter + CrowCranialAnatomy.showcaseCenterOffsetMeters
     let headVertexStart = vertices.count
     vertices.append(
       contentsOf: CrowCranialAnatomy.vertices(

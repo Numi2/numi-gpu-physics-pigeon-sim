@@ -468,7 +468,9 @@ func estimatedCrowBodyLoftPreservesAnatomicalRegions() {
   #expect(rings.count >= 10)
   #expect(zip(rings, rings.dropFirst()).allSatisfy { $0.x < $1.x })
   #expect(rings.first!.halfWidth < 0.012)
-  #expect(rings.last!.halfWidth > 0.030 && rings.last!.halfWidth < 0.035)
+  let visibleAnterior = rings[CrowBodyAnatomy.visibleAnteriorRingIndex]
+  #expect(visibleAnterior.halfWidth > 0.030 && visibleAnterior.halfWidth < 0.035)
+  #expect(rings.last!.halfWidth < 0.015)
 
   let sternum = rings[CrowBodyAnatomy.sternumRingIndex]
   let shoulder = rings[CrowBodyAnatomy.shoulderRingIndex]
@@ -479,6 +481,8 @@ func estimatedCrowBodyLoftPreservesAnatomicalRegions() {
   let neck = CrowBodyAnatomy.neckRingRange.map { rings[$0] }
   #expect(zip(neck, neck.dropFirst()).allSatisfy { $0.halfWidth > $1.halfWidth })
   #expect(zip(neck, neck.dropFirst()).allSatisfy { $0.dorsalRadius > $1.dorsalRadius })
+  let sleeve = CrowBodyAnatomy.cervicalSleeveRingRange.map { rings[$0] }
+  #expect(zip(sleeve, sleeve.dropFirst()).allSatisfy { $0.halfWidth > $1.halfWidth })
   #expect(rings.last!.x - rings.first!.x < 0.41)
 }
 

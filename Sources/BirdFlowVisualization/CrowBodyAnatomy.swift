@@ -5,8 +5,10 @@ import simd
 ///
 /// The profile is intentionally asymmetric in Z: a crow's dorsal mantle and
 /// ventral breast/keel do not form the rotationally symmetric egg produced by
-/// an ellipsoid. These are artistic, species-informed dimensions, not measured
-/// joint centers or a same-specimen reconstruction.
+/// an ellipsoid. The final three rings form a closed cervical sleeve whose cap
+/// sits inside the cranial loft, avoiding a visible flat body cap at the neck.
+/// These are artistic, species-informed dimensions, not measured joint centers
+/// or a same-specimen reconstruction.
 struct CrowBodyLoftRing: Equatable {
   let x: Float
   let z: Float
@@ -29,11 +31,16 @@ enum CrowBodyAnatomy {
     .init(x: 0.125, z: 0.045, halfWidth: 0.036, dorsalRadius: 0.038, ventralRadius: 0.035),
     .init(x: 0.142, z: 0.050, halfWidth: 0.034, dorsalRadius: 0.037, ventralRadius: 0.031),
     .init(x: 0.150, z: 0.052, halfWidth: 0.032, dorsalRadius: 0.040, ventralRadius: 0.032),
+    .init(x: 0.162, z: 0.055, halfWidth: 0.0295, dorsalRadius: 0.0335, ventralRadius: 0.028),
+    .init(x: 0.174, z: 0.056, halfWidth: 0.024, dorsalRadius: 0.026, ventralRadius: 0.022),
+    .init(x: 0.184, z: 0.055, halfWidth: 0.014, dorsalRadius: 0.016, ventralRadius: 0.013),
   ]
 
   static let sternumRingIndex = 5
   static let shoulderRingIndex = 6
   static let neckRingRange = 7...9
+  static let visibleAnteriorRingIndex = 11
+  static let cervicalSleeveRingRange = 12...14
 
   static func verticalRadius(
     for sine: Float,
