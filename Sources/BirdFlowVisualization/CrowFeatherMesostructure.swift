@@ -20,11 +20,17 @@ struct CrowFeatherMesostructureSegment: Equatable {
 /// the representation stops at its silhouette, exposes its rachis, resolves
 /// paired barbs, or spends close-up compute on interlocking barbules.
 enum CrowFeatherMesostructure {
+  static let bodyContourEdgeDetailThresholdPixels: Float = 96
+
   static func segments(
     for feather: CrowBodyContourShingle,
     projectedPixelsPerMeter: Float
   ) -> [CrowFeatherMesostructureSegment] {
-    segments(
+    guard
+      feather.referenceLengthMeters * projectedPixelsPerMeter
+        >= bodyContourEdgeDetailThresholdPixels
+    else { return [] }
+    return segments(
       frame: Frame(feather: feather),
       projectedPixelsPerMeter: projectedPixelsPerMeter
     )

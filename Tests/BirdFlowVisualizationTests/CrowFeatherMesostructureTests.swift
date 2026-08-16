@@ -11,9 +11,15 @@ func bodyFeatherMesostructureResolvesHierarchy() {
     for: feather,
     projectedPixelsPerMeter: 12 / length
   )
-  let vane = CrowFeatherMesostructure.segments(
+  let unresolved = CrowFeatherMesostructure.segments(
     for: feather,
     projectedPixelsPerMeter: 48 / length
+  )
+  let vane = CrowFeatherMesostructure.segments(
+    for: feather,
+    projectedPixelsPerMeter:
+      (CrowFeatherMesostructure.bodyContourEdgeDetailThresholdPixels + 1)
+      / feather.referenceLengthMeters
   )
   let barbs = CrowFeatherMesostructure.segments(
     for: feather,
@@ -25,6 +31,7 @@ func bodyFeatherMesostructureResolvesHierarchy() {
   )
 
   #expect(silhouette.isEmpty)
+  #expect(unresolved.isEmpty)
   #expect(vane.filter { $0.kind == .rachis }.count == 4)
   #expect(vane.filter { $0.kind == .edgeBarbGroup }.count == 25)
   #expect(vane.allSatisfy { $0.kind != .barb && $0.kind != .barbule })
@@ -46,7 +53,9 @@ func bodyFeatherEdgeGroupsCrossClosedVaneOutline() {
     let length = simd_distance(feather.rootOffset, feather.tipOffset)
     let segments = CrowFeatherMesostructure.segments(
       for: feather,
-      projectedPixelsPerMeter: 48 / length
+      projectedPixelsPerMeter:
+        (CrowFeatherMesostructure.bodyContourEdgeDetailThresholdPixels + 1)
+        / feather.referenceLengthMeters
     ).filter { $0.kind == .edgeBarbGroup }
     #expect(segments.count == 25)
 
