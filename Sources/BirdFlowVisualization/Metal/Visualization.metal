@@ -1410,6 +1410,15 @@ inline float3 showcaseCrowLinearRadiance(
     float secondaryVane=featherClass==2u?persistentVane:0.0f;
     float rectrixVane=featherClass==3u?persistentVane:0.0f;
     float greaterCovertVane=featherClass==4u?persistentVane:0.0f;
+    // Folded secondaries present the broadest continuous grazing area. Give
+    // their rough vanes less additive thin-film energy than narrow exposed
+    // primaries, so a rear camera reads overlapping black feathers rather
+    // than a row of silver paddles. CPU body plumage retains the base scale.
+    float classSheenScale=1.0f;
+    classSheenScale=mix(classSheenScale,0.82f,primaryVane);
+    classSheenScale=mix(classSheenScale,0.46f,secondaryVane);
+    classSheenScale=mix(classSheenScale,0.70f,rectrixVane);
+    classSheenScale=mix(classSheenScale,0.64f,greaterCovertVane);
     float3 featherAxis=crowFeatherAxis(
         world,normal,featherCoordinates
     );
@@ -1457,8 +1466,10 @@ inline float3 showcaseCrowLinearRadiance(
     float flightDarkening=mix(1.0f,0.58f,flightFeather);
     float3 color=albedoAndMaterial.rgb*diffuse*flightDarkening;
     color+=sheen*(0.022f+0.125f*grazing)*(0.36f+0.64f*ndk)
-        *flightDarkening*(0.72f+0.28f*anisotropicSpecular);
-    color+=barbMicro*mix(float3(0.035f,0.070f,0.11f),sheen,0.45f);
+        *flightDarkening*(0.72f+0.28f*anisotropicSpecular)
+        *classSheenScale;
+    color+=barbMicro*classSheenScale
+        *mix(float3(0.035f,0.070f,0.11f),sheen,0.45f);
     float3 sharpTint=mix(
         float3(0.075f,0.095f,0.125f),
         float3(0.030f,0.038f,0.050f),
@@ -1486,13 +1497,15 @@ inline float3 showcaseCrowLinearRadiance(
     color*=1.0f-0.055f*persistentVane*(1.0f-localBarbs);
     color+=rachis*mix(0.20f,1.0f,flightFeather)
         *(0.012f+0.025f*ndk)*float3(0.42f,0.56f,0.74f);
-    color+=vaneEdge*grazing*float3(0.010f,0.022f,0.042f);
+    color+=vaneEdge*grazing*classSheenScale
+        *float3(0.010f,0.022f,0.042f);
     // Adult crow plumage should remain neutral-black under the warm key. A
     // direct copper lobe overwhelms the very low eumelanin albedo and makes
     // broad body regions read brown, so only a restrained cool sky return is
     // added here; blue/violet structure stays view-dependent in `sheen`.
     color+=nds*float3(0.004f,0.006f,0.010f);
-    color+=rim*float3(0.022f,0.040f,0.065f);
+    color+=rim*mix(1.0f,classSheenScale,persistentVane)
+        *float3(0.022f,0.040f,0.065f);
     return 1.68f*color;
 }
 
