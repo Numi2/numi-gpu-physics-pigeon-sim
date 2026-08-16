@@ -410,12 +410,17 @@ func dorsalContourFeathersResolveAsNarrowInterdigitatedVanes() {
   let asymmetries = dorsal.map(\.vaneAsymmetry)
   let rippleAmplitudes = dorsal.map(\.edgeRippleAmplitude)
   let materialVariations = dorsal.map(\.materialVariation)
+  let transverseCamberRatios = dorsal.map(\.transverseCamberRatio)
   #expect(asymmetries.min()! < -0.040)
   #expect(asymmetries.max()! > 0.040)
   #expect(rippleAmplitudes.min()! >= 0.012)
   #expect(rippleAmplitudes.max()! <= 0.0301)
   #expect(materialVariations.min()! < -0.90)
   #expect(materialVariations.max()! > 0.90)
+  #expect(transverseCamberRatios.min()! >= 0.015)
+  #expect(transverseCamberRatios.max()! <= 0.0351)
+  #expect(transverseCamberRatios.min()! < 0.0151)
+  #expect(transverseCamberRatios.max()! > 0.0349)
 
   for feather in dorsal {
     for axial: Float in [feather.pennaceousStartFraction, 0.65, 0.84] {

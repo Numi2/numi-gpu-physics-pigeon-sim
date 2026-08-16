@@ -1833,7 +1833,7 @@ private struct CrowMeshBuilder {
         color: color,
         sections: 7,
         camber: shingle.camberMeters,
-        transverseCamberRatio: 0.025,
+        transverseCamberRatio: shingle.transverseCamberRatio,
         vaneAsymmetry: shingle.vaneAsymmetry,
         edgeRippleAmplitude: shingle.edgeRippleAmplitude,
         edgeRipplePhase: shingle.edgeRipplePhase,

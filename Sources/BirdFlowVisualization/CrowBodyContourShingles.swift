@@ -23,6 +23,7 @@ struct CrowBodyContourShingle: Equatable {
   let rootWidthMeters: Float
   let maximumWidthMeters: Float
   let camberMeters: Float
+  let transverseCamberRatio: Float
   let pennaceousStartFraction: Float
   let vaneAsymmetry: Float
   let edgeRippleAmplitude: Float
@@ -153,6 +154,11 @@ enum CrowBodyContourShingles {
           axialIndex: axialIndex,
           salt: 0x1B56_C4E9
         )
+        let crownIdentity = identityVariation(
+          radialIndex: radialIndex,
+          axialIndex: axialIndex,
+          salt: 0x27D4_EB2F
+        )
         let tipTheta = rootTheta + tipAngularFlowRadians(
           region: region,
           rootTheta: rootTheta,
@@ -205,6 +211,8 @@ enum CrowBodyContourShingles {
             maximumWidthMeters: maximumWidth,
             camberMeters: (0.022 + 0.009 * (0.5 + 0.5 * sin(morphologyPhase + 1.6)))
               * maximumWidth,
+            transverseCamberRatio: regionTransverseCamberRatio(region)
+              + 0.010 * crownIdentity,
             pennaceousStartFraction: clamp(
               regionPennaceousStart(region) + 0.020 * tipIdentity,
               lower: 0.34,
@@ -379,6 +387,16 @@ enum CrowBodyContourShingles {
     case .dorsal: 0.42
     case .flank: 0.40
     case .ventral: 0.38
+    }
+  }
+
+  private static func regionTransverseCamberRatio(
+    _ region: CrowBodyContourRegion
+  ) -> Float {
+    switch region {
+    case .dorsal: 0.025
+    case .flank: 0.030
+    case .ventral: 0.035
     }
   }
 
