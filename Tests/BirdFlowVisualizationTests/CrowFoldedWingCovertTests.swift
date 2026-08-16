@@ -158,3 +158,65 @@ func foldedWingCovertsFormSymmetricBodySeatedShell() {
     }
   }
 }
+
+@Test("folded wing coverts resolve crown-attached shafts and barb groups")
+func foldedWingCovertsResolveCrownAttachedMesostructure() {
+  let samples = CrowFoldedWingCoverts.samples()
+  for feather in samples {
+    #expect(
+      CrowFoldedWingCovertDetail.segments(
+        for: feather,
+        projectedPixelsPerMeter: 1_000
+      ).isEmpty
+    )
+    let segments = CrowFoldedWingCovertDetail.segments(
+      for: feather,
+      projectedPixelsPerMeter: 1_600
+    )
+    #expect(
+      segments.count == 1 + 2 * CrowFoldedWingCovertDetail.barbPairCount
+    )
+    #expect(segments.filter { $0.kind == .rachis }.count == 1)
+    #expect(
+      segments.filter { $0.kind == .edgeBarbGroup }.count
+        == 2 * CrowFoldedWingCovertDetail.barbPairCount
+    )
+    let featherLength = simd_distance(feather.rootOffset, feather.tipOffset)
+    let direction = (feather.tipOffset - feather.rootOffset) / featherLength
+    let normal = simd_normalize(
+      feather.planeNormal
+        - direction * simd_dot(feather.planeNormal, direction)
+    )
+    let widthAxis = simd_normalize(simd_cross(normal, direction))
+    let rachis = segments.first { $0.kind == .rachis }!
+    for (fraction, point) in [(Float(0.12), rachis.start), (0.96, rachis.end)] {
+      let centerline =
+        feather.rootOffset + fraction * (feather.tipOffset - feather.rootOffset)
+      let axialFraction =
+        simd_dot(point - feather.rootOffset, direction) / featherLength
+      let crownHeight = simd_dot(point - centerline, normal)
+      #expect(abs(axialFraction - fraction) < 1e-5)
+      #expect(crownHeight > 0.00010)
+      #expect(crownHeight < 0.0030)
+    }
+    let edgeGroups = segments.filter { $0.kind == .edgeBarbGroup }
+    for pair in stride(from: 0, to: edgeGroups.count, by: 2) {
+      let left = edgeGroups[pair]
+      let right = edgeGroups[pair + 1]
+      #expect(simd_distance(left.start, right.start) < 1e-7)
+      #expect(simd_dot(left.end - feather.rootOffset, widthAxis) < -0.001)
+      #expect(simd_dot(right.end - feather.rootOffset, widthAxis) > 0.001)
+    }
+    #expect(
+      segments.allSatisfy {
+        $0.start.x.isFinite && $0.start.y.isFinite && $0.start.z.isFinite
+          && $0.end.x.isFinite && $0.end.y.isFinite && $0.end.z.isFinite
+          && $0.startRadiusMeters > $0.endRadiusMeters
+          && $0.endRadiusMeters > 0
+          && simd_distance($0.start, $0.end) > 1e-5
+          && simd_distance($0.start, feather.rootOffset) < featherLength
+          && simd_distance($0.end, feather.rootOffset) < 1.30 * featherLength
+      }
+    )
+  }
+}

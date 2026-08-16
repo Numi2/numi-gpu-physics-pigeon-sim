@@ -2513,8 +2513,9 @@ private struct CrowMeshBuilder {
     let rowDenominator = Float(max(visibleSamples.map(\.row).max() ?? 0, 1))
     for sample in visibleSamples {
       let rowFraction = Float(sample.row) / rowDenominator
+      let material = sample.materialVariation
       let color: SIMD4<Float>
-      if sample.materialVariation == 0 {
+      if material == 0 {
         color = SIMD4<Float>(
           0.006 + 0.001 * rowFraction,
           0.009 + 0.002 * rowFraction,
@@ -2522,7 +2523,6 @@ private struct CrowMeshBuilder {
           0.17
         )
       } else {
-        let material = sample.materialVariation
         color = SIMD4<Float>(
           (0.006 + 0.001 * rowFraction) * (1 + 0.08 * material),
           (0.009 + 0.002 * rowFraction) * (1 + 0.065 * material),
@@ -2549,6 +2549,16 @@ private struct CrowMeshBuilder {
         surfaceFeatherClass: CrowFoldedWingCoverts.surfaceFeatherClass,
         lodLengthMeters: simd_distance(sample.rootOffset, sample.tipOffset),
         projectedPixelsPerMeter: projectedPixelsPerMeter,
+        to: &vertices
+      )
+      appendTractFeatherMesostructure(
+        CrowFoldedWingCovertDetail.segments(
+          for: sample,
+          projectedPixelsPerMeter: projectedPixelsPerMeter
+        ),
+        bodyCenter: bodyCenter,
+        planeNormal: sample.planeNormal,
+        material: material,
         to: &vertices
       )
     }
