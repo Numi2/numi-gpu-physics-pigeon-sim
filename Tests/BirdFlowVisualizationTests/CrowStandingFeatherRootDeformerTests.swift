@@ -175,8 +175,8 @@ func standingCrowFeatherRootsMatchMetalReference() throws {
     side: 0,
     fraction: 0
   )
-  #expect(centerTail.rootOffset.z > 0.005)
-  #expect(edgeTail.rootOffset.z >= 0.003)
+  #expect(centerTail.rootOffset.z > 0.006)
+  #expect(edgeTail.rootOffset.z >= 0.002)
   #expect(abs(edgeTail.rootOffset.y) >= 0.0059)
   #expect(centerTail.direction.z < 0)
   let tailLength: Float = 0.166
@@ -184,6 +184,6 @@ func standingCrowFeatherRootsMatchMetalReference() throws {
   let edgeTailTip = edgeTail.rootOffset + tailLength * edgeTail.direction
   #expect(abs(centerTailTip.y) < 1e-6)
   #expect(abs(edgeTailTip.y) <= 0.0061)
-  #expect(abs(centerTailTip.z + 0.055) < 1e-5)
-  #expect(abs(edgeTailTip.z + 0.055) < 1e-5)
+  #expect(abs(centerTailTip.z + 0.025) < 1e-5)
+  #expect(abs(edgeTailTip.z + 0.031) < 1e-5)
 }

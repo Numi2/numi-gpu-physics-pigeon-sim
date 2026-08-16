@@ -72,33 +72,18 @@ enum CrowFoldedWingAnatomy {
         SIMD3<Float>(0.025, side, 0.24 + 0.06 * fraction),
         fallback: SIMD3<Float>(0, side, 0)
       )
+    case 3:
+      let tail = CrowClosedTailAnatomy.pose(fraction: fraction)
+      rootOffset = tail.rootOffset
+      direction = tail.direction
+      normal = tail.normal
     default:
-      let lateral = (fraction - 0.5) * 0.012
-      rootOffset = SIMD3<Float>(
-        -0.154 + 0.003 * abs(2 * fraction - 1),
-        lateral,
-        0.006 - 0.003 * abs(2 * fraction - 1)
-      )
-      let length: Float = 0.166
-      let targetLateral = (fraction - 0.5) * 0.012
-      let lateralDirection = (targetLateral - lateral) / length
-      let verticalDirection = (-0.055 - rootOffset.z) / length
+      rootOffset = SIMD3<Float>(-0.138, 0, 0)
       direction = safeNormalize(
-        SIMD3<Float>(
-          -sqrt(
-            max(
-              0,
-              1 - lateralDirection * lateralDirection
-                - verticalDirection * verticalDirection)),
-          lateralDirection,
-          verticalDirection
-        ),
+        SIMD3<Float>(-1, 0, -0.02),
         fallback: SIMD3<Float>(-1, 0, 0)
       )
-      normal = safeNormalize(
-        SIMD3<Float>(0.04, 0.20 * lateral, 1),
-        fallback: SIMD3<Float>(0, 0, 1)
-      )
+      normal = SIMD3<Float>(0, 0, 1)
     }
     return CrowFoldedFeatherPose(
       rootOffset: rootOffset,

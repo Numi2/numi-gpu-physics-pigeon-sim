@@ -72,9 +72,13 @@ without hiding a discontinuity through framing.
 
 The twelve retained rectrices form a closed standing stack: their bases remain
 buried beneath the rump shell, their root and distal lateral spans are each
-`12 mm`, and their distal envelope descends `55 mm` below the body center. Full
-asset length and identity remain unchanged. The compact stack is an estimated
-quiet-pose articulation, not measured tail kinematics.
+`12 mm`, and their distal envelope descends `25-31 mm` below the body center.
+Within each side, every medial rectrix lies above its lateral neighbour and the
+two sides form a shallow tent, avoiding both a coplanar sheet and an open fan.
+This ordering follows the general folded-tail overlap described by
+[Clark (2010)](https://academic.oup.com/auk/article/127/1/44/5148514); only the
+ordering transfers here, while the dimensions remain estimated rather than
+crow measurements. Full asset length and identity remain unchanged.
 
 The cranial surface is not transported as a detached rigid shell during quiet
 standing. Points buried in the trunk-facing nape remain body-anchored, a cubic

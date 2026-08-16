@@ -342,29 +342,40 @@ inline CrowStandingRootPose crowStandingRootPose(
             float3(0.025f,side,0.24f+0.06f*fraction),
             float3(0,side,0)
         );
-    }else{
-        float lateral=(fraction-0.5f)*0.012f;
+    }else if(featherClass==3u){
+        float centered=2.0f*fraction-1.0f;
+        float radialFraction=abs(centered);
+        float sideSign=centered==0.0f?0.0f:(centered>0.0f?1.0f:-1.0f);
         result.root=center+float3(
-            -0.154f+0.003f*abs(2.0f*fraction-1.0f),
-            lateral,
-            0.006f-0.003f*abs(2.0f*fraction-1.0f)
+            -0.154f+0.003f*radialFraction,
+            0.006f*centered,
+            0.0065f-0.004f*radialFraction
         );
         float featherLength=0.166f;
-        float targetLateral=(fraction-0.5f)*0.012f;
-        float lateralDirection=(targetLateral-lateral)/featherLength;
-        float verticalDirection=(-0.055f-(result.root.z-center.z))/featherLength;
+        float targetZ=-0.025f-0.006f*radialFraction;
+        float verticalDirection=(targetZ-(result.root.z-center.z))/featherLength;
         result.direction=safeNormalizeCrow(
             float3(
-                -sqrt(max(0.0f,1.0f-lateralDirection*lateralDirection
-                    -verticalDirection*verticalDirection)),
-                lateralDirection,
+                -sqrt(max(0.0f,1.0f-verticalDirection*verticalDirection)),
+                0,
                 verticalDirection
             ),
             float3(-1,0,0)
         );
         result.normal=safeNormalizeCrow(
-            float3(0.04f,0.20f*lateral,1),float3(0,0,1)
+            float3(
+                0.04f,
+                sideSign*(0.045f+0.110f*radialFraction),
+                1
+            ),
+            float3(0,0,1)
         );
+    }else{
+        result.root=center+float3(-0.138f,0,0);
+        result.direction=safeNormalizeCrow(
+            float3(-1,0,-0.02f),float3(-1,0,0)
+        );
+        result.normal=float3(0,0,1);
     }
     return result;
 }
