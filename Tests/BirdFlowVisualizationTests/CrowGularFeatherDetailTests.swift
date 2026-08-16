@@ -45,7 +45,7 @@ func gularDetailRemainsFiniteAndAttachedToEveryThroatVane() {
     radii: SIMD3<Float>(0.0447, 0.0328, 0.0387),
     breathingScale: 1.01
   ).filter { $0.region == .throat }
-  #expect(samples.count == 84)
+  #expect(samples.count == 167)
   for feather in samples {
     let featherLength = simd_distance(feather.root, feather.tip)
     let segments = CrowGularFeatherDetail.segments(

@@ -36,7 +36,7 @@ enum CrowCranialFeatherTracts {
   static var axialRings: [CrowCranialLoftRing] {
     CrowCranialAnatomy.sampledLoftRings()
       .enumerated()
-      .filter { $0.offset.isMultiple(of: 2) && $0.element.axialFraction <= 0.84 }
+      .filter { $0.element.axialFraction <= 0.84 }
       .map(\.element)
   }
 

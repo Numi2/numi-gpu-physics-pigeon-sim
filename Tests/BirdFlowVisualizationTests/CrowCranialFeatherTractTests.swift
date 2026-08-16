@@ -12,11 +12,11 @@ func crowCranialContourTractsRemainAttachedAndRegionallyBounded() {
     radii: radii,
     breathingScale: 1.01
   )
-  #expect(samples.count == 306)
-  #expect(samples.filter { $0.region == .nape }.count == 128)
-  #expect(samples.filter { $0.region == .crown }.count == 73)
-  #expect(samples.filter { $0.region == .cheek }.count == 21)
-  #expect(samples.filter { $0.region == .throat }.count == 84)
+  #expect(samples.count == 587)
+  #expect(samples.filter { $0.region == .nape }.count == 224)
+  #expect(samples.filter { $0.region == .crown }.count == 148)
+  #expect(samples.filter { $0.region == .cheek }.count == 48)
+  #expect(samples.filter { $0.region == .throat }.count == 167)
   #expect(
     samples.allSatisfy {
       $0.surfaceFeatherClass
@@ -47,6 +47,12 @@ func crowCranialContourTractsRemainAttachedAndRegionallyBounded() {
   )
 
   let rings = CrowCranialFeatherTracts.axialRings
+  #expect(
+    rings.count
+      == CrowCranialAnatomy.sampledLoftRings().filter {
+        $0.axialFraction <= 0.84
+      }.count
+  )
   for sample in samples {
     let ring = rings[sample.axialIndex]
     let theta = sample.thetaRadians
@@ -147,9 +153,9 @@ func crowCranialContourTractsRemainAttachedAndRegionallyBounded() {
     breathingScale: 1,
     projectedPixelsPerMeter: 1_600
   )
-  #expect(low.count == 82)
-  #expect(medium.count == 152)
-  #expect(full.count == 306)
+  #expect(low.count == 152)
+  #expect(medium.count == 291)
+  #expect(full.count == 587)
   #expect(low.count < medium.count && medium.count < full.count)
   for region in CrowCranialFeatherRegion.allCases {
     #expect(low.contains { $0.region == region })
