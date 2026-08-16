@@ -62,3 +62,34 @@ func bodyContourRootsFollowAsymmetricLoft() {
     #expect(abs(clearance - CrowBodyContourShingles.shellClearanceMeters) < 1e-6)
   }
 }
+
+@Test("body contour tracts break transverse rows with bounded deterministic variation")
+func bodyContourTractsBreakTransverseRows() {
+  let first = CrowBodyContourShingles.samples()
+  let second = CrowBodyContourShingles.samples()
+  #expect(first == second)
+  #expect(Set(first.map(\.region)) == Set(CrowBodyContourRegion.allCases))
+
+  for axialIndex in 0..<CrowBodyContourShingles.axialCount {
+    let course = first.filter { $0.axialIndex == axialIndex }
+    let rootXs = course.map(\.rootOffset.x)
+    #expect(rootXs.max()! - rootXs.min()! > 0.004)
+  }
+
+  let lengths = first.map { simd_distance($0.rootOffset, $0.tipOffset) }
+  let widths = first.map(\.maximumWidthMeters)
+  #expect(lengths.max()! - lengths.min()! > 0.006)
+  #expect(widths.max()! - widths.min()! > 0.002)
+
+  for radialIndex in 0..<CrowBodyContourShingles.radialCount {
+    let tract =
+      first
+      .filter { $0.radialIndex == radialIndex }
+      .sorted { $0.axialIndex < $1.axialIndex }
+    let spacings = zip(tract, tract.dropFirst()).map {
+      $0.rootOffset.x - $1.rootOffset.x
+    }
+    #expect(spacings.min()! > 0.008)
+    #expect(spacings.max()! - spacings.min()! > 0.0004)
+  }
+}
