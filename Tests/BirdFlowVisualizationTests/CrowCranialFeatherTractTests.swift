@@ -90,6 +90,11 @@ func crowCranialContourTractsRemainAttachedAndRegionallyBounded() {
     samples
     .filter { $0.region == .throat }
     .map { simd_normalize($0.tip - $0.root) }
+  let throatLengths = samples.filter { $0.region == .throat }.map {
+    simd_distance($0.root, $0.tip)
+  }
+  #expect(throatLengths.min()! < 0.0111)
+  #expect(throatLengths.max()! > 0.0149)
   let lateralComponents = throatDirections.map(\.y)
   #expect(lateralComponents.min()! < -0.10)
   #expect(lateralComponents.max()! > 0.10)

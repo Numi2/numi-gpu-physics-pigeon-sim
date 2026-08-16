@@ -11,18 +11,23 @@ func throatBridgeBreaksCervicalPectoralCollarAtFullResolution() {
     samples.count
       == 2 * CrowThroatBridgeFeathers.rowCount * CrowThroatBridgeFeathers.columnCount
   )
-  #expect(samples.count == 72)
+  #expect(samples.count == 88)
   #expect(CrowThroatBridgeFeathers.surfaceFeatherClass == 7)
+  #expect(CrowThroatBridgeFeathers.rootWidthRatio > 0.80)
+  #expect(CrowThroatBridgeFeathers.rootWidthRatio < 0.85)
+  #expect(CrowThroatBridgeFeathers.visibleRootEnvelopeRatio == 0.70)
+  #expect(CrowThroatBridgeFeathers.pennaceousStartFraction == 0)
   #expect(samples.allSatisfy { $0.surfaceFeatherClass == 7 })
   let courseStaggers = (0..<CrowThroatBridgeFeathers.rowCount).map {
     CrowThroatBridgeFeathers.courseStaggerMeters(row: $0)
   }
   #expect(courseStaggers.first == 0 && courseStaggers.last == 0)
   #expect(Set(courseStaggers).count == CrowThroatBridgeFeathers.rowCount - 1)
-  #expect(abs(courseStaggers.max()! - 0.0022) < 1e-7)
+  #expect(abs(courseStaggers.min()! + 0.0022) < 1e-7)
+  #expect(abs(courseStaggers.max()! - 0.00275) < 1e-7)
   #expect(
     zip(courseStaggers, courseStaggers.dropFirst()).allSatisfy {
-      abs($0 - $1) > 0.0009
+      abs($0 - $1) > 0.0005
     }
   )
   #expect(

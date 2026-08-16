@@ -171,7 +171,9 @@ enum CrowCranialFeatherTracts {
       angularIndex: angularIndex,
       salt: 0x27D4_EB2F
     )
-    let length = axialLength(region: region, ring: ring) * (1 + 0.04 * lengthIdentity)
+    let lengthVariation: Float = region == .throat ? 0.16 : 0.04
+    let length = axialLength(region: region, ring: ring)
+      * (1 + lengthVariation * lengthIdentity)
     let direction = normalized(
       -axialTangent
         + (region == .throat ? 0.085 : 0.035) * directionIdentity * angularTangent

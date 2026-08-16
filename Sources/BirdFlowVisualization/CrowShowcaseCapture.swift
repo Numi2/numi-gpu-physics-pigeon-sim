@@ -2191,7 +2191,8 @@ private struct CrowMeshBuilder {
         vaneAsymmetry: 0.035 * material,
         edgeRippleAmplitude: 0.018 + 0.008 * abs(material),
         edgeRipplePhase: Float.pi * (material + 1),
-        axialStartFraction: 0.18,
+        rootEnvelopeRatio: CrowThroatBridgeFeathers.visibleRootEnvelopeRatio,
+        axialStartFraction: CrowThroatBridgeFeathers.pennaceousStartFraction,
         surfaceFeatherClass: sample.surfaceFeatherClass,
         lodLengthMeters: simd_distance(sample.rootOffset, sample.tipOffset),
         projectedPixelsPerMeter: projectedPixelsPerMeter,
@@ -3156,6 +3157,7 @@ private struct CrowMeshBuilder {
     edgeRippleAmplitude: Float = 0,
     edgeRipplePhase: Float = 0,
     edgeRippleCycles: Float = 1.5,
+    rootEnvelopeRatio: Float = 0.32,
     axialStartFraction: Float = 0,
     surfaceFeatherClass: UInt32 = 0,
     lodLengthMeters: Float? = nil,
@@ -3178,7 +3180,9 @@ private struct CrowMeshBuilder {
       let localFraction = Float(index) / Float(tessellation.axialSections)
       let startFraction = min(max(axialStartFraction, 0), 0.95)
       let t = startFraction + (1 - startFraction) * localFraction
-      let bodyEnvelope = 0.32 + 0.68 * pow(max(sin(Float.pi * t), 0), 0.58)
+      let rootEnvelope = min(max(rootEnvelopeRatio, 0.05), 1)
+      let bodyEnvelope = rootEnvelope
+        + (1 - rootEnvelope) * pow(max(sin(Float.pi * t), 0), 0.58)
       let tipTaper = 1 - 0.985 * pow(t, 3.2)
       let envelope = bodyEnvelope * tipTaper
       let rippleEnvelope = pow(max(sin(Float.pi * t), 0), 2)

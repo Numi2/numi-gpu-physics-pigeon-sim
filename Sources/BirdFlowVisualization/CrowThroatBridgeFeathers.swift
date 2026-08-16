@@ -23,9 +23,12 @@ struct CrowThroatBridgeFeather: Equatable {
 /// more than the posterior course, preventing either a rigid collar or a crack
 /// when the simulated crow makes millimetric standing motions.
 enum CrowThroatBridgeFeathers {
-  static let rowCount = 9
+  static let rowCount = 11
   static let columnCount = 4
   static let shellClearanceMeters: Float = 0.0007
+  static let rootWidthRatio: Float = 0.82
+  static let visibleRootEnvelopeRatio: Float = 0.70
+  static let pennaceousStartFraction: Float = 0
 
   static func visibleSamples(
     neckPose: CrowStandingNeckPose? = nil,
@@ -123,7 +126,7 @@ enum CrowThroatBridgeFeathers {
               planeNormal:
                 neckPose?.rotated(unposedPlaneNormal, coupling: neckCoupling)
                 ?? unposedPlaneNormal,
-              rootWidthMeters: 0.58 * maximumWidth,
+              rootWidthMeters: rootWidthRatio * maximumWidth,
               maximumWidthMeters: maximumWidth,
               camberMeters: (0.0010 + 0.0003 * columnFraction)
                 * (1 + 0.08 * rootIdentity),
@@ -142,14 +145,15 @@ enum CrowThroatBridgeFeathers {
   static let surfaceFeatherClass: UInt32 = 7
 
   /// Keeps the two field boundaries fixed while interleaving every interior
-  /// course through a different axial phase. The seven-slot permutation has
-  /// no repeated interior phase or binary even/odd cadence.
+  /// course on both sides of the nominal root ring. The signed nine-slot
+  /// permutation has no repeated interior phase or binary even/odd cadence.
   static func courseStaggerMeters(row: Int) -> Float {
     let boundedRow = min(max(row, 0), rowCount - 1)
     guard boundedRow > 0 && boundedRow < rowCount - 1 else { return 0 }
     let interiorIndex = boundedRow - 1
-    let slot = ((interiorIndex * 4 + 3) % 7) + 1
-    return 0.0022 * Float(slot) / 7
+    let slot = ((interiorIndex * 5 + 3) % 9) + 1
+    let signedSlot = slot <= 4 ? slot - 5 : slot - 4
+    return 0.00055 * Float(signedSlot)
   }
 
   private static func mirroredSurfacePoint(
