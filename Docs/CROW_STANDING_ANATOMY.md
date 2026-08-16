@@ -49,6 +49,12 @@ This keeps persistent identity and temporal correspondence while folding the
 flight feathers along the body. It does not claim feather contact dynamics or
 measured folded-wing anatomy.
 
+The standing primary and secondary directions converge into compact,
+class-specific caudal envelopes. Roots remain in their estimated
+shoulder-to-pelvis series, but lateral fanning is reduced so the folded tips do
+not split into separated decks when viewed from behind. This is estimated
+presentation anatomy and does not enter the solver.
+
 Run the presentation with:
 
 ```bash

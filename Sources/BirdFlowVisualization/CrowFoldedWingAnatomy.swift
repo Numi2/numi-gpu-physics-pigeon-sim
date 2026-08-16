@@ -31,8 +31,8 @@ enum CrowFoldedWingAnatomy {
       direction = safeNormalize(
         SIMD3<Float>(
           -0.989,
-          -side * (0.045 + 0.095 * fraction),
-          -0.140 - 0.050 * fraction
+          -side * (0.0375 + 0.0575 * fraction),
+          -0.1375 - 0.0125 * fraction
         ),
         fallback: SIMD3<Float>(-1, 0, 0)
       )
@@ -49,8 +49,8 @@ enum CrowFoldedWingAnatomy {
       direction = safeNormalize(
         SIMD3<Float>(
           -0.992,
-          -side * (0.035 + 0.055 * fraction),
-          -0.100 - 0.060 * fraction
+          -side * (0.030 + 0.0365 * fraction),
+          -0.105 - 0.035 * fraction
         ),
         fallback: SIMD3<Float>(-1, 0, 0)
       )

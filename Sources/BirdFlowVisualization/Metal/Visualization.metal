@@ -307,8 +307,8 @@ inline CrowStandingRootPose crowStandingRootPose(
         result.direction=safeNormalizeCrow(
             float3(
                 -0.989f,
-                -side*(0.045f+0.095f*fraction),
-                -0.140f-0.050f*fraction
+                -side*(0.0375f+0.0575f*fraction),
+                -0.1375f-0.0125f*fraction
             ),
             float3(-1,0,0)
         );
@@ -325,8 +325,8 @@ inline CrowStandingRootPose crowStandingRootPose(
         result.direction=safeNormalizeCrow(
             float3(
                 -0.992f,
-                -side*(0.035f+0.055f*fraction),
-                -0.100f-0.060f*fraction
+                -side*(0.030f+0.0365f*fraction),
+                -0.105f-0.035f*fraction
             ),
             float3(-1,0,0)
         );

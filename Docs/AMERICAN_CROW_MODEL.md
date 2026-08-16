@@ -76,12 +76,13 @@ camera or multiplying appearance-only review frames.
 
 Procedural contour and folded-wing feathers select quantized tessellation from
 their projected length at the final output resolution. The four asset LOD
-thresholds drive silhouette, curved vane-shell, denser ribbon, and
-microstructure-preparation tiers. Vane-shell and finer geometry subdivides
-across the width and crowns the vane instead of rendering a single planar card;
-current and previous temporal geometry share one tier for stable motion vectors.
-The highest tier is denser shell topology only: explicit barbs and barbules are
-not yet synthesized.
+thresholds drive silhouette, curved vane shell, rachis, paired-barb, and
+close-up barbule budgets. Body contour mesostructure is derived from the same
+root, tip, plane, width, and camber envelope as its visible vane; it is not a
+detached decoration. Current and previous temporal geometry share one tier for
+stable motion vectors. The crow material derives a local feather axis from
+live vane coordinates where present and uses a surface-projected fallback on
+the body for a restrained anisotropic black-feather highlight.
 
 ## Native Metal capture
 

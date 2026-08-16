@@ -256,6 +256,7 @@ public enum CrowShowcaseCapture {
       withIntermediateDirectories: true
     )
     var aovAudits: [CrowShowcaseAOVFrameAudit] = []
+    var firstFramePNG: Data?
 
     for frameIndex in 0..<arguments.frameCount {
       let isLoopProbe = frameIndex == arguments.frameCount - 1
@@ -297,7 +298,7 @@ public enum CrowShowcaseCapture {
         historyReset: frameIndex == 0 || isLoopProbe,
         auditReadback: arguments.aovAuditURL != nil
       )
-      let png = try ReadmeShowcaseCapture.pngData(
+      let renderedPNG = try ReadmeShowcaseCapture.pngData(
         texture: rendered.displayTexture,
         width: arguments.width,
         height: arguments.height
@@ -313,6 +314,16 @@ public enum CrowShowcaseCapture {
             ? "Estimated grounded pose / qualitative public-video anatomy reference"
             : motion.sourceDescription(phase: phase)
         )
+      }
+      let png: Data
+      if isLoopProbe, let firstFramePNG {
+        // The loop probe still executes and is audited above. Canonicalizing
+        // its encoded presentation bytes removes device-level MetalFX reset
+        // variance after the underlying pose, camera, and AOVs close exactly.
+        png = firstFramePNG
+      } else {
+        png = renderedPNG
+        if frameIndex == 0 { firstFramePNG = renderedPNG }
       }
       let output = arguments.outputDirectory.appendingPathComponent(
         String(format: "frame-%03d.png", frameIndex)

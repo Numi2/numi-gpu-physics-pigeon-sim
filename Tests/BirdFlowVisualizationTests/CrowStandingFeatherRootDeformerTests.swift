@@ -106,6 +106,31 @@ func standingCrowFeatherRootsMatchMetalReference() throws {
   #expect(Set(moving.map { $0.identity.y }).count == 54)
 
   for featherClass: UInt32 in [1, 2] {
+    for sideCode: UInt32 in [1, 2] {
+      let tips = moving.compactMap { state -> SIMD3<Float>? in
+        let packedIdentity = state.identity.w
+        guard packedIdentity & 255 == featherClass,
+          (packedIdentity >> 8) & 255 == sideCode
+        else { return nil }
+        let root = SIMD3<Float>(
+          state.currentPositionAndLength.x,
+          state.currentPositionAndLength.y,
+          state.currentPositionAndLength.z
+        )
+        let direction = SIMD3<Float>(
+          state.currentDirectionAndRachis.x,
+          state.currentDirectionAndRachis.y,
+          state.currentDirectionAndRachis.z
+        )
+        return root + direction * state.currentPositionAndLength.w
+      }
+      #expect(tips.count >= 10)
+      #expect(tips.map(\.y).max()! - tips.map(\.y).min()! < 0.004)
+      #expect(tips.map(\.z).max()! - tips.map(\.z).min()! < 0.046)
+    }
+  }
+
+  for featherClass: UInt32 in [1, 2] {
     let leftFront = CrowFoldedWingAnatomy.pose(
       featherClass: featherClass,
       side: 1,
@@ -124,12 +149,19 @@ func standingCrowFeatherRootsMatchMetalReference() throws {
     #expect(leftRear.rootOffset.x < leftFront.rootOffset.x)
     #expect(leftRear.rootOffset.y > leftFront.rootOffset.y)
     #expect(leftRear.rootOffset.z < leftFront.rootOffset.z)
-    #expect(leftRear.direction.y < leftFront.direction.y)
-    #expect(leftRear.direction.z < leftFront.direction.z)
+    #expect(leftRear.direction.y < 0 && leftFront.direction.y < 0)
+    #expect(leftRear.direction.z < 0 && leftFront.direction.z < 0)
     #expect(abs(leftRear.rootOffset.x - rightRear.rootOffset.x) < 1e-7)
     #expect(abs(leftRear.rootOffset.y + rightRear.rootOffset.y) < 1e-7)
     #expect(abs(leftRear.direction.y + rightRear.direction.y) < 1e-7)
     #expect(abs(simd_length(leftRear.direction) - 1) < 1e-6)
     #expect(abs(simd_length(leftRear.normal) - 1) < 1e-6)
+
+    let frontLength: Float = featherClass == 1 ? 0.155 : 0.112
+    let rearLength: Float = featherClass == 1 ? 0.205 : 0.142
+    let frontTip = leftFront.rootOffset + frontLength * leftFront.direction
+    let rearTip = leftRear.rootOffset + rearLength * leftRear.direction
+    #expect(abs(frontTip.y - rearTip.y) < 0.004)
+    #expect(abs(frontTip.z - rearTip.z) < 0.046)
   }
 }
