@@ -16,7 +16,7 @@
   ],
   "poseParameters": {
     "footSeparationMeters": 0.078,
-    "supportHeightRelativeToBodyCenterMeters": -0.180,
+    "supportHeightRelativeToBodyCenterMeters": -0.172,
     "maximumBodySwayMeters": 0.003,
     "maximumAnkleTravelMeters": 0.0015,
     "forwardToeCountPerFoot": 3,

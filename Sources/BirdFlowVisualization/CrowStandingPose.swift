@@ -68,8 +68,9 @@ struct CrowStandingPoseSample: Equatable {
 /// living motion stays millimetric. No image or video bytes are part of this
 /// model, and none of these values are measured kinematics.
 enum CrowStandingPose {
-  static let supportHeightRelativeToBodyCenter: Float = -0.180
+  static let supportHeightRelativeToBodyCenter: Float = -0.172
   static let footHalfSeparationMeters: Float = 0.039
+  static let tarsusLengthMeters: Float = 0.057
 
   static func sample(
     phase: Float,
@@ -125,13 +126,6 @@ enum CrowStandingPose {
   ) -> CrowStandingFootPose {
     let counterPhase = slowPhase + (side > 0 ? 0 : Float.pi)
     let hip = bodyCenter + SIMD3<Float>(-0.025, side * 0.035, -0.060)
-    let hock =
-      referenceBodyCenter
-      + SIMD3<Float>(
-        -0.014 + 0.0014 * sin(counterPhase),
-        side * (0.040 + 0.0008 * cos(counterPhase)),
-        -0.111 + 0.0010 * sin(2 * counterPhase)
-      )
     let ankle =
       referenceBodyCenter
       + SIMD3<Float>(
@@ -139,6 +133,14 @@ enum CrowStandingPose {
         side * footHalfSeparationMeters,
         supportHeight - referenceBodyCenter.z + 0.006
       )
+    let tarsusDirection = simd_normalize(
+      SIMD3<Float>(
+        -0.245 + 0.012 * sin(counterPhase),
+        side * (0.018 + 0.006 * cos(counterPhase)),
+        0.969
+      )
+    )
+    let hock = ankle + tarsusLengthMeters * tarsusDirection
 
     // Digits II-IV point forward with increasing then decreasing length;
     // digit I (hallux) opposes them behind the ankle. The distal contacts stay

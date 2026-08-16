@@ -21,6 +21,19 @@ func standingCrowPoseKeepsContactsPlanted() {
     #expect(sample.leftFoot.digitTips[3].x < sample.leftFoot.ankle.x)
     #expect(sample.rightFoot.digitTips[1].x > sample.rightFoot.ankle.x)
     #expect(sample.rightFoot.digitTips[3].x < sample.rightFoot.ankle.x)
+    #expect(
+      abs(
+        simd_distance(sample.leftFoot.hock, sample.leftFoot.ankle)
+          - CrowStandingPose.tarsusLengthMeters
+      ) < 1e-6
+    )
+    #expect(
+      abs(
+        simd_distance(sample.rightFoot.hock, sample.rightFoot.ankle)
+          - CrowStandingPose.tarsusLengthMeters
+      ) < 1e-6
+    )
+    #expect(sample.bodyCenter.z - sample.supportHeight < 0.175)
 
     let supportMinimumY = min(
       sample.leftFoot.digitTips.map(\.y).min()!,

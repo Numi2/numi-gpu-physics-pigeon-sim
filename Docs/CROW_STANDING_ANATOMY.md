@@ -28,8 +28,10 @@ measurement.
 sets stay fixed on the support while the body moves by less than `3 mm` and each
 ankle by less than `1.5 mm`. Each foot has digit I behind the ankle and digits
 II-IV in front. The renderer builds tapered, segmented leg and toe geometry,
-scute rings, claws, and a visible support so contact can be inspected rather
-than inferred from floating geometry.
+an elliptical tarsometatarsus with localized anterior scutes, claws, and a
+visible support so contact can be inspected rather than inferred from floating
+geometry. The hock-to-ankle segment is constrained to the selected `57 mm`
+tarsus estimate rather than inheriting the former tube endpoint spacing.
 
 Standing feather motion is a separate retained Metal path:
 

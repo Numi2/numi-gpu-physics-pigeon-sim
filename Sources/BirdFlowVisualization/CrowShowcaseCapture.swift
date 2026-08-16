@@ -2051,34 +2051,14 @@ private struct CrowMeshBuilder {
           to: &vertices
         )
       }
-      appendTaperedTube(
-        from: foot.hock,
-        to: foot.ankle,
-        startRadius: 0.0052,
-        endRadius: 0.0041,
-        color: keratin,
-        radialSegments: 10,
-        to: &vertices
-      )
-      for ring in 1...6 {
-        let fraction = Float(ring) / 7
-        let center = foot.hock + (foot.ankle - foot.hock) * fraction
-        appendTaperedTube(
-          from: center - safeNormalize(
-            foot.ankle - foot.hock,
-            fallback: SIMD3<Float>(0, 0, -1)
-          ) * 0.0008,
-          to: center + safeNormalize(
-            foot.ankle - foot.hock,
-            fallback: SIMD3<Float>(0, 0, -1)
-          ) * 0.0008,
-          startRadius: 0.0049,
-          endRadius: 0.0049,
-          color: SIMD4<Float>(0.050, 0.054, 0.061, 0.60),
-          radialSegments: 10,
-          to: &vertices
+      vertices.append(
+        contentsOf: CrowTarsometatarsusAnatomy.vertices(
+          hock: foot.hock,
+          ankle: foot.ankle,
+          shaftColor: keratin,
+          scuteColor: SIMD4<Float>(0.052, 0.057, 0.064, 0.62)
         )
-      }
+      )
       for digit in 0..<4 {
         let joint = foot.digitJoints[digit]
         let tip = foot.digitTips[digit]
