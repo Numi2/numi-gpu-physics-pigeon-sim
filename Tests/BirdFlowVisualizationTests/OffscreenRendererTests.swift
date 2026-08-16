@@ -460,6 +460,37 @@ func estimatedCrowBodyLoftPreservesAnatomicalRegions() {
   #expect(rings.last!.x - rings.first!.x < 0.41)
 }
 
+@Test("estimated crow cranium bridges nape, crown, and bill")
+func estimatedCrowCraniumBridgesNapeCrownAndBill() {
+  let rings = CrowCranialAnatomy.loftRings
+  #expect(rings.count >= 7)
+  #expect(
+    zip(rings, rings.dropFirst()).allSatisfy {
+      $0.axialFraction < $1.axialFraction
+    }
+  )
+  #expect(rings.first!.axialFraction < -1)
+  #expect(rings.first!.halfWidthFraction > 0.5)
+  #expect(rings[2].dorsalRadiusFraction > 1)
+  #expect(rings.last!.halfWidthFraction < 0.3)
+
+  let radii = SIMD3<Float>(0.045, 0.033, 0.039)
+  let vertices = CrowCranialAnatomy.vertices(
+    center: SIMD3<Float>(0.164, 0, 0.052),
+    radii: radii,
+    breathingScale: 1,
+    color: SIMD4<Float>(0.006, 0.008, 0.013, 0.10)
+  )
+  #expect(vertices.count == (rings.count - 1) * 48 * 6)
+  #expect(
+    vertices.allSatisfy {
+      let normal = SIMD3<Float>($0.normal.x, $0.normal.y, $0.normal.z)
+      return normal.x.isFinite && normal.y.isFinite && normal.z.isFinite
+        && abs(simd_length(normal) - 1) < 1e-5
+    }
+  )
+}
+
 @Test("crow feather tessellation follows final-output coverage tiers")
 func crowFeatherTessellationFollowsProjectedCoverage() {
   let pixelsPerMeter = CrowFeatherCoverageLOD.projectedPixelsPerMeter(
