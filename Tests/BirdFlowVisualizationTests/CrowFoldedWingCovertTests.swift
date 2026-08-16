@@ -13,11 +13,18 @@ func foldedWingCovertsFormSymmetricBodySeatedShell() {
   )
   #expect(samples.count == 360)
   #expect(CrowFoldedWingCoverts.surfaceFeatherClass == 4)
-  #expect(CrowFoldedWingCoverts.outerCourseWidthScale(row: 0) == 1)
-  #expect(
+  #expect(CrowFoldedWingCoverts.outerCourseWidthScale(row: 0, column: 13) == 1)
+  #expect(abs(
     CrowFoldedWingCoverts.outerCourseWidthScale(
-      row: CrowFoldedWingCoverts.rowCount - 1
-    ) == 1.30
+      row: CrowFoldedWingCoverts.rowCount - 1,
+      column: 0
+    ) - 1.30) < 1e-6
+  )
+  #expect(abs(
+    CrowFoldedWingCoverts.outerCourseWidthScale(
+      row: CrowFoldedWingCoverts.rowCount - 1,
+      column: 13
+    ) - 1.45) < 1e-6
   )
   #expect(
     CrowFoldedWingCoverts.visibleSamples(projectedPixelsPerMeter: 800).count

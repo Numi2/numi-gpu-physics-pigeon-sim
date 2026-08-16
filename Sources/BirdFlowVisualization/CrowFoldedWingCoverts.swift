@@ -28,8 +28,10 @@ enum CrowFoldedWingCoverts {
 
   /// The body-facing outer course overlaps the folded primary taper. Its roots
   /// and lengths remain unchanged, preserving distinct vane silhouettes.
-  static func outerCourseWidthScale(row: Int) -> Float {
-    row == rowCount - 1 ? 1.30 : 1
+  static func outerCourseWidthScale(row: Int, column: Int) -> Float {
+    guard row == rowCount - 1 else { return 1 }
+    let posteriorOverlap = max(0, 1 - Float(abs(column - 13)) / 3)
+    return 1.30 + 0.15 * posteriorOverlap
   }
 
   static func visibleSamples(
@@ -141,7 +143,7 @@ enum CrowFoldedWingCoverts {
               rootWidthMeters: 0.52 * localWidth,
               maximumWidthMeters:
                 localWidth * (1 + 0.08 * axial) * (1 + 0.04 * shapeIdentity)
-                * outerCourseWidthScale(row: row),
+                * outerCourseWidthScale(row: row, column: column),
               camberMeters: (0.00155 + 0.00055 * rowFraction)
                 * (1 + 0.09 * rootIdentity),
               materialVariation: materialIdentity
