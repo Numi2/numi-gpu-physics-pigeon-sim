@@ -13,6 +13,7 @@ struct CrowThroatBridgeFeather: Equatable {
   let maximumWidthMeters: Float
   let camberMeters: Float
   let materialVariation: Float
+  let surfaceFeatherClass: UInt32
 }
 
 /// Interdigitated throat feathers crossing the cervical/pectoral boundary.
@@ -126,7 +127,8 @@ enum CrowThroatBridgeFeathers {
               maximumWidthMeters: maximumWidth,
               camberMeters: (0.0010 + 0.0003 * columnFraction)
                 * (1 + 0.08 * rootIdentity),
-              materialVariation: materialIdentity
+              materialVariation: materialIdentity,
+              surfaceFeatherClass: surfaceFeatherClass
             )
           )
         }
@@ -134,6 +136,10 @@ enum CrowThroatBridgeFeathers {
     }
     return result
   }
+
+  /// This field bridges two ventral pterylae and must retain their soft body
+  /// contour material rather than introducing a generic-feather collar.
+  static let surfaceFeatherClass: UInt32 = 7
 
   private static func mirroredSurfacePoint(
     x: Float,

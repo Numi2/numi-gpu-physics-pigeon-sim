@@ -12,6 +12,8 @@ func throatBridgeBreaksCervicalPectoralCollarAtFullResolution() {
       == 2 * CrowThroatBridgeFeathers.rowCount * CrowThroatBridgeFeathers.columnCount
   )
   #expect(samples.count == 72)
+  #expect(CrowThroatBridgeFeathers.surfaceFeatherClass == 7)
+  #expect(samples.allSatisfy { $0.surfaceFeatherClass == 7 })
   #expect(
     CrowThroatBridgeFeathers.visibleSamples(projectedPixelsPerMeter: 1_000).isEmpty
   )

@@ -2236,6 +2236,7 @@ private struct CrowMeshBuilder {
         edgeRippleAmplitude: 0.018 + 0.008 * abs(material),
         edgeRipplePhase: Float.pi * (material + 1),
         axialStartFraction: 0.18,
+        surfaceFeatherClass: sample.surfaceFeatherClass,
         lodLengthMeters: simd_distance(sample.rootOffset, sample.tipOffset),
         projectedPixelsPerMeter: projectedPixelsPerMeter,
         to: &vertices
