@@ -72,6 +72,13 @@ func crowBodyFeatherTractsOverlapNeckAndCoverWingRoots() {
   )
   #expect(samples.map(\.materialVariation).min()! < -0.90)
   #expect(samples.map(\.materialVariation).max()! > 0.90)
+  #expect(samples.map(\.vaneAsymmetry).min()! < -0.050)
+  #expect(samples.map(\.vaneAsymmetry).max()! > 0.050)
+  #expect(samples.map(\.edgeRippleAmplitude).min()! >= 0.010)
+  #expect(samples.map(\.edgeRippleAmplitude).max()! <= 0.0341)
+  #expect(samples.map(\.edgeRippleCycles).min()! >= 1.30)
+  #expect(samples.map(\.edgeRippleCycles).max()! <= 2.101)
+  #expect(Set(samples.map(\.edgeRipplePhase)).count > samples.count / 2)
 
   for region in [CrowBodyFeatherTractRegion.mantle, .scapular] {
     let regionSamples = samples.filter { $0.region == region }

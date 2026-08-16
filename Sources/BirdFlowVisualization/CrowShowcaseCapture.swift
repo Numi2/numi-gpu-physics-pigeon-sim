@@ -2034,6 +2034,10 @@ private struct CrowMeshBuilder {
         sections: sample.region == .cervical ? 6 : 8,
         camber: sample.camberMeters,
         transverseCamberRatio: sample.region == .cervical ? 0.24 : 0.28,
+        vaneAsymmetry: sample.vaneAsymmetry,
+        edgeRippleAmplitude: sample.edgeRippleAmplitude,
+        edgeRipplePhase: sample.edgeRipplePhase,
+        edgeRippleCycles: sample.edgeRippleCycles,
         lodLengthMeters: simd_distance(sample.rootOffset, sample.tipOffset),
         projectedPixelsPerMeter: projectedPixelsPerMeter,
         to: &vertices
@@ -2882,6 +2886,7 @@ private struct CrowMeshBuilder {
     vaneAsymmetry: Float = 0,
     edgeRippleAmplitude: Float = 0,
     edgeRipplePhase: Float = 0,
+    edgeRippleCycles: Float = 1.5,
     axialStartFraction: Float = 0,
     surfaceFeatherClass: UInt32 = 0,
     lodLengthMeters: Float? = nil,
@@ -2910,7 +2915,8 @@ private struct CrowMeshBuilder {
       let rippleEnvelope = pow(max(sin(Float.pi * t), 0), 2)
       let edgeRipple =
         1
-        + edgeRippleAmplitude * sin(3 * Float.pi * t + edgeRipplePhase)
+        + edgeRippleAmplitude
+        * sin(2 * Float.pi * edgeRippleCycles * t + edgeRipplePhase)
         * rippleEnvelope
       let width = (rootWidth * (1 - t) + maximumWidth * t) * envelope * edgeRipple
       let center = root + (tip - root) * t + normal * (camber * sin(Float.pi * t))

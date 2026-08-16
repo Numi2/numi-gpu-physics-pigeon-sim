@@ -23,6 +23,10 @@ struct CrowBodyFeatherTractSample: Equatable {
   let rootWidthMeters: Float
   let maximumWidthMeters: Float
   let camberMeters: Float
+  let vaneAsymmetry: Float
+  let edgeRippleAmplitude: Float
+  let edgeRipplePhase: Float
+  let edgeRippleCycles: Float
   let materialVariation: Float
   let headCoupling: Float
 }
@@ -83,6 +87,24 @@ enum CrowBodyFeatherTracts {
             + 0.04 * rowStep
             * sin(Float(row) * 1.173 + Float(column) * 0.83 + side * 1.31)
           let coupling = 0.10 + 0.78 * axial
+          let vaneIdentity = identityVariation(
+            side: side,
+            row: row,
+            column: column,
+            salt: 0x1656_67B1
+          )
+          let edgeIdentity = identityVariation(
+            side: side,
+            row: row,
+            column: column,
+            salt: 0x68E3_1DA4
+          )
+          let cycleIdentity = identityVariation(
+            side: side,
+            row: row,
+            column: column,
+            salt: 0x27D4_EB2F
+          )
           let center = SIMD3<Float>(
             0.086 + 0.062 * axial,
             0,
@@ -140,6 +162,10 @@ enum CrowBodyFeatherTracts {
               camberMeters:
                 0.0010
                 * (1 + 0.06 * sin(Float(row) * 1.49 - Float(column) * 2.11)),
+              vaneAsymmetry: 0.040 * vaneIdentity,
+              edgeRippleAmplitude: 0.010 + 0.016 * (0.5 + 0.5 * edgeIdentity),
+              edgeRipplePhase: Float.pi * (edgeIdentity + 1),
+              edgeRippleCycles: 1.30 + 0.50 * (0.5 + 0.5 * cycleIdentity),
               materialVariation: identityVariation(
                 side: side,
                 row: row,
@@ -180,6 +206,18 @@ enum CrowBodyFeatherTracts {
             column: column,
             salt: 0xC2B2_AE35
           )
+          let edgeIdentity = identityVariation(
+            side: side,
+            row: row,
+            column: column,
+            salt: 0x68E3_1DA4
+          )
+          let cycleIdentity = identityVariation(
+            side: side,
+            row: row,
+            column: column,
+            salt: 0x27D4_EB2F
+          )
           let axialStep = 1 / Float(mantleColumnCount - 1)
           let axial = min(
             1,
@@ -200,10 +238,15 @@ enum CrowBodyFeatherTracts {
                   ? 0 : 0.12 * rowStep * shapeIdentity)
             )
           )
-          let stagger: Float =
-            row.isMultiple(of: 2)
-            ? 0
-            : 0.5 * 0.154 / Float(mantleColumnCount - 1)
+          let rowPhase = identityVariation(
+            side: side,
+            row: row,
+            column: 0,
+            salt: 0xD3A2_646C
+          )
+          let staggerFraction: Float =
+            (row.isMultiple(of: 2) ? 0 : 0.5) + 0.075 * rowPhase
+          let stagger = staggerFraction * 0.154 / Float(mantleColumnCount - 1)
           let root = SIMD3<Float>(
             0.074 - 0.154 * axial - stagger,
             side * (0.018 + 0.023 * course + 0.0007 * rootIdentity),
@@ -238,6 +281,10 @@ enum CrowBodyFeatherTracts {
               rootWidthMeters: 0.0038 * (1 + 0.035 * rootIdentity),
               maximumWidthMeters: (0.0067 + 0.0012 * course) * (1 + 0.045 * shapeIdentity),
               camberMeters: (0.00155 + 0.00035 * course) * (1 + 0.09 * rootIdentity),
+              vaneAsymmetry: 0.052 * shapeIdentity,
+              edgeRippleAmplitude: 0.012 + 0.018 * (0.5 + 0.5 * edgeIdentity),
+              edgeRipplePhase: Float.pi * (edgeIdentity + 1),
+              edgeRippleCycles: 1.35 + 0.65 * (0.5 + 0.5 * cycleIdentity),
               materialVariation: materialIdentity,
               headCoupling: 0
             )
@@ -273,6 +320,18 @@ enum CrowBodyFeatherTracts {
             column: column,
             salt: 0xD3A2_646C
           )
+          let edgeIdentity = identityVariation(
+            side: side,
+            row: row,
+            column: column,
+            salt: 0x68E3_1DA4
+          )
+          let cycleIdentity = identityVariation(
+            side: side,
+            row: row,
+            column: column,
+            salt: 0xC801_3EA4
+          )
           let axialStep = 1 / Float(scapularColumnCount - 1)
           let axial = min(
             1,
@@ -293,10 +352,15 @@ enum CrowBodyFeatherTracts {
                   ? 0 : 0.13 * rowStep * shapeIdentity)
             )
           )
-          let stagger: Float =
-            row.isMultiple(of: 2)
-            ? 0
-            : 0.5 * 0.164 / Float(scapularColumnCount - 1)
+          let rowPhase = identityVariation(
+            side: side,
+            row: row,
+            column: 0,
+            salt: 0x9E37_79B9
+          )
+          let staggerFraction: Float =
+            (row.isMultiple(of: 2) ? 0 : 0.5) + 0.075 * rowPhase
+          let stagger = staggerFraction * 0.164 / Float(scapularColumnCount - 1)
           let root = SIMD3<Float>(
             0.080 - 0.164 * axial - stagger,
             side * (0.041 + 0.024 * course + 0.0008 * rootIdentity),
@@ -331,6 +395,10 @@ enum CrowBodyFeatherTracts {
               rootWidthMeters: 0.0045 * (1 + 0.04 * rootIdentity),
               maximumWidthMeters: (0.0078 + 0.0015 * course) * (1 + 0.05 * shapeIdentity),
               camberMeters: (0.0019 + 0.00055 * course) * (1 + 0.10 * rootIdentity),
+              vaneAsymmetry: 0.060 * shapeIdentity,
+              edgeRippleAmplitude: 0.014 + 0.020 * (0.5 + 0.5 * edgeIdentity),
+              edgeRipplePhase: Float.pi * (edgeIdentity + 1),
+              edgeRippleCycles: 1.40 + 0.70 * (0.5 + 0.5 * cycleIdentity),
               materialVariation: materialIdentity,
               headCoupling: 0
             )
