@@ -7,6 +7,7 @@ enum CrowVentralFeatherTractRegion: UInt8, CaseIterable {
 
 struct CrowVentralFeatherTractSample: Equatable {
   let region: CrowVentralFeatherTractRegion
+  let surfaceFeatherClass: UInt32
   let side: Float
   let row: Int
   let column: Int
@@ -158,6 +159,7 @@ enum CrowVentralFeatherTracts {
           result.append(
             CrowVentralFeatherTractSample(
               region: region,
+              surfaceFeatherClass: surfaceFeatherClass(for: region),
               side: side,
               row: row,
               column: column,
@@ -185,6 +187,18 @@ enum CrowVentralFeatherTracts {
           )
         }
       }
+    }
+  }
+
+  /// Both explicit ventral pterylae continue the short, soft body-contour
+  /// material across the breast and abdomen instead of falling back to the
+  /// generic feather response between the surrounding ventral shingles.
+  static func surfaceFeatherClass(
+    for region: CrowVentralFeatherTractRegion
+  ) -> UInt32 {
+    switch region {
+    case .pectoral, .abdominal:
+      return 7
     }
   }
 

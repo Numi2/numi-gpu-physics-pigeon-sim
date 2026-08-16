@@ -25,6 +25,12 @@ func crowVentralTractsCoverBreastAndAbdomenAtFullResolution() {
   )
   #expect(samples.filter { $0.region == .pectoral }.count == 360)
   #expect(samples.filter { $0.region == .abdominal }.count == 224)
+  #expect(samples.allSatisfy { $0.surfaceFeatherClass == 7 })
+  #expect(
+    CrowVentralFeatherTractRegion.allCases.allSatisfy {
+      CrowVentralFeatherTracts.surfaceFeatherClass(for: $0) == 7
+    }
+  )
   #expect(samples.map(\.materialVariation).min()! < -0.90)
   #expect(samples.map(\.materialVariation).max()! > 0.90)
 
