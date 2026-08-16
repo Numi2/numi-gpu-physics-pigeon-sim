@@ -1683,6 +1683,12 @@ private struct CrowMeshBuilder {
       projectedPixelsPerMeter: projectedPixelsPerMeter,
       to: &vertices
     )
+    appendThroatBridgeFeathers(
+      bodyCenter: posedBodyCenter,
+      neckPose: standingPose?.neckPose,
+      projectedPixelsPerMeter: projectedPixelsPerMeter,
+      to: &vertices
+    )
     if let standingPose {
       appendFoldedWingCoverts(
         bodyCenter: posedBodyCenter,
@@ -2033,6 +2039,44 @@ private struct CrowMeshBuilder {
         camber: sample.camberMeters,
         transverseCamberRatio: 0.10,
         axialStartFraction: sample.pennaceousStartFraction,
+        lodLengthMeters: simd_distance(sample.rootOffset, sample.tipOffset),
+        projectedPixelsPerMeter: projectedPixelsPerMeter,
+        to: &vertices
+      )
+    }
+  }
+
+  private func appendThroatBridgeFeathers(
+    bodyCenter: SIMD3<Float>,
+    neckPose: CrowStandingNeckPose?,
+    projectedPixelsPerMeter: Float,
+    to vertices: inout [ColoredVertex]
+  ) {
+    for sample in CrowThroatBridgeFeathers.visibleSamples(
+      neckPose: neckPose,
+      projectedPixelsPerMeter: projectedPixelsPerMeter
+    ) {
+      let material = sample.materialVariation
+      let color = SIMD4<Float>(
+        0.0058 * (1 + 0.10 * material),
+        0.0088 * (1 + 0.075 * material),
+        0.0158 * (1 + 0.05 * material),
+        0.145 + 0.010 * material
+      )
+      appendFeatherBlade(
+        root: bodyCenter + sample.rootOffset,
+        tip: bodyCenter + sample.tipOffset,
+        planeNormal: sample.planeNormal,
+        rootWidth: sample.rootWidthMeters,
+        maximumWidth: sample.maximumWidthMeters,
+        color: color,
+        sections: 7,
+        camber: sample.camberMeters,
+        transverseCamberRatio: 0.12,
+        vaneAsymmetry: 0.035 * material,
+        edgeRippleAmplitude: 0.018 + 0.008 * abs(material),
+        edgeRipplePhase: Float.pi * (material + 1),
+        axialStartFraction: 0.18,
         lodLengthMeters: simd_distance(sample.rootOffset, sample.tipOffset),
         projectedPixelsPerMeter: projectedPixelsPerMeter,
         to: &vertices
