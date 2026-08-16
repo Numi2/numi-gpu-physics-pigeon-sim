@@ -104,3 +104,31 @@ func bodyFeatherMesostructureRemainsAttached() {
     )
   }
 }
+
+@Test("body tract feathers inherit resolution-scaled rachis and barb detail")
+func bodyTractFeathersResolveMesostructure() {
+  for feather in CrowBodyFeatherTracts.samples() {
+    let length = simd_distance(feather.rootOffset, feather.tipOffset)
+    let silhouette = CrowFeatherMesostructure.segments(
+      for: feather,
+      projectedPixelsPerMeter: 12 / length
+    )
+    let resolved = CrowFeatherMesostructure.segments(
+      for: feather,
+      projectedPixelsPerMeter: 48 / length
+    )
+    #expect(silhouette.isEmpty)
+    #expect(resolved.filter { $0.kind == .rachis }.count == 4)
+    #expect(resolved.filter { $0.kind == .edgeBarbGroup }.count == 25)
+    #expect(
+      resolved.allSatisfy {
+        $0.start.x.isFinite && $0.start.y.isFinite && $0.start.z.isFinite
+          && $0.end.x.isFinite && $0.end.y.isFinite && $0.end.z.isFinite
+          && $0.startRadiusMeters > 0
+          && $0.endRadiusMeters > 0
+          && simd_distance($0.start, $0.end) > 1e-7
+          && simd_distance($0.start, feather.rootOffset) < 1.40 * length
+      }
+    )
+  }
+}

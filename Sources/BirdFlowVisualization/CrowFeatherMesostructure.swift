@@ -24,7 +24,27 @@ enum CrowFeatherMesostructure {
     for feather: CrowBodyContourShingle,
     projectedPixelsPerMeter: Float
   ) -> [CrowFeatherMesostructureSegment] {
-    let length = simd_distance(feather.rootOffset, feather.tipOffset)
+    segments(
+      frame: Frame(feather: feather),
+      projectedPixelsPerMeter: projectedPixelsPerMeter
+    )
+  }
+
+  static func segments(
+    for feather: CrowBodyFeatherTractSample,
+    projectedPixelsPerMeter: Float
+  ) -> [CrowFeatherMesostructureSegment] {
+    segments(
+      frame: Frame(feather: feather),
+      projectedPixelsPerMeter: projectedPixelsPerMeter
+    )
+  }
+
+  private static func segments(
+    frame: Frame,
+    projectedPixelsPerMeter: Float
+  ) -> [CrowFeatherMesostructureSegment] {
+    let length = simd_distance(frame.root, frame.tip)
     let tessellation = CrowFeatherCoverageLOD.tessellation(
       lengthMeters: length,
       projectedPixelsPerMeter: projectedPixelsPerMeter,
@@ -32,7 +52,6 @@ enum CrowFeatherMesostructure {
     )
     guard tessellation.rachisSections > 0 else { return [] }
 
-    let frame = Frame(feather: feather)
     var result: [CrowFeatherMesostructureSegment] = []
     result.reserveCapacity(
       tessellation.rachisSections
@@ -57,14 +76,25 @@ enum CrowFeatherMesostructure {
   }
 
   private struct Frame {
-    let feather: CrowBodyContourShingle
+    let root: SIMD3<Float>
+    let tip: SIMD3<Float>
     let direction: SIMD3<Float>
     let normal: SIMD3<Float>
     let widthAxis: SIMD3<Float>
+    let rootWidthMeters: Float
+    let maximumWidthMeters: Float
+    let camberMeters: Float
     let pennaceousStartFraction: Float
+    let vaneAsymmetry: Float
+    let edgeRippleAmplitude: Float
+    let edgeRipplePhase: Float
+    let edgeRippleCycles: Float
+    let identityFirst: Int
+    let identitySecond: Int
 
     init(feather: CrowBodyContourShingle) {
-      self.feather = feather
+      root = feather.rootOffset
+      tip = feather.tipOffset
       direction = normalized(
         feather.tipOffset - feather.rootOffset,
         fallback: SIMD3<Float>(-1, 0, 0)
@@ -78,22 +108,67 @@ enum CrowFeatherMesostructure {
         simd_cross(normal, direction),
         fallback: SIMD3<Float>(0, 1, 0)
       )
+      rootWidthMeters = feather.rootWidthMeters
+      maximumWidthMeters = feather.maximumWidthMeters
+      camberMeters = feather.camberMeters
       pennaceousStartFraction = feather.pennaceousStartFraction
+      vaneAsymmetry = feather.vaneAsymmetry
+      edgeRippleAmplitude = feather.edgeRippleAmplitude
+      edgeRipplePhase = feather.edgeRipplePhase
+      edgeRippleCycles = 1.5
+      identityFirst = feather.radialIndex
+      identitySecond = feather.axialIndex
+    }
+
+    init(feather: CrowBodyFeatherTractSample) {
+      root = feather.rootOffset
+      tip = feather.tipOffset
+      direction = normalized(
+        feather.tipOffset - feather.rootOffset,
+        fallback: SIMD3<Float>(-1, 0, 0)
+      )
+      normal = normalized(
+        feather.planeNormal
+          - direction * simd_dot(feather.planeNormal, direction),
+        fallback: feather.planeNormal
+      )
+      widthAxis = normalized(
+        simd_cross(normal, direction),
+        fallback: SIMD3<Float>(0, 1, 0)
+      )
+      rootWidthMeters = feather.rootWidthMeters
+      maximumWidthMeters = feather.maximumWidthMeters
+      camberMeters = feather.camberMeters
+      pennaceousStartFraction = 0
+      vaneAsymmetry = feather.vaneAsymmetry
+      edgeRippleAmplitude = feather.edgeRippleAmplitude
+      edgeRipplePhase = feather.edgeRipplePhase
+      edgeRippleCycles = feather.edgeRippleCycles
+      identityFirst = feather.row + 31 * Int(feather.region.rawValue)
+      identitySecond = feather.column + (feather.side < 0 ? 97 : 0)
     }
 
     func center(at axial: Float) -> SIMD3<Float> {
       let t = clamp(axial)
-      return feather.rootOffset
-        + (feather.tipOffset - feather.rootOffset) * t
-        + normal * (feather.camberMeters * sin(Float.pi * t) + 0.00012)
+      return root
+        + (tip - root) * t
+        + normal * (camberMeters * sin(Float.pi * t) + 0.00012)
     }
 
     func halfWidth(at axial: Float, signedWidth: Float = 0) -> Float {
-      CrowBodyContourShingles.vaneHalfWidth(
-        for: feather,
-        at: axial,
-        signedWidth: signedWidth
-      )
+      let t = clamp(axial)
+      let bodyEnvelope = 0.32 + 0.68 * pow(max(sin(Float.pi * t), 0), 0.58)
+      let tipTaper = 1 - 0.985 * pow(t, 3.2)
+      let rippleEnvelope = pow(max(sin(Float.pi * t), 0), 2)
+      let edgeRipple =
+        1
+        + edgeRippleAmplitude
+        * sin(2 * Float.pi * edgeRippleCycles * t + edgeRipplePhase)
+        * rippleEnvelope
+      let sideScale = 1 + vaneAsymmetry * min(max(signedWidth, -1), 1)
+      return
+        (rootWidthMeters * (1 - t) + maximumWidthMeters * t)
+        * bodyEnvelope * tipTaper * edgeRipple * sideScale
     }
 
     func pennaceousAxial(at localFraction: Float) -> Float {
@@ -147,8 +222,8 @@ enum CrowFeatherMesostructure {
       )
       for side: Float in [-1, 1] {
         let identity = sin(
-          Float(frame.feather.radialIndex + 1) * 12.9898
-            + Float(frame.feather.axialIndex + 1) * 78.233
+          Float(frame.identityFirst + 1) * 12.9898
+            + Float(frame.identitySecond + 1) * 78.233
             + Float(pair + 1) * 37.719
             + side * 1.371
         )
@@ -210,12 +285,12 @@ enum CrowFeatherMesostructure {
         + lane * frame.widthAxis * rootHalfWidth * 0.42
         + frame.normal * 0.00012
       let laneIdentity = sin(
-        Float(frame.feather.radialIndex + 1) * 17.117
-          + Float(frame.feather.axialIndex + 1) * 43.731
+        Float(frame.identityFirst + 1) * 17.117
+          + Float(frame.identitySecond + 1) * 43.731
           + lane * 2.913
       )
       let tip =
-        frame.feather.tipOffset
+        frame.tip
         + frame.direction * extensionMeters * (0.82 + 0.12 * laneIdentity)
         + lane * frame.widthAxis * 0.18 * rootHalfWidth
         + frame.normal * 0.00020

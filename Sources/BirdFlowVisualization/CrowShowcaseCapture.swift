@@ -1864,6 +1864,62 @@ private struct CrowMeshBuilder {
     }
   }
 
+  private func appendBodyTractFeatherMesostructure(
+    _ feather: CrowBodyFeatherTractSample,
+    bodyCenter: SIMD3<Float>,
+    projectedPixelsPerMeter: Float,
+    to vertices: inout [ColoredVertex]
+  ) {
+    let material = feather.materialVariation
+    for segment in CrowFeatherMesostructure.segments(
+      for: feather,
+      projectedPixelsPerMeter: projectedPixelsPerMeter
+    ) {
+      let color: SIMD4<Float>
+      switch segment.kind {
+      case .rachis:
+        color = SIMD4<Float>(
+          0.010 * (1 + 0.06 * material),
+          0.014 * (1 + 0.04 * material),
+          0.022 * (1 + 0.03 * material),
+          0.14
+        )
+      case .edgeBarbGroup:
+        color = SIMD4<Float>(
+          0.0075 * (1 + 0.08 * material),
+          0.011 * (1 + 0.06 * material),
+          0.019 * (1 + 0.04 * material),
+          0.135
+        )
+      case .barb:
+        color = SIMD4<Float>(0.008, 0.012, 0.020, 0.14)
+      case .barbule:
+        color = SIMD4<Float>(0.006, 0.010, 0.017, 0.14)
+      }
+      if segment.kind == .edgeBarbGroup {
+        appendTaperedRibbon(
+          from: bodyCenter + segment.start,
+          to: bodyCenter + segment.end,
+          startHalfWidth: segment.startRadiusMeters,
+          endHalfWidth: segment.endRadiusMeters,
+          surfaceNormal: feather.planeNormal,
+          color: color,
+          to: &vertices
+        )
+      } else {
+        appendTaperedTube(
+          from: bodyCenter + segment.start,
+          to: bodyCenter + segment.end,
+          startRadius: segment.startRadiusMeters,
+          endRadius: segment.endRadiusMeters,
+          color: color,
+          radialSegments: segment.kind == .rachis ? 4 : 3,
+          to: &vertices
+        )
+      }
+    }
+  }
+
   private func appendRumpTailUnderlayer(
     bodyCenter: SIMD3<Float>,
     to vertices: inout [ColoredVertex]
@@ -2098,6 +2154,12 @@ private struct CrowMeshBuilder {
         edgeRipplePhase: sample.edgeRipplePhase,
         edgeRippleCycles: sample.edgeRippleCycles,
         lodLengthMeters: simd_distance(sample.rootOffset, sample.tipOffset),
+        projectedPixelsPerMeter: projectedPixelsPerMeter,
+        to: &vertices
+      )
+      appendBodyTractFeatherMesostructure(
+        sample,
+        bodyCenter: bodyCenter,
         projectedPixelsPerMeter: projectedPixelsPerMeter,
         to: &vertices
       )
