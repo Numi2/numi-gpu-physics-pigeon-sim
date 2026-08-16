@@ -97,8 +97,8 @@ enum CrowLegPlumage {
         let tipFraction = min(
           1.13,
           rootFraction
-            + 0.30 * (1 + 0.055 * shapeIdentity + 0.025 * tipIdentity)
-            + 0.028 * distalFringeWeight * tipIdentity
+            + 0.30 * (1 + 0.070 * shapeIdentity + 0.055 * tipIdentity)
+            + 0.045 * distalFringeWeight * tipIdentity
         )
         let rootRadius = radius(at: rootFraction)
         let tipRadius = radius(at: tipFraction)

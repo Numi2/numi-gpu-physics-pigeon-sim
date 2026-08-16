@@ -107,6 +107,15 @@ func crowCruralPlumageOverlapsLegAndCrossesHockBoundary() {
     }
   }
 
+  for stationIndex in 0..<CrowLegPlumage.stationCount {
+    let axialLengths = samples.filter {
+      $0.stationIndex == stationIndex
+    }.map {
+      simd_dot($0.tip - $0.root, axis)
+    }
+    #expect(axialLengths.max()! - axialLengths.min()! > 0.0022)
+  }
+
   let distalProjection = samples.map { simd_dot($0.tip - hip, axis) }.max()!
   #expect(distalProjection > legLength + 0.003)
   #expect(distalProjection < legLength + 0.007)
@@ -149,6 +158,55 @@ func crowCruralPlumageRetainsCircumferentialOverlap() {
     #expect(
       simd_distance(sample.root, neighbor.root)
         < sample.maximumWidthMeters + neighbor.maximumWidthMeters
+    )
+  }
+}
+
+@Test("crural vanes resolve shafts, paired barbs, and terminal bundles")
+func crowCruralVanesResolveFullDensityMesostructure() {
+  let samples = CrowLegPlumage.samples(
+    hip: SIMD3<Float>(-0.025, 0.035, -0.060),
+    hock: SIMD3<Float>(-0.014, 0.040, -0.111)
+  )
+  for feather in samples {
+    #expect(
+      CrowCruralFeatherDetail.segments(
+        for: feather,
+        projectedPixelsPerMeter: 1_000
+      ).isEmpty
+    )
+    let segments = CrowCruralFeatherDetail.segments(
+      for: feather,
+      projectedPixelsPerMeter: 1_600
+    )
+    #expect(
+      segments.count
+        == 1 + 2 * CrowCruralFeatherDetail.barbPairCount
+          + CrowCruralFeatherDetail.terminalBundleCount
+    )
+    #expect(segments.filter { $0.kind == .rachis }.count == 1)
+    #expect(
+      segments.filter { $0.kind == .edgeBarbGroup }.count
+        == 2 * CrowCruralFeatherDetail.barbPairCount
+          + CrowCruralFeatherDetail.terminalBundleCount
+    )
+    let featherLength = simd_distance(feather.root, feather.tip)
+    #expect(
+      segments.allSatisfy {
+        $0.start.x.isFinite && $0.start.y.isFinite && $0.start.z.isFinite
+          && $0.end.x.isFinite && $0.end.y.isFinite && $0.end.z.isFinite
+          && $0.startRadiusMeters > $0.endRadiusMeters
+          && $0.endRadiusMeters > 0
+          && simd_distance($0.start, $0.end) > 1e-5
+          && simd_distance($0.start, feather.root) < featherLength
+          && simd_distance($0.end, feather.root) < 1.05 * featherLength
+      }
+    )
+    let terminal = segments.suffix(CrowCruralFeatherDetail.terminalBundleCount)
+    #expect(
+      terminal.allSatisfy {
+        simd_dot($0.end - feather.tip, feather.tip - feather.root) > 0
+      }
     )
   }
 }

@@ -2725,6 +2725,16 @@ private struct CrowMeshBuilder {
           projectedPixelsPerMeter: projectedPixelsPerMeter,
           to: &vertices
         )
+        appendTractFeatherMesostructure(
+          CrowCruralFeatherDetail.segments(
+            for: feather,
+            projectedPixelsPerMeter: projectedPixelsPerMeter
+          ),
+          bodyCenter: .zero,
+          planeNormal: feather.planeNormal,
+          material: feather.materialVariation,
+          to: &vertices
+        )
       }
       vertices.append(
         contentsOf: CrowTarsometatarsusAnatomy.vertices(
