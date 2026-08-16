@@ -1689,6 +1689,11 @@ private struct CrowMeshBuilder {
       projectedPixelsPerMeter: projectedPixelsPerMeter,
       to: &vertices
     )
+    appendUndertailCoverts(
+      bodyCenter: posedBodyCenter,
+      projectedPixelsPerMeter: projectedPixelsPerMeter,
+      to: &vertices
+    )
     if let standingPose {
       appendFoldedWingCoverts(
         bodyCenter: posedBodyCenter,
@@ -2095,6 +2100,42 @@ private struct CrowMeshBuilder {
         edgeRippleAmplitude: 0.018 + 0.008 * abs(material),
         edgeRipplePhase: Float.pi * (material + 1),
         axialStartFraction: 0.18,
+        lodLengthMeters: simd_distance(sample.rootOffset, sample.tipOffset),
+        projectedPixelsPerMeter: projectedPixelsPerMeter,
+        to: &vertices
+      )
+    }
+  }
+
+  private func appendUndertailCoverts(
+    bodyCenter: SIMD3<Float>,
+    projectedPixelsPerMeter: Float,
+    to vertices: inout [ColoredVertex]
+  ) {
+    for sample in CrowUndertailCoverts.visibleSamples(
+      projectedPixelsPerMeter: projectedPixelsPerMeter
+    ) {
+      let material = sample.materialVariation
+      let color = SIMD4<Float>(
+        0.006 * (1 + 0.09 * material),
+        0.009 * (1 + 0.07 * material),
+        0.016 * (1 + 0.045 * material),
+        0.16 + 0.009 * material
+      )
+      appendFeatherBlade(
+        root: bodyCenter + sample.rootOffset,
+        tip: bodyCenter + sample.tipOffset,
+        planeNormal: sample.planeNormal,
+        rootWidth: sample.rootWidthMeters,
+        maximumWidth: sample.maximumWidthMeters,
+        color: color,
+        sections: 7,
+        camber: sample.camberMeters,
+        transverseCamberRatio: 0.10,
+        vaneAsymmetry: 0.025 * material,
+        edgeRippleAmplitude: 0.014 + 0.006 * abs(material),
+        edgeRipplePhase: Float.pi * (material + 1),
+        axialStartFraction: 0.26,
         lodLengthMeters: simd_distance(sample.rootOffset, sample.tipOffset),
         projectedPixelsPerMeter: projectedPixelsPerMeter,
         to: &vertices
