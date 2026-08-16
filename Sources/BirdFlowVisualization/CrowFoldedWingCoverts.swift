@@ -114,7 +114,7 @@ enum CrowFoldedWingCoverts {
           )
           let stagger =
             courseStaggerFraction(row: row)
-            * 0.250 / Float(columnCount - 1)
+            * 0.280 / Float(columnCount - 1)
           let rootX = 0.092 - 0.224 * axial - stagger
           let rootSurface = mirroredSurfacePoint(
             x: rootX,
@@ -222,7 +222,7 @@ enum CrowFoldedWingCoverts {
           let axial = Float(column) / Float(coarseColumnCount - 1)
           let stagger =
             courseStaggerFraction(row: row)
-            * 0.250 / Float(coarseColumnCount - 1)
+            * 0.280 / Float(coarseColumnCount - 1)
           let rootX = 0.092 - 0.224 * axial - stagger
           let rootSurface = mirroredSurfacePoint(
             x: rootX,
@@ -320,14 +320,14 @@ enum CrowFoldedWingCoverts {
     )
   }
 
-  /// Interleaved axial strata give every covert row a distinct start while
-  /// reserving at least 0.40 of a root interval between neighboring phases.
-  /// This leaves room for stable per-feather jitter without collapsing the
-  /// established three-millimetre cross-course separation.
+  /// A finite low-discrepancy permutation distributes the 18 covert courses
+  /// across one complete axial root interval. The coprime nine-of-nineteen
+  /// stride keeps neighboring rows almost half an interval apart without the
+  /// two broad sheets produced by even/odd staggering. This preserves more
+  /// than three millimetres of cross-course separation at full density.
   static func courseStaggerFraction(row: Int) -> Float {
     let boundedRow = min(max(row, 0), rowCount - 1)
-    let stratum = 0.020 * Float(boundedRow / 2)
-    return boundedRow.isMultiple(of: 2) ? stratum : 0.55 + stratum
+    return Float((boundedRow * 9) % 19) / 19
   }
 
   private static func smootherstep(_ value: Float) -> Float {

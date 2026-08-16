@@ -65,15 +65,15 @@ func foldedWingCovertsFormSymmetricBodySeatedShell() {
     CrowFoldedWingCoverts.courseStaggerFraction(row: $0)
   }
   #expect(courseStaggers.first == 0)
-  #expect(courseStaggers.allSatisfy { $0 >= 0 && $0 < 0.72 })
+  #expect(courseStaggers.allSatisfy { $0 >= 0 && $0 < 1 })
   #expect(
     Set(courseStaggers.map { Int(($0 * 10_000).rounded()) }).count
       == CrowFoldedWingCoverts.rowCount
   )
-  #expect(courseStaggers.max()! - courseStaggers.min()! > 0.70)
+  #expect(courseStaggers.max()! - courseStaggers.min()! > 0.94)
   #expect(
     zip(courseStaggers, courseStaggers.dropFirst()).allSatisfy {
-      abs($0 - $1) > 0.399
+      abs($0 - $1) > 0.47
     }
   )
   #expect(
