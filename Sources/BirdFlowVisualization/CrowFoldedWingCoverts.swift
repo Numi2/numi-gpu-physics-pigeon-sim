@@ -27,7 +27,7 @@ struct CrowFoldedWingCovertSample: Equatable {
 /// and axillary seams from arbitrary cameras while retaining explicit feather
 /// identities that can move to mesh shaders on future hardware.
 enum CrowFoldedWingCoverts {
-  static let rowCount = 14
+  static let rowCount = 18
   static let columnCount = 34
   static let shellClearanceMeters: Float = 0.0012
   static let surfaceFeatherClass: UInt32 = 4
@@ -85,6 +85,11 @@ enum CrowFoldedWingCoverts {
             column: column,
             salt: 0x1656_67B1
           )
+          let lengthIdentity = identityVariation(
+            row: row,
+            column: column,
+            salt: 0x7E95_761E
+          )
           let rowStep = 1 / Float(rowCount - 1)
           let rowFraction = min(
             1,
@@ -125,7 +130,7 @@ enum CrowFoldedWingCoverts {
           let root = rootSurface + clearance * rootNormal
           let nominalLength =
             (0.034 + 0.044 * axial + 0.006 * rowFraction)
-            * (1 + 0.055 * shapeIdentity)
+            * (1 + 0.070 * shapeIdentity + 0.035 * lengthIdentity)
           let tipX = rootX - nominalLength
           let tipTheta =
             theta - 0.050 - 0.024 * axial + 0.012 * rootIdentity
@@ -145,7 +150,7 @@ enum CrowFoldedWingCoverts {
             tip += SIMD3<Float>(tipX - clampedTipX, 0, 0.16 * (tipX - clampedTipX))
           }
           let localWidth = max(
-            0.0062,
+            0.0046,
             0.78
               * circumferentialSpacing(
                 x: rootX,
@@ -186,7 +191,7 @@ enum CrowFoldedWingCoverts {
               maximumWidthMeters:
                 localWidth * (1 + 0.08 * axial) * (1 + 0.04 * shapeIdentity)
                 * outerCourseWidthScale(row: row, column: column),
-              camberMeters: (0.00155 + 0.00055 * rowFraction)
+              camberMeters: (0.00115 + 0.00040 * rowFraction)
                 * (1 + 0.09 * rootIdentity),
               vaneAsymmetry: 0.035 * vaneIdentity,
               edgeRippleAmplitude:
@@ -308,7 +313,7 @@ enum CrowFoldedWingCoverts {
     theta: Float,
     rowCount: Int
   ) -> Float {
-    let halfStep = 0.5 * Float.pi / Float(rowCount + 2)
+    let halfStep = 0.5 * 1.02 / Float(max(rowCount - 1, 1))
     return simd_distance(
       CrowBodyAnatomy.surfacePoint(atX: x, theta: theta - halfStep),
       CrowBodyAnatomy.surfacePoint(atX: x, theta: theta + halfStep)
@@ -321,7 +326,7 @@ enum CrowFoldedWingCoverts {
   /// established three-millimetre cross-course separation.
   static func courseStaggerFraction(row: Int) -> Float {
     let boundedRow = min(max(row, 0), rowCount - 1)
-    let stratum = 0.025 * Float(boundedRow / 2)
+    let stratum = 0.020 * Float(boundedRow / 2)
     return boundedRow.isMultiple(of: 2) ? stratum : 0.55 + stratum
   }
 
