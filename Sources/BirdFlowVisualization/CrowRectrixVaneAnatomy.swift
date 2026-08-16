@@ -85,8 +85,15 @@ enum CrowRectrixVaneAnatomy {
     order: Int,
     count: Int
   ) -> Float {
-    guard featherClass == .tail else { return assetWidthMeters }
-    return assetWidthMeters * profile(order: order, count: count).maximumWidthScale
+    if featherClass == .tail {
+      return assetWidthMeters * profile(order: order, count: count).maximumWidthScale
+    }
+    return assetWidthMeters
+      * (CrowRemexVaneAnatomy.profile(
+        featherClass: featherClass,
+        order: order,
+        count: count
+      )?.maximumWidthScale ?? 1)
   }
 
   static func camberMeters(
@@ -97,6 +104,13 @@ enum CrowRectrixVaneAnatomy {
   ) -> Float {
     if featherClass == .tail {
       return lengthMeters * profile(order: order, count: count).camberLengthScale
+    }
+    if let remex = CrowRemexVaneAnatomy.profile(
+      featherClass: featherClass,
+      order: order,
+      count: count
+    ) {
+      return lengthMeters * remex.camberLengthScale
     }
     let scale: Float
     switch featherClass {

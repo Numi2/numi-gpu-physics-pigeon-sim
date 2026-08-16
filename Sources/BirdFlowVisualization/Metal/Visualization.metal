@@ -433,6 +433,63 @@ inline float4 crowRectrixVaneProfile(uint packedIdentity) {
     );
 }
 
+inline float4 crowRemexVaneProfile(uint packedIdentity) {
+    uint featherClass=packedIdentity&255u;
+    if(featherClass!=1u&&featherClass!=2u){return float4(0);}
+    uint sideCode=(packedIdentity>>8u)&255u;
+    uint order=(packedIdentity>>16u)&255u;
+    uint count=max((packedIdentity>>24u)&255u,1u);
+    float fraction=float(min(order,count-1u))/float(max(count-1u,1u));
+    float dorsalSignedWidth=sideCode==2u?-1.0f:1.0f;
+    float vaneAsymmetry=featherClass==1u
+        ?0.075f+0.095f*fraction
+        :0.040f+0.035f*fraction;
+    float camberSkew=featherClass==1u
+        ?0.015f+0.055f*fraction
+        :-0.035f+0.025f*fraction;
+    return float4(
+        fraction,dorsalSignedWidth,vaneAsymmetry,camberSkew
+    );
+}
+
+inline float3 crowRemexEdgeMicrostructure(
+    float axial,
+    float signedWidth,
+    uint packedIdentity,
+    float4 remex) {
+    axial=clamp(axial,0.0f,1.0f);
+    uint featherClass=packedIdentity&255u;
+    float sine=max(sin(M_PI_F*axial),0.0f);
+    float cosine=cos(M_PI_F*axial);
+    float sinePower=pow(sine,0.9f);
+    float distalBias=0.30f+0.70f*axial;
+    float envelope=sinePower*distalBias;
+    float envelopeDerivative=0.9f*pow(max(sine,1.0e-6f),-0.1f)
+        *M_PI_F*cosine*distalBias+0.70f*sinePower;
+    float amplitude=featherClass==1u
+        ?0.012f+0.008f*remex.x
+        :0.010f+0.004f*remex.x;
+    float phase=(featherClass==1u
+        ?0.65f+2.70f*remex.x
+        :1.10f+2.10f*remex.x)+0.38f*signedWidth*remex.y;
+    float firstFrequency=2.0f*M_PI_F*(featherClass==1u?5.0f:4.0f);
+    float secondFrequency=2.0f*M_PI_F*(featherClass==1u?11.0f:9.0f);
+    float firstAngle=firstFrequency*axial+phase;
+    float secondAngle=secondFrequency*axial-0.65f*phase;
+    float wave=0.72f*sin(firstAngle)+0.28f*sin(secondAngle);
+    float waveAxialDerivative=0.72f*firstFrequency*cos(firstAngle)
+        +0.28f*secondFrequency*cos(secondAngle);
+    float phaseSignedWidthDerivative=0.38f*remex.y;
+    float waveSignedWidthDerivative=0.72f*cos(firstAngle)
+        *phaseSignedWidthDerivative
+        -0.28f*0.65f*cos(secondAngle)*phaseSignedWidthDerivative;
+    return float3(
+        1.0f+amplitude*envelope*wave,
+        amplitude*(envelopeDerivative*wave+envelope*waveAxialDerivative),
+        amplitude*envelope*waveSignedWidthDerivative
+    );
+}
+
 inline float3 crowRectrixEdgeMicrostructure(
     float axial,
     float signedWidth,
@@ -469,6 +526,12 @@ inline float crowFeatherCrownRatio(uint packedIdentity) {
         float radialFraction=crowRectrixVaneProfile(packedIdentity).x;
         return 0.105f+0.020f*(1.0f-radialFraction);
     }
+    if(featherClass==1u||featherClass==2u){
+        float fraction=crowRemexVaneProfile(packedIdentity).x;
+        return featherClass==1u
+            ?0.122f-0.018f*fraction
+            :0.158f-0.012f*fraction;
+    }
     return featherClass==1u?0.13f:(featherClass==2u?0.16f:0.14f);
 }
 
@@ -491,13 +554,22 @@ inline float3 crowFeatherPosition(
     );
     float symmetricWidth=mix(0.55f*maximumWidthMeters,maximumWidthMeters,axial)
         *crowFeatherWidthEnvelope(axial);
+    uint featherClass=packedIdentity&255u;
     float4 rectrix=crowRectrixVaneProfile(packedIdentity);
-    float sideScale=1.0f-rectrix.z*signedWidth*rectrix.y;
-    float edgeModulation=(packedIdentity&255u)==3u
-        ?crowRectrixEdgeMicrostructure(axial,signedWidth,rectrix).x:1.0f;
+    float4 remex=crowRemexVaneProfile(packedIdentity);
+    float vaneAsymmetry=featherClass==3u?rectrix.z:remex.z;
+    float narrowSignedWidth=featherClass==3u?rectrix.y:remex.y;
+    float sideScale=1.0f-vaneAsymmetry*signedWidth*narrowSignedWidth;
+    float edgeModulation=featherClass==3u
+        ?crowRectrixEdgeMicrostructure(axial,signedWidth,rectrix).x
+        :((featherClass==1u||featherClass==2u)
+            ?crowRemexEdgeMicrostructure(
+                axial,signedWidth,packedIdentity,remex
+            ).x:1.0f);
     float width=symmetricWidth*sideScale*edgeModulation;
+    float camberSkew=featherClass==3u?rectrix.w:remex.w;
     float camberEnvelope=sin(M_PI_F*axial)
-        *(1.0f+rectrix.w*(2.0f*axial-1.0f));
+        *(1.0f+camberSkew*(2.0f*axial-1.0f));
     float3 center=root+tangent*(lengthMeters*axial)
         +orthogonalNormal*(camberMeters*camberEnvelope);
     float transverseEnvelope=max(0.0f,1.0f-signedWidth*signedWidth);
@@ -537,27 +609,35 @@ inline float3 crowFeatherNormal(
     float symmetricWidthDerivative=baseWidthDerivative*bodyEnvelope*tipTaper
         +baseWidth*bodyDerivative*tipTaper
         +baseWidth*bodyEnvelope*tipDerivative;
+    uint featherClass=packedIdentity&255u;
     float4 rectrix=crowRectrixVaneProfile(packedIdentity);
-    float sideScale=1.0f-rectrix.z*signedWidth*rectrix.y;
-    float3 edgeMicrostructure=(packedIdentity&255u)==3u
+    float4 remex=crowRemexVaneProfile(packedIdentity);
+    float vaneAsymmetry=featherClass==3u?rectrix.z:remex.z;
+    float narrowSignedWidth=featherClass==3u?rectrix.y:remex.y;
+    float sideScale=1.0f-vaneAsymmetry*signedWidth*narrowSignedWidth;
+    float3 edgeMicrostructure=featherClass==3u
         ?crowRectrixEdgeMicrostructure(sampledAxial,signedWidth,rectrix)
-        :float3(1.0f,0.0f,0.0f);
+        :((featherClass==1u||featherClass==2u)
+            ?crowRemexEdgeMicrostructure(
+                sampledAxial,signedWidth,packedIdentity,remex
+            ):float3(1.0f,0.0f,0.0f));
     float width=symmetricWidth*sideScale*edgeMicrostructure.x;
     float widthDerivative=sideScale*(
         symmetricWidthDerivative*edgeMicrostructure.x
         +symmetricWidth*edgeMicrostructure.y
     );
     float widthSignedDerivative=symmetricWidth*(
-        -rectrix.z*rectrix.y*edgeMicrostructure.x
+        -vaneAsymmetry*narrowSignedWidth*edgeMicrostructure.x
         +sideScale*edgeMicrostructure.z
     );
     float crownEnvelope=pow(sine,0.65f);
     float crownDerivative=0.65f*pow(sine,-0.35f)*sineDerivative;
     float transverseEnvelope=max(0.0f,1.0f-signedWidth*signedWidth);
     float crownRatio=crowFeatherCrownRatio(packedIdentity);
+    float camberSkew=featherClass==3u?rectrix.w:remex.w;
     float camberDerivative=sineDerivative
-        *(1.0f+rectrix.w*(2.0f*sampledAxial-1.0f))
-        +sine*2.0f*rectrix.w;
+        *(1.0f+camberSkew*(2.0f*sampledAxial-1.0f))
+        +sine*2.0f*camberSkew;
     float3 axialTangent=tangent*lengthMeters
         +orthogonalNormal*(camberMeters*camberDerivative)
         +widthAxis*(signedWidth*widthDerivative)
@@ -1263,7 +1343,8 @@ inline float3 showcaseCrowLinearRadiance(
     float3 normalInput,
     float4 albedoAndMaterial,
     float3 eyePosition,
-    float2 featherCoordinates) {
+    float2 featherCoordinates,
+    uint packedIdentity) {
     float3 normal=normalize(normalInput);
     float3 view=normalize(eyePosition-world);
     float material=albedoAndMaterial.a;
@@ -1324,6 +1405,10 @@ inline float3 showcaseCrowLinearRadiance(
     float vaneCoordinates=step(1.0e-5f,
         abs(featherCoordinates.x)+abs(featherCoordinates.y));
     float persistentVane=featherMaterial*vaneCoordinates;
+    uint featherClass=packedIdentity&255u;
+    float primaryVane=featherClass==1u?persistentVane:0.0f;
+    float secondaryVane=featherClass==2u?persistentVane:0.0f;
+    float rectrixVane=featherClass==3u?persistentVane:0.0f;
     float3 featherAxis=crowFeatherAxis(
         world,normal,featherCoordinates
     );
@@ -1332,11 +1417,18 @@ inline float3 showcaseCrowLinearRadiance(
         mix(0.52f,1.0f,flightFeather),
         vaneCoordinates
     );
+    float longitudinalRoughness=mix(0.34f,0.25f,flightFeather);
+    float transverseRoughness=mix(0.12f,0.075f,flightFeather);
+    longitudinalRoughness=mix(longitudinalRoughness,0.215f,primaryVane);
+    longitudinalRoughness=mix(longitudinalRoughness,0.285f,secondaryVane);
+    longitudinalRoughness=mix(longitudinalRoughness,0.245f,rectrixVane);
+    transverseRoughness=mix(transverseRoughness,0.065f,primaryVane);
+    transverseRoughness=mix(transverseRoughness,0.090f,secondaryVane);
+    transverseRoughness=mix(transverseRoughness,0.075f,rectrixVane);
     float anisotropicSpecular=featherMaterial*vaneAnisotropy
         *crowFeatherAnisotropicLobe(
         normal,featherAxis,halfVector,
-        mix(0.34f,0.25f,flightFeather),
-        mix(0.12f,0.075f,flightFeather)
+        longitudinalRoughness,transverseRoughness
     );
     float axial=saturate(featherCoordinates.x);
     float signedWidth=clamp(featherCoordinates.y,-1.0f,1.0f);
@@ -1344,8 +1436,11 @@ inline float3 showcaseCrowLinearRadiance(
         *smoothstep(0.035f,0.16f,axial)
         *(1.0f-smoothstep(0.80f,0.985f,axial))
         *exp2(-42.0f*abs(signedWidth));
+    float barbFrequency=178.0f;
+    barbFrequency=mix(barbFrequency,214.0f,primaryVane);
+    barbFrequency=mix(barbFrequency,190.0f,secondaryVane);
     float localBarbs=0.5f+0.5f*sin(
-        178.0f*axial+23.0f*abs(signedWidth)+7.0f*signedWidth
+        barbFrequency*axial+23.0f*abs(signedWidth)+7.0f*signedWidth
     );
     float barbPhase=520.0f*world.x+390.0f*world.y-270.0f*world.z;
     float barb=0.5f+0.5f*sin(barbPhase);
@@ -1377,7 +1472,12 @@ inline float3 showcaseCrowLinearRadiance(
     // than exposed remiges. Keep their sharp lobe below the isolated silver
     // flashes that otherwise appear when one shoulder vane meets the half
     // vector, while preserving the full sharp response on flight feathers.
-    color+=sharpTint*featherSpecular*mix(0.30f,1.0f,flightFeather);
+    float classSharpScale=1.0f;
+    classSharpScale=mix(classSharpScale,0.82f,primaryVane);
+    classSharpScale=mix(classSharpScale,0.60f,secondaryVane);
+    classSharpScale=mix(classSharpScale,0.72f,rectrixVane);
+    color+=sharpTint*featherSpecular*mix(0.30f,1.0f,flightFeather)
+        *classSharpScale;
     color+=softTint*softSpecular;
     color+=anisotropicSpecular
         *mix(float3(0.020f,0.030f,0.046f),float3(0.012f,0.020f,0.034f),flightFeather);
@@ -1398,7 +1498,7 @@ fragment float4 showcaseCrowFragment(
     RasterVertex in [[stage_in]],
     constant CameraUniforms& camera [[buffer(0)]]) {
     float3 radiance=showcaseCrowLinearRadiance(
-        in.world,in.normal,in.color,camera.eyeAndWidth.xyz,in.uv
+        in.world,in.normal,in.color,camera.eyeAndWidth.xyz,in.uv,0u
     );
     return float4(1.0f-exp(-radiance),1.0f);
 }
@@ -1409,7 +1509,7 @@ fragment CrowAOVOutput showcaseCrowAOVFragment(
     float3 normal=normalize(in.normal);
     float3 radiance=showcaseCrowLinearRadiance(
         in.world,normal,in.albedoAndMaterial,camera.eyeAndWidth.xyz,
-        in.featherCoordinates
+        in.featherCoordinates,in.identity.w
     );
     float inversePreviousW=1.0f/in.previousClipPosition.w;
     float2 previousNDC=in.previousClipPosition.xy*inversePreviousW;

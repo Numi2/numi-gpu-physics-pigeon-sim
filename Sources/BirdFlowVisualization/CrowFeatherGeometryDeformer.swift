@@ -239,13 +239,21 @@ final class CrowFeatherGeometryDeformer {
       (0.55 * maximumWidthMeters * (1 - axial)
         + maximumWidthMeters * axial) * bodyEnvelope * tipTaper
     let rectrix = CrowRectrixVaneAnatomy.profile(packedIdentity: packedIdentity)
+    let remex = CrowRemexVaneAnatomy.profile(packedIdentity: packedIdentity)
     let sideScale =
       1
-      - (rectrix?.vaneAsymmetry ?? 0) * signedWidth
-      * (rectrix?.outerSignedWidth ?? 0)
+      - (rectrix?.vaneAsymmetry ?? remex?.vaneAsymmetry ?? 0) * signedWidth
+      * (rectrix?.outerSignedWidth ?? remex?.dorsalSignedWidth ?? 0)
     let edgeModulation =
       rectrix.map {
         CrowRectrixVaneAnatomy.edgeModulation(
+          axial: axial,
+          signedWidth: signedWidth,
+          profile: $0
+        )
+      }
+      ?? remex.map {
+        CrowRemexVaneAnatomy.edgeModulation(
           axial: axial,
           signedWidth: signedWidth,
           profile: $0
@@ -255,6 +263,9 @@ final class CrowFeatherGeometryDeformer {
     let camberEnvelope =
       rectrix.map {
         CrowRectrixVaneAnatomy.camberEnvelope(axial: axial, profile: $0)
+      }
+      ?? remex.map {
+        CrowRemexVaneAnatomy.camberEnvelope(axial: axial, profile: $0)
       } ?? sin(Float.pi * axial)
     let center =
       root + tangent * (lengthMeters * axial)
@@ -302,12 +313,20 @@ final class CrowFeatherGeometryDeformer {
       + baseWidth * bodyDerivative * tipTaper
       + baseWidth * bodyEnvelope * tipDerivative
     let rectrix = CrowRectrixVaneAnatomy.profile(packedIdentity: packedIdentity)
-    let asymmetry = rectrix?.vaneAsymmetry ?? 0
-    let outerSignedWidth = rectrix?.outerSignedWidth ?? 0
+    let remex = CrowRemexVaneAnatomy.profile(packedIdentity: packedIdentity)
+    let asymmetry = rectrix?.vaneAsymmetry ?? remex?.vaneAsymmetry ?? 0
+    let outerSignedWidth = rectrix?.outerSignedWidth ?? remex?.dorsalSignedWidth ?? 0
     let sideScale = 1 - asymmetry * signedWidth * outerSignedWidth
     let edgeModulation =
       rectrix.map {
         CrowRectrixVaneAnatomy.edgeModulation(
+          axial: sampledAxial,
+          signedWidth: signedWidth,
+          profile: $0
+        )
+      }
+      ?? remex.map {
+        CrowRemexVaneAnatomy.edgeModulation(
           axial: sampledAxial,
           signedWidth: signedWidth,
           profile: $0
@@ -320,10 +339,24 @@ final class CrowFeatherGeometryDeformer {
           signedWidth: signedWidth,
           profile: $0
         )
+      }
+      ?? remex.map {
+        CrowRemexVaneAnatomy.edgeModulationAxialDerivative(
+          axial: sampledAxial,
+          signedWidth: signedWidth,
+          profile: $0
+        )
       } ?? 0
     let edgeSignedWidthDerivative =
       rectrix.map {
         CrowRectrixVaneAnatomy.edgeModulationSignedWidthDerivative(
+          axial: sampledAxial,
+          signedWidth: signedWidth,
+          profile: $0
+        )
+      }
+      ?? remex.map {
+        CrowRemexVaneAnatomy.edgeModulationSignedWidthDerivative(
           axial: sampledAxial,
           signedWidth: signedWidth,
           profile: $0
@@ -342,7 +375,7 @@ final class CrowFeatherGeometryDeformer {
     let crownDerivative = 0.65 * pow(sine, -0.35) * sineDerivative
     let transverseEnvelope = max(0, 1 - signedWidth * signedWidth)
     let crownRatio = crownRatio(packedIdentity: packedIdentity)
-    let camberSkew = rectrix?.camberSkew ?? 0
+    let camberSkew = rectrix?.camberSkew ?? remex?.camberSkew ?? 0
     let camberDerivative =
       sineDerivative * (1 + camberSkew * (2 * sampledAxial - 1))
       + sine * 2 * camberSkew
@@ -370,6 +403,9 @@ final class CrowFeatherGeometryDeformer {
   private static func crownRatio(packedIdentity: UInt32) -> Float {
     if let rectrix = CrowRectrixVaneAnatomy.profile(packedIdentity: packedIdentity) {
       return rectrix.crownRatio
+    }
+    if let remex = CrowRemexVaneAnatomy.profile(packedIdentity: packedIdentity) {
+      return remex.crownRatio
     }
     let featherClass = packedIdentity & 255
     switch featherClass {

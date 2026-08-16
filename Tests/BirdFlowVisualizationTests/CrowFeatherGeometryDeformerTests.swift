@@ -152,8 +152,8 @@ func crowFeatherTemplateGPUDeformationMatchesCPUReference() throws {
     }
   )
 
-  for rectrix in movingRoots.filter({ $0.identity.w & 255 == 3 }) {
-    let vertices = movingVertices.filter { $0.identity.x == rectrix.identity.x }
+  for feather in movingRoots.filter({ ($0.identity.w & 255) <= 3 }) {
+    let vertices = movingVertices.filter { $0.identity.x == feather.identity.x }
     func point(axial: Float, signedWidth: Float) -> SIMD3<Float> {
       let vertex = vertices.first {
         abs($0.parameters.x - axial) < 1e-7
@@ -166,8 +166,8 @@ func crowFeatherTemplateGPUDeformationMatchesCPUReference() throws {
         && abs($0.parameters.y) < 1e-7
     }!
     let axialTangent =
-      point(axial: 13.0 / 24.0, signedWidth: 0)
-      - point(axial: 11.0 / 24.0, signedWidth: 0)
+      point(axial: 25.0 / 48.0, signedWidth: 0)
+      - point(axial: 23.0 / 48.0, signedWidth: 0)
     let widthTangent =
       point(axial: 0.5, signedWidth: 0.25)
       - point(axial: 0.5, signedWidth: -0.25)
