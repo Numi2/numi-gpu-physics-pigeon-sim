@@ -33,6 +33,57 @@ func crowVentralTractsCoverBreastAndAbdomenAtFullResolution() {
   )
   #expect(samples.map(\.materialVariation).min()! < -0.90)
   #expect(samples.map(\.materialVariation).max()! > 0.90)
+  #expect(samples.map(\.vaneAsymmetry).min()! < -0.043)
+  #expect(samples.map(\.vaneAsymmetry).max()! > 0.043)
+  #expect(samples.map(\.edgeRippleAmplitude).min()! > 0.0119)
+  #expect(samples.map(\.edgeRippleAmplitude).max()! < 0.0281)
+  #expect(samples.map(\.edgeRippleAmplitude).max()! > 0.0275)
+  #expect(samples.map(\.edgeRippleCycles).min()! > 1.34)
+  #expect(samples.map(\.edgeRippleCycles).max()! < 2.01)
+  #expect(
+    Set(samples.map { Int(($0.edgeRipplePhase * 100_000).rounded()) }).count
+      > 280
+  )
+  let rowFlows = CrowVentralFeatherTractRegion.allCases.flatMap { region in
+    let rowCount = region == .pectoral
+      ? CrowVentralFeatherTracts.pectoralRowCount
+      : CrowVentralFeatherTracts.abdominalRowCount
+    let columnCount = region == .pectoral
+      ? CrowVentralFeatherTracts.pectoralColumnCount
+      : CrowVentralFeatherTracts.abdominalColumnCount
+    return (0..<rowCount).flatMap { row in
+      (0..<columnCount).map {
+        CrowVentralFeatherTracts.rootRowFlowSteps(
+          region: region,
+          row: row,
+          column: $0
+        )
+      }
+    }
+  }
+  let crownRolls = CrowVentralFeatherTractRegion.allCases.flatMap { region in
+    let rowCount = region == .pectoral
+      ? CrowVentralFeatherTracts.pectoralRowCount
+      : CrowVentralFeatherTracts.abdominalRowCount
+    let columnCount = region == .pectoral
+      ? CrowVentralFeatherTracts.pectoralColumnCount
+      : CrowVentralFeatherTracts.abdominalColumnCount
+    return (0..<rowCount).flatMap { row in
+      (0..<columnCount).map {
+        CrowVentralFeatherTracts.crownRollSlope(
+          region: region,
+          row: row,
+          column: $0
+        )
+      }
+    }
+  }
+  #expect(rowFlows.allSatisfy { abs($0) < 0.221 })
+  #expect(rowFlows.max()! - rowFlows.min()! > 0.40)
+  #expect(Set(rowFlows.map { Int(($0 * 100_000).rounded()) }).count > 285)
+  #expect(crownRolls.allSatisfy { abs($0) < 0.066 })
+  #expect(crownRolls.max()! - crownRolls.min()! > 0.115)
+  #expect(Set(crownRolls.map { Int(($0 * 100_000).rounded()) }).count > 285)
 
   let anteriorPectoralRoots = samples.filter {
     $0.region == .pectoral && $0.column == 0
@@ -75,6 +126,21 @@ func crowVentralTractsCoverBreastAndAbdomenAtFullResolution() {
     #expect(abs(simd_length(sample.planeNormal) - 1) < 1e-5)
     let rootNormal = simd_normalize(sample.rootOffset - sample.rootSurfaceOffset)
     #expect(simd_dot(rootNormal, sample.planeNormal) > 0.96)
+  }
+
+  let negative = samples.filter { $0.side == -1 }
+  let positive = samples.filter { $0.side == 1 }
+  #expect(negative.count == positive.count)
+  for pair in zip(negative, positive) {
+    #expect(pair.0.region == pair.1.region)
+    #expect(pair.0.row == pair.1.row && pair.0.column == pair.1.column)
+    #expect(abs(pair.0.rootOffset.x - pair.1.rootOffset.x) < 1e-7)
+    #expect(abs(pair.0.rootOffset.y + pair.1.rootOffset.y) < 1e-7)
+    #expect(abs(pair.0.rootOffset.z - pair.1.rootOffset.z) < 1e-7)
+    #expect(abs(pair.0.tipOffset.y + pair.1.tipOffset.y) < 1e-7)
+    #expect(abs(pair.0.planeNormal.x - pair.1.planeNormal.x) < 1e-7)
+    #expect(abs(pair.0.planeNormal.y + pair.1.planeNormal.y) < 1e-7)
+    #expect(abs(pair.0.planeNormal.z - pair.1.planeNormal.z) < 1e-7)
   }
 
   for region in CrowVentralFeatherTractRegion.allCases {

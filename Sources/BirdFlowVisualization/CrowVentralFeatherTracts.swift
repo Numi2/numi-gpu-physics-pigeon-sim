@@ -19,6 +19,10 @@ struct CrowVentralFeatherTractSample: Equatable {
   let maximumWidthMeters: Float
   let camberMeters: Float
   let pennaceousStartFraction: Float
+  let vaneAsymmetry: Float
+  let edgeRippleAmplitude: Float
+  let edgeRipplePhase: Float
+  let edgeRippleCycles: Float
   let materialVariation: Float
 }
 
@@ -104,11 +108,34 @@ enum CrowVentralFeatherTracts {
             column: column,
             salt: 0xC2B2_AE35
           )
+          let vaneIdentity = identityVariation(
+            region: region,
+            row: row,
+            column: column,
+            salt: 0xB529_7A4D
+          )
+          let edgeIdentity = identityVariation(
+            region: region,
+            row: row,
+            column: column,
+            salt: 0x68E3_1DA4
+          )
+          let cycleIdentity = identityVariation(
+            region: region,
+            row: row,
+            column: column,
+            salt: 0xD3A2_646C
+          )
           let rowStep = 1 / Float(rowCount - 1)
           let rowFraction = clamp(
             baseRowFraction
               + (row == 0 || row == rowCount - 1
-                ? 0 : 0.10 * rowStep * rootIdentity),
+                ? 0
+                : rowStep * rootRowFlowSteps(
+                  region: region,
+                  row: row,
+                  column: column
+                )),
             lower: 0,
             upper: 1
           )
@@ -156,6 +183,28 @@ enum CrowVentralFeatherTracts {
           let maximumWidth =
             max(0.0062, 0.86 * circumferentialSpacing)
             * (1 + 0.045 * shapeIdentity)
+          let centerline = normalized(
+            tip - root,
+            fallback: SIMD3<Float>(-1, 0, 0)
+          )
+          let basePlaneNormal = normalized(
+            0.82 * rootNormal + 0.18 * tipNormal,
+            fallback: rootNormal
+          )
+          let crownAxis = normalized(
+            simd_cross(basePlaneNormal, centerline),
+            fallback: SIMD3<Float>(0, side, 0)
+          )
+          let planeNormal = normalized(
+            basePlaneNormal
+              + side
+              * crownRollSlope(
+                region: region,
+                row: row,
+                column: column
+              ) * crownAxis,
+            fallback: basePlaneNormal
+          )
           result.append(
             CrowVentralFeatherTractSample(
               region: region,
@@ -166,10 +215,7 @@ enum CrowVentralFeatherTracts {
               rootSurfaceOffset: rootSurface,
               rootOffset: root,
               tipOffset: tip,
-              planeNormal: normalized(
-                0.82 * rootNormal + 0.18 * tipNormal,
-                fallback: rootNormal
-              ),
+              planeNormal: planeNormal,
               rootWidthMeters:
                 region == .pectoral && column == 0
                 ? 0.82 * maximumWidth
@@ -182,6 +228,11 @@ enum CrowVentralFeatherTracts {
                 region == .pectoral && column == 0
                 ? 0.10
                 : (region == .pectoral && column == 1 ? 0.24 : 0.34),
+              vaneAsymmetry: 0.045 * vaneIdentity,
+              edgeRippleAmplitude:
+                0.012 + 0.016 * (0.5 + 0.5 * edgeIdentity),
+              edgeRipplePhase: Float.pi * (edgeIdentity + 1),
+              edgeRippleCycles: 1.35 + 0.65 * (0.5 + 0.5 * cycleIdentity),
               materialVariation: materialIdentity
             )
           )
@@ -200,6 +251,46 @@ enum CrowVentralFeatherTracts {
     case .pectoral, .abdominal:
       return 7
     }
+  }
+
+  /// Pectoral and abdominal roots follow coherent but non-lattice tract flow.
+  /// The bound stays below one quarter row interval so roots cannot reorder.
+  static func rootRowFlowSteps(
+    region: CrowVentralFeatherTractRegion,
+    row: Int,
+    column: Int
+  ) -> Float {
+    let regionPhase: Float = region == .pectoral ? 0.31 : 1.07
+    let smooth = 0.15 * sin(
+      Float(row) * 1.11 + Float(column) * 0.67 + regionPhase
+    )
+    let identity = identityVariation(
+      region: region,
+      row: row,
+      column: column,
+      salt: 0x27D4_EB2F
+    )
+    return smooth + 0.070 * identity
+  }
+
+  /// Mirrored crown roll varies grazing response without moving either end of
+  /// a vane away from its anatomically owned body surface.
+  static func crownRollSlope(
+    region: CrowVentralFeatherTractRegion,
+    row: Int,
+    column: Int
+  ) -> Float {
+    let regionPhase: Float = region == .pectoral ? 0.73 : 1.39
+    let smooth = 0.045 * sin(
+      Float(row) * 0.83 + Float(column) * 0.51 + regionPhase
+    )
+    let identity = identityVariation(
+      region: region,
+      row: row,
+      column: column,
+      salt: 0x1656_67B1
+    )
+    return smooth + 0.020 * identity
   }
 
   private static func mirroredSurfacePoint(
