@@ -1701,6 +1701,11 @@ private struct CrowMeshBuilder {
       projectedPixelsPerMeter: projectedPixelsPerMeter,
       to: &vertices
     )
+    appendRumpTailContourFeathers(
+      bodyCenter: posedBodyCenter,
+      projectedPixelsPerMeter: projectedPixelsPerMeter,
+      to: &vertices
+    )
     if let standingPose {
       appendAxillaryFeatherTracts(
         bodyCenter: posedBodyCenter,
@@ -2368,6 +2373,56 @@ private struct CrowMeshBuilder {
         sections: 10,
         camber: sample.camberMeters,
         transverseCamberRatio: 0.08,
+        vaneAsymmetry: sample.vaneAsymmetry,
+        edgeRippleAmplitude: sample.edgeRippleAmplitude,
+        edgeRipplePhase: sample.edgeRipplePhase,
+        edgeRippleCycles: sample.edgeRippleCycles,
+        rootEnvelopeRatio: sample.rootEnvelopeRatio,
+        axialStartFraction: 0,
+        surfaceFeatherClass: sample.surfaceFeatherClass,
+        lodLengthMeters: simd_distance(sample.rootOffset, sample.tipOffset),
+        projectedPixelsPerMeter: projectedPixelsPerMeter,
+        to: &vertices
+      )
+      appendTractFeatherMesostructure(
+        CrowFeatherMesostructure.segments(
+          for: sample,
+          projectedPixelsPerMeter: projectedPixelsPerMeter
+        ),
+        bodyCenter: bodyCenter,
+        planeNormal: sample.planeNormal,
+        material: material,
+        to: &vertices
+      )
+    }
+  }
+
+  private func appendRumpTailContourFeathers(
+    bodyCenter: SIMD3<Float>,
+    projectedPixelsPerMeter: Float,
+    to vertices: inout [ColoredVertex]
+  ) {
+    for sample in CrowRumpTailContourFeathers.visibleSamples(
+      projectedPixelsPerMeter: projectedPixelsPerMeter
+    ) {
+      let material = sample.materialVariation
+      let dorsal = sample.surfaceFeatherClass == 5
+      let color = SIMD4<Float>(
+        (dorsal ? 0.0058 : 0.0054) * (1 + 0.09 * material),
+        (dorsal ? 0.0090 : 0.0082) * (1 + 0.07 * material),
+        (dorsal ? 0.0162 : 0.0148) * (1 + 0.045 * material),
+        0.125 + 0.006 * material
+      )
+      appendFeatherBlade(
+        root: bodyCenter + sample.rootOffset,
+        tip: bodyCenter + sample.tipOffset,
+        planeNormal: sample.planeNormal,
+        rootWidth: sample.rootWidthMeters,
+        maximumWidth: sample.maximumWidthMeters,
+        color: color,
+        sections: 8,
+        camber: sample.camberMeters,
+        transverseCamberRatio: 0.10,
         vaneAsymmetry: sample.vaneAsymmetry,
         edgeRippleAmplitude: sample.edgeRippleAmplitude,
         edgeRipplePhase: sample.edgeRipplePhase,
