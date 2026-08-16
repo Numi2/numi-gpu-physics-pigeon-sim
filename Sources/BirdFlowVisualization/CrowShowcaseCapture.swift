@@ -1496,7 +1496,6 @@ private struct CrowMeshBuilder {
     let posedBodyCenter = standingPose?.bodyCenter ?? bodyCenter
     appendCrowBodyLoft(
       center: posedBodyCenter,
-      verticalScale: presentation == .standing ? 1.22 : 1,
       to: &vertices
     )
     let radiiRaw = profile.visualTransform.headRadiusXYZMeters
@@ -1532,39 +1531,22 @@ private struct CrowMeshBuilder {
 
   private func appendCrowBodyLoft(
     center: SIMD3<Float>,
-    verticalScale: Float,
     to vertices: inout [ColoredVertex]
   ) {
-    struct Ring {
-      let x: Float
-      let z: Float
-      let radiusY: Float
-      let radiusZ: Float
-    }
-    let rings: [Ring] = [
-      Ring(x: -0.180, z: 0.000, radiusY: 0.009, radiusZ: 0.014),
-      Ring(x: -0.158, z: -0.002, radiusY: 0.032, radiusZ: 0.041),
-      Ring(x: -0.116, z: -0.006, radiusY: 0.052, radiusZ: 0.059),
-      Ring(x: -0.060, z: -0.010, radiusY: 0.064, radiusZ: 0.070),
-      Ring(x: 0.002, z: -0.008, radiusY: 0.068, radiusZ: 0.073),
-      Ring(x: 0.060, z: 0.000, radiusY: 0.063, radiusZ: 0.067),
-      Ring(x: 0.108, z: 0.014, radiusY: 0.054, radiusZ: 0.057),
-      Ring(x: 0.145, z: 0.028, radiusY: 0.044, radiusZ: 0.047),
-      Ring(x: 0.174, z: 0.033, radiusY: 0.033, radiusZ: 0.037),
-      Ring(x: 0.194, z: 0.031, radiusY: 0.017, radiusZ: 0.023),
-    ]
+    let rings = CrowBodyAnatomy.loftRings
     let segments = 48
     var positions: [SIMD3<Float>] = []
     positions.reserveCapacity(rings.count * segments)
     for ring in rings {
       for segment in 0..<segments {
         let theta = 2 * Float.pi * Float(segment) / Float(segments)
+        let sine = sin(theta)
         positions.append(
           center
             + SIMD3<Float>(
               ring.x,
-              cos(theta) * ring.radiusY,
-              verticalScale * (ring.z + sin(theta) * ring.radiusZ)
+              cos(theta) * ring.halfWidth,
+              ring.z + sine * CrowBodyAnatomy.verticalRadius(for: sine, ring: ring)
             )
         )
       }
@@ -1611,24 +1593,32 @@ private struct CrowMeshBuilder {
   ) {
     let color = SIMD4<Float>(0.012, 0.017, 0.029, 0.17)
     for side: Float in [-1, 1] {
-      for row in 0..<7 {
-        let angle = -0.92 + 1.84 * Float(row) / 6
-        for column in 0..<9 {
-          let fraction = Float(column) / 8
-          let x = bodyCenter.x + 0.092 - 0.230 * fraction
-          let longitudinal = (x - bodyCenter.x + 0.020) / 0.155
-          let envelope = sqrt(max(0.10, 1 - longitudinal * longitudinal))
-          let radiusY = 0.064 * envelope
-          let radiusZ = 0.070 * envelope
-          let stagger: Float = row.isMultiple(of: 2) ? 0 : 0.007
+      for row in 0..<9 {
+        let rowFraction = Float(row) / 8
+        let angle = -1.02 + 2.04 * rowFraction
+        for column in 0..<10 {
+          let fraction = Float(column) / 9
+          let x = bodyCenter.x + 0.105 - 0.250 * fraction
+          let longitudinal = (x - bodyCenter.x + 0.018) / 0.165
+          let envelope = sqrt(max(0.08, 1 - longitudinal * longitudinal))
+          let radiusY = 0.061 * envelope
+          let verticalRadius: Float = sin(angle) >= 0 ? 0.058 : 0.066
+          let radiusZ = verticalRadius * envelope
+          let stagger: Float = row.isMultiple(of: 2) ? 0 : 0.006
           let root = SIMD3<Float>(
             x - stagger,
             bodyCenter.y + side * radiusY * cos(angle),
-            bodyCenter.z - 0.008 + radiusZ * sin(angle)
+            bodyCenter.z - 0.003 + radiusZ * sin(angle)
           )
+          let ventralSweep = max(0, -sin(angle))
           appendFeatherBlade(
             root: root,
-            tip: root + SIMD3<Float>(-0.027 - 0.007 * fraction, 0, -0.004),
+            tip: root
+              + SIMD3<Float>(
+                -0.025 - 0.010 * fraction,
+                -side * 0.0015 * sin(Float.pi * fraction),
+                -0.002 - 0.005 * ventralSweep
+              ),
             planeNormal: safeNormalize(
               SIMD3<Float>(0, side * cos(angle), sin(angle)),
               fallback: SIMD3<Float>(0, side, 0)
@@ -1811,27 +1801,37 @@ private struct CrowMeshBuilder {
     to vertices: inout [ColoredVertex]
   ) {
     for side: Float in [-1, 1] {
-      for row in 0..<4 {
-        let rowFraction = Float(row) / 3
-        for index in 0..<8 {
-          let fraction = Float(index) / 7
+      for row in 0..<5 {
+        let rowFraction = Float(row) / 4
+        for index in 0..<10 {
+          let fraction = Float(index) / 9
           let root =
             bodyCenter
             + SIMD3<Float>(
-              0.092 - 0.198 * fraction - 0.010 * rowFraction,
-              side * (0.056 + 0.002 * rowFraction),
-              0.018 - 0.065 * fraction + 0.005 * rowFraction
+              0.092 - 0.218 * fraction - 0.008 * rowFraction,
+              side * (0.058 + 0.004 * rowFraction),
+              0.034 - 0.068 * fraction - 0.008 * rowFraction
             )
-          let length = 0.036 + 0.018 * fraction + 0.005 * rowFraction
+          let length = 0.040 + 0.035 * fraction + 0.012 * rowFraction
           appendFeatherBlade(
             root: root,
-            tip: root + SIMD3<Float>(-length, -side * 0.002, -0.010),
-            planeNormal: SIMD3<Float>(0.04, side, 0.10),
-            rootWidth: 0.0055,
-            maximumWidth: 0.0095 + 0.002 * fraction,
-            color: SIMD4<Float>(0.011, 0.016, 0.027, 0.18),
-            sections: 6,
-            camber: 0.002,
+            tip: root
+              + SIMD3<Float>(
+                -length,
+                -side * (0.002 + 0.003 * rowFraction),
+                -0.008 - 0.007 * rowFraction
+              ),
+            planeNormal: SIMD3<Float>(0.08, side, 0.14),
+            rootWidth: 0.0060,
+            maximumWidth: 0.0105 + 0.003 * fraction,
+            color: SIMD4<Float>(
+              0.010 + 0.002 * rowFraction,
+              0.015 + 0.003 * rowFraction,
+              0.026 + 0.005 * rowFraction,
+              0.19
+            ),
+            sections: 7,
+            camber: 0.0025 + 0.001 * rowFraction,
             to: &vertices
           )
         }

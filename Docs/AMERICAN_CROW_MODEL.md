@@ -29,6 +29,13 @@ wingspan, `0.174 m` tail, and `0.049 m` bill. These are useful central estimates
 not a same-specimen measurement. The display wingbeat is `4.6 Hz`; the original
 dove sequence supplies phase shape, not crow timing.
 
+The standing presentation uses an asymmetric axial body loft rather than an
+ellipsoid: separate dorsal and ventral envelopes form the mantle, shoulder,
+breast/sternum, pelvic taper, and narrowing neck transition. Overlapping contour
+and folded-wing covert rows then break up the analytic surface. These remain
+estimated presentation geometry; they are not inferred skeletal landmarks or a
+measured body scan.
+
 ## Native Metal capture
 
 The native renderer consumes both locked inputs. Its encoding, input hashes,

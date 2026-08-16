@@ -389,6 +389,26 @@ func estimatedCrowShowcaseCaptureProducesDistinctFrames() throws {
   #expect(audit.frames.allSatisfy { $0.nativeFullFrameDisplayRMSE == nil })
 }
 
+@Test("estimated crow body loft preserves asymmetric anatomical regions")
+func estimatedCrowBodyLoftPreservesAnatomicalRegions() {
+  let rings = CrowBodyAnatomy.loftRings
+  #expect(rings.count >= 10)
+  #expect(zip(rings, rings.dropFirst()).allSatisfy { $0.x < $1.x })
+  #expect(rings.first!.halfWidth < 0.012)
+  #expect(rings.last!.halfWidth < 0.025)
+
+  let sternum = rings[CrowBodyAnatomy.sternumRingIndex]
+  let shoulder = rings[CrowBodyAnatomy.shoulderRingIndex]
+  #expect(sternum.ventralRadius > sternum.dorsalRadius)
+  #expect(shoulder.z > sternum.z)
+  #expect(shoulder.halfWidth > rings[2].halfWidth)
+
+  let neck = CrowBodyAnatomy.neckRingRange.map { rings[$0] }
+  #expect(zip(neck, neck.dropFirst()).allSatisfy { $0.halfWidth > $1.halfWidth })
+  #expect(zip(neck, neck.dropFirst()).allSatisfy { $0.dorsalRadius > $1.dorsalRadius })
+  #expect(rings.last!.x - rings.first!.x < 0.37)
+}
+
 @Test("estimated standing crow capture keeps the reference private and moves subtly")
 func estimatedStandingCrowCaptureProducesLoopClosedFrames() throws {
   guard let device = MTLCreateSystemDefaultDevice(),
