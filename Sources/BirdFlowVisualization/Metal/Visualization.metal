@@ -1340,6 +1340,20 @@ inline float crowFeatherAnisotropicLobe(
     return exp(max(exponent,-80.0f))*sqrt(normalHalf);
 }
 
+/// Box-filter a procedural sine in screen space and fade it before its phase
+/// crosses the pixel Nyquist limit. Close views retain the resolved barb
+/// pattern; distant vanes converge to their mean instead of forming stippled
+/// or crawling diagonal bands.
+inline float crowBandLimitedSine(float phase) {
+    float footprint=max(abs(dfdx(phase)),abs(dfdy(phase)));
+    float halfFootprint=0.5f*footprint;
+    float boxAmplitude=halfFootprint>1.0e-4f
+        ?sin(halfFootprint)/halfFootprint
+        :1.0f;
+    float nyquistFade=1.0f-smoothstep(2.2f,M_PI_F,footprint);
+    return sin(phase)*max(boxAmplitude,0.0f)*nyquistFade;
+}
+
 inline float3 showcaseCrowLinearRadiance(
     float3 world,
     float3 normalInput,
@@ -1474,9 +1488,10 @@ inline float3 showcaseCrowLinearRadiance(
     float localBarbAngle=
         barbFrequency*axial+23.0f*abs(signedWidth)+7.0f*signedWidth
             +featherCoordinates.z;
-    float localBarbs=0.5f+0.5f*sin(localBarbAngle);
+    float localBarbWave=crowBandLimitedSine(localBarbAngle);
+    float localBarbs=0.5f+0.5f*localBarbWave;
     float barbPhase=520.0f*world.x+390.0f*world.y-270.0f*world.z;
-    float barb=0.5f+0.5f*sin(barbPhase);
+    float barb=0.5f+0.5f*crowBandLimitedSine(barbPhase);
     float barbSignal=mix(barb,localBarbs,persistentVane);
     float barbMicro=persistentVane
         *mix(0.006f+0.010f*barbSignal,0.010f+0.018f*barbSignal,flightFeather)
@@ -1490,7 +1505,7 @@ inline float3 showcaseCrowLinearRadiance(
     float3 bodyBarbAxis=safeNormalizeCrow(
         cross(normal,featherAxis),float3(0.0f,1.0f,0.0f)
     );
-    float bodyBarbTilt=0.052f*bodyContourVane*sin(localBarbAngle)
+    float bodyBarbTilt=0.052f*bodyContourVane*localBarbWave
         *(1.0f-smoothstep(0.72f,0.96f,abs(signedWidth)));
     float3 specularNormal=safeNormalizeCrow(
         normal+bodyBarbTilt*bodyBarbAxis,normal
