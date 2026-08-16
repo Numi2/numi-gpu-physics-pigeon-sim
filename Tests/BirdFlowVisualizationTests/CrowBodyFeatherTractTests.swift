@@ -187,8 +187,12 @@ func crowBodyFeatherTractsOverlapNeckAndCoverWingRoots() {
       }
       let quantizedPhases = Set(phases.map { Int(($0 * 1_000).rounded()) })
       #expect(quantizedPhases.count == rowCount)
+      #expect(phases.min()! < 0.12)
+      #expect(phases.max()! > 0.88)
       for pair in zip(phases, phases.dropFirst()) {
-        #expect(abs(pair.0 - pair.1) > 0.44)
+        let linearDistance = abs(pair.0 - pair.1)
+        let circularDistance = min(linearDistance, 1 - linearDistance)
+        #expect(circularDistance > 0.30)
       }
       for column in 0..<columnCount {
         let course =

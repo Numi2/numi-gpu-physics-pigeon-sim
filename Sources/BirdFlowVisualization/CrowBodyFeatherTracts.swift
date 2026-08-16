@@ -280,7 +280,7 @@ enum CrowBodyFeatherTracts {
               0,
               baseAxial
                 + (column == 0 || column == mantleColumnCount - 1
-                  ? 0 : 0.08 * axialStep * rootIdentity)
+                  ? 0 : 0.02 * axialStep * rootIdentity)
             )
           )
           let rowStep = 1 / Float(mantleRowCount - 1)
@@ -402,7 +402,7 @@ enum CrowBodyFeatherTracts {
               0,
               baseAxial
                 + (column == 0 || column == scapularColumnCount - 1
-                  ? 0 : 0.08 * axialStep * rootIdentity)
+                  ? 0 : 0.02 * axialStep * rootIdentity)
             )
           )
           let rowStep = 1 / Float(scapularRowCount - 1)
@@ -487,9 +487,11 @@ enum CrowBodyFeatherTracts {
     }
   }
 
-  /// Breaks the binary row cadence without randomizing roots independently.
-  /// Alternating courses interdigitate by more than half an axial spacing,
-  /// while stable identity and bilateral offsets prevent a binary zipper.
+  /// Breaks binary row cadence without randomizing roots independently.
+  /// A low-discrepancy course phase distributes roots across the full axial
+  /// spacing, so same-parity rows cannot collapse into two smooth bands. Stable
+  /// identity and bilateral offsets keep the result deterministic and mirrored
+  /// in density without making the two sides mechanically identical.
   static func tractStaggerFraction(
     region: CrowBodyFeatherTractRegion,
     side: Float,
@@ -507,17 +509,15 @@ enum CrowBodyFeatherTracts {
       sideOffset = side < 0 ? 0.03 : 0
       salt = 0x9E37_79B9
     }
-    let pair = Float(row / 2)
-    let base = row.isMultiple(of: 2)
-      ? pair * 0.025
-      : 0.60 + pair * 0.015
     let identity = identityVariation(
       side: side,
       row: row,
       column: 0,
       salt: salt
     )
-    return base + sideOffset + 0.018 * identity
+    let unwrapped =
+      Float(row) * 0.618_033_988_75 + sideOffset + 0.018 * identity
+    return unwrapped - unwrapped.rounded(.down)
   }
 
   private static func normalized(
