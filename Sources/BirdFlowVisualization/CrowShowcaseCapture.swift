@@ -2019,36 +2019,21 @@ private struct CrowMeshBuilder {
     to vertices: inout [ColoredVertex]
   ) {
     let color = SIMD4<Float>(0.006, 0.009, 0.015, 0.14)
-    for side: Float in [-1, 1] {
-      for row in 0..<4 {
-        let angle = -0.62 + 1.24 * Float(row) / 3
-        for column in 0..<5 {
-          let fraction = Float(column) / 4
-          let root =
-            center
-            + SIMD3<Float>(
-              0.025 - 0.054 * fraction,
-              side * radii.y * 0.98 * cos(angle),
-              radii.z * 0.78 * sin(angle)
-            )
-          appendFeatherBlade(
-            root: root,
-            tip: root + SIMD3<Float>(-0.014 - 0.006 * fraction, 0, -0.0015),
-            planeNormal: safeNormalize(
-              SIMD3<Float>(0.12, side * cos(angle), sin(angle)),
-              fallback: SIMD3<Float>(0, side, 0)
-            ),
-            rootWidth: 0.0024,
-            maximumWidth: 0.0041,
-            color: color,
-            sections: 5,
-            camber: 0.001,
-            transverseCamberRatio: 0.20,
-            projectedPixelsPerMeter: projectedPixelsPerMeter,
-            to: &vertices
-          )
-        }
-      }
+    for sample in CrowHeadContourFeathers.samples(center: center, radii: radii) {
+      appendFeatherBlade(
+        root: sample.root,
+        tip: sample.tip,
+        planeNormal: sample.planeNormal,
+        rootWidth: sample.rootWidthMeters,
+        maximumWidth: sample.maximumWidthMeters,
+        color: color,
+        sections: 5,
+        camber: sample.camberMeters,
+        transverseCamberRatio: 0.20,
+        surfaceFeatherClass: sample.surfaceFeatherClass,
+        projectedPixelsPerMeter: projectedPixelsPerMeter,
+        to: &vertices
+      )
     }
   }
 
