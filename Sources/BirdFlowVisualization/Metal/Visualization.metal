@@ -1101,6 +1101,45 @@ fragment float4 showcaseDoveFragment(
     return float4(color,in.color.a);
 }
 
+inline float3 crowFeatherAxis(
+    float3 world,
+    float3 normal,
+    float2 featherCoordinates) {
+    float3 dpdx=dfdx(world);
+    float3 dpdy=dfdy(world);
+    float2 duvdx=dfdx(featherCoordinates);
+    float2 duvdy=dfdy(featherCoordinates);
+    float determinant=duvdx.x*duvdy.y-duvdx.y*duvdy.x;
+    float3 fallback=abs(normal.x)<0.86f
+        ?float3(-1.0f,0.0f,0.0f)
+        :float3(0.0f,1.0f,0.0f);
+    fallback=safeNormalizeCrow(
+        fallback-normal*dot(fallback,normal),float3(0.0f,0.0f,1.0f)
+    );
+    float3 axis=abs(determinant)>1.0e-8f
+        ?(duvdy.y*dpdx-duvdx.y*dpdy)/determinant
+        :fallback;
+    axis-=normal*dot(axis,normal);
+    return safeNormalizeCrow(axis,fallback);
+}
+
+inline float crowFeatherAnisotropicLobe(
+    float3 normal,
+    float3 featherAxis,
+    float3 halfVector,
+    float longitudinalRoughness,
+    float transverseRoughness) {
+    float3 barbAxis=safeNormalizeCrow(
+        cross(normal,featherAxis),float3(0.0f,1.0f,0.0f)
+    );
+    float normalHalf=max(abs(dot(normal,halfVector)),0.055f);
+    float longitudinal=dot(featherAxis,halfVector)/longitudinalRoughness;
+    float transverse=dot(barbAxis,halfVector)/transverseRoughness;
+    float exponent=-(longitudinal*longitudinal+transverse*transverse)
+        /(normalHalf*normalHalf);
+    return exp(max(exponent,-80.0f))*sqrt(normalHalf);
+}
+
 inline float3 showcaseCrowLinearRadiance(
     float3 world,
     float3 normalInput,
@@ -1163,8 +1202,17 @@ inline float3 showcaseCrowLinearRadiance(
     float3 violet=float3(0.065f,0.035f,0.075f);
     float3 sheen=mix(blue,violet,interference);
     float flightFeather=smoothstep(0.19f,0.25f,material);
+    float featherMaterial=1.0f-smoothstep(0.46f,0.50f,material);
     float persistentVane=flightFeather*step(1.0e-5f,
         abs(featherCoordinates.x)+abs(featherCoordinates.y));
+    float3 featherAxis=crowFeatherAxis(
+        world,normal,featherCoordinates
+    );
+    float anisotropicSpecular=featherMaterial*crowFeatherAnisotropicLobe(
+        normal,featherAxis,halfVector,
+        mix(0.34f,0.25f,flightFeather),
+        mix(0.12f,0.075f,flightFeather)
+    );
     float axial=saturate(featherCoordinates.x);
     float signedWidth=clamp(featherCoordinates.y,-1.0f,1.0f);
     float rachis=persistentVane
@@ -1184,7 +1232,8 @@ inline float3 showcaseCrowLinearRadiance(
     float diffuse=0.46f+0.72f*ndk+0.22f*ndf+0.13f*nds;
     float flightDarkening=mix(1.0f,0.58f,flightFeather);
     float3 color=albedoAndMaterial.rgb*diffuse*flightDarkening;
-    color+=sheen*(0.018f+0.095f*grazing)*(0.42f+0.58f*ndk)*flightDarkening;
+    color+=sheen*(0.018f+0.095f*grazing)*(0.42f+0.58f*ndk)
+        *flightDarkening*(0.72f+0.28f*anisotropicSpecular);
     color+=barbMicro*mix(float3(0.035f,0.070f,0.11f),sheen,0.45f);
     float3 sharpTint=mix(
         float3(0.14f,0.17f,0.22f),
@@ -1198,6 +1247,8 @@ inline float3 showcaseCrowLinearRadiance(
     );
     color+=sharpTint*featherSpecular;
     color+=softTint*softSpecular;
+    color+=anisotropicSpecular
+        *mix(float3(0.020f,0.030f,0.046f),float3(0.012f,0.020f,0.034f),flightFeather);
     color*=1.0f-0.055f*persistentVane*(1.0f-localBarbs);
     color+=rachis*(0.012f+0.025f*ndk)*float3(0.42f,0.56f,0.74f);
     color+=vaneEdge*grazing*float3(0.010f,0.022f,0.042f);

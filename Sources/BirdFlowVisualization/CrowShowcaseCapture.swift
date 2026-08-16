@@ -1678,6 +1678,47 @@ private struct CrowMeshBuilder {
         projectedPixelsPerMeter: projectedPixelsPerMeter,
         to: &vertices
       )
+      appendBodyFeatherMesostructure(
+        shingle,
+        bodyCenter: bodyCenter,
+        projectedPixelsPerMeter: projectedPixelsPerMeter,
+        to: &vertices
+      )
+    }
+  }
+
+  private func appendBodyFeatherMesostructure(
+    _ shingle: CrowBodyContourShingle,
+    bodyCenter: SIMD3<Float>,
+    projectedPixelsPerMeter: Float,
+    to vertices: inout [ColoredVertex]
+  ) {
+    for segment in CrowFeatherMesostructure.segments(
+      for: shingle,
+      projectedPixelsPerMeter: projectedPixelsPerMeter
+    ) {
+      let color: SIMD4<Float>
+      let radialSegments: Int
+      switch segment.kind {
+      case .rachis:
+        color = SIMD4<Float>(0.010, 0.014, 0.022, 0.14)
+        radialSegments = 4
+      case .barb:
+        color = SIMD4<Float>(0.008, 0.012, 0.020, 0.14)
+        radialSegments = 3
+      case .barbule:
+        color = SIMD4<Float>(0.006, 0.010, 0.017, 0.14)
+        radialSegments = 3
+      }
+      appendTaperedTube(
+        from: bodyCenter + segment.start,
+        to: bodyCenter + segment.end,
+        startRadius: segment.startRadiusMeters,
+        endRadius: segment.endRadiusMeters,
+        color: color,
+        radialSegments: radialSegments,
+        to: &vertices
+      )
     }
   }
 

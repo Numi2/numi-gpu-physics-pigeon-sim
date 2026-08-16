@@ -4,9 +4,12 @@ struct CrowFeatherTessellation: Equatable {
   let tier: Int
   let axialSections: Int
   let widthSections: Int
+  let rachisSections: Int
+  let barbPairs: Int
+  let barbulesPerBarb: Int
 }
 
-/// Quantized presentation tessellation driven by final-output coverage.
+/// Quantized vane and mesostructure budgets driven by final-output coverage.
 ///
 /// The thresholds mirror the persistent asset's render-LOD contract. Using
 /// final-output pixels keeps native and temporally reconstructed frames on the
@@ -36,27 +39,39 @@ enum CrowFeatherCoverageLOD {
       return CrowFeatherTessellation(
         tier: 0,
         axialSections: max(base * 2, 16),
-        widthSections: 7
+        widthSections: 7,
+        rachisSections: 12,
+        barbPairs: 18,
+        barbulesPerBarb: 3
       )
     }
     if projectedLength >= 120 {
       return CrowFeatherTessellation(
         tier: 1,
         axialSections: max(Int((Float(base) * 1.5).rounded()), 10),
-        widthSections: 5
+        widthSections: 5,
+        rachisSections: 8,
+        barbPairs: 9,
+        barbulesPerBarb: 0
       )
     }
     if projectedLength >= 24 {
       return CrowFeatherTessellation(
         tier: 2,
         axialSections: max(base, 6),
-        widthSections: 3
+        widthSections: 3,
+        rachisSections: 4,
+        barbPairs: 0,
+        barbulesPerBarb: 0
       )
     }
     return CrowFeatherTessellation(
       tier: 3,
       axialSections: max(Int((Float(base) * 0.5).rounded()), 2),
-      widthSections: 1
+      widthSections: 1,
+      rachisSections: 0,
+      barbPairs: 0,
+      barbulesPerBarb: 0
     )
   }
 }
