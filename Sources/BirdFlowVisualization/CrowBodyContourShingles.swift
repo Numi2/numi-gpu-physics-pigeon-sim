@@ -32,7 +32,7 @@ struct CrowBodyContourShingle: Equatable {
 enum CrowBodyContourShingles {
   static let radialCount = 56
   static let axialCount = 48
-  static let shellClearanceMeters: Float = 0.00045
+  static let shellClearanceMeters: Float = 0.0012
 
   private static let frontX: Float = 0.110
   private static let backX: Float = -0.160

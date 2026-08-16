@@ -32,8 +32,9 @@ struct CrowBodyFeatherTractSample: Equatable {
 }
 
 enum CrowBodyFeatherTracts {
-  static let cervicalRowCount = 11
+  static let cervicalRowCount = 13
   static let cervicalColumnCount = 7
+  static let cervicalShellClearanceMeters: Float = 0.0012
   static let mantleRowCount = 7
   static let mantleColumnCount = 18
   static let scapularRowCount = 10
@@ -105,21 +106,18 @@ enum CrowBodyFeatherTracts {
             column: column,
             salt: 0x27D4_EB2F
           )
-          let center = SIMD3<Float>(
-            0.086 + 0.062 * axial,
-            0,
-            0.033 + 0.016 * axial
+          let unposedRootSurface = cervicalRootSurface(
+            side: side,
+            row: row,
+            column: column
           )
-          let halfWidth = 0.046 - 0.015 * axial
-          let verticalRadius = 0.046 - 0.013 * axial
-          let stagger: Float = row.isMultiple(of: 2) ? 0 : 0.002
+          let unposedNormal = cervicalRootNormal(
+            side: side,
+            row: row,
+            column: column
+          )
           let unposedRoot =
-            center
-            + SIMD3<Float>(
-              -stagger,
-              side * halfWidth * cos(angle),
-              verticalRadius * sin(angle)
-            )
+            unposedRootSurface + cervicalShellClearanceMeters * unposedNormal
           let length = 0.023 - 0.004 * axial
           let unposedTip =
             unposedRoot
@@ -128,10 +126,6 @@ enum CrowBodyFeatherTracts {
               -side * 0.0015 * sin(Float.pi * axial),
               -0.001 - 0.0025 * max(0, -sin(angle))
             )
-          let unposedNormal = normalized(
-            SIMD3<Float>(0.10, side * cos(angle), sin(angle)),
-            fallback: SIMD3<Float>(0, side, 0)
-          )
           let root =
             neckPose?.transform(
               offset: unposedRoot,
@@ -157,7 +151,7 @@ enum CrowBodyFeatherTracts {
               tipOffset: tip,
               planeNormal: planeNormal,
               rootWidthMeters: 0.0030,
-              maximumWidthMeters: (0.00545 - 0.0006 * axial)
+              maximumWidthMeters: 1.05 * (0.00545 - 0.0006 * axial)
                 * (1 + 0.020 * sin(Float(row) * 2.07 + Float(column) * 1.31)),
               camberMeters:
                 0.0010
@@ -178,6 +172,45 @@ enum CrowBodyFeatherTracts {
         }
       }
     }
+  }
+
+  static func cervicalRootSurface(
+    side: Float,
+    row: Int,
+    column: Int
+  ) -> SIMD3<Float> {
+    let axial = Float(column) / Float(cervicalColumnCount - 1)
+    let angle = cervicalRootAngle(side: side, row: row, column: column)
+    let point = CrowBodyAnatomy.surfacePoint(atX: 0.086 + 0.062 * axial, theta: angle)
+    return SIMD3<Float>(point.x, side * point.y, point.z)
+  }
+
+  static func cervicalRootNormal(
+    side: Float,
+    row: Int,
+    column: Int
+  ) -> SIMD3<Float> {
+    let axial = Float(column) / Float(cervicalColumnCount - 1)
+    let angle = cervicalRootAngle(side: side, row: row, column: column)
+    let normal = CrowBodyAnatomy.surfaceNormal(
+      atX: 0.086 + 0.062 * axial,
+      theta: angle
+    )
+    return SIMD3<Float>(normal.x, side * normal.y, normal.z)
+  }
+
+  private static func cervicalRootAngle(
+    side: Float,
+    row: Int,
+    column: Int
+  ) -> Float {
+    let rowFraction = Float(row) / Float(cervicalRowCount - 1)
+    let rowStep = 2.10 / Float(cervicalRowCount - 1)
+    return
+      -1.05 + 2.10 * rowFraction
+      + 0.20 * rowStep * sin(Float(column) * 2.399_963 + side * 0.71)
+      + 0.04 * rowStep
+      * sin(Float(row) * 1.173 + Float(column) * 0.83 + side * 1.31)
   }
 
   private static func appendMantle(
@@ -218,6 +251,12 @@ enum CrowBodyFeatherTracts {
             column: column,
             salt: 0x27D4_EB2F
           )
+          let courseIdentity = identityVariation(
+            side: side,
+            row: row,
+            column: column,
+            salt: 0x7E95_761E
+          )
           let axialStep = 1 / Float(mantleColumnCount - 1)
           let axial = min(
             1,
@@ -238,14 +277,11 @@ enum CrowBodyFeatherTracts {
                   ? 0 : 0.12 * rowStep * shapeIdentity)
             )
           )
-          let rowPhase = identityVariation(
+          let staggerFraction = tractStaggerFraction(
+            region: .mantle,
             side: side,
-            row: row,
-            column: 0,
-            salt: 0xD3A2_646C
+            row: row
           )
-          let staggerFraction: Float =
-            (row.isMultiple(of: 2) ? 0 : 0.60) + 0.075 * rowPhase
           let stagger = staggerFraction * 0.154 / Float(mantleColumnCount - 1)
           let root = SIMD3<Float>(
             0.074 - 0.154 * axial - stagger,
@@ -254,7 +290,7 @@ enum CrowBodyFeatherTracts {
           )
           let length =
             (0.025 + 0.010 * axial + 0.003 * course)
-            * (1 + 0.055 * shapeIdentity)
+            * (1 + 0.045 * shapeIdentity + 0.018 * courseIdentity)
           let tip =
             root
             + SIMD3<Float>(
@@ -332,6 +368,12 @@ enum CrowBodyFeatherTracts {
             column: column,
             salt: 0xC801_3EA4
           )
+          let courseIdentity = identityVariation(
+            side: side,
+            row: row,
+            column: column,
+            salt: 0xB529_7A4D
+          )
           let axialStep = 1 / Float(scapularColumnCount - 1)
           let axial = min(
             1,
@@ -352,14 +394,11 @@ enum CrowBodyFeatherTracts {
                   ? 0 : 0.13 * rowStep * shapeIdentity)
             )
           )
-          let rowPhase = identityVariation(
+          let staggerFraction = tractStaggerFraction(
+            region: .scapular,
             side: side,
-            row: row,
-            column: 0,
-            salt: 0x9E37_79B9
+            row: row
           )
-          let staggerFraction: Float =
-            (row.isMultiple(of: 2) ? 0 : 0.60) + 0.075 * rowPhase
           let stagger = staggerFraction * 0.164 / Float(scapularColumnCount - 1)
           let root = SIMD3<Float>(
             0.080 - 0.164 * axial - stagger,
@@ -368,7 +407,7 @@ enum CrowBodyFeatherTracts {
           )
           let length =
             (0.028 + 0.013 * axial + 0.004 * course)
-            * (1 + 0.06 * shapeIdentity)
+            * (1 + 0.050 * shapeIdentity + 0.020 * courseIdentity)
           let tip =
             root
             + SIMD3<Float>(
@@ -406,6 +445,48 @@ enum CrowBodyFeatherTracts {
         }
       }
     }
+  }
+
+  /// Breaks the binary row cadence without randomizing roots independently.
+  /// The finite mantle and scapular fields use different irrational-like
+  /// increments, with a small stable identity offset and bilateral phase.
+  static func tractStaggerFraction(
+    region: CrowBodyFeatherTractRegion,
+    side: Float,
+    row: Int
+  ) -> Float {
+    let lowStep: Float
+    let highStart: Float
+    let highStep: Float
+    let sideOffset: Float
+    let salt: UInt32
+    switch region {
+    case .cervical:
+      return 0
+    case .mantle:
+      lowStep = 0.065
+      highStart = 0.90
+      highStep = 0.035
+      sideOffset = side < 0 ? 0.12 : 0
+      salt = 0xD3A2_646C
+    case .scapular:
+      lowStep = 0.055
+      highStart = 0.90
+      highStep = 0.035
+      sideOffset = side < 0 ? 0.08 : 0
+      salt = 0x9E37_79B9
+    }
+    let pair = Float(row / 2)
+    let base = row.isMultiple(of: 2)
+      ? pair * lowStep
+      : highStart - pair * highStep
+    let identity = identityVariation(
+      side: side,
+      row: row,
+      column: 0,
+      salt: salt
+    )
+    return base + sideOffset + 0.05 * identity
   }
 
   private static func normalized(
