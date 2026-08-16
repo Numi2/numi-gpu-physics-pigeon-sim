@@ -26,6 +26,12 @@ enum CrowFoldedWingCoverts {
   static let shellClearanceMeters: Float = 0.0012
   static let surfaceFeatherClass: UInt32 = 4
 
+  /// The body-facing outer course overlaps the folded primary taper. Its roots
+  /// and lengths remain unchanged, preserving distinct vane silhouettes.
+  static func outerCourseWidthScale(row: Int) -> Float {
+    row == rowCount - 1 ? 1.30 : 1
+  }
+
   static func visibleSamples(
     projectedPixelsPerMeter: Float
   ) -> [CrowFoldedWingCovertSample] {
@@ -134,7 +140,8 @@ enum CrowFoldedWingCoverts {
               planeNormal: normalized(rootNormal + tipNormal, fallback: rootNormal),
               rootWidthMeters: 0.52 * localWidth,
               maximumWidthMeters:
-                localWidth * (1 + 0.08 * axial) * (1 + 0.04 * shapeIdentity),
+                localWidth * (1 + 0.08 * axial) * (1 + 0.04 * shapeIdentity)
+                * outerCourseWidthScale(row: row),
               camberMeters: (0.00155 + 0.00055 * rowFraction)
                 * (1 + 0.09 * rootIdentity),
               materialVariation: materialIdentity

@@ -13,6 +13,12 @@ func foldedWingCovertsFormSymmetricBodySeatedShell() {
   )
   #expect(samples.count == 360)
   #expect(CrowFoldedWingCoverts.surfaceFeatherClass == 4)
+  #expect(CrowFoldedWingCoverts.outerCourseWidthScale(row: 0) == 1)
+  #expect(
+    CrowFoldedWingCoverts.outerCourseWidthScale(
+      row: CrowFoldedWingCoverts.rowCount - 1
+    ) == 1.30
+  )
   #expect(
     CrowFoldedWingCoverts.visibleSamples(projectedPixelsPerMeter: 800).count
       == 130
@@ -27,6 +33,7 @@ func foldedWingCovertsFormSymmetricBodySeatedShell() {
   )
   #expect(samples.map(\.materialVariation).min()! < -0.90)
   #expect(samples.map(\.materialVariation).max()! > 0.90)
+  #expect(samples.map(\.maximumWidthMeters).max()! < 0.024)
   let courseStaggers = (0..<CrowFoldedWingCoverts.rowCount).map {
     CrowFoldedWingCoverts.courseStaggerFraction(row: $0)
   }
