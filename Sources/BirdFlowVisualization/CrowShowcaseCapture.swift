@@ -2178,18 +2178,30 @@ private struct CrowMeshBuilder {
     let rowDenominator = Float(max(visibleSamples.map(\.row).max() ?? 0, 1))
     for sample in visibleSamples {
       let rowFraction = Float(sample.row) / rowDenominator
+      let color: SIMD4<Float>
+      if sample.materialVariation == 0 {
+        color = SIMD4<Float>(
+          0.006 + 0.001 * rowFraction,
+          0.009 + 0.002 * rowFraction,
+          0.016 + 0.003 * rowFraction,
+          0.17
+        )
+      } else {
+        let material = sample.materialVariation
+        color = SIMD4<Float>(
+          (0.006 + 0.001 * rowFraction) * (1 + 0.08 * material),
+          (0.009 + 0.002 * rowFraction) * (1 + 0.065 * material),
+          (0.016 + 0.003 * rowFraction) * (1 + 0.045 * material),
+          0.17 + 0.008 * material
+        )
+      }
       appendFeatherBlade(
         root: bodyCenter + sample.rootOffset,
         tip: bodyCenter + sample.tipOffset,
         planeNormal: sample.planeNormal,
         rootWidth: sample.rootWidthMeters,
         maximumWidth: sample.maximumWidthMeters,
-        color: SIMD4<Float>(
-          0.006 + 0.001 * rowFraction,
-          0.009 + 0.002 * rowFraction,
-          0.016 + 0.003 * rowFraction,
-          0.17
-        ),
+        color: color,
         sections: 8,
         camber: sample.camberMeters,
         transverseCamberRatio: 0.26,
@@ -2224,13 +2236,18 @@ private struct CrowMeshBuilder {
         hock: foot.hock,
         projectedPixelsPerMeter: projectedPixelsPerMeter
       ) {
+        let color = denseLegFeatherColor(
+          base: featheredLeg,
+          materialVariation: feather.materialVariation,
+          bodyMaterialBlend: feather.bodyMaterialBlend
+        )
         appendFeatherBlade(
           root: feather.root,
           tip: feather.tip,
           planeNormal: feather.planeNormal,
           rootWidth: feather.rootWidthMeters,
           maximumWidth: feather.maximumWidthMeters,
-          color: featheredLeg,
+          color: color,
           sections: 7,
           camber: feather.camberMeters,
           transverseCamberRatio: 0.12,
@@ -2244,13 +2261,18 @@ private struct CrowMeshBuilder {
         hock: foot.hock,
         projectedPixelsPerMeter: projectedPixelsPerMeter
       ) {
+        let color = denseLegFeatherColor(
+          base: featheredLeg,
+          materialVariation: feather.materialVariation,
+          bodyMaterialBlend: feather.bodyMaterialBlend
+        )
         appendFeatherBlade(
           root: feather.root,
           tip: feather.tip,
           planeNormal: feather.planeNormal,
           rootWidth: feather.rootWidthMeters,
           maximumWidth: feather.maximumWidthMeters,
-          color: featheredLeg,
+          color: color,
           sections: 6,
           camber: feather.camberMeters,
           transverseCamberRatio: 0.08,
@@ -2279,6 +2301,22 @@ private struct CrowMeshBuilder {
         )
       }
     }
+  }
+
+  private func denseLegFeatherColor(
+    base: SIMD4<Float>,
+    materialVariation: Float,
+    bodyMaterialBlend: Float
+  ) -> SIMD4<Float> {
+    guard bodyMaterialBlend > 0 else { return base }
+    let body = SIMD4<Float>(0.006, 0.009, 0.016, 0.15)
+    let blended = base + bodyMaterialBlend * (body - base)
+    return SIMD4<Float>(
+      blended.x * (1 + 0.08 * materialVariation),
+      blended.y * (1 + 0.06 * materialVariation),
+      blended.z * (1 + 0.04 * materialVariation),
+      blended.w + 0.008 * materialVariation
+    )
   }
 
   private func appendStandingSupport(

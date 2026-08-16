@@ -55,6 +55,20 @@ func femoralPlumageBridgesBodyLoftAndUpperCruralTract() {
         hock: leftHock
       )
   )
+  #expect(left.map(\.materialVariation).min()! < -0.90)
+  #expect(left.map(\.materialVariation).max()! > 0.90)
+  #expect(left.allSatisfy { $0.bodyMaterialBlend >= 0.60 })
+  #expect(left.allSatisfy { $0.bodyMaterialBlend <= 0.88 })
+  #expect(
+    CrowFemoralPlumage.visibleSamples(
+      bodyCenter: bodyCenter,
+      hip: leftHip,
+      hock: leftHock,
+      projectedPixelsPerMeter: 1_000
+    ).allSatisfy {
+      $0.materialVariation == 0 && $0.bodyMaterialBlend == 0
+    }
+  )
 
   for pair in zip(left, right) {
     #expect(pair.0.row == pair.1.row)
@@ -77,6 +91,8 @@ func femoralPlumageBridgesBodyLoftAndUpperCruralTract() {
     #expect(simd_dot(feather.tip - feather.root, legAxis) > 0)
     #expect(feather.maximumWidthMeters > feather.rootWidthMeters)
     #expect(abs(simd_length(feather.planeNormal) - 1) < 1e-5)
+    let rootNormal = simd_normalize(feather.root - feather.rootSurface)
+    #expect(simd_dot(rootNormal, feather.planeNormal) > 0.94)
     #expect(cruralRoots.map { simd_distance($0, feather.tip) }.min()! < 0.025)
   }
 

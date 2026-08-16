@@ -33,6 +33,19 @@ func crowCruralPlumageOverlapsLegAndCrossesHockBoundary() {
       projectedPixelsPerMeter: 1_600
     ).count == 98
   )
+  #expect(samples.map(\.materialVariation).min()! < -0.90)
+  #expect(samples.map(\.materialVariation).max()! > 0.90)
+  #expect(samples.allSatisfy { $0.bodyMaterialBlend >= 0.15 })
+  #expect(samples.allSatisfy { $0.bodyMaterialBlend <= 0.62 })
+  #expect(
+    CrowLegPlumage.visibleSamples(
+      hip: hip,
+      hock: hock,
+      projectedPixelsPerMeter: 1_000
+    ).allSatisfy {
+      $0.materialVariation == 0 && $0.bodyMaterialBlend == 0
+    }
+  )
 
   for radialIndex in 0..<CrowLegPlumage.radialCount {
     let row =

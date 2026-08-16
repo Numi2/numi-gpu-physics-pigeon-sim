@@ -11,6 +11,7 @@ struct CrowFoldedWingCovertSample: Equatable {
   let rootWidthMeters: Float
   let maximumWidthMeters: Float
   let camberMeters: Float
+  let materialVariation: Float
 }
 
 /// An imbricated folded-wing shell seated on the same loft as the trunk.
@@ -47,6 +48,11 @@ enum CrowFoldedWingCoverts {
             row: row,
             column: column,
             salt: 0x85EB_CA6B
+          )
+          let materialIdentity = identityVariation(
+            row: row,
+            column: column,
+            salt: 0xC2B2_AE35
           )
           let rowStep = 1 / Float(rowCount - 1)
           let rowFraction = min(
@@ -130,7 +136,8 @@ enum CrowFoldedWingCoverts {
               maximumWidthMeters:
                 localWidth * (1 + 0.08 * axial) * (1 + 0.04 * shapeIdentity),
               camberMeters: (0.00155 + 0.00055 * rowFraction)
-                * (1 + 0.09 * rootIdentity)
+                * (1 + 0.09 * rootIdentity),
+              materialVariation: materialIdentity
             )
           )
         }
@@ -202,7 +209,8 @@ enum CrowFoldedWingCoverts {
               planeNormal: normalized(rootNormal + tipNormal, fallback: rootNormal),
               rootWidthMeters: 0.58 * localWidth,
               maximumWidthMeters: localWidth * (1 + 0.10 * axial),
-              camberMeters: 0.0018 + 0.0007 * rowFraction
+              camberMeters: 0.0018 + 0.0007 * rowFraction,
+              materialVariation: 0
             )
           )
         }

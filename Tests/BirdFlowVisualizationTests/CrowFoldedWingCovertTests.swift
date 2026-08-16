@@ -24,6 +24,12 @@ func foldedWingCovertsFormSymmetricBodySeatedShell() {
     CrowFoldedWingCoverts.visibleSamples(projectedPixelsPerMeter: 1_600).count
       == 360
   )
+  #expect(samples.map(\.materialVariation).min()! < -0.90)
+  #expect(samples.map(\.materialVariation).max()! > 0.90)
+  #expect(
+    CrowFoldedWingCoverts.visibleSamples(projectedPixelsPerMeter: 1_000)
+      .allSatisfy { $0.materialVariation == 0 }
+  )
 
   for sample in samples {
     #expect(

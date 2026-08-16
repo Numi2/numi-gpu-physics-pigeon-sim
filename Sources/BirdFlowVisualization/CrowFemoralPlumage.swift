@@ -11,6 +11,8 @@ struct CrowFemoralPlumageFeather: Equatable {
   let rootWidthMeters: Float
   let maximumWidthMeters: Float
   let camberMeters: Float
+  let materialVariation: Float
+  let bodyMaterialBlend: Float
 }
 
 /// Estimated femoral tract joining pelvic contour plumage to the crural tract.
@@ -56,6 +58,11 @@ enum CrowFemoralPlumage {
           row: row,
           course: course,
           salt: 0x85EB_CA6B
+        )
+        let materialIdentity = identityVariation(
+          row: row,
+          course: course,
+          salt: 0xC2B2_AE35
         )
         let rowStep = 1 / Float(rowCount - 1)
         let rowFraction = min(
@@ -136,7 +143,9 @@ enum CrowFemoralPlumage {
             rootWidthMeters: 0.52 * maximumWidth,
             maximumWidthMeters: maximumWidth * (1 + 0.04 * shapeIdentity),
             camberMeters: (0.00085 + 0.00030 * courseFraction)
-              * (1 + 0.08 * rootIdentity)
+              * (1 + 0.08 * rootIdentity),
+            materialVariation: materialIdentity,
+            bodyMaterialBlend: 0.88 - 0.28 * courseFraction
           )
         )
       }
@@ -189,7 +198,9 @@ enum CrowFemoralPlumage {
             planeNormal: normalized(localNormal + radial, fallback: localNormal),
             rootWidthMeters: 0.56 * maximumWidth,
             maximumWidthMeters: maximumWidth,
-            camberMeters: 0.0012 + 0.0004 * courseFraction
+            camberMeters: 0.0012 + 0.0004 * courseFraction,
+            materialVariation: 0,
+            bodyMaterialBlend: 0
           )
         )
       }

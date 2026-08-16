@@ -9,6 +9,8 @@ struct CrowLegPlumageFeather: Equatable {
   let rootWidthMeters: Float
   let maximumWidthMeters: Float
   let camberMeters: Float
+  let materialVariation: Float
+  let bodyMaterialBlend: Float
 }
 
 /// Estimated crural contour feathers joining the pelvic plumage to the hock.
@@ -50,6 +52,11 @@ enum CrowLegPlumage {
           stationIndex: stationIndex,
           salt: 0x9E37_79B9
         )
+        let materialIdentity = identityVariation(
+          radialIndex: radialIndex,
+          stationIndex: stationIndex,
+          salt: 0xC2B2_AE35
+        )
         let baseTheta = 2 * Float.pi * Float(radialIndex) / Float(radialCount)
         let theta =
           baseTheta
@@ -81,7 +88,10 @@ enum CrowLegPlumage {
             planeNormal: radial,
             rootWidthMeters: 0.54 * maximumWidth,
             maximumWidthMeters: maximumWidth,
-            camberMeters: 0.00040 * (1 + 0.10 * shapeIdentity)
+            camberMeters: 0.00040 * (1 + 0.10 * shapeIdentity),
+            materialVariation: materialIdentity,
+            bodyMaterialBlend:
+              0.62 - 0.47 * Float(stationIndex) / Float(stationCount - 1)
           )
         )
       }
@@ -130,7 +140,9 @@ enum CrowLegPlumage {
             planeNormal: radial,
             rootWidthMeters: 0.58 * maximumWidth,
             maximumWidthMeters: maximumWidth,
-            camberMeters: 0.00045
+            camberMeters: 0.00045,
+            materialVariation: 0,
+            bodyMaterialBlend: 0
           )
         )
       }
