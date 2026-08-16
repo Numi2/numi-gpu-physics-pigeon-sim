@@ -1415,6 +1415,7 @@ inline float3 showcaseCrowLinearRadiance(
     float dorsalBodyVane=featherClass==5u?persistentVane:0.0f;
     float flankBodyVane=featherClass==6u?persistentVane:0.0f;
     float ventralBodyVane=featherClass==7u?persistentVane:0.0f;
+    float bodyContourVane=max(dorsalBodyVane,max(flankBodyVane,ventralBodyVane));
     // Folded secondaries present the broadest continuous grazing area. Give
     // their rough vanes less additive thin-film energy than narrow exposed
     // primaries, so a rear camera reads overlapping black feathers rather
@@ -1470,10 +1471,10 @@ inline float3 showcaseCrowLinearRadiance(
     barbFrequency=mix(barbFrequency,180.0f,dorsalBodyVane);
     barbFrequency=mix(barbFrequency,176.0f,flankBodyVane);
     barbFrequency=mix(barbFrequency,172.0f,ventralBodyVane);
-    float localBarbs=0.5f+0.5f*sin(
+    float localBarbAngle=
         barbFrequency*axial+23.0f*abs(signedWidth)+7.0f*signedWidth
-            +featherCoordinates.z
-    );
+            +featherCoordinates.z;
+    float localBarbs=0.5f+0.5f*sin(localBarbAngle);
     float barbPhase=520.0f*world.x+390.0f*world.y-270.0f*world.z;
     float barb=0.5f+0.5f*sin(barbPhase);
     float barbSignal=mix(barb,localBarbs,persistentVane);
@@ -1482,7 +1483,19 @@ inline float3 showcaseCrowLinearRadiance(
         *grazing*mix(0.25f,1.0f,flightFeather);
     float vaneEdge=persistentVane*smoothstep(0.78f,0.98f,abs(signedWidth))
         *mix(0.35f,1.0f,flightFeather);
-    float featherSpecular=pow(saturate(dot(normal,halfVector)),92.0f);
+    // Body vane barbs are not a single polished plate. Tilt only the tight
+    // specular sample across the resolved barb direction, using the stable
+    // per-feather phase carried by the procedural vane. The three-degree
+    // bound preserves the owning geometric normal and all AOV contracts.
+    float3 bodyBarbAxis=safeNormalizeCrow(
+        cross(normal,featherAxis),float3(0.0f,1.0f,0.0f)
+    );
+    float bodyBarbTilt=0.052f*bodyContourVane*sin(localBarbAngle)
+        *(1.0f-smoothstep(0.72f,0.96f,abs(signedWidth)));
+    float3 specularNormal=safeNormalizeCrow(
+        normal+bodyBarbTilt*bodyBarbAxis,normal
+    );
+    float featherSpecular=pow(saturate(dot(specularNormal,halfVector)),92.0f);
     float softSpecular=pow(saturate(dot(normal,halfVector)),24.0f);
     float diffuse=0.28f+0.62f*ndk+0.16f*ndf+0.10f*nds;
     float flightDarkening=mix(1.0f,0.58f,flightFeather);
