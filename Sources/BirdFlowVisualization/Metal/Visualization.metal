@@ -1405,22 +1405,28 @@ inline float3 showcaseCrowLinearRadiance(
         return 1.12f*keratin;
     }
 
-    // Eumelanin makes the body nearly black while a view-dependent thin-film
-    // band adds the restrained blue/violet sheen visible on adult crow
-    // feather regions. The spatial term breaks up a plastic-looking highlight
-    // without pretending to be a measured feather microstructure.
+    // Eumelanin makes the body nearly black while a weak, view-dependent
+    // cortex response adds the restrained blue/violet sheen of adult crow
+    // feather regions. Keep the phase in the local vane frame: a world-space
+    // wave would visibly slide over feathers as the standing body moves.
     float grazing=pow(1.0f-ndv,1.55f);
-    float interference=0.5f+0.5f*cos(
-        32.0f*ndv+17.0f*world.x-11.0f*world.y+8.0f*world.z
-    );
-    float3 blue=float3(0.025f,0.055f,0.090f);
-    float3 violet=float3(0.065f,0.035f,0.075f);
-    float3 sheen=mix(blue,violet,interference);
     float flightFeather=smoothstep(0.19f,0.25f,material);
     float featherMaterial=1.0f-smoothstep(0.46f,0.50f,material);
     float vaneCoordinates=step(1.0e-5f,
         abs(featherCoordinates.x)+abs(featherCoordinates.y));
     float persistentVane=featherMaterial*vaneCoordinates;
+    float axial=saturate(featherCoordinates.x);
+    float signedWidth=clamp(featherCoordinates.y,-1.0f,1.0f);
+    float cortexPhase=
+        29.0f*ndv
+        +2.10f*featherCoordinates.z
+        +3.25f*axial
+        +0.85f*abs(signedWidth);
+    float localCortexResponse=0.5f+0.5f*crowBandLimitedSine(cortexPhase);
+    float interference=mix(0.5f,localCortexResponse,persistentVane);
+    float3 blue=float3(0.025f,0.055f,0.090f);
+    float3 violet=float3(0.065f,0.035f,0.075f);
+    float3 sheen=mix(blue,violet,interference);
     uint featherClass=packedIdentity&255u;
     float primaryVane=featherClass==1u?persistentVane:0.0f;
     float secondaryVane=featherClass==2u?persistentVane:0.0f;
@@ -1430,19 +1436,18 @@ inline float3 showcaseCrowLinearRadiance(
     float flankBodyVane=featherClass==6u?persistentVane:0.0f;
     float ventralBodyVane=featherClass==7u?persistentVane:0.0f;
     float bodyContourVane=max(dorsalBodyVane,max(flankBodyVane,ventralBodyVane));
-    // Folded secondaries present the broadest continuous grazing area. Give
-    // their rough vanes less additive thin-film energy than narrow exposed
-    // primaries, so a rear camera reads overlapping black feathers rather
-    // than a row of silver paddles. Body contour classes then step down from
-    // structured dorsal sheen to the softer ventral response.
+    // American-crow dorsal body, tail, and wings form one optical region at
+    // natural-viewing discrimination, so do not assign unrelated material
+    // energy to those geometric classes. Ventral contour classes retain a
+    // restrained step down without turning the body into a glossy black plate.
     float classSheenScale=1.0f;
-    classSheenScale=mix(classSheenScale,0.82f,primaryVane);
-    classSheenScale=mix(classSheenScale,0.46f,secondaryVane);
-    classSheenScale=mix(classSheenScale,0.70f,rectrixVane);
-    classSheenScale=mix(classSheenScale,0.64f,greaterCovertVane);
-    classSheenScale=mix(classSheenScale,0.99f,dorsalBodyVane);
-    classSheenScale=mix(classSheenScale,0.97f,flankBodyVane);
-    classSheenScale=mix(classSheenScale,0.94f,ventralBodyVane);
+    classSheenScale=mix(classSheenScale,0.72f,primaryVane);
+    classSheenScale=mix(classSheenScale,0.72f,secondaryVane);
+    classSheenScale=mix(classSheenScale,0.72f,rectrixVane);
+    classSheenScale=mix(classSheenScale,0.72f,greaterCovertVane);
+    classSheenScale=mix(classSheenScale,0.72f,dorsalBodyVane);
+    classSheenScale=mix(classSheenScale,0.67f,flankBodyVane);
+    classSheenScale=mix(classSheenScale,0.62f,ventralBodyVane);
     float3 featherAxis=crowFeatherAxis(
         world,normal,featherCoordinates.xy
     );
@@ -1473,8 +1478,6 @@ inline float3 showcaseCrowLinearRadiance(
         normal,featherAxis,halfVector,
         longitudinalRoughness,transverseRoughness
     );
-    float axial=saturate(featherCoordinates.x);
-    float signedWidth=clamp(featherCoordinates.y,-1.0f,1.0f);
     float rachis=persistentVane
         *smoothstep(0.035f,0.16f,axial)
         *(1.0f-smoothstep(0.80f,0.985f,axial))
