@@ -158,8 +158,9 @@ struct DrawPrimitivesIndirectArguments {
 /// Immutable per-feather metadata uploaded once from `BirdRealityAsset`.
 /// Four-vector packing is mirrored exactly in Visualization.metal.
 struct CrowFeatherRootBindingGPU {
-  var sourceAndIdentity: SIMD4<UInt32>
-  var restDirectionAndLength: SIMD4<Float>
+  var sourceIndicesAndHash: SIMD4<UInt32>
+  var ownershipAndIdentity: SIMD4<UInt32>
+  var localDirectionAndLength: SIMD4<Float>
   var widthRachisAndPadding: SIMD4<Float>
 }
 
@@ -169,7 +170,10 @@ struct CrowFeatherRootBindingGPU {
 struct CrowFeatherRootStateGPU: Equatable {
   var currentPositionAndLength: SIMD4<Float>
   var previousPositionAndWidth: SIMD4<Float>
-  var restDirectionAndRachis: SIMD4<Float>
+  var currentDirectionAndRachis: SIMD4<Float>
+  var previousDirectionAndCamber: SIMD4<Float>
+  var currentNormalAndPadding: SIMD4<Float>
+  var previousNormalAndPadding: SIMD4<Float>
   var identity: SIMD4<UInt32>
 }
 
@@ -177,4 +181,25 @@ struct CrowFeatherDeformationUniforms {
   var frameIndices: SIMD4<UInt32>
   var counts: SIMD4<UInt32>
   var interpolation: SIMD4<Float>
+}
+
+/// One canonical vane-template vertex. The same retained template is expanded
+/// for every feather; x is axial fraction and y is signed half-width.
+struct CrowFeatherTemplateVertexGPU {
+  var parameters: SIMD4<Float>
+}
+
+/// Compute-generated geometry that is directly renderable today and retains
+/// previous positions plus stable identity for future temporal/AOV paths.
+struct CrowFeatherVertexGPU: Equatable {
+  var position: SIMD4<Float>
+  var normal: SIMD4<Float>
+  var color: SIMD4<Float>
+  var previousPosition: SIMD4<Float>
+  var identity: SIMD4<UInt32>
+}
+
+struct CrowFeatherGeometryUniforms {
+  var counts: SIMD4<UInt32>
+  var renderOffsetAndPadding: SIMD4<Float>
 }

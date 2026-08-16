@@ -79,7 +79,13 @@ estimated geometry and material on Apple silicon. A locked
 live Apple-Metal geometry and production TRT moving-boundary coupling gates.
 The complete [model and evidence boundary](Docs/AMERICAN_CROW_MODEL.md) keeps
 the generated hero, executable render, and solver surface distinct from crow
-aerodynamic validation.
+aerodynamic validation. A versioned
+[bird-reality asset](Docs/BIRD_REALITY_ASSET.md) now binds `54` stable flight
+and tail feather identities to the surface; retained Metal passes transport
+their current/previous frames and generate the rendered vane triangles. The
+[reality roadmap](Docs/BIRD_REALITY_ROADMAP.md) defines the ordered HDR,
+geometric-LOD, physical-material, ray-tracing, and neural-residual gates without
+showing a real-crow target as simulation output.
 
 [Quick start](#quick-start) · [Validation scoreboard](#validation-scoreboard) · [Native viewer](#native-metal-viewer) · [Architecture](#architecture) · [Measured data](#measured-geometry-and-kinematics) · [Scientific limits](#scientific-boundary) · [Full validation contract](Docs/VALIDATION.md)
 

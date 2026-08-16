@@ -189,7 +189,7 @@ public enum CrowShowcaseCapture {
       let orbit = 2 * Float.pi * phase
       var camera = CameraState()
       camera.target = SIMD3<Float>(-0.018, 0, 0.020)
-      camera.distance = 0.86 * (1 + 0.010 * cos(orbit))
+      camera.distance = 1.05 * (1 + 0.010 * cos(orbit))
       camera.yaw = -1.06 + 0.024 * sin(orbit)
       camera.pitch = 0.18 + 0.012 * cos(orbit)
       let texture = try renderer.render(
@@ -466,11 +466,13 @@ private final class CrowShowcaseRenderer {
   private let meshBuilder: CrowMeshBuilder
   private let surfacePipeline: MTLRenderPipelineState
   private let backgroundPipeline: MTLRenderPipelineState
+  private let featherPipeline: MTLRenderPipelineState?
   private let depthState: MTLDepthStencilState
   private let sampleCount: Int
   private let featherRootDeformer: CrowFeatherRootDeformer?
+  private let featherGeometryDeformer: CrowFeatherGeometryDeformer?
+  private let featherRenderOffset: SIMD3<Float>
   private var previousPhase: Float?
-  private(set) var latestFeatherRootStates: [CrowFeatherRootStateGPU] = []
 
   init(
     device: MTLDevice,
@@ -481,12 +483,13 @@ private final class CrowShowcaseRenderer {
   ) throws {
     let createdBackend = try VisualizationBackend(device: device)
     backend = createdBackend
-    meshBuilder = CrowMeshBuilder(
+    let createdMeshBuilder = CrowMeshBuilder(
       dataset: dataset,
       profile: profile,
       motion: motion,
       realityAsset: realityAsset
     )
+    meshBuilder = createdMeshBuilder
     featherRootDeformer = try realityAsset.map {
       try CrowFeatherRootDeformer(
         backend: createdBackend,
@@ -494,18 +497,34 @@ private final class CrowShowcaseRenderer {
         asset: $0
       )
     }
-    sampleCount = device.supportsTextureSampleCount(4) ? 4 : 1
+    featherGeometryDeformer = try realityAsset.map {
+      try CrowFeatherGeometryDeformer(
+        backend: createdBackend,
+        featherCount: $0.feathers.count
+      )
+    }
+    featherRenderOffset = createdMeshBuilder.featherRenderOffset
+    let createdSampleCount = device.supportsTextureSampleCount(4) ? 4 : 1
+    sampleCount = createdSampleCount
     surfacePipeline = try backend.render(
       vertex: "coloredSurfaceVertex",
       fragment: "showcaseCrowFragment",
       colorFormat: .bgra8Unorm_srgb,
-      sampleCount: sampleCount
+      sampleCount: createdSampleCount
     )
+    featherPipeline = try realityAsset.map { _ in
+      try createdBackend.render(
+        vertex: "crowFeatherVertex",
+        fragment: "showcaseCrowFragment",
+        colorFormat: .bgra8Unorm_srgb,
+        sampleCount: createdSampleCount
+      )
+    }
     backgroundPipeline = try backend.render(
       vertex: "showcaseBackgroundVertex",
       fragment: "showcaseCrowBackgroundFragment",
       colorFormat: .bgra8Unorm_srgb,
-      sampleCount: sampleCount
+      sampleCount: createdSampleCount
     )
     let depth = MTLDepthStencilDescriptor()
     depth.depthCompareFunction = .less
@@ -577,6 +596,16 @@ private final class CrowShowcaseRenderer {
       previousPhase: previousPhase ?? phase,
       commandBuffer: commandBuffer
     )
+    let featherFrame: CrowFeatherGeometryFrame?
+    if let rootFrame, let featherGeometryDeformer {
+      featherFrame = try featherGeometryDeformer.encode(
+        rootFrame: rootFrame,
+        renderOffset: featherRenderOffset,
+        commandBuffer: commandBuffer
+      )
+    } else {
+      featherFrame = nil
+    }
 
     let pass = MTLRenderPassDescriptor()
     pass.colorAttachments[0].texture = color
@@ -632,6 +661,20 @@ private final class CrowShowcaseRenderer {
       vertexStart: 0,
       vertexCount: vertices.count
     )
+    if let featherFrame, let featherPipeline {
+      encoder.setRenderPipelineState(featherPipeline)
+      encoder.setVertexBuffer(featherFrame.outputBuffer, offset: 0, index: 0)
+      encoder.setVertexBytes(
+        &cameraUniforms,
+        length: MemoryLayout<CameraUniforms>.stride,
+        index: 1
+      )
+      encoder.drawPrimitives(
+        type: .triangle,
+        vertexStart: 0,
+        vertexCount: featherFrame.vertexCount
+      )
+    }
     encoder.endEncoding()
     commandBuffer.commit()
     commandBuffer.waitUntilCompleted()
@@ -639,9 +682,6 @@ private final class CrowShowcaseRenderer {
       throw VisualizationError.shader(
         commandBuffer.error?.localizedDescription ?? "crow render failed"
       )
-    }
-    if let rootFrame, let featherRootDeformer {
-      latestFeatherRootStates = featherRootDeformer.states(for: rootFrame)
     }
     previousPhase = phase
     return resolved
@@ -656,6 +696,10 @@ private struct CrowMeshBuilder {
   private let referenceBodyCenter: SIMD3<Float>
   private let vertexPartIdentifiers: [UInt8]
   private let persistentFeathers: [BirdRealityFeather]
+
+  var featherRenderOffset: SIMD3<Float> {
+    surfaceIsEstimatedCrow ? -referenceBodyCenter : .zero
+  }
 
   init(
     dataset: MeasuredBirdSurfaceSequence,
@@ -695,6 +739,13 @@ private struct CrowMeshBuilder {
     let bodyPoints = bodyIndices.map { states[$0] }
     let bodyCenter = average(bodyPoints)
     let bodyBounds = bounds(bodyPoints)
+    if !persistentFeathers.isEmpty {
+      appendMeasuredScaffold(
+        states,
+        includedPartIdentifiers: [2, 3, 4],
+        to: &vertices
+      )
+    }
     appendCrowAnatomy(
       bodyCenter: bodyCenter,
       bodyBounds: bodyBounds,
@@ -739,6 +790,7 @@ private struct CrowMeshBuilder {
 
   private func appendMeasuredScaffold(
     _ states: [SIMD3<Float>],
+    includedPartIdentifiers: Set<UInt8>,
     to vertices: inout [ColoredVertex]
   ) {
     var smoothNormals = [SIMD3<Float>](
@@ -755,10 +807,11 @@ private struct CrowMeshBuilder {
       for index in indices { smoothNormals[index] += weighted }
     }
     for triangleIndex in 0..<dataset.triangleCount {
+      let part = dataset.trianglePartIdentifiers[triangleIndex]
+      guard includedPartIdentifiers.contains(part) else { continue }
       let triangle = dataset.triangle(triangleIndex)
       let indices = [Int(triangle.x), Int(triangle.y), Int(triangle.z)]
       let points = indices.map { states[$0] }
-      let part = dataset.trianglePartIdentifiers[triangleIndex]
       let color: SIMD4<Float>
       switch part {
       case 2:
@@ -1145,80 +1198,82 @@ private struct CrowMeshBuilder {
       simd_cross(forward, spanDirection),
       fallback: SIMD3<Float>(0, 0, 1)
     )
-    let assetPrimaries = persistentFeathers.filter {
-      $0.featherClass == .primary
-        && $0.side == (left ? .left : .right)
-    }
-    let primaryCount =
-      assetPrimaries.isEmpty
-      ? profile.visualTransform.primaryFeatherCountPerWing
-      : assetPrimaries.count
-    for index in 0..<primaryCount {
-      let f = Float(index) / Float(max(primaryCount - 1, 1))
-      let featherRoot =
-        root + span * (0.44 + 0.027 * Float(index))
-        - forward * (0.020 + 0.010 * (1 - f))
-      let proceduralTip =
-        root + span * (0.72 + 0.33 * f)
-        - forward * (0.145 - 0.112 * f)
-        + planeNormal * (0.008 * sin(Float.pi * f))
-      let assetFeather = assetPrimaries.isEmpty ? nil : assetPrimaries[index]
-      let featherTip =
-        assetFeather.map {
-          featherRoot + safeNormalize(
-            proceduralTip - featherRoot,
-            fallback: spanDirection
-          ) * $0.lengthMeters
-        } ?? proceduralTip
-      let shade = 0.008 + 0.004 * f
-      appendFeatherBlade(
-        root: featherRoot,
-        tip: featherTip,
-        planeNormal: planeNormal,
-        rootWidth: 0.58
-          * (assetFeather?.maximumWidthMeters
-            ?? (0.019 - 0.004 * f)),
-        maximumWidth: assetFeather?.maximumWidthMeters
-          ?? (0.019 - 0.004 * f),
-        color: SIMD4<Float>(shade, shade * 1.20, shade * 1.48, 0.25),
-        sections: 9,
-        camber: 0.012 * (0.4 + f),
-        to: &vertices
-      )
-    }
-    let assetSecondaries = persistentFeathers.filter {
-      $0.featherClass == .secondary
-        && $0.side == (left ? .left : .right)
-    }
-    let secondaryCount =
-      assetSecondaries.isEmpty
-      ? profile.visualTransform.secondaryFeatherCountPerWing
-      : assetSecondaries.count
-    for index in 0..<secondaryCount {
-      let f = Float(index) / Float(max(secondaryCount - 1, 1))
-      let featherRoot = root + span * (0.08 + 0.50 * f) + forward * 0.005
-      let proceduralTip =
-        root + span * (0.13 + 0.55 * f)
-        - forward * (0.105 + 0.014 * sin(Float.pi * f))
-      let assetFeather = assetSecondaries.isEmpty ? nil : assetSecondaries[index]
-      let featherTip =
-        assetFeather.map {
-          featherRoot + safeNormalize(
-            proceduralTip - featherRoot,
-            fallback: spanDirection
-          ) * $0.lengthMeters
-        } ?? proceduralTip
-      appendFeatherBlade(
-        root: featherRoot,
-        tip: featherTip,
-        planeNormal: planeNormal,
-        rootWidth: 0.52 * (assetFeather?.maximumWidthMeters ?? 0.020),
-        maximumWidth: assetFeather?.maximumWidthMeters ?? 0.020,
-        color: SIMD4<Float>(0.008, 0.012, 0.019, 0.22),
-        sections: 8,
-        camber: 0.008,
-        to: &vertices
-      )
+    if persistentFeathers.isEmpty {
+      let assetPrimaries = persistentFeathers.filter {
+        $0.featherClass == .primary
+          && $0.side == (left ? .left : .right)
+      }
+      let primaryCount =
+        assetPrimaries.isEmpty
+        ? profile.visualTransform.primaryFeatherCountPerWing
+        : assetPrimaries.count
+      for index in 0..<primaryCount {
+        let f = Float(index) / Float(max(primaryCount - 1, 1))
+        let featherRoot =
+          root + span * (0.44 + 0.027 * Float(index))
+          - forward * (0.020 + 0.010 * (1 - f))
+        let proceduralTip =
+          root + span * (0.72 + 0.33 * f)
+          - forward * (0.145 - 0.112 * f)
+          + planeNormal * (0.008 * sin(Float.pi * f))
+        let assetFeather = assetPrimaries.isEmpty ? nil : assetPrimaries[index]
+        let featherTip =
+          assetFeather.map {
+            featherRoot + safeNormalize(
+              proceduralTip - featherRoot,
+              fallback: spanDirection
+            ) * $0.lengthMeters
+          } ?? proceduralTip
+        let shade = 0.008 + 0.004 * f
+        appendFeatherBlade(
+          root: featherRoot,
+          tip: featherTip,
+          planeNormal: planeNormal,
+          rootWidth: 0.58
+            * (assetFeather?.maximumWidthMeters
+              ?? (0.019 - 0.004 * f)),
+          maximumWidth: assetFeather?.maximumWidthMeters
+            ?? (0.019 - 0.004 * f),
+          color: SIMD4<Float>(shade, shade * 1.20, shade * 1.48, 0.25),
+          sections: 9,
+          camber: 0.012 * (0.4 + f),
+          to: &vertices
+        )
+      }
+      let assetSecondaries = persistentFeathers.filter {
+        $0.featherClass == .secondary
+          && $0.side == (left ? .left : .right)
+      }
+      let secondaryCount =
+        assetSecondaries.isEmpty
+        ? profile.visualTransform.secondaryFeatherCountPerWing
+        : assetSecondaries.count
+      for index in 0..<secondaryCount {
+        let f = Float(index) / Float(max(secondaryCount - 1, 1))
+        let featherRoot = root + span * (0.08 + 0.50 * f) + forward * 0.005
+        let proceduralTip =
+          root + span * (0.13 + 0.55 * f)
+          - forward * (0.105 + 0.014 * sin(Float.pi * f))
+        let assetFeather = assetSecondaries.isEmpty ? nil : assetSecondaries[index]
+        let featherTip =
+          assetFeather.map {
+            featherRoot + safeNormalize(
+              proceduralTip - featherRoot,
+              fallback: spanDirection
+            ) * $0.lengthMeters
+          } ?? proceduralTip
+        appendFeatherBlade(
+          root: featherRoot,
+          tip: featherTip,
+          planeNormal: planeNormal,
+          rootWidth: 0.52 * (assetFeather?.maximumWidthMeters ?? 0.020),
+          maximumWidth: assetFeather?.maximumWidthMeters ?? 0.020,
+          color: SIMD4<Float>(0.008, 0.012, 0.019, 0.22),
+          sections: 8,
+          camber: 0.008,
+          to: &vertices
+        )
+      }
     }
     for row in 0..<3 {
       for index in 0..<9 {
@@ -1293,6 +1348,7 @@ private struct CrowMeshBuilder {
     let assetRectrices = persistentFeathers.filter {
       $0.featherClass == .tail
     }
+    if !assetRectrices.isEmpty { return }
     let count =
       assetRectrices.isEmpty
       ? profile.visualTransform.tailFeatherCount

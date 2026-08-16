@@ -251,25 +251,25 @@
       {
         "seriesIdentifier": "left.primary",
         "surfacePartIdentifier": 2,
-        "rootVertexIndices": [1654, 1663, 1672, 1681, 1690, 1699, 1708, 1717, 1726, 1735],
+        "rootVertexIndices": [1609, 1618, 1627, 1636, 1645, 1654, 1663, 1672, 1681, 1690],
         "evidenceClass": "estimated"
       },
       {
         "seriesIdentifier": "right.primary",
         "surfacePartIdentifier": 3,
-        "rootVertexIndices": [1951, 1960, 1969, 1978, 1987, 1996, 2005, 2014, 2023, 2032],
+        "rootVertexIndices": [1906, 1915, 1924, 1933, 1942, 1951, 1960, 1969, 1978, 1987],
         "evidenceClass": "estimated"
       },
       {
         "seriesIdentifier": "left.secondary",
         "surfacePartIdentifier": 2,
-        "rootVertexIndices": [1555, 1564, 1573, 1582, 1591, 1600, 1609, 1618, 1627, 1636, 1645],
+        "rootVertexIndices": [1501, 1510, 1519, 1528, 1537, 1546, 1555, 1564, 1573, 1582, 1591],
         "evidenceClass": "estimated"
       },
       {
         "seriesIdentifier": "right.secondary",
         "surfacePartIdentifier": 3,
-        "rootVertexIndices": [1852, 1861, 1870, 1879, 1888, 1897, 1906, 1915, 1924, 1933, 1942],
+        "rootVertexIndices": [1798, 1807, 1816, 1825, 1834, 1843, 1852, 1861, 1870, 1879, 1888],
         "evidenceClass": "estimated"
       },
       {

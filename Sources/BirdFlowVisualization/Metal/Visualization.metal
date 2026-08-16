@@ -9,15 +9,19 @@ struct SliceProbeOutput { float4 worldAndScalar; float4 velocity; float4 vortici
 struct CameraUniforms { float4x4 viewProjection; float4 eyeAndWidth; };
 
 struct CrowFeatherRootBindingGPU {
-    uint4 sourceAndIdentity;
-    float4 restDirectionAndLength;
+    uint4 sourceIndicesAndHash;
+    uint4 ownershipAndIdentity;
+    float4 localDirectionAndLength;
     float4 widthRachisAndPadding;
 };
 
 struct CrowFeatherRootStateGPU {
     float4 currentPositionAndLength;
     float4 previousPositionAndWidth;
-    float4 restDirectionAndRachis;
+    float4 currentDirectionAndRachis;
+    float4 previousDirectionAndCamber;
+    float4 currentNormalAndPadding;
+    float4 previousNormalAndPadding;
     uint4 identity;
 };
 
@@ -25,6 +29,21 @@ struct CrowFeatherDeformationUniforms {
     uint4 frameIndices;
     uint4 counts;
     float4 interpolation;
+};
+
+struct CrowFeatherTemplateVertexGPU { float4 parameters; };
+
+struct CrowFeatherVertexGPU {
+    float4 position;
+    float4 normal;
+    float4 color;
+    float4 previousPosition;
+    uint4 identity;
+};
+
+struct CrowFeatherGeometryUniforms {
+    uint4 counts;
+    float4 renderOffsetAndPadding;
 };
 
 struct VisualizationUniforms {
@@ -74,6 +93,71 @@ inline uint3 unflatten(uint index, uint3 size) {
     return uint3(remainder - y * size.x, y, z);
 }
 
+inline float3 safeNormalizeCrow(float3 value,float3 fallback) {
+    float magnitude=length(value);
+    return magnitude>1.0e-12f?value/magnitude:fallback;
+}
+
+struct CrowSurfaceFrame {
+    float3 root;
+    float3 tangent;
+    float3 bitangent;
+    float3 normal;
+};
+
+inline float3 crowSurfacePoint(
+    device const float4* points,
+    uint vertexCount,
+    uint firstFrame,
+    uint secondFrame,
+    float blend,
+    uint vertexIndex) {
+    return mix(
+        points[firstFrame*vertexCount+vertexIndex].xyz,
+        points[secondFrame*vertexCount+vertexIndex].xyz,
+        blend
+    );
+}
+
+inline CrowSurfaceFrame crowSurfaceFrame(
+    device const float4* points,
+    uint vertexCount,
+    uint firstFrame,
+    uint secondFrame,
+    float blend,
+    uint3 indices) {
+    CrowSurfaceFrame frame;
+    frame.root=crowSurfacePoint(
+        points,vertexCount,firstFrame,secondFrame,blend,indices.x
+    );
+    float3 first=crowSurfacePoint(
+        points,vertexCount,firstFrame,secondFrame,blend,indices.y
+    );
+    float3 second=crowSurfacePoint(
+        points,vertexCount,firstFrame,secondFrame,blend,indices.z
+    );
+    float3 firstEdge=first-frame.root;
+    frame.tangent=safeNormalizeCrow(firstEdge,float3(1,0,0));
+    frame.normal=safeNormalizeCrow(
+        cross(firstEdge,second-frame.root),float3(0,0,1)
+    );
+    frame.bitangent=safeNormalizeCrow(
+        cross(frame.normal,frame.tangent),float3(0,1,0)
+    );
+    return frame;
+}
+
+inline float3 crowTransportDirection(
+    float3 localDirection,
+    CrowSurfaceFrame frame) {
+    return safeNormalizeCrow(
+        localDirection.x*frame.tangent
+            +localDirection.y*frame.bitangent
+            +localDirection.z*frame.normal,
+        frame.tangent
+    );
+}
+
 kernel void deformCrowFeatherRoots(
     device const float4* sourcePoints [[buffer(0)]],
     device const CrowFeatherRootBindingGPU* bindings [[buffer(1)]],
@@ -84,39 +168,106 @@ kernel void deformCrowFeatherRoots(
     if(featherIndex>=featherCount){return;}
     CrowFeatherRootBindingGPU binding=bindings[featherIndex];
     uint vertexCount=uniforms.counts.x;
-    uint vertexIndex=binding.sourceAndIdentity.x;
-    uint currentFirst=uniforms.frameIndices.x*vertexCount+vertexIndex;
-    uint currentSecond=uniforms.frameIndices.y*vertexCount+vertexIndex;
-    uint previousFirst=uniforms.frameIndices.z*vertexCount+vertexIndex;
-    uint previousSecond=uniforms.frameIndices.w*vertexCount+vertexIndex;
-    float3 current=mix(
-        sourcePoints[currentFirst].xyz,
-        sourcePoints[currentSecond].xyz,
-        uniforms.interpolation.x
+    uint3 indices=binding.sourceIndicesAndHash.xyz;
+    CrowSurfaceFrame current=crowSurfaceFrame(
+        sourcePoints,vertexCount,
+        uniforms.frameIndices.x,uniforms.frameIndices.y,
+        uniforms.interpolation.x,indices
     );
-    float3 previous=mix(
-        sourcePoints[previousFirst].xyz,
-        sourcePoints[previousSecond].xyz,
-        uniforms.interpolation.y
+    CrowSurfaceFrame previous=crowSurfaceFrame(
+        sourcePoints,vertexCount,
+        uniforms.frameIndices.z,uniforms.frameIndices.w,
+        uniforms.interpolation.y,indices
     );
+    float3 localDirection=binding.localDirectionAndLength.xyz;
     CrowFeatherRootStateGPU state;
     state.currentPositionAndLength=float4(
-        current,binding.restDirectionAndLength.w
+        current.root,binding.localDirectionAndLength.w
     );
     state.previousPositionAndWidth=float4(
-        previous,binding.widthRachisAndPadding.x
+        previous.root,binding.widthRachisAndPadding.x
     );
-    state.restDirectionAndRachis=float4(
-        binding.restDirectionAndLength.xyz,
+    state.currentDirectionAndRachis=float4(
+        crowTransportDirection(localDirection,current),
         binding.widthRachisAndPadding.y
     );
+    state.previousDirectionAndCamber=float4(
+        crowTransportDirection(localDirection,previous),
+        binding.widthRachisAndPadding.z
+    );
+    state.currentNormalAndPadding=float4(current.normal,0);
+    state.previousNormalAndPadding=float4(previous.normal,0);
     state.identity=uint4(
         featherIndex,
-        binding.sourceAndIdentity.y,
-        binding.sourceAndIdentity.z,
-        binding.sourceAndIdentity.w
+        binding.sourceIndicesAndHash.w,
+        binding.ownershipAndIdentity.x,
+        binding.ownershipAndIdentity.y
     );
     output[featherIndex]=state;
+}
+
+inline float crowFeatherWidthEnvelope(float axial) {
+    float body=0.32f+0.68f*pow(max(sin(M_PI_F*axial),0.0f),0.58f);
+    return body*(1.0f-0.985f*pow(axial,3.2f));
+}
+
+inline float3 crowFeatherPosition(
+    float3 root,
+    float3 direction,
+    float3 surfaceNormal,
+    float lengthMeters,
+    float maximumWidthMeters,
+    float camberMeters,
+    float axial,
+    float signedWidth) {
+    float3 widthAxis=safeNormalizeCrow(
+        cross(surfaceNormal,direction),float3(0,1,0)
+    );
+    float width=mix(0.55f*maximumWidthMeters,maximumWidthMeters,axial)
+        *crowFeatherWidthEnvelope(axial);
+    float3 center=root+direction*(lengthMeters*axial)
+        +surfaceNormal*(camberMeters*sin(M_PI_F*axial));
+    return center+widthAxis*(signedWidth*width);
+}
+
+kernel void deformCrowFeatherTemplates(
+    device const CrowFeatherTemplateVertexGPU* templateVertices [[buffer(0)]],
+    device const CrowFeatherRootStateGPU* roots [[buffer(1)]],
+    device CrowFeatherVertexGPU* output [[buffer(2)]],
+    constant CrowFeatherGeometryUniforms& uniforms [[buffer(3)]],
+    uint outputIndex [[thread_position_in_grid]]) {
+    uint outputCount=uniforms.counts.z;
+    if(outputIndex>=outputCount){return;}
+    uint templateVertexCount=uniforms.counts.y;
+    uint featherIndex=outputIndex/templateVertexCount;
+    uint templateIndex=outputIndex-featherIndex*templateVertexCount;
+    CrowFeatherRootStateGPU root=roots[featherIndex];
+    float2 parameter=templateVertices[templateIndex].parameters.xy;
+    float3 currentDirection=root.currentDirectionAndRachis.xyz;
+    float3 previousDirection=root.previousDirectionAndCamber.xyz;
+    float3 currentNormal=root.currentNormalAndPadding.xyz;
+    float3 previousNormal=root.previousNormalAndPadding.xyz;
+    float lengthMeters=root.currentPositionAndLength.w;
+    float maximumWidthMeters=root.previousPositionAndWidth.w;
+    float camberMeters=root.previousDirectionAndCamber.w;
+    float3 current=crowFeatherPosition(
+        root.currentPositionAndLength.xyz,currentDirection,currentNormal,
+        lengthMeters,maximumWidthMeters,camberMeters,parameter.x,parameter.y
+    )+uniforms.renderOffsetAndPadding.xyz;
+    float3 previous=crowFeatherPosition(
+        root.previousPositionAndWidth.xyz,previousDirection,previousNormal,
+        lengthMeters,maximumWidthMeters,camberMeters,parameter.x,parameter.y
+    )+uniforms.renderOffsetAndPadding.xyz;
+    uint featherClass=root.identity.w&255u;
+    float material=featherClass==1u?0.25f:(featherClass==2u?0.22f:0.23f);
+    float shade=0.0075f+0.00045f*float(root.identity.x%11u);
+    CrowFeatherVertexGPU result;
+    result.position=float4(current,1);
+    result.normal=float4(currentNormal,0);
+    result.color=float4(shade,shade*1.28f,shade*1.72f,material);
+    result.previousPosition=float4(previous,1);
+    result.identity=root.identity;
+    output[outputIndex]=result;
 }
 
 inline float4 quaternionConjugate(float4 q) { return float4(-q.xyz, q.w); }
@@ -620,6 +771,19 @@ vertex RasterVertex coloredSurfaceVertex(
     ColoredVertex source=vertices[vid]; RasterVertex out;
     out.position=camera.viewProjection*source.position;out.world=source.position.xyz;
     out.normal=normalize(source.normal.xyz);out.color=source.color;out.uv=float2(0);return out;
+}
+
+vertex RasterVertex crowFeatherVertex(
+    device const CrowFeatherVertexGPU* vertices [[buffer(0)]],
+    constant CameraUniforms& camera [[buffer(1)]],
+    uint vid [[vertex_id]]) {
+    CrowFeatherVertexGPU source=vertices[vid];RasterVertex out;
+    out.position=camera.viewProjection*source.position;
+    out.world=source.position.xyz;
+    out.normal=normalize(source.normal.xyz);
+    out.color=source.color;
+    out.uv=float2(0);
+    return out;
 }
 
 vertex RasterVertex isoSurfaceVertex(

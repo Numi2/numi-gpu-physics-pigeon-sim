@@ -61,13 +61,23 @@ root position, morphology, surface ownership, class, side, inventory index, and
 a deterministic stable-ID hash. The immutable surface sequence and feather
 bindings are uploaded once rather than rebuilt per frame.
 
-The GPU pass is qualified against an independent CPU interpolation path at
-multiple phases, including frame-to-frame motion and exact identity parity. It
-establishes temporal correspondence; it does **not** yet deform the beauty-mesh
-vertices. Those vertices remain CPU-generated procedural estimates whose
-primary, secondary, and tail counts, lengths, and widths come from this asset.
+Each root also carries a fixed-topology surface triangle. Metal transports the
+estimated rest direction through that triangle's current and previous tangent
+frames, then expands one retained twelve-section vane template into `3,888`
+triangle vertices. The primary, secondary, and tail vertices rendered by the
+live capture now come from private GPU buffers; their previous positions and
+stable feather IDs remain beside the current render attributes. The physical
+wing/tail surface is rendered as a dark underlayer so the attachment boundary
+stays visible rather than being hidden by a disconnected procedural wing.
 
-The next renderer milestone is retained GPU feather-template deformation plus
-HDR albedo, normal, material, identity, depth, and deformation-motion-vector
-outputs. Those buffers are prerequisites for temporal reconstruction, MetalFX,
-ray tracing, and neural appearance models.
+Both GPU stages are qualified against independent CPU interpolation and
+deformation paths at multiple phases. Gates cover exact identity, finite state,
+unit directions, current/previous motion, a bounded `0.75 m` radial envelope,
+and a `1.10 m` conservative bilateral presentation envelope. These are
+implementation and visual-sanity gates, not measured anatomy validation.
+
+The next renderer milestone is HDR albedo, normal, material, identity, depth,
+and deformation-motion-vector outputs. Those buffers are prerequisites for
+temporal reconstruction, MetalFX, ray tracing, and neural appearance models.
+The longer architecture is recorded in
+[`BIRD_REALITY_ROADMAP.md`](BIRD_REALITY_ROADMAP.md).

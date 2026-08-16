@@ -53,15 +53,15 @@ swift build -c release --product birdflow-viewer
 ```
 
 It verifies the reality asset, crow-surface manifest, generating profile, and
-their SHA-256 locks before rendering. A retained Metal compute pass evaluates
-current and previous positions for all `54` persistent flight/tail feather roots
-from the same surface used by the solver. The current beauty geometry is built
-from a smooth body/head loft plus explicit primary, secondary, covert, contour,
-and tail feathers; its persistent-feather counts and morphology come from the
-asset, while its vertices remain CPU-generated procedural estimates. Four-sample
-Metal rasterization and a dedicated eumelanin shader provide view-dependent cool
-sheen while keeping the bird visually black. The native result is an executable
-motion and material estimate, not a photograph.
+their SHA-256 locks before rendering. One retained Metal pass evaluates current
+and previous tangent frames for all `54` persistent flight/tail feather roots;
+a second expands a shared twelve-section vane template into `3,888` renderable
+vertices. Current and previous positions plus stable feather IDs stay GPU-side.
+The physical wing/tail surface supplies an attachment underlayer, while the
+smooth body/head, coverts, and contour feathers remain procedural estimates.
+Four-sample Metal rasterization and a dedicated eumelanin shader provide
+view-dependent cool sheen while keeping the bird visually black. The native
+result is an executable motion and material estimate, not a photograph.
 The beauty mesh and fluid boundary mesh are intentionally distinct: the former
 adds feather detail, while the latter remains the fixed-topology coupling input.
 

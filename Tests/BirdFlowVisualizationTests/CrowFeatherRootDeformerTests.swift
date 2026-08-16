@@ -34,8 +34,8 @@ func crowFeatherRootGPUDeformationMatchesCPUReference() throws {
     asset: asset
   )
 
-  #expect(MemoryLayout<CrowFeatherRootBindingGPU>.stride == 48)
-  #expect(MemoryLayout<CrowFeatherRootStateGPU>.stride == 64)
+  #expect(MemoryLayout<CrowFeatherRootBindingGPU>.stride == 64)
+  #expect(MemoryLayout<CrowFeatherRootStateGPU>.stride == 112)
   #expect(MemoryLayout<CrowFeatherDeformationUniforms>.stride == 48)
   #expect(deformer.featherCount == 54)
 
@@ -53,7 +53,8 @@ func crowFeatherRootGPUDeformationMatchesCPUReference() throws {
     let frame = try deformer.encode(
       currentPhase: phase.current,
       previousPhase: phase.previous,
-      commandBuffer: commandBuffer
+      commandBuffer: commandBuffer,
+      auditReadback: true
     )
     commandBuffer.commit()
     commandBuffer.waitUntilCompleted()
@@ -68,7 +69,12 @@ func crowFeatherRootGPUDeformationMatchesCPUReference() throws {
     for (gpu, cpu) in zip(actual, expected) {
       #expect(simd_length(gpu.currentPositionAndLength - cpu.currentPositionAndLength) < 1e-7)
       #expect(simd_length(gpu.previousPositionAndWidth - cpu.previousPositionAndWidth) < 1e-7)
-      #expect(simd_length(gpu.restDirectionAndRachis - cpu.restDirectionAndRachis) < 1e-7)
+      #expect(simd_length(gpu.currentDirectionAndRachis - cpu.currentDirectionAndRachis) < 1e-5)
+      #expect(
+        simd_length(gpu.previousDirectionAndCamber - cpu.previousDirectionAndCamber) < 1e-5
+      )
+      #expect(simd_length(gpu.currentNormalAndPadding - cpu.currentNormalAndPadding) < 1e-5)
+      #expect(simd_length(gpu.previousNormalAndPadding - cpu.previousNormalAndPadding) < 1e-5)
       #expect(gpu.identity == cpu.identity)
     }
   }
@@ -93,4 +99,15 @@ func crowFeatherRootGPUDeformationMatchesCPUReference() throws {
       ) > 1e-5
     })
   #expect(Set(movingFrame.map { $0.identity.y }).count == 54)
+  #expect(
+    movingFrame.allSatisfy {
+      abs(
+        simd_length(
+          SIMD3<Float>(
+            $0.currentDirectionAndRachis.x,
+            $0.currentDirectionAndRachis.y,
+            $0.currentDirectionAndRachis.z
+          )) - 1) < 1e-6
+    }
+  )
 }

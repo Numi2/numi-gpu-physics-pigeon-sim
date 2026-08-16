@@ -51,6 +51,11 @@ func birdRealityAssetExpandsBilateralFeathersDeterministically() throws {
   let right = asset.feathers.filter { $0.seriesIdentifier == "right.primary" }
 
   #expect(left.count == right.count)
+  #expect(
+    left.map(\.physicsRootVertexIndex) == [
+      1_609, 1_618, 1_627, 1_636, 1_645,
+      1_654, 1_663, 1_672, 1_681, 1_690,
+    ])
   for (leftFeather, rightFeather) in zip(left, right) {
     #expect(leftFeather.ordinal == rightFeather.ordinal)
     #expect(leftFeather.rootPositionMeters.x == rightFeather.rootPositionMeters.x)
@@ -60,6 +65,7 @@ func birdRealityAssetExpandsBilateralFeathersDeterministically() throws {
     #expect(leftFeather.restDirection.y == -rightFeather.restDirection.y)
     #expect(leftFeather.restDirection.z == rightFeather.restDirection.z)
     #expect(leftFeather.lengthMeters == rightFeather.lengthMeters)
+    #expect(rightFeather.physicsRootVertexIndex - leftFeather.physicsRootVertexIndex == 297)
   }
 }
 
