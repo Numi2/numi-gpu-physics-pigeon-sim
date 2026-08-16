@@ -2859,6 +2859,96 @@ private struct CrowMeshBuilder {
       projectedPixelsPerMeter: projectedPixelsPerMeter,
       to: &vertices
     )
+    appendSurfaceBoundAxillaryUnderlayer(
+      states: states,
+      left: left,
+      to: &vertices
+    )
+  }
+
+  /// A continuous axillary covert bed sits beneath the exposed dorsal vanes.
+  /// The surface is hidden by their feather geometry in normal views, but
+  /// closes projection slots without broadening the visible course.
+  private func appendSurfaceBoundAxillaryUnderlayer(
+    states: [SIMD3<Float>],
+    left: Bool,
+    to vertices: inout [ColoredVertex]
+  ) {
+    let partIdentifier: UInt8 = left ? 2 : 3
+    guard
+      let wing = dataset.components.first(where: {
+        $0.partIdentifier == partIdentifier
+      }), wing.vertexCount == 9 * 33
+    else { return }
+    let chordCount = CrowFlightWingBodyIntegration.chordCount
+    func point(span: Int, chord: Int) -> SIMD3<Float> {
+      states[wing.vertexOffset + span * chordCount + chord]
+    }
+    let rootChord = CrowFlightWingBodyIntegration.axillaryUnderlayerRootChordIndex
+    let tipChord = CrowFlightWingBodyIntegration.axillaryUnderlayerTipChordIndex
+    typealias UnderlayerStation = (
+      root: SIMD3<Float>, tip: SIMD3<Float>, normal: SIMD3<Float>
+    )
+    func underlayerStation(span: Int) -> UnderlayerStation {
+      let root = point(span: span, chord: rootChord)
+      let trailingStation = point(span: span, chord: tipChord)
+      let nextSpan = min(span + 1, CrowFlightWingBodyIntegration.spanCount - 1)
+      let previousSpan = max(span - 1, 0)
+      let spanVector = point(span: nextSpan, chord: rootChord)
+        - point(span: previousSpan, chord: rootChord)
+      let chordVector = trailingStation - root
+      let chordDirection = safeNormalize(
+        chordVector,
+        fallback: SIMD3<Float>(-1, 0, 0)
+      )
+      let spanDirection = safeNormalize(
+        spanVector,
+        fallback: SIMD3<Float>(0, left ? 1 : -1, 0)
+      )
+      let dorsalNormal = CrowFlightWingBodyIntegration.covertSurfaceNormal(
+        chordDirection: chordDirection,
+        spanDirection: spanDirection,
+        left: left
+      )
+      let tipSpanFraction =
+        CrowFlightWingBodyIntegration.axillaryUnderlayerTipSpanFraction(
+          spanIndex: span
+        )
+      let chordScale = 1.92
+        + CrowFlightWingBodyIntegration.covertProximalChordExtension(
+          spanIndex: span
+        )
+      return (
+        root: root - dorsalNormal * 0.0008,
+        tip: root + chordScale * chordVector + tipSpanFraction * spanVector
+          - dorsalNormal * 0.0004,
+        normal: dorsalNormal
+      )
+    }
+    let stations = CrowFlightWingBodyIntegration.axillaryUnderlayerSpanIndices.map {
+      underlayerStation(span: $0)
+    }
+    let color = SIMD4<Float>(0.0058, 0.0088, 0.016, 0.145)
+    let rootParameters = SIMD4<Float>(0, 0, 0, 4)
+    let tipParameters = SIMD4<Float>(1, 0, 0, 4)
+    func appendStation(_ station: UnderlayerStation, tip: Bool) {
+      vertices.append(
+        vertex(
+          tip ? station.tip : station.root,
+          normal: station.normal,
+          color: color,
+          parameters: tip ? tipParameters : rootParameters
+        )
+      )
+    }
+    for index in 0..<(stations.count - 1) {
+      appendStation(stations[index], tip: false)
+      appendStation(stations[index + 1], tip: false)
+      appendStation(stations[index + 1], tip: true)
+      appendStation(stations[index], tip: false)
+      appendStation(stations[index + 1], tip: true)
+      appendStation(stations[index], tip: true)
+    }
   }
 
   /// Imbricated coverts sampled from the fixed 9 x 33 wing topology.

@@ -15,6 +15,15 @@ enum CrowFlightWingBodyIntegration {
   static let articulationSpanCount = 12
   static let covertCourseOverlapScale: Float = 1.24
   static let covertChordIndices = [0, 3, 4, 5, 6]
+  static let axillaryUnderlayerRootChordIndex = 6
+  static let axillaryUnderlayerTipChordIndex = 8
+
+  /// Nine body-seated stations bound the continuous axillary covert bed. Its
+  /// eight topology intervals close projection slots without widening or
+  /// lengthening the exposed dorsal course.
+  static var axillaryUnderlayerSpanIndices: [Int] {
+    Array(0...8)
+  }
 
   /// Samples every fixed wing-topology station from the body-seated root to
   /// the last station with a two-step surface target. Dense, stable courses
@@ -99,6 +108,14 @@ enum CrowFlightWingBodyIntegration {
       chordIndex: chordIndex,
       spanIndex: spanIndex,
       salt: 0x1656_67B1
+    )
+  }
+
+  static func axillaryUnderlayerTipSpanFraction(spanIndex: Int) -> Float {
+    0.34 + 0.018 * covertIdentityVariation(
+      chordIndex: axillaryUnderlayerRootChordIndex,
+      spanIndex: spanIndex,
+      salt: 0x7E95_761E
     )
   }
 

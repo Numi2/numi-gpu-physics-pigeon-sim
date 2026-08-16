@@ -172,6 +172,20 @@ func flightCovertCoursesDenselyCoverEveryBodyToWingStation() {
     }
   )
 
+  let axillarySpans = CrowFlightWingBodyIntegration.axillaryUnderlayerSpanIndices
+  #expect(axillarySpans == Array(0...8))
+  #expect(axillarySpans.allSatisfy {
+    $0 < CrowFlightWingBodyIntegration.attachmentSpanCount
+  })
+  #expect(CrowFlightWingBodyIntegration.axillaryUnderlayerRootChordIndex == 6)
+  #expect(CrowFlightWingBodyIntegration.axillaryUnderlayerTipChordIndex == 8)
+  let axillaryTipFractions = axillarySpans.map {
+    CrowFlightWingBodyIntegration.axillaryUnderlayerTipSpanFraction(spanIndex: $0)
+  }
+  #expect(axillaryTipFractions.min()! > 0.32)
+  #expect(axillaryTipFractions.max()! < 0.36)
+  #expect(Set(axillaryTipFractions).count == axillarySpans.count)
+
   let identities = CrowFlightWingBodyIntegration.covertChordIndices.flatMap {
     chord in
     CrowFlightWingBodyIntegration.covertSpanIndices.map { span in
