@@ -1409,6 +1409,7 @@ inline float3 showcaseCrowLinearRadiance(
     float primaryVane=featherClass==1u?persistentVane:0.0f;
     float secondaryVane=featherClass==2u?persistentVane:0.0f;
     float rectrixVane=featherClass==3u?persistentVane:0.0f;
+    float greaterCovertVane=featherClass==4u?persistentVane:0.0f;
     float3 featherAxis=crowFeatherAxis(
         world,normal,featherCoordinates
     );
@@ -1476,6 +1477,7 @@ inline float3 showcaseCrowLinearRadiance(
     classSharpScale=mix(classSharpScale,0.82f,primaryVane);
     classSharpScale=mix(classSharpScale,0.60f,secondaryVane);
     classSharpScale=mix(classSharpScale,0.72f,rectrixVane);
+    classSharpScale=mix(classSharpScale,0.48f,greaterCovertVane);
     color+=sharpTint*featherSpecular*mix(0.30f,1.0f,flightFeather)
         *classSharpScale;
     color+=softTint*softSpecular;

@@ -30,6 +30,17 @@ enum CrowFoldedFlightCoverts {
   static let primaryCount = 10
   static let secondaryCount = 11
   static let rootClearanceMeters: Float = 0.0010
+  /// CPU-authored greater coverts use a dedicated packed class so the live
+  /// crow material can keep their short overlapping vanes rougher than the
+  /// exposed remiges they bury.
+  static let surfaceFeatherClass: UInt32 = 4
+
+  /// Keep greater coverts inside the body-feather material band. Crossing the
+  /// flight-feather boundary makes neighboring coverts acquire inconsistent
+  /// remex highlights from identity variation alone.
+  static func materialValue(variation: Float) -> Float {
+    0.18 + 0.006 * min(max(variation, -1), 1)
+  }
 
   static func visibleSamples(
     projectedPixelsPerMeter: Float

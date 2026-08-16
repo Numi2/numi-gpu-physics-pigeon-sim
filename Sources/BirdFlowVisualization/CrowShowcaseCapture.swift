@@ -910,7 +910,7 @@ private final class CrowShowcaseRenderer {
           UInt32.max,
           UInt32(index / 3 + 1),
           Self.surfaceMaterialCode(pair.0.color.w),
-          0
+          UInt32(max(pair.0.parameters.w.rounded(), 0))
         )
       )
     }
@@ -2372,7 +2372,7 @@ private struct CrowMeshBuilder {
         (0.0062 + classLift) * (1 + 0.08 * material),
         (0.0093 + classLift) * (1 + 0.065 * material),
         (0.0165 + 1.4 * classLift) * (1 + 0.045 * material),
-        0.19 + 0.008 * material
+        CrowFoldedFlightCoverts.materialValue(variation: material)
       )
       appendFeatherBlade(
         root: bodyCenter + sample.rootOffset,
@@ -2388,6 +2388,7 @@ private struct CrowMeshBuilder {
         edgeRippleAmplitude: sample.edgeRippleAmplitude,
         edgeRipplePhase: sample.edgeRipplePhase,
         axialStartFraction: 0.08,
+        surfaceFeatherClass: CrowFoldedFlightCoverts.surfaceFeatherClass,
         lodLengthMeters: simd_distance(sample.rootOffset, sample.tipOffset),
         projectedPixelsPerMeter: projectedPixelsPerMeter,
         to: &vertices
@@ -2882,6 +2883,7 @@ private struct CrowMeshBuilder {
     edgeRippleAmplitude: Float = 0,
     edgeRipplePhase: Float = 0,
     axialStartFraction: Float = 0,
+    surfaceFeatherClass: UInt32 = 0,
     lodLengthMeters: Float? = nil,
     projectedPixelsPerMeter: Float,
     to vertices: inout [ColoredVertex]
@@ -2923,7 +2925,7 @@ private struct CrowMeshBuilder {
           (
             center + widthAxis * (signedWidth * localWidth)
               + normal * (localWidth * transverseCamberRatio * transverseEnvelope),
-            SIMD4<Float>(t, signedWidth, 1, 0)
+            SIMD4<Float>(t, signedWidth, 1, Float(surfaceFeatherClass))
           )
         )
       }

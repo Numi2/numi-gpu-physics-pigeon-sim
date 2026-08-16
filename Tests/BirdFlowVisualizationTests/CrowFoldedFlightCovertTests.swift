@@ -15,6 +15,13 @@ func greaterFoldedCovertsBuryPersistentRemexRootsAndProximalVanes() {
   )
   #expect(samples.map(\.materialVariation).min()! < -0.85)
   #expect(samples.map(\.materialVariation).max()! > 0.85)
+  #expect(CrowFoldedFlightCoverts.surfaceFeatherClass == 4)
+  let materialValues = samples.map {
+    CrowFoldedFlightCoverts.materialValue(variation: $0.materialVariation)
+  }
+  #expect(materialValues.min()! >= 0.174)
+  #expect(materialValues.max()! <= 0.186)
+  #expect(materialValues.allSatisfy { $0 < 0.19 })
 
   for sample in samples {
     #expect(sample.featherClass == 1 || sample.featherClass == 2)
