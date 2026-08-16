@@ -2519,6 +2519,7 @@ private struct CrowMeshBuilder {
         sections: 8,
         camber: sample.camberMeters,
         transverseCamberRatio: 0.26,
+        surfaceFeatherClass: CrowFoldedWingCoverts.surfaceFeatherClass,
         lodLengthMeters: simd_distance(sample.rootOffset, sample.tipOffset),
         projectedPixelsPerMeter: projectedPixelsPerMeter,
         to: &vertices

@@ -12,6 +12,7 @@ func foldedWingCovertsFormSymmetricBodySeatedShell() {
       == 2 * CrowFoldedWingCoverts.rowCount * CrowFoldedWingCoverts.columnCount
   )
   #expect(samples.count == 360)
+  #expect(CrowFoldedWingCoverts.surfaceFeatherClass == 4)
   #expect(
     CrowFoldedWingCoverts.visibleSamples(projectedPixelsPerMeter: 800).count
       == 130

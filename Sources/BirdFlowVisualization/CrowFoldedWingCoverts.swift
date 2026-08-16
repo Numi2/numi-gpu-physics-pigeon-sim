@@ -24,6 +24,7 @@ enum CrowFoldedWingCoverts {
   static let rowCount = 9
   static let columnCount = 20
   static let shellClearanceMeters: Float = 0.0012
+  static let surfaceFeatherClass: UInt32 = 4
 
   static func visibleSamples(
     projectedPixelsPerMeter: Float
