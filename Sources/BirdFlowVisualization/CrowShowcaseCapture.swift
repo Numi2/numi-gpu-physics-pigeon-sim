@@ -1647,22 +1647,13 @@ private struct CrowMeshBuilder {
       projectedPixelsPerMeter: projectedPixelsPerMeter,
       to: &vertices
     )
-    if presentation == .standing {
-      appendStandingCranialFeatherTracts(
-        center: headCenter,
-        radii: radii,
-        breathingScale: breathing,
-        projectedPixelsPerMeter: projectedPixelsPerMeter,
-        to: &vertices
-      )
-    } else {
-      appendHeadContourFeathers(
-        center: headCenter,
-        radii: radii,
-        projectedPixelsPerMeter: projectedPixelsPerMeter,
-        to: &vertices
-      )
-    }
+    appendCranialFeatherTracts(
+      center: headCenter,
+      radii: radii,
+      breathingScale: breathing,
+      projectedPixelsPerMeter: projectedPixelsPerMeter,
+      to: &vertices
+    )
     if let neckPose = standingPose?.neckPose {
       transformHeadVertices(
         in: headVertexStart..<vertices.count,
@@ -2012,32 +2003,7 @@ private struct CrowMeshBuilder {
     }
   }
 
-  private func appendHeadContourFeathers(
-    center: SIMD3<Float>,
-    radii: SIMD3<Float>,
-    projectedPixelsPerMeter: Float,
-    to vertices: inout [ColoredVertex]
-  ) {
-    let color = SIMD4<Float>(0.006, 0.009, 0.015, 0.14)
-    for sample in CrowHeadContourFeathers.samples(center: center, radii: radii) {
-      appendFeatherBlade(
-        root: sample.root,
-        tip: sample.tip,
-        planeNormal: sample.planeNormal,
-        rootWidth: sample.rootWidthMeters,
-        maximumWidth: sample.maximumWidthMeters,
-        color: color,
-        sections: 5,
-        camber: sample.camberMeters,
-        transverseCamberRatio: 0.20,
-        surfaceFeatherClass: sample.surfaceFeatherClass,
-        projectedPixelsPerMeter: projectedPixelsPerMeter,
-        to: &vertices
-      )
-    }
-  }
-
-  private func appendStandingCranialFeatherTracts(
+  private func appendCranialFeatherTracts(
     center: SIMD3<Float>,
     radii: SIMD3<Float>,
     breathingScale: Float,
