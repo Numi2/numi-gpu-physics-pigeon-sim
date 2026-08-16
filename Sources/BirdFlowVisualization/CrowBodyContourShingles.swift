@@ -3,6 +3,7 @@ import simd
 struct CrowBodyContourShingle: Equatable {
   let radialIndex: Int
   let axialIndex: Int
+  let rootSurfaceOffset: SIMD3<Float>
   let rootOffset: SIMD3<Float>
   let tipOffset: SIMD3<Float>
   let planeNormal: SIMD3<Float>
@@ -29,49 +30,48 @@ enum CrowBodyContourShingles {
     result.reserveCapacity(radialCount * axialCount)
     for radialIndex in 0..<radialCount {
       let theta = 2 * Float.pi * Float(radialIndex) / Float(radialCount)
-      let sine = sin(theta)
-      let cosine = cos(theta)
       let stagger: Float = radialIndex.isMultiple(of: 2) ? 0 : 0.5
       for axialIndex in 0..<axialCount {
         let axial =
           (Float(axialIndex) + stagger) / Float(axialCount)
         let rootX = mix(frontX, backX, axial)
         let rootRing = CrowBodyAnatomy.interpolatedRing(atX: rootX)
-        let rootNormal = surfaceNormal(
+        let rootNormal = CrowBodyAnatomy.surfaceNormal(
+          atX: rootX,
+          theta: theta
+        )
+        let rootShell = CrowBodyAnatomy.surfacePoint(
           ring: rootRing,
-          sine: sine,
-          cosine: cosine
+          theta: theta
         )
-        let rootShell = shellPoint(
-          ring: rootRing,
-          sine: sine,
-          cosine: cosine
+        let halfAngularSpacing = Float.pi / Float(radialCount)
+        let circumferentialSpacing = simd_distance(
+          CrowBodyAnatomy.surfacePoint(
+            ring: rootRing,
+            theta: theta - halfAngularSpacing
+          ),
+          CrowBodyAnatomy.surfacePoint(
+            ring: rootRing,
+            theta: theta + halfAngularSpacing
+          )
         )
-        let localRadius = sqrt(
-          square(rootRing.halfWidth * sine)
-            + square(CrowBodyAnatomy.verticalRadius(for: sine, ring: rootRing) * cosine)
-        )
-        let circumferentialSpacing =
-          2 * Float.pi * localRadius / Float(radialCount)
         let maximumWidth = max(0.0042, 0.86 * circumferentialSpacing)
         let posterior = max(0, min(1, (frontX - rootX) / (frontX - backX)))
         let length = 0.028 + 0.010 * posterior
         let tipX = max(rootX - length, CrowBodyAnatomy.loftRings.first!.x)
-        let tipRing = CrowBodyAnatomy.interpolatedRing(atX: tipX)
-        let tipNormal = surfaceNormal(
-          ring: tipRing,
-          sine: sine,
-          cosine: cosine
+        let tipNormal = CrowBodyAnatomy.surfaceNormal(
+          atX: tipX,
+          theta: theta
         )
-        let tipShell = shellPoint(
-          ring: tipRing,
-          sine: sine,
-          cosine: cosine
+        let tipShell = CrowBodyAnatomy.surfacePoint(
+          atX: tipX,
+          theta: theta
         )
         result.append(
           CrowBodyContourShingle(
             radialIndex: radialIndex,
             axialIndex: axialIndex,
+            rootSurfaceOffset: rootShell,
             rootOffset: rootShell + shellClearanceMeters * rootNormal,
             tipOffset: tipShell + shellClearanceMeters * tipNormal,
             planeNormal: normalized(
@@ -88,30 +88,6 @@ enum CrowBodyContourShingles {
     return result
   }
 
-  private static func shellPoint(
-    ring: CrowBodyLoftRing,
-    sine: Float,
-    cosine: Float
-  ) -> SIMD3<Float> {
-    SIMD3<Float>(
-      ring.x,
-      cosine * ring.halfWidth,
-      ring.z + sine * CrowBodyAnatomy.verticalRadius(for: sine, ring: ring)
-    )
-  }
-
-  private static func surfaceNormal(
-    ring: CrowBodyLoftRing,
-    sine: Float,
-    cosine: Float
-  ) -> SIMD3<Float> {
-    let verticalRadius = CrowBodyAnatomy.verticalRadius(for: sine, ring: ring)
-    return normalized(
-      SIMD3<Float>(0, cosine / ring.halfWidth, sine / verticalRadius),
-      fallback: SIMD3<Float>(0, cosine, sine)
-    )
-  }
-
   private static func normalized(
     _ value: SIMD3<Float>,
     fallback: SIMD3<Float>
@@ -122,9 +98,5 @@ enum CrowBodyContourShingles {
 
   private static func mix(_ first: Float, _ second: Float, _ blend: Float) -> Float {
     first + blend * (second - first)
-  }
-
-  private static func square(_ value: Float) -> Float {
-    value * value
   }
 }

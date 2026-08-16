@@ -1,3 +1,4 @@
+import Foundation
 import simd
 
 /// Estimated axial envelope used by the presentation mesh.
@@ -61,6 +62,76 @@ enum CrowBodyAnatomy {
       )
     }
     return last
+  }
+
+  static func surfacePoint(
+    ring: CrowBodyLoftRing,
+    theta: Float
+  ) -> SIMD3<Float> {
+    let sine = sin(theta)
+    let cosine = cos(theta)
+    let verticalRadius = verticalRadius(for: sine, ring: ring)
+    let verticalExponent: Float = sine >= 0 ? 1.12 : 0.84
+    let verticalFraction = copySign(
+      pow(abs(sine), verticalExponent),
+      sine
+    )
+    return SIMD3<Float>(
+      ring.x,
+      cosine * ring.halfWidth * lateralScale(for: sine, ring: ring),
+      ring.z + verticalFraction * verticalRadius
+    )
+  }
+
+  static func surfacePoint(
+    atX x: Float,
+    theta: Float
+  ) -> SIMD3<Float> {
+    surfacePoint(ring: interpolatedRing(atX: x), theta: theta)
+  }
+
+  static func surfaceNormal(
+    atX x: Float,
+    theta: Float
+  ) -> SIMD3<Float> {
+    let axialStep: Float = 0.0005
+    let angularStep: Float = 0.002
+    let firstX = loftRings.first!.x
+    let lastX = loftRings.last!.x
+    let axialTangent =
+      surfacePoint(atX: min(lastX, x + axialStep), theta: theta)
+      - surfacePoint(atX: max(firstX, x - axialStep), theta: theta)
+    let angularTangent =
+      surfacePoint(atX: x, theta: theta + angularStep)
+      - surfacePoint(atX: x, theta: theta - angularStep)
+    let normal = simd_cross(angularTangent, axialTangent)
+    let length = simd_length(normal)
+    return length > 1e-10
+      ? normal / length
+      : SIMD3<Float>(0, cos(theta), sin(theta))
+  }
+
+  private static func lateralScale(
+    for sine: Float,
+    ring: CrowBodyLoftRing
+  ) -> Float {
+    let shoulderWeight = clamp(1 - abs(ring.x - 0.030) / 0.120)
+    let pelvicWeight = clamp((-ring.x - 0.035) / 0.130)
+    let upperFlankWeight = clamp(1 - abs(sine - 0.30) / 0.70)
+    let lowerFlankWeight = clamp(1 - abs(sine + 0.45) / 0.55)
+    return max(
+      0.68,
+      1 + 0.10 * shoulderWeight * upperFlankWeight
+        - (0.18 + 0.08 * pelvicWeight) * lowerFlankWeight
+    )
+  }
+
+  private static func clamp(_ value: Float) -> Float {
+    min(max(value, 0), 1)
+  }
+
+  private static func copySign(_ magnitude: Float, _ sign: Float) -> Float {
+    sign < 0 ? -magnitude : magnitude
   }
 
   private static func mix(_ first: Float, _ second: Float, _ blend: Float) -> Float {

@@ -58,14 +58,7 @@ func crowBodyContourShinglesOverlapAroundAndAlongLoft() {
 func bodyContourRootsFollowAsymmetricLoft() {
   let samples = CrowBodyContourShingles.samples()
   for sample in samples {
-    let ring = CrowBodyAnatomy.interpolatedRing(atX: sample.rootOffset.x)
-    let normalizedY = sample.rootOffset.y / ring.halfWidth
-    let sineSign: Float = sample.rootOffset.z >= ring.z ? 1 : -1
-    let verticalRadius =
-      sineSign >= 0 ? ring.dorsalRadius : ring.ventralRadius
-    let normalizedZ = (sample.rootOffset.z - ring.z) / verticalRadius
-    let normalizedRadius = sqrt(normalizedY * normalizedY + normalizedZ * normalizedZ)
-    #expect(normalizedRadius > 1)
-    #expect(normalizedRadius < 1.04)
+    let clearance = simd_distance(sample.rootOffset, sample.rootSurfaceOffset)
+    #expect(abs(clearance - CrowBodyContourShingles.shellClearanceMeters) < 1e-6)
   }
 }

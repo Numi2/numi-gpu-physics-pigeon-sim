@@ -1590,14 +1590,8 @@ private struct CrowMeshBuilder {
     for ring in rings {
       for segment in 0..<segments {
         let theta = 2 * Float.pi * Float(segment) / Float(segments)
-        let sine = sin(theta)
         positions.append(
-          center
-            + SIMD3<Float>(
-              ring.x,
-              cos(theta) * ring.halfWidth,
-              ring.z + sine * CrowBodyAnatomy.verticalRadius(for: sine, ring: ring)
-            )
+          center + CrowBodyAnatomy.surfacePoint(ring: ring, theta: theta)
         )
       }
     }
