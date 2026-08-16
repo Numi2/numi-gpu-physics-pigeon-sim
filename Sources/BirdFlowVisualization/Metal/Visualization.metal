@@ -1196,7 +1196,11 @@ inline float3 showcaseCrowLinearRadiance(
     color*=1.0f-0.055f*persistentVane*(1.0f-localBarbs);
     color+=rachis*(0.012f+0.025f*ndk)*float3(0.42f,0.56f,0.74f);
     color+=vaneEdge*grazing*float3(0.010f,0.022f,0.042f);
-    color+=nds*float3(0.026f,0.016f,0.010f);
+    // Adult crow plumage should remain neutral-black under the warm key. A
+    // direct copper lobe overwhelms the very low eumelanin albedo and makes
+    // broad body regions read brown, so only a restrained cool sky return is
+    // added here; blue/violet structure stays view-dependent in `sheen`.
+    color+=nds*float3(0.004f,0.006f,0.010f);
     color+=rim*float3(0.018f,0.032f,0.050f);
     return 1.82f*color;
 }

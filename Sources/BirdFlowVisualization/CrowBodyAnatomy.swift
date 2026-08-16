@@ -25,9 +25,9 @@ enum CrowBodyAnatomy {
     .init(x: 0.044, z: 0.018, halfWidth: 0.059, dorsalRadius: 0.054, ventralRadius: 0.057),
     .init(x: 0.083, z: 0.029, halfWidth: 0.052, dorsalRadius: 0.050, ventralRadius: 0.048),
     .init(x: 0.105, z: 0.038, halfWidth: 0.042, dorsalRadius: 0.042, ventralRadius: 0.039),
-    .init(x: 0.125, z: 0.045, halfWidth: 0.030, dorsalRadius: 0.032, ventralRadius: 0.030),
-    .init(x: 0.142, z: 0.050, halfWidth: 0.022, dorsalRadius: 0.025, ventralRadius: 0.023),
-    .init(x: 0.150, z: 0.052, halfWidth: 0.016, dorsalRadius: 0.019, ventralRadius: 0.017),
+    .init(x: 0.125, z: 0.045, halfWidth: 0.036, dorsalRadius: 0.038, ventralRadius: 0.035),
+    .init(x: 0.142, z: 0.050, halfWidth: 0.029, dorsalRadius: 0.032, ventralRadius: 0.029),
+    .init(x: 0.150, z: 0.052, halfWidth: 0.022, dorsalRadius: 0.026, ventralRadius: 0.023),
   ]
 
   static let sternumRingIndex = 5

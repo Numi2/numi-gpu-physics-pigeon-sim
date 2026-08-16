@@ -271,7 +271,7 @@ public enum CrowShowcaseCapture {
       var camera = CameraState()
       if arguments.presentation == .standing {
         camera.target = SIMD3<Float>(0.015, 0, -0.055)
-        camera.distance = 0.55 * (1 + 0.004 * cos(orbit))
+        camera.distance = 0.50 * (1 + 0.004 * cos(orbit))
         camera.yaw = 0.36 + 0.012 * sin(orbit)
         camera.pitch = 0.075 + 0.006 * cos(orbit)
       } else {
@@ -1528,27 +1528,27 @@ private struct CrowMeshBuilder {
     let radiiRaw = profile.visualTransform.headRadiusXYZMeters
     let radii =
       SIMD3<Float>(radiiRaw[0], radiiRaw[1], radiiRaw[2])
-      * SIMD3<Float>(0.92, 0.90, 0.92)
+      * SIMD3<Float>(0.86, 0.80, 0.88)
     let breathing = 1 + 0.012 * sin(2 * Float.pi * phase)
     let headCenter =
       posedBodyCenter + SIMD3<Float>(0.164, 0, 0.052)
       + (standingPose?.headOffset ?? .zero)
-    appendEllipsoid(
-      center: headCenter,
-      radii: radii * SIMD3<Float>(breathing, 1, breathing),
-      latitudeCount: 18,
-      longitudeCount: 30,
-      color: SIMD4<Float>(0.006, 0.008, 0.013, 0.10),
-      to: &vertices
+    vertices.append(
+      contentsOf: CrowCranialAnatomy.vertices(
+        center: headCenter,
+        radii: radii,
+        breathingScale: breathing,
+        color: SIMD4<Float>(0.006, 0.008, 0.013, 0.10)
+      )
     )
     appendBill(center: headCenter, to: &vertices)
     appendEyes(center: headCenter, headRadii: radii, to: &vertices)
+    appendFacialBristles(
+      center: headCenter,
+      projectedPixelsPerMeter: projectedPixelsPerMeter,
+      to: &vertices
+    )
     if presentation == .wingbeat {
-      appendFacialBristles(
-        center: headCenter,
-        projectedPixelsPerMeter: projectedPixelsPerMeter,
-        to: &vertices
-      )
       appendHeadContourFeathers(
         center: headCenter,
         radii: radii,
@@ -1636,7 +1636,7 @@ private struct CrowMeshBuilder {
     projectedPixelsPerMeter: Float,
     to vertices: inout [ColoredVertex]
   ) {
-    let color = SIMD4<Float>(0.009, 0.013, 0.023, 0.15)
+    let color = SIMD4<Float>(0.006, 0.009, 0.016, 0.14)
     for side: Float in [-1, 1] {
       for row in 0..<7 {
         let rowFraction = Float(row) / 6
@@ -1688,7 +1688,7 @@ private struct CrowMeshBuilder {
     projectedPixelsPerMeter: Float,
     to vertices: inout [ColoredVertex]
   ) {
-    let color = SIMD4<Float>(0.010, 0.014, 0.024, 0.18)
+    let color = SIMD4<Float>(0.006, 0.009, 0.015, 0.14)
     for side: Float in [-1, 1] {
       for row in 0..<4 {
         let angle = -0.62 + 1.24 * Float(row) / 3
@@ -1878,10 +1878,10 @@ private struct CrowMeshBuilder {
             rootWidth: 0.0075,
             maximumWidth: 0.0125 + 0.002 * fraction,
             color: SIMD4<Float>(
-              0.010 + 0.002 * rowFraction,
-              0.015 + 0.003 * rowFraction,
-              0.026 + 0.005 * rowFraction,
-              0.19
+              0.006 + 0.001 * rowFraction,
+              0.009 + 0.002 * rowFraction,
+              0.016 + 0.003 * rowFraction,
+              0.17
             ),
             sections: 8,
             camber: 0.0022 + 0.0008 * rowFraction,

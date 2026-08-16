@@ -108,14 +108,17 @@ swift build -c release --product birdflow-viewer
 
 It verifies the reality asset, crow-surface manifest, generating profile, and
 their SHA-256 locks before rendering. One retained Metal pass evaluates current
-and previous tangent frames for all `54` persistent flight/tail feather roots;
-a second expands a shared twelve-section vane template into `3,888` renderable
-vertices. Current and previous positions plus stable feather IDs stay GPU-side.
-The physical wing/tail surface supplies an attachment underlayer, while the
-smooth body/head, coverts, and contour feathers remain procedural estimates.
-Four-sample Metal rasterization and a dedicated eumelanin shader provide
-view-dependent cool sheen while keeping the bird visually black. The native
-result is an executable motion and material estimate, not a photograph.
+and previous part frames for all `54` persistent flight/tail feather roots; a
+second expands a shared twelve-by-four-section vane template into `15,552`
+renderable vertices. Current and previous positions plus stable feather IDs
+stay GPU-side. The physical
+wing/tail surface supplies root positions without becoming an opaque beauty
+underlayer, while the smooth body/head, coverts, and contour feathers remain
+procedural estimates. Four-sample Metal rasterization and a dedicated
+eumelanin shader provide view-dependent cool sheen while keeping the bird
+neutral-black instead of allowing the warm key light to dominate its very low
+albedo. The native result is an executable motion and material estimate, not a
+photograph.
 Before display tone mapping, the same pass emits a scene-linear HDR image and
 typed albedo/material, normal/coverage, metric-depth, and deformation-motion
 AOVs. A separate single-sample integer pass preserves exact surface and feather
