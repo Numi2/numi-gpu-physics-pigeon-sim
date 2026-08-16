@@ -57,6 +57,21 @@ struct CrowFeatherGeometryUniforms {
     float4 renderOffsetAndPadding;
 };
 
+struct CrowSurfaceTemporalVertexGPU {
+    float4 position;
+    float4 previousPosition;
+    float4 normal;
+    float4 albedoAndMaterial;
+    uint4 identity;
+};
+
+struct CrowTemporalCameraUniforms {
+    float4x4 viewProjection;
+    float4x4 previousViewProjection;
+    float4 eyeAndWidth;
+    float4 viewportAndInverse;
+};
+
 struct VisualizationUniforms {
     uint4 grid;
     uint4 flags;
@@ -90,6 +105,28 @@ struct RasterVertex {
     float3 normal;
     float4 color;
     float2 uv;
+};
+
+struct CrowRasterVertex {
+    float4 position [[position]];
+    float4 previousClipPosition;
+    float3 world;
+    float3 normal;
+    float4 albedoAndMaterial;
+    uint4 identity [[flat]];
+};
+
+struct CrowAOVOutput {
+    half4 beauty [[color(0)]];
+    half4 albedoAndMaterial [[color(1)]];
+    half4 normal [[color(2)]];
+    half2 motion [[color(3)]];
+    float metricDepth [[color(4)]];
+};
+
+struct CrowResolveOutput {
+    float4 display [[color(0)]];
+    half4 normal [[color(1)]];
 };
 
 inline uint flatten(uint3 p, uint3 size) {
@@ -885,6 +922,36 @@ vertex RasterVertex crowFeatherVertex(
     return out;
 }
 
+vertex CrowRasterVertex crowSurfaceAOVVertex(
+    device const CrowSurfaceTemporalVertexGPU* vertices [[buffer(0)]],
+    constant CrowTemporalCameraUniforms& camera [[buffer(1)]],
+    uint vid [[vertex_id]]) {
+    CrowSurfaceTemporalVertexGPU source=vertices[vid];
+    CrowRasterVertex out;
+    out.position=camera.viewProjection*source.position;
+    out.previousClipPosition=camera.previousViewProjection*source.previousPosition;
+    out.world=source.position.xyz;
+    out.normal=normalize(source.normal.xyz);
+    out.albedoAndMaterial=source.albedoAndMaterial;
+    out.identity=source.identity;
+    return out;
+}
+
+vertex CrowRasterVertex crowFeatherAOVVertex(
+    device const CrowFeatherVertexGPU* vertices [[buffer(0)]],
+    constant CrowTemporalCameraUniforms& camera [[buffer(1)]],
+    uint vid [[vertex_id]]) {
+    CrowFeatherVertexGPU source=vertices[vid];
+    CrowRasterVertex out;
+    out.position=camera.viewProjection*source.position;
+    out.previousClipPosition=camera.previousViewProjection*source.previousPosition;
+    out.world=source.position.xyz;
+    out.normal=normalize(source.normal.xyz);
+    out.albedoAndMaterial=source.color;
+    out.identity=source.identity;
+    return out;
+}
+
 vertex RasterVertex isoSurfaceVertex(
     device const IsoVertex* vertices [[buffer(0)]],
     constant CameraUniforms& camera [[buffer(1)]],
@@ -932,12 +999,14 @@ fragment float4 showcaseDoveFragment(
     return float4(color,in.color.a);
 }
 
-fragment float4 showcaseCrowFragment(
-    RasterVertex in [[stage_in]],
-    constant CameraUniforms& camera [[buffer(0)]]) {
-    float3 normal=normalize(in.normal);
-    float3 view=normalize(camera.eyeAndWidth.xyz-in.world);
-    float material=in.color.a;
+inline float3 showcaseCrowLinearRadiance(
+    float3 world,
+    float3 normalInput,
+    float4 albedoAndMaterial,
+    float3 eyePosition) {
+    float3 normal=normalize(normalInput);
+    float3 view=normalize(eyePosition-world);
+    float material=albedoAndMaterial.a;
     float3 key=normalize(float3(0.28f,-0.46f,0.84f));
     float3 fill=normalize(float3(-0.62f,0.34f,0.52f));
     float3 sun=normalize(float3(-0.74f,-0.34f,0.58f));
@@ -953,9 +1022,9 @@ fragment float4 showcaseCrowFragment(
     if(material>0.90f){
         float diffuse=0.32f+0.58f*ndk+0.18f*ndf;
         float roughSpecular=pow(saturate(dot(normal,halfVector)),18.0f);
-        float3 support=in.color.rgb*diffuse;
+        float3 support=albedoAndMaterial.rgb*diffuse;
         support+=roughSpecular*float3(0.055f,0.060f,0.068f);
-        return float4(1.0f-exp(-1.18f*support),1.0f);
+        return 1.18f*support;
     }
 
     // Eyes use the upper material band. A tight white catchlight and a warm
@@ -963,20 +1032,20 @@ fragment float4 showcaseCrowFragment(
     if(material>0.72f){
         float specular=pow(saturate(dot(normal,halfVector)),180.0f);
         float horizon=pow(1.0f-ndv,3.0f);
-        float3 eye=in.color.rgb*(0.13f+0.72f*ndk+0.12f*ndf);
-        eye+=float3(0.82f,0.76f,0.66f)*specular;
-        eye+=float3(0.055f,0.025f,0.010f)*horizon;
-        return float4(1.0f-exp(-eye),1.0f);
+        float3 eyeRadiance=albedoAndMaterial.rgb*(0.13f+0.72f*ndk+0.12f*ndf);
+        eyeRadiance+=float3(0.82f,0.76f,0.66f)*specular;
+        eyeRadiance+=float3(0.055f,0.025f,0.010f)*horizon;
+        return eyeRadiance;
     }
 
     // Keratin in the bill, claws, and legs is dark graphite rather than
     // feather black. It carries a broader, weaker highlight.
     if(material>0.48f){
         float specular=pow(saturate(dot(normal,halfVector)),48.0f);
-        float3 keratin=in.color.rgb*(0.24f+0.66f*ndk+0.18f*ndf);
+        float3 keratin=albedoAndMaterial.rgb*(0.24f+0.66f*ndk+0.18f*ndf);
         keratin+=specular*float3(0.24f,0.27f,0.31f);
         keratin+=rim*float3(0.025f,0.035f,0.050f);
-        return float4(1.0f-exp(-1.12f*keratin),1.0f);
+        return 1.12f*keratin;
     }
 
     // Eumelanin makes the body nearly black while a view-dependent thin-film
@@ -985,20 +1054,20 @@ fragment float4 showcaseCrowFragment(
     // without pretending to be a measured feather microstructure.
     float grazing=pow(1.0f-ndv,1.55f);
     float interference=0.5f+0.5f*cos(
-        32.0f*ndv+17.0f*in.world.x-11.0f*in.world.y+8.0f*in.world.z
+        32.0f*ndv+17.0f*world.x-11.0f*world.y+8.0f*world.z
     );
     float3 blue=float3(0.025f,0.055f,0.090f);
     float3 violet=float3(0.065f,0.035f,0.075f);
     float3 sheen=mix(blue,violet,interference);
     float flightFeather=smoothstep(0.19f,0.25f,material);
-    float barbPhase=520.0f*in.world.x+390.0f*in.world.y-270.0f*in.world.z;
+    float barbPhase=520.0f*world.x+390.0f*world.y-270.0f*world.z;
     float barb=0.5f+0.5f*sin(barbPhase);
     float barbMicro=flightFeather*(0.010f+0.018f*barb)*grazing;
     float featherSpecular=pow(saturate(dot(normal,halfVector)),92.0f);
     float softSpecular=pow(saturate(dot(normal,halfVector)),24.0f);
     float diffuse=0.46f+0.72f*ndk+0.22f*ndf+0.13f*nds;
     float flightDarkening=mix(1.0f,0.58f,flightFeather);
-    float3 color=in.color.rgb*diffuse*flightDarkening;
+    float3 color=albedoAndMaterial.rgb*diffuse*flightDarkening;
     color+=sheen*(0.018f+0.095f*grazing)*(0.42f+0.58f*ndk)*flightDarkening;
     color+=barbMicro*mix(float3(0.035f,0.070f,0.11f),sheen,0.45f);
     float3 sharpTint=mix(
@@ -1015,7 +1084,45 @@ fragment float4 showcaseCrowFragment(
     color+=softTint*softSpecular;
     color+=nds*float3(0.026f,0.016f,0.010f);
     color+=rim*float3(0.018f,0.032f,0.050f);
-    return float4(1.0f-exp(-1.82f*color),1.0f);
+    return 1.82f*color;
+}
+
+fragment float4 showcaseCrowFragment(
+    RasterVertex in [[stage_in]],
+    constant CameraUniforms& camera [[buffer(0)]]) {
+    float3 radiance=showcaseCrowLinearRadiance(
+        in.world,in.normal,in.color,camera.eyeAndWidth.xyz
+    );
+    return float4(1.0f-exp(-radiance),1.0f);
+}
+
+fragment CrowAOVOutput showcaseCrowAOVFragment(
+    CrowRasterVertex in [[stage_in]],
+    constant CrowTemporalCameraUniforms& camera [[buffer(0)]]) {
+    float3 normal=normalize(in.normal);
+    float3 radiance=showcaseCrowLinearRadiance(
+        in.world,normal,in.albedoAndMaterial,camera.eyeAndWidth.xyz
+    );
+    float inversePreviousW=1.0f/in.previousClipPosition.w;
+    float2 previousNDC=in.previousClipPosition.xy*inversePreviousW;
+    float2 previousPixel=(previousNDC*float2(0.5f,-0.5f)+0.5f)
+        *camera.viewportAndInverse.xy;
+    float2 motion=previousPixel-in.position.xy;
+    CrowAOVOutput out;
+    out.beauty=half4(half3(radiance),half(1));
+    out.albedoAndMaterial=half4(in.albedoAndMaterial);
+    // Keep material classification in albedo.w. normal.w is geometric sample
+    // coverage so resolved edge normals and depth are never mistaken for
+    // fully-covered surface samples by temporal or dataset consumers.
+    out.normal=half4(half3(normal),half(1));
+    out.motion=half2(motion);
+    out.metricDepth=length(camera.eyeAndWidth.xyz-in.world);
+    return out;
+}
+
+fragment uint4 showcaseCrowIdentityFragment(
+    CrowRasterVertex in [[stage_in]]) {
+    return in.identity;
 }
 
 fragment float4 showcaseWireFragment(RasterVertex in [[stage_in]]) {
@@ -1054,10 +1161,9 @@ fragment float4 showcaseBackgroundFragment(
     return float4(base,1);
 }
 
-fragment float4 showcaseCrowBackgroundFragment(
-    RasterVertex in [[stage_in]],
-    constant float4& options [[buffer(0)]]) {
-    float2 uv=in.uv;
+inline float3 showcaseCrowBackgroundRadiance(
+    float2 uv,
+    float4 options) {
     float aspect=max(options.y,0.1f);
     float2 p=uv-0.5f;
     p.x*=aspect;
@@ -1068,7 +1174,7 @@ fragment float4 showcaseCrowBackgroundFragment(
     float2 sunCenter=float2(-0.46f*aspect,0.22f);
     float sun=exp(-13.0f*dot(p-sunCenter,p-sunCenter));
     float halo=exp(-2.8f*dot(p-sunCenter,p-sunCenter));
-    sky+=sun*float3(1.08f,0.63f,0.28f)+halo*float3(0.13f,0.075f,0.045f);
+    sky+=sun*float3(1.42f,0.78f,0.34f)+halo*float3(0.13f,0.075f,0.045f);
     float cloudA=sin(5.2f*p.x+0.7f*sin(9.0f*p.y));
     float cloudB=sin(8.5f*p.x-3.7f*p.y+1.1f);
     float cloud=smoothstep(0.72f,1.45f,cloudA+0.52f*cloudB);
@@ -1077,7 +1183,26 @@ fragment float4 showcaseCrowBackgroundFragment(
     sky*=0.66f+0.34f*vignette;
     float grain=fract(sin(dot(floor(uv*float2(1280.0f,720.0f)),float2(12.9898f,78.233f)))*43758.5453f);
     sky+=(grain-0.5f)/420.0f;
-    return float4(sky,1.0f);
+    return sky;
+}
+
+fragment float4 showcaseCrowBackgroundFragment(
+    RasterVertex in [[stage_in]],
+    constant float4& options [[buffer(0)]]) {
+    return float4(showcaseCrowBackgroundRadiance(in.uv,options),1.0f);
+}
+
+fragment CrowAOVOutput showcaseCrowBackgroundAOVFragment(
+    RasterVertex in [[stage_in]],
+    constant float4& options [[buffer(0)]]) {
+    float3 sky=showcaseCrowBackgroundRadiance(in.uv,options);
+    CrowAOVOutput out;
+    out.beauty=half4(half3(sky),half(1));
+    out.albedoAndMaterial=half4(half3(sky),half(0));
+    out.normal=half4(0);
+    out.motion=half2(0);
+    out.metricDepth=0.0f;
+    return out;
 }
 
 vertex RasterVertex showcasePostVertex(uint vid [[vertex_id]]) {
@@ -1086,6 +1211,23 @@ vertex RasterVertex showcasePostVertex(uint vid [[vertex_id]]) {
     out.position=float4(positions[vid],0,1);
     out.world=float3(0);out.normal=float3(0,0,1);out.color=float4(1);
     out.uv=0.5f*(positions[vid]+1.0f);
+    return out;
+}
+
+fragment CrowResolveOutput showcaseCrowToneMapFragment(
+    RasterVertex in [[stage_in]],
+    texture2d<half> hdrColor [[texture(0)]],
+    texture2d<half> resolvedNormal [[texture(1)]]) {
+    uint2 pixel=uint2(in.position.xy);
+    float3 radiance=float3(hdrColor.read(pixel).rgb);
+    half4 rawNormal=resolvedNormal.read(pixel);
+    float normalLength=length(float3(rawNormal.xyz));
+    half3 normal=normalLength>1.0e-6f
+        ? half3(float3(rawNormal.xyz)/normalLength)
+        : half3(0);
+    CrowResolveOutput out;
+    out.display=float4(1.0f-exp(-max(radiance,0.0f)),1.0f);
+    out.normal=half4(normal,rawNormal.w);
     return out;
 }
 

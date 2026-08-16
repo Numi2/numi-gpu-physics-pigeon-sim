@@ -82,7 +82,11 @@ the generated hero, executable render, and solver surface distinct from crow
 aerodynamic validation. A versioned
 [bird-reality asset](Docs/BIRD_REALITY_ASSET.md) now binds `54` stable flight
 and tail feather identities to the surface; retained Metal passes transport
-their current/previous frames and generate the rendered vane triangles. The
+their current/previous frames and generate the rendered vane triangles. A
+native [HDR and temporal AOV contract](Docs/CROW_TEMPORAL_AOVS.md) now emits
+scene-linear beauty, albedo/material, normalized normal/coverage, metric depth,
+current-to-previous pixel motion, and exact integer identity before tone
+mapping. The
 [reality roadmap](Docs/BIRD_REALITY_ROADMAP.md) defines the ordered HDR,
 geometric-LOD, physical-material, ray-tracing, and neural-residual gates without
 showing a real-crow target as simulation output. A separate

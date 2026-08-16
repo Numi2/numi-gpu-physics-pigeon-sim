@@ -215,3 +215,22 @@ struct CrowFeatherGeometryUniforms {
   var counts: SIMD4<UInt32>
   var renderOffsetAndPadding: SIMD4<Float>
 }
+
+/// Procedural crow geometry paired across two frames for true deformation
+/// motion rather than camera-only reprojection.
+struct CrowSurfaceTemporalVertexGPU {
+  var position: SIMD4<Float>
+  var previousPosition: SIMD4<Float>
+  var normal: SIMD4<Float>
+  var albedoAndMaterial: SIMD4<Float>
+  var identity: SIMD4<UInt32>
+}
+
+/// Current and previous camera transforms plus pixel dimensions. Motion is
+/// written in MetalFX's current-pixel-to-previous-pixel convention.
+struct CrowTemporalCameraUniforms {
+  var viewProjection: simd_float4x4
+  var previousViewProjection: simd_float4x4
+  var eyeAndWidth: SIMD4<Float>
+  var viewportAndInverse: SIMD4<Float>
+}

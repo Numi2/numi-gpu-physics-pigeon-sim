@@ -62,6 +62,12 @@ smooth body/head, coverts, and contour feathers remain procedural estimates.
 Four-sample Metal rasterization and a dedicated eumelanin shader provide
 view-dependent cool sheen while keeping the bird visually black. The native
 result is an executable motion and material estimate, not a photograph.
+Before display tone mapping, the same pass emits a scene-linear HDR image and
+typed albedo/material, normal/coverage, metric-depth, and deformation-motion
+AOVs. A separate single-sample integer pass preserves exact surface and feather
+identity. The executable conventions and qualification are in
+[`CROW_TEMPORAL_AOVS.md`](CROW_TEMPORAL_AOVS.md); temporal upscaling itself is
+not yet integrated.
 The beauty mesh and fluid boundary mesh are intentionally distinct: the former
 adds feather detail, while the latter remains the fixed-topology coupling input.
 

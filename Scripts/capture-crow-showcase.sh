@@ -5,6 +5,7 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 OUTPUT="${1:-$ROOT/Docs/Media/american-crow-hybrid-native-v1.mp4}"
 POSTER="${2:-$ROOT/Docs/Media/american-crow-hybrid-native-v1.png}"
 PRESENTATION="${3:-wingbeat}"
+AOV_AUDIT="${4:-}"
 MANIFEST="$ROOT/ValidationInputs/american-crow-hybrid-surface-v1/manifest.json"
 GENERATION_AUDIT="$ROOT/ValidationArtifacts/american-crow-hybrid-surface-generation-v1.json"
 PROFILE="$ROOT/ValidationInputs/american-crow-hybrid-visual-v1.json"
@@ -31,8 +32,16 @@ cleanup() {
 trap cleanup EXIT
 
 mkdir -p "$(dirname "$OUTPUT")" "$(dirname "$POSTER")"
+if [[ -n "$AOV_AUDIT" ]]; then
+  mkdir -p "$(dirname "$AOV_AUDIT")"
+fi
 cd "$ROOT"
 swift build -c release --product birdflow-viewer
+
+AOV_ARGUMENTS=()
+if [[ -n "$AOV_AUDIT" ]]; then
+  AOV_ARGUMENTS=(--capture-crow-aov-audit "$AOV_AUDIT")
+fi
 
 # The 49th frame is a seam probe equal to frame zero. The encoded movie uses
 # the first 48 frames, avoiding a duplicated endpoint pause at the loop wrap.
@@ -43,6 +52,7 @@ swift build -c release --product birdflow-viewer
   --capture-crow-profile "$PROFILE" \
   --capture-crow-standing-reference "$STANDING_REFERENCE" \
   --capture-crow-presentation "$PRESENTATION" \
+  "${AOV_ARGUMENTS[@]}" \
   --capture-width 1280 \
   --capture-height 720 \
   --capture-frames 49

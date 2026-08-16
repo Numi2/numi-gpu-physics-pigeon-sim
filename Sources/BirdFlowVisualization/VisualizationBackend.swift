@@ -74,12 +74,36 @@ final class VisualizationBackend {
     blending: Bool = false,
     sampleCount: Int = 1
   ) throws -> MTLRenderPipelineState {
-    let key = "\(vertex)|\(fragment)|\(colorFormat.rawValue)|\(depthFormat.rawValue)|\(blending)|\(sampleCount)"
+    try render(
+      vertex: vertex,
+      fragment: fragment,
+      colorFormats: [colorFormat],
+      depthFormat: depthFormat,
+      blending: blending,
+      sampleCount: sampleCount
+    )
+  }
+
+  func render(
+    vertex: String,
+    fragment: String,
+    colorFormats: [MTLPixelFormat],
+    depthFormat: MTLPixelFormat = .depth32Float,
+    blending: Bool = false,
+    sampleCount: Int = 1
+  ) throws -> MTLRenderPipelineState {
+    guard !colorFormats.isEmpty, colorFormats.count <= 8 else {
+      throw VisualizationError.pipeline("render target count")
+    }
+    let formats = colorFormats.map { String($0.rawValue) }.joined(separator: ",")
+    let key = "\(vertex)|\(fragment)|\(formats)|\(depthFormat.rawValue)|\(blending)|\(sampleCount)"
     if let existing = renderPipelines[key] { return existing }
     let descriptor = MTLRenderPipelineDescriptor()
     descriptor.vertexFunction = library.makeFunction(name: vertex)
     descriptor.fragmentFunction = library.makeFunction(name: fragment)
-    descriptor.colorAttachments[0].pixelFormat = colorFormat
+    for (index, format) in colorFormats.enumerated() {
+      descriptor.colorAttachments[index].pixelFormat = format
+    }
     descriptor.depthAttachmentPixelFormat = depthFormat
     descriptor.rasterSampleCount = sampleCount
     if blending {

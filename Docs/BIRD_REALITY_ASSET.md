@@ -83,8 +83,13 @@ unit directions, current/previous motion, a bounded `0.75 m` radial envelope,
 and a `1.10 m` conservative bilateral presentation envelope. These are
 implementation and visual-sanity gates, not measured anatomy validation.
 
-The next renderer milestone is HDR albedo, normal, material, identity, depth,
-and deformation-motion-vector outputs. Those buffers are prerequisites for
-temporal reconstruction, MetalFX, ray tracing, and neural appearance models.
-The longer architecture is recorded in
+The renderer now emits scene-linear HDR beauty, albedo/material,
+normal/coverage, metric depth, current-to-previous pixel motion, and exact
+integer identity. It keeps the integer pass outside MSAA resolution and
+renormalizes filtered normals before exposing them. This is the baseline
+contract for temporal reconstruction, MetalFX, ray tracing, and neural
+appearance models; it does not yet claim that MetalFX is integrated. Exact
+formats, conventions, and audit fields are documented in
+[`CROW_TEMPORAL_AOVS.md`](CROW_TEMPORAL_AOVS.md). The longer architecture is
+recorded in
 [`BIRD_REALITY_ROADMAP.md`](BIRD_REALITY_ROADMAP.md).

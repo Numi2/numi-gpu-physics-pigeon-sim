@@ -28,6 +28,7 @@ public enum CrowShowcaseCapture {
     let crowProfileURL: URL
     let realityAssetURL: URL
     let standingReferenceURL: URL
+    let aovAuditURL: URL?
     let presentation: CrowShowcasePresentation
 
     public init(commandLine: [String]) throws {
@@ -81,6 +82,9 @@ public enum CrowShowcaseCapture {
         fileURLWithPath: try value(after: "--capture-crow-standing-reference")
           ?? "ValidationInputs/american-crow-standing-reference-v1.json"
       )
+      aovAuditURL = try value(after: "--capture-crow-aov-audit").map {
+        URL(fileURLWithPath: $0)
+      }
       let presentationValue =
         try value(after: "--capture-crow-presentation")
         ?? CrowShowcasePresentation.wingbeat.rawValue
@@ -213,6 +217,7 @@ public enum CrowShowcaseCapture {
       at: arguments.outputDirectory,
       withIntermediateDirectories: true
     )
+    var aovAudits: [CrowShowcaseAOVFrameAudit] = []
 
     for frameIndex in 0..<arguments.frameCount {
       let phase =
@@ -232,14 +237,14 @@ public enum CrowShowcaseCapture {
         camera.yaw = -1.06 + 0.024 * sin(orbit)
         camera.pitch = 0.18 + 0.012 * cos(orbit)
       }
-      let texture = try renderer.render(
+      let rendered = try renderer.render(
         phase: phase,
         camera: camera,
         width: arguments.width,
         height: arguments.height
       )
       let png = try ReadmeShowcaseCapture.pngData(
-        texture: texture,
+        texture: rendered.displayTexture,
         width: arguments.width,
         height: arguments.height
       ) { graphics in
@@ -259,10 +264,23 @@ public enum CrowShowcaseCapture {
         String(format: "frame-%03d.png", frameIndex)
       )
       try png.write(to: output, options: .atomic)
+      if arguments.aovAuditURL != nil {
+        aovAudits.append(rendered.audit(frameIndex: frameIndex))
+      }
       print(
         "captured estimated American crow \(arguments.presentation.rawValue) "
           + "\(frameIndex + 1)/\(arguments.frameCount)"
       )
+    }
+    if let auditURL = arguments.aovAuditURL {
+      let report = CrowShowcaseAOVAuditReport(frames: aovAudits)
+      let encoder = JSONEncoder()
+      encoder.outputFormatting = [.prettyPrinted, .sortedKeys, .withoutEscapingSlashes]
+      try FileManager.default.createDirectory(
+        at: auditURL.deletingLastPathComponent(),
+        withIntermediateDirectories: true
+      )
+      try encoder.encode(report).write(to: auditURL, options: .atomic)
     }
   }
 
@@ -566,15 +584,19 @@ private struct CrowVisualProfile: Decodable {
 private final class CrowShowcaseRenderer {
   private let backend: VisualizationBackend
   private let meshBuilder: CrowMeshBuilder
-  private let surfacePipeline: MTLRenderPipelineState
-  private let backgroundPipeline: MTLRenderPipelineState
-  private let featherPipeline: MTLRenderPipelineState?
+  private let surfaceAOVPipeline: MTLRenderPipelineState
+  private let backgroundAOVPipeline: MTLRenderPipelineState
+  private let featherAOVPipeline: MTLRenderPipelineState?
+  private let surfaceIdentityPipeline: MTLRenderPipelineState
+  private let featherIdentityPipeline: MTLRenderPipelineState?
+  private let toneMapPipeline: MTLRenderPipelineState
   private let depthState: MTLDepthStencilState
   private let sampleCount: Int
   private let featherRootDeformer: (any CrowFeatherRootDeforming)?
   private let featherGeometryDeformer: CrowFeatherGeometryDeformer?
   private let featherRenderOffset: SIMD3<Float>
   private var previousPhase: Float?
+  private var previousCamera: CameraState?
 
   init(
     device: MTLDevice,
@@ -621,25 +643,50 @@ private final class CrowShowcaseRenderer {
     featherRenderOffset = createdMeshBuilder.featherRenderOffset
     let createdSampleCount = device.supportsTextureSampleCount(4) ? 4 : 1
     sampleCount = createdSampleCount
-    surfacePipeline = try backend.render(
-      vertex: "coloredSurfaceVertex",
-      fragment: "showcaseCrowFragment",
-      colorFormat: .bgra8Unorm_srgb,
+    let aovFormats: [MTLPixelFormat] = [
+      .rgba16Float,
+      .rgba16Float,
+      .rgba16Float,
+      .rg16Float,
+      .r32Float,
+    ]
+    surfaceAOVPipeline = try backend.render(
+      vertex: "crowSurfaceAOVVertex",
+      fragment: "showcaseCrowAOVFragment",
+      colorFormats: aovFormats,
       sampleCount: createdSampleCount
     )
-    featherPipeline = try realityAsset.map { _ in
+    featherAOVPipeline = try realityAsset.map { _ in
       try createdBackend.render(
-        vertex: "crowFeatherVertex",
-        fragment: "showcaseCrowFragment",
-        colorFormat: .bgra8Unorm_srgb,
+        vertex: "crowFeatherAOVVertex",
+        fragment: "showcaseCrowAOVFragment",
+        colorFormats: aovFormats,
         sampleCount: createdSampleCount
       )
     }
-    backgroundPipeline = try backend.render(
+    backgroundAOVPipeline = try backend.render(
       vertex: "showcaseBackgroundVertex",
-      fragment: "showcaseCrowBackgroundFragment",
-      colorFormat: .bgra8Unorm_srgb,
+      fragment: "showcaseCrowBackgroundAOVFragment",
+      colorFormats: aovFormats,
       sampleCount: createdSampleCount
+    )
+    surfaceIdentityPipeline = try backend.render(
+      vertex: "crowSurfaceAOVVertex",
+      fragment: "showcaseCrowIdentityFragment",
+      colorFormat: .rgba32Uint
+    )
+    featherIdentityPipeline = try realityAsset.map { _ in
+      try createdBackend.render(
+        vertex: "crowFeatherAOVVertex",
+        fragment: "showcaseCrowIdentityFragment",
+        colorFormat: .rgba32Uint
+      )
+    }
+    toneMapPipeline = try backend.render(
+      vertex: "showcasePostVertex",
+      fragment: "showcaseCrowToneMapFragment",
+      colorFormats: [.bgra8Unorm_srgb, .rgba16Float],
+      depthFormat: .invalid
     )
     let depth = MTLDepthStencilDescriptor()
     depth.depthCompareFunction = .less
@@ -655,60 +702,123 @@ private final class CrowShowcaseRenderer {
     camera: CameraState,
     width: Int,
     height: Int
-  ) throws -> MTLTexture {
+  ) throws -> CrowShowcaseFrame {
+    let priorPhase = previousPhase ?? phase
     let vertices = meshBuilder.vertices(phase: phase)
-    let byteCount = MemoryLayout<ColoredVertex>.stride * vertices.count
+    let previousVertices = meshBuilder.vertices(phase: priorPhase)
+    guard vertices.count == previousVertices.count else {
+      throw VisualizationError.pipeline("crow temporal surface topology")
+    }
+    let temporalVertices = zip(vertices, previousVertices).enumerated().map {
+      index, pair in
+      CrowSurfaceTemporalVertexGPU(
+        position: pair.0.position,
+        previousPosition: pair.1.position,
+        normal: pair.0.normal,
+        albedoAndMaterial: pair.0.color,
+        identity: SIMD4<UInt32>(
+          UInt32.max,
+          UInt32(index / 3 + 1),
+          Self.surfaceMaterialCode(pair.0.color.w),
+          0
+        )
+      )
+    }
+    let byteCount =
+      MemoryLayout<CrowSurfaceTemporalVertexGPU>.stride
+      * temporalVertices.count
     let buffer = try backend.buffer(length: byteCount, shared: true)
-    vertices.withUnsafeBytes { bytes in
+    temporalVertices.withUnsafeBytes { bytes in
       _ = memcpy(buffer.contents(), bytes.baseAddress!, bytes.count)
     }
 
-    let resolvedDescriptor = MTLTextureDescriptor.texture2DDescriptor(
-      pixelFormat: .bgra8Unorm_srgb,
+    let formats: [MTLPixelFormat] = [
+      .rgba16Float,
+      .rgba16Float,
+      .rgba16Float,
+      .rg16Float,
+      .r32Float,
+    ]
+    let bytesPerPixel = [8, 8, 8, 4, 4]
+    let resolvedAOVs = try formats.enumerated().map { index, format in
+      try makeTexture(
+        format: format,
+        width: width,
+        height: height,
+        sampleCount: 1,
+        storageMode: .shared,
+        usage: [.renderTarget, .shaderRead],
+        estimatedBytes: width * height * bytesPerPixel[index]
+      )
+    }
+    let renderAOVs: [MTLTexture]
+    if sampleCount == 1 {
+      renderAOVs = resolvedAOVs
+    } else {
+      renderAOVs = try formats.enumerated().map { index, format in
+        try makeTexture(
+          format: format,
+          width: width,
+          height: height,
+          sampleCount: sampleCount,
+          storageMode: .private,
+          usage: .renderTarget,
+          estimatedBytes: width * height * bytesPerPixel[index] * sampleCount
+        )
+      }
+    }
+
+    let depth = try makeTexture(
+      format: .depth32Float,
       width: width,
       height: height,
-      mipmapped: false
+      sampleCount: sampleCount,
+      storageMode: .private,
+      usage: .renderTarget,
+      estimatedBytes: width * height * 4 * sampleCount
     )
-    resolvedDescriptor.storageMode = .shared
-    resolvedDescriptor.usage = [.renderTarget, .shaderRead]
-    guard let resolved = backend.device.makeTexture(descriptor: resolvedDescriptor) else {
-      throw VisualizationError.allocation(width * height * 4)
-    }
-
-    let color: MTLTexture
-    if sampleCount > 1 {
-      let descriptor = MTLTextureDescriptor()
-      descriptor.textureType = .type2DMultisample
-      descriptor.pixelFormat = .bgra8Unorm_srgb
-      descriptor.width = width
-      descriptor.height = height
-      descriptor.sampleCount = sampleCount
-      descriptor.storageMode = .private
-      descriptor.usage = .renderTarget
-      guard let texture = backend.device.makeTexture(descriptor: descriptor) else {
-        throw VisualizationError.allocation(width * height * 4 * sampleCount)
-      }
-      color = texture
-    } else {
-      color = resolved
-    }
-
-    let depthDescriptor = MTLTextureDescriptor()
-    depthDescriptor.textureType = sampleCount > 1 ? .type2DMultisample : .type2D
-    depthDescriptor.pixelFormat = .depth32Float
-    depthDescriptor.width = width
-    depthDescriptor.height = height
-    depthDescriptor.sampleCount = sampleCount
-    depthDescriptor.storageMode = .private
-    depthDescriptor.usage = .renderTarget
-    guard let depth = backend.device.makeTexture(descriptor: depthDescriptor),
-      let commandBuffer = backend.queue.makeCommandBuffer()
-    else {
-      throw VisualizationError.allocation(width * height * 8)
+    let identity = try makeTexture(
+      format: .rgba32Uint,
+      width: width,
+      height: height,
+      sampleCount: 1,
+      storageMode: .shared,
+      usage: [.renderTarget, .shaderRead],
+      estimatedBytes: width * height * 16
+    )
+    let identityDepth = try makeTexture(
+      format: .depth32Float,
+      width: width,
+      height: height,
+      sampleCount: 1,
+      storageMode: .private,
+      usage: .renderTarget,
+      estimatedBytes: width * height * 4
+    )
+    let display = try makeTexture(
+      format: .bgra8Unorm_srgb,
+      width: width,
+      height: height,
+      sampleCount: 1,
+      storageMode: .shared,
+      usage: [.renderTarget, .shaderRead],
+      estimatedBytes: width * height * 4
+    )
+    let normalizedNormal = try makeTexture(
+      format: .rgba16Float,
+      width: width,
+      height: height,
+      sampleCount: 1,
+      storageMode: .shared,
+      usage: [.renderTarget, .shaderRead],
+      estimatedBytes: width * height * 8
+    )
+    guard let commandBuffer = backend.queue.makeCommandBuffer() else {
+      throw VisualizationError.pipeline("crow command buffer")
     }
     let rootFrame = try featherRootDeformer?.encode(
       currentPhase: phase,
-      previousPhase: previousPhase ?? phase,
+      previousPhase: priorPhase,
       commandBuffer: commandBuffer,
       auditReadback: false
     )
@@ -724,22 +834,39 @@ private final class CrowShowcaseRenderer {
     }
 
     let pass = MTLRenderPassDescriptor()
-    pass.colorAttachments[0].texture = color
-    pass.colorAttachments[0].loadAction = .clear
-    pass.colorAttachments[0].clearColor = MTLClearColorMake(0.01, 0.018, 0.028, 1)
-    if sampleCount > 1 {
-      pass.colorAttachments[0].resolveTexture = resolved
-      pass.colorAttachments[0].storeAction = .multisampleResolve
-    } else {
-      pass.colorAttachments[0].storeAction = .store
+    for index in formats.indices {
+      pass.colorAttachments[index].texture = renderAOVs[index]
+      pass.colorAttachments[index].loadAction = .clear
+      pass.colorAttachments[index].clearColor = MTLClearColorMake(0, 0, 0, 0)
+      if sampleCount > 1 {
+        pass.colorAttachments[index].resolveTexture = resolvedAOVs[index]
+        pass.colorAttachments[index].storeAction = .multisampleResolve
+      } else {
+        pass.colorAttachments[index].storeAction = .store
+      }
     }
     pass.depthAttachment.texture = depth
     pass.depthAttachment.loadAction = .clear
     pass.depthAttachment.storeAction = .dontCare
     pass.depthAttachment.clearDepth = 1
-    var cameraUniforms = camera.uniforms(
+    let currentCamera = camera.uniforms(
       aspect: Float(width) / Float(height),
       ribbonWidth: 0.001
+    )
+    let priorCamera = (previousCamera ?? camera).uniforms(
+      aspect: Float(width) / Float(height),
+      ribbonWidth: 0.001
+    )
+    var cameraUniforms = CrowTemporalCameraUniforms(
+      viewProjection: currentCamera.viewProjection,
+      previousViewProjection: priorCamera.viewProjection,
+      eyeAndWidth: currentCamera.eyeAndWidth,
+      viewportAndInverse: SIMD4<Float>(
+        Float(width),
+        Float(height),
+        1 / Float(width),
+        1 / Float(height)
+      )
     )
     var backgroundOptions = SIMD4<Float>(
       phase,
@@ -748,11 +875,11 @@ private final class CrowShowcaseRenderer {
       0
     )
     guard let encoder = commandBuffer.makeRenderCommandEncoder(descriptor: pass) else {
-      throw VisualizationError.pipeline("crow render encoder")
+      throw VisualizationError.pipeline("crow AOV render encoder")
     }
-    encoder.label = "Estimated American crow showcase"
+    encoder.label = "Estimated American crow HDR and temporal AOVs"
     encoder.setCullMode(.none)
-    encoder.setRenderPipelineState(backgroundPipeline)
+    encoder.setRenderPipelineState(backgroundAOVPipeline)
     encoder.setFragmentBytes(
       &backgroundOptions,
       length: MemoryLayout<SIMD4<Float>>.stride,
@@ -760,30 +887,35 @@ private final class CrowShowcaseRenderer {
     )
     encoder.drawPrimitives(type: .triangle, vertexStart: 0, vertexCount: 3)
     encoder.setDepthStencilState(depthState)
-    encoder.setRenderPipelineState(surfacePipeline)
+    encoder.setRenderPipelineState(surfaceAOVPipeline)
     encoder.setVertexBuffer(buffer, offset: 0, index: 0)
     encoder.setVertexBytes(
       &cameraUniforms,
-      length: MemoryLayout<CameraUniforms>.stride,
+      length: MemoryLayout<CrowTemporalCameraUniforms>.stride,
       index: 1
     )
     encoder.setFragmentBytes(
       &cameraUniforms,
-      length: MemoryLayout<CameraUniforms>.stride,
+      length: MemoryLayout<CrowTemporalCameraUniforms>.stride,
       index: 0
     )
     encoder.drawPrimitives(
       type: .triangle,
       vertexStart: 0,
-      vertexCount: vertices.count
+      vertexCount: temporalVertices.count
     )
-    if let featherFrame, let featherPipeline {
-      encoder.setRenderPipelineState(featherPipeline)
+    if let featherFrame, let featherAOVPipeline {
+      encoder.setRenderPipelineState(featherAOVPipeline)
       encoder.setVertexBuffer(featherFrame.outputBuffer, offset: 0, index: 0)
       encoder.setVertexBytes(
         &cameraUniforms,
-        length: MemoryLayout<CameraUniforms>.stride,
+        length: MemoryLayout<CrowTemporalCameraUniforms>.stride,
         index: 1
+      )
+      encoder.setFragmentBytes(
+        &cameraUniforms,
+        length: MemoryLayout<CrowTemporalCameraUniforms>.stride,
+        index: 0
       )
       encoder.drawPrimitives(
         type: .triangle,
@@ -792,6 +924,75 @@ private final class CrowShowcaseRenderer {
       )
     }
     encoder.endEncoding()
+
+    let identityPass = MTLRenderPassDescriptor()
+    identityPass.colorAttachments[0].texture = identity
+    identityPass.colorAttachments[0].loadAction = .clear
+    identityPass.colorAttachments[0].storeAction = .store
+    identityPass.colorAttachments[0].clearColor = MTLClearColorMake(0, 0, 0, 0)
+    identityPass.depthAttachment.texture = identityDepth
+    identityPass.depthAttachment.loadAction = .clear
+    identityPass.depthAttachment.storeAction = .dontCare
+    identityPass.depthAttachment.clearDepth = 1
+    guard
+      let identityEncoder = commandBuffer.makeRenderCommandEncoder(
+        descriptor: identityPass
+      )
+    else {
+      throw VisualizationError.pipeline("crow identity render encoder")
+    }
+    identityEncoder.label = "Exact crow identity AOV"
+    identityEncoder.setCullMode(.none)
+    identityEncoder.setDepthStencilState(depthState)
+    identityEncoder.setRenderPipelineState(surfaceIdentityPipeline)
+    identityEncoder.setVertexBuffer(buffer, offset: 0, index: 0)
+    identityEncoder.setVertexBytes(
+      &cameraUniforms,
+      length: MemoryLayout<CrowTemporalCameraUniforms>.stride,
+      index: 1
+    )
+    identityEncoder.drawPrimitives(
+      type: .triangle,
+      vertexStart: 0,
+      vertexCount: temporalVertices.count
+    )
+    if let featherFrame, let featherIdentityPipeline {
+      identityEncoder.setRenderPipelineState(featherIdentityPipeline)
+      identityEncoder.setVertexBuffer(featherFrame.outputBuffer, offset: 0, index: 0)
+      identityEncoder.setVertexBytes(
+        &cameraUniforms,
+        length: MemoryLayout<CrowTemporalCameraUniforms>.stride,
+        index: 1
+      )
+      identityEncoder.drawPrimitives(
+        type: .triangle,
+        vertexStart: 0,
+        vertexCount: featherFrame.vertexCount
+      )
+    }
+    identityEncoder.endEncoding()
+
+    let toneMapPass = MTLRenderPassDescriptor()
+    toneMapPass.colorAttachments[0].texture = display
+    toneMapPass.colorAttachments[0].loadAction = .dontCare
+    toneMapPass.colorAttachments[0].storeAction = .store
+    toneMapPass.colorAttachments[1].texture = normalizedNormal
+    toneMapPass.colorAttachments[1].loadAction = .dontCare
+    toneMapPass.colorAttachments[1].storeAction = .store
+    guard
+      let toneMapEncoder = commandBuffer.makeRenderCommandEncoder(
+        descriptor: toneMapPass
+      )
+    else {
+      throw VisualizationError.pipeline("crow tone-map encoder")
+    }
+    toneMapEncoder.label = "Crow linear-HDR display tone map"
+    toneMapEncoder.setRenderPipelineState(toneMapPipeline)
+    toneMapEncoder.setFragmentTexture(resolvedAOVs[0], index: 0)
+    toneMapEncoder.setFragmentTexture(resolvedAOVs[2], index: 1)
+    toneMapEncoder.drawPrimitives(type: .triangle, vertexStart: 0, vertexCount: 3)
+    toneMapEncoder.endEncoding()
+
     commandBuffer.commit()
     commandBuffer.waitUntilCompleted()
     guard commandBuffer.status == .completed else {
@@ -800,7 +1001,47 @@ private final class CrowShowcaseRenderer {
       )
     }
     previousPhase = phase
-    return resolved
+    previousCamera = camera
+    return CrowShowcaseFrame(
+      displayTexture: display,
+      hdrColorTexture: resolvedAOVs[0],
+      albedoMaterialTexture: resolvedAOVs[1],
+      normalCoverageTexture: normalizedNormal,
+      motionTexture: resolvedAOVs[3],
+      metricDepthTexture: resolvedAOVs[4],
+      identityTexture: identity
+    )
+  }
+
+  private func makeTexture(
+    format: MTLPixelFormat,
+    width: Int,
+    height: Int,
+    sampleCount: Int,
+    storageMode: MTLStorageMode,
+    usage: MTLTextureUsage,
+    estimatedBytes: Int
+  ) throws -> MTLTexture {
+    let descriptor = MTLTextureDescriptor()
+    descriptor.textureType = sampleCount > 1 ? .type2DMultisample : .type2D
+    descriptor.pixelFormat = format
+    descriptor.width = width
+    descriptor.height = height
+    descriptor.sampleCount = sampleCount
+    descriptor.storageMode = storageMode
+    descriptor.usage = usage
+    guard let texture = backend.device.makeTexture(descriptor: descriptor) else {
+      throw VisualizationError.allocation(estimatedBytes)
+    }
+    return texture
+  }
+
+  private static func surfaceMaterialCode(_ material: Float) -> UInt32 {
+    if material > 0.90 { return 6 }
+    if material > 0.72 { return 5 }
+    if material > 0.48 { return 4 }
+    if material > 0.24 { return 3 }
+    return 2
   }
 }
 

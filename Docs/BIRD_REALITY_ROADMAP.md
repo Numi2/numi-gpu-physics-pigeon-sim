@@ -29,7 +29,7 @@ HDR material, normal, depth, identity, motion AOVs
 temporal reconstruction + physical lighting + optional neural residual
 ```
 
-The present Apple M4 implementation realizes the first four boundaries with a
+The present Apple M4 implementation realizes the first five boundaries with a
 portable compute-generated triangle path. It expands one retained vane template
 for all `54` persistent remiges and rectrices, producing current and previous
 positions plus stable IDs. This is intentionally usable without a future-only
@@ -48,6 +48,14 @@ ankles move by millimetres.
    persistence before enabling temporal reconstruction. MetalFX explicitly
    consumes color, depth, and motion inputs, so those buffers precede any
    upscaler integration.
+
+   **Implemented baseline:** the native capture now writes five float AOVs plus
+   a separate exact `rgba32Uint` identity pass. Current and previous procedural
+   surface positions are paired by stable topology; retained feather vertices
+   already carry both positions and stable IDs. A JSON audit qualifies finite
+   pixels, extended-range highlights, normalized fully covered normals, metric
+   depth, ID visibility, motion sign/magnitude, and standing support orientation.
+   MetalFX integration and disocclusion/reactive masks remain the next gate.
 
 2. **Geometric feather LODs.** Replace the single blade with nested rachis,
    vane, barb-group, and silhouette-meshlet representations. Select LOD from

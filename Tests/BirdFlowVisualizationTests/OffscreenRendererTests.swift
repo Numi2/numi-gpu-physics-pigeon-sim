@@ -391,10 +391,12 @@ func estimatedStandingCrowCaptureProducesLoopClosedFrames() throws {
     isDirectory: true
   )
   defer { try? FileManager.default.removeItem(at: output) }
+  let aovAuditURL = output.appendingPathComponent("aov-audit.json")
   let arguments = try CrowShowcaseCapture.Arguments(commandLine: [
     "birdflow-viewer",
     "--capture-crow-frames", output.path,
     "--capture-crow-presentation", "standing",
+    "--capture-crow-aov-audit", aovAuditURL.path,
     "--capture-width", "480",
     "--capture-height", "360",
     "--capture-frames", "3",
@@ -435,4 +437,31 @@ func estimatedStandingCrowCaptureProducesLoopClosedFrames() throws {
   }
   #expect(Int(image.size.width) == 480)
   #expect(Int(image.size.height) == 360)
+
+  let audit = try JSONDecoder().decode(
+    CrowShowcaseAOVAuditReport.self,
+    from: Data(contentsOf: aovAuditURL)
+  )
+  #expect(audit.schemaVersion == 1)
+  #expect(audit.formats["hdrColor"] == "rgba16Float")
+  #expect(audit.formats["normalCoverage"] == "rgba16Float")
+  #expect(audit.formats["identity"] == "rgba32Uint")
+  #expect(audit.frames.count == 3)
+  #expect(audit.frames.allSatisfy { $0.finitePixelCount == 480 * 360 })
+  #expect(audit.frames.allSatisfy { $0.aboveOneHDRPixelCount > 0 })
+  #expect(audit.frames.allSatisfy { $0.activeIdentityPixelCount > 2_000 })
+  #expect(audit.frames.allSatisfy { $0.fullyCoveredAOVPixelCount > 2_000 })
+  #expect(audit.frames.allSatisfy { $0.visibleFeatherIdentityCount > 0 })
+  #expect(audit.frames.allSatisfy { $0.maximumNormalUnitError < 0.002 })
+  #expect(audit.frames.allSatisfy { $0.minimumFullyCoveredDepthMeters > 0.1 })
+  #expect(audit.frames.allSatisfy { $0.maximumFullyCoveredDepthMeters < 2.0 })
+  #expect(
+    audit.frames.allSatisfy {
+      $0.supportCentroidYPixels > $0.birdCentroidYPixels + 40
+    }
+  )
+  #expect(audit.frames[0].maximumMotionPixels < 0.01)
+  #expect(audit.frames[1].movingFullyCoveredPixelCount > 1_000)
+  #expect(audit.frames[1].maximumMotionPixels > 0.1)
+  #expect(audit.frames[1].maximumMotionPixels < 100)
 }
