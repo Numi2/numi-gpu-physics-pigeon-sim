@@ -89,7 +89,76 @@ func bodyContourTractsBreakTransverseRows() {
     let spacings = zip(tract, tract.dropFirst()).map {
       $0.rootOffset.x - $1.rootOffset.x
     }
-    #expect(spacings.min()! > 0.008)
+    let nominalSpacing = 0.270 / Float(CrowBodyContourShingles.axialCount)
+    #expect(spacings.min()! > 0.50 * nominalSpacing)
     #expect(spacings.max()! - spacings.min()! > 0.0004)
+  }
+}
+
+@Test("body contour pennaceous tips retain a closed irregular outer shell")
+func bodyContourPennaceousTipsRetainClosedOuterShell() {
+  let samples = CrowBodyContourShingles.samples()
+  let fractions = samples.map(\.pennaceousStartFraction)
+  #expect(fractions.min()! >= 0.38)
+  #expect(fractions.max()! <= 0.51)
+  #expect(fractions.max()! - fractions.min()! > 0.06)
+
+  for feather in samples {
+    let start = CrowBodyContourShingles.centerlinePoint(
+      for: feather,
+      at: feather.pennaceousStartFraction
+    )
+    let fullLength = simd_distance(feather.rootOffset, feather.tipOffset)
+    let hiddenLength = simd_distance(feather.rootOffset, start)
+    #expect(hiddenLength > 0.36 * fullLength)
+    #expect(hiddenLength < 0.54 * fullLength)
+    #expect(
+      CrowBodyContourShingles.vaneHalfWidth(
+        for: feather,
+        at: feather.pennaceousStartFraction
+      ) > 0.004
+    )
+  }
+
+  for radialIndex in 0..<CrowBodyContourShingles.radialCount {
+    let tract =
+      samples
+      .filter { $0.radialIndex == radialIndex }
+      .sorted { $0.axialIndex < $1.axialIndex }
+    for pair in zip(tract, tract.dropFirst()) {
+      let followingPennaceousStart = CrowBodyContourShingles.centerlinePoint(
+        for: pair.1,
+        at: pair.1.pennaceousStartFraction
+      )
+      #expect(pair.0.tipOffset.x < followingPennaceousStart.x)
+    }
+  }
+
+  for axialIndex in 0..<CrowBodyContourShingles.axialCount {
+    let course = samples.filter { $0.axialIndex == axialIndex }
+    for radialIndex in 0..<CrowBodyContourShingles.radialCount {
+      let current = course.first { $0.radialIndex == radialIndex }!
+      let next = course.first {
+        $0.radialIndex == (radialIndex + 1) % CrowBodyContourShingles.radialCount
+      }!
+      let currentStart = CrowBodyContourShingles.centerlinePoint(
+        for: current,
+        at: current.pennaceousStartFraction
+      )
+      let nextStart = CrowBodyContourShingles.centerlinePoint(
+        for: next,
+        at: next.pennaceousStartFraction
+      )
+      let availableWidth =
+        CrowBodyContourShingles.vaneHalfWidth(
+          for: current,
+          at: current.pennaceousStartFraction
+        )
+        + CrowBodyContourShingles.vaneHalfWidth(
+          for: next,
+          at: next.pennaceousStartFraction
+        )
+      #expect(simd_distance(currentStart, nextStart) < availableWidth)
+    }
   }
 }

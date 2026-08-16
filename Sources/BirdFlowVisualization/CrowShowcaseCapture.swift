@@ -1749,7 +1749,14 @@ private struct CrowMeshBuilder {
         sections: 7,
         camber: shingle.camberMeters,
         transverseCamberRatio: 0.04,
+        axialStartFraction: shingle.pennaceousStartFraction,
         lodLengthMeters: simd_distance(shingle.rootOffset, shingle.tipOffset),
+        projectedPixelsPerMeter: projectedPixelsPerMeter,
+        to: &vertices
+      )
+      appendBodyContourUnderlayer(
+        shingle,
+        bodyCenter: bodyCenter,
         projectedPixelsPerMeter: projectedPixelsPerMeter,
         to: &vertices
       )
@@ -1757,6 +1764,29 @@ private struct CrowMeshBuilder {
         shingle,
         bodyCenter: bodyCenter,
         projectedPixelsPerMeter: projectedPixelsPerMeter,
+        to: &vertices
+      )
+    }
+  }
+
+  private func appendBodyContourUnderlayer(
+    _ shingle: CrowBodyContourShingle,
+    bodyCenter: SIMD3<Float>,
+    projectedPixelsPerMeter: Float,
+    to vertices: inout [ColoredVertex]
+  ) {
+    let color = SIMD4<Float>(0.0045, 0.0065, 0.011, 0.12)
+    for segment in CrowBodyContourUnderlayer.segments(
+      for: shingle,
+      projectedPixelsPerMeter: projectedPixelsPerMeter
+    ) {
+      appendTaperedTube(
+        from: bodyCenter + segment.start,
+        to: bodyCenter + segment.end,
+        startRadius: segment.startRadiusMeters,
+        endRadius: segment.endRadiusMeters,
+        color: color,
+        radialSegments: 3,
         to: &vertices
       )
     }
@@ -2517,6 +2547,7 @@ private struct CrowMeshBuilder {
     sections: Int,
     camber: Float = 0,
     transverseCamberRatio: Float = 0.18,
+    axialStartFraction: Float = 0,
     lodLengthMeters: Float? = nil,
     projectedPixelsPerMeter: Float,
     to vertices: inout [ColoredVertex]
@@ -2533,7 +2564,9 @@ private struct CrowMeshBuilder {
       baseAxialSections: sections
     )
     func crossSection(at index: Int) -> [SIMD3<Float>] {
-      let t = Float(index) / Float(tessellation.axialSections)
+      let localFraction = Float(index) / Float(tessellation.axialSections)
+      let startFraction = min(max(axialStartFraction, 0), 0.95)
+      let t = startFraction + (1 - startFraction) * localFraction
       let bodyEnvelope = 0.32 + 0.68 * pow(max(sin(Float.pi * t), 0), 0.58)
       let tipTaper = 1 - 0.985 * pow(t, 3.2)
       let envelope = bodyEnvelope * tipTaper

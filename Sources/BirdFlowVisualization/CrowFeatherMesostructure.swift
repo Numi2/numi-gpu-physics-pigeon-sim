@@ -36,7 +36,7 @@ enum CrowFeatherMesostructure {
     result.reserveCapacity(
       tessellation.rachisSections
         + 2 * tessellation.barbPairs
-          * (1 + tessellation.barbulesPerBarb)
+        * (1 + tessellation.barbulesPerBarb)
     )
     appendRachis(
       sections: tessellation.rachisSections,
@@ -57,6 +57,7 @@ enum CrowFeatherMesostructure {
     let direction: SIMD3<Float>
     let normal: SIMD3<Float>
     let widthAxis: SIMD3<Float>
+    let pennaceousStartFraction: Float
 
     init(feather: CrowBodyContourShingle) {
       self.feather = feather
@@ -73,6 +74,7 @@ enum CrowFeatherMesostructure {
         simd_cross(normal, direction),
         fallback: SIMD3<Float>(0, 1, 0)
       )
+      pennaceousStartFraction = feather.pennaceousStartFraction
     }
 
     func center(at axial: Float) -> SIMD3<Float> {
@@ -86,10 +88,14 @@ enum CrowFeatherMesostructure {
       let t = clamp(axial)
       let bodyEnvelope = 0.32 + 0.68 * pow(max(sin(Float.pi * t), 0), 0.58)
       let tipTaper = 1 - 0.985 * pow(t, 3.2)
-      return (
-        feather.rootWidthMeters * (1 - t)
-          + feather.maximumWidthMeters * t
-      ) * bodyEnvelope * tipTaper
+      return
+        (feather.rootWidthMeters * (1 - t)
+        + feather.maximumWidthMeters * t) * bodyEnvelope * tipTaper
+    }
+
+    func pennaceousAxial(at localFraction: Float) -> Float {
+      pennaceousStartFraction
+        + (1 - pennaceousStartFraction) * clamp(localFraction)
     }
   }
 
@@ -99,8 +105,12 @@ enum CrowFeatherMesostructure {
     to result: inout [CrowFeatherMesostructureSegment]
   ) {
     for section in 0..<sections {
-      let first = Float(section) / Float(sections)
-      let second = Float(section + 1) / Float(sections)
+      let first = frame.pennaceousAxial(
+        at: Float(section) / Float(sections)
+      )
+      let second = frame.pennaceousAxial(
+        at: Float(section + 1) / Float(sections)
+      )
       result.append(
         CrowFeatherMesostructureSegment(
           kind: .rachis,
@@ -121,8 +131,11 @@ enum CrowFeatherMesostructure {
   ) {
     guard pairCount > 0 else { return }
     for pair in 0..<pairCount {
-      let axial = 0.10 + 0.77 * Float(pair + 1) / Float(pairCount + 1)
-      let reachAxial = min(0.94, axial + 0.035 + 0.020 * axial)
+      let localAxial = 0.10 + 0.77 * Float(pair + 1) / Float(pairCount + 1)
+      let axial = frame.pennaceousAxial(at: localAxial)
+      let reachAxial = frame.pennaceousAxial(
+        at: min(0.94, localAxial + 0.035 + 0.020 * localAxial)
+      )
       let start = frame.center(at: axial)
       for side: Float in [-1, 1] {
         let end =

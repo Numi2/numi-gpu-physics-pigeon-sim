@@ -70,6 +70,19 @@ and continue over the rump before extrapolating caudally. This seals the
 scapular, axillary, and pelvic wing-body boundaries from front and rear cameras
 without hiding a discontinuity through framing.
 
+The `576` estimated body contour feathers now separate a concealed proximal
+plumulaceous zone from the distal pennaceous vane that owns the visible shell.
+Only the distal `49-62%` is emitted as a continuous vane; deterministic
+identity variation breaks aligned transverse rows while axial and
+circumferential overlap remain explicit gates. Paired downy barbs are retained
+as output-coverage-driven geometry for close future renders and omitted when
+subpixel. This two-zone organization follows observed contour-feather
+morphology ([Ng et al. 2014](https://pmc.ncbi.nlm.nih.gov/articles/PMC4202321/))
+and the layered optical role of hidden bases beneath exposed tips
+([Eliason et al. 2025](https://pmc.ncbi.nlm.nih.gov/articles/PMC12285719/)); the
+zone fractions are bounded presentation estimates, not American-crow
+measurements.
+
 The twelve retained rectrices form a closed standing stack: their bases remain
 buried beneath the rump shell, their root and distal lateral spans are each
 `12 mm`, and their distal envelope descends `25-31 mm` below the body center.

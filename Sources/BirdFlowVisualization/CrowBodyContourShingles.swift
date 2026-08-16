@@ -17,6 +17,7 @@ struct CrowBodyContourShingle: Equatable {
   let rootWidthMeters: Float
   let maximumWidthMeters: Float
   let camberMeters: Float
+  let pennaceousStartFraction: Float
 }
 
 /// Dense, imbricated contour coverage over the asymmetric body loft.
@@ -25,8 +26,8 @@ struct CrowBodyContourShingle: Equatable {
 /// follows local circumferential spacing and every feather extends beyond the
 /// following axial root, creating a roof-tile shell instead of isolated leaves.
 enum CrowBodyContourShingles {
-  static let radialCount = 20
-  static let axialCount = 16
+  static let radialCount = 24
+  static let axialCount = 24
   static let shellClearanceMeters: Float = 0.0008
 
   private static let frontX: Float = 0.110
@@ -41,9 +42,15 @@ enum CrowBodyContourShingles {
       let tractPhase = axialTractPhase(theta: theta)
       for axialIndex in 0..<axialCount {
         let morphologyPhase = Float(axialIndex) * 2.399_963 + theta * 3.17
+        let axialIdentity = identityVariation(
+          radialIndex: radialIndex,
+          axialIndex: axialIndex,
+          salt: 0xA341_316C
+        )
         let localPhase =
           0.10 * sin(morphologyPhase)
           + 0.045 * sin(Float(axialIndex) * 1.173 - theta * 7.0)
+          + 0.13 * axialIdentity
         let axial = clamp(
           (Float(axialIndex) + tractPhase + localPhase) / Float(axialCount),
           lower: 0.012,
@@ -70,19 +77,38 @@ enum CrowBodyContourShingles {
             theta: theta + halfAngularSpacing
           )
         )
-        let widthVariation = 1 + 0.075 * sin(morphologyPhase + 0.83)
+        let widthIdentity = identityVariation(
+          radialIndex: radialIndex,
+          axialIndex: axialIndex,
+          salt: 0xC801_3EA4
+        )
+        let widthVariation =
+          1 + 0.075 * sin(morphologyPhase + 0.83) + 0.045 * widthIdentity
         let maximumWidth = max(
           0.0042,
-          regionWidthScale(region) * widthVariation * 0.86 * circumferentialSpacing
+          regionWidthScale(region) * widthVariation * 1.06 * circumferentialSpacing
         )
         let posterior = max(0, min(1, (frontX - rootX) / (frontX - backX)))
-        let lengthVariation = 0.0018 * sin(morphologyPhase - 0.51)
+        let lengthIdentity = identityVariation(
+          radialIndex: radialIndex,
+          axialIndex: axialIndex,
+          salt: 0xAD90_777D
+        )
+        let lengthVariation =
+          0.0018 * sin(morphologyPhase - 0.51) + 0.0012 * lengthIdentity
         let length =
           regionLength(region)
           + 0.010 * posterior
           + lengthVariation
         let tipX = max(rootX - length, CrowBodyAnatomy.loftRings.first!.x)
-        let tipTheta = theta - 0.038 * cos(theta) * (0.35 + 0.65 * posterior)
+        let tipIdentity = identityVariation(
+          radialIndex: radialIndex,
+          axialIndex: axialIndex,
+          salt: 0x7E95_761E
+        )
+        let tipTheta =
+          theta - 0.038 * cos(theta) * (0.35 + 0.65 * posterior)
+          + 0.012 * tipIdentity
         let tipNormal = CrowBodyAnatomy.surfaceNormal(
           atX: tipX,
           theta: tipTheta
@@ -105,9 +131,13 @@ enum CrowBodyContourShingles {
             ),
             rootWidthMeters: (0.57 + 0.035 * cos(morphologyPhase)) * maximumWidth,
             maximumWidthMeters: maximumWidth,
-            camberMeters:
-              (0.022 + 0.009 * (0.5 + 0.5 * sin(morphologyPhase + 1.6)))
-              * maximumWidth
+            camberMeters: (0.022 + 0.009 * (0.5 + 0.5 * sin(morphologyPhase + 1.6)))
+              * maximumWidth,
+            pennaceousStartFraction: clamp(
+              regionPennaceousStart(region) + 0.020 * tipIdentity,
+              lower: 0.38,
+              upper: 0.51
+            )
           )
         )
       }
@@ -132,9 +162,9 @@ enum CrowBodyContourShingles {
 
   private static func regionLength(_ region: CrowBodyContourRegion) -> Float {
     switch region {
-    case .dorsal: 0.030
-    case .flank: 0.028
-    case .ventral: 0.026
+    case .dorsal: 0.036
+    case .flank: 0.034
+    case .ventral: 0.032
     }
   }
 
@@ -144,6 +174,54 @@ enum CrowBodyContourShingles {
     case .flank: 1.0
     case .ventral: 1.06
     }
+  }
+
+  private static func regionPennaceousStart(_ region: CrowBodyContourRegion) -> Float {
+    switch region {
+    case .dorsal: 0.47
+    case .flank: 0.44
+    case .ventral: 0.41
+    }
+  }
+
+  static func centerlinePoint(
+    for feather: CrowBodyContourShingle,
+    at fraction: Float
+  ) -> SIMD3<Float> {
+    let t = clamp(fraction, lower: 0, upper: 1)
+    return feather.rootOffset
+      + (feather.tipOffset - feather.rootOffset) * t
+      + feather.planeNormal * (feather.camberMeters * sin(Float.pi * t))
+  }
+
+  static func vaneHalfWidth(
+    for feather: CrowBodyContourShingle,
+    at fraction: Float
+  ) -> Float {
+    let t = clamp(fraction, lower: 0, upper: 1)
+    let bodyEnvelope = 0.32 + 0.68 * pow(max(sin(Float.pi * t), 0), 0.58)
+    let tipTaper = 1 - 0.985 * pow(t, 3.2)
+    return
+      (feather.rootWidthMeters * (1 - t)
+      + feather.maximumWidthMeters * t) * bodyEnvelope * tipTaper
+  }
+
+  /// Stable identity noise prevents periodic courses without allowing temporal
+  /// flicker. It is presentation morphology, not a measured feather sample.
+  private static func identityVariation(
+    radialIndex: Int,
+    axialIndex: Int,
+    salt: UInt32
+  ) -> Float {
+    var value = UInt32(truncatingIfNeeded: radialIndex) &* 0x9E37_79B9
+    value ^= UInt32(truncatingIfNeeded: axialIndex) &* 0x85EB_CA6B
+    value ^= salt
+    value ^= value >> 16
+    value &*= 0x7FEB_352D
+    value ^= value >> 15
+    value &*= 0x846C_A68B
+    value ^= value >> 16
+    return 2 * Float(value & 0x00FF_FFFF) / Float(0x00FF_FFFF) - 1
   }
 
   private static func normalized(
