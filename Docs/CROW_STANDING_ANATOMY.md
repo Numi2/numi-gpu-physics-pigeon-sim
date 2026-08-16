@@ -81,14 +81,22 @@ and continue over the rump before extrapolating caudally. This seals the
 scapular, axillary, and pelvic wing-body boundaries from front and rear cameras
 without hiding a discontinuity through framing.
 
-The `1,440` estimated body contour feathers now separate a concealed proximal
+The `2,688` estimated body contour feathers now separate a concealed proximal
 plumulaceous zone from the distal pennaceous vane that owns the visible shell.
-Only the distal `56-64%` is emitted as a continuous vane. Thirty-six axial
-courses and forty circumferential tracts replace the broad `24 x 24` plates;
+Only the distal `56-64%` is emitted as a continuous vane. Forty-eight axial
+courses and fifty-six circumferential tracts replace the broad `24 x 24` plates;
 identity-stable tract phase plus bounded root-angle jitter on the live
 loft break aligned transverse and longitudinal rows. The smaller `0.45 mm`
 shell clearance, flatter transverse crown, and narrower vane aspect keep axial
-and circumferential overlap explicit. Paired downy barbs are retained as
+and circumferential overlap explicit. The denser shell narrows nominal
+dorsal/flank/ventral vanes while preserving the prior length and distal
+visible-length gates. It enforces a `4.8 mm` minimum maximum half-width at
+narrow loft rings and caps half-width below `24.9%` of vane length. Its inset
+axial parameterization preserves physical tract staggering at both endpoint
+courses instead of losing variation to a clamp. These values are estimated
+presentation morphology; the increased density raises deterministic fallback
+geometry cost and is intended to become cullable meshlet or curve work on
+future hardware. Paired downy barbs are retained as
 output-coverage-driven geometry for close future renders and omitted when
 subpixel. Each visible vane now carries its own axial/width coordinates through
 the temporal AOV path, so smooth geometric normals drive the highlight along

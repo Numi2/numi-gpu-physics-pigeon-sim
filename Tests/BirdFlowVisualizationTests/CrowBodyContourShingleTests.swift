@@ -203,8 +203,8 @@ func dorsalContourFeathersResolveAsNarrowInterdigitatedVanes() {
   for feather in dorsal {
     let length = simd_distance(feather.rootOffset, feather.tipOffset)
     let fullMaximumWidth = 2 * feather.maximumWidthMeters
-    #expect(length / fullMaximumWidth > 1.38)
-    #expect(length / fullMaximumWidth < 4.3)
+    #expect(length / fullMaximumWidth > 2.0)
+    #expect(length / fullMaximumWidth < 5.8)
     #expect((1 - feather.pennaceousStartFraction) * length > 0.020)
   }
 

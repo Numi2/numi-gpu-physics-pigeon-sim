@@ -30,8 +30,8 @@ struct CrowBodyContourShingle: Equatable {
 /// follows local circumferential spacing and every feather extends beyond the
 /// following axial root, creating a roof-tile shell instead of isolated leaves.
 enum CrowBodyContourShingles {
-  static let radialCount = 40
-  static let axialCount = 36
+  static let radialCount = 56
+  static let axialCount = 48
   static let shellClearanceMeters: Float = 0.00045
 
   private static let frontX: Float = 0.110
@@ -48,7 +48,7 @@ enum CrowBodyContourShingles {
         axialIndex: 0,
         salt: 0x6D2B_79F5
       )
-      let tractPhase = axialTractPhase(theta: theta) + 0.30 * tractIdentity
+      let tractPhase = axialTractPhase(theta: theta) + 0.20 * tractIdentity
       for axialIndex in 0..<axialCount {
         let morphologyPhase = Float(axialIndex) * 2.399_963 + theta * 3.17
         let axialIdentity = identityVariation(
@@ -61,7 +61,8 @@ enum CrowBodyContourShingles {
           + 0.045 * sin(Float(axialIndex) * 1.173 - theta * 7.0)
           + 0.13 * axialIdentity
         let axial = clamp(
-          (Float(axialIndex) + tractPhase + localPhase) / Float(axialCount),
+          (Float(axialIndex) + 1.70 + tractPhase + localPhase)
+            / (Float(axialCount) + 2.40),
           lower: 0.012,
           upper: 0.988
         )
@@ -95,9 +96,9 @@ enum CrowBodyContourShingles {
         )
         let widthVariation =
           1 + 0.075 * sin(morphologyPhase + 0.83) + 0.045 * widthIdentity
-        let maximumWidth = max(
-          0.0042,
-          regionWidthScale(region) * widthVariation * 1.24 * circumferentialSpacing
+        let nominalMaximumWidth = max(
+          0.0048,
+          regionWidthScale(region) * widthVariation * 1.38 * circumferentialSpacing
         )
         let posterior = max(0, min(1, (frontX - rootX) / (frontX - backX)))
         let lengthIdentity = identityVariation(
@@ -111,6 +112,7 @@ enum CrowBodyContourShingles {
           regionLength(region)
           + 0.010 * posterior
           + lengthVariation
+        let maximumWidth = min(nominalMaximumWidth, 0.249 * length)
         let tipX = max(rootX - length, CrowBodyAnatomy.loftRings.first!.x)
         let tipIdentity = identityVariation(
           radialIndex: radialIndex,
@@ -178,9 +180,8 @@ enum CrowBodyContourShingles {
   /// A periodic, low-frequency phase field makes neighbouring feather tracts
   /// interdigitate without turning the body into aligned transverse hoops.
   private static func axialTractPhase(theta: Float) -> Float {
-    0.34
-      + 0.22 * sin(2 * theta + 0.61)
-      + 0.12 * sin(5 * theta - 0.27)
+    0.40 * sin(2 * theta + 0.61)
+      + 0.20 * sin(5 * theta - 0.27)
   }
 
   private static func region(for theta: Float) -> CrowBodyContourRegion {

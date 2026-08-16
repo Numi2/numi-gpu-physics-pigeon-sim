@@ -74,6 +74,10 @@ ankles move by millimetres.
    occlusion/coverage layer beneath them. These aggregates are estimated
    presentation geometry; future mesh-shader or curve emission can consume the
    same stable feather identity and LOD contract without changing anatomy.
+   The current body fallback carries `2,688` stable contour identities at full
+   showcase coverage; it deliberately remains a deterministic triangle oracle,
+   while a future indirect meshlet path should visibility-cull the same records
+   rather than lowering anatomical density to recover frame time.
 
 3. **Measured appearance, bounded claims.** Implement an energy-bounded,
    anisotropic feather BSDF with separate eumelanin absorption, longitudinal
