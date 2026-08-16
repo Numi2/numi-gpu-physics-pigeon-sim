@@ -5,13 +5,13 @@ import simd
 
 @Test("body feather mesostructure resolves a nested anatomical hierarchy")
 func bodyFeatherMesostructureResolvesHierarchy() {
-  let feather = CrowBodyContourShingles.samples()[117]
+  let feather = CrowBodyContourShingles.samples().first { $0.region == .dorsal }!
   let length = simd_distance(feather.rootOffset, feather.tipOffset)
   let silhouette = CrowFeatherMesostructure.segments(
     for: feather,
     projectedPixelsPerMeter: 12 / length
   )
-  let unresolved = CrowFeatherMesostructure.segments(
+  let dorsalVane = CrowFeatherMesostructure.segments(
     for: feather,
     projectedPixelsPerMeter: 48 / length
   )
@@ -29,9 +29,18 @@ func bodyFeatherMesostructureResolvesHierarchy() {
     for: feather,
     projectedPixelsPerMeter: 520 / length
   )
+  let flank = CrowBodyContourShingles.samples().first { $0.region == .flank }!
+  let flankAtDorsalThreshold = CrowFeatherMesostructure.segments(
+    for: flank,
+    projectedPixelsPerMeter:
+      CrowFeatherMesostructure.dorsalBodyContourDetailThresholdPixels
+      / flank.referenceLengthMeters
+  )
 
   #expect(silhouette.isEmpty)
-  #expect(unresolved.isEmpty)
+  #expect(flankAtDorsalThreshold.isEmpty)
+  #expect(dorsalVane.filter { $0.kind == .rachis }.count == 4)
+  #expect(dorsalVane.filter { $0.kind == .edgeBarbGroup }.count == 25)
   #expect(vane.filter { $0.kind == .rachis }.count == 4)
   #expect(vane.filter { $0.kind == .edgeBarbGroup }.count == 25)
   #expect(vane.allSatisfy { $0.kind != .barb && $0.kind != .barbule })
@@ -43,7 +52,8 @@ func bodyFeatherMesostructureResolvesHierarchy() {
   #expect(barbules.filter { $0.kind == .edgeBarbGroup }.count == 5)
   #expect(barbules.filter { $0.kind == .barb }.count == 36)
   #expect(barbules.filter { $0.kind == .barbule }.count == 108)
-  #expect(silhouette.count < vane.count && vane.count < barbs.count)
+  #expect(silhouette.count < dorsalVane.count && dorsalVane.count <= vane.count)
+  #expect(vane.count < barbs.count)
   #expect(barbs.count < barbules.count)
 }
 

@@ -21,14 +21,19 @@ struct CrowFeatherMesostructureSegment: Equatable {
 /// paired barbs, or spends close-up compute on interlocking barbules.
 enum CrowFeatherMesostructure {
   static let bodyContourEdgeDetailThresholdPixels: Float = 96
+  static let dorsalBodyContourDetailThresholdPixels: Float = 48
 
   static func segments(
     for feather: CrowBodyContourShingle,
     projectedPixelsPerMeter: Float
   ) -> [CrowFeatherMesostructureSegment] {
+    let threshold =
+      feather.region == .dorsal
+      ? dorsalBodyContourDetailThresholdPixels
+      : bodyContourEdgeDetailThresholdPixels
     guard
       feather.referenceLengthMeters * projectedPixelsPerMeter
-        >= bodyContourEdgeDetailThresholdPixels
+        >= threshold
     else { return [] }
     return segments(
       frame: Frame(feather: feather),
