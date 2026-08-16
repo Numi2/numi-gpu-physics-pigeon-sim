@@ -2907,10 +2907,10 @@ private struct CrowMeshBuilder {
           spanVector,
           fallback: SIMD3<Float>(0, left ? 1 : -1, 0)
         )
-        let normalSign: Float = left ? 1 : -1
-        let normal = safeNormalize(
-          normalSign * simd_cross(chordDirection, spanDirection),
-          fallback: SIMD3<Float>(0, 0, 1)
+        let dorsalNormal = CrowFlightWingBodyIntegration.covertSurfaceNormal(
+          chordDirection: chordDirection,
+          spanDirection: spanDirection,
+          left: left
         )
         let isTrailingCourse = chord == 6
         let surfaceTip =
@@ -2925,7 +2925,6 @@ private struct CrowMeshBuilder {
         let covertOverlap =
           CrowFlightWingBodyIntegration.covertCourseOverlapScale
           * attachmentOverlap
-        let dorsalNormal = normal.z >= 0 ? normal : -normal
         appendFeatherBlade(
           root: root + dorsalNormal * 0.0015,
           tip: surfaceTip + dorsalNormal * 0.0025,

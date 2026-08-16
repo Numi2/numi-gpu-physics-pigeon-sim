@@ -30,6 +30,21 @@ enum CrowFlightWingBodyIntegration {
     return 1 + 0.28 * (1 - smootherstep(progress))
   }
 
+  /// Resolves the anatomical dorsal side from fixed topology orientation.
+  /// World Z is intentionally absent: a reversing wing must not swap the
+  /// feather shell to its opposite physical face.
+  static func covertSurfaceNormal(
+    chordDirection: SIMD3<Float>,
+    spanDirection: SIMD3<Float>,
+    left: Bool
+  ) -> SIMD3<Float> {
+    let orientation: Float = left ? 1 : -1
+    let cross = orientation * simd_cross(chordDirection, spanDirection)
+    let fallback = SIMD3<Float>(0, 0, -1)
+    let length = simd_length(cross)
+    return length > 1e-8 ? cross / length : fallback
+  }
+
   static func bodyRoot(chordIndex: Int, left: Bool) -> SIMD3<Float> {
     precondition((0..<chordCount).contains(chordIndex))
     let fraction = Float(chordIndex) / Float(chordCount - 1)

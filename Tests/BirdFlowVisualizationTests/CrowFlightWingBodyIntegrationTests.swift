@@ -148,3 +148,34 @@ func flightCovertCoursesDenselyCoverEveryBodyToWingStation() {
     zip(overlapScales, overlapScales.dropFirst()).allSatisfy { $1 <= $0 }
   )
 }
+
+@Test("flight covert normals retain anatomical side through reversal")
+func flightCovertNormalsRetainAnatomicalSideThroughReversal() {
+  let chord = SIMD3<Float>(-1, 0, 0)
+  let leftSpan = SIMD3<Float>(0, 1, 0)
+  let rightSpan = SIMD3<Float>(0, -1, 0)
+  let left = CrowFlightWingBodyIntegration.covertSurfaceNormal(
+    chordDirection: chord,
+    spanDirection: leftSpan,
+    left: true
+  )
+  let right = CrowFlightWingBodyIntegration.covertSurfaceNormal(
+    chordDirection: chord,
+    spanDirection: rightSpan,
+    left: false
+  )
+  #expect(left.z < -0.999 && right.z < -0.999)
+  #expect(simd_distance(left, right) < 1e-7)
+
+  for angle: Float in [-0.54, -0.27, 0, 0.27, 0.54] {
+    let span = SIMD3<Float>(0, cos(angle), sin(angle))
+    let normal = CrowFlightWingBodyIntegration.covertSurfaceNormal(
+      chordDirection: chord,
+      spanDirection: span,
+      left: true
+    )
+    let expected = simd_normalize(simd_cross(chord, span))
+    #expect(abs(simd_length(normal) - 1) < 1e-6)
+    #expect(simd_dot(normal, expected) > 0.999)
+  }
+}
