@@ -35,6 +35,14 @@ func crowCruralPlumageOverlapsLegAndCrossesHockBoundary() {
   )
   #expect(samples.map(\.materialVariation).min()! < -0.90)
   #expect(samples.map(\.materialVariation).max()! > 0.90)
+  #expect(samples.map(\.vaneAsymmetry).min()! < -0.040)
+  #expect(samples.map(\.vaneAsymmetry).max()! > 0.040)
+  #expect(samples.allSatisfy { $0.edgeRippleAmplitude >= 0.012 })
+  #expect(samples.allSatisfy { $0.edgeRippleAmplitude <= 0.030 })
+  #expect(samples.allSatisfy { $0.edgeRipplePhase >= 0 })
+  #expect(samples.allSatisfy { $0.edgeRipplePhase <= 2 * Float.pi })
+  #expect(samples.allSatisfy { $0.edgeRippleCycles >= 1.25 })
+  #expect(samples.allSatisfy { $0.edgeRippleCycles <= 1.90 })
   #expect(CrowLegPlumage.proximalUnderlayerRadiusMeters == 0.014)
   #expect(CrowLegPlumage.distalUnderlayerRadiusMeters == 0.0065)
   let firstRootRadius =
@@ -76,6 +84,10 @@ func crowCruralPlumageOverlapsLegAndCrossesHockBoundary() {
   let distalProjection = samples.map { simd_dot($0.tip - hip, axis) }.max()!
   #expect(distalProjection > legLength + 0.003)
   #expect(distalProjection < legLength + 0.007)
+  let distalCourseProjections = samples.filter { $0.stationIndex == 6 }.map {
+    simd_dot($0.tip - hip, axis)
+  }
+  #expect(distalCourseProjections.max()! - distalCourseProjections.min()! > 0.001)
   #expect(
     samples.allSatisfy {
       simd_dot($0.tip - $0.root, axis) > 0

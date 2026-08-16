@@ -2559,6 +2559,10 @@ private struct CrowMeshBuilder {
           sections: 6,
           camber: feather.camberMeters,
           transverseCamberRatio: 0.08,
+          vaneAsymmetry: feather.vaneAsymmetry,
+          edgeRippleAmplitude: feather.edgeRippleAmplitude,
+          edgeRipplePhase: feather.edgeRipplePhase,
+          edgeRippleCycles: feather.edgeRippleCycles,
           lodLengthMeters: simd_distance(feather.root, feather.tip),
           projectedPixelsPerMeter: projectedPixelsPerMeter,
           to: &vertices

@@ -9,6 +9,10 @@ struct CrowLegPlumageFeather: Equatable {
   let rootWidthMeters: Float
   let maximumWidthMeters: Float
   let camberMeters: Float
+  let vaneAsymmetry: Float
+  let edgeRippleAmplitude: Float
+  let edgeRipplePhase: Float
+  let edgeRippleCycles: Float
   let materialVariation: Float
   let bodyMaterialBlend: Float
 }
@@ -59,6 +63,21 @@ enum CrowLegPlumage {
           stationIndex: stationIndex,
           salt: 0xC2B2_AE35
         )
+        let tipIdentity = identityVariation(
+          radialIndex: radialIndex,
+          stationIndex: stationIndex,
+          salt: 0x1656_67B1
+        )
+        let edgeIdentity = identityVariation(
+          radialIndex: radialIndex,
+          stationIndex: stationIndex,
+          salt: 0x68E3_1DA4
+        )
+        let cycleIdentity = identityVariation(
+          radialIndex: radialIndex,
+          stationIndex: stationIndex,
+          salt: 0x27D4_EB2F
+        )
         let baseTheta = 2 * Float.pi * Float(radialIndex) / Float(radialCount)
         let theta =
           baseTheta
@@ -69,8 +88,9 @@ enum CrowLegPlumage {
           0.025 + 0.13 * (Float(stationIndex) + stagger)
         )
         let tipFraction = min(
-          1.10,
-          rootFraction + 0.31 * (1 + 0.045 * shapeIdentity)
+          1.13,
+          rootFraction
+            + 0.31 * (1 + 0.055 * shapeIdentity + 0.035 * tipIdentity)
         )
         let rootRadius = radius(at: rootFraction)
         let tipRadius = radius(at: tipFraction)
@@ -91,6 +111,10 @@ enum CrowLegPlumage {
             rootWidthMeters: 0.54 * maximumWidth,
             maximumWidthMeters: maximumWidth,
             camberMeters: 0.00040 * (1 + 0.10 * shapeIdentity),
+            vaneAsymmetry: 0.045 * tipIdentity,
+            edgeRippleAmplitude: 0.012 + 0.018 * (0.5 + 0.5 * edgeIdentity),
+            edgeRipplePhase: Float.pi * (edgeIdentity + 1),
+            edgeRippleCycles: 1.25 + 0.65 * (0.5 + 0.5 * cycleIdentity),
             materialVariation: materialIdentity,
             bodyMaterialBlend:
               0.62 - 0.47 * Float(stationIndex) / Float(stationCount - 1)
@@ -143,6 +167,10 @@ enum CrowLegPlumage {
             rootWidthMeters: 0.58 * maximumWidth,
             maximumWidthMeters: maximumWidth,
             camberMeters: 0.00045,
+            vaneAsymmetry: 0,
+            edgeRippleAmplitude: 0,
+            edgeRipplePhase: 0,
+            edgeRippleCycles: 0,
             materialVariation: 0,
             bodyMaterialBlend: 0
           )

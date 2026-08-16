@@ -177,6 +177,12 @@ struct CrowShowcaseFrame {
       largestEnclosedBirdSilhouetteHoleCentroidY: silhouetteHoles.centroidY,
       largestEnclosedBirdSilhouetteHoleAdjacentFeatherClassMask:
         silhouetteHoles.adjacentFeatherClassMask,
+      expectedLowerBodyAperturePixelCount:
+        silhouetteHoles.expectedLowerBodyAperturePixelCount,
+      expectedLowerBodyApertureComponentCount:
+        silhouetteHoles.expectedLowerBodyApertureComponentCount,
+      largestExpectedLowerBodyAperturePixelCount:
+        silhouetteHoles.largestExpectedLowerBodyAperturePixelCount,
       movingFullyCoveredPixelCount: movingActivePixelCount,
       maximumHDRComponent: maximumHDRComponent,
       maximumMotionPixels: maximumMotionPixels,
@@ -363,6 +369,9 @@ struct CrowShowcaseFrame {
     var total = 0
     var components = 0
     var largest = 0
+    var apertureTotal = 0
+    var apertureComponents = 0
+    var largestAperture = 0
     var largestMinimumX = 0
     var largestMaximumX = 0
     var largestMinimumY = 0
@@ -374,7 +383,6 @@ struct CrowShowcaseFrame {
       for x in minimumX...maximumX {
         let start = y * width + x
         guard !birdMask[start], !visited[start] else { continue }
-        components += 1
         var componentQueue = [start]
         visited[start] = true
         var componentHead = 0
@@ -419,7 +427,33 @@ struct CrowShowcaseFrame {
             }
           }
         }
+        let componentWidth = componentMaximumX - componentMinimumX + 1
+        let componentHeight = componentMaximumY - componentMinimumY + 1
+        let birdHeight = maximumY - minimumY + 1
+        // A planted crow legitimately encloses background between its two
+        // legs and between spread digits. Keep those scale-aware lower-body
+        // apertures separate from plumage or body-shell defects.
+        let expectedInterLegAperture =
+          adjacentClassMask == 1
+          && componentMinimumY >= minimumY + birdHeight / 2
+          && componentHeight >= max(4, birdHeight / 8)
+          && componentHeight * 2 >= 3 * componentWidth
+          && componentSize >= max(8, birdHeight / 2)
+        let expectedPedalAperture =
+          adjacentClassMask == 1
+          && componentMinimumY >= minimumY + 9 * birdHeight / 10
+          && componentWidth >= componentHeight
+          && componentSize >= 2
+        let expectedLowerBodyAperture =
+          expectedInterLegAperture || expectedPedalAperture
+        if expectedLowerBodyAperture {
+          apertureTotal += componentSize
+          apertureComponents += 1
+          largestAperture = max(largestAperture, componentSize)
+          continue
+        }
         total += componentSize
+        components += 1
         if componentSize > largest {
           largest = componentSize
           largestMinimumX = componentMinimumX
@@ -442,7 +476,10 @@ struct CrowShowcaseFrame {
       maximumY: largestMaximumY,
       centroidX: largestCentroidX,
       centroidY: largestCentroidY,
-      adjacentFeatherClassMask: largestAdjacentClassMask
+      adjacentFeatherClassMask: largestAdjacentClassMask,
+      expectedLowerBodyAperturePixelCount: apertureTotal,
+      expectedLowerBodyApertureComponentCount: apertureComponents,
+      largestExpectedLowerBodyAperturePixelCount: largestAperture
     )
   }
 
@@ -519,6 +556,9 @@ struct CrowSilhouetteHoleAudit: Equatable {
   let centroidX: Float
   let centroidY: Float
   let adjacentFeatherClassMask: UInt32
+  let expectedLowerBodyAperturePixelCount: Int
+  let expectedLowerBodyApertureComponentCount: Int
+  let largestExpectedLowerBodyAperturePixelCount: Int
 
   static let zero = CrowSilhouetteHoleAudit(
     pixelCount: 0,
@@ -530,7 +570,10 @@ struct CrowSilhouetteHoleAudit: Equatable {
     maximumY: 0,
     centroidX: 0,
     centroidY: 0,
-    adjacentFeatherClassMask: 0
+    adjacentFeatherClassMask: 0,
+    expectedLowerBodyAperturePixelCount: 0,
+    expectedLowerBodyApertureComponentCount: 0,
+    largestExpectedLowerBodyAperturePixelCount: 0
   )
 }
 
@@ -566,6 +609,9 @@ struct CrowShowcaseAOVFrameAudit: Codable, Equatable {
   let largestEnclosedBirdSilhouetteHoleCentroidX: Float
   let largestEnclosedBirdSilhouetteHoleCentroidY: Float
   let largestEnclosedBirdSilhouetteHoleAdjacentFeatherClassMask: UInt32
+  let expectedLowerBodyAperturePixelCount: Int
+  let expectedLowerBodyApertureComponentCount: Int
+  let largestExpectedLowerBodyAperturePixelCount: Int
   let movingFullyCoveredPixelCount: Int
   let maximumHDRComponent: Float
   let maximumMotionPixels: Float
@@ -592,7 +638,7 @@ struct CrowShowcaseAOVAuditReport: Codable, Equatable {
   let frames: [CrowShowcaseAOVFrameAudit]
 
   init(frames: [CrowShowcaseAOVFrameAudit]) {
-    schemaVersion = 4
+    schemaVersion = 5
     colorSpace = "scene-linear extended range; display output is tone mapped separately"
     motionConvention =
       "current pixel to previous pixel in upper-left-origin pixel units; MetalFX scale 1"
