@@ -51,3 +51,80 @@ func neckTransformPreservesHeadDistancesAndShoulderContinuity() {
   let normal = simd_normalize(SIMD3<Float>(0.2, 0.7, 0.4))
   #expect(abs(simd_length(pose.rotated(normal, coupling: 1)) - 1) < 1e-6)
 }
+
+@Test("head-neck coupling anchors the nape and reaches a rigid cranium")
+func headNeckCouplingAnchorsNapeAndReachesRigidCranium() {
+  let samples = (0...64).map { index in
+    CrowHeadNeckBlend.coupling(
+      axialOffsetMeters: 0.090 + 0.085 * Float(index) / 64
+    )
+  }
+  #expect(samples.first == 0)
+  #expect(samples.last == 1)
+  #expect(zip(samples, samples.dropFirst()).allSatisfy { $0 <= $1 })
+  #expect(
+    abs(
+      CrowHeadNeckBlend.coupling(axialOffsetMeters: 0.1305) - 0.5
+    ) < 1e-6
+  )
+
+  let pose = CrowStandingNeckPose(
+    translation: SIMD3<Float>(0.0015, -0.0024, 0.0017),
+    yawRadians: 0.018,
+    pitchRadians: -0.014,
+    rollRadians: 0.006
+  )
+  let bodyCenter = SIMD3<Float>(0.001, -0.002, 0.0005)
+  let nape = bodyCenter + SIMD3<Float>(0.100, 0.012, 0.050)
+  let rigidCranium = bodyCenter + SIMD3<Float>(0.170, 0.012, 0.050)
+  #expect(
+    simd_distance(
+      CrowHeadNeckBlend.position(
+        nape,
+        bodyCenter: bodyCenter,
+        neckPose: pose
+      ),
+      nape
+    ) < 1e-8
+  )
+  #expect(
+    simd_distance(
+      CrowHeadNeckBlend.position(
+        rigidCranium,
+        bodyCenter: bodyCenter,
+        neckPose: pose
+      ),
+      bodyCenter
+        + pose.transform(
+          offset: rigidCranium - bodyCenter,
+          coupling: 1
+        )
+    ) < 1e-8
+  )
+
+  let normal = simd_normalize(SIMD3<Float>(0.15, 0.70, 0.45))
+  for axialOffset: Float in stride(from: 0.095, through: 0.170, by: 0.0025) {
+    let position = bodyCenter + SIMD3<Float>(axialOffset, 0.012, 0.050)
+    let transformed = CrowHeadNeckBlend.normal(
+      normal,
+      position: position,
+      bodyCenter: bodyCenter,
+      neckPose: pose
+    )
+    #expect(abs(simd_length(transformed) - 1) < 1e-6)
+  }
+  let anchoredNormal = CrowHeadNeckBlend.normal(
+    normal,
+    position: nape,
+    bodyCenter: bodyCenter,
+    neckPose: pose
+  )
+  #expect(simd_distance(anchoredNormal, normal) < 1e-5)
+  let rigidNormal = CrowHeadNeckBlend.normal(
+    normal,
+    position: rigidCranium,
+    bodyCenter: bodyCenter,
+    neckPose: pose
+  )
+  #expect(simd_distance(rigidNormal, pose.rotated(normal, coupling: 1)) < 1e-4)
+}

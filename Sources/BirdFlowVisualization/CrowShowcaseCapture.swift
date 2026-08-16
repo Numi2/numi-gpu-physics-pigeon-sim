@@ -1825,14 +1825,20 @@ private struct CrowMeshBuilder {
         transformed.normal.z
       )
       transformed.position = SIMD4<Float>(
-        bodyCenter + neckPose.transform(
-          offset: position - bodyCenter,
-          coupling: 1
+        CrowHeadNeckBlend.position(
+          position,
+          bodyCenter: bodyCenter,
+          neckPose: neckPose
         ),
         transformed.position.w
       )
       transformed.normal = SIMD4<Float>(
-        neckPose.rotated(normal, coupling: 1),
+        CrowHeadNeckBlend.normal(
+          normal,
+          position: position,
+          bodyCenter: bodyCenter,
+          neckPose: neckPose
+        ),
         transformed.normal.w
       )
       vertices[index] = transformed

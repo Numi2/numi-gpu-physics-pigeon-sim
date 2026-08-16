@@ -55,6 +55,12 @@ shoulder-to-pelvis series, but lateral fanning is reduced so the folded tips do
 not split into separated decks when viewed from behind. This is estimated
 presentation anatomy and does not enter the solver.
 
+The cranial surface is not transported as a detached rigid shell during quiet
+standing. Points buried in the trunk-facing nape remain body-anchored, a cubic
+coupling field deforms the visible neck, and the field reaches rigid-head motion
+before the orbit and bill. Cervical feather tracts use the same shoulder-to-head
+continuity principle over this underlying surface.
+
 Run the presentation with:
 
 ```bash
