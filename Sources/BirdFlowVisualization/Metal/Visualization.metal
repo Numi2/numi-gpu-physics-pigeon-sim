@@ -120,7 +120,7 @@ struct CrowRasterVertex {
     float3 world;
     float3 normal;
     float4 albedoAndMaterial;
-    float2 featherCoordinates;
+    float3 featherCoordinates;
     uint4 identity [[flat]];
 };
 
@@ -1233,7 +1233,7 @@ vertex CrowRasterVertex crowSurfaceAOVVertex(
     out.world=source.position.xyz;
     out.normal=normalize(source.normal.xyz);
     out.albedoAndMaterial=source.albedoAndMaterial;
-    out.featherCoordinates=source.parameters.xy;
+    out.featherCoordinates=source.parameters.xyz;
     out.identity=source.identity;
     return out;
 }
@@ -1249,7 +1249,7 @@ vertex CrowRasterVertex crowFeatherAOVVertex(
     out.world=source.position.xyz;
     out.normal=normalize(source.normal.xyz);
     out.albedoAndMaterial=source.color;
-    out.featherCoordinates=source.parameters.xy;
+    out.featherCoordinates=source.parameters.xyz;
     out.identity=source.identity;
     return out;
 }
@@ -1345,7 +1345,7 @@ inline float3 showcaseCrowLinearRadiance(
     float3 normalInput,
     float4 albedoAndMaterial,
     float3 eyePosition,
-    float2 featherCoordinates,
+    float3 featherCoordinates,
     uint packedIdentity) {
     float3 normal=normalize(normalInput);
     float3 view=normalize(eyePosition-world);
@@ -1429,7 +1429,7 @@ inline float3 showcaseCrowLinearRadiance(
     classSheenScale=mix(classSheenScale,0.97f,flankBodyVane);
     classSheenScale=mix(classSheenScale,0.94f,ventralBodyVane);
     float3 featherAxis=crowFeatherAxis(
-        world,normal,featherCoordinates
+        world,normal,featherCoordinates.xy
     );
     float vaneAnisotropy=mix(
         0.18f,
@@ -1472,6 +1472,7 @@ inline float3 showcaseCrowLinearRadiance(
     barbFrequency=mix(barbFrequency,172.0f,ventralBodyVane);
     float localBarbs=0.5f+0.5f*sin(
         barbFrequency*axial+23.0f*abs(signedWidth)+7.0f*signedWidth
+            +featherCoordinates.z
     );
     float barbPhase=520.0f*world.x+390.0f*world.y-270.0f*world.z;
     float barb=0.5f+0.5f*sin(barbPhase);
@@ -1537,7 +1538,7 @@ fragment float4 showcaseCrowFragment(
     RasterVertex in [[stage_in]],
     constant CameraUniforms& camera [[buffer(0)]]) {
     float3 radiance=showcaseCrowLinearRadiance(
-        in.world,in.normal,in.color,camera.eyeAndWidth.xyz,in.uv,0u
+        in.world,in.normal,in.color,camera.eyeAndWidth.xyz,float3(in.uv,0),0u
     );
     return float4(1.0f-exp(-radiance),1.0f);
 }

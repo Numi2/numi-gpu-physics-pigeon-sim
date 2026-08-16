@@ -116,7 +116,7 @@ enum CrowFeatherMesostructure {
       vaneAsymmetry = feather.vaneAsymmetry
       edgeRippleAmplitude = feather.edgeRippleAmplitude
       edgeRipplePhase = feather.edgeRipplePhase
-      edgeRippleCycles = 1.5
+      edgeRippleCycles = feather.edgeRippleCycles
       identityFirst = feather.radialIndex
       identitySecond = feather.axialIndex
     }

@@ -3196,7 +3196,7 @@ private struct CrowMeshBuilder {
           (
             center + widthAxis * (signedWidth * localWidth)
               + normal * (localWidth * transverseCamberRatio * transverseEnvelope),
-            SIMD4<Float>(t, signedWidth, 1, Float(surfaceFeatherClass))
+            SIMD4<Float>(t, signedWidth, edgeRipplePhase, Float(surfaceFeatherClass))
           )
         )
       }
