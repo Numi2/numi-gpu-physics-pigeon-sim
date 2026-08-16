@@ -6,6 +6,11 @@ import Foundation
 import Metal
 import simd
 
+enum CrowShowcasePresentation: String {
+  case wingbeat
+  case standing
+}
+
 /// Native Metal presentation of an explicitly estimated American-crow model.
 ///
 /// The measured Deetjen dove contributes only a deformation scaffold. Crow
@@ -22,6 +27,8 @@ public enum CrowShowcaseCapture {
     let surfaceGenerationAuditURL: URL
     let crowProfileURL: URL
     let realityAssetURL: URL
+    let standingReferenceURL: URL
+    let presentation: CrowShowcasePresentation
 
     public init(commandLine: [String]) throws {
       func value(after flag: String) throws -> String? {
@@ -70,6 +77,23 @@ public enum CrowShowcaseCapture {
         fileURLWithPath: try value(after: "--capture-crow-reality-asset")
           ?? "ValidationInputs/american-crow-hybrid-reality-v1.json"
       )
+      standingReferenceURL = URL(
+        fileURLWithPath: try value(after: "--capture-crow-standing-reference")
+          ?? "ValidationInputs/american-crow-standing-reference-v1.json"
+      )
+      let presentationValue =
+        try value(after: "--capture-crow-presentation")
+        ?? CrowShowcasePresentation.wingbeat.rawValue
+      guard
+        let parsedPresentation = CrowShowcasePresentation(
+          rawValue: presentationValue
+        )
+      else {
+        throw CaptureError.invalidArguments(
+          "--capture-crow-presentation requires wingbeat or standing"
+        )
+      }
+      presentation = parsedPresentation
     }
   }
 
@@ -92,6 +116,14 @@ public enum CrowShowcaseCapture {
     let profileData = try Data(contentsOf: arguments.crowProfileURL)
     let profile = try JSONDecoder().decode(CrowVisualProfile.self, from: profileData)
     try profile.validate()
+    if arguments.presentation == .standing {
+      let standingData = try Data(contentsOf: arguments.standingReferenceURL)
+      let standingReference = try JSONDecoder().decode(
+        CrowStandingReference.self,
+        from: standingData
+      )
+      try standingReference.validate()
+    }
     let dataset = try MeasuredBirdSurfaceSequenceLoader.load(
       manifestURL: arguments.surfaceManifestURL
     )
@@ -174,7 +206,8 @@ public enum CrowShowcaseCapture {
       dataset: dataset,
       profile: profile,
       motion: motion,
-      realityAsset: realityAsset
+      realityAsset: realityAsset,
+      presentation: arguments.presentation
     )
     try FileManager.default.createDirectory(
       at: arguments.outputDirectory,
@@ -188,10 +221,17 @@ public enum CrowShowcaseCapture {
         : Float(frameIndex) / Float(arguments.frameCount - 1)
       let orbit = 2 * Float.pi * phase
       var camera = CameraState()
-      camera.target = SIMD3<Float>(-0.018, 0, 0.020)
-      camera.distance = 1.05 * (1 + 0.010 * cos(orbit))
-      camera.yaw = -1.06 + 0.024 * sin(orbit)
-      camera.pitch = 0.18 + 0.012 * cos(orbit)
+      if arguments.presentation == .standing {
+        camera.target = SIMD3<Float>(0.015, 0, -0.055)
+        camera.distance = 0.55 * (1 + 0.004 * cos(orbit))
+        camera.yaw = 0.36 + 0.012 * sin(orbit)
+        camera.pitch = 0.075 + 0.006 * cos(orbit)
+      } else {
+        camera.target = SIMD3<Float>(-0.018, 0, 0.020)
+        camera.distance = 1.05 * (1 + 0.010 * cos(orbit))
+        camera.yaw = -1.06 + 0.024 * sin(orbit)
+        camera.pitch = 0.18 + 0.012 * cos(orbit)
+      }
       let texture = try renderer.render(
         phase: phase,
         camera: camera,
@@ -209,7 +249,10 @@ public enum CrowShowcaseCapture {
           height: arguments.height,
           profile: profile,
           phase: phase,
-          sourceDescription: motion.sourceDescription(phase: phase)
+          presentation: arguments.presentation,
+          sourceDescription: arguments.presentation == .standing
+            ? "Estimated grounded pose / qualitative public-video anatomy reference"
+            : motion.sourceDescription(phase: phase)
         )
       }
       let output = arguments.outputDirectory.appendingPathComponent(
@@ -217,8 +260,8 @@ public enum CrowShowcaseCapture {
       )
       try png.write(to: output, options: .atomic)
       print(
-        "captured estimated American crow \(frameIndex + 1)/\(arguments.frameCount) "
-          + motion.sourceDescription(phase: phase)
+        "captured estimated American crow \(arguments.presentation.rawValue) "
+          + "\(frameIndex + 1)/\(arguments.frameCount)"
       )
     }
   }
@@ -229,6 +272,7 @@ public enum CrowShowcaseCapture {
     height: Int,
     profile: CrowVisualProfile,
     phase: Float,
+    presentation: CrowShowcasePresentation,
     sourceDescription: String
   ) {
     graphics.saveGState()
@@ -260,14 +304,23 @@ public enum CrowShowcaseCapture {
       tracking: 0.9 * scale
     )
     let selected = profile.selectedCrowEstimate
-    drawText(
-      String(
+    let dimensions =
+      presentation == .standing
+      ? String(
+        format: "%.2f m length   %.0f g selected mass   %.0f mm tarsus   QUIET STANCE",
+        selected.totalLengthMeters,
+        selected.bodyMassKilograms * 1000,
+        selected.tarsusLengthMeters * 1000
+      )
+      : String(
         format: "%.2f m wingspan   %.2f m length   %.0f g selected mass   %.1f Hz display",
         selected.wingspanMeters,
         selected.totalLengthMeters,
         selected.bodyMassKilograms * 1000,
         selected.presentationWingbeatFrequencyHertz
-      ),
+      )
+    drawText(
+      dimensions,
       at: CGPoint(x: margin, y: 50 * scale),
       font: detailFont,
       color: cool,
@@ -363,6 +416,55 @@ private struct CrowSurfaceGenerationAudit: Decodable {
   let manifestSHA256: String
   let crowProfileSHA256: String
   let checks: [String: Bool]
+}
+
+private struct CrowStandingReference: Decodable {
+  struct PoseParameters: Decodable {
+    let footSeparationMeters: Float
+    let supportHeightRelativeToBodyCenterMeters: Float
+    let maximumBodySwayMeters: Float
+    let maximumAnkleTravelMeters: Float
+    let forwardToeCountPerFoot: Int
+    let rearToeCountPerFoot: Int
+  }
+
+  let schemaVersion: Int
+  let referenceIdentifier: String
+  let referenceURL: String
+  let referencePostIdentifier: String
+  let evidenceClass: String
+  let redistributionPolicy: String
+  let qualitativeObservations: [String]
+  let exclusions: [String]
+  let poseParameters: PoseParameters
+
+  func validate() throws {
+    guard schemaVersion == 1,
+      referenceIdentifier == "american-crow-standing-qualitative-v1",
+      referenceURL.hasPrefix("https://x.com/"),
+      referencePostIdentifier == "2088717365177672110",
+      evidenceClass == "single-view-qualitative-appearance-reference",
+      redistributionPolicy.contains("no image or video bytes"),
+      qualitativeObservations.count >= 5,
+      exclusions.count >= 5,
+      abs(
+        poseParameters.footSeparationMeters
+          - 2 * CrowStandingPose.footHalfSeparationMeters
+      ) < 1e-7,
+      abs(
+        poseParameters.supportHeightRelativeToBodyCenterMeters
+          - CrowStandingPose.supportHeightRelativeToBodyCenter
+      ) < 1e-7,
+      poseParameters.maximumBodySwayMeters <= 0.003,
+      poseParameters.maximumAnkleTravelMeters <= 0.0015,
+      poseParameters.forwardToeCountPerFoot == 3,
+      poseParameters.rearToeCountPerFoot == 1
+    else {
+      throw CrowShowcaseCapture.CaptureError.invalidProfile(
+        "standing crow reference contract is invalid"
+      )
+    }
+  }
 }
 
 private struct CrowVisualProfile: Decodable {
@@ -469,7 +571,7 @@ private final class CrowShowcaseRenderer {
   private let featherPipeline: MTLRenderPipelineState?
   private let depthState: MTLDepthStencilState
   private let sampleCount: Int
-  private let featherRootDeformer: CrowFeatherRootDeformer?
+  private let featherRootDeformer: (any CrowFeatherRootDeforming)?
   private let featherGeometryDeformer: CrowFeatherGeometryDeformer?
   private let featherRenderOffset: SIMD3<Float>
   private var previousPhase: Float?
@@ -479,7 +581,8 @@ private final class CrowShowcaseRenderer {
     dataset: MeasuredBirdSurfaceSequence,
     profile: CrowVisualProfile,
     motion: any CrowShowcaseMotion,
-    realityAsset: BirdRealityAsset?
+    realityAsset: BirdRealityAsset?,
+    presentation: CrowShowcasePresentation
   ) throws {
     let createdBackend = try VisualizationBackend(device: device)
     backend = createdBackend
@@ -487,15 +590,27 @@ private final class CrowShowcaseRenderer {
       dataset: dataset,
       profile: profile,
       motion: motion,
-      realityAsset: realityAsset
+      realityAsset: realityAsset,
+      presentation: presentation
     )
     meshBuilder = createdMeshBuilder
-    featherRootDeformer = try realityAsset.map {
-      try CrowFeatherRootDeformer(
-        backend: createdBackend,
-        dataset: dataset,
-        asset: $0
-      )
+    if let realityAsset {
+      switch presentation {
+      case .wingbeat:
+        featherRootDeformer = try CrowFeatherRootDeformer(
+          backend: createdBackend,
+          dataset: dataset,
+          asset: realityAsset
+        )
+      case .standing:
+        featherRootDeformer = try CrowStandingFeatherRootDeformer(
+          backend: createdBackend,
+          asset: realityAsset,
+          referenceBodyCenter: createdMeshBuilder.referenceSurfaceBodyCenter
+        )
+      }
+    } else {
+      featherRootDeformer = nil
     }
     featherGeometryDeformer = try realityAsset.map {
       try CrowFeatherGeometryDeformer(
@@ -594,7 +709,8 @@ private final class CrowShowcaseRenderer {
     let rootFrame = try featherRootDeformer?.encode(
       currentPhase: phase,
       previousPhase: previousPhase ?? phase,
-      commandBuffer: commandBuffer
+      commandBuffer: commandBuffer,
+      auditReadback: false
     )
     let featherFrame: CrowFeatherGeometryFrame?
     if let rootFrame, let featherGeometryDeformer {
@@ -696,6 +812,9 @@ private struct CrowMeshBuilder {
   private let referenceBodyCenter: SIMD3<Float>
   private let vertexPartIdentifiers: [UInt8]
   private let persistentFeathers: [BirdRealityFeather]
+  private let presentation: CrowShowcasePresentation
+
+  var referenceSurfaceBodyCenter: SIMD3<Float> { referenceBodyCenter }
 
   var featherRenderOffset: SIMD3<Float> {
     surfaceIsEstimatedCrow ? -referenceBodyCenter : .zero
@@ -705,11 +824,13 @@ private struct CrowMeshBuilder {
     dataset: MeasuredBirdSurfaceSequence,
     profile: CrowVisualProfile,
     motion: any CrowShowcaseMotion,
-    realityAsset: BirdRealityAsset?
+    realityAsset: BirdRealityAsset?,
+    presentation: CrowShowcasePresentation
   ) {
     self.dataset = dataset
     self.profile = profile
     self.motion = motion
+    self.presentation = presentation
     persistentFeathers = realityAsset?.feathers ?? []
     surfaceIsEstimatedCrow =
       dataset.scientificTier == "estimated-hybrid-complete-surface"
@@ -737,9 +858,9 @@ private struct CrowMeshBuilder {
     vertices.reserveCapacity(48_000)
     let bodyIndices = componentIndices(partIdentifier: 1)
     let bodyPoints = bodyIndices.map { states[$0] }
-    let bodyCenter = average(bodyPoints)
+    let bodyCenter = presentation == .standing ? SIMD3<Float>.zero : average(bodyPoints)
     let bodyBounds = bounds(bodyPoints)
-    if !persistentFeathers.isEmpty {
+    if !persistentFeathers.isEmpty && presentation == .wingbeat {
       appendMeasuredScaffold(
         states,
         includedPartIdentifiers: [2, 3, 4],
@@ -752,23 +873,25 @@ private struct CrowMeshBuilder {
       phase: phase,
       to: &vertices
     )
-    appendWingFeathers(
-      states: states,
-      bodyCenter: bodyCenter,
-      left: true,
-      to: &vertices
-    )
-    appendWingFeathers(
-      states: states,
-      bodyCenter: bodyCenter,
-      left: false,
-      to: &vertices
-    )
-    appendTailFeathers(
-      states: states,
-      bodyCenter: bodyCenter,
-      to: &vertices
-    )
+    if presentation == .wingbeat {
+      appendWingFeathers(
+        states: states,
+        bodyCenter: bodyCenter,
+        left: true,
+        to: &vertices
+      )
+      appendWingFeathers(
+        states: states,
+        bodyCenter: bodyCenter,
+        left: false,
+        to: &vertices
+      )
+      appendTailFeathers(
+        states: states,
+        bodyCenter: bodyCenter,
+        to: &vertices
+      )
+    }
     return vertices
   }
 
@@ -839,13 +962,24 @@ private struct CrowMeshBuilder {
     phase: Float,
     to vertices: inout [ColoredVertex]
   ) {
-    appendCrowBodyLoft(center: bodyCenter, to: &vertices)
+    let standingPose =
+      presentation == .standing
+      ? CrowStandingPose.sample(phase: phase, referenceBodyCenter: bodyCenter)
+      : nil
+    let posedBodyCenter = standingPose?.bodyCenter ?? bodyCenter
+    appendCrowBodyLoft(
+      center: posedBodyCenter,
+      verticalScale: presentation == .standing ? 1.22 : 1,
+      to: &vertices
+    )
     let radiiRaw = profile.visualTransform.headRadiusXYZMeters
     let radii =
       SIMD3<Float>(radiiRaw[0], radiiRaw[1], radiiRaw[2])
       * SIMD3<Float>(0.96, 0.92, 0.94)
     let breathing = 1 + 0.012 * sin(2 * Float.pi * phase)
-    let headCenter = bodyCenter + SIMD3<Float>(0.146, 0, 0.032)
+    let headCenter =
+      posedBodyCenter + SIMD3<Float>(0.146, 0, 0.032)
+      + (standingPose?.headOffset ?? .zero)
     appendEllipsoid(
       center: headCenter,
       radii: radii * SIMD3<Float>(breathing, 1, breathing),
@@ -856,14 +990,22 @@ private struct CrowMeshBuilder {
     )
     appendBill(center: headCenter, to: &vertices)
     appendEyes(center: headCenter, headRadii: radii, to: &vertices)
-    appendFacialBristles(center: headCenter, to: &vertices)
-    appendHeadContourFeathers(center: headCenter, radii: radii, to: &vertices)
-    appendBodyContourFeathers(bodyCenter: bodyCenter, to: &vertices)
+    if presentation == .wingbeat {
+      appendFacialBristles(center: headCenter, to: &vertices)
+      appendHeadContourFeathers(center: headCenter, radii: radii, to: &vertices)
+    }
+    appendBodyContourFeathers(bodyCenter: posedBodyCenter, to: &vertices)
+    if let standingPose {
+      appendFoldedWingCoverts(bodyCenter: posedBodyCenter, to: &vertices)
+      appendStandingLegsAndFeet(standingPose, to: &vertices)
+      appendStandingSupport(height: standingPose.supportHeight, to: &vertices)
+    }
     _ = bodyBounds
   }
 
   private func appendCrowBodyLoft(
     center: SIMD3<Float>,
+    verticalScale: Float,
     to vertices: inout [ColoredVertex]
   ) {
     struct Ring {
@@ -895,7 +1037,7 @@ private struct CrowMeshBuilder {
             + SIMD3<Float>(
               ring.x,
               cos(theta) * ring.radiusY,
-              ring.z + sin(theta) * ring.radiusZ
+              verticalScale * (ring.z + sin(theta) * ring.radiusZ)
             )
         )
       }
@@ -1019,7 +1161,7 @@ private struct CrowMeshBuilder {
   ) {
     let length = profile.visualTransform.billLengthMeters
     let base = center + SIMD3<Float>(0.038, 0, -0.001)
-    let color = SIMD4<Float>(0.044, 0.050, 0.061, 0.58)
+    let color = SIMD4<Float>(0.018, 0.021, 0.027, 0.58)
     let stationCount = 9
     let radialCount = 14
     var positions: [SIMD3<Float>] = []
@@ -1032,10 +1174,10 @@ private struct CrowMeshBuilder {
         + SIMD3<Float>(
           length * t,
           0,
-          0.003 * (1 - t) - 0.006 * t * t
+          0.002 * (1 - t) - 0.016 * t * t
         )
-      let halfWidth = 0.0165 * taper + 0.0008
-      let halfHeight = 0.0145 * taper + 0.0007
+      let halfWidth = 0.0135 * taper + 0.0007
+      let halfHeight = 0.0110 * taper + 0.0006
       for radial in 0..<radialCount {
         let angle = 2 * Float.pi * Float(radial) / Float(radialCount)
         positions.append(
@@ -1062,7 +1204,7 @@ private struct CrowMeshBuilder {
         )
       }
     }
-    let nostrilColor = SIMD4<Float>(0.002, 0.002, 0.003, 0.82)
+    let nostrilColor = SIMD4<Float>(0.002, 0.002, 0.003, 0.68)
     for side: Float in [-1, 1] {
       appendEllipsoid(
         center: base + SIMD3<Float>(0.012, side * 0.0148, 0.0065),
@@ -1137,39 +1279,193 @@ private struct CrowMeshBuilder {
     }
   }
 
-  private func appendTuckedFeet(
+  private func appendFoldedWingCoverts(
     bodyCenter: SIMD3<Float>,
-    bodyBounds: (minimum: SIMD3<Float>, maximum: SIMD3<Float>),
     to vertices: inout [ColoredVertex]
   ) {
-    let color = SIMD4<Float>(0.025, 0.029, 0.038, 0.58)
     for side: Float in [-1, 1] {
-      let hip = SIMD3<Float>(
-        bodyCenter.x - 0.030, bodyCenter.y + side * 0.050, bodyBounds.minimum.z + 0.020)
-      let ankle = hip + SIMD3<Float>(-0.038, side * 0.010, -0.020)
-      appendFeatherBlade(
-        root: hip,
-        tip: ankle,
-        planeNormal: SIMD3<Float>(0, side, 0.25),
-        rootWidth: 0.009,
-        maximumWidth: 0.010,
-        color: color,
-        sections: 5,
+      for row in 0..<4 {
+        let rowFraction = Float(row) / 3
+        for index in 0..<8 {
+          let fraction = Float(index) / 7
+          let root =
+            bodyCenter
+            + SIMD3<Float>(
+              0.092 - 0.198 * fraction - 0.010 * rowFraction,
+              side * (0.056 + 0.002 * rowFraction),
+              0.018 - 0.065 * fraction + 0.005 * rowFraction
+            )
+          let length = 0.036 + 0.018 * fraction + 0.005 * rowFraction
+          appendFeatherBlade(
+            root: root,
+            tip: root + SIMD3<Float>(-length, -side * 0.002, -0.010),
+            planeNormal: SIMD3<Float>(0.04, side, 0.10),
+            rootWidth: 0.0055,
+            maximumWidth: 0.0095 + 0.002 * fraction,
+            color: SIMD4<Float>(0.011, 0.016, 0.027, 0.18),
+            sections: 6,
+            camber: 0.002,
+            to: &vertices
+          )
+        }
+      }
+    }
+  }
+
+  private func appendStandingLegsAndFeet(
+    _ pose: CrowStandingPoseSample,
+    to vertices: inout [ColoredVertex]
+  ) {
+    let featheredLeg = SIMD4<Float>(0.010, 0.014, 0.022, 0.16)
+    let keratin = SIMD4<Float>(0.048, 0.053, 0.061, 0.58)
+    let claw = SIMD4<Float>(0.010, 0.012, 0.016, 0.64)
+    for foot in [pose.leftFoot, pose.rightFoot] {
+      appendTaperedTube(
+        from: foot.hip,
+        to: foot.hock,
+        startRadius: 0.012,
+        endRadius: 0.0065,
+        color: featheredLeg,
+        radialSegments: 12,
         to: &vertices
       )
-      for toeIndex in 0..<3 {
-        let spread = Float(toeIndex - 1) * 0.010
-        appendFeatherBlade(
-          root: ankle,
-          tip: ankle + SIMD3<Float>(-0.034, side * spread, 0.006 - 0.004 * Float(toeIndex)),
-          planeNormal: SIMD3<Float>(0, side, 0.1),
-          rootWidth: 0.0023,
-          maximumWidth: 0.0028,
-          color: color,
-          sections: 4,
+      appendTaperedTube(
+        from: foot.hock,
+        to: foot.ankle,
+        startRadius: 0.0042,
+        endRadius: 0.0033,
+        color: keratin,
+        radialSegments: 10,
+        to: &vertices
+      )
+      for ring in 1...6 {
+        let fraction = Float(ring) / 7
+        let center = foot.hock + (foot.ankle - foot.hock) * fraction
+        appendTaperedTube(
+          from: center - safeNormalize(
+            foot.ankle - foot.hock,
+            fallback: SIMD3<Float>(0, 0, -1)
+          ) * 0.0008,
+          to: center + safeNormalize(
+            foot.ankle - foot.hock,
+            fallback: SIMD3<Float>(0, 0, -1)
+          ) * 0.0008,
+          startRadius: 0.0040,
+          endRadius: 0.0040,
+          color: SIMD4<Float>(0.050, 0.054, 0.061, 0.60),
+          radialSegments: 10,
           to: &vertices
         )
       }
+      for digit in 0..<4 {
+        let joint = foot.digitJoints[digit]
+        let tip = foot.digitTips[digit]
+        appendTaperedTube(
+          from: foot.ankle,
+          to: joint,
+          startRadius: 0.0030,
+          endRadius: 0.0025,
+          color: keratin,
+          radialSegments: 8,
+          to: &vertices
+        )
+        appendTaperedTube(
+          from: joint,
+          to: tip,
+          startRadius: 0.0025,
+          endRadius: 0.0016,
+          color: keratin,
+          radialSegments: 8,
+          to: &vertices
+        )
+        let direction = safeNormalize(tip - joint, fallback: SIMD3<Float>(1, 0, 0))
+        let clawTip = tip + direction * 0.005 + SIMD3<Float>(0, 0, -0.0022)
+        appendTaperedTube(
+          from: tip,
+          to: clawTip,
+          startRadius: 0.0014,
+          endRadius: 0.00025,
+          color: claw,
+          radialSegments: 7,
+          to: &vertices
+        )
+      }
+    }
+  }
+
+  private func appendStandingSupport(
+    height: Float,
+    to vertices: inout [ColoredVertex]
+  ) {
+    let x0: Float = -0.065
+    let x1: Float = 0.070
+    let y0: Float = -0.215
+    let y1: Float = 0.215
+    let z0 = height - 0.018
+    let z1 = height
+    let color = SIMD4<Float>(0.055, 0.061, 0.070, 0.94)
+    appendQuad(
+      SIMD3<Float>(x0, y0, z1), SIMD3<Float>(x1, y0, z1),
+      SIMD3<Float>(x1, y1, z1), SIMD3<Float>(x0, y1, z1),
+      color: color, to: &vertices
+    )
+    appendQuad(
+      SIMD3<Float>(x1, y0, z0), SIMD3<Float>(x0, y0, z0),
+      SIMD3<Float>(x0, y1, z0), SIMD3<Float>(x1, y1, z0),
+      color: color, to: &vertices
+    )
+    for face in [
+      (
+        SIMD3<Float>(x0, y0, z0), SIMD3<Float>(x1, y0, z0),
+        SIMD3<Float>(x1, y0, z1), SIMD3<Float>(x0, y0, z1)
+      ),
+      (
+        SIMD3<Float>(x1, y1, z0), SIMD3<Float>(x0, y1, z0),
+        SIMD3<Float>(x0, y1, z1), SIMD3<Float>(x1, y1, z1)
+      ),
+      (
+        SIMD3<Float>(x0, y1, z0), SIMD3<Float>(x0, y0, z0),
+        SIMD3<Float>(x0, y0, z1), SIMD3<Float>(x0, y1, z1)
+      ),
+      (
+        SIMD3<Float>(x1, y0, z0), SIMD3<Float>(x1, y1, z0),
+        SIMD3<Float>(x1, y1, z1), SIMD3<Float>(x1, y0, z1)
+      ),
+    ] {
+      appendQuad(face.0, face.1, face.2, face.3, color: color, to: &vertices)
+    }
+  }
+
+  private func appendTaperedTube(
+    from start: SIMD3<Float>,
+    to end: SIMD3<Float>,
+    startRadius: Float,
+    endRadius: Float,
+    color: SIMD4<Float>,
+    radialSegments: Int,
+    to vertices: inout [ColoredVertex]
+  ) {
+    let axis = safeNormalize(end - start, fallback: SIMD3<Float>(0, 0, 1))
+    let helper: SIMD3<Float> =
+      abs(axis.z) < 0.82
+      ? SIMD3<Float>(0, 0, 1)
+      : SIMD3<Float>(0, 1, 0)
+    let first = safeNormalize(simd_cross(axis, helper), fallback: SIMD3<Float>(1, 0, 0))
+    let second = safeNormalize(simd_cross(axis, first), fallback: SIMD3<Float>(0, 1, 0))
+    for index in 0..<radialSegments {
+      let next = (index + 1) % radialSegments
+      let angle0 = 2 * Float.pi * Float(index) / Float(radialSegments)
+      let angle1 = 2 * Float.pi * Float(next) / Float(radialSegments)
+      let radial0 = cos(angle0) * first + sin(angle0) * second
+      let radial1 = cos(angle1) * first + sin(angle1) * second
+      appendQuad(
+        start + startRadius * radial0,
+        start + startRadius * radial1,
+        end + endRadius * radial1,
+        end + endRadius * radial0,
+        color: color,
+        to: &vertices
+      )
     }
   }
 

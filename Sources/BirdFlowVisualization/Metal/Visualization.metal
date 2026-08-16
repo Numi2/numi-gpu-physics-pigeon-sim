@@ -31,6 +31,17 @@ struct CrowFeatherDeformationUniforms {
     float4 interpolation;
 };
 
+struct CrowStandingFeatherBindingGPU {
+    uint4 identity;
+    uint4 orderCountClassSide;
+    float4 morphology;
+};
+
+struct CrowStandingFeatherUniforms {
+    float4 phaseAndCount;
+    float4 referenceBodyCenter;
+};
+
 struct CrowFeatherTemplateVertexGPU { float4 parameters; };
 
 struct CrowFeatherVertexGPU {
@@ -203,6 +214,94 @@ kernel void deformCrowFeatherRoots(
         binding.ownershipAndIdentity.x,
         binding.ownershipAndIdentity.y
     );
+    output[featherIndex]=state;
+}
+
+struct CrowStandingRootPose {
+    float3 root;
+    float3 direction;
+    float3 normal;
+};
+
+inline CrowStandingRootPose crowStandingRootPose(
+    CrowStandingFeatherBindingGPU binding,
+    float phase,
+    float3 referenceBodyCenter) {
+    float angle=2.0f*M_PI_F*phase;
+    float3 motion=float3(
+        0.0007f*sin(angle+0.35f),
+        0.0018f*sin(angle),
+        0.0011f*sin(2.0f*angle-0.45f)
+    );
+    float3 center=referenceBodyCenter+motion;
+    uint count=max(binding.orderCountClassSide.y,1u);
+    float fraction=float(binding.orderCountClassSide.x)/float(max(count-1u,1u));
+    uint featherClass=binding.orderCountClassSide.z;
+    uint sideCode=binding.orderCountClassSide.w;
+    float side=sideCode==1u?1.0f:(sideCode==2u?-1.0f:0.0f);
+    CrowStandingRootPose result;
+    if(featherClass==1u){
+        result.root=center+float3(
+            0.015f-0.105f*fraction,
+            side*(0.054f+0.003f*fraction),
+            0.012f-0.060f*fraction
+        );
+        result.direction=safeNormalizeCrow(
+            float3(-0.99f,-side*(0.025f+0.045f*fraction),-0.08f),
+            float3(-1,0,0)
+        );
+        result.normal=safeNormalizeCrow(
+            float3(0.06f,side,0.10f),float3(0,0,1)
+        );
+    }else if(featherClass==2u){
+        result.root=center+float3(
+            0.074f-0.175f*fraction,
+            side*(0.055f+0.002f*fraction),
+            0.024f-0.045f*fraction
+        );
+        result.direction=safeNormalizeCrow(
+            float3(-0.995f,-side*0.025f,-0.065f),
+            float3(-1,0,0)
+        );
+        result.normal=safeNormalizeCrow(
+            float3(0.04f,side,0.08f),float3(0,0,1)
+        );
+    }else{
+        float lateral=(fraction-0.5f)*0.082f;
+        result.root=center+float3(-0.125f,lateral*0.30f,-0.005f);
+        result.direction=safeNormalizeCrow(
+            float3(-0.995f,lateral*0.32f,-0.055f),
+            float3(-1,0,0)
+        );
+        result.normal=safeNormalizeCrow(
+            float3(0,0.04f*side,1),float3(0,0,1)
+        );
+    }
+    return result;
+}
+
+kernel void poseStandingCrowFeatherRoots(
+    device const CrowStandingFeatherBindingGPU* bindings [[buffer(0)]],
+    device CrowFeatherRootStateGPU* output [[buffer(1)]],
+    constant CrowStandingFeatherUniforms& uniforms [[buffer(2)]],
+    uint featherIndex [[thread_position_in_grid]]) {
+    uint featherCount=uint(uniforms.phaseAndCount.z);
+    if(featherIndex>=featherCount){return;}
+    CrowStandingFeatherBindingGPU binding=bindings[featherIndex];
+    CrowStandingRootPose current=crowStandingRootPose(
+        binding,uniforms.phaseAndCount.x,uniforms.referenceBodyCenter.xyz
+    );
+    CrowStandingRootPose previous=crowStandingRootPose(
+        binding,uniforms.phaseAndCount.y,uniforms.referenceBodyCenter.xyz
+    );
+    CrowFeatherRootStateGPU state;
+    state.currentPositionAndLength=float4(current.root,binding.morphology.x);
+    state.previousPositionAndWidth=float4(previous.root,binding.morphology.y);
+    state.currentDirectionAndRachis=float4(current.direction,binding.morphology.z);
+    state.previousDirectionAndCamber=float4(previous.direction,binding.morphology.w);
+    state.currentNormalAndPadding=float4(current.normal,0);
+    state.previousNormalAndPadding=float4(previous.normal,0);
+    state.identity=binding.identity;
     output[featherIndex]=state;
 }
 
@@ -848,6 +947,16 @@ fragment float4 showcaseCrowFragment(
     float ndv=saturate(abs(dot(normal,view)));
     float rim=pow(1.0f-ndv,2.2f);
     float3 halfVector=normalize(key+view);
+
+    // The standing presentation support is deliberately neutral and separate
+    // from the bird material bands.
+    if(material>0.90f){
+        float diffuse=0.32f+0.58f*ndk+0.18f*ndf;
+        float roughSpecular=pow(saturate(dot(normal,halfVector)),18.0f);
+        float3 support=in.color.rgb*diffuse;
+        support+=roughSpecular*float3(0.055f,0.060f,0.068f);
+        return float4(1.0f-exp(-1.18f*support),1.0f);
+    }
 
     // Eyes use the upper material band. A tight white catchlight and a warm
     // iris keep the eye readable without lifting the surrounding plumage.

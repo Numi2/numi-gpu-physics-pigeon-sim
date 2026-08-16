@@ -85,7 +85,12 @@ and tail feather identities to the surface; retained Metal passes transport
 their current/previous frames and generate the rendered vane triangles. The
 [reality roadmap](Docs/BIRD_REALITY_ROADMAP.md) defines the ordered HDR,
 geometric-LOD, physical-material, ray-tracing, and neural-residual gates without
-showing a real-crow target as simulation output.
+showing a real-crow target as simulation output. A separate
+[standing-anatomy contract](Docs/CROW_STANDING_ANATOMY.md) uses only private
+qualitative observations from the supplied public clip: the simulated bird now
+has a loop-closed grounded pose, folded GPU feathers, paired tarsometatarsi,
+three forward digits and an opposing hallux per foot, planted contacts, and
+millimetric idle motion. No source frame or video byte is copied into the repo.
 
 [Quick start](#quick-start) · [Validation scoreboard](#validation-scoreboard) · [Native viewer](#native-metal-viewer) · [Architecture](#architecture) · [Measured data](#measured-geometry-and-kinematics) · [Scientific limits](#scientific-boundary) · [Full validation contract](Docs/VALIDATION.md)
 

@@ -65,6 +65,22 @@ result is an executable motion and material estimate, not a photograph.
 The beauty mesh and fluid boundary mesh are intentionally distinct: the former
 adds feather detail, while the latter remains the fixed-topology coupling input.
 
+The same executable renderer also has a distinct `standing` presentation. It
+does not freeze or slow the flight surface. A dedicated Metal kernel folds the
+same `54` persistent feathers against the body and retains current/previous
+state, while an analytic leg chain supplies feathered upper legs, scaled
+tarsometatarsi, three anterior digits, an opposing hallux, claws, and explicit
+support contact. The qualitative source observations and exclusions are in
+[`CROW_STANDING_ANATOMY.md`](CROW_STANDING_ANATOMY.md); no source-media bytes
+are stored or displayed.
+
+```bash
+./Scripts/capture-crow-showcase.sh \
+  /tmp/american-crow-standing.mp4 \
+  /tmp/american-crow-standing.png \
+  standing
+```
+
 ## Apple-GPU simulation surface
 
 The solver-facing crow is a separate fixed-topology asset generated from the

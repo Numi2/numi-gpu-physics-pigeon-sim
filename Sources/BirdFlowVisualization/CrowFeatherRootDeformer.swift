@@ -4,11 +4,22 @@ import Metal
 import simd
 
 struct CrowFeatherRootFrame {
-  fileprivate let slot: Int
-  fileprivate let readbackReady: Bool
+  let slot: Int
+  let readbackReady: Bool
   let outputBuffer: MTLBuffer
   let currentPhase: Float
   let previousPhase: Float
+}
+
+protocol CrowFeatherRootDeforming: AnyObject {
+  var featherCount: Int { get }
+
+  func encode(
+    currentPhase: Float,
+    previousPhase: Float,
+    commandBuffer: MTLCommandBuffer,
+    auditReadback: Bool
+  ) throws -> CrowFeatherRootFrame
 }
 
 /// Retained Metal state for the persistent feather inventory.
@@ -407,3 +418,5 @@ final class CrowFeatherRootDeformer {
     return buffer
   }
 }
+
+extension CrowFeatherRootDeformer: CrowFeatherRootDeforming {}

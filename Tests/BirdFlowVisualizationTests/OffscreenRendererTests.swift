@@ -378,3 +378,61 @@ func estimatedCrowShowcaseCaptureProducesDistinctFrames() throws {
   #expect(Int(image.size.width) == 480)
   #expect(Int(image.size.height) == 270)
 }
+
+@Test("estimated standing crow capture keeps the reference private and moves subtly")
+func estimatedStandingCrowCaptureProducesLoopClosedFrames() throws {
+  guard MTLCreateSystemDefaultDevice() != nil else { return }
+  let testFile = URL(fileURLWithPath: #filePath)
+  let root = testFile.deletingLastPathComponent()
+    .deletingLastPathComponent()
+    .deletingLastPathComponent()
+  let output = FileManager.default.temporaryDirectory.appendingPathComponent(
+    "birdflow-standing-crow-\(UUID().uuidString)",
+    isDirectory: true
+  )
+  defer { try? FileManager.default.removeItem(at: output) }
+  let arguments = try CrowShowcaseCapture.Arguments(commandLine: [
+    "birdflow-viewer",
+    "--capture-crow-frames", output.path,
+    "--capture-crow-presentation", "standing",
+    "--capture-width", "480",
+    "--capture-height", "360",
+    "--capture-frames", "3",
+    "--capture-crow-surface-manifest",
+    root.appendingPathComponent(
+      "ValidationInputs/american-crow-hybrid-surface-v1/manifest.json"
+    ).path,
+    "--capture-crow-surface-generation-audit",
+    root.appendingPathComponent(
+      "ValidationArtifacts/american-crow-hybrid-surface-generation-v1.json"
+    ).path,
+    "--capture-crow-profile",
+    root.appendingPathComponent(
+      "ValidationInputs/american-crow-hybrid-visual-v1.json"
+    ).path,
+    "--capture-crow-reality-asset",
+    root.appendingPathComponent(
+      "ValidationInputs/american-crow-hybrid-reality-v1.json"
+    ).path,
+    "--capture-crow-standing-reference",
+    root.appendingPathComponent(
+      "ValidationInputs/american-crow-standing-reference-v1.json"
+    ).path,
+  ])
+  try CrowShowcaseCapture.run(arguments)
+
+  let first = try Data(contentsOf: output.appendingPathComponent("frame-000.png"))
+  let middle = try Data(contentsOf: output.appendingPathComponent("frame-001.png"))
+  let last = try Data(contentsOf: output.appendingPathComponent("frame-002.png"))
+  #expect(first.count > 30_000)
+  #expect(middle.count > 30_000)
+  #expect(last.count > 30_000)
+  #expect(first != middle)
+  #expect(first == last)
+  guard let image = NSImage(data: middle) else {
+    Issue.record("standing crow capture did not encode a readable PNG")
+    return
+  }
+  #expect(Int(image.size.width) == 480)
+  #expect(Int(image.size.height) == 360)
+}

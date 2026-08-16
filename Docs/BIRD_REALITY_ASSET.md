@@ -70,6 +70,13 @@ stable feather IDs remain beside the current render attributes. The physical
 wing/tail surface is rendered as a dark underlayer so the attachment boundary
 stays visible rather than being hidden by a disconnected procedural wing.
 
+Quiet standing uses the same identities and vane expansion through a separate
+`poseStandingCrowFeatherRoots` kernel. That path folds primaries and secondaries
+along the body and retains current/previous state for millimetric idle motion;
+it does not misuse a slowed, outstretched flight frame. The visible leg, digit,
+hallux, claw, and support-contact contract is documented in
+[`CROW_STANDING_ANATOMY.md`](CROW_STANDING_ANATOMY.md).
+
 Both GPU stages are qualified against independent CPU interpolation and
 deformation paths at multiple phases. Gates cover exact identity, finite state,
 unit directions, current/previous motion, a bounded `0.75 m` radial envelope,

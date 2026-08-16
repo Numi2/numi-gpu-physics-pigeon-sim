@@ -95,6 +95,7 @@ REQUIRED_KERNELS = {
 
 REQUIRED_VISUALIZATION_KERNELS = {
     "deformCrowFeatherRoots",
+    "poseStandingCrowFeatherRoots",
     "deformCrowFeatherTemplates",
     "samplePressureSurface",
     "renderFlowSlice",

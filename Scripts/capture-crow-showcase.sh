@@ -4,9 +4,16 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 OUTPUT="${1:-$ROOT/Docs/Media/american-crow-hybrid-native-v1.mp4}"
 POSTER="${2:-$ROOT/Docs/Media/american-crow-hybrid-native-v1.png}"
+PRESENTATION="${3:-wingbeat}"
 MANIFEST="$ROOT/ValidationInputs/american-crow-hybrid-surface-v1/manifest.json"
 GENERATION_AUDIT="$ROOT/ValidationArtifacts/american-crow-hybrid-surface-generation-v1.json"
 PROFILE="$ROOT/ValidationInputs/american-crow-hybrid-visual-v1.json"
+STANDING_REFERENCE="$ROOT/ValidationInputs/american-crow-standing-reference-v1.json"
+
+if [[ "$PRESENTATION" != "wingbeat" && "$PRESENTATION" != "standing" ]]; then
+  echo "presentation must be wingbeat or standing" >&2
+  exit 1
+fi
 
 if ! command -v ffmpeg >/dev/null 2>&1; then
   echo "ffmpeg is required to encode the crow showcase" >&2
@@ -34,6 +41,8 @@ swift build -c release --product birdflow-viewer
   --capture-crow-surface-manifest "$MANIFEST" \
   --capture-crow-surface-generation-audit "$GENERATION_AUDIT" \
   --capture-crow-profile "$PROFILE" \
+  --capture-crow-standing-reference "$STANDING_REFERENCE" \
+  --capture-crow-presentation "$PRESENTATION" \
   --capture-width 1280 \
   --capture-height 720 \
   --capture-frames 49
@@ -74,4 +83,4 @@ fi
 
 BYTES="$(stat -f '%z' "$OUTPUT")"
 SHA256="$(shasum -a 256 "$OUTPUT" | awk '{print $1}')"
-echo "Crow showcase: $OUTPUT (${DIMENSIONS}, ${FRAME_COUNT} frames, ${BYTES} bytes, sha256=${SHA256})"
+echo "Crow ${PRESENTATION} showcase: $OUTPUT (${DIMENSIONS}, ${FRAME_COUNT} frames, ${BYTES} bytes, sha256=${SHA256})"

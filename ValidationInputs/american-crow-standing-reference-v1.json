@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "referenceIdentifier": "american-crow-standing-qualitative-v1",
+  "referenceURL": "https://x.com/ZeroStateReflex/status/2088717365177672110/video/1",
+  "referencePostIdentifier": "2088717365177672110",
+  "accessedDate": "2026-08-16",
+  "evidenceClass": "single-view-qualitative-appearance-reference",
+  "redistributionPolicy": "URL and observations only; no image or video bytes are stored, redistributed, or shown as simulation output.",
+  "qualitativeObservations": [
+    "front-biased view with both legs and both feet visible",
+    "tarsometatarsi are near vertical beneath the lower body",
+    "feet remain separated while the body projection stays between them",
+    "three anterior digits spread over the support and a rear hallux opposes them",
+    "upper leg plumage transitions into a narrower scaled tarsometatarsus",
+    "quiet standing includes low-amplitude head, body, and ankle motion without a step"
+  ],
+  "poseParameters": {
+    "footSeparationMeters": 0.078,
+    "supportHeightRelativeToBodyCenterMeters": -0.180,
+    "maximumBodySwayMeters": 0.003,
+    "maximumAnkleTravelMeters": 0.0015,
+    "forwardToeCountPerFoot": 3,
+    "rearToeCountPerFoot": 1
+  },
+  "mechanicsSources": [
+    {
+      "citation": "Backus et al. 2015, Royal Society Open Science 2:140350, DOI 10.1098/rsos.140350",
+      "use": "multi-joint anisodactyl foot and perching-force architecture"
+    },
+    {
+      "citation": "Roderick et al. 2019, eLife 8:e46415, DOI 10.7554/eLife.46415",
+      "use": "toe contact adapts to support geometry; appearance is not a force measurement"
+    }
+  ],
+  "exclusions": [
+    "measured American-crow joint centers",
+    "measured crow center of mass",
+    "measured toe or tendon forces",
+    "measured quiet-standing frequencies or amplitudes",
+    "same-individual dimensions or taxonomic verification",
+    "redistribution of the source image or video"
+  ]
+}

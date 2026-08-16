@@ -183,6 +183,18 @@ struct CrowFeatherDeformationUniforms {
   var interpolation: SIMD4<Float>
 }
 
+/// Immutable classification and morphology for the grounded-pose kernel.
+struct CrowStandingFeatherBindingGPU {
+  var identity: SIMD4<UInt32>
+  var orderCountClassSide: SIMD4<UInt32>
+  var morphology: SIMD4<Float>
+}
+
+struct CrowStandingFeatherUniforms {
+  var phaseAndCount: SIMD4<Float>
+  var referenceBodyCenter: SIMD4<Float>
+}
+
 /// One canonical vane-template vertex. The same retained template is expanded
 /// for every feather; x is axial fraction and y is signed half-width.
 struct CrowFeatherTemplateVertexGPU {

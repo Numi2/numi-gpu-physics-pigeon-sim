@@ -35,6 +35,10 @@ for all `54` persistent remiges and rectrices, producing current and previous
 positions plus stable IDs. This is intentionally usable without a future-only
 API. The same records can later feed object/mesh shaders, motion acceleration
 structures, or learned appearance without rewriting anatomy or provenance.
+The grounded-pose path now proves that identity contract across a second motion
+regime: it folds the same inventory on Metal rather than treating quiet standing
+as a slowed flight loop, and keeps toe contacts fixed while the body, head, and
+ankles move by millimetres.
 
 ## Ordered milestones
 
