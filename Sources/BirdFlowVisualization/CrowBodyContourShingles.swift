@@ -27,6 +27,7 @@ struct CrowBodyContourShingle: Equatable {
   let vaneAsymmetry: Float
   let edgeRippleAmplitude: Float
   let edgeRipplePhase: Float
+  let edgeRippleCycles: Float
   let materialVariation: Float
 }
 
@@ -138,6 +139,11 @@ enum CrowBodyContourShingles {
           axialIndex: axialIndex,
           salt: 0x68E3_1DA4
         )
+        let cycleIdentity = identityVariation(
+          radialIndex: radialIndex,
+          axialIndex: axialIndex,
+          salt: 0xC2B2_AE35
+        )
         let materialIdentity = identityVariation(
           radialIndex: radialIndex,
           axialIndex: axialIndex,
@@ -203,6 +209,7 @@ enum CrowBodyContourShingles {
             vaneAsymmetry: 0.045 * vaneIdentity,
             edgeRippleAmplitude: 0.012 + 0.018 * (0.5 + 0.5 * edgeIdentity),
             edgeRipplePhase: Float.pi * (edgeIdentity + 1),
+            edgeRippleCycles: 1.20 + 0.80 * (0.5 + 0.5 * cycleIdentity),
             materialVariation: materialIdentity
           )
         )

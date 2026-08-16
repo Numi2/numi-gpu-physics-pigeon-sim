@@ -182,8 +182,13 @@ func bodyContourTractsBreakTransverseRows() {
 
   let lengths = first.map { simd_distance($0.rootOffset, $0.tipOffset) }
   let widths = first.map(\.maximumWidthMeters)
+  let edgeCycles = first.map(\.edgeRippleCycles)
   #expect(lengths.max()! - lengths.min()! > 0.006)
   #expect(widths.max()! - widths.min()! > 0.002)
+  #expect(edgeCycles.min()! > 1.19)
+  #expect(edgeCycles.max()! < 2.01)
+  #expect(edgeCycles.max()! - edgeCycles.min()! > 0.78)
+  #expect(Set(edgeCycles.map { Int(($0 * 100_000).rounded()) }).count > 2_500)
 
   for radialIndex in 0..<CrowBodyContourShingles.radialCount {
     let tract =
