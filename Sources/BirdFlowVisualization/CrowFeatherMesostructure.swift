@@ -90,6 +90,7 @@ enum CrowFeatherMesostructure {
     let rootWidthMeters: Float
     let maximumWidthMeters: Float
     let camberMeters: Float
+    let rootEnvelopeRatio: Float
     let pennaceousStartFraction: Float
     let vaneAsymmetry: Float
     let edgeRippleAmplitude: Float
@@ -118,6 +119,7 @@ enum CrowFeatherMesostructure {
       rootWidthMeters = feather.rootWidthMeters
       maximumWidthMeters = feather.maximumWidthMeters
       camberMeters = feather.camberMeters
+      rootEnvelopeRatio = 0.32
       pennaceousStartFraction = feather.pennaceousStartFraction
       vaneAsymmetry = feather.vaneAsymmetry
       edgeRippleAmplitude = feather.edgeRippleAmplitude
@@ -147,7 +149,8 @@ enum CrowFeatherMesostructure {
       rootWidthMeters = feather.rootWidthMeters
       maximumWidthMeters = feather.maximumWidthMeters
       camberMeters = feather.camberMeters
-      pennaceousStartFraction = 0
+      rootEnvelopeRatio = feather.rootEnvelopeRatio
+      pennaceousStartFraction = feather.pennaceousStartFraction
       vaneAsymmetry = feather.vaneAsymmetry
       edgeRippleAmplitude = feather.edgeRippleAmplitude
       edgeRipplePhase = feather.edgeRipplePhase
@@ -165,7 +168,8 @@ enum CrowFeatherMesostructure {
 
     func halfWidth(at axial: Float, signedWidth: Float = 0) -> Float {
       let t = clamp(axial)
-      let bodyEnvelope = 0.32 + 0.68 * pow(max(sin(Float.pi * t), 0), 0.58)
+      let bodyEnvelope = rootEnvelopeRatio
+        + (1 - rootEnvelopeRatio) * pow(max(sin(Float.pi * t), 0), 0.58)
       let tipTaper = 1 - 0.985 * pow(t, 3.2)
       let rippleEnvelope = pow(max(sin(Float.pi * t), 0), 2)
       let edgeRipple =

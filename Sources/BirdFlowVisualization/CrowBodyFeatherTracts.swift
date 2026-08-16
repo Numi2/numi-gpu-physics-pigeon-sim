@@ -28,6 +28,8 @@ struct CrowBodyFeatherTractSample: Equatable {
   let edgeRippleAmplitude: Float
   let edgeRipplePhase: Float
   let edgeRippleCycles: Float
+  let rootEnvelopeRatio: Float
+  let pennaceousStartFraction: Float
   let materialVariation: Float
   let headCoupling: Float
 }
@@ -36,10 +38,10 @@ enum CrowBodyFeatherTracts {
   static let cervicalRowCount = 13
   static let cervicalColumnCount = 7
   static let cervicalShellClearanceMeters: Float = 0.0012
-  static let mantleRowCount = 7
-  static let mantleColumnCount = 18
-  static let scapularRowCount = 10
-  static let scapularColumnCount = 20
+  static let mantleRowCount = 11
+  static let mantleColumnCount = 24
+  static let scapularRowCount = 12
+  static let scapularColumnCount = 24
 
   static func visibleSamples(
     neckPose: CrowStandingNeckPose? = nil,
@@ -165,6 +167,8 @@ enum CrowBodyFeatherTracts {
               edgeRippleAmplitude: 0.010 + 0.016 * (0.5 + 0.5 * edgeIdentity),
               edgeRipplePhase: Float.pi * (edgeIdentity + 1),
               edgeRippleCycles: 1.30 + 0.50 * (0.5 + 0.5 * cycleIdentity),
+              rootEnvelopeRatio: 0.58,
+              pennaceousStartFraction: 0,
               materialVariation: identityVariation(
                 side: side,
                 row: row,
@@ -290,8 +294,8 @@ enum CrowBodyFeatherTracts {
           let stagger = staggerFraction * 0.154 / Float(mantleColumnCount - 1)
           let root = SIMD3<Float>(
             0.074 - 0.154 * axial - stagger,
-            side * (0.018 + 0.023 * course + 0.0007 * rootIdentity),
-            0.056 - 0.010 * course - 0.010 * axial + 0.0007 * shapeIdentity
+            side * (0.003 + 0.038 * course + 0.0006 * rootIdentity),
+            0.057 - 0.011 * course - 0.010 * axial + 0.0007 * shapeIdentity
           )
           let length =
             (0.025 + 0.010 * axial + 0.003 * course)
@@ -327,6 +331,8 @@ enum CrowBodyFeatherTracts {
               edgeRippleAmplitude: 0.012 + 0.018 * (0.5 + 0.5 * edgeIdentity),
               edgeRipplePhase: Float.pi * (edgeIdentity + 1),
               edgeRippleCycles: 1.35 + 0.65 * (0.5 + 0.5 * cycleIdentity),
+              rootEnvelopeRatio: 0.68 - 0.06 * course,
+              pennaceousStartFraction: 0,
               materialVariation: materialIdentity,
               headCoupling: 0
             )
@@ -445,6 +451,8 @@ enum CrowBodyFeatherTracts {
               edgeRippleAmplitude: 0.014 + 0.020 * (0.5 + 0.5 * edgeIdentity),
               edgeRipplePhase: Float.pi * (edgeIdentity + 1),
               edgeRippleCycles: 1.40 + 0.70 * (0.5 + 0.5 * cycleIdentity),
+              rootEnvelopeRatio: 0.64 - 0.05 * course,
+              pennaceousStartFraction: 0,
               materialVariation: materialIdentity,
               headCoupling: 0
             )
@@ -469,45 +477,36 @@ enum CrowBodyFeatherTracts {
   }
 
   /// Breaks the binary row cadence without randomizing roots independently.
-  /// The finite mantle and scapular fields use different irrational-like
-  /// increments, with a small stable identity offset and bilateral phase.
+  /// Alternating courses interdigitate by more than half an axial spacing,
+  /// while stable identity and bilateral offsets prevent a binary zipper.
   static func tractStaggerFraction(
     region: CrowBodyFeatherTractRegion,
     side: Float,
     row: Int
   ) -> Float {
-    let lowStep: Float
-    let highStart: Float
-    let highStep: Float
     let sideOffset: Float
     let salt: UInt32
     switch region {
     case .cervical:
       return 0
     case .mantle:
-      lowStep = 0.065
-      highStart = 0.90
-      highStep = 0.035
-      sideOffset = side < 0 ? 0.12 : 0
+      sideOffset = side < 0 ? 0.04 : 0
       salt = 0xD3A2_646C
     case .scapular:
-      lowStep = 0.055
-      highStart = 0.90
-      highStep = 0.035
-      sideOffset = side < 0 ? 0.08 : 0
+      sideOffset = side < 0 ? 0.03 : 0
       salt = 0x9E37_79B9
     }
     let pair = Float(row / 2)
     let base = row.isMultiple(of: 2)
-      ? pair * lowStep
-      : highStart - pair * highStep
+      ? pair * 0.025
+      : 0.60 + pair * 0.015
     let identity = identityVariation(
       side: side,
       row: row,
       column: 0,
       salt: salt
     )
-    return base + sideOffset + 0.05 * identity
+    return base + sideOffset + 0.018 * identity
   }
 
   private static func normalized(
