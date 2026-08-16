@@ -71,7 +71,7 @@ enum CrowThroatBridgeFeathers {
             )
           )
           let theta = -1.52 + 1.02 * rowFraction
-          let rowStagger: Float = row.isMultiple(of: 2) ? 0 : 0.0022
+          let rowStagger = courseStaggerMeters(row: row)
           let rootX = 0.149 - 0.029 * columnFraction - rowStagger
           let rootSurface = mirroredSurfacePoint(x: rootX, theta: theta, side: side)
           let rootNormal = mirroredSurfaceNormal(x: rootX, theta: theta, side: side)
@@ -140,6 +140,17 @@ enum CrowThroatBridgeFeathers {
   /// This field bridges two ventral pterylae and must retain their soft body
   /// contour material rather than introducing a generic-feather collar.
   static let surfaceFeatherClass: UInt32 = 7
+
+  /// Keeps the two field boundaries fixed while interleaving every interior
+  /// course through a different axial phase. The seven-slot permutation has
+  /// no repeated interior phase or binary even/odd cadence.
+  static func courseStaggerMeters(row: Int) -> Float {
+    let boundedRow = min(max(row, 0), rowCount - 1)
+    guard boundedRow > 0 && boundedRow < rowCount - 1 else { return 0 }
+    let interiorIndex = boundedRow - 1
+    let slot = ((interiorIndex * 4 + 3) % 7) + 1
+    return 0.0022 * Float(slot) / 7
+  }
 
   private static func mirroredSurfacePoint(
     x: Float,

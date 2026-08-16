@@ -14,6 +14,17 @@ func throatBridgeBreaksCervicalPectoralCollarAtFullResolution() {
   #expect(samples.count == 72)
   #expect(CrowThroatBridgeFeathers.surfaceFeatherClass == 7)
   #expect(samples.allSatisfy { $0.surfaceFeatherClass == 7 })
+  let courseStaggers = (0..<CrowThroatBridgeFeathers.rowCount).map {
+    CrowThroatBridgeFeathers.courseStaggerMeters(row: $0)
+  }
+  #expect(courseStaggers.first == 0 && courseStaggers.last == 0)
+  #expect(Set(courseStaggers).count == CrowThroatBridgeFeathers.rowCount - 1)
+  #expect(abs(courseStaggers.max()! - 0.0022) < 1e-7)
+  #expect(
+    zip(courseStaggers, courseStaggers.dropFirst()).allSatisfy {
+      abs($0 - $1) > 0.0009
+    }
+  )
   #expect(
     CrowThroatBridgeFeathers.visibleSamples(projectedPixelsPerMeter: 1_000).isEmpty
   )
@@ -25,6 +36,11 @@ func throatBridgeBreaksCervicalPectoralCollarAtFullResolution() {
   #expect(samples.map(\.materialVariation).max()! > 0.90)
 
   for sample in samples {
+    let columnFraction = Float(sample.column)
+      / Float(CrowThroatBridgeFeathers.columnCount - 1)
+    let expectedRootX = 0.149 - 0.029 * columnFraction
+      - CrowThroatBridgeFeathers.courseStaggerMeters(row: sample.row)
+    #expect(abs(sample.rootSurfaceOffset.x - expectedRootX) < 1e-6)
     #expect(
       abs(
         simd_distance(sample.rootOffset, sample.rootSurfaceOffset)
@@ -52,6 +68,23 @@ func throatBridgeBreaksCervicalPectoralCollarAtFullResolution() {
             < pair.0.maximumWidthMeters + pair.1.maximumWidthMeters
         )
       }
+    }
+  }
+
+  for row in 0..<CrowThroatBridgeFeathers.rowCount {
+    for column in 0..<CrowThroatBridgeFeathers.columnCount {
+      let left = samples.first {
+        $0.side < 0 && $0.row == row && $0.column == column
+      }!
+      let right = samples.first {
+        $0.side > 0 && $0.row == row && $0.column == column
+      }!
+      #expect(abs(left.rootOffset.x - right.rootOffset.x) < 1e-7)
+      #expect(abs(left.rootOffset.y + right.rootOffset.y) < 1e-7)
+      #expect(abs(left.rootOffset.z - right.rootOffset.z) < 1e-7)
+      #expect(abs(left.tipOffset.x - right.tipOffset.x) < 1e-7)
+      #expect(abs(left.tipOffset.y + right.tipOffset.y) < 1e-7)
+      #expect(abs(left.tipOffset.z - right.tipOffset.z) < 1e-7)
     }
   }
 
