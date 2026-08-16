@@ -61,9 +61,9 @@ root position, morphology, surface ownership, class, side, inventory index, and
 a deterministic stable-ID hash. The immutable surface sequence and feather
 bindings are uploaded once rather than rebuilt per frame.
 
-Each root also carries a fixed-topology surface triangle. Metal transports the
-estimated rest direction through that triangle's current and previous tangent
-frames, then expands one retained twelve-section vane template into `3,888`
+Each root also carries fixed-topology root, span, and chord anchors. Metal
+transports the estimated rest direction through that part's current and
+previous orthonormal frames, then expands one retained twelve-section vane template into `3,888`
 triangle vertices. The primary, secondary, and tail vertices rendered by the
 live capture now come from private GPU buffers; their previous positions and
 stable feather IDs remain beside the current render attributes. The physical

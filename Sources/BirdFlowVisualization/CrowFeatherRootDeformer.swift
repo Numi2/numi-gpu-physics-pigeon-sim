@@ -78,7 +78,7 @@ final class CrowFeatherRootDeformer {
         ownershipAndIdentity: SIMD4<UInt32>(
           UInt32(feather.physicsSurfacePartIdentifier),
           Self.packedIdentity(feather),
-          0,
+          UInt32(surfaceFrame.partChord),
           0
         ),
         localDirectionAndLength: SIMD4<Float>(
@@ -242,10 +242,15 @@ final class CrowFeatherRootDeformer {
       vertexIndex: Int(indices.z)
     ).positionMeters
     let packedIdentity = binding.ownershipAndIdentity.y
+    let partChord = dataset.state(
+      timeSeconds: timeSeconds,
+      vertexIndex: Int(binding.ownershipAndIdentity.z)
+    ).positionMeters
     let basis = Self.frameBasis(
       root: root,
       partRoot: partRoot,
       partTip: partTip,
+      partChord: partChord,
       featherClass: packedIdentity & 255,
       side: (packedIdentity >> 8) & 255
     )
@@ -303,6 +308,7 @@ final class CrowFeatherRootDeformer {
   ) throws -> (
     partRoot: Int,
     partTip: Int,
+    partChord: Int,
     localDirection: SIMD3<Float>
   ) {
     let rootIndex = feather.physicsRootVertexIndex
@@ -338,11 +344,27 @@ final class CrowFeatherRootDeformer {
         "feather \(feather.identifier) has no coherent part frame"
       )
     }
+    let partAxis = safeNormalize(
+      dataset.vertex(frame: 0, index: partTip)
+        - dataset.vertex(frame: 0, index: partRoot),
+      fallback: SIMD3<Float>(0, sideCode(feather.side) == 2 ? -1 : 1, 0)
+    )
+    let partChord = partIndices.max(by: {
+      let first = dataset.vertex(frame: 0, index: $0)
+        - dataset.vertex(frame: 0, index: partRoot)
+      let second = dataset.vertex(frame: 0, index: $1)
+        - dataset.vertex(frame: 0, index: partRoot)
+      let firstPerpendicular = first - partAxis * simd_dot(first, partAxis)
+      let secondPerpendicular = second - partAxis * simd_dot(second, partAxis)
+      return simd_length_squared(firstPerpendicular)
+        < simd_length_squared(secondPerpendicular)
+    }) ?? partRoot
     let root = dataset.vertex(frame: 0, index: rootIndex)
     let basis = frameBasis(
       root: root,
       partRoot: dataset.vertex(frame: 0, index: partRoot),
       partTip: dataset.vertex(frame: 0, index: partTip),
+      partChord: dataset.vertex(frame: 0, index: partChord),
       featherClass: classCode(feather.featherClass),
       side: sideCode(feather.side)
     )
@@ -353,6 +375,7 @@ final class CrowFeatherRootDeformer {
     return (
       partRoot,
       partTip,
+      partChord,
       SIMD3<Float>(
         simd_dot(direction, basis.tangent),
         simd_dot(direction, basis.bitangent),
@@ -365,6 +388,7 @@ final class CrowFeatherRootDeformer {
     root: SIMD3<Float>,
     partRoot: SIMD3<Float>,
     partTip: SIMD3<Float>,
+    partChord: SIMD3<Float>,
     featherClass: UInt32,
     side: UInt32
   ) -> (tangent: SIMD3<Float>, bitangent: SIMD3<Float>, normal: SIMD3<Float>) {
@@ -388,8 +412,9 @@ final class CrowFeatherRootDeformer {
       return (tangent, bitangent, normal)
     }
     let bitangent = partAxis
+    let chord = partChord - partRoot
     let tangent = safeNormalize(
-      SIMD3<Float>(1, 0, 0) - bitangent * bitangent.x,
+      chord - bitangent * simd_dot(chord, bitangent),
       fallback: SIMD3<Float>(1, 0, 0)
     )
     let mirror: Float = side == 2 ? -1 : 1

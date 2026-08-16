@@ -171,6 +171,7 @@ inline CrowSurfaceFrame crowSurfaceFrame(
     uint secondFrame,
     float blend,
     uint3 indices,
+    uint chordIndex,
     uint featherClass,
     uint side) {
     CrowSurfaceFrame frame;
@@ -197,8 +198,11 @@ inline CrowSurfaceFrame crowSurfaceFrame(
         );
     }else{
         frame.bitangent=partAxis;
+        float3 partChord=crowSurfacePoint(
+            points,vertexCount,firstFrame,secondFrame,blend,chordIndex
+        )-partRoot;
         frame.tangent=safeNormalizeCrow(
-            float3(1,0,0)-frame.bitangent*frame.bitangent.x,float3(1,0,0)
+            partChord-frame.bitangent*dot(partChord,frame.bitangent),float3(1,0,0)
         );
         float mirror=side==2u?-1.0f:1.0f;
         frame.normal=safeNormalizeCrow(
@@ -233,15 +237,16 @@ kernel void deformCrowFeatherRoots(
     uint packedIdentity=binding.ownershipAndIdentity.y;
     uint featherClass=packedIdentity&255u;
     uint side=(packedIdentity>>8u)&255u;
+    uint chordIndex=binding.ownershipAndIdentity.z;
     CrowSurfaceFrame current=crowSurfaceFrame(
         sourcePoints,vertexCount,
         uniforms.frameIndices.x,uniforms.frameIndices.y,
-        uniforms.interpolation.x,indices,featherClass,side
+        uniforms.interpolation.x,indices,chordIndex,featherClass,side
     );
     CrowSurfaceFrame previous=crowSurfaceFrame(
         sourcePoints,vertexCount,
         uniforms.frameIndices.z,uniforms.frameIndices.w,
-        uniforms.interpolation.y,indices,featherClass,side
+        uniforms.interpolation.y,indices,chordIndex,featherClass,side
     );
     float3 localDirection=binding.localDirectionAndLength.xyz;
     CrowFeatherRootStateGPU state;

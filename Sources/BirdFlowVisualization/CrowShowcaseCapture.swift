@@ -277,8 +277,8 @@ public enum CrowShowcaseCapture {
       } else {
         camera.target = SIMD3<Float>(-0.018, 0, 0.020)
         camera.distance = 0.96 * (1 + 0.010 * cos(orbit))
-        camera.yaw = -1.06 + 0.024 * sin(orbit)
-        camera.pitch = 0.18 + 0.012 * cos(orbit)
+        camera.yaw = -1.06 + 0.30 * sin(orbit)
+        camera.pitch = 0.18 + 0.08 * (1 - cos(orbit))
       }
       if let cameraYawRadians = arguments.cameraYawRadians {
         camera.yaw = cameraYawRadians
@@ -1366,6 +1366,8 @@ private struct CrowMeshBuilder {
   private let vertexPartIdentifiers: [UInt8]
   private let persistentFeathers: [BirdRealityFeather]
   private let presentation: CrowShowcasePresentation
+  private let leftWingAnchor: CrowWingAttachmentAnchor?
+  private let rightWingAnchor: CrowWingAttachmentAnchor?
 
   var referenceSurfaceBodyCenter: SIMD3<Float> { referenceBodyCenter }
 
@@ -1401,6 +1403,14 @@ private struct CrowMeshBuilder {
       }
     }
     vertexPartIdentifiers = parts
+    leftWingAnchor = CrowWingAttachmentFrame.anchor(
+      dataset: dataset,
+      partIdentifier: 2
+    )
+    rightWingAnchor = CrowWingAttachmentFrame.anchor(
+      dataset: dataset,
+      partIdentifier: 3
+    )
   }
 
   func vertices(
@@ -1424,6 +1434,11 @@ private struct CrowMeshBuilder {
       to: &vertices
     )
     if presentation == .wingbeat {
+      appendMeasuredScaffold(
+        states,
+        includedPartIdentifiers: [2, 3, 4],
+        to: &vertices
+      )
       appendWingFeathers(
         states: states,
         bodyCenter: bodyCenter,
@@ -2085,21 +2100,32 @@ private struct CrowMeshBuilder {
     projectedPixelsPerMeter: Float,
     to vertices: inout [ColoredVertex]
   ) {
-    let part: UInt8 = left ? 2 : 3
-    let points = componentIndices(partIdentifier: part).map { states[$0] }
-    guard !points.isEmpty else { return }
-    let measuredSpanDirection = symmetrizedWingSpanDirection(
+    guard let leftWingAnchor, let rightWingAnchor else { return }
+    let measuredSpanDirection = CrowWingAttachmentFrame.symmetrizedSpanDirection(
       states: states,
-      bodyCenter: bodyCenter,
-      left: left
+      left: left,
+      leftAnchor: leftWingAnchor,
+      rightAnchor: rightWingAnchor
     )
     let spanDirection = safeNormalize(
       0.70 * measuredSpanDirection + 0.48 * SIMD3<Float>(0, left ? 1 : -1, 0),
       fallback: SIMD3<Float>(0, left ? 1 : -1, 0)
     )
-    let root = bodyCenter + SIMD3<Float>(0.015, left ? 0.067 : -0.067, 0.038)
+    let root = CrowWingAttachmentFrame.symmetrizedRoot(
+      states: states,
+      bodyCenter: bodyCenter,
+      left: left,
+      leftAnchor: leftWingAnchor,
+      rightAnchor: rightWingAnchor
+    )
     let span = spanDirection * 0.420
-    let forward = SIMD3<Float>(1, 0, 0)
+    let trailingDirection = CrowWingAttachmentFrame.symmetrizedChordDirection(
+      states: states,
+      left: left,
+      leftAnchor: leftWingAnchor,
+      rightAnchor: rightWingAnchor
+    )
+    let forward = -trailingDirection
     let planeNormal = safeNormalize(
       simd_cross(forward, spanDirection),
       fallback: SIMD3<Float>(0, 0, 1)
@@ -2186,70 +2212,80 @@ private struct CrowMeshBuilder {
         )
       }
     }
-    for row in 0..<6 {
-      for index in 0..<14 {
-        let f = Float(index) / 13
-        let rowFraction = Float(row) / 5
-        let featherRoot =
-          root + span * (0.025 + 0.80 * f + 0.012 * rowFraction)
-          + forward * (0.038 - 0.012 * rowFraction)
-        let featherTip =
-          featherRoot + spanDirection * (0.012 + 0.024 * f)
-          - forward
-            * (0.078 + 0.035 * rowFraction + 0.010 * sin(Float.pi * f))
-          + planeNormal * (0.008 * (1 - rowFraction))
+    appendSurfaceBoundWingCoverts(
+      states: states,
+      left: left,
+      projectedPixelsPerMeter: projectedPixelsPerMeter,
+      to: &vertices
+    )
+  }
+
+  /// Imbricated coverts sampled from the fixed 9 x 33 wing topology.
+  ///
+  /// Both ends of every blade are derived from current surface vertices. This
+  /// keeps the decorative shell on the live wing through stroke and pitch,
+  /// while the underlying measured-derived surface closes sub-feather gaps.
+  private func appendSurfaceBoundWingCoverts(
+    states: [SIMD3<Float>],
+    left: Bool,
+    projectedPixelsPerMeter: Float,
+    to vertices: inout [ColoredVertex]
+  ) {
+    let partIdentifier: UInt8 = left ? 2 : 3
+    guard let wing = dataset.components.first(where: {
+      $0.partIdentifier == partIdentifier
+    }), wing.vertexCount == 9 * 33 else { return }
+    let chordCount = 9
+    let spanCount = 33
+    func point(span: Int, chord: Int) -> SIMD3<Float> {
+      states[wing.vertexOffset + span * chordCount + chord]
+    }
+    for chord in stride(from: 0, through: 6, by: 2) {
+      let rowFraction = Float(chord) / 8
+      for span in stride(from: 1, through: spanCount - 3, by: 2) {
+        let root = point(span: span, chord: chord)
+        let chordTarget = point(span: span, chord: min(chord + 3, 8))
+        let spanTarget = point(span: span + 2, chord: chord)
+        let chordVector = chordTarget - root
+        let spanVector = spanTarget - root
+        let chordDirection = safeNormalize(
+          chordVector,
+          fallback: SIMD3<Float>(-1, 0, 0)
+        )
+        let spanDirection = safeNormalize(
+          spanVector,
+          fallback: SIMD3<Float>(0, left ? 1 : -1, 0)
+        )
+        let normalSign: Float = left ? 1 : -1
+        let normal = safeNormalize(
+          normalSign * simd_cross(chordDirection, spanDirection),
+          fallback: SIMD3<Float>(0, 0, 1)
+        )
+        let tip = root + 1.16 * chordVector + 0.34 * spanVector + normal * 0.0025
+        let spacing = max(simd_length(spanVector), 0.012)
         appendFeatherBlade(
-          root: featherRoot,
-          tip: featherTip,
-          planeNormal: planeNormal,
-          rootWidth: 0.011,
-          maximumWidth: 0.020 - 0.003 * rowFraction,
+          root: root + normal * 0.0015,
+          tip: tip,
+          planeNormal: normal,
+          rootWidth: 0.34 * spacing,
+          maximumWidth: 0.58 * spacing,
           color: SIMD4<Float>(
-            0.009 + 0.002 * rowFraction,
-            0.013 + 0.003 * rowFraction,
-            0.023 + 0.004 * rowFraction,
+            0.008 + 0.002 * rowFraction,
+            0.012 + 0.003 * rowFraction,
+            0.021 + 0.004 * rowFraction,
             0.18
           ),
-          sections: 8,
-          camber: 0.006 + 0.002 * rowFraction,
-          transverseCamberRatio: 0.20,
+          sections: 7,
+          camber: 0.035 * simd_length(chordVector),
+          transverseCamberRatio: 0.16,
+          // A fixed LOD contract preserves identical temporal topology even
+          // while the measured-derived wing changes chord length slightly.
           lodLengthMeters: 0.12,
           projectedPixelsPerMeter: projectedPixelsPerMeter,
           to: &vertices
         )
       }
     }
-  }
-
-  private func symmetrizedWingSpanDirection(
-    states: [SIMD3<Float>],
-    bodyCenter: SIMD3<Float>,
-    left: Bool
-  ) -> SIMD3<Float> {
-    func spanDirection(partIdentifier: UInt8) -> SIMD3<Float> {
-      let wingPoints = componentIndices(partIdentifier: partIdentifier).map { states[$0] }
-      let root = wingPoints.min {
-        distanceSquared($0, bodyCenter) < distanceSquared($1, bodyCenter)
-      }!
-      let tip = wingPoints.max {
-        distanceSquared($0, root) < distanceSquared($1, root)
-      }!
-      return safeNormalize(
-        tip - root,
-        fallback: SIMD3<Float>(0, partIdentifier == 2 ? 1 : -1, 0)
-      )
-    }
-    let leftDirection = spanDirection(partIdentifier: 2)
-    let rightDirection = spanDirection(partIdentifier: 3)
-    let symmetric = SIMD3<Float>(
-      0.5 * (leftDirection.x + rightDirection.x),
-      (left ? 1 : -1) * 0.5 * (abs(leftDirection.y) + abs(rightDirection.y)),
-      0.5 * (leftDirection.z + rightDirection.z)
-    )
-    return safeNormalize(
-      symmetric,
-      fallback: SIMD3<Float>(0, left ? 1 : -1, 0)
-    )
   }
 
   private func appendTailFeathers(
@@ -2466,13 +2502,6 @@ private struct CrowMeshBuilder {
     fallback: SIMD3<Float>
   ) -> SIMD3<Float> {
     simd_length_squared(value) > 1e-14 ? simd_normalize(value) : fallback
-  }
-
-  private func distanceSquared(
-    _ a: SIMD3<Float>,
-    _ b: SIMD3<Float>
-  ) -> Float {
-    simd_length_squared(a - b)
   }
 
   private func vertex(

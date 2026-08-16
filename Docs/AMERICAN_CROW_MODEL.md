@@ -50,25 +50,25 @@ The retained feather lengths and stable identities do not change; only the
 estimated grounded rest pose prevents all vanes from collapsing into one
 planar flank slab.
 
-The flight presentation does not draw the fixed-topology wing and tail physics
-surface as an opaque beauty layer beneath the retained feather inventory. That
-surface still owns deformation and every persistent root, while overlapping
-primaries, secondaries, rectrices, and procedural coverts own the visible
-silhouette. This keeps the solver/render binding executable without turning the
-coarse moving-boundary sheet into a false feather surface.
+The flight presentation draws the fixed-topology wing and tail surface as a
+dark underlayer beneath the retained feather inventory. That live surface owns
+deformation and every persistent root, closes sub-feather gaps, and makes the
+attachment boundary inspectable; it is not asserted to be a literal smooth
+crow skin or resolved plumage surface.
 
-Six staggered covert bands now bridge each shoulder-to-wrist interval. Their
-roots follow the current measured-derived span direction and overlap both
-axially and chordwise, so the retained outer flight feathers read as one wing
-instead of a detached comb. The coverts are estimated presentation geometry and
-do not enter the moving-boundary, force, or power calculation.
+Four staggered covert rows are sampled from each wing's fixed `9 x 33`
+topology. Both ends of every blade follow current surface vertices, and adjacent
+rows overlap chordwise and spanwise, so the retained outer flight feathers read
+as one articulated wing instead of a detached comb. The coverts remain
+estimated presentation geometry and do not enter the moving-boundary, force,
+or power calculation.
 
 Persistent flight-feather roots remain attached to their exact fixed-topology
-surface vertices. Vane direction now uses one shoulder-to-tip frame per wing
-(and one base-to-tip frame for the tail), evaluated independently for current
-and previous phases on Metal. This removes triangle-scale rotational noise that
-previously broke adjacent feathers into unrelated fans during large strokes;
-it does not change the solver surface or assert measured crow kinematics.
+surface vertices. Vane direction now uses one shoulder-to-tip span plus a fixed
+topology chord anchor per wing (and one base-to-tip frame for the tail),
+evaluated independently for current and previous phases on Metal. This removes
+triangle-scale rotational noise and world-axis drift during large strokes; it
+does not change the solver surface or assert measured crow kinematics.
 
 Sparse diagnostic captures can set `--capture-crow-camera-yaw` in radians so a
 geometry milestone is checked from a new view without changing the release
@@ -111,10 +111,10 @@ their SHA-256 locks before rendering. One retained Metal pass evaluates current
 and previous part frames for all `54` persistent flight/tail feather roots; a
 second expands a shared twelve-by-four-section vane template into `15,552`
 renderable vertices. Current and previous positions plus stable feather IDs
-stay GPU-side. The physical
-wing/tail surface supplies root positions without becoming an opaque beauty
-underlayer, while the smooth body/head, coverts, and contour feathers remain
-procedural estimates. Four-sample Metal rasterization and a dedicated
+stay GPU-side. The fixed-topology wing/tail surface supplies root positions and
+a dark gap-closing underlayer, while the smooth body/head, topology-bound
+coverts, and contour feathers remain procedural estimates. Four-sample Metal
+rasterization and a dedicated
 eumelanin shader provide view-dependent cool sheen while keeping the bird
 neutral-black instead of allowing the warm key light to dominate its very low
 albedo. The native result is an executable motion and material estimate, not a
