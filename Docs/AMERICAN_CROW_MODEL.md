@@ -66,8 +66,9 @@ Before display tone mapping, the same pass emits a scene-linear HDR image and
 typed albedo/material, normal/coverage, metric-depth, and deformation-motion
 AOVs. A separate single-sample integer pass preserves exact surface and feather
 identity. The executable conventions and qualification are in
-[`CROW_TEMPORAL_AOVS.md`](CROW_TEMPORAL_AOVS.md); temporal upscaling itself is
-not yet integrated.
+[`CROW_TEMPORAL_AOVS.md`](CROW_TEMPORAL_AOVS.md). A capability-gated MetalFX
+path reconstructs lower-resolution inputs only when explicitly requested; the
+native-resolution renderer remains its executable parity oracle.
 The beauty mesh and fluid boundary mesh are intentionally distinct: the former
 adds feather detail, while the latter remains the fixed-topology coupling input.
 

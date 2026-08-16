@@ -124,11 +124,6 @@ struct CrowAOVOutput {
     float metricDepth [[color(4)]];
 };
 
-struct CrowResolveOutput {
-    float4 display [[color(0)]];
-    half4 normal [[color(1)]];
-};
-
 inline uint flatten(uint3 p, uint3 size) {
     return p.x + size.x * (p.y + size.y * p.z);
 }
@@ -1107,7 +1102,9 @@ fragment CrowAOVOutput showcaseCrowAOVFragment(
     float2 previousNDC=in.previousClipPosition.xy*inversePreviousW;
     float2 previousPixel=(previousNDC*float2(0.5f,-0.5f)+0.5f)
         *camera.viewportAndInverse.xy;
-    float2 motion=previousPixel-in.position.xy;
+    float2 motion=camera.viewportAndInverse.z>0.5f
+        ? float2(0)
+        : previousPixel-in.position.xy;
     CrowAOVOutput out;
     out.beauty=half4(half3(radiance),half(1));
     out.albedoAndMaterial=half4(in.albedoAndMaterial);
@@ -1214,21 +1211,55 @@ vertex RasterVertex showcasePostVertex(uint vid [[vertex_id]]) {
     return out;
 }
 
-fragment CrowResolveOutput showcaseCrowToneMapFragment(
+fragment half4 showcaseCrowNormalResolveFragment(
     RasterVertex in [[stage_in]],
-    texture2d<half> hdrColor [[texture(0)]],
-    texture2d<half> resolvedNormal [[texture(1)]]) {
+    texture2d<half> resolvedNormal [[texture(0)]]) {
     uint2 pixel=uint2(in.position.xy);
-    float3 radiance=float3(hdrColor.read(pixel).rgb);
     half4 rawNormal=resolvedNormal.read(pixel);
     float normalLength=length(float3(rawNormal.xyz));
     half3 normal=normalLength>1.0e-6f
         ? half3(float3(rawNormal.xyz)/normalLength)
         : half3(0);
-    CrowResolveOutput out;
-    out.display=float4(1.0f-exp(-max(radiance,0.0f)),1.0f);
-    out.normal=half4(normal,rawNormal.w);
-    return out;
+    return half4(normal,rawNormal.w);
+}
+
+fragment half showcaseCrowReactiveMaskFragment(
+    RasterVertex in [[stage_in]],
+    texture2d<half> motionTexture [[texture(0)]],
+    texture2d<half> normalCoverageTexture [[texture(1)]]) {
+    uint2 pixel=uint2(in.position.xy);
+    uint2 maximum=uint2(
+        motionTexture.get_width()-1,
+        motionTexture.get_height()-1
+    );
+    uint2 right=min(pixel+uint2(1,0),maximum);
+    uint2 down=min(pixel+uint2(0,1),maximum);
+    float2 motion=float2(motionTexture.read(pixel).xy);
+    float2 rightMotion=float2(motionTexture.read(right).xy);
+    float2 downMotion=float2(motionTexture.read(down).xy);
+    float coverage=float(normalCoverageTexture.read(pixel).w);
+    float rightCoverage=float(normalCoverageTexture.read(right).w);
+    float downCoverage=float(normalCoverageTexture.read(down).w);
+    float motionDiscontinuity=max(
+        length(motion-rightMotion),length(motion-downMotion)
+    );
+    float coverageDiscontinuity=max(
+        abs(coverage-rightCoverage),abs(coverage-downCoverage)
+    );
+    float edge=max(
+        smoothstep(0.75f,8.0f,motionDiscontinuity),
+        smoothstep(0.04f,0.55f,coverageDiscontinuity)
+    );
+    float fastMotion=0.72f*smoothstep(8.0f,32.0f,length(motion));
+    return half(max(edge,fastMotion));
+}
+
+fragment float4 showcaseCrowToneMapFragment(
+    RasterVertex in [[stage_in]],
+    texture2d<half> hdrColor [[texture(0)]]) {
+    uint2 pixel=uint2(in.position.xy);
+    float3 radiance=float3(hdrColor.read(pixel).rgb);
+    return float4(1.0f-exp(-max(radiance,0.0f)),1.0f);
 }
 
 inline float showcaseBloomWeight(float3 color) {

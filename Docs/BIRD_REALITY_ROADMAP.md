@@ -55,7 +55,10 @@ ankles move by millimetres.
    already carry both positions and stable IDs. A JSON audit qualifies finite
    pixels, extended-range highlights, normalized fully covered normals, metric
    depth, ID visibility, motion sign/magnitude, and standing support orientation.
-   MetalFX integration and disocclusion/reactive masks remain the next gate.
+   A capability-gated MetalFX path now reconstructs from HDR, resolved device
+   depth, and motion with Halton jitter and explicit history resets. It is
+   promoted only against a separately rendered native-resolution oracle;
+   opaque geometry does not receive a cosmetic reactive mask.
 
 2. **Geometric feather LODs.** Replace the single blade with nested rachis,
    vane, barb-group, and silhouette-meshlet representations. Select LOD from

@@ -6,6 +6,7 @@ OUTPUT="${1:-$ROOT/Docs/Media/american-crow-hybrid-native-v1.mp4}"
 POSTER="${2:-$ROOT/Docs/Media/american-crow-hybrid-native-v1.png}"
 PRESENTATION="${3:-wingbeat}"
 AOV_AUDIT="${4:-}"
+TEMPORAL_SCALE="${5:-1}"
 MANIFEST="$ROOT/ValidationInputs/american-crow-hybrid-surface-v1/manifest.json"
 GENERATION_AUDIT="$ROOT/ValidationArtifacts/american-crow-hybrid-surface-generation-v1.json"
 PROFILE="$ROOT/ValidationInputs/american-crow-hybrid-visual-v1.json"
@@ -53,6 +54,7 @@ fi
   --capture-crow-standing-reference "$STANDING_REFERENCE" \
   --capture-crow-presentation "$PRESENTATION" \
   "${AOV_ARGUMENTS[@]}" \
+  --capture-crow-temporal-scale "$TEMPORAL_SCALE" \
   --capture-width 1280 \
   --capture-height 720 \
   --capture-frames 49

@@ -226,8 +226,8 @@ struct CrowSurfaceTemporalVertexGPU {
   var identity: SIMD4<UInt32>
 }
 
-/// Current and previous camera transforms plus pixel dimensions. Motion is
-/// written in MetalFX's current-pixel-to-previous-pixel convention.
+/// Current and previous camera transforms plus pixel dimensions and reset
+/// state. Motion is written in MetalFX's current-to-previous pixel convention.
 struct CrowTemporalCameraUniforms {
   var viewProjection: simd_float4x4
   var previousViewProjection: simd_float4x4

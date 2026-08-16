@@ -88,8 +88,9 @@ normal/coverage, metric depth, current-to-previous pixel motion, and exact
 integer identity. It keeps the integer pass outside MSAA resolution and
 renormalizes filtered normals before exposing them. This is the baseline
 contract for temporal reconstruction, MetalFX, ray tracing, and neural
-appearance models; it does not yet claim that MetalFX is integrated. Exact
-formats, conventions, and audit fields are documented in
+appearance models. A capability-gated MetalFX temporal path now consumes the
+linear HDR, resolved device depth, and motion buffers while a native-resolution
+render remains the parity oracle. Exact formats, conventions, and audit fields
+are documented in
 [`CROW_TEMPORAL_AOVS.md`](CROW_TEMPORAL_AOVS.md). The longer architecture is
-recorded in
-[`BIRD_REALITY_ROADMAP.md`](BIRD_REALITY_ROADMAP.md).
+recorded in [`BIRD_REALITY_ROADMAP.md`](BIRD_REALITY_ROADMAP.md).

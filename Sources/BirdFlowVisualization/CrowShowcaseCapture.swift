@@ -29,6 +29,7 @@ public enum CrowShowcaseCapture {
     let realityAssetURL: URL
     let standingReferenceURL: URL
     let aovAuditURL: URL?
+    let temporalScale: Float
     let presentation: CrowShowcasePresentation
 
     public init(commandLine: [String]) throws {
@@ -46,6 +47,13 @@ public enum CrowShowcaseCapture {
         }
         return parsed
       }
+      func positiveFloat(after flag: String, default fallback: Float) throws -> Float {
+        guard let raw = try value(after: flag) else { return fallback }
+        guard let parsed = Float(raw), parsed.isFinite, parsed > 0 else {
+          throw CaptureError.invalidArguments("\(flag) requires a positive finite number")
+        }
+        return parsed
+      }
 
       guard let output = try value(after: "--capture-crow-frames") else {
         throw CaptureError.invalidArguments(
@@ -56,8 +64,17 @@ public enum CrowShowcaseCapture {
       width = try positiveInteger(after: "--capture-width", default: 1600)
       height = try positiveInteger(after: "--capture-height", default: 900)
       frameCount = try positiveInteger(after: "--capture-frames", default: 48)
+      temporalScale = try positiveFloat(
+        after: "--capture-crow-temporal-scale",
+        default: 1
+      )
       guard frameCount >= 2 else {
         throw CaptureError.invalidArguments("--capture-frames must be at least 2")
+      }
+      guard temporalScale >= 1 else {
+        throw CaptureError.invalidArguments(
+          "--capture-crow-temporal-scale must be at least 1"
+        )
       }
       surfaceManifestURL = URL(
         fileURLWithPath:
@@ -213,6 +230,18 @@ public enum CrowShowcaseCapture {
       realityAsset: realityAsset,
       presentation: arguments.presentation
     )
+    let nativeReferenceRenderer =
+      try arguments.temporalScale > 1
+      && arguments.aovAuditURL != nil
+      ? CrowShowcaseRenderer(
+        device: device,
+        dataset: dataset,
+        profile: profile,
+        motion: motion,
+        realityAsset: realityAsset,
+        presentation: arguments.presentation
+      )
+      : nil
     try FileManager.default.createDirectory(
       at: arguments.outputDirectory,
       withIntermediateDirectories: true
@@ -220,8 +249,9 @@ public enum CrowShowcaseCapture {
     var aovAudits: [CrowShowcaseAOVFrameAudit] = []
 
     for frameIndex in 0..<arguments.frameCount {
+      let isLoopProbe = frameIndex == arguments.frameCount - 1
       let phase =
-        frameIndex == arguments.frameCount - 1
+        isLoopProbe
         ? Float.zero
         : Float(frameIndex) / Float(arguments.frameCount - 1)
       let orbit = 2 * Float.pi * phase
@@ -240,8 +270,16 @@ public enum CrowShowcaseCapture {
       let rendered = try renderer.render(
         phase: phase,
         camera: camera,
-        width: arguments.width,
-        height: arguments.height
+        outputWidth: arguments.width,
+        outputHeight: arguments.height,
+        temporalScale: arguments.temporalScale,
+        jitter: arguments.temporalScale > 1
+          ? temporalJitter(
+            frameIndex: isLoopProbe ? 0 : frameIndex
+          )
+          : .zero,
+        historyReset: frameIndex == 0 || isLoopProbe,
+        auditReadback: arguments.aovAuditURL != nil
       )
       let png = try ReadmeShowcaseCapture.pngData(
         texture: rendered.displayTexture,
@@ -265,7 +303,22 @@ public enum CrowShowcaseCapture {
       )
       try png.write(to: output, options: .atomic)
       if arguments.aovAuditURL != nil {
-        aovAudits.append(rendered.audit(frameIndex: frameIndex))
+        let nativeReference = try nativeReferenceRenderer?.render(
+          phase: phase,
+          camera: camera,
+          outputWidth: arguments.width,
+          outputHeight: arguments.height,
+          temporalScale: 1,
+          jitter: .zero,
+          historyReset: frameIndex == 0 || isLoopProbe,
+          auditReadback: false
+        )
+        aovAudits.append(
+          rendered.audit(
+            frameIndex: frameIndex,
+            nativeReference: nativeReference
+          )
+        )
       }
       print(
         "captured estimated American crow \(arguments.presentation.rawValue) "
@@ -282,6 +335,26 @@ public enum CrowShowcaseCapture {
       )
       try encoder.encode(report).write(to: auditURL, options: .atomic)
     }
+  }
+
+  private static func temporalJitter(frameIndex: Int) -> SIMD2<Float> {
+    let sample = frameIndex % 8 + 1
+    return SIMD2<Float>(
+      halton(sample, base: 2) - 0.5,
+      halton(sample, base: 3) - 0.5
+    )
+  }
+
+  private static func halton(_ index: Int, base: Int) -> Float {
+    var result: Float = 0
+    var fraction = 1 / Float(base)
+    var remaining = index
+    while remaining > 0 {
+      result += fraction * Float(remaining % base)
+      remaining /= base
+      fraction /= Float(base)
+    }
+    return result
   }
 
   private static func drawOverlay(
@@ -589,6 +662,8 @@ private final class CrowShowcaseRenderer {
   private let featherAOVPipeline: MTLRenderPipelineState?
   private let surfaceIdentityPipeline: MTLRenderPipelineState
   private let featherIdentityPipeline: MTLRenderPipelineState?
+  private let normalResolvePipeline: MTLRenderPipelineState
+  private let reactiveMaskPipeline: MTLRenderPipelineState
   private let toneMapPipeline: MTLRenderPipelineState
   private let depthState: MTLDepthStencilState
   private let sampleCount: Int
@@ -597,6 +672,8 @@ private final class CrowShowcaseRenderer {
   private let featherRenderOffset: SIMD3<Float>
   private var previousPhase: Float?
   private var previousCamera: CameraState?
+  private var previousJitter: SIMD2<Float>?
+  private var temporalUpscaler: CrowTemporalUpscaler?
 
   init(
     device: MTLDevice,
@@ -682,10 +759,22 @@ private final class CrowShowcaseRenderer {
         colorFormat: .rgba32Uint
       )
     }
+    normalResolvePipeline = try backend.render(
+      vertex: "showcasePostVertex",
+      fragment: "showcaseCrowNormalResolveFragment",
+      colorFormat: .rgba16Float,
+      depthFormat: .invalid
+    )
+    reactiveMaskPipeline = try backend.render(
+      vertex: "showcasePostVertex",
+      fragment: "showcaseCrowReactiveMaskFragment",
+      colorFormat: .r8Unorm,
+      depthFormat: .invalid
+    )
     toneMapPipeline = try backend.render(
       vertex: "showcasePostVertex",
       fragment: "showcaseCrowToneMapFragment",
-      colorFormats: [.bgra8Unorm_srgb, .rgba16Float],
+      colorFormat: .bgra8Unorm_srgb,
       depthFormat: .invalid
     )
     let depth = MTLDepthStencilDescriptor()
@@ -700,10 +789,46 @@ private final class CrowShowcaseRenderer {
   func render(
     phase: Float,
     camera: CameraState,
-    width: Int,
-    height: Int
+    outputWidth: Int,
+    outputHeight: Int,
+    temporalScale: Float,
+    jitter: SIMD2<Float>,
+    historyReset: Bool,
+    auditReadback: Bool
   ) throws -> CrowShowcaseFrame {
-    let priorPhase = previousPhase ?? phase
+    let temporalEnabled = temporalScale > 1.0001
+    let renderWidth =
+      temporalEnabled
+      ? max(1, Int((Float(outputWidth) / temporalScale).rounded()))
+      : outputWidth
+    let renderHeight =
+      temporalEnabled
+      ? max(1, Int((Float(outputHeight) / temporalScale).rounded()))
+      : outputHeight
+    let upscaler: CrowTemporalUpscaler?
+    if temporalEnabled {
+      if let existing = temporalUpscaler,
+        existing.inputWidth == renderWidth,
+        existing.inputHeight == renderHeight,
+        existing.outputWidth == outputWidth,
+        existing.outputHeight == outputHeight
+      {
+        upscaler = existing
+      } else {
+        let created = try CrowTemporalUpscaler(
+          device: backend.device,
+          inputWidth: renderWidth,
+          inputHeight: renderHeight,
+          outputWidth: outputWidth,
+          outputHeight: outputHeight
+        )
+        temporalUpscaler = created
+        upscaler = created
+      }
+    } else {
+      upscaler = nil
+    }
+    let priorPhase = historyReset ? phase : (previousPhase ?? phase)
     let vertices = meshBuilder.vertices(phase: phase)
     let previousVertices = meshBuilder.vertices(phase: priorPhase)
     guard vertices.count == previousVertices.count else {
@@ -743,12 +868,12 @@ private final class CrowShowcaseRenderer {
     let resolvedAOVs = try formats.enumerated().map { index, format in
       try makeTexture(
         format: format,
-        width: width,
-        height: height,
+        width: renderWidth,
+        height: renderHeight,
         sampleCount: 1,
         storageMode: .shared,
         usage: [.renderTarget, .shaderRead],
-        estimatedBytes: width * height * bytesPerPixel[index]
+        estimatedBytes: renderWidth * renderHeight * bytesPerPixel[index]
       )
     }
     let renderAOVs: [MTLTexture]
@@ -758,61 +883,107 @@ private final class CrowShowcaseRenderer {
       renderAOVs = try formats.enumerated().map { index, format in
         try makeTexture(
           format: format,
-          width: width,
-          height: height,
+          width: renderWidth,
+          height: renderHeight,
           sampleCount: sampleCount,
           storageMode: .private,
           usage: .renderTarget,
-          estimatedBytes: width * height * bytesPerPixel[index] * sampleCount
+          estimatedBytes: renderWidth * renderHeight * bytesPerPixel[index] * sampleCount
         )
       }
     }
 
-    let depth = try makeTexture(
+    let resolvedDeviceDepth = try makeTexture(
       format: .depth32Float,
-      width: width,
-      height: height,
-      sampleCount: sampleCount,
+      width: renderWidth,
+      height: renderHeight,
+      sampleCount: 1,
       storageMode: .private,
-      usage: .renderTarget,
-      estimatedBytes: width * height * 4 * sampleCount
+      usage: [.renderTarget, .shaderRead],
+      estimatedBytes: renderWidth * renderHeight * 4
     )
+    let deviceDepthReadback =
+      try auditReadback
+      ? backend.buffer(length: renderWidth * renderHeight * 4, shared: true)
+      : nil
+    let renderDepth: MTLTexture
+    if sampleCount == 1 {
+      renderDepth = resolvedDeviceDepth
+    } else {
+      renderDepth = try makeTexture(
+        format: .depth32Float,
+        width: renderWidth,
+        height: renderHeight,
+        sampleCount: sampleCount,
+        storageMode: .private,
+        usage: .renderTarget,
+        estimatedBytes: renderWidth * renderHeight * 4 * sampleCount
+      )
+    }
     let identity = try makeTexture(
       format: .rgba32Uint,
-      width: width,
-      height: height,
+      width: renderWidth,
+      height: renderHeight,
       sampleCount: 1,
       storageMode: .shared,
       usage: [.renderTarget, .shaderRead],
-      estimatedBytes: width * height * 16
+      estimatedBytes: renderWidth * renderHeight * 16
     )
     let identityDepth = try makeTexture(
       format: .depth32Float,
-      width: width,
-      height: height,
+      width: renderWidth,
+      height: renderHeight,
       sampleCount: 1,
       storageMode: .private,
       usage: .renderTarget,
-      estimatedBytes: width * height * 4
+      estimatedBytes: renderWidth * renderHeight * 4
     )
     let display = try makeTexture(
       format: .bgra8Unorm_srgb,
-      width: width,
-      height: height,
+      width: outputWidth,
+      height: outputHeight,
       sampleCount: 1,
       storageMode: .shared,
       usage: [.renderTarget, .shaderRead],
-      estimatedBytes: width * height * 4
+      estimatedBytes: outputWidth * outputHeight * 4
     )
     let normalizedNormal = try makeTexture(
       format: .rgba16Float,
-      width: width,
-      height: height,
+      width: renderWidth,
+      height: renderHeight,
       sampleCount: 1,
       storageMode: .shared,
       usage: [.renderTarget, .shaderRead],
-      estimatedBytes: width * height * 8
+      estimatedBytes: renderWidth * renderHeight * 8
     )
+    let reconstructedHDR: MTLTexture
+    if let upscaler {
+      reconstructedHDR = try makeTexture(
+        format: .rgba16Float,
+        width: outputWidth,
+        height: outputHeight,
+        sampleCount: 1,
+        storageMode: .private,
+        usage: upscaler.outputTextureUsage,
+        estimatedBytes: outputWidth * outputHeight * 8
+      )
+    } else {
+      reconstructedHDR = resolvedAOVs[0]
+    }
+    let reactiveMask: MTLTexture?
+    if upscaler?.usesReactiveMask == true {
+      reactiveMask = try makeTexture(
+        format: .r8Unorm,
+        width: renderWidth,
+        height: renderHeight,
+        sampleCount: 1,
+        storageMode: .private,
+        usage: upscaler?.reactiveMaskTextureUsage ?? [.renderTarget, .shaderRead],
+        estimatedBytes: renderWidth * renderHeight
+      )
+    } else {
+      reactiveMask = nil
+    }
     guard let commandBuffer = backend.queue.makeCommandBuffer() else {
       throw VisualizationError.pipeline("crow command buffer")
     }
@@ -845,32 +1016,51 @@ private final class CrowShowcaseRenderer {
         pass.colorAttachments[index].storeAction = .store
       }
     }
-    pass.depthAttachment.texture = depth
+    pass.depthAttachment.texture = renderDepth
     pass.depthAttachment.loadAction = .clear
-    pass.depthAttachment.storeAction = .dontCare
     pass.depthAttachment.clearDepth = 1
+    if sampleCount > 1 {
+      pass.depthAttachment.resolveTexture = resolvedDeviceDepth
+      pass.depthAttachment.storeAction = .multisampleResolve
+      pass.depthAttachment.depthResolveFilter = .min
+    } else {
+      pass.depthAttachment.storeAction = .store
+    }
     let currentCamera = camera.uniforms(
-      aspect: Float(width) / Float(height),
+      aspect: Float(renderWidth) / Float(renderHeight),
       ribbonWidth: 0.001
     )
-    let priorCamera = (previousCamera ?? camera).uniforms(
-      aspect: Float(width) / Float(height),
+    let priorCamera = (historyReset ? camera : (previousCamera ?? camera)).uniforms(
+      aspect: Float(renderWidth) / Float(renderHeight),
       ribbonWidth: 0.001
+    )
+    let currentViewProjection = Self.jitteredViewProjection(
+      currentCamera.viewProjection,
+      jitter: jitter,
+      width: renderWidth,
+      height: renderHeight
+    )
+    let priorJitter = historyReset ? jitter : (previousJitter ?? jitter)
+    let previousViewProjection = Self.jitteredViewProjection(
+      priorCamera.viewProjection,
+      jitter: priorJitter,
+      width: renderWidth,
+      height: renderHeight
     )
     var cameraUniforms = CrowTemporalCameraUniforms(
-      viewProjection: currentCamera.viewProjection,
-      previousViewProjection: priorCamera.viewProjection,
+      viewProjection: currentViewProjection,
+      previousViewProjection: previousViewProjection,
       eyeAndWidth: currentCamera.eyeAndWidth,
       viewportAndInverse: SIMD4<Float>(
-        Float(width),
-        Float(height),
-        1 / Float(width),
-        1 / Float(height)
+        Float(renderWidth),
+        Float(renderHeight),
+        historyReset ? 1 : 0,
+        0
       )
     )
     var backgroundOptions = SIMD4<Float>(
       phase,
-      Float(width) / Float(height),
+      Float(renderWidth) / Float(renderHeight),
       0,
       0
     )
@@ -972,13 +1162,77 @@ private final class CrowShowcaseRenderer {
     }
     identityEncoder.endEncoding()
 
+    if let deviceDepthReadback {
+      guard let depthReadbackEncoder = commandBuffer.makeBlitCommandEncoder() else {
+        throw VisualizationError.pipeline("crow device-depth readback encoder")
+      }
+      depthReadbackEncoder.label = "Crow device-depth audit readback"
+      depthReadbackEncoder.copy(
+        from: resolvedDeviceDepth,
+        sourceSlice: 0,
+        sourceLevel: 0,
+        sourceOrigin: MTLOrigin(x: 0, y: 0, z: 0),
+        sourceSize: MTLSize(width: renderWidth, height: renderHeight, depth: 1),
+        to: deviceDepthReadback,
+        destinationOffset: 0,
+        destinationBytesPerRow: renderWidth * 4,
+        destinationBytesPerImage: renderWidth * renderHeight * 4
+      )
+      depthReadbackEncoder.endEncoding()
+    }
+
+    let normalResolvePass = MTLRenderPassDescriptor()
+    normalResolvePass.colorAttachments[0].texture = normalizedNormal
+    normalResolvePass.colorAttachments[0].loadAction = .dontCare
+    normalResolvePass.colorAttachments[0].storeAction = .store
+    guard
+      let normalResolveEncoder = commandBuffer.makeRenderCommandEncoder(
+        descriptor: normalResolvePass
+      )
+    else {
+      throw VisualizationError.pipeline("crow normal-resolve encoder")
+    }
+    normalResolveEncoder.label = "Crow resolved-normal normalization"
+    normalResolveEncoder.setRenderPipelineState(normalResolvePipeline)
+    normalResolveEncoder.setFragmentTexture(resolvedAOVs[2], index: 0)
+    normalResolveEncoder.drawPrimitives(type: .triangle, vertexStart: 0, vertexCount: 3)
+    normalResolveEncoder.endEncoding()
+
+    if let reactiveMask {
+      let reactivePass = MTLRenderPassDescriptor()
+      reactivePass.colorAttachments[0].texture = reactiveMask
+      reactivePass.colorAttachments[0].loadAction = .dontCare
+      reactivePass.colorAttachments[0].storeAction = .store
+      guard
+        let reactiveEncoder = commandBuffer.makeRenderCommandEncoder(
+          descriptor: reactivePass
+        )
+      else {
+        throw VisualizationError.pipeline("crow reactive-mask encoder")
+      }
+      reactiveEncoder.label = "Crow motion-discontinuity reactive mask"
+      reactiveEncoder.setRenderPipelineState(reactiveMaskPipeline)
+      reactiveEncoder.setFragmentTexture(resolvedAOVs[3], index: 0)
+      reactiveEncoder.setFragmentTexture(resolvedAOVs[2], index: 1)
+      reactiveEncoder.drawPrimitives(type: .triangle, vertexStart: 0, vertexCount: 3)
+      reactiveEncoder.endEncoding()
+    }
+
+    upscaler?.encode(
+      commandBuffer: commandBuffer,
+      color: resolvedAOVs[0],
+      depth: resolvedDeviceDepth,
+      motion: resolvedAOVs[3],
+      reactiveMask: reactiveMask,
+      output: reconstructedHDR,
+      jitter: jitter,
+      reset: historyReset
+    )
+
     let toneMapPass = MTLRenderPassDescriptor()
     toneMapPass.colorAttachments[0].texture = display
     toneMapPass.colorAttachments[0].loadAction = .dontCare
     toneMapPass.colorAttachments[0].storeAction = .store
-    toneMapPass.colorAttachments[1].texture = normalizedNormal
-    toneMapPass.colorAttachments[1].loadAction = .dontCare
-    toneMapPass.colorAttachments[1].storeAction = .store
     guard
       let toneMapEncoder = commandBuffer.makeRenderCommandEncoder(
         descriptor: toneMapPass
@@ -988,8 +1242,7 @@ private final class CrowShowcaseRenderer {
     }
     toneMapEncoder.label = "Crow linear-HDR display tone map"
     toneMapEncoder.setRenderPipelineState(toneMapPipeline)
-    toneMapEncoder.setFragmentTexture(resolvedAOVs[0], index: 0)
-    toneMapEncoder.setFragmentTexture(resolvedAOVs[2], index: 1)
+    toneMapEncoder.setFragmentTexture(reconstructedHDR, index: 0)
     toneMapEncoder.drawPrimitives(type: .triangle, vertexStart: 0, vertexCount: 3)
     toneMapEncoder.endEncoding()
 
@@ -1002,6 +1255,17 @@ private final class CrowShowcaseRenderer {
     }
     previousPhase = phase
     previousCamera = camera
+    previousJitter = jitter
+    let inputPixels = renderWidth * renderHeight
+    let outputPixels = outputWidth * outputHeight
+    let resolvedInputBytes =
+      inputPixels
+      * (32 + 4 + 16 + 4 + 8 + (reactiveMask == nil ? 0 : 1))
+    let multisampleBytes =
+      sampleCount > 1
+      ? inputPixels * (32 + 4) * sampleCount
+      : 0
+    let outputBytes = outputPixels * (4 + (temporalEnabled ? 8 : 0))
     return CrowShowcaseFrame(
       displayTexture: display,
       hdrColorTexture: resolvedAOVs[0],
@@ -1009,8 +1273,30 @@ private final class CrowShowcaseRenderer {
       normalCoverageTexture: normalizedNormal,
       motionTexture: resolvedAOVs[3],
       metricDepthTexture: resolvedAOVs[4],
-      identityTexture: identity
+      deviceDepthReadbackBuffer: deviceDepthReadback,
+      identityTexture: identity,
+      reconstructionMode: temporalEnabled ? "metalfx-temporal" : "native",
+      historyReset: historyReset,
+      jitter: jitter,
+      reactiveMaskEnabled: reactiveMask != nil,
+      gpuDurationMilliseconds: max(
+        0,
+        (commandBuffer.gpuEndTime - commandBuffer.gpuStartTime) * 1_000
+      ),
+      allocatedRenderTargetBytes: resolvedInputBytes + multisampleBytes + outputBytes
     )
+  }
+
+  private static func jitteredViewProjection(
+    _ viewProjection: simd_float4x4,
+    jitter: SIMD2<Float>,
+    width: Int,
+    height: Int
+  ) -> simd_float4x4 {
+    var clipTranslation = matrix_identity_float4x4
+    clipTranslation.columns.3.x = 2 * jitter.x / Float(width)
+    clipTranslation.columns.3.y = -2 * jitter.y / Float(height)
+    return clipTranslation * viewProjection
   }
 
   private func makeTexture(

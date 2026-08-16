@@ -86,7 +86,9 @@ their current/previous frames and generate the rendered vane triangles. A
 native [HDR and temporal AOV contract](Docs/CROW_TEMPORAL_AOVS.md) now emits
 scene-linear beauty, albedo/material, normalized normal/coverage, metric depth,
 current-to-previous pixel motion, and exact integer identity before tone
-mapping. The
+mapping. A capability-gated MetalFX path consumes linear HDR, resolved device
+depth, and motion while a separate native-resolution render acts as the
+promotion oracle. The
 [reality roadmap](Docs/BIRD_REALITY_ROADMAP.md) defines the ordered HDR,
 geometric-LOD, physical-material, ray-tracing, and neural-residual gates without
 showing a real-crow target as simulation output. A separate

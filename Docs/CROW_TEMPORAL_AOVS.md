@@ -3,7 +3,7 @@
 The native crow capture renders a typed scene-linear frame before producing its
 display PNG. This is executable infrastructure for later temporal
 reconstruction, ray tracing, dataset generation, and neural residual work. It
-does not claim photorealism, MetalFX integration, or measured crow appearance.
+does not claim photorealism or measured crow appearance.
 
 ## Render products
 
@@ -14,6 +14,7 @@ does not claim photorealism, MetalFX integration, or measured crow appearance.
 | Normal/coverage | `rgba16Float` | Renormalized world normal in XYZ; resolved geometric coverage in W |
 | Motion | `rg16Float` | Current pixel to previous pixel, in upper-left-origin pixel units |
 | Metric depth | `r32Float` | Euclidean camera-to-surface distance in meters; background is zero |
+| Device depth | `depth32Float` | Projection depth for MetalFX; zero is near and one is far |
 | Identity | `rgba32Uint` | Exact stable surface or feather identity |
 | Display | `bgra8Unorm_srgb` | Tone-mapped output used for PNG/video presentation |
 
@@ -25,15 +26,31 @@ previous state equals current state deliberately.
 
 Motion is `previousPixel - currentPixel`. A positive or negative value is never
 inferred from optical flow. The viewport scale is one pixel per stored unit,
-matching the direct MetalFX convention. MetalFX is not enabled yet; the next
-milestone must add scaler ownership, reset/disocclusion behavior, reactive-mask
-policy, and native-resolution parity checks.
+matching the direct MetalFX convention.
 
 Four-sample rasterization resolves the float attachments. Resolved normals are
 renormalized in the display/resolve pass, while their W component retains
 coverage so a consumer can exclude mixed edge samples from strict geometry
 checks. Integer identity is rendered in a separate single-sample depth-tested
-pass because categorical IDs must never be averaged by MSAA.
+pass because categorical IDs must never be averaged by MSAA. The multisample
+depth attachment resolves its nearest sample into a shader-readable
+`depth32Float` texture; metric depth stays a separate scientific/debug channel.
+
+## Capability-gated temporal reconstruction
+
+`--capture-crow-temporal-scale N` requests MetalFX temporal reconstruction from
+an internal width and height reduced by `N` to the declared capture size. Scale
+`1` keeps the native path as the default correctness oracle. A value above one
+fails closed if the current Metal device or requested factor is unsupported.
+
+The renderer retains one scaler across the sequence, applies an eight-sample
+Halton projection jitter, transports the previous jitter through true
+current/previous geometry transforms, and supplies linear HDR, resolved device
+depth, and pixel-unit motion directly to MetalFX. History resets on the first
+frame and the duplicate loop-closure probe. On macOS 14.4 and later, a separate
+pass derives a reactive mask from resolved coverage edges, motion
+discontinuities, and fast motion. It is never filled with an uninformative
+constant.
 
 Surface identity is `(UInt32.max, triangle + 1, materialCode, 0)`. Feather
 identity retains the persistent inventory index, deterministic ID hash, surface
@@ -48,21 +65,45 @@ Pass an audit path to the capture executable:
 .build/release/birdflow-viewer \
   --capture-crow-frames /tmp/crow-frames \
   --capture-crow-presentation standing \
+  --capture-crow-temporal-scale 2 \
   --capture-crow-aov-audit /tmp/crow-aov-audit.json \
   --capture-frames 49
 ```
 
-Or use the optional fourth argument of the showcase script:
+Or use the optional fourth and fifth arguments of the showcase script for the
+audit path and temporal scale:
 
 ```bash
 ./Scripts/capture-crow-showcase.sh \
-  /tmp/crow.mp4 /tmp/crow.png standing /tmp/crow-aov-audit.json
+  /tmp/crow.mp4 /tmp/crow.png standing /tmp/crow-aov-audit.json 2
 ```
 
 The JSON report records format and coordinate conventions plus per-frame
 finite-pixel count, HDR values above one, exact active IDs, visible feather IDs,
 fully covered samples, unit-normal error, depth range, moving-pixel count,
-maximum motion, and bird/support vertical centroids. The standing capture test
-requires the support centroid to remain below the bird in Metal's upper-left
-pixel coordinates. These gates qualify buffer semantics; rendered inspection is
-still required for anatomy, material, lighting, and perceptual quality.
+maximum motion, and bird/support vertical centroids. When temporal scaling is
+active, the audit also renders a separate full-resolution native oracle and
+records whole-frame RMSE, bird-foreground RMSE, maximum channel error, and bird
+silhouette intersection-over-union plus foreground gradient-energy retention.
+The standing gate at `2x` requires RMSE below `0.01` globally and `0.025` on the
+bird foreground, silhouette IoU above `0.94`, gradient retention above `0.74`,
+reset/loop closure, and the support centroid below the bird in Metal's
+upper-left pixel coordinates. These gates qualify reconstruction and buffer
+semantics; rendered inspection remains required for anatomy, material,
+lighting, and perceptual quality.
+
+The audit also records command-buffer GPU duration and renderer-owned target
+bytes for both paths. These are same-device comparative measurements, not total
+process residency or a cross-device performance claim. In the release Apple M4
+standing qualification at 1280×720 with `2x` reconstruction, frames `1...47`
+had median GPU durations of `3.67 ms` temporal versus `3.86 ms` native. Tracked
+render targets were `56.47 MiB` versus `186.33 MiB`; MetalFX-internal storage is
+not included. The worst visual gates over all 49 audit frames were `0.00403`
+whole-frame RMSE, `0.0109` bird-foreground RMSE, `0.978` silhouette IoU, and
+`0.822` foreground gradient-energy retention.
+
+The same `2x` setting is **not promoted for wingbeat**. In its 49-frame Apple M4
+probe, motion reached roughly `61.7 px`, minimum gradient retention fell to
+`0.621`, and median temporal GPU duration (`3.77 ms`) did not beat native
+(`3.73 ms`). Wingbeat therefore remains on native resolution until a stronger
+fast-feather disocclusion strategy passes both quality and time gates.

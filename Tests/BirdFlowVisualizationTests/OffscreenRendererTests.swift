@@ -2,6 +2,7 @@ import AppKit
 import BirdFlowCore
 import BirdFlowMetal
 import Metal
+import MetalFX
 import Testing
 import simd
 
@@ -338,9 +339,11 @@ func estimatedCrowShowcaseCaptureProducesDistinctFrames() throws {
     isDirectory: true
   )
   defer { try? FileManager.default.removeItem(at: output) }
+  let aovAuditURL = output.appendingPathComponent("aov-audit.json")
   let arguments = try CrowShowcaseCapture.Arguments(commandLine: [
     "birdflow-viewer",
     "--capture-crow-frames", output.path,
+    "--capture-crow-aov-audit", aovAuditURL.path,
     "--capture-width", "480",
     "--capture-height", "270",
     "--capture-frames", "3",
@@ -377,11 +380,20 @@ func estimatedCrowShowcaseCaptureProducesDistinctFrames() throws {
   }
   #expect(Int(image.size.width) == 480)
   #expect(Int(image.size.height) == 270)
+  let audit = try JSONDecoder().decode(
+    CrowShowcaseAOVAuditReport.self,
+    from: Data(contentsOf: aovAuditURL)
+  )
+  #expect(audit.frames.allSatisfy { $0.reconstructionMode == "native" })
+  #expect(audit.frames.allSatisfy { $0.width == 480 && $0.outputWidth == 480 })
+  #expect(audit.frames.allSatisfy { $0.nativeFullFrameDisplayRMSE == nil })
 }
 
 @Test("estimated standing crow capture keeps the reference private and moves subtly")
 func estimatedStandingCrowCaptureProducesLoopClosedFrames() throws {
-  guard MTLCreateSystemDefaultDevice() != nil else { return }
+  guard let device = MTLCreateSystemDefaultDevice(),
+    MTLFXTemporalScalerDescriptor.supportsDevice(device)
+  else { return }
   let testFile = URL(fileURLWithPath: #filePath)
   let root = testFile.deletingLastPathComponent()
     .deletingLastPathComponent()
@@ -397,6 +409,7 @@ func estimatedStandingCrowCaptureProducesLoopClosedFrames() throws {
     "--capture-crow-frames", output.path,
     "--capture-crow-presentation", "standing",
     "--capture-crow-aov-audit", aovAuditURL.path,
+    "--capture-crow-temporal-scale", "2",
     "--capture-width", "480",
     "--capture-height", "360",
     "--capture-frames", "3",
@@ -442,26 +455,72 @@ func estimatedStandingCrowCaptureProducesLoopClosedFrames() throws {
     CrowShowcaseAOVAuditReport.self,
     from: Data(contentsOf: aovAuditURL)
   )
-  #expect(audit.schemaVersion == 1)
+  #expect(audit.schemaVersion == 2)
   #expect(audit.formats["hdrColor"] == "rgba16Float")
   #expect(audit.formats["normalCoverage"] == "rgba16Float")
+  #expect(audit.formats["deviceDepth"] == "depth32Float")
   #expect(audit.formats["identity"] == "rgba32Uint")
   #expect(audit.frames.count == 3)
-  #expect(audit.frames.allSatisfy { $0.finitePixelCount == 480 * 360 })
+  #expect(audit.frames.allSatisfy { $0.width == 240 && $0.height == 180 })
+  #expect(audit.frames.allSatisfy { $0.outputWidth == 480 && $0.outputHeight == 360 })
+  #expect(audit.frames.allSatisfy { $0.reconstructionMode == "metalfx-temporal" })
+  if #available(macOS 14.4, *) {
+    #expect(audit.frames.allSatisfy { $0.reactiveMaskEnabled })
+  }
+  #expect(audit.frames.allSatisfy { $0.renderScaleX == 2 && $0.renderScaleY == 2 })
+  #expect(audit.frames.allSatisfy { $0.gpuDurationMilliseconds > 0 })
+  #expect(
+    audit.frames.allSatisfy {
+      $0.nativeReferenceGPUDurationMilliseconds.map { $0 > 0 } == true
+    }
+  )
+  #expect(
+    audit.frames.allSatisfy { frame in
+      frame.nativeReferenceAllocatedRenderTargetBytes.map {
+        $0 > frame.allocatedRenderTargetBytes
+      } == true
+    }
+  )
+  #expect(audit.frames.allSatisfy { $0.finitePixelCount == 240 * 180 })
   #expect(audit.frames.allSatisfy { $0.aboveOneHDRPixelCount > 0 })
-  #expect(audit.frames.allSatisfy { $0.activeIdentityPixelCount > 2_000 })
-  #expect(audit.frames.allSatisfy { $0.fullyCoveredAOVPixelCount > 2_000 })
+  #expect(audit.frames.allSatisfy { $0.activeIdentityPixelCount > 500 })
+  #expect(audit.frames.allSatisfy { $0.fullyCoveredAOVPixelCount > 500 })
   #expect(audit.frames.allSatisfy { $0.visibleFeatherIdentityCount > 0 })
   #expect(audit.frames.allSatisfy { $0.maximumNormalUnitError < 0.002 })
   #expect(audit.frames.allSatisfy { $0.minimumFullyCoveredDepthMeters > 0.1 })
   #expect(audit.frames.allSatisfy { $0.maximumFullyCoveredDepthMeters < 2.0 })
+  #expect(audit.frames.allSatisfy { $0.minimumFullyCoveredDeviceDepth > 0 })
+  #expect(audit.frames.allSatisfy { $0.maximumFullyCoveredDeviceDepth < 1 })
   #expect(
     audit.frames.allSatisfy {
-      $0.supportCentroidYPixels > $0.birdCentroidYPixels + 40
+      $0.supportCentroidYPixels > $0.birdCentroidYPixels + 20
     }
   )
   #expect(audit.frames[0].maximumMotionPixels < 0.01)
-  #expect(audit.frames[1].movingFullyCoveredPixelCount > 1_000)
+  #expect(audit.frames[1].movingFullyCoveredPixelCount > 250)
   #expect(audit.frames[1].maximumMotionPixels > 0.1)
   #expect(audit.frames[1].maximumMotionPixels < 100)
+  #expect(audit.frames[0].historyReset)
+  #expect(!audit.frames[1].historyReset)
+  #expect(audit.frames[2].historyReset)
+  #expect(
+    audit.frames.allSatisfy {
+      $0.nativeFullFrameDisplayRMSE.map { $0 < 0.01 } == true
+    }
+  )
+  #expect(
+    audit.frames.allSatisfy {
+      $0.nativeForegroundDisplayRMSE.map { $0 < 0.025 } == true
+    }
+  )
+  #expect(
+    audit.frames.allSatisfy {
+      $0.nativeBirdSilhouetteIntersectionOverUnion.map { $0 > 0.94 } == true
+    }
+  )
+  #expect(
+    audit.frames.allSatisfy {
+      $0.nativeForegroundGradientEnergyRatio.map { $0 > 0.74 } == true
+    }
+  )
 }
