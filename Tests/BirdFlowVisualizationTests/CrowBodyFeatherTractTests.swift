@@ -59,9 +59,14 @@ func crowBodyFeatherTractsOverlapNeckAndCoverWingRoots() {
 
 @Test("quiet head motion bends the cervical tract without moving the mantle")
 func quietHeadMotionBendsOnlyCervicalTract() {
-  let headOffset = SIMD3<Float>(0.0015, -0.0024, 0.0017)
+  let neckPose = CrowStandingNeckPose(
+    translation: SIMD3<Float>(0.0015, -0.0024, 0.0017),
+    yawRadians: 0.018,
+    pitchRadians: -0.014,
+    rollRadians: 0.006
+  )
   let reference = CrowBodyFeatherTracts.samples()
-  let moved = CrowBodyFeatherTracts.samples(headOffset: headOffset)
+  let moved = CrowBodyFeatherTracts.samples(neckPose: neckPose)
   #expect(reference.count == moved.count)
 
   let paired = Array(zip(reference, moved))
@@ -84,5 +89,5 @@ func quietHeadMotionBendsOnlyCervicalTract() {
     .min()!
   #expect(shoulderDisplacement > 0)
   #expect(cranialDisplacement > 6 * shoulderDisplacement)
-  #expect(cranialDisplacement < simd_length(headOffset))
+  #expect(cranialDisplacement < 0.006)
 }

@@ -35,7 +35,7 @@ enum CrowBodyFeatherTracts {
   static let scapularColumnCount = 9
 
   static func samples(
-    headOffset: SIMD3<Float> = .zero
+    neckPose: CrowStandingNeckPose? = nil
   ) -> [CrowBodyFeatherTractSample] {
     var result: [CrowBodyFeatherTractSample] = []
     result.reserveCapacity(
@@ -44,14 +44,14 @@ enum CrowBodyFeatherTracts {
           + mantleRowCount * mantleColumnCount
           + scapularRowCount * scapularColumnCount)
     )
-    appendCervical(headOffset: headOffset, to: &result)
+    appendCervical(neckPose: neckPose, to: &result)
     appendMantle(to: &result)
     appendScapular(to: &result)
     return result
   }
 
   private static func appendCervical(
-    headOffset: SIMD3<Float>,
+    neckPose: CrowStandingNeckPose?,
     to result: inout [CrowBodyFeatherTractSample]
   ) {
     for side: Float in [-1, 1] {
@@ -69,22 +69,40 @@ enum CrowBodyFeatherTracts {
           let halfWidth = 0.046 - 0.015 * axial
           let verticalRadius = 0.046 - 0.013 * axial
           let stagger: Float = row.isMultiple(of: 2) ? 0 : 0.003
-          let root =
+          let unposedRoot =
             center
             + SIMD3<Float>(
               -stagger,
               side * halfWidth * cos(angle),
               verticalRadius * sin(angle)
             )
-            + coupling * headOffset
           let length = 0.023 - 0.004 * axial
-          let tip =
-            root
+          let unposedTip =
+            unposedRoot
             + SIMD3<Float>(
               -length,
               -side * 0.0015 * sin(Float.pi * axial),
               -0.001 - 0.0025 * max(0, -sin(angle))
             )
+          let unposedNormal = normalized(
+            SIMD3<Float>(0.10, side * cos(angle), sin(angle)),
+            fallback: SIMD3<Float>(0, side, 0)
+          )
+          let root =
+            neckPose?.transform(
+              offset: unposedRoot,
+              coupling: coupling
+            ) ?? unposedRoot
+          let tip =
+            neckPose?.transform(
+              offset: unposedTip,
+              coupling: coupling
+            ) ?? unposedTip
+          let planeNormal =
+            neckPose?.rotated(
+              unposedNormal,
+              coupling: coupling
+            ) ?? unposedNormal
           result.append(
             CrowBodyFeatherTractSample(
               region: .cervical,
@@ -93,10 +111,7 @@ enum CrowBodyFeatherTracts {
               column: column,
               rootOffset: root,
               tipOffset: tip,
-              planeNormal: normalized(
-                SIMD3<Float>(0.10, side * cos(angle), sin(angle)),
-                fallback: SIMD3<Float>(0, side, 0)
-              ),
+              planeNormal: planeNormal,
               rootWidthMeters: 0.0035,
               maximumWidthMeters: 0.0062 - 0.0006 * axial,
               camberMeters: 0.0013,

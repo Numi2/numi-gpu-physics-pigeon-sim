@@ -9,9 +9,53 @@ struct CrowStandingFootPose: Equatable {
   let digitTips: [SIMD3<Float>]
 }
 
+struct CrowStandingNeckPose: Equatable {
+  static let pivotOffset = SIMD3<Float>(0.096, 0, 0.038)
+
+  let translation: SIMD3<Float>
+  let yawRadians: Float
+  let pitchRadians: Float
+  let rollRadians: Float
+
+  func transform(
+    offset: SIMD3<Float>,
+    coupling: Float
+  ) -> SIMD3<Float> {
+    let blend = min(max(coupling, 0), 1)
+    let local = offset - Self.pivotOffset
+    return Self.pivotOffset + rotated(local, coupling: blend) + blend * translation
+  }
+
+  func rotated(
+    _ vector: SIMD3<Float>,
+    coupling: Float
+  ) -> SIMD3<Float> {
+    let blend = min(max(coupling, 0), 1)
+    let roll = rollRadians * blend
+    let pitch = pitchRadians * blend
+    let yaw = yawRadians * blend
+
+    let rolled = SIMD3<Float>(
+      vector.x,
+      cos(roll) * vector.y - sin(roll) * vector.z,
+      sin(roll) * vector.y + cos(roll) * vector.z
+    )
+    let pitched = SIMD3<Float>(
+      cos(pitch) * rolled.x + sin(pitch) * rolled.z,
+      rolled.y,
+      -sin(pitch) * rolled.x + cos(pitch) * rolled.z
+    )
+    return SIMD3<Float>(
+      cos(yaw) * pitched.x - sin(yaw) * pitched.y,
+      sin(yaw) * pitched.x + cos(yaw) * pitched.y,
+      pitched.z
+    )
+  }
+}
+
 struct CrowStandingPoseSample: Equatable {
   let bodyCenter: SIMD3<Float>
-  let headOffset: SIMD3<Float>
+  let neckPose: CrowStandingNeckPose
   let supportHeight: Float
   let leftFoot: CrowStandingFootPose
   let rightFoot: CrowStandingFootPose
@@ -41,14 +85,19 @@ enum CrowStandingPose {
     )
     let bodyCenter = referenceBodyCenter + bodyOffset
     let supportHeight = referenceBodyCenter.z + supportHeightRelativeToBodyCenter
-    let headOffset = SIMD3<Float>(
-      0.0015 * sin(slow + 1.10),
-      0.0026 * sin(slow + 0.62),
-      0.0018 * sin(breath + 0.30)
+    let neckPose = CrowStandingNeckPose(
+      translation: SIMD3<Float>(
+        0.0015 * sin(slow + 1.10),
+        0.0026 * sin(slow + 0.62),
+        0.0018 * sin(breath + 0.30)
+      ),
+      yawRadians: 0.020 * sin(slow + 0.62),
+      pitchRadians: 0.017 * sin(breath + 0.30),
+      rollRadians: 0.007 * sin(slow - 0.18)
     )
     return CrowStandingPoseSample(
       bodyCenter: bodyCenter,
-      headOffset: headOffset,
+      neckPose: neckPose,
       supportHeight: supportHeight,
       leftFoot: foot(
         side: 1,

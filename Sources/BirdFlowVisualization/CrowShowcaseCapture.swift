@@ -1545,9 +1545,8 @@ private struct CrowMeshBuilder {
       SIMD3<Float>(radiiRaw[0], radiiRaw[1], radiiRaw[2])
       * SIMD3<Float>(0.86, 0.80, 0.88)
     let breathing = 1 + 0.012 * sin(2 * Float.pi * phase)
-    let headCenter =
-      posedBodyCenter + SIMD3<Float>(0.164, 0, 0.052)
-      + (standingPose?.headOffset ?? .zero)
+    let headCenter = posedBodyCenter + SIMD3<Float>(0.164, 0, 0.052)
+    let headVertexStart = vertices.count
     vertices.append(
       contentsOf: CrowCranialAnatomy.vertices(
         center: headCenter,
@@ -1571,6 +1570,14 @@ private struct CrowMeshBuilder {
         to: &vertices
       )
     }
+    if let neckPose = standingPose?.neckPose {
+      transformHeadVertices(
+        in: headVertexStart..<vertices.count,
+        bodyCenter: posedBodyCenter,
+        neckPose: neckPose,
+        vertices: &vertices
+      )
+    }
     appendBodyContourFeathers(
       bodyCenter: posedBodyCenter,
       projectedPixelsPerMeter: projectedPixelsPerMeter,
@@ -1578,7 +1585,7 @@ private struct CrowMeshBuilder {
     )
     appendBodyFeatherTracts(
       bodyCenter: posedBodyCenter,
-      headOffset: standingPose?.headOffset ?? .zero,
+      neckPose: standingPose?.neckPose,
       projectedPixelsPerMeter: projectedPixelsPerMeter,
       to: &vertices
     )
@@ -1716,11 +1723,11 @@ private struct CrowMeshBuilder {
 
   private func appendBodyFeatherTracts(
     bodyCenter: SIMD3<Float>,
-    headOffset: SIMD3<Float>,
+    neckPose: CrowStandingNeckPose?,
     projectedPixelsPerMeter: Float,
     to vertices: inout [ColoredVertex]
   ) {
-    for sample in CrowBodyFeatherTracts.samples(headOffset: headOffset) {
+    for sample in CrowBodyFeatherTracts.samples(neckPose: neckPose) {
       let color: SIMD4<Float>
       switch sample.region {
       case .cervical:
@@ -1744,6 +1751,39 @@ private struct CrowMeshBuilder {
         projectedPixelsPerMeter: projectedPixelsPerMeter,
         to: &vertices
       )
+    }
+  }
+
+  private func transformHeadVertices(
+    in range: Range<Int>,
+    bodyCenter: SIMD3<Float>,
+    neckPose: CrowStandingNeckPose,
+    vertices: inout [ColoredVertex]
+  ) {
+    for index in range {
+      var transformed = vertices[index]
+      let position = SIMD3<Float>(
+        transformed.position.x,
+        transformed.position.y,
+        transformed.position.z
+      )
+      let normal = SIMD3<Float>(
+        transformed.normal.x,
+        transformed.normal.y,
+        transformed.normal.z
+      )
+      transformed.position = SIMD4<Float>(
+        bodyCenter + neckPose.transform(
+          offset: position - bodyCenter,
+          coupling: 1
+        ),
+        transformed.position.w
+      )
+      transformed.normal = SIMD4<Float>(
+        neckPose.rotated(normal, coupling: 1),
+        transformed.normal.w
+      )
+      vertices[index] = transformed
     }
   }
 
