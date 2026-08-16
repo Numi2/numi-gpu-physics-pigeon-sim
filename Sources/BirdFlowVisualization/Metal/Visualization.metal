@@ -1332,7 +1332,11 @@ inline float3 showcaseCrowLinearRadiance(
         float3(0.006f,0.009f,0.014f),
         flightFeather
     );
-    color+=sharpTint*featherSpecular*mix(0.55f,1.0f,flightFeather);
+    // Body contour vanes are short, overlapping, and collectively rougher
+    // than exposed remiges. Keep their sharp lobe below the isolated silver
+    // flashes that otherwise appear when one shoulder vane meets the half
+    // vector, while preserving the full sharp response on flight feathers.
+    color+=sharpTint*featherSpecular*mix(0.30f,1.0f,flightFeather);
     color+=softTint*softSpecular;
     color+=anisotropicSpecular
         *mix(float3(0.020f,0.030f,0.046f),float3(0.012f,0.020f,0.034f),flightFeather);
