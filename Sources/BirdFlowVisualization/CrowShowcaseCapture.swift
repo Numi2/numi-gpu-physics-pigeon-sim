@@ -2323,6 +2323,16 @@ private struct CrowMeshBuilder {
         projectedPixelsPerMeter: projectedPixelsPerMeter,
         to: &vertices
       )
+      appendTractFeatherMesostructure(
+        CrowUppertailCovertDetail.segments(
+          for: sample,
+          projectedPixelsPerMeter: projectedPixelsPerMeter
+        ),
+        bodyCenter: bodyCenter,
+        planeNormal: sample.planeNormal,
+        material: material,
+        to: &vertices
+      )
     }
   }
 

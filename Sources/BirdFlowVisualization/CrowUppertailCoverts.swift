@@ -162,19 +162,24 @@ enum CrowUppertailCoverts {
     0.020 + 0.030 * min(max(axialFraction, 0), 1)
   }
 
-  /// Medial posterior coverts broaden over the rectrix insertion where their
-  /// tapered tips otherwise reveal the smooth pelvic loft to rear cameras.
+  /// Posterior coverts broaden over both the medial rectrix insertion and the
+  /// lateral folded-wing tuck. The center closes the tail-root stack; the two
+  /// lateral courses overlap the innermost folded remiges instead of exposing
+  /// a smooth pelvic wedge between independently tapering feather fields.
   static func insertionWidthScale(
     rowFraction: Float,
     axialFraction: Float
   ) -> Float {
+    let lateral = smootherstep(
+      min(max((abs(2 * rowFraction - 1) - 0.58) / 0.42, 0), 1)
+    )
     let medial = smootherstep(
       min(max((1 - abs(2 * rowFraction - 1) - 0.35) / 0.65, 0), 1)
     )
     let posterior = smootherstep(
       min(max((axialFraction - 0.55) / 0.45, 0), 1)
     )
-    return 1 + 0.38 * medial * posterior
+    return 1 + (0.38 * medial + 0.32 * lateral) * posterior
   }
 
   private static func smootherstep(_ value: Float) -> Float {

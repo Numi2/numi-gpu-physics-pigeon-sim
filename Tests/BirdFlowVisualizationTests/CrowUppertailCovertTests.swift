@@ -37,10 +37,12 @@ func uppertailCovertsCloseDorsalPelvicToRectrixShell() {
     ) == 1.38
   )
   #expect(
-    CrowUppertailCoverts.insertionWidthScale(
-      rowFraction: 0,
-      axialFraction: 1
-    ) == 1
+    abs(
+      CrowUppertailCoverts.insertionWidthScale(
+        rowFraction: 0,
+        axialFraction: 1
+      ) - 1.32
+    ) < 1e-6
   )
   #expect(
     CrowUppertailCoverts.insertionWidthScale(
@@ -85,6 +87,43 @@ func uppertailCovertsCloseDorsalPelvicToRectrixShell() {
     #expect(simd_distance(posterior.tipOffset, rectrixOverlapPoint) < 0.018)
     #expect(
       simd_dot(posterior.tipOffset - rectrixOverlapPoint, tail.normal) > 0.008
+    )
+  }
+}
+
+@Test("upper-tail coverts resolve shafts and paired barb groups at full density")
+func uppertailCovertsResolveFullDensityMesostructure() {
+  let samples = CrowUppertailCoverts.samples()
+  for feather in samples {
+    #expect(
+      CrowUppertailCovertDetail.segments(
+        for: feather,
+        projectedPixelsPerMeter: 1_000
+      ).isEmpty
+    )
+    let segments = CrowUppertailCovertDetail.segments(
+      for: feather,
+      projectedPixelsPerMeter: 1_600
+    )
+    #expect(
+      segments.count == 1 + 2 * CrowUppertailCovertDetail.barbPairCount
+    )
+    #expect(segments.filter { $0.kind == .rachis }.count == 1)
+    #expect(
+      segments.filter { $0.kind == .edgeBarbGroup }.count
+        == 2 * CrowUppertailCovertDetail.barbPairCount
+    )
+    let featherLength = simd_distance(feather.rootOffset, feather.tipOffset)
+    #expect(
+      segments.allSatisfy {
+        $0.start.x.isFinite && $0.start.y.isFinite && $0.start.z.isFinite
+          && $0.end.x.isFinite && $0.end.y.isFinite && $0.end.z.isFinite
+          && $0.startRadiusMeters > $0.endRadiusMeters
+          && $0.endRadiusMeters > 0
+          && simd_distance($0.start, $0.end) > 1e-5
+          && simd_distance($0.start, feather.rootOffset) < featherLength
+          && simd_distance($0.end, feather.rootOffset) < 1.30 * featherLength
+      }
     )
   }
 }
