@@ -2156,6 +2156,7 @@ private struct CrowMeshBuilder {
         edgeRippleAmplitude: sample.edgeRippleAmplitude,
         edgeRipplePhase: sample.edgeRipplePhase,
         edgeRippleCycles: sample.edgeRippleCycles,
+        surfaceFeatherClass: sample.surfaceFeatherClass,
         lodLengthMeters: simd_distance(sample.rootOffset, sample.tipOffset),
         projectedPixelsPerMeter: projectedPixelsPerMeter,
         to: &vertices

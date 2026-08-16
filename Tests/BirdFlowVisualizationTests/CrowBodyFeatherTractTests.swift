@@ -22,6 +22,22 @@ func crowBodyFeatherTractsOverlapNeckAndCoverWingRoots() {
   #expect(cervical.count == 182)
   #expect(mantle.count == 252)
   #expect(scapular.count == 400)
+  #expect(Set(cervical.map(\.surfaceFeatherClass)) == Set([5, 6]))
+  #expect(mantle.allSatisfy { $0.surfaceFeatherClass == 5 })
+  #expect(scapular.allSatisfy { $0.surfaceFeatherClass == 6 })
+  #expect(samples.allSatisfy { $0.surfaceFeatherClass == 5 || $0.surfaceFeatherClass == 6 })
+  #expect(
+    CrowBodyFeatherTracts.surfaceFeatherClass(
+      for: .cervical,
+      cervicalAngle: 0.75
+    ) == 5
+  )
+  #expect(
+    CrowBodyFeatherTracts.surfaceFeatherClass(
+      for: .cervical,
+      cervicalAngle: -0.75
+    ) == 6
+  )
 
   let mantleLengths = mantle.map { simd_distance($0.rootOffset, $0.tipOffset) }
   let scapularLengths = scapular.map { simd_distance($0.rootOffset, $0.tipOffset) }

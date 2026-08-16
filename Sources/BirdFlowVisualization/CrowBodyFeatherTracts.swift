@@ -14,6 +14,7 @@ enum CrowBodyFeatherTractRegion: UInt8, CaseIterable {
 /// trunk, preventing a visible neck seam.
 struct CrowBodyFeatherTractSample: Equatable {
   let region: CrowBodyFeatherTractRegion
+  let surfaceFeatherClass: UInt32
   let side: Float
   let row: Int
   let column: Int
@@ -144,6 +145,10 @@ enum CrowBodyFeatherTracts {
           result.append(
             CrowBodyFeatherTractSample(
               region: .cervical,
+              surfaceFeatherClass: surfaceFeatherClass(
+                for: .cervical,
+                cervicalAngle: angle
+              ),
               side: side,
               row: row,
               column: column,
@@ -301,6 +306,7 @@ enum CrowBodyFeatherTracts {
           result.append(
             CrowBodyFeatherTractSample(
               region: .mantle,
+              surfaceFeatherClass: surfaceFeatherClass(for: .mantle),
               side: side,
               row: row,
               column: column,
@@ -418,6 +424,7 @@ enum CrowBodyFeatherTracts {
           result.append(
             CrowBodyFeatherTractSample(
               region: .scapular,
+              surfaceFeatherClass: surfaceFeatherClass(for: .scapular),
               side: side,
               row: row,
               column: column,
@@ -444,6 +451,20 @@ enum CrowBodyFeatherTracts {
           )
         }
       }
+    }
+  }
+
+  static func surfaceFeatherClass(
+    for region: CrowBodyFeatherTractRegion,
+    cervicalAngle: Float = 0
+  ) -> UInt32 {
+    switch region {
+    case .cervical:
+      return sin(cervicalAngle) > 0.28 ? 5 : 6
+    case .mantle:
+      return 5
+    case .scapular:
+      return 6
     }
   }
 
