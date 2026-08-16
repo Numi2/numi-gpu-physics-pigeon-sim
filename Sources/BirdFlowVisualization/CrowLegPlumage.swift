@@ -17,8 +17,25 @@ struct CrowLegPlumageFeather: Equatable {
 /// visible silhouette. Staggered feather rows overlap axially and wrap around
 /// the limb; their distal tips cross the hock to break the artificial cuff.
 enum CrowLegPlumage {
-  static let radialCount = 10
-  static let stationCount = 5
+  static let radialCount = 14
+  static let stationCount = 7
+
+  static func visibleSamples(
+    hip: SIMD3<Float>,
+    hock: SIMD3<Float>,
+    projectedPixelsPerMeter: Float
+  ) -> [CrowLegPlumageFeather] {
+    let complete = samples(hip: hip, hock: hock)
+    if projectedPixelsPerMeter >= 1_400 { return complete }
+    if projectedPixelsPerMeter >= 900 {
+      return complete.filter {
+        $0.radialIndex.isMultiple(of: 2) && $0.stationIndex.isMultiple(of: 2)
+      }
+    }
+    return complete.filter {
+      $0.radialIndex.isMultiple(of: 2) && $0.stationIndex.isMultiple(of: 3)
+    }
+  }
 
   static func samples(
     hip: SIMD3<Float>,
@@ -34,22 +51,35 @@ enum CrowLegPlumage {
     var result: [CrowLegPlumageFeather] = []
     result.reserveCapacity(radialCount * stationCount)
     for radialIndex in 0..<radialCount {
-      let theta = 2 * Float.pi * Float(radialIndex) / Float(radialCount)
-      let radial = cos(theta) * first + sin(theta) * second
       let stagger: Float = radialIndex.isMultiple(of: 2) ? 0 : 0.5
       for stationIndex in 0..<stationCount {
-        let rootFraction = min(
-          0.78,
-          0.03 + 0.18 * (Float(stationIndex) + stagger)
+        let shapeIdentity = identityVariation(
+          radialIndex: radialIndex,
+          stationIndex: stationIndex,
+          salt: 0x9E37_79B9
         )
-        let tipFraction = min(1.10, rootFraction + 0.34)
+        let baseTheta = 2 * Float.pi * Float(radialIndex) / Float(radialCount)
+        let theta =
+          baseTheta
+          + 0.08 * (2 * Float.pi / Float(radialCount)) * shapeIdentity
+        let radial = cos(theta) * first + sin(theta) * second
+        let rootFraction = min(
+          0.82,
+          0.025 + 0.13 * (Float(stationIndex) + stagger)
+        )
+        let tipFraction = min(
+          1.10,
+          rootFraction + 0.31 * (1 + 0.045 * shapeIdentity)
+        )
         let rootRadius = radius(at: rootFraction)
         let tipRadius = radius(at: tipFraction)
         let root = mix(hip, hock, rootFraction) + rootRadius * radial
         let tip = mix(hip, hock, tipFraction) + tipRadius * radial
         let circumferentialSpacing =
           2 * Float.pi * rootRadius / Float(radialCount)
-        let maximumWidth = max(0.0024, 0.68 * circumferentialSpacing)
+        let maximumWidth =
+          max(0.0022, 0.76 * circumferentialSpacing)
+          * (1 + 0.04 * shapeIdentity)
         result.append(
           CrowLegPlumageFeather(
             radialIndex: radialIndex,
@@ -57,9 +87,9 @@ enum CrowLegPlumage {
             root: root,
             tip: tip,
             planeNormal: radial,
-            rootWidthMeters: 0.58 * maximumWidth,
+            rootWidthMeters: 0.54 * maximumWidth,
             maximumWidthMeters: maximumWidth,
-            camberMeters: 0.00045
+            camberMeters: 0.00040 * (1 + 0.10 * shapeIdentity)
           )
         )
       }
@@ -87,5 +117,21 @@ enum CrowLegPlumage {
   ) -> SIMD3<Float> {
     let length = simd_length(value)
     return length > 1e-8 ? value / length : fallback
+  }
+
+  private static func identityVariation(
+    radialIndex: Int,
+    stationIndex: Int,
+    salt: UInt32
+  ) -> Float {
+    var value = UInt32(truncatingIfNeeded: radialIndex) &* 0x9E37_79B9
+    value ^= UInt32(truncatingIfNeeded: stationIndex) &* 0x85EB_CA6B
+    value ^= salt
+    value ^= value >> 16
+    value &*= 0x7FEB_352D
+    value ^= value >> 15
+    value &*= 0x846C_A68B
+    value ^= value >> 16
+    return 2 * Float(value & 0x00FF_FFFF) / Float(0x00FF_FFFF) - 1
   }
 }

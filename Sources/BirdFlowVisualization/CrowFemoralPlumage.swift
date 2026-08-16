@@ -19,9 +19,27 @@ struct CrowFemoralPlumageFeather: Equatable {
 /// the dorsal/outer upper thigh. This deliberately changes only presentation
 /// geometry: hip, hock, ankle, and planted digital contacts remain untouched.
 enum CrowFemoralPlumage {
-  static let rowCount = 5
-  static let courseCount = 7
+  static let rowCount = 9
+  static let courseCount = 12
   static let shellClearanceMeters: Float = 0.0009
+
+  static func visibleSamples(
+    bodyCenter: SIMD3<Float>,
+    hip: SIMD3<Float>,
+    hock: SIMD3<Float>,
+    projectedPixelsPerMeter: Float
+  ) -> [CrowFemoralPlumageFeather] {
+    let complete = samples(bodyCenter: bodyCenter, hip: hip, hock: hock)
+    if projectedPixelsPerMeter >= 1_400 { return complete }
+    if projectedPixelsPerMeter >= 900 {
+      return complete.filter {
+        $0.row.isMultiple(of: 2) && $0.course.isMultiple(of: 2)
+      }
+    }
+    return complete.filter {
+      $0.row.isMultiple(of: 2) && $0.course.isMultiple(of: 3)
+    }
+  }
 
   static func samples(
     bodyCenter: SIMD3<Float>,
@@ -33,11 +51,45 @@ enum CrowFemoralPlumage {
     var result: [CrowFemoralPlumageFeather] = []
     result.reserveCapacity(rowCount * courseCount)
     for row in 0..<rowCount {
-      let theta = -1.18 + 0.17 * Float(row)
+      let baseRowFraction = Float(row) / Float(rowCount - 1)
       for course in 0..<courseCount {
-        let courseFraction = Float(course) / Float(courseCount - 1)
-        let stagger: Float = row.isMultiple(of: 2) ? 0 : 0.004
-        let rootX = -0.070 + 0.075 * courseFraction - stagger
+        let rootIdentity = identityVariation(
+          row: row,
+          course: course,
+          salt: 0x9E37_79B9
+        )
+        let shapeIdentity = identityVariation(
+          row: row,
+          course: course,
+          salt: 0x85EB_CA6B
+        )
+        let rowStep = 1 / Float(rowCount - 1)
+        let rowFraction = min(
+          1,
+          max(
+            0,
+            baseRowFraction
+              + (row == 0 || row == rowCount - 1
+                ? 0 : 0.11 * rowStep * rootIdentity)
+          )
+        )
+        let theta = -1.20 + 0.70 * rowFraction
+        let baseCourseFraction = Float(course) / Float(courseCount - 1)
+        let courseStep = 1 / Float(courseCount - 1)
+        let courseFraction = min(
+          1,
+          max(
+            0,
+            baseCourseFraction
+              + (course == 0 || course == courseCount - 1
+                ? 0 : 0.10 * courseStep * shapeIdentity)
+          )
+        )
+        let stagger: Float =
+          row.isMultiple(of: 2)
+          ? 0
+          : 0.0028
+        let rootX = -0.048 + 0.040 * courseFraction - stagger
         let localSurface = mirroredSurfacePoint(
           x: rootX,
           theta: theta,
@@ -56,13 +108,25 @@ enum CrowFemoralPlumage {
             - legAxis * simd_dot(rootRelativeToHip, legAxis),
           fallback: SIMD3<Float>(0, side, 0)
         )
-        let tipFraction =
-          0.105 + 0.165 * courseFraction
-          + (row.isMultiple(of: 2) ? 0 : 0.012)
-        let tipRadius = 0.0132 - 0.0015 * courseFraction
-        let tip = mix(hip, hock, tipFraction) + tipRadius * radial
-        let length = simd_distance(root, tip)
-        let maximumWidth = min(0.011, max(0.006, 0.30 * length))
+        let targetFraction =
+          0.045 + 0.145 * courseFraction
+          + (row.isMultiple(of: 2) ? 0 : 0.008)
+        let targetRadius =
+          (0.0142 - 0.0011 * courseFraction)
+          * (1 + 0.025 * rootIdentity)
+        let bridgeTarget =
+          mix(hip, hock, targetFraction) + targetRadius * radial
+        let bridgeVector = bridgeTarget - root
+        let bridgeDistance = simd_length(bridgeVector)
+        let length =
+          min(0.0285, max(0.018, 0.56 * bridgeDistance))
+          * (1 + 0.10 * shapeIdentity)
+        let direction = normalized(
+          bridgeVector + 0.20 * bridgeDistance * legAxis,
+          fallback: legAxis
+        )
+        let tip = root + length * direction
+        let maximumWidth = min(0.0082, max(0.0043, 0.22 * length))
         result.append(
           CrowFemoralPlumageFeather(
             side: side,
@@ -71,10 +135,14 @@ enum CrowFemoralPlumage {
             rootSurface: rootSurface,
             root: root,
             tip: tip,
-            planeNormal: normalized(localNormal + radial, fallback: localNormal),
-            rootWidthMeters: 0.56 * maximumWidth,
-            maximumWidthMeters: maximumWidth,
-            camberMeters: 0.0012 + 0.0004 * courseFraction
+            planeNormal: normalized(
+              0.85 * localNormal + 0.15 * radial,
+              fallback: localNormal
+            ),
+            rootWidthMeters: 0.52 * maximumWidth,
+            maximumWidthMeters: maximumWidth * (1 + 0.04 * shapeIdentity),
+            camberMeters: (0.00085 + 0.00030 * courseFraction)
+              * (1 + 0.08 * rootIdentity)
           )
         )
       }
@@ -114,5 +182,21 @@ enum CrowFemoralPlumage {
   ) -> SIMD3<Float> {
     let length = simd_length(value)
     return length > 1e-8 ? value / length : fallback
+  }
+
+  private static func identityVariation(
+    row: Int,
+    course: Int,
+    salt: UInt32
+  ) -> Float {
+    var value = UInt32(truncatingIfNeeded: row) &* 0x9E37_79B9
+    value ^= UInt32(truncatingIfNeeded: course) &* 0x85EB_CA6B
+    value ^= salt
+    value ^= value >> 16
+    value &*= 0x7FEB_352D
+    value ^= value >> 15
+    value &*= 0x846C_A68B
+    value ^= value >> 16
+    return 2 * Float(value & 0x00FF_FFFF) / Float(0x00FF_FFFF) - 1
   }
 }

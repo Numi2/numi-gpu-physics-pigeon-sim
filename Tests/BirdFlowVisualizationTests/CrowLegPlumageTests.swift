@@ -11,6 +11,28 @@ func crowCruralPlumageOverlapsLegAndCrossesHockBoundary() {
   let legLength = simd_distance(hip, hock)
   let samples = CrowLegPlumage.samples(hip: hip, hock: hock)
   #expect(samples.count == CrowLegPlumage.radialCount * CrowLegPlumage.stationCount)
+  #expect(samples.count == 98)
+  #expect(
+    CrowLegPlumage.visibleSamples(
+      hip: hip,
+      hock: hock,
+      projectedPixelsPerMeter: 800
+    ).count == 21
+  )
+  #expect(
+    CrowLegPlumage.visibleSamples(
+      hip: hip,
+      hock: hock,
+      projectedPixelsPerMeter: 1_000
+    ).count == 28
+  )
+  #expect(
+    CrowLegPlumage.visibleSamples(
+      hip: hip,
+      hock: hock,
+      projectedPixelsPerMeter: 1_600
+    ).count == 98
+  )
 
   for radialIndex in 0..<CrowLegPlumage.radialCount {
     let row =
@@ -33,6 +55,7 @@ func crowCruralPlumageOverlapsLegAndCrossesHockBoundary() {
     samples.allSatisfy {
       simd_dot($0.tip - $0.root, axis) > 0
         && $0.maximumWidthMeters > $0.rootWidthMeters
+        && $0.maximumWidthMeters < 0.0052
         && abs(simd_length($0.planeNormal) - 1) < 1e-5
     }
   )

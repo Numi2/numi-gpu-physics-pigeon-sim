@@ -20,20 +20,68 @@ struct CrowFoldedWingCovertSample: Equatable {
 /// and axillary seams from arbitrary cameras while retaining explicit feather
 /// identities that can move to mesh shaders on future hardware.
 enum CrowFoldedWingCoverts {
-  static let rowCount = 5
-  static let columnCount = 13
+  static let rowCount = 9
+  static let columnCount = 20
   static let shellClearanceMeters: Float = 0.0012
+
+  static func visibleSamples(
+    projectedPixelsPerMeter: Float
+  ) -> [CrowFoldedWingCovertSample] {
+    let complete = samples()
+    if projectedPixelsPerMeter >= 1_400 { return complete }
+    if projectedPixelsPerMeter >= 900 {
+      return complete.filter {
+        $0.row.isMultiple(of: 2) && $0.column.isMultiple(of: 2)
+      }
+    }
+    return complete.filter {
+      $0.row.isMultiple(of: 3) && $0.column.isMultiple(of: 3)
+    }
+  }
 
   static func samples() -> [CrowFoldedWingCovertSample] {
     var result: [CrowFoldedWingCovertSample] = []
     result.reserveCapacity(2 * rowCount * columnCount)
     for side: Float in [-1, 1] {
       for row in 0..<rowCount {
-        let rowFraction = Float(row) / Float(rowCount - 1)
-        let theta = 0.92 - 0.98 * rowFraction
+        let baseRowFraction = Float(row) / Float(rowCount - 1)
         for column in 0..<columnCount {
-          let axial = Float(column) / Float(columnCount - 1)
-          let stagger: Float = row.isMultiple(of: 2) ? 0 : 0.0045
+          let rootIdentity = identityVariation(
+            row: row,
+            column: column,
+            salt: 0x9E37_79B9
+          )
+          let shapeIdentity = identityVariation(
+            row: row,
+            column: column,
+            salt: 0x85EB_CA6B
+          )
+          let rowStep = 1 / Float(rowCount - 1)
+          let rowFraction = min(
+            1,
+            max(
+              0,
+              baseRowFraction
+                + (row == 0 || row == rowCount - 1
+                  ? 0 : 0.10 * rowStep * rootIdentity)
+            )
+          )
+          let theta = 0.94 - 1.02 * rowFraction
+          let baseAxial = Float(column) / Float(columnCount - 1)
+          let axialStep = 1 / Float(columnCount - 1)
+          let axial = min(
+            1,
+            max(
+              0,
+              baseAxial
+                + (column == 0 || column == columnCount - 1
+                  ? 0 : 0.09 * axialStep * shapeIdentity)
+            )
+          )
+          let stagger: Float =
+            row.isMultiple(of: 2)
+            ? 0
+            : 0.5 * 0.224 / Float(columnCount - 1)
           let rootX = 0.092 - 0.224 * axial - stagger
           let rootSurface = mirroredSurfacePoint(
             x: rootX,
@@ -47,9 +95,12 @@ enum CrowFoldedWingCoverts {
           )
           let clearance = shellClearanceMeters + 0.00025 * rowFraction
           let root = rootSurface + clearance * rootNormal
-          let nominalLength = 0.038 + 0.044 * axial + 0.007 * rowFraction
+          let nominalLength =
+            (0.034 + 0.044 * axial + 0.006 * rowFraction)
+            * (1 + 0.055 * shapeIdentity)
           let tipX = rootX - nominalLength
-          let tipTheta = theta - 0.055 - 0.025 * axial
+          let tipTheta =
+            theta - 0.050 - 0.024 * axial + 0.012 * rootIdentity
           let clampedTipX = max(tipX, CrowBodyAnatomy.loftRings.first!.x)
           let tipSurface = mirroredSurfacePoint(
             x: clampedTipX,
@@ -66,8 +117,8 @@ enum CrowFoldedWingCoverts {
             tip += SIMD3<Float>(tipX - clampedTipX, 0, 0.16 * (tipX - clampedTipX))
           }
           let localWidth = max(
-            0.0085,
-            0.88 * circumferentialSpacing(x: rootX, theta: theta)
+            0.0062,
+            0.78 * circumferentialSpacing(x: rootX, theta: theta)
           )
           result.append(
             CrowFoldedWingCovertSample(
@@ -78,9 +129,11 @@ enum CrowFoldedWingCoverts {
               rootOffset: root,
               tipOffset: tip,
               planeNormal: normalized(rootNormal + tipNormal, fallback: rootNormal),
-              rootWidthMeters: 0.58 * localWidth,
-              maximumWidthMeters: localWidth * (1 + 0.10 * axial),
-              camberMeters: 0.0018 + 0.0007 * rowFraction
+              rootWidthMeters: 0.52 * localWidth,
+              maximumWidthMeters:
+                localWidth * (1 + 0.08 * axial) * (1 + 0.04 * shapeIdentity),
+              camberMeters: (0.00155 + 0.00055 * rowFraction)
+                * (1 + 0.09 * rootIdentity)
             )
           )
         }
@@ -121,5 +174,21 @@ enum CrowFoldedWingCoverts {
   ) -> SIMD3<Float> {
     let length = simd_length(value)
     return length > 1e-8 ? value / length : fallback
+  }
+
+  private static func identityVariation(
+    row: Int,
+    column: Int,
+    salt: UInt32
+  ) -> Float {
+    var value = UInt32(truncatingIfNeeded: row) &* 0x9E37_79B9
+    value ^= UInt32(truncatingIfNeeded: column) &* 0x85EB_CA6B
+    value ^= salt
+    value ^= value >> 16
+    value &*= 0x7FEB_352D
+    value ^= value >> 15
+    value &*= 0x846C_A68B
+    value ^= value >> 16
+    return 2 * Float(value & 0x00FF_FFFF) / Float(0x00FF_FFFF) - 1
   }
 }

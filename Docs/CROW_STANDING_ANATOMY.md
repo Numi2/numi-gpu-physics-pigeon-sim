@@ -161,9 +161,13 @@ as the nape, so the visible transition cannot collapse into a narrow static
 collar while the head moves.
 
 The pelvic-to-leg transition uses a distinct estimated femoral tract before the
-existing crural tract. Five body-surface-rooted rows cross the dorsal/outer
-upper thigh in seven overlapping courses and terminate inside the proximal
-crural envelope. This organization follows the corvid pterylography reported
+existing crural tract. Nine body-surface-rooted rows cross the dorsal/outer
+upper thigh in twelve overlapping courses and advance toward the proximal
+fourteen-by-seven crural envelope without converging onto one cylindrical tip
+ring. Identity-stable root, length, radial phase,
+width, and camber variation breaks the former broad cuff into `108` femoral and
+`98` crural vanes per side without changing hip, hock, ankle, or digital support
+coordinates. This organization follows the corvid pterylography reported
 for Clark's Nutcracker by
 [Mewaldt (1958)](https://sora.unm.edu/sites/default/files/journals/condor/v060n03/p0165-p0187.pdf);
 only the tract relationship transfers here, not species dimensions. The layer
@@ -197,6 +201,15 @@ adjacent roots remain covered circumferentially and axially. Deterministic
 low/medium/full output tiers retain `140`, `236`, or `470` combined cervical,
 mantle, and scapular vanes. Throat tips also receive bounded tangential sweep so
 the ventral cranial shell does not collapse into a single geometric fan.
+The folded-wing shell now uses nine by twenty body-seated courses per side,
+raising its inventory from `130` broad panels to `360` narrower coverts. Every
+root remains on the asymmetric body loft, every axial and circumferential
+neighbour overlaps, and bounded course, length, tip-sweep, width, and camber
+variation prevents a regular tiled plate from replacing the former sparse grid.
+Final-output coverage selects low/medium/full combined tiers of `42`/`100`/`360`
+folded coverts, `20`/`30`/`108` femoral vanes per side, and `21`/`28`/`98`
+crural vanes per side. The full `1280 x 720` standing view retains every identity;
+smaller temporally reconstructed outputs do not alias subpixel feather fields.
 
 Run the presentation with:
 

@@ -21,7 +21,40 @@ func femoralPlumageBridgesBodyLoftAndUpperCruralTract() {
     hock: rightHock
   )
   #expect(left.count == CrowFemoralPlumage.rowCount * CrowFemoralPlumage.courseCount)
+  #expect(left.count == 108)
   #expect(left.count == right.count)
+  #expect(
+    CrowFemoralPlumage.visibleSamples(
+      bodyCenter: bodyCenter,
+      hip: leftHip,
+      hock: leftHock,
+      projectedPixelsPerMeter: 800
+    ).count == 20
+  )
+  #expect(
+    CrowFemoralPlumage.visibleSamples(
+      bodyCenter: bodyCenter,
+      hip: leftHip,
+      hock: leftHock,
+      projectedPixelsPerMeter: 1_000
+    ).count == 30
+  )
+  #expect(
+    CrowFemoralPlumage.visibleSamples(
+      bodyCenter: bodyCenter,
+      hip: leftHip,
+      hock: leftHock,
+      projectedPixelsPerMeter: 1_600
+    ).count == 108
+  )
+  #expect(
+    left
+      == CrowFemoralPlumage.samples(
+        bodyCenter: bodyCenter,
+        hip: leftHip,
+        hock: leftHock
+      )
+  )
 
   for pair in zip(left, right) {
     #expect(pair.0.row == pair.1.row)
@@ -36,15 +69,12 @@ func femoralPlumageBridgesBodyLoftAndUpperCruralTract() {
   let cruralRoots = CrowLegPlumage.samples(hip: leftHip, hock: leftHock).map(\.root)
   for feather in left {
     let clearance = simd_distance(feather.root, feather.rootSurface)
-    let tipProjection = simd_dot(feather.tip - leftHip, legAxis)
-    let tipAxisPoint = leftHip + tipProjection * legAxis
+    let length = simd_distance(feather.root, feather.tip)
     #expect(abs(clearance - CrowFemoralPlumage.shellClearanceMeters) < 1e-5)
     #expect(feather.root.y > 0)
-    #expect(tipProjection > 0.004)
-    #expect(tipProjection < 0.018)
-    #expect(simd_distance(feather.tip, tipAxisPoint) > 0.010)
-    #expect(simd_distance(feather.tip, tipAxisPoint) < 0.014)
-    #expect(simd_distance(feather.root, feather.tip) < 0.070)
+    #expect(length > 0.015)
+    #expect(length < 0.032)
+    #expect(simd_dot(feather.tip - feather.root, legAxis) > 0)
     #expect(feather.maximumWidthMeters > feather.rootWidthMeters)
     #expect(abs(simd_length(feather.planeNormal) - 1) < 1e-5)
     #expect(cruralRoots.map { simd_distance($0, feather.tip) }.min()! < 0.025)
@@ -57,6 +87,18 @@ func femoralPlumageBridgesBodyLoftAndUpperCruralTract() {
         simd_distance(pair.0.root, pair.1.root)
           < simd_distance(pair.0.root, pair.0.tip)
       )
+    }
+  }
+
+  for course in 0..<CrowFemoralPlumage.courseCount {
+    let row = left.filter { $0.course == course }.sorted { $0.row < $1.row }
+    #expect(row.count == CrowFemoralPlumage.rowCount)
+    for pair in zip(row, row.dropFirst()) {
+      #expect(
+        simd_distance(pair.0.root, pair.1.root)
+          < pair.0.maximumWidthMeters + pair.1.maximumWidthMeters
+      )
+      #expect(abs(pair.0.root.x - pair.1.root.x) > 0.002)
     }
   }
 }

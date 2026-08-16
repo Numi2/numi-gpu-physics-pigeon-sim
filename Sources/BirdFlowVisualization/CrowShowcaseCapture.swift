@@ -2167,7 +2167,9 @@ private struct CrowMeshBuilder {
     projectedPixelsPerMeter: Float,
     to vertices: inout [ColoredVertex]
   ) {
-    for sample in CrowFoldedWingCoverts.samples() {
+    for sample in CrowFoldedWingCoverts.visibleSamples(
+      projectedPixelsPerMeter: projectedPixelsPerMeter
+    ) {
       let rowFraction = Float(sample.row) / Float(CrowFoldedWingCoverts.rowCount - 1)
       appendFeatherBlade(
         root: bodyCenter + sample.rootOffset,
@@ -2209,10 +2211,11 @@ private struct CrowMeshBuilder {
         radialSegments: 12,
         to: &vertices
       )
-      for feather in CrowFemoralPlumage.samples(
+      for feather in CrowFemoralPlumage.visibleSamples(
         bodyCenter: pose.bodyCenter,
         hip: foot.hip,
-        hock: foot.hock
+        hock: foot.hock,
+        projectedPixelsPerMeter: projectedPixelsPerMeter
       ) {
         appendFeatherBlade(
           root: feather.root,
@@ -2224,12 +2227,19 @@ private struct CrowMeshBuilder {
           sections: 7,
           camber: feather.camberMeters,
           transverseCamberRatio: 0.12,
-          lodLengthMeters: simd_distance(feather.root, feather.tip),
+          // The articulated hip/hock distance changes subtly with the standing
+          // sway. Use the presentation feather's fixed coverage contract so a
+          // threshold crossing cannot change current/previous topology.
+          lodLengthMeters: 0.030,
           projectedPixelsPerMeter: projectedPixelsPerMeter,
           to: &vertices
         )
       }
-      for feather in CrowLegPlumage.samples(hip: foot.hip, hock: foot.hock) {
+      for feather in CrowLegPlumage.visibleSamples(
+        hip: foot.hip,
+        hock: foot.hock,
+        projectedPixelsPerMeter: projectedPixelsPerMeter
+      ) {
         appendFeatherBlade(
           root: feather.root,
           tip: feather.tip,
@@ -2240,7 +2250,7 @@ private struct CrowMeshBuilder {
           sections: 6,
           camber: feather.camberMeters,
           transverseCamberRatio: 0.08,
-          lodLengthMeters: simd_distance(feather.root, feather.tip),
+          lodLengthMeters: 0.030,
           projectedPixelsPerMeter: projectedPixelsPerMeter,
           to: &vertices
         )

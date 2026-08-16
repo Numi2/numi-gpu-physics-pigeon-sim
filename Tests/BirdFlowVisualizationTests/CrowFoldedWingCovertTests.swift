@@ -6,9 +6,23 @@ import simd
 @Test("folded wing coverts form a symmetric body-seated shell")
 func foldedWingCovertsFormSymmetricBodySeatedShell() {
   let samples = CrowFoldedWingCoverts.samples()
+  #expect(samples == CrowFoldedWingCoverts.samples())
   #expect(
     samples.count
       == 2 * CrowFoldedWingCoverts.rowCount * CrowFoldedWingCoverts.columnCount
+  )
+  #expect(samples.count == 360)
+  #expect(
+    CrowFoldedWingCoverts.visibleSamples(projectedPixelsPerMeter: 800).count
+      == 42
+  )
+  #expect(
+    CrowFoldedWingCoverts.visibleSamples(projectedPixelsPerMeter: 1_000).count
+      == 100
+  )
+  #expect(
+    CrowFoldedWingCoverts.visibleSamples(projectedPixelsPerMeter: 1_600).count
+      == 360
   )
 
   for sample in samples {
@@ -39,6 +53,20 @@ func foldedWingCovertsFormSymmetricBodySeatedShell() {
   }
 
   for side: Float in [-1, 1] {
+    for column in 0..<CrowFoldedWingCoverts.columnCount {
+      let course =
+        samples
+        .filter { $0.side == side && $0.column == column }
+        .sorted { $0.row < $1.row }
+      #expect(course.count == CrowFoldedWingCoverts.rowCount)
+      for pair in zip(course, course.dropFirst()) {
+        #expect(
+          simd_distance(pair.0.rootOffset, pair.1.rootOffset)
+            < pair.0.maximumWidthMeters + pair.1.maximumWidthMeters
+        )
+        #expect(abs(pair.0.rootOffset.x - pair.1.rootOffset.x) > 0.003)
+      }
+    }
     for row in 0..<CrowFoldedWingCoverts.rowCount {
       let course =
         samples
@@ -50,6 +78,8 @@ func foldedWingCovertsFormSymmetricBodySeatedShell() {
             < simd_distance(pair.0.rootOffset, pair.0.tipOffset)
         )
       }
+      let lengths = course.map { simd_distance($0.rootOffset, $0.tipOffset) }
+      #expect(lengths.max()! - lengths.min()! > 0.025)
     }
   }
 }
