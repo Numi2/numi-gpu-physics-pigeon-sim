@@ -1692,16 +1692,24 @@ fragment half showcaseCrowReactiveMaskFragment(
     float coverage=float(normalCoverageTexture.read(pixel).w);
     float rightCoverage=float(normalCoverageTexture.read(right).w);
     float downCoverage=float(normalCoverageTexture.read(down).w);
+    float3 normal=float3(normalCoverageTexture.read(pixel).xyz);
+    float3 rightNormal=float3(normalCoverageTexture.read(right).xyz);
+    float3 downNormal=float3(normalCoverageTexture.read(down).xyz);
     float motionDiscontinuity=max(
         length(motion-rightMotion),length(motion-downMotion)
     );
     float coverageDiscontinuity=max(
         abs(coverage-rightCoverage),abs(coverage-downCoverage)
     );
+    float normalDiscontinuity=max(
+        min(coverage,rightCoverage)*(1.0f-abs(dot(normal,rightNormal))),
+        min(coverage,downCoverage)*(1.0f-abs(dot(normal,downNormal)))
+    );
     float edge=max(
         smoothstep(0.75f,8.0f,motionDiscontinuity),
         smoothstep(0.04f,0.55f,coverageDiscontinuity)
     );
+    edge=max(edge,0.65f*smoothstep(0.015f,0.22f,normalDiscontinuity));
     float fastMotion=0.72f*smoothstep(8.0f,32.0f,length(motion));
     return half(max(edge,fastMotion));
 }

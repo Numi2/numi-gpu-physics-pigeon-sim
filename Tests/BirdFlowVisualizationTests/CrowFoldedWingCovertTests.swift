@@ -27,6 +27,18 @@ func foldedWingCovertsFormSymmetricBodySeatedShell() {
   )
   #expect(samples.map(\.materialVariation).min()! < -0.90)
   #expect(samples.map(\.materialVariation).max()! > 0.90)
+  let courseStaggers = (0..<CrowFoldedWingCoverts.rowCount).map {
+    CrowFoldedWingCoverts.courseStaggerFraction(row: $0)
+  }
+  #expect(courseStaggers.first == 0)
+  #expect(courseStaggers.allSatisfy { $0 >= 0 && $0 < 0.73 })
+  #expect(Set(courseStaggers.map { Int(($0 * 10_000).rounded()) }).count == 9)
+  #expect(courseStaggers.max()! - courseStaggers.min()! > 0.71)
+  #expect(
+    zip(courseStaggers, courseStaggers.dropFirst()).allSatisfy {
+      abs($0 - $1) > 0.399
+    }
+  )
   #expect(
     CrowFoldedWingCoverts.visibleSamples(projectedPixelsPerMeter: 1_000)
       .allSatisfy { $0.materialVariation == 0 }

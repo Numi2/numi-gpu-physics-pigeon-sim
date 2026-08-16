@@ -74,13 +74,12 @@ enum CrowFoldedWingCoverts {
               0,
               baseAxial
                 + (column == 0 || column == columnCount - 1
-                  ? 0 : 0.09 * axialStep * shapeIdentity)
+                  ? 0 : 0.04 * axialStep * shapeIdentity)
             )
           )
-          let stagger: Float =
-            row.isMultiple(of: 2)
-            ? 0
-            : 0.5 * 0.224 / Float(columnCount - 1)
+          let stagger =
+            courseStaggerFraction(row: row)
+            * 0.224 / Float(columnCount - 1)
           let rootX = 0.092 - 0.224 * axial - stagger
           let rootSurface = mirroredSurfacePoint(
             x: rootX,
@@ -158,7 +157,9 @@ enum CrowFoldedWingCoverts {
         let theta = 0.92 - 0.98 * rowFraction
         for column in 0..<coarseColumnCount {
           let axial = Float(column) / Float(coarseColumnCount - 1)
-          let stagger: Float = row.isMultiple(of: 2) ? 0 : 0.0045
+          let stagger =
+            courseStaggerFraction(row: row)
+            * 0.224 / Float(coarseColumnCount - 1)
           let rootX = 0.092 - 0.224 * axial - stagger
           let rootSurface = mirroredSurfacePoint(
             x: rootX,
@@ -248,6 +249,16 @@ enum CrowFoldedWingCoverts {
       CrowBodyAnatomy.surfacePoint(atX: x, theta: theta - halfStep),
       CrowBodyAnatomy.surfacePoint(atX: x, theta: theta + halfStep)
     )
+  }
+
+  /// Interleaved axial strata give all nine covert rows distinct starts while
+  /// reserving at least 0.40 of a root interval between neighboring phases.
+  /// This leaves room for stable per-feather jitter without collapsing the
+  /// established three-millimetre cross-course separation.
+  static func courseStaggerFraction(row: Int) -> Float {
+    let boundedRow = min(max(row, 0), rowCount - 1)
+    let stratum = 0.08 * Float(boundedRow / 2)
+    return boundedRow.isMultiple(of: 2) ? stratum : 0.48 + stratum
   }
 
   private static func normalized(
