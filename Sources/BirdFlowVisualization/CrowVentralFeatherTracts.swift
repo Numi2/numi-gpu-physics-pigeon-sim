@@ -156,9 +156,10 @@ enum CrowVentralFeatherTracts {
           )
           let theta = thetaRange.lowerBound + thetaSpan * rowFraction
           let stagger: Float =
-            row.isMultiple(of: 2) || column == 0
+            column == 0
             ? 0
-            : 0.48 * axialSpan / Float(columnCount - 1)
+            : axialStaggerFraction(region: region, row: row)
+              * axialSpan / Float(columnCount - 1)
           let rootX = axialRange.upperBound - axialSpan * axial - stagger
           let rootSurface = mirroredSurfacePoint(x: rootX, theta: theta, side: side)
           let rootNormal = mirroredSurfaceNormal(x: rootX, theta: theta, side: side)
@@ -303,6 +304,25 @@ enum CrowVentralFeatherTracts {
       salt: 0x1656_67B1
     )
     return smooth + 0.020 * identity
+  }
+
+  /// Distributes successive ventral courses across the full axial interval.
+  /// A low-discrepancy phase avoids the two broad sheets produced by even/odd
+  /// staggering while column zero remains a shared neck-to-breast insertion.
+  static func axialStaggerFraction(
+    region: CrowVentralFeatherTractRegion,
+    row: Int
+  ) -> Float {
+    let regionOffset: Float = region == .pectoral ? 0.00 : 0.39
+    let identity = identityVariation(
+      region: region,
+      row: row,
+      column: 0,
+      salt: 0xC801_3EA4
+    )
+    let unwrapped =
+      Float(row) * 0.618_033_988_75 + regionOffset + 0.018 * identity
+    return unwrapped - unwrapped.rounded(.down)
   }
 
   private static func mirroredSurfacePoint(

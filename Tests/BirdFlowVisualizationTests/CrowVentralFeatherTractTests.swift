@@ -84,6 +84,21 @@ func crowVentralTractsCoverBreastAndAbdomenAtFullResolution() {
   #expect(crownRolls.allSatisfy { abs($0) < 0.066 })
   #expect(crownRolls.max()! - crownRolls.min()! > 0.115)
   #expect(Set(crownRolls.map { Int(($0 * 100_000).rounded()) }).count > 510)
+  for region in CrowVentralFeatherTractRegion.allCases {
+    let rowCount = region == .pectoral
+      ? CrowVentralFeatherTracts.pectoralRowCount
+      : CrowVentralFeatherTracts.abdominalRowCount
+    let phases = (0..<rowCount).map {
+      CrowVentralFeatherTracts.axialStaggerFraction(region: region, row: $0)
+    }
+    #expect(Set(phases.map { Int(($0 * 1_000).rounded()) }).count == rowCount)
+    #expect(phases.min()! < 0.15)
+    #expect(phases.max()! > 0.85)
+    for pair in zip(phases, phases.dropFirst()) {
+      let linearDistance = abs(pair.0 - pair.1)
+      #expect(min(linearDistance, 1 - linearDistance) > 0.30)
+    }
+  }
   #expect(samples.map(\.rootEnvelopeRatio).min()! >= 0.53)
   #expect(samples.map(\.rootEnvelopeRatio).max()! <= 0.621)
   let pectoral = samples.filter { $0.region == .pectoral }
