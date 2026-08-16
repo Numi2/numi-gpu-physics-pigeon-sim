@@ -35,6 +35,18 @@ func crowCruralPlumageOverlapsLegAndCrossesHockBoundary() {
   )
   #expect(samples.map(\.materialVariation).min()! < -0.90)
   #expect(samples.map(\.materialVariation).max()! > 0.90)
+  #expect(CrowLegPlumage.proximalUnderlayerRadiusMeters == 0.014)
+  #expect(CrowLegPlumage.distalUnderlayerRadiusMeters == 0.0065)
+  let firstRootRadius =
+    0.975 * CrowLegPlumage.proximalUnderlayerRadiusMeters
+    + 0.025 * CrowLegPlumage.distalUnderlayerRadiusMeters
+  #expect(
+    samples.filter {
+      $0.stationIndex == 0 && $0.radialIndex.isMultiple(of: 2)
+    }.allSatisfy {
+      abs(simd_distance($0.root, mix(hip, hock, 0.025)) - firstRootRadius) < 1e-6
+    }
+  )
   #expect(samples.allSatisfy { $0.bodyMaterialBlend >= 0.15 })
   #expect(samples.allSatisfy { $0.bodyMaterialBlend <= 0.62 })
   #expect(
@@ -72,6 +84,14 @@ func crowCruralPlumageOverlapsLegAndCrossesHockBoundary() {
         && abs(simd_length($0.planeNormal) - 1) < 1e-5
     }
   )
+}
+
+private func mix(
+  _ first: SIMD3<Float>,
+  _ second: SIMD3<Float>,
+  _ blend: Float
+) -> SIMD3<Float> {
+  first + blend * (second - first)
 }
 
 @Test("crow crural plumage retains circumferential overlap")

@@ -56,6 +56,7 @@ struct CrowShowcaseFrame {
     var supportPixelCount = 0
     var featherHashes: Set<UInt32> = []
     var birdMask = [Bool](repeating: false, count: pixelCount)
+    var featherClassCodes = [UInt8](repeating: 0, count: pixelCount)
 
     for pixel in 0..<pixelCount {
       let hdrOffset = pixel * 4
@@ -85,6 +86,7 @@ struct CrowShowcaseFrame {
       let id3 = identity[identityOffset + 3]
       let active = id0 != 0 || id1 != 0 || id2 != 0 || id3 != 0
       birdMask[pixel] = Self.birdIdentity(identity, offset: identityOffset)
+      featherClassCodes[pixel] = UInt8(truncatingIfNeeded: id3 & 255)
       if active {
         activeIdentityPixelCount += 1
         if id0 != UInt32.max { featherHashes.insert(id1) }
@@ -128,6 +130,7 @@ struct CrowShowcaseFrame {
     if !minimumFullyCoveredDeviceDepth.isFinite { minimumFullyCoveredDeviceDepth = 0 }
     let silhouetteHoles = Self.silhouetteHoles(
       birdMask: birdMask,
+      featherClassCodes: featherClassCodes,
       width: width,
       height: height
     )
@@ -166,6 +169,14 @@ struct CrowShowcaseFrame {
       enclosedBirdSilhouetteHoleComponentCount: silhouetteHoles.componentCount,
       largestEnclosedBirdSilhouetteHolePixelCount:
         silhouetteHoles.largestComponentPixelCount,
+      largestEnclosedBirdSilhouetteHoleMinimumX: silhouetteHoles.minimumX,
+      largestEnclosedBirdSilhouetteHoleMaximumX: silhouetteHoles.maximumX,
+      largestEnclosedBirdSilhouetteHoleMinimumY: silhouetteHoles.minimumY,
+      largestEnclosedBirdSilhouetteHoleMaximumY: silhouetteHoles.maximumY,
+      largestEnclosedBirdSilhouetteHoleCentroidX: silhouetteHoles.centroidX,
+      largestEnclosedBirdSilhouetteHoleCentroidY: silhouetteHoles.centroidY,
+      largestEnclosedBirdSilhouetteHoleAdjacentFeatherClassMask:
+        silhouetteHoles.adjacentFeatherClassMask,
       movingFullyCoveredPixelCount: movingActivePixelCount,
       maximumHDRComponent: maximumHDRComponent,
       maximumMotionPixels: maximumMotionPixels,
@@ -292,10 +303,12 @@ struct CrowShowcaseFrame {
   /// diagonal path to open background is not reported as an anatomical hole.
   static func silhouetteHoles(
     birdMask: [Bool],
+    featherClassCodes: [UInt8] = [],
     width: Int,
     height: Int
   ) -> CrowSilhouetteHoleAudit {
     precondition(width >= 0 && height >= 0 && birdMask.count == width * height)
+    precondition(featherClassCodes.isEmpty || featherClassCodes.count == birdMask.count)
     guard width > 0, height > 0 else { return .zero }
     let birdPixels = birdMask.indices.filter { birdMask[$0] }
     guard let first = birdPixels.first else { return .zero }
@@ -350,6 +363,13 @@ struct CrowShowcaseFrame {
     var total = 0
     var components = 0
     var largest = 0
+    var largestMinimumX = 0
+    var largestMaximumX = 0
+    var largestMinimumY = 0
+    var largestMaximumY = 0
+    var largestCentroidX: Float = 0
+    var largestCentroidY: Float = 0
+    var largestAdjacentClassMask: UInt32 = 0
     for y in minimumY...maximumY {
       for x in minimumX...maximumX {
         let start = y * width + x
@@ -359,12 +379,25 @@ struct CrowShowcaseFrame {
         visited[start] = true
         var componentHead = 0
         var componentSize = 0
+        var componentMinimumX = x
+        var componentMaximumX = x
+        var componentMinimumY = y
+        var componentMaximumY = y
+        var componentXTotal = 0
+        var componentYTotal = 0
+        var adjacentClassMask: UInt32 = 0
         while componentHead < componentQueue.count {
           let pixel = componentQueue[componentHead]
           componentHead += 1
           componentSize += 1
           let pixelX = pixel % width
           let pixelY = pixel / width
+          componentMinimumX = min(componentMinimumX, pixelX)
+          componentMaximumX = max(componentMaximumX, pixelX)
+          componentMinimumY = min(componentMinimumY, pixelY)
+          componentMaximumY = max(componentMaximumY, pixelY)
+          componentXTotal += pixelX
+          componentYTotal += pixelY
           for offsetY in -1...1 {
             for offsetX in -1...1 where offsetX != 0 || offsetY != 0 {
               let neighborX = pixelX + offsetX
@@ -373,6 +406,13 @@ struct CrowShowcaseFrame {
                 neighborY >= minimumY, neighborY <= maximumY
               else { continue }
               let neighbor = neighborY * width + neighborX
+              if birdMask[neighbor] {
+                let classCode = featherClassCodes.isEmpty
+                  ? 0
+                  : min(UInt32(featherClassCodes[neighbor]), 31)
+                adjacentClassMask |= 1 << classCode
+                continue
+              }
               guard !birdMask[neighbor], !visited[neighbor] else { continue }
               visited[neighbor] = true
               componentQueue.append(neighbor)
@@ -380,13 +420,29 @@ struct CrowShowcaseFrame {
           }
         }
         total += componentSize
-        largest = max(largest, componentSize)
+        if componentSize > largest {
+          largest = componentSize
+          largestMinimumX = componentMinimumX
+          largestMaximumX = componentMaximumX
+          largestMinimumY = componentMinimumY
+          largestMaximumY = componentMaximumY
+          largestCentroidX = Float(componentXTotal) / Float(componentSize)
+          largestCentroidY = Float(componentYTotal) / Float(componentSize)
+          largestAdjacentClassMask = adjacentClassMask
+        }
       }
     }
     return CrowSilhouetteHoleAudit(
       pixelCount: total,
       componentCount: components,
-      largestComponentPixelCount: largest
+      largestComponentPixelCount: largest,
+      minimumX: largestMinimumX,
+      maximumX: largestMaximumX,
+      minimumY: largestMinimumY,
+      maximumY: largestMaximumY,
+      centroidX: largestCentroidX,
+      centroidY: largestCentroidY,
+      adjacentFeatherClassMask: largestAdjacentClassMask
     )
   }
 
@@ -456,11 +512,25 @@ struct CrowSilhouetteHoleAudit: Equatable {
   let pixelCount: Int
   let componentCount: Int
   let largestComponentPixelCount: Int
+  let minimumX: Int
+  let maximumX: Int
+  let minimumY: Int
+  let maximumY: Int
+  let centroidX: Float
+  let centroidY: Float
+  let adjacentFeatherClassMask: UInt32
 
   static let zero = CrowSilhouetteHoleAudit(
     pixelCount: 0,
     componentCount: 0,
-    largestComponentPixelCount: 0
+    largestComponentPixelCount: 0,
+    minimumX: 0,
+    maximumX: 0,
+    minimumY: 0,
+    maximumY: 0,
+    centroidX: 0,
+    centroidY: 0,
+    adjacentFeatherClassMask: 0
   )
 }
 
@@ -489,6 +559,13 @@ struct CrowShowcaseAOVFrameAudit: Codable, Equatable {
   let enclosedBirdSilhouetteHolePixelCount: Int
   let enclosedBirdSilhouetteHoleComponentCount: Int
   let largestEnclosedBirdSilhouetteHolePixelCount: Int
+  let largestEnclosedBirdSilhouetteHoleMinimumX: Int
+  let largestEnclosedBirdSilhouetteHoleMaximumX: Int
+  let largestEnclosedBirdSilhouetteHoleMinimumY: Int
+  let largestEnclosedBirdSilhouetteHoleMaximumY: Int
+  let largestEnclosedBirdSilhouetteHoleCentroidX: Float
+  let largestEnclosedBirdSilhouetteHoleCentroidY: Float
+  let largestEnclosedBirdSilhouetteHoleAdjacentFeatherClassMask: UInt32
   let movingFullyCoveredPixelCount: Int
   let maximumHDRComponent: Float
   let maximumMotionPixels: Float
@@ -515,7 +592,7 @@ struct CrowShowcaseAOVAuditReport: Codable, Equatable {
   let frames: [CrowShowcaseAOVFrameAudit]
 
   init(frames: [CrowShowcaseAOVFrameAudit]) {
-    schemaVersion = 3
+    schemaVersion = 4
     colorSpace = "scene-linear extended range; display output is tone mapped separately"
     motionConvention =
       "current pixel to previous pixel in upper-left-origin pixel units; MetalFX scale 1"

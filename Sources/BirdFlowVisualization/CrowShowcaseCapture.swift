@@ -1621,6 +1621,10 @@ private struct CrowMeshBuilder {
       neckPose: standingPose?.neckPose,
       to: &vertices
     )
+    appendRumpTailUnderlayer(
+      bodyCenter: posedBodyCenter,
+      to: &vertices
+    )
     let radiiRaw = profile.visualTransform.headRadiusXYZMeters
     let radii =
       SIMD3<Float>(radiiRaw[0], radiiRaw[1], radiiRaw[2])
@@ -1694,6 +1698,11 @@ private struct CrowMeshBuilder {
       projectedPixelsPerMeter: projectedPixelsPerMeter,
       to: &vertices
     )
+    appendUppertailCoverts(
+      bodyCenter: posedBodyCenter,
+      projectedPixelsPerMeter: projectedPixelsPerMeter,
+      to: &vertices
+    )
     if let standingPose {
       appendFoldedWingCoverts(
         bodyCenter: posedBodyCenter,
@@ -1723,7 +1732,7 @@ private struct CrowMeshBuilder {
     let rings = CrowBodyAnatomy.loftRings
     let segments = 48
     var positions: [SIMD3<Float>] = []
-    positions.reserveCapacity(rings.count * segments)
+    positions.reserveCapacity(rings.count * segments + 2)
     for ring in rings {
       for segment in 0..<segments {
         let theta = 2 * Float.pi * Float(segment) / Float(segments)
@@ -1739,6 +1748,28 @@ private struct CrowMeshBuilder {
         )
       }
     }
+    let posteriorCenterIndex = positions.count
+    let posteriorCenter = center + SIMD3<Float>(rings.first!.x, 0, rings.first!.z)
+    positions.append(
+      neckPose.map {
+        CrowHeadNeckBlend.position(
+          posteriorCenter,
+          bodyCenter: center,
+          neckPose: $0
+        )
+      } ?? posteriorCenter
+    )
+    let anteriorCenterIndex = positions.count
+    let anteriorCenter = center + SIMD3<Float>(rings.last!.x, 0, rings.last!.z)
+    positions.append(
+      neckPose.map {
+        CrowHeadNeckBlend.position(
+          anteriorCenter,
+          bodyCenter: center,
+          neckPose: $0
+        )
+      } ?? anteriorCenter
+    )
     var normals = [SIMD3<Float>](repeating: .zero, count: positions.count)
     var triangles: [SIMD3<Int>] = []
     for ring in 0..<(rings.count - 1) {
@@ -1751,6 +1782,18 @@ private struct CrowMeshBuilder {
         triangles.append(SIMD3<Int>(a, b, c))
         triangles.append(SIMD3<Int>(a, c, d))
       }
+    }
+    let anteriorRingOffset = (rings.count - 1) * segments
+    for segment in 0..<segments {
+      let next = (segment + 1) % segments
+      triangles.append(SIMD3<Int>(posteriorCenterIndex, next, segment))
+      triangles.append(
+        SIMD3<Int>(
+          anteriorCenterIndex,
+          anteriorRingOffset + segment,
+          anteriorRingOffset + next
+        )
+      )
     }
     for triangle in triangles {
       let weighted = simd_cross(
@@ -1819,6 +1862,22 @@ private struct CrowMeshBuilder {
         to: &vertices
       )
     }
+  }
+
+  private func appendRumpTailUnderlayer(
+    bodyCenter: SIMD3<Float>,
+    to vertices: inout [ColoredVertex]
+  ) {
+    let segment = CrowRumpTailUnderlayer.segment()
+    appendTaperedTube(
+      from: bodyCenter + segment.startOffset,
+      to: bodyCenter + segment.endOffset,
+      startRadius: segment.startRadiusMeters,
+      endRadius: segment.endRadiusMeters,
+      color: SIMD4<Float>(0.0048, 0.0068, 0.0115, 0.11),
+      radialSegments: 18,
+      to: &vertices
+    )
   }
 
   private func appendBodyContourUnderlayer(
@@ -2152,6 +2211,42 @@ private struct CrowMeshBuilder {
     }
   }
 
+  private func appendUppertailCoverts(
+    bodyCenter: SIMD3<Float>,
+    projectedPixelsPerMeter: Float,
+    to vertices: inout [ColoredVertex]
+  ) {
+    for sample in CrowUppertailCoverts.visibleSamples(
+      projectedPixelsPerMeter: projectedPixelsPerMeter
+    ) {
+      let material = sample.materialVariation
+      let color = SIMD4<Float>(
+        0.0064 * (1 + 0.10 * material),
+        0.0098 * (1 + 0.075 * material),
+        0.0175 * (1 + 0.05 * material),
+        0.17 + 0.010 * material
+      )
+      appendFeatherBlade(
+        root: bodyCenter + sample.rootOffset,
+        tip: bodyCenter + sample.tipOffset,
+        planeNormal: sample.planeNormal,
+        rootWidth: sample.rootWidthMeters,
+        maximumWidth: sample.maximumWidthMeters,
+        color: color,
+        sections: 8,
+        camber: sample.camberMeters,
+        transverseCamberRatio: 0.12,
+        vaneAsymmetry: 0.028 * material,
+        edgeRippleAmplitude: 0.013 + 0.007 * abs(material),
+        edgeRipplePhase: Float.pi * (material + 1),
+        axialStartFraction: 0,
+        lodLengthMeters: simd_distance(sample.rootOffset, sample.tipOffset),
+        projectedPixelsPerMeter: projectedPixelsPerMeter,
+        to: &vertices
+      )
+    }
+  }
+
   private func transformHeadVertices(
     in range: Range<Int>,
     bodyCenter: SIMD3<Float>,
@@ -2412,8 +2507,8 @@ private struct CrowMeshBuilder {
       appendTaperedTube(
         from: foot.hip,
         to: foot.hock,
-        startRadius: 0.0090,
-        endRadius: 0.0048,
+        startRadius: CrowLegPlumage.proximalUnderlayerRadiusMeters,
+        endRadius: CrowLegPlumage.distalUnderlayerRadiusMeters,
         color: featheredLeg,
         radialSegments: 12,
         to: &vertices

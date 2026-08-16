@@ -21,6 +21,8 @@ struct CrowLegPlumageFeather: Equatable {
 enum CrowLegPlumage {
   static let radialCount = 14
   static let stationCount = 7
+  static let proximalUnderlayerRadiusMeters: Float = 0.014
+  static let distalUnderlayerRadiusMeters: Float = 0.0065
 
   static func visibleSamples(
     hip: SIMD3<Float>,
@@ -152,7 +154,8 @@ enum CrowLegPlumage {
 
   private static func radius(at fraction: Float) -> Float {
     let clamped = min(max(fraction, 0), 1)
-    return 0.014 * (1 - clamped) + 0.0065 * clamped
+    return proximalUnderlayerRadiusMeters * (1 - clamped)
+      + distalUnderlayerRadiusMeters * clamped
       - 0.002 * max(0, fraction - 1) / 0.10
   }
 

@@ -1,0 +1,70 @@
+import Testing
+import simd
+
+@testable import BirdFlowVisualization
+
+@Test("upper-tail coverts close the dorsal pelvic-to-rectrix shell")
+func uppertailCovertsCloseDorsalPelvicToRectrixShell() {
+  let samples = CrowUppertailCoverts.samples()
+  #expect(samples == CrowUppertailCoverts.samples())
+  #expect(samples.count == CrowUppertailCoverts.rowCount * CrowUppertailCoverts.columnCount)
+  #expect(samples.count == 216)
+  #expect(CrowUppertailCoverts.visibleSamples(projectedPixelsPerMeter: 1_000).isEmpty)
+  #expect(
+    CrowUppertailCoverts.visibleSamples(projectedPixelsPerMeter: 1_600).count
+      == samples.count
+  )
+  #expect(samples.map(\.materialVariation).min()! < -0.90)
+  #expect(samples.map(\.materialVariation).max()! > 0.90)
+
+  for sample in samples {
+    #expect(
+      abs(
+        simd_distance(sample.rootOffset, sample.rootSurfaceOffset)
+          - CrowUppertailCoverts.shellClearanceMeters
+      ) < 1e-6
+    )
+    let length = simd_distance(sample.rootOffset, sample.tipOffset)
+    #expect(length > 0.030 && length < 0.110)
+    #expect(length < 0.70 * CrowClosedTailAnatomy.rectrixLengthMeters)
+    #expect(sample.tipOffset.x < sample.rootOffset.x)
+    #expect(sample.maximumWidthMeters > sample.rootWidthMeters)
+    #expect(length > sample.maximumWidthMeters)
+    #expect(abs(simd_length(sample.planeNormal) - 1) < 1e-5)
+    #expect(sample.rootSurfaceOffset.z > -0.005)
+  }
+
+  for row in 0..<CrowUppertailCoverts.rowCount {
+    let course = samples.filter { $0.row == row }.sorted { $0.column < $1.column }
+    #expect(course.count == CrowUppertailCoverts.columnCount)
+    for pair in zip(course, course.dropFirst()) {
+      #expect(pair.0.rootOffset.x > pair.1.rootOffset.x)
+      #expect(
+        simd_distance(pair.0.rootOffset, pair.1.rootOffset)
+          < simd_distance(pair.0.rootOffset, pair.0.tipOffset)
+      )
+    }
+    let posterior = course.last!
+    let tail = CrowClosedTailAnatomy.pose(
+      fraction: Float(row) / Float(CrowUppertailCoverts.rowCount - 1)
+    )
+    let rectrixOverlapPoint = tail.rootOffset + 0.032 * tail.direction
+    #expect(simd_distance(posterior.tipOffset, rectrixOverlapPoint) < 0.018)
+  }
+}
+
+@Test("upper-tail covert rows overlap across the dorsal pelvic shell")
+func uppertailCovertRowsOverlapAcrossDorsalPelvicShell() {
+  let samples = CrowUppertailCoverts.samples()
+  for column in 0..<CrowUppertailCoverts.columnCount {
+    let crossCourse =
+      samples.filter { $0.column == column }.sorted { $0.row < $1.row }
+    #expect(crossCourse.count == CrowUppertailCoverts.rowCount)
+    for pair in zip(crossCourse, crossCourse.dropFirst()) {
+      #expect(
+        simd_distance(pair.0.rootOffset, pair.1.rootOffset)
+          < pair.0.maximumWidthMeters + pair.1.maximumWidthMeters
+      )
+    }
+  }
+}
