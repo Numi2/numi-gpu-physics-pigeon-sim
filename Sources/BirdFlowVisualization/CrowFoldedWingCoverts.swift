@@ -21,8 +21,8 @@ struct CrowFoldedWingCovertSample: Equatable {
 /// and axillary seams from arbitrary cameras while retaining explicit feather
 /// identities that can move to mesh shaders on future hardware.
 enum CrowFoldedWingCoverts {
-  static let rowCount = 9
-  static let columnCount = 20
+  static let rowCount = 12
+  static let columnCount = 28
   static let shellClearanceMeters: Float = 0.0012
   static let surfaceFeatherClass: UInt32 = 4
 
@@ -87,7 +87,7 @@ enum CrowFoldedWingCoverts {
           )
           let stagger =
             courseStaggerFraction(row: row)
-            * 0.224 / Float(columnCount - 1)
+            * 0.250 / Float(columnCount - 1)
           let rootX = 0.092 - 0.224 * axial - stagger
           let rootSurface = mirroredSurfacePoint(
             x: rootX,
@@ -168,7 +168,7 @@ enum CrowFoldedWingCoverts {
           let axial = Float(column) / Float(coarseColumnCount - 1)
           let stagger =
             courseStaggerFraction(row: row)
-            * 0.224 / Float(coarseColumnCount - 1)
+            * 0.250 / Float(coarseColumnCount - 1)
           let rootX = 0.092 - 0.224 * axial - stagger
           let rootSurface = mirroredSurfacePoint(
             x: rootX,
@@ -260,13 +260,13 @@ enum CrowFoldedWingCoverts {
     )
   }
 
-  /// Interleaved axial strata give all nine covert rows distinct starts while
+  /// Interleaved axial strata give all twelve covert rows distinct starts while
   /// reserving at least 0.40 of a root interval between neighboring phases.
   /// This leaves room for stable per-feather jitter without collapsing the
   /// established three-millimetre cross-course separation.
   static func courseStaggerFraction(row: Int) -> Float {
     let boundedRow = min(max(row, 0), rowCount - 1)
-    let stratum = 0.08 * Float(boundedRow / 2)
+    let stratum = 0.049 * Float(boundedRow / 2)
     return boundedRow.isMultiple(of: 2) ? stratum : 0.48 + stratum
   }
 
