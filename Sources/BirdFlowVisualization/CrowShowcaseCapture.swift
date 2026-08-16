@@ -2811,6 +2811,16 @@ private struct CrowMeshBuilder {
           projectedPixelsPerMeter: projectedPixelsPerMeter,
           to: &vertices
         )
+        appendTractFeatherMesostructure(
+          CrowFeatherMesostructure.segments(
+            for: feather,
+            projectedPixelsPerMeter: projectedPixelsPerMeter
+          ),
+          bodyCenter: .zero,
+          planeNormal: feather.planeNormal,
+          material: feather.materialVariation,
+          to: &vertices
+        )
       }
       for feather in CrowLegPlumage.visibleSamples(
         hip: foot.hip,

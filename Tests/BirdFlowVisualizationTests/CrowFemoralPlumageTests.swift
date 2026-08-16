@@ -141,3 +141,34 @@ func femoralPlumageBridgesBodyLoftAndUpperCruralTract() {
     )
   }
 }
+
+@Test("femoral plumage resolves shafts and barbs with output coverage")
+func femoralPlumageResolvesMesostructure() {
+  let feathers = CrowFemoralPlumage.samples(
+    bodyCenter: .zero,
+    hip: SIMD3<Float>(-0.025, 0.035, -0.060),
+    hock: SIMD3<Float>(-0.014, 0.040, -0.111)
+  )
+  for feather in feathers {
+    #expect(
+      CrowFeatherMesostructure.segments(
+        for: feather,
+        projectedPixelsPerMeter: 600
+      ).isEmpty
+    )
+    let resolved = CrowFeatherMesostructure.segments(
+      for: feather,
+      projectedPixelsPerMeter: 1_600
+    )
+    #expect(resolved.filter { $0.kind == .rachis }.count == 4)
+    #expect(resolved.filter { $0.kind == .edgeBarbGroup }.count == 25)
+    #expect(resolved.allSatisfy { simd_distance($0.start, $0.end) > 0 })
+
+    let future = CrowFeatherMesostructure.segments(
+      for: feather,
+      projectedPixelsPerMeter: 14_000
+    )
+    #expect(future.contains { $0.kind == .barb })
+    #expect(future.count > resolved.count)
+  }
+}
