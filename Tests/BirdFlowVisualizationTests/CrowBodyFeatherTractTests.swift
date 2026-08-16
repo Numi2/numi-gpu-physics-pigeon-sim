@@ -21,7 +21,7 @@ func crowBodyFeatherTractsOverlapNeckAndCoverWingRoots() {
   let scapular = samples.filter { $0.region == .scapular }
   #expect(cervical.count == 182)
   #expect(mantle.count == 720)
-  #expect(scapular.count == 576)
+  #expect(scapular.count == 768)
   #expect(Set(cervical.map(\.surfaceFeatherClass)) == Set([5, 6]))
   #expect(mantle.allSatisfy { $0.surfaceFeatherClass == 5 })
   #expect(scapular.allSatisfy { $0.surfaceFeatherClass == 6 })
@@ -51,6 +51,13 @@ func crowBodyFeatherTractsOverlapNeckAndCoverWingRoots() {
   )
   #expect(scapularLengths.min()! > 0.026)
   #expect(scapularLengths.max()! < 0.049)
+  #expect(
+    scapular.allSatisfy {
+      2 * $0.maximumWidthMeters
+        / simd_distance($0.rootOffset, $0.tipOffset) < 0.47
+    }
+  )
+  #expect(scapular.map(\.maximumWidthMeters).max()! < 0.0063)
 
   for side: Float in [-1, 1] {
     let wingRoot = SIMD3<Float>(0.015, side * 0.067, 0.038)
@@ -214,12 +221,12 @@ func crowBodyFeatherTractsOverlapNeckAndCoverWingRoots() {
   #expect(low.filter { $0.region == .mantle }.count == 192)
   #expect(medium.filter { $0.region == .mantle }.count == 360)
   #expect(full.filter { $0.region == .mantle }.count == 720)
-  #expect(low.filter { $0.region == .scapular }.count == 144)
-  #expect(medium.filter { $0.region == .scapular }.count == 288)
-  #expect(full.filter { $0.region == .scapular }.count == 576)
-  #expect(low.count == 392)
-  #expect(medium.count == 740)
-  #expect(full.count == 1_478)
+  #expect(low.filter { $0.region == .scapular }.count == 192)
+  #expect(medium.filter { $0.region == .scapular }.count == 384)
+  #expect(full.filter { $0.region == .scapular }.count == 768)
+  #expect(low.count == 440)
+  #expect(medium.count == 836)
+  #expect(full.count == 1_670)
 }
 
 @Test("quiet head motion bends the cervical tract without moving the mantle")

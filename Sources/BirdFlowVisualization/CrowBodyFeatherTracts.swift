@@ -40,7 +40,7 @@ enum CrowBodyFeatherTracts {
   static let cervicalShellClearanceMeters: Float = 0.0012
   static let mantleRowCount = 15
   static let mantleColumnCount = 24
-  static let scapularRowCount = 12
+  static let scapularRowCount = 16
   static let scapularColumnCount = 24
 
   static func visibleSamples(
@@ -447,8 +447,10 @@ enum CrowBodyFeatherTracts {
                 fallback: SIMD3<Float>(0, side, 0)
               ),
               rootWidthMeters: 0.0033 * (1 + 0.04 * rootIdentity),
-              maximumWidthMeters: (0.0057 + 0.0011 * course) * (1 + 0.05 * shapeIdentity),
-              camberMeters: (0.00155 + 0.00040 * course) * (1 + 0.10 * rootIdentity),
+              maximumWidthMeters: (0.0050 + 0.0009 * course)
+                * (1 + 0.05 * shapeIdentity),
+              camberMeters: (0.00120 + 0.00030 * course)
+                * (1 + 0.10 * rootIdentity),
               vaneAsymmetry: 0.060 * shapeIdentity,
               edgeRippleAmplitude: 0.014 + 0.020 * (0.5 + 0.5 * edgeIdentity),
               edgeRipplePhase: Float.pi * (edgeIdentity + 1),
