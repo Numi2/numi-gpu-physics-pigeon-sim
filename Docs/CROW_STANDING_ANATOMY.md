@@ -170,12 +170,26 @@ only the tract relationship transfers here, not species dimensions. The layer
 does not modify hip, hock, ankle, or digital support coordinates.
 
 Standing crown, cheek, throat, and nape contour tracts are rooted directly on
-the breathing cranial loft. Fifty-four compact overlapping vanes break the
-analytic head silhouette while staying behind the orbit and bill base; the same
-graded head-neck transform transports their roots, tips, and normals.
-Final-output coverage selects deterministic `27`, `36`, or `54`-tract tiers so
-subpixel vanes do not alias at current output sizes while future high-resolution
-renders retain the complete cranial inventory.
+the breathing cranial loft. The standing path now uses one `306`-vane field
+instead of stacking the former `40`-vane legacy overlay over a sparse second
+system. Eleven axial stations by thirty-two angular tracts are finite-difference
+attached to the loft; explicit holes reserve both orbits, and the two anterior
+stations retain only crown and throat coverage so the bill base remains clear.
+Every non-reserved angular neighbour overlaps, every retained axial neighbour
+is reached by the preceding vane, and the same graded head-neck transform
+transports roots, tips, and normals. Alternating half-tract angular phase plus
+bounded identity-stable length, camber, and eumelanin variation prevents the
+field from collapsing into aligned bead rows. Final-output coverage selects
+deterministic `82`, `152`, or `306`-tract tiers so subpixel vanes do not alias
+while a `1280 x 720` standing render retains the complete inventory.
+
+The cervical bridge likewise increases from `50` broad accents to `154`
+narrower vanes in eleven circumferential rows and seven axial courses. Their
+adjacent widths overlap around the live neck envelope, their axial reach remains
+longer than root spacing, and head coupling still rises from the anchored
+shoulder end to the cranial end without moving mantle or scapular tracts. These
+densities and dimensions are presentation estimates, not measured crow feather
+counts.
 
 Run the presentation with:
 
@@ -197,8 +211,9 @@ Run the presentation with:
 - a readable nonempty simulated capture, with no reference image in output.
 
 Passing these gates establishes an executable grounded pose, not perceptual
-realism. The present smooth body, approximate folded-feather layering, analytic
-leg surface, and uncalibrated idle timing remain visible limitations.
+realism. Approximate folded-feather layering, the analytic cranial coverage
+surface beneath the contour shell, analytic leg surface, and uncalibrated idle
+timing remain visible limitations.
 
 ## Mechanics references
 

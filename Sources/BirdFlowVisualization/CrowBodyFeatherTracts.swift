@@ -27,12 +27,29 @@ struct CrowBodyFeatherTractSample: Equatable {
 }
 
 enum CrowBodyFeatherTracts {
-  static let cervicalRowCount = 5
-  static let cervicalColumnCount = 5
+  static let cervicalRowCount = 11
+  static let cervicalColumnCount = 7
   static let mantleRowCount = 3
   static let mantleColumnCount = 8
   static let scapularRowCount = 4
   static let scapularColumnCount = 9
+
+  static func visibleSamples(
+    neckPose: CrowStandingNeckPose? = nil,
+    projectedPixelsPerMeter: Float
+  ) -> [CrowBodyFeatherTractSample] {
+    let complete = samples(neckPose: neckPose)
+    if projectedPixelsPerMeter >= 1_400 { return complete }
+    if projectedPixelsPerMeter >= 900 {
+      return complete.filter {
+        $0.region != .cervical || ($0.row + $0.column).isMultiple(of: 2)
+      }
+    }
+    return complete.filter {
+      $0.region != .cervical
+        || ($0.row.isMultiple(of: 2) && $0.column.isMultiple(of: 2))
+    }
+  }
 
   static func samples(
     neckPose: CrowStandingNeckPose? = nil
@@ -57,9 +74,14 @@ enum CrowBodyFeatherTracts {
     for side: Float in [-1, 1] {
       for row in 0..<cervicalRowCount {
         let rowFraction = Float(row) / Float(cervicalRowCount - 1)
-        let angle = -1.05 + 2.10 * rowFraction
         for column in 0..<cervicalColumnCount {
           let axial = Float(column) / Float(cervicalColumnCount - 1)
+          let rowStep = 2.10 / Float(cervicalRowCount - 1)
+          let angle =
+            -1.05 + 2.10 * rowFraction
+            + 0.20 * rowStep * sin(Float(column) * 2.399_963 + side * 0.71)
+            + 0.04 * rowStep
+              * sin(Float(row) * 1.173 + Float(column) * 0.83 + side * 1.31)
           let coupling = 0.10 + 0.78 * axial
           let center = SIMD3<Float>(
             0.086 + 0.062 * axial,
@@ -68,7 +90,7 @@ enum CrowBodyFeatherTracts {
           )
           let halfWidth = 0.046 - 0.015 * axial
           let verticalRadius = 0.046 - 0.013 * axial
-          let stagger: Float = row.isMultiple(of: 2) ? 0 : 0.003
+          let stagger: Float = row.isMultiple(of: 2) ? 0 : 0.002
           let unposedRoot =
             center
             + SIMD3<Float>(
@@ -112,9 +134,13 @@ enum CrowBodyFeatherTracts {
               rootOffset: root,
               tipOffset: tip,
               planeNormal: planeNormal,
-              rootWidthMeters: 0.0035,
-              maximumWidthMeters: 0.0062 - 0.0006 * axial,
-              camberMeters: 0.0013,
+              rootWidthMeters: 0.0030,
+              maximumWidthMeters:
+                (0.00545 - 0.0006 * axial)
+                * (1 + 0.020 * sin(Float(row) * 2.07 + Float(column) * 1.31)),
+              camberMeters:
+                0.0010
+                * (1 + 0.06 * sin(Float(row) * 1.49 - Float(column) * 2.11)),
               headCoupling: coupling
             )
           )

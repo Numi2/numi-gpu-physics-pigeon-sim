@@ -1638,17 +1638,18 @@ private struct CrowMeshBuilder {
       projectedPixelsPerMeter: projectedPixelsPerMeter,
       to: &vertices
     )
-    appendHeadContourFeathers(
-      center: headCenter,
-      radii: radii,
-      projectedPixelsPerMeter: projectedPixelsPerMeter,
-      to: &vertices
-    )
     if presentation == .standing {
       appendStandingCranialFeatherTracts(
         center: headCenter,
         radii: radii,
         breathingScale: breathing,
+        projectedPixelsPerMeter: projectedPixelsPerMeter,
+        to: &vertices
+      )
+    } else {
+      appendHeadContourFeathers(
+        center: headCenter,
+        radii: radii,
         projectedPixelsPerMeter: projectedPixelsPerMeter,
         to: &vertices
       )
@@ -1914,13 +1915,19 @@ private struct CrowMeshBuilder {
     projectedPixelsPerMeter: Float,
     to vertices: inout [ColoredVertex]
   ) {
-    let color = SIMD4<Float>(0.006, 0.009, 0.015, 0.14)
     for sample in CrowCranialFeatherTracts.visibleSamples(
       center: center,
       radii: radii,
       breathingScale: breathingScale,
       projectedPixelsPerMeter: projectedPixelsPerMeter
     ) {
+      let materialScale = 1 + 0.08 * sample.materialVariation
+      let color = SIMD4<Float>(
+        0.006 * materialScale,
+        0.009 * (1 + 0.06 * sample.materialVariation),
+        0.015 * (1 + 0.04 * sample.materialVariation),
+        0.14
+      )
       appendFeatherBlade(
         root: sample.root,
         tip: sample.tip,
@@ -1944,11 +1951,24 @@ private struct CrowMeshBuilder {
     projectedPixelsPerMeter: Float,
     to vertices: inout [ColoredVertex]
   ) {
-    for sample in CrowBodyFeatherTracts.samples(neckPose: neckPose) {
+    for sample in CrowBodyFeatherTracts.visibleSamples(
+      neckPose: neckPose,
+      projectedPixelsPerMeter: projectedPixelsPerMeter
+    ) {
       let color: SIMD4<Float>
       switch sample.region {
       case .cervical:
-        color = SIMD4<Float>(0.006, 0.009, 0.016, 0.14)
+        let variation = sin(
+          Float(sample.row + 1) * 12.9898
+            + Float(sample.column + 1) * 78.233
+            + sample.side * 1.371
+        )
+        color = SIMD4<Float>(
+          0.006 * (1 + 0.07 * variation),
+          0.009 * (1 + 0.05 * variation),
+          0.016 * (1 + 0.035 * variation),
+          0.14
+        )
       case .mantle:
         color = SIMD4<Float>(0.0065, 0.010, 0.018, 0.16)
       case .scapular:
