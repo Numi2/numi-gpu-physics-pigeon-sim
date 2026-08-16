@@ -2113,6 +2113,26 @@ private struct CrowMeshBuilder {
         radialSegments: 12,
         to: &vertices
       )
+      for feather in CrowFemoralPlumage.samples(
+        bodyCenter: pose.bodyCenter,
+        hip: foot.hip,
+        hock: foot.hock
+      ) {
+        appendFeatherBlade(
+          root: feather.root,
+          tip: feather.tip,
+          planeNormal: feather.planeNormal,
+          rootWidth: feather.rootWidthMeters,
+          maximumWidth: feather.maximumWidthMeters,
+          color: featheredLeg,
+          sections: 7,
+          camber: feather.camberMeters,
+          transverseCamberRatio: 0.12,
+          lodLengthMeters: simd_distance(feather.root, feather.tip),
+          projectedPixelsPerMeter: projectedPixelsPerMeter,
+          to: &vertices
+        )
+      }
       for feather in CrowLegPlumage.samples(hip: foot.hip, hock: foot.hock) {
         appendFeatherBlade(
           root: feather.root,

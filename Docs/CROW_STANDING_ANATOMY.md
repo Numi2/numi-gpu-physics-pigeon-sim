@@ -91,6 +91,15 @@ they overlap the cranial loft. Those body vertices enter the same coupling field
 as the nape, so the visible transition cannot collapse into a narrow static
 collar while the head moves.
 
+The pelvic-to-leg transition uses a distinct estimated femoral tract before the
+existing crural tract. Five body-surface-rooted rows cross the dorsal/outer
+upper thigh in seven overlapping courses and terminate inside the proximal
+crural envelope. This organization follows the corvid pterylography reported
+for Clark's Nutcracker by
+[Mewaldt (1958)](https://sora.unm.edu/sites/default/files/journals/condor/v060n03/p0165-p0187.pdf);
+only the tract relationship transfers here, not species dimensions. The layer
+does not modify hip, hock, ankle, or digital support coordinates.
+
 Standing crown, cheek, throat, and nape contour tracts are rooted directly on
 the breathing cranial loft. Fifty-four compact overlapping vanes break the
 analytic head silhouette while staying behind the orbit and bill base; the same
