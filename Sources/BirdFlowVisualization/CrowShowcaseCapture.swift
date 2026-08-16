@@ -1833,6 +1833,9 @@ private struct CrowMeshBuilder {
       case .rachis:
         color = SIMD4<Float>(0.010, 0.014, 0.022, 0.14)
         radialSegments = 4
+      case .edgeBarbGroup:
+        color = SIMD4<Float>(0.0075, 0.011, 0.019, 0.135)
+        radialSegments = 0
       case .barb:
         color = SIMD4<Float>(0.008, 0.012, 0.020, 0.14)
         radialSegments = 3
@@ -1840,15 +1843,27 @@ private struct CrowMeshBuilder {
         color = SIMD4<Float>(0.006, 0.010, 0.017, 0.14)
         radialSegments = 3
       }
-      appendTaperedTube(
-        from: bodyCenter + segment.start,
-        to: bodyCenter + segment.end,
-        startRadius: segment.startRadiusMeters,
-        endRadius: segment.endRadiusMeters,
-        color: color,
-        radialSegments: radialSegments,
-        to: &vertices
-      )
+      if segment.kind == .edgeBarbGroup {
+        appendTaperedRibbon(
+          from: bodyCenter + segment.start,
+          to: bodyCenter + segment.end,
+          startHalfWidth: segment.startRadiusMeters,
+          endHalfWidth: segment.endRadiusMeters,
+          surfaceNormal: shingle.planeNormal,
+          color: color,
+          to: &vertices
+        )
+      } else {
+        appendTaperedTube(
+          from: bodyCenter + segment.start,
+          to: bodyCenter + segment.end,
+          startRadius: segment.startRadiusMeters,
+          endRadius: segment.endRadiusMeters,
+          color: color,
+          radialSegments: radialSegments,
+          to: &vertices
+        )
+      }
     }
   }
 
@@ -2299,6 +2314,33 @@ private struct CrowMeshBuilder {
         color: color,
         to: &vertices
       )
+    }
+  }
+
+  private func appendTaperedRibbon(
+    from start: SIMD3<Float>,
+    to end: SIMD3<Float>,
+    startHalfWidth: Float,
+    endHalfWidth: Float,
+    surfaceNormal: SIMD3<Float>,
+    color: SIMD4<Float>,
+    to vertices: inout [ColoredVertex]
+  ) {
+    let axis = safeNormalize(end - start, fallback: SIMD3<Float>(-1, 0, 0))
+    let normal = safeNormalize(
+      surfaceNormal - axis * simd_dot(surfaceNormal, axis),
+      fallback: surfaceNormal
+    )
+    let across = safeNormalize(
+      simd_cross(normal, axis),
+      fallback: SIMD3<Float>(0, 1, 0)
+    )
+    let a = start - across * startHalfWidth
+    let b = start + across * startHalfWidth
+    let c = end + across * endHalfWidth
+    let d = end - across * endHalfWidth
+    for point in [a, b, c, a, c, d] {
+      vertices.append(vertex(point, normal: normal, color: color))
     }
   }
 

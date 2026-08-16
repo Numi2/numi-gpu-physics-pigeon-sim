@@ -66,6 +66,15 @@ ankles move by millimetres.
    shaders can cull and emit only visible meshlets; the compute triangle path
    remains the deterministic fallback and parity oracle.
 
+   **Implemented contour baseline:** final-output coverage now selects a closed
+   vane, rachis, edge-barb aggregates, full barbs, and close-up barbules. At the
+   standing showcase distance, thin overlapping ribbons root inside the vane
+   and extend slightly beyond its side and terminal edges, so a hard plate is
+   no longer the only silhouette primitive. The continuous vane remains the
+   occlusion/coverage layer beneath them. These aggregates are estimated
+   presentation geometry; future mesh-shader or curve emission can consume the
+   same stable feather identity and LOD contract without changing anatomy.
+
 3. **Measured appearance, bounded claims.** Implement an energy-bounded,
    anisotropic feather BSDF with separate eumelanin absorption, longitudinal
    structure, roughness, and thin-film/nanostructure terms. The SIGGRAPH 2022

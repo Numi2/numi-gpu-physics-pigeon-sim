@@ -104,6 +104,15 @@ and the layered optical role of hidden bases beneath exposed tips
 zone fractions are bounded presentation estimates, not American-crow
 measurements.
 
+At the ordinary standing-camera coverage, each visible vane now emits ten
+paired outer-barb aggregates plus five overlapping terminal aggregates. Their
+roots remain inside the continuous vane, while their sub-millimetre overreach
+breaks the former sealed polygon edge without cutting holes into the coverage
+shell. The groups are one-quad ribbons whose width and overreach are bounded in
+final-output pixels; at closer LODs they give way to full rachis-to-edge barbs
+and optional barbules. This is a raster-scale silhouette representation of
+unresolved barb populations, not individually resolved or measured crow barbs.
+
 Body-vane barb, rachis, and edge energy is attenuated independently from the
 larger remiges when it becomes unresolved by the half-resolution temporal
 input. The retained native-versus-`2x` gate requires full-frame display RMSE

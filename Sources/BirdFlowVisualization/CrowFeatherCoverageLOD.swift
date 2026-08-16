@@ -5,6 +5,7 @@ struct CrowFeatherTessellation: Equatable {
   let axialSections: Int
   let widthSections: Int
   let rachisSections: Int
+  let edgeBarbPairs: Int
   let barbPairs: Int
   let barbulesPerBarb: Int
 }
@@ -41,6 +42,7 @@ enum CrowFeatherCoverageLOD {
         axialSections: max(base * 2, 16),
         widthSections: 7,
         rachisSections: 12,
+        edgeBarbPairs: 18,
         barbPairs: 18,
         barbulesPerBarb: 3
       )
@@ -51,6 +53,7 @@ enum CrowFeatherCoverageLOD {
         axialSections: max(Int((Float(base) * 1.5).rounded()), 10),
         widthSections: 5,
         rachisSections: 8,
+        edgeBarbPairs: 9,
         barbPairs: 9,
         barbulesPerBarb: 0
       )
@@ -61,6 +64,7 @@ enum CrowFeatherCoverageLOD {
         axialSections: max(base, 6),
         widthSections: 3,
         rachisSections: 4,
+        edgeBarbPairs: 10,
         barbPairs: 0,
         barbulesPerBarb: 0
       )
@@ -70,6 +74,7 @@ enum CrowFeatherCoverageLOD {
       axialSections: max(Int((Float(base) * 0.5).rounded()), 2),
       widthSections: 1,
       rachisSections: 0,
+      edgeBarbPairs: 0,
       barbPairs: 0,
       barbulesPerBarb: 0
     )

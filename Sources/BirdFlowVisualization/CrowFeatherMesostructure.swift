@@ -2,6 +2,7 @@ import simd
 
 enum CrowFeatherMesostructureKind: UInt8, CaseIterable {
   case rachis
+  case edgeBarbGroup
   case barb
   case barbule
 }
@@ -35,8 +36,9 @@ enum CrowFeatherMesostructure {
     var result: [CrowFeatherMesostructureSegment] = []
     result.reserveCapacity(
       tessellation.rachisSections
-        + 2 * tessellation.barbPairs
+        + 2 * tessellation.edgeBarbPairs
         * (1 + tessellation.barbulesPerBarb)
+        + (tessellation.edgeBarbPairs > 0 ? 5 : 0)
     )
     appendRachis(
       sections: tessellation.rachisSections,
@@ -45,7 +47,9 @@ enum CrowFeatherMesostructure {
     )
     appendBarbs(
       pairCount: tessellation.barbPairs,
+      edgePairCount: tessellation.edgeBarbPairs,
       barbulesPerBarb: tessellation.barbulesPerBarb,
+      projectedPixelsPerMeter: projectedPixelsPerMeter,
       frame: frame,
       to: &result
     )
@@ -84,13 +88,12 @@ enum CrowFeatherMesostructure {
         + normal * (feather.camberMeters * sin(Float.pi * t) + 0.00012)
     }
 
-    func halfWidth(at axial: Float) -> Float {
-      let t = clamp(axial)
-      let bodyEnvelope = 0.32 + 0.68 * pow(max(sin(Float.pi * t), 0), 0.58)
-      let tipTaper = 1 - 0.985 * pow(t, 3.2)
-      return
-        (feather.rootWidthMeters * (1 - t)
-        + feather.maximumWidthMeters * t) * bodyEnvelope * tipTaper
+    func halfWidth(at axial: Float, signedWidth: Float = 0) -> Float {
+      CrowBodyContourShingles.vaneHalfWidth(
+        for: feather,
+        at: axial,
+        signedWidth: signedWidth
+      )
     }
 
     func pennaceousAxial(at localFraction: Float) -> Float {
@@ -125,41 +128,106 @@ enum CrowFeatherMesostructure {
 
   private static func appendBarbs(
     pairCount: Int,
+    edgePairCount: Int,
     barbulesPerBarb: Int,
+    projectedPixelsPerMeter: Float,
     frame: Frame,
     to result: inout [CrowFeatherMesostructureSegment]
   ) {
-    guard pairCount > 0 else { return }
-    for pair in 0..<pairCount {
-      let localAxial = 0.10 + 0.77 * Float(pair + 1) / Float(pairCount + 1)
+    guard edgePairCount > 0 else { return }
+    let coarseEdgeOnly = pairCount == 0
+    let safePixelsPerMeter = max(projectedPixelsPerMeter, 1)
+    let aggregateRadius = min(0.00020, max(0.000035, 0.30 / safePixelsPerMeter))
+    let baseExtension = min(0.0012, max(0.00050, 1.10 / safePixelsPerMeter))
+    for pair in 0..<edgePairCount {
+      let localAxial = 0.10 + 0.77 * Float(pair + 1) / Float(edgePairCount + 1)
       let axial = frame.pennaceousAxial(at: localAxial)
       let reachAxial = frame.pennaceousAxial(
         at: min(0.94, localAxial + 0.035 + 0.020 * localAxial)
       )
-      let start = frame.center(at: axial)
       for side: Float in [-1, 1] {
+        let identity = sin(
+          Float(frame.feather.radialIndex + 1) * 12.9898
+            + Float(frame.feather.axialIndex + 1) * 78.233
+            + Float(pair + 1) * 37.719
+            + side * 1.371
+        )
+        let start =
+          frame.center(at: axial)
+          + side * frame.widthAxis * frame.halfWidth(at: axial, signedWidth: side)
+            * (coarseEdgeOnly ? 0.72 : 0)
+          + frame.normal * (coarseEdgeOnly ? 0.00010 : 0.00005)
+        let edgeExtension = baseExtension * (0.86 + 0.14 * identity)
         let end =
           frame.center(at: reachAxial)
-          + side * frame.widthAxis * frame.halfWidth(at: reachAxial) * 0.94
-          + frame.normal * 0.00005
+          + side * frame.widthAxis
+            * (frame.halfWidth(at: reachAxial, signedWidth: side) + edgeExtension)
+          + frame.normal * (coarseEdgeOnly ? 0.00018 : 0.00008)
         result.append(
           CrowFeatherMesostructureSegment(
-            kind: .barb,
+            kind: coarseEdgeOnly ? .edgeBarbGroup : .barb,
             start: start,
             end: end,
-            startRadiusMeters: 0.000050,
-            endRadiusMeters: 0.000018
+            startRadiusMeters: coarseEdgeOnly ? aggregateRadius : 0.000050,
+            endRadiusMeters: coarseEdgeOnly ? 0.58 * aggregateRadius : 0.000018
           )
         )
-        appendBarbules(
-          count: barbulesPerBarb,
-          side: side,
-          start: start,
-          end: end,
-          frame: frame,
-          to: &result
-        )
+        if !coarseEdgeOnly {
+          appendBarbules(
+            count: barbulesPerBarb,
+            side: side,
+            start: start,
+            end: end,
+            frame: frame,
+            to: &result
+          )
+        }
       }
+    }
+    appendTerminalBarbGroups(
+      radius: aggregateRadius,
+      extensionMeters: baseExtension,
+      frame: frame,
+      to: &result
+    )
+  }
+
+  /// Five overlapping terminal bundles break the single geometric point of
+  /// the closed vane. Their roots remain on the vane and their tips extend by
+  /// less than a millimetre at showcase coverage; they are a raster-scale
+  /// aggregate, not a claim that individual barbs are resolved.
+  private static func appendTerminalBarbGroups(
+    radius: Float,
+    extensionMeters: Float,
+    frame: Frame,
+    to result: inout [CrowFeatherMesostructureSegment]
+  ) {
+    let rootAxial: Float = 0.88
+    let rootHalfWidth = frame.halfWidth(at: rootAxial)
+    for lane: Float in [-1, -0.5, 0, 0.5, 1] {
+      let root =
+        frame.center(at: rootAxial)
+        + lane * frame.widthAxis * rootHalfWidth * 0.42
+        + frame.normal * 0.00012
+      let laneIdentity = sin(
+        Float(frame.feather.radialIndex + 1) * 17.117
+          + Float(frame.feather.axialIndex + 1) * 43.731
+          + lane * 2.913
+      )
+      let tip =
+        frame.feather.tipOffset
+        + frame.direction * extensionMeters * (0.82 + 0.12 * laneIdentity)
+        + lane * frame.widthAxis * 0.18 * rootHalfWidth
+        + frame.normal * 0.00020
+      result.append(
+        CrowFeatherMesostructureSegment(
+          kind: .edgeBarbGroup,
+          start: root,
+          end: tip,
+          startRadiusMeters: 0.88 * radius,
+          endRadiusMeters: 0.50 * radius
+        )
+      )
     }
   }
 
