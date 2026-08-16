@@ -18,6 +18,7 @@ struct CrowVentralFeatherTractSample: Equatable {
   let rootWidthMeters: Float
   let maximumWidthMeters: Float
   let camberMeters: Float
+  let rootEnvelopeRatio: Float
   let pennaceousStartFraction: Float
   let vaneAsymmetry: Float
   let edgeRippleAmplitude: Float
@@ -33,10 +34,10 @@ struct CrowVentralFeatherTractSample: Equatable {
 /// and overlap the proximal femoral field; they are an explicit future-compute
 /// layer rather than a displacement or texture painted over the trunk.
 enum CrowVentralFeatherTracts {
-  static let pectoralRowCount = 10
-  static let pectoralColumnCount = 18
-  static let abdominalRowCount = 7
-  static let abdominalColumnCount = 16
+  static let pectoralRowCount = 13
+  static let pectoralColumnCount = 24
+  static let abdominalRowCount = 10
+  static let abdominalColumnCount = 22
   static let shellClearanceMeters: Float = 0.0008
 
   static func visibleSamples(
@@ -224,6 +225,10 @@ enum CrowVentralFeatherTracts {
               maximumWidthMeters: maximumWidth,
               camberMeters: (0.00115 + 0.00045 * axial)
                 * (1 + 0.08 * rootIdentity),
+              rootEnvelopeRatio:
+                region == .pectoral
+                ? 0.66 - 0.08 * axial
+                : 0.62 - 0.06 * axial,
               pennaceousStartFraction:
                 region == .pectoral && column == 0
                 ? 0.10

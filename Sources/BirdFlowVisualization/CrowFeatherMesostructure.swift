@@ -46,6 +46,16 @@ enum CrowFeatherMesostructure {
     )
   }
 
+  static func segments(
+    for feather: CrowVentralFeatherTractSample,
+    projectedPixelsPerMeter: Float
+  ) -> [CrowFeatherMesostructureSegment] {
+    segments(
+      frame: Frame(feather: feather),
+      projectedPixelsPerMeter: projectedPixelsPerMeter
+    )
+  }
+
   private static func segments(
     frame: Frame,
     projectedPixelsPerMeter: Float
@@ -157,6 +167,36 @@ enum CrowFeatherMesostructure {
       edgeRippleCycles = feather.edgeRippleCycles
       identityFirst = feather.row + 31 * Int(feather.region.rawValue)
       identitySecond = feather.column + (feather.side < 0 ? 97 : 0)
+    }
+
+    init(feather: CrowVentralFeatherTractSample) {
+      root = feather.rootOffset
+      tip = feather.tipOffset
+      referenceLengthMeters = simd_distance(feather.rootOffset, feather.tipOffset)
+      direction = normalized(
+        feather.tipOffset - feather.rootOffset,
+        fallback: SIMD3<Float>(-1, 0, 0)
+      )
+      normal = normalized(
+        feather.planeNormal
+          - direction * simd_dot(feather.planeNormal, direction),
+        fallback: feather.planeNormal
+      )
+      widthAxis = normalized(
+        simd_cross(normal, direction),
+        fallback: SIMD3<Float>(0, 1, 0)
+      )
+      rootWidthMeters = feather.rootWidthMeters
+      maximumWidthMeters = feather.maximumWidthMeters
+      camberMeters = feather.camberMeters
+      rootEnvelopeRatio = feather.rootEnvelopeRatio
+      pennaceousStartFraction = feather.pennaceousStartFraction
+      vaneAsymmetry = feather.vaneAsymmetry
+      edgeRippleAmplitude = feather.edgeRippleAmplitude
+      edgeRipplePhase = feather.edgeRipplePhase
+      edgeRippleCycles = feather.edgeRippleCycles
+      identityFirst = feather.row + 41 * Int(feather.region.rawValue)
+      identitySecond = feather.column + (feather.side < 0 ? 131 : 0)
     }
 
     func center(at axial: Float) -> SIMD3<Float> {

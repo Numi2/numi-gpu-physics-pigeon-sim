@@ -15,7 +15,7 @@ func crowVentralTractsCoverBreastAndAbdomenAtFullResolution() {
         + CrowVentralFeatherTracts.abdominalRowCount
         * CrowVentralFeatherTracts.abdominalColumnCount)
   )
-  #expect(samples.count == 584)
+  #expect(samples.count == 1_064)
   #expect(
     CrowVentralFeatherTracts.visibleSamples(projectedPixelsPerMeter: 1_000).isEmpty
   )
@@ -23,8 +23,8 @@ func crowVentralTractsCoverBreastAndAbdomenAtFullResolution() {
     CrowVentralFeatherTracts.visibleSamples(projectedPixelsPerMeter: 1_600).count
       == samples.count
   )
-  #expect(samples.filter { $0.region == .pectoral }.count == 360)
-  #expect(samples.filter { $0.region == .abdominal }.count == 224)
+  #expect(samples.filter { $0.region == .pectoral }.count == 624)
+  #expect(samples.filter { $0.region == .abdominal }.count == 440)
   #expect(samples.allSatisfy { $0.surfaceFeatherClass == 7 })
   #expect(
     CrowVentralFeatherTractRegion.allCases.allSatisfy {
@@ -42,7 +42,7 @@ func crowVentralTractsCoverBreastAndAbdomenAtFullResolution() {
   #expect(samples.map(\.edgeRippleCycles).max()! < 2.01)
   #expect(
     Set(samples.map { Int(($0.edgeRipplePhase * 100_000).rounded()) }).count
-      > 280
+      > 510
   )
   let rowFlows = CrowVentralFeatherTractRegion.allCases.flatMap { region in
     let rowCount = region == .pectoral
@@ -80,10 +80,12 @@ func crowVentralTractsCoverBreastAndAbdomenAtFullResolution() {
   }
   #expect(rowFlows.allSatisfy { abs($0) < 0.221 })
   #expect(rowFlows.max()! - rowFlows.min()! > 0.40)
-  #expect(Set(rowFlows.map { Int(($0 * 100_000).rounded()) }).count > 285)
+  #expect(Set(rowFlows.map { Int(($0 * 100_000).rounded()) }).count > 510)
   #expect(crownRolls.allSatisfy { abs($0) < 0.066 })
   #expect(crownRolls.max()! - crownRolls.min()! > 0.115)
-  #expect(Set(crownRolls.map { Int(($0 * 100_000).rounded()) }).count > 285)
+  #expect(Set(crownRolls.map { Int(($0 * 100_000).rounded()) }).count > 510)
+  #expect(samples.map(\.rootEnvelopeRatio).min()! >= 0.56)
+  #expect(samples.map(\.rootEnvelopeRatio).max()! <= 0.661)
 
   let anteriorPectoralRoots = samples.filter {
     $0.region == .pectoral && $0.column == 0
