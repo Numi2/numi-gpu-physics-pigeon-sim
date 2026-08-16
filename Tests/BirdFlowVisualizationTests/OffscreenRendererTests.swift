@@ -446,7 +446,7 @@ func estimatedCrowBodyLoftPreservesAnatomicalRegions() {
   #expect(rings.count >= 10)
   #expect(zip(rings, rings.dropFirst()).allSatisfy { $0.x < $1.x })
   #expect(rings.first!.halfWidth < 0.012)
-  #expect(rings.last!.halfWidth < 0.025)
+  #expect(rings.last!.halfWidth > 0.030 && rings.last!.halfWidth < 0.035)
 
   let sternum = rings[CrowBodyAnatomy.sternumRingIndex]
   let shoulder = rings[CrowBodyAnatomy.shoulderRingIndex]

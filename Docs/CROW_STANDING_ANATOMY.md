@@ -63,6 +63,11 @@ coupling field deforms the visible neck, and the field reaches rigid-head motion
 before the orbit and bill. Cervical feather tracts use the same shoulder-to-head
 continuity principle over this underlying surface.
 
+The final body-loft rings retain a broad dorsal and lateral neck envelope where
+they overlap the cranial loft. Those body vertices enter the same coupling field
+as the nape, so the visible transition cannot collapse into a narrow static
+collar while the head moves.
+
 Run the presentation with:
 
 ```bash

@@ -1549,6 +1549,7 @@ private struct CrowMeshBuilder {
     let posedBodyCenter = standingPose?.bodyCenter ?? bodyCenter
     appendCrowBodyLoft(
       center: posedBodyCenter,
+      neckPose: standingPose?.neckPose,
       to: &vertices
     )
     let radiiRaw = profile.visualTransform.headRadiusXYZMeters
@@ -1618,6 +1619,7 @@ private struct CrowMeshBuilder {
 
   private func appendCrowBodyLoft(
     center: SIMD3<Float>,
+    neckPose: CrowStandingNeckPose?,
     to vertices: inout [ColoredVertex]
   ) {
     let rings = CrowBodyAnatomy.loftRings
@@ -1627,8 +1629,15 @@ private struct CrowMeshBuilder {
     for ring in rings {
       for segment in 0..<segments {
         let theta = 2 * Float.pi * Float(segment) / Float(segments)
+        let unposed = center + CrowBodyAnatomy.surfacePoint(ring: ring, theta: theta)
         positions.append(
-          center + CrowBodyAnatomy.surfacePoint(ring: ring, theta: theta)
+          neckPose.map {
+            CrowHeadNeckBlend.position(
+              unposed,
+              bodyCenter: center,
+              neckPose: $0
+            )
+          } ?? unposed
         )
       }
     }

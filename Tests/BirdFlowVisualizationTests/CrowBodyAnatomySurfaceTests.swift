@@ -22,6 +22,16 @@ func crowTrunkCrossSectionSeparatesAnatomicalRegions() {
   let sternumNormalizedWidth = abs(sternumLower.y) / sternum.halfWidth
   let pelvisNormalizedWidth = abs(pelvisLower.y) / pelvis.halfWidth
   #expect(pelvisNormalizedWidth < sternumNormalizedWidth)
+
+  let cranialBodyRings = CrowBodyAnatomy.loftRings.suffix(3)
+  #expect(cranialBodyRings.last!.halfWidth > 0.030)
+  #expect(cranialBodyRings.last!.dorsalRadius >= 0.040)
+  #expect(
+    zip(cranialBodyRings, cranialBodyRings.dropFirst()).allSatisfy {
+      abs($1.halfWidth - $0.halfWidth) < 0.008
+        && abs(($1.z + $1.dorsalRadius) - ($0.z + $0.dorsalRadius)) < 0.012
+    }
+  )
 }
 
 @Test("crow anatomical body surface provides finite outward unit normals")
