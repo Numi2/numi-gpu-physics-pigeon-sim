@@ -2882,9 +2882,9 @@ private struct CrowMeshBuilder {
     func point(span: Int, chord: Int) -> SIMD3<Float> {
       states[wing.vertexOffset + span * chordCount + chord]
     }
-    // Three broad, overlapping courses read as plumage while remaining sparse
-    // enough to stay coherent when a wing is nearly edge-on.
-    for chord in [0, 3, 6] {
+    // Dense middle and trailing courses close the body-facing wing shell while
+    // retaining the established leading course and fixed temporal topology.
+    for chord in CrowFlightWingBodyIntegration.covertChordIndices {
       let rowFraction = Float(chord) / 8
       for span in CrowFlightWingBodyIntegration.covertSpanIndices {
         let root = point(span: span, chord: chord)

@@ -107,6 +107,12 @@ func flightWingAttachmentDeformationIsContinuous() {
 
 @Test("flight covert courses densely cover every body-to-wing station")
 func flightCovertCoursesDenselyCoverEveryBodyToWingStation() {
+  #expect(CrowFlightWingBodyIntegration.covertChordIndices == [0, 3, 4, 5, 6])
+  #expect(
+    CrowFlightWingBodyIntegration.covertChordIndices.allSatisfy {
+      (0..<CrowFlightWingBodyIntegration.chordCount).contains($0)
+    }
+  )
   let indices = CrowFlightWingBodyIntegration.covertSpanIndices
   #expect(indices.first == 0)
   #expect(indices.dropFirst().first == 1)

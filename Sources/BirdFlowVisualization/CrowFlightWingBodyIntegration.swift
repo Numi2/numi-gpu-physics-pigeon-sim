@@ -14,6 +14,7 @@ enum CrowFlightWingBodyIntegration {
   static let attachmentSpanCount = 14
   static let articulationSpanCount = 12
   static let covertCourseOverlapScale: Float = 1.24
+  static let covertChordIndices = [0, 3, 4, 5, 6]
 
   /// Samples every fixed wing-topology station from the body-seated root to
   /// the last station with a two-step surface target. Dense, stable courses
