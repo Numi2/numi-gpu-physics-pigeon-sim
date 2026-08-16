@@ -2879,7 +2879,6 @@ private struct CrowMeshBuilder {
       }), wing.vertexCount == 9 * 33
     else { return }
     let chordCount = 9
-    let spanCount = 33
     func point(span: Int, chord: Int) -> SIMD3<Float> {
       states[wing.vertexOffset + span * chordCount + chord]
     }
@@ -2887,7 +2886,7 @@ private struct CrowMeshBuilder {
     // enough to stay coherent when a wing is nearly edge-on.
     for chord in [0, 3, 6] {
       let rowFraction = Float(chord) / 8
-      for span in stride(from: 1, through: spanCount - 3, by: 2) {
+      for span in CrowFlightWingBodyIntegration.covertSpanIndices {
         let root = point(span: span, chord: chord)
         let chordTarget = point(span: span, chord: min(chord + 2, 8))
         let spanTarget = point(span: span + 2, chord: chord)
@@ -2919,13 +2918,22 @@ private struct CrowMeshBuilder {
           + (isTrailingCourse ? 1.92 : 1.16) * chordVector
           + 0.34 * spanVector
         let spacing = max(simd_length(spanVector), 0.012)
+        let attachmentOverlap =
+          CrowFlightWingBodyIntegration.covertAttachmentOverlapScale(
+            spanIndex: span
+          )
+        let covertOverlap =
+          CrowFlightWingBodyIntegration.covertCourseOverlapScale
+          * attachmentOverlap
         let dorsalNormal = normal.z >= 0 ? normal : -normal
         appendFeatherBlade(
           root: root + dorsalNormal * 0.0015,
           tip: surfaceTip + dorsalNormal * 0.0025,
           planeNormal: dorsalNormal,
-          rootWidth: (isTrailingCourse ? 0.44 : 0.38) * spacing,
-          maximumWidth: (isTrailingCourse ? 0.78 : 0.66) * spacing,
+          rootWidth:
+            covertOverlap * (isTrailingCourse ? 0.44 : 0.38) * spacing,
+          maximumWidth:
+            covertOverlap * (isTrailingCourse ? 0.78 : 0.66) * spacing,
           color: SIMD4<Float>(
             0.008 + 0.002 * rowFraction,
             0.012 + 0.003 * rowFraction,
@@ -2935,6 +2943,7 @@ private struct CrowMeshBuilder {
           sections: 7,
           camber: 0.035 * simd_length(chordVector),
           transverseCamberRatio: 0.16,
+          surfaceFeatherClass: 4,
           // A fixed LOD contract preserves identical temporal topology even
           // while the measured-derived wing changes chord length slightly.
           lodLengthMeters: 0.12,

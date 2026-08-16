@@ -13,6 +13,21 @@ enum CrowFlightWingBodyIntegration {
   static let spanCount = 33
   static let attachmentSpanCount = 14
   static let articulationSpanCount = 12
+  static let covertCourseOverlapScale: Float = 1.24
+
+  /// Samples every fixed wing-topology station from the body-seated root to
+  /// the last station with a two-step surface target. Dense, stable courses
+  /// avoid hiding sparse-plumage slots with implausibly broad vanes.
+  static var covertSpanIndices: [Int] {
+    Array(0...(spanCount - 3))
+  }
+
+  /// Axillary coverts overlap most strongly where the wing is body-seated,
+  /// then recover the established vane width before free articulation.
+  static func covertAttachmentOverlapScale(spanIndex: Int) -> Float {
+    let progress = clamp(Float(spanIndex) / Float(attachmentSpanCount))
+    return 1 + 0.28 * (1 - smootherstep(progress))
+  }
 
   static func bodyRoot(chordIndex: Int, left: Bool) -> SIMD3<Float> {
     precondition((0..<chordCount).contains(chordIndex))

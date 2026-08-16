@@ -104,3 +104,41 @@ func flightWingAttachmentDeformationIsContinuous() {
     previous = point
   }
 }
+
+@Test("flight covert courses densely cover every body-to-wing station")
+func flightCovertCoursesDenselyCoverEveryBodyToWingStation() {
+  let indices = CrowFlightWingBodyIntegration.covertSpanIndices
+  #expect(indices.first == 0)
+  #expect(indices.dropFirst().first == 1)
+  #expect(indices.last == CrowFlightWingBodyIntegration.spanCount - 3)
+  #expect(indices.count == CrowFlightWingBodyIntegration.spanCount - 2)
+  #expect(Set(indices).count == indices.count)
+  #expect(
+    indices.allSatisfy {
+      (0..<CrowFlightWingBodyIntegration.spanCount - 2).contains($0)
+    }
+  )
+  #expect(
+    zip(indices, indices.dropFirst()).allSatisfy {
+      $1 - $0 == 1
+    }
+  )
+
+  let overlapScales = (0..<CrowFlightWingBodyIntegration.spanCount).map {
+    CrowFlightWingBodyIntegration.covertAttachmentOverlapScale(spanIndex: $0)
+  }
+  #expect(abs(overlapScales.first! - 1.28) < 1e-6)
+  #expect(
+    abs(CrowFlightWingBodyIntegration.covertCourseOverlapScale - 1.24) < 1e-6
+  )
+  #expect(
+    abs(overlapScales[CrowFlightWingBodyIntegration.attachmentSpanCount] - 1)
+      < 1e-6
+  )
+  #expect(
+    overlapScales.dropFirst().allSatisfy { $0 >= 1 && $0 <= 1.28 }
+  )
+  #expect(
+    zip(overlapScales, overlapScales.dropFirst()).allSatisfy { $1 <= $0 }
+  )
+}
