@@ -29,7 +29,9 @@ enum CrowFoldedWingAnatomy {
         side * 0.050,
         0.032 - 0.024 * fraction
       )
-      let lateralDirection = side * (0.009 + 0.001 * fraction - 0.050) / length
+      let lateralDirection =
+        side * (primaryTipLateralOffsetMeters(fraction: fraction) - 0.050)
+        / length
       let tipHeight = -0.068 * fraction * fraction + 0.062 * fraction - 0.018
       let verticalDirection = (tipHeight - rootOffset.z) / length
       direction = safeNormalize(
@@ -91,6 +93,14 @@ enum CrowFoldedWingAnatomy {
       direction: direction,
       normal: normal
     )
+  }
+
+  /// Posterior primaries settle progressively farther over the outer rectrix.
+  /// The cubic onset leaves the anterior fan nearly unchanged while closing
+  /// the tapered distal seam visible from low rear cameras.
+  static func primaryTipLateralOffsetMeters(fraction rawFraction: Float) -> Float {
+    let fraction = min(max(rawFraction, 0), 1)
+    return 0.009 + 0.001 * fraction - 0.003 * fraction * fraction * fraction
   }
 
   private static func safeNormalize(

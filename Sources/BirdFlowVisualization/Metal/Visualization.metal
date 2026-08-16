@@ -311,7 +311,9 @@ inline CrowStandingRootPose crowStandingRootPose(
             side*0.050f,
             0.032f-0.024f*fraction
         );
-        float lateralDirection=side*(0.009f+0.001f*fraction-0.050f)/featherLength;
+        float primaryTipLateralOffset=0.009f+0.001f*fraction
+            -0.003f*fraction*fraction*fraction;
+        float lateralDirection=side*(primaryTipLateralOffset-0.050f)/featherLength;
         float tipHeight=-0.068f*fraction*fraction+0.062f*fraction-0.018f;
         float verticalDirection=(tipHeight-(result.root.z-center.z))/featherLength;
         result.direction=safeNormalizeCrow(

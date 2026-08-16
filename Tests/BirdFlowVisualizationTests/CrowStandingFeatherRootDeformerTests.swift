@@ -225,6 +225,10 @@ func standingCrowFeatherRootsMatchMetalReference() throws {
       let lateralTailEdge =
         side * tailCenter.y + abs(tailWidthAxis.y) * tailHalfWidth
       #expect(side * primaryTip.y < lateralTailEdge - 0.0005)
+      let primaryOrder = (primary.identity.w >> 16) & 255
+      if primaryOrder >= 7 {
+        #expect(side * primaryTip.y < lateralTailEdge - 0.002)
+      }
       #expect(abs(primaryTip.z - tailCenter.z) < 0.0045)
     }
     #expect(evaluatedPrimaryCount >= 6)
@@ -264,6 +268,21 @@ func standingCrowFeatherRootsMatchMetalReference() throws {
     #expect(abs(frontTip.y - rearTip.y) < 0.004)
     #expect(abs(frontTip.z - rearTip.z) < 0.046)
   }
+
+  let anteriorPrimaryTipOffset = CrowFoldedWingAnatomy
+    .primaryTipLateralOffsetMeters(fraction: 0)
+  let posteriorPrimaryTipOffset = CrowFoldedWingAnatomy
+    .primaryTipLateralOffsetMeters(fraction: 1)
+  #expect(abs(anteriorPrimaryTipOffset - 0.009) < 1e-7)
+  #expect(abs(posteriorPrimaryTipOffset - 0.007) < 1e-7)
+  #expect(
+    CrowFoldedWingAnatomy.primaryTipLateralOffsetMeters(fraction: 7.0 / 9.0)
+      < 0.0084
+  )
+  #expect(
+    CrowFoldedWingAnatomy.primaryTipLateralOffsetMeters(fraction: 8.0 / 9.0)
+      < 0.0078
+  )
 
   let centerTail = CrowFoldedWingAnatomy.pose(
     featherClass: 3,
