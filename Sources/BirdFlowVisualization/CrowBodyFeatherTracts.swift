@@ -35,8 +35,8 @@ struct CrowBodyFeatherTractSample: Equatable {
 }
 
 enum CrowBodyFeatherTracts {
-  static let cervicalRowCount = 17
-  static let cervicalColumnCount = 7
+  static let cervicalRowCount = 24
+  static let cervicalColumnCount = 10
   static let cervicalShellClearanceMeters: Float = 0.0012
   static let cervicalMinimumAngleRadians: Float = -1.05
   static let cervicalMaximumAngleRadians: Float = 1.54
@@ -96,6 +96,24 @@ enum CrowBodyFeatherTracts {
             + 0.20 * rowStep * sin(Float(column) * 2.399_963 + side * 0.71)
             + 0.04 * rowStep
             * sin(Float(row) * 1.173 + Float(column) * 0.83 + side * 1.31)
+          let rootIdentity = identityVariation(
+            side: side,
+            row: row,
+            column: column,
+            salt: 0x9E37_79B9
+          )
+          let shapeIdentity = identityVariation(
+            side: side,
+            row: row,
+            column: column,
+            salt: 0x85EB_CA6B
+          )
+          let lengthIdentity = identityVariation(
+            side: side,
+            row: row,
+            column: column,
+            salt: 0x7E95_761E
+          )
           let coupling = 0.10 + 0.78 * axial
           let vaneIdentity = identityVariation(
             side: side,
@@ -127,13 +145,18 @@ enum CrowBodyFeatherTracts {
           )
           let unposedRoot =
             unposedRootSurface + cervicalShellClearanceMeters * unposedNormal
-          let length = 0.023 - 0.004 * axial
+          let length =
+            (0.0215 - 0.0035 * axial)
+            * (1 + 0.060 * shapeIdentity + 0.025 * lengthIdentity)
           let unposedTip =
             unposedRoot
             + SIMD3<Float>(
               -length,
-              -side * 0.0015 * sin(Float.pi * axial),
+              -side
+                * (0.0015 + 0.00045 * rootIdentity)
+                * sin(Float.pi * axial),
               -0.001 - 0.0025 * max(0, -sin(angle))
+                + 0.00055 * shapeIdentity * sin(Float.pi * axial)
             )
           let root =
             neckPose?.transform(
@@ -163,9 +186,10 @@ enum CrowBodyFeatherTracts {
               rootOffset: root,
               tipOffset: tip,
               planeNormal: planeNormal,
-              rootWidthMeters: 0.0030,
-              maximumWidthMeters: 1.05 * (0.00545 - 0.0006 * axial)
-                * (1 + 0.020 * sin(Float(row) * 2.07 + Float(column) * 1.31)),
+              rootWidthMeters: 0.0024 * (1 + 0.070 * rootIdentity),
+              maximumWidthMeters: 1.03 * (0.00420 - 0.00045 * axial)
+                * (1 + 0.020 * sin(Float(row) * 2.07 + Float(column) * 1.31))
+                * (1 + 0.045 * shapeIdentity),
               camberMeters:
                 0.0010
                 * (1 + 0.06 * sin(Float(row) * 1.49 - Float(column) * 2.11)),
@@ -173,7 +197,7 @@ enum CrowBodyFeatherTracts {
               edgeRippleAmplitude: 0.010 + 0.016 * (0.5 + 0.5 * edgeIdentity),
               edgeRipplePhase: Float.pi * (edgeIdentity + 1),
               edgeRippleCycles: 1.30 + 0.50 * (0.5 + 0.5 * cycleIdentity),
-              rootEnvelopeRatio: 0.58,
+              rootEnvelopeRatio: 0.48 + 0.07 * (0.5 + 0.5 * shapeIdentity),
               pennaceousStartFraction: 0,
               materialVariation: identityVariation(
                 side: side,
@@ -194,9 +218,11 @@ enum CrowBodyFeatherTracts {
     row: Int,
     column: Int
   ) -> SIMD3<Float> {
-    let axial = Float(column) / Float(cervicalColumnCount - 1)
     let angle = cervicalRootAngle(side: side, row: row, column: column)
-    let point = CrowBodyAnatomy.surfacePoint(atX: 0.086 + 0.062 * axial, theta: angle)
+    let point = CrowBodyAnatomy.surfacePoint(
+      atX: cervicalRootX(row: row, column: column),
+      theta: angle
+    )
     return SIMD3<Float>(point.x, side * point.y, point.z)
   }
 
@@ -205,13 +231,42 @@ enum CrowBodyFeatherTracts {
     row: Int,
     column: Int
   ) -> SIMD3<Float> {
-    let axial = Float(column) / Float(cervicalColumnCount - 1)
     let angle = cervicalRootAngle(side: side, row: row, column: column)
     let normal = CrowBodyAnatomy.surfaceNormal(
-      atX: 0.086 + 0.062 * axial,
+      atX: cervicalRootX(row: row, column: column),
       theta: angle
     )
     return SIMD3<Float>(normal.x, side * normal.y, normal.z)
+  }
+
+  /// Distributes the 24 cervical courses over one axial root interval without
+  /// the repeated transverse stations of a rectangular neck grid. Eleven and
+  /// twenty-five are coprime, so every row receives a unique phase while each
+  /// neighboring row stays almost half an interval away.
+  static func cervicalCoursePhase(row: Int) -> Float {
+    let boundedRow = min(max(row, 0), cervicalRowCount - 1)
+    return Float((boundedRow * 11) % 25) / 25
+  }
+
+  /// Tapers course staggering to zero at the fixed shoulder and cranial
+  /// boundaries. The four-millimetre interior span breaks tiled highlights
+  /// while retaining root order and cross-course vane overlap.
+  static func cervicalAxialStaggerMeters(row: Int, column: Int) -> Float {
+    let boundedColumn = min(max(column, 0), cervicalColumnCount - 1)
+    guard boundedColumn > 0 && boundedColumn < cervicalColumnCount - 1 else {
+      return 0
+    }
+    let axial = Float(boundedColumn) / Float(cervicalColumnCount - 1)
+    return 0.0040
+      * (cervicalCoursePhase(row: row) - 0.5)
+      * sin(Float.pi * axial)
+  }
+
+  private static func cervicalRootX(row: Int, column: Int) -> Float {
+    let boundedColumn = min(max(column, 0), cervicalColumnCount - 1)
+    let axial = Float(boundedColumn) / Float(cervicalColumnCount - 1)
+    return 0.086 + 0.062 * axial
+      + cervicalAxialStaggerMeters(row: row, column: boundedColumn)
   }
 
   private static func cervicalRootAngle(
