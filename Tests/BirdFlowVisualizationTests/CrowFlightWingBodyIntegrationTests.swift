@@ -147,6 +147,20 @@ func flightCovertCoursesDenselyCoverEveryBodyToWingStation() {
   #expect(
     zip(overlapScales, overlapScales.dropFirst()).allSatisfy { $1 <= $0 }
   )
+
+  let distalExtensions = (0..<CrowFlightWingBodyIntegration.spanCount).map {
+    CrowFlightWingBodyIntegration.covertDistalChordExtension(spanIndex: $0)
+  }
+  #expect(
+    abs(distalExtensions[CrowFlightWingBodyIntegration.spanCount - 10]) < 1e-6
+  )
+  #expect(
+    abs(distalExtensions[CrowFlightWingBodyIntegration.spanCount - 3] - 0.36)
+      < 1e-6
+  )
+  #expect(
+    zip(distalExtensions, distalExtensions.dropFirst()).allSatisfy { $1 >= $0 }
+  )
 }
 
 @Test("flight covert normals retain anatomical side through reversal")

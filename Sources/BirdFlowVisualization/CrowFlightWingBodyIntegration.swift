@@ -30,6 +30,18 @@ enum CrowFlightWingBodyIntegration {
     return 1 + 0.28 * (1 - smootherstep(progress))
   }
 
+  /// Distal trailing coverts project slightly farther across the marginal
+  /// scaffold boundary instead of becoming implausibly broad.
+  static func covertDistalChordExtension(spanIndex: Int) -> Float {
+    let firstDistalStation = spanCount - 10
+    let lastCovertStation = spanCount - 3
+    let progress = clamp(
+      Float(spanIndex - firstDistalStation)
+        / Float(lastCovertStation - firstDistalStation)
+    )
+    return 0.36 * smootherstep(progress)
+  }
+
   /// Resolves the anatomical dorsal side from fixed topology orientation.
   /// World Z is intentionally absent: a reversing wing must not swap the
   /// feather shell to its opposite physical face.

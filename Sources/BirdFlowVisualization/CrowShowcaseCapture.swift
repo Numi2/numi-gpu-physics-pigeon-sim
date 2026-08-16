@@ -2913,9 +2913,16 @@ private struct CrowMeshBuilder {
           left: left
         )
         let isTrailingCourse = chord == 6
+        let distalChordExtension =
+          isTrailingCourse
+          ? CrowFlightWingBodyIntegration.covertDistalChordExtension(
+            spanIndex: span
+          )
+          : 0
         let surfaceTip =
           root
-          + (isTrailingCourse ? 1.92 : 1.16) * chordVector
+          + (isTrailingCourse ? 1.92 + distalChordExtension : 1.16)
+            * chordVector
           + 0.34 * spanVector
         let spacing = max(simd_length(spanVector), 0.012)
         let attachmentOverlap =
