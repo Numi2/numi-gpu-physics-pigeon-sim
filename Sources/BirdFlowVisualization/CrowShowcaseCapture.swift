@@ -1696,6 +1696,11 @@ private struct CrowMeshBuilder {
       to: &vertices
     )
     if let standingPose {
+      appendAxillaryFeatherTracts(
+        bodyCenter: posedBodyCenter,
+        projectedPixelsPerMeter: projectedPixelsPerMeter,
+        to: &vertices
+      )
       appendFoldedWingCoverts(
         bodyCenter: posedBodyCenter,
         projectedPixelsPerMeter: projectedPixelsPerMeter,
@@ -2533,6 +2538,55 @@ private struct CrowMeshBuilder {
         surfaceFeatherClass: CrowFoldedWingCoverts.surfaceFeatherClass,
         lodLengthMeters: simd_distance(sample.rootOffset, sample.tipOffset),
         projectedPixelsPerMeter: projectedPixelsPerMeter,
+        to: &vertices
+      )
+    }
+  }
+
+  private func appendAxillaryFeatherTracts(
+    bodyCenter: SIMD3<Float>,
+    projectedPixelsPerMeter: Float,
+    to vertices: inout [ColoredVertex]
+  ) {
+    for sample in CrowAxillaryFeatherTracts.visibleSamples(
+      projectedPixelsPerMeter: projectedPixelsPerMeter
+    ) {
+      let material = sample.materialVariation
+      let color = SIMD4<Float>(
+        0.0060 * (1 + 0.08 * material),
+        0.0091 * (1 + 0.06 * material),
+        0.0162 * (1 + 0.04 * material),
+        0.15 + 0.008 * material
+      )
+      appendFeatherBlade(
+        root: bodyCenter + sample.rootOffset,
+        tip: bodyCenter + sample.tipOffset,
+        planeNormal: sample.planeNormal,
+        rootWidth: sample.rootWidthMeters,
+        maximumWidth: sample.maximumWidthMeters,
+        color: color,
+        sections: 9,
+        camber: sample.camberMeters,
+        transverseCamberRatio: 0.18,
+        vaneAsymmetry: sample.vaneAsymmetry,
+        edgeRippleAmplitude: sample.edgeRippleAmplitude,
+        edgeRipplePhase: sample.edgeRipplePhase,
+        edgeRippleCycles: sample.edgeRippleCycles,
+        rootEnvelopeRatio: sample.rootEnvelopeRatio,
+        axialStartFraction: sample.pennaceousStartFraction,
+        surfaceFeatherClass: sample.surfaceFeatherClass,
+        lodLengthMeters: simd_distance(sample.rootOffset, sample.tipOffset),
+        projectedPixelsPerMeter: projectedPixelsPerMeter,
+        to: &vertices
+      )
+      appendTractFeatherMesostructure(
+        CrowAxillaryFeatherDetail.segments(
+          for: sample,
+          projectedPixelsPerMeter: projectedPixelsPerMeter
+        ),
+        bodyCenter: bodyCenter,
+        planeNormal: sample.planeNormal,
+        material: material,
         to: &vertices
       )
     }
