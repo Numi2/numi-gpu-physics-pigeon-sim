@@ -21,7 +21,7 @@ func femoralPlumageBridgesBodyLoftAndUpperCruralTract() {
     hock: rightHock
   )
   #expect(left.count == CrowFemoralPlumage.rowCount * CrowFemoralPlumage.courseCount)
-  #expect(left.count == 108)
+  #expect(left.count == 208)
   #expect(CrowFemoralPlumage.surfaceFeatherClass == 7)
   #expect(left.count == right.count)
   #expect(
@@ -46,7 +46,7 @@ func femoralPlumageBridgesBodyLoftAndUpperCruralTract() {
       hip: leftHip,
       hock: leftHock,
       projectedPixelsPerMeter: 1_600
-    ).count == 108
+    ).count == 208
   )
   #expect(
     left
@@ -58,6 +58,18 @@ func femoralPlumageBridgesBodyLoftAndUpperCruralTract() {
   )
   #expect(left.map(\.materialVariation).min()! < -0.90)
   #expect(left.map(\.materialVariation).max()! > 0.90)
+  #expect(left.map(\.vaneAsymmetry).min()! < -0.035)
+  #expect(left.map(\.vaneAsymmetry).max()! > 0.035)
+  #expect(left.allSatisfy { $0.edgeRippleAmplitude >= 0.010 })
+  #expect(left.allSatisfy { $0.edgeRippleAmplitude <= 0.024 })
+  #expect(left.allSatisfy { $0.edgeRipplePhase >= 0 })
+  #expect(left.allSatisfy { $0.edgeRipplePhase <= 2 * Float.pi })
+  #expect(left.allSatisfy { $0.edgeRippleCycles >= 1.20 })
+  #expect(left.allSatisfy { $0.edgeRippleCycles <= 1.90 })
+  #expect(left.allSatisfy {
+    $0.rootEnvelopeRatio == CrowFemoralPlumage.visibleRootEnvelopeRatio
+      && $0.pennaceousStartFraction == 0
+  })
   #expect(left.allSatisfy { $0.bodyMaterialBlend >= 0.60 })
   #expect(left.allSatisfy { $0.bodyMaterialBlend <= 0.88 })
   #expect(
@@ -70,6 +82,12 @@ func femoralPlumageBridgesBodyLoftAndUpperCruralTract() {
       $0.materialVariation == 0 && $0.bodyMaterialBlend == 0
     }
   )
+  let staggers = (0..<CrowFemoralPlumage.rowCount).map {
+    CrowFemoralPlumage.courseStaggerMeters(row: $0)
+  }
+  #expect(staggers.min()! < -0.0022)
+  #expect(staggers.max()! > 0.0022)
+  #expect(Set(staggers.map { Int(($0 * 1_000_000).rounded()) }).count == staggers.count)
 
   for pair in zip(left, right) {
     #expect(pair.0.row == pair.1.row)
@@ -115,7 +133,11 @@ func femoralPlumageBridgesBodyLoftAndUpperCruralTract() {
         simd_distance(pair.0.root, pair.1.root)
           < pair.0.maximumWidthMeters + pair.1.maximumWidthMeters
       )
-      #expect(abs(pair.0.root.x - pair.1.root.x) > 0.002)
     }
+    #expect(row.map(\.root.x).max()! - row.map(\.root.x).min()! > 0.0044)
+    #expect(
+      Set(row.map { Int(($0.root.x * 1_000_000).rounded()) }).count
+        == CrowFemoralPlumage.rowCount
+    )
   }
 }

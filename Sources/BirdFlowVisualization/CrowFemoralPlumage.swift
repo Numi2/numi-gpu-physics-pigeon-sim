@@ -11,6 +11,12 @@ struct CrowFemoralPlumageFeather: Equatable {
   let rootWidthMeters: Float
   let maximumWidthMeters: Float
   let camberMeters: Float
+  let vaneAsymmetry: Float
+  let edgeRippleAmplitude: Float
+  let edgeRipplePhase: Float
+  let edgeRippleCycles: Float
+  let rootEnvelopeRatio: Float
+  let pennaceousStartFraction: Float
   let materialVariation: Float
   let bodyMaterialBlend: Float
 }
@@ -21,9 +27,10 @@ struct CrowFemoralPlumageFeather: Equatable {
 /// the dorsal/outer upper thigh. This deliberately changes only presentation
 /// geometry: hip, hock, ankle, and planted digital contacts remain untouched.
 enum CrowFemoralPlumage {
-  static let rowCount = 9
-  static let courseCount = 12
+  static let rowCount = 13
+  static let courseCount = 16
   static let shellClearanceMeters: Float = 0.0009
+  static let visibleRootEnvelopeRatio: Float = 0.74
   static let surfaceFeatherClass: UInt32 = 7
 
   static func visibleSamples(
@@ -65,6 +72,21 @@ enum CrowFemoralPlumage {
           course: course,
           salt: 0xC2B2_AE35
         )
+        let vaneIdentity = identityVariation(
+          row: row,
+          course: course,
+          salt: 0xB529_7A4D
+        )
+        let edgeIdentity = identityVariation(
+          row: row,
+          course: course,
+          salt: 0x68E3_1DA4
+        )
+        let cycleIdentity = identityVariation(
+          row: row,
+          course: course,
+          salt: 0xD3A2_646C
+        )
         let rowStep = 1 / Float(rowCount - 1)
         let rowFraction = min(
           1,
@@ -75,7 +97,7 @@ enum CrowFemoralPlumage {
                 ? 0 : 0.11 * rowStep * rootIdentity)
           )
         )
-        let theta = -1.20 + 0.70 * rowFraction
+        let theta = -1.36 + 0.98 * rowFraction
         let baseCourseFraction = Float(course) / Float(courseCount - 1)
         let courseStep = 1 / Float(courseCount - 1)
         let courseFraction = min(
@@ -87,11 +109,8 @@ enum CrowFemoralPlumage {
                 ? 0 : 0.10 * courseStep * shapeIdentity)
           )
         )
-        let stagger: Float =
-          row.isMultiple(of: 2)
-          ? 0
-          : 0.0028
-        let rootX = -0.048 + 0.040 * courseFraction - stagger
+        let stagger = courseStaggerMeters(row: row)
+        let rootX = -0.068 + 0.068 * courseFraction - stagger
         let localSurface = mirroredSurfacePoint(
           x: rootX,
           theta: theta,
@@ -111,8 +130,8 @@ enum CrowFemoralPlumage {
           fallback: SIMD3<Float>(0, side, 0)
         )
         let targetFraction =
-          0.045 + 0.145 * courseFraction
-          + (row.isMultiple(of: 2) ? 0 : 0.008)
+          0.035 + 0.195 * courseFraction
+          + 0.008 * sin(2.35 * Float(row) + 0.61)
         let targetRadius =
           (0.0142 - 0.0011 * courseFraction)
           * (1 + 0.025 * rootIdentity)
@@ -128,7 +147,7 @@ enum CrowFemoralPlumage {
           fallback: legAxis
         )
         let tip = root + length * direction
-        let maximumWidth = min(0.0082, max(0.0043, 0.22 * length))
+        let maximumWidth = min(0.0076, max(0.0041, 0.235 * length))
         result.append(
           CrowFemoralPlumageFeather(
             side: side,
@@ -141,10 +160,17 @@ enum CrowFemoralPlumage {
               0.85 * localNormal + 0.15 * radial,
               fallback: localNormal
             ),
-            rootWidthMeters: 0.52 * maximumWidth,
+            rootWidthMeters: 0.68 * maximumWidth,
             maximumWidthMeters: maximumWidth * (1 + 0.04 * shapeIdentity),
             camberMeters: (0.00085 + 0.00030 * courseFraction)
               * (1 + 0.08 * rootIdentity),
+            vaneAsymmetry: 0.040 * vaneIdentity,
+            edgeRippleAmplitude:
+              0.010 + 0.014 * (0.5 + 0.5 * edgeIdentity),
+            edgeRipplePhase: Float.pi * (edgeIdentity + 1),
+            edgeRippleCycles: 1.20 + 0.70 * (0.5 + 0.5 * cycleIdentity),
+            rootEnvelopeRatio: visibleRootEnvelopeRatio,
+            pennaceousStartFraction: 0,
             materialVariation: materialIdentity,
             bodyMaterialBlend: 0.88 - 0.28 * courseFraction
           )
@@ -200,6 +226,12 @@ enum CrowFemoralPlumage {
             rootWidthMeters: 0.56 * maximumWidth,
             maximumWidthMeters: maximumWidth,
             camberMeters: 0.0012 + 0.0004 * courseFraction,
+            vaneAsymmetry: 0,
+            edgeRippleAmplitude: 0,
+            edgeRipplePhase: 0,
+            edgeRippleCycles: 0,
+            rootEnvelopeRatio: 0.58,
+            pennaceousStartFraction: 0,
             materialVariation: 0,
             bodyMaterialBlend: 0
           )
@@ -207,6 +239,12 @@ enum CrowFemoralPlumage {
       }
     }
     return result
+  }
+
+  /// Signed non-repeating course offsets interdigitate the pelvic roots
+  /// without forming the zipper-like alternating seam visible from below.
+  static func courseStaggerMeters(row: Int) -> Float {
+    0.00245 * sin(2.399_963 * Float(row) + 0.37)
   }
 
   private static func mirroredSurfacePoint(
