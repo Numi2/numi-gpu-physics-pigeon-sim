@@ -161,6 +161,47 @@ func flightCovertCoursesDenselyCoverEveryBodyToWingStation() {
   #expect(
     zip(distalExtensions, distalExtensions.dropFirst()).allSatisfy { $1 >= $0 }
   )
+
+  let identities = CrowFlightWingBodyIntegration.covertChordIndices.flatMap {
+    chord in
+    CrowFlightWingBodyIntegration.covertSpanIndices.map { span in
+      (
+        chord,
+        span,
+        CrowFlightWingBodyIntegration.covertTipSpanFraction(
+          chordIndex: chord,
+          spanIndex: span
+        ),
+        CrowFlightWingBodyIntegration.covertWidthScale(
+          chordIndex: chord,
+          spanIndex: span
+        ),
+        CrowFlightWingBodyIntegration.covertCamberScale(
+          chordIndex: chord,
+          spanIndex: span
+        ),
+        CrowFlightWingBodyIntegration.covertMaterialVariation(
+          chordIndex: chord,
+          spanIndex: span
+        )
+      )
+    }
+  }
+  #expect(identities.count == 155)
+  #expect(identities.map(\.2).min()! > 0.285)
+  #expect(identities.map(\.2).max()! < 0.400)
+  #expect(identities.map(\.3).min()! > 1.00)
+  #expect(identities.map(\.3).max()! > 1.05)
+  #expect(identities.map(\.4).min()! < 0.91)
+  #expect(identities.map(\.4).max()! > 1.09)
+  #expect(identities.map(\.5).min()! < -0.90)
+  #expect(identities.map(\.5).max()! > 0.90)
+  let courseMeans = CrowFlightWingBodyIntegration.covertChordIndices.map {
+    chord in
+    let course = identities.filter { $0.0 == chord }
+    return course.map(\.2).reduce(0, +) / Float(course.count)
+  }
+  #expect(Set(courseMeans.map { Int(($0 * 100_000).rounded()) }).count == 5)
 }
 
 @Test("flight covert normals retain anatomical side through reversal")

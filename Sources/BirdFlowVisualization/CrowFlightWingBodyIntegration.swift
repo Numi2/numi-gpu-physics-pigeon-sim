@@ -42,6 +42,58 @@ enum CrowFlightWingBodyIntegration {
     return 0.36 * smootherstep(progress)
   }
 
+  /// Staggers visible vane tips while every root remains on its exact live
+  /// topology station. Course phases are interleaved rather than alternating.
+  static func covertTipSpanFraction(chordIndex: Int, spanIndex: Int) -> Float {
+    let coursePhase: Float
+    switch chordIndex {
+    case 0: coursePhase = -0.040
+    case 3: coursePhase = 0.025
+    case 4: coursePhase = -0.015
+    case 5: coursePhase = 0.045
+    case 6: coursePhase = 0
+    default: coursePhase = 0
+    }
+    return 0.34 + coursePhase
+      + 0.012 * covertIdentityVariation(
+        chordIndex: chordIndex,
+        spanIndex: spanIndex,
+        salt: 0x9E37_79B9
+      )
+  }
+
+  static func covertWidthScale(chordIndex: Int, spanIndex: Int) -> Float {
+    1.03 + 0.025 * covertIdentityVariation(
+      chordIndex: chordIndex,
+      spanIndex: spanIndex,
+      salt: 0x85EB_CA6B
+    )
+  }
+
+  static func covertCamberScale(chordIndex: Int, spanIndex: Int) -> Float {
+    1 + 0.10 * covertIdentityVariation(
+      chordIndex: chordIndex,
+      spanIndex: spanIndex,
+      salt: 0xC2B2_AE35
+    )
+  }
+
+  static func covertMaterialVariation(chordIndex: Int, spanIndex: Int) -> Float {
+    covertIdentityVariation(
+      chordIndex: chordIndex,
+      spanIndex: spanIndex,
+      salt: 0x27D4_EB2F
+    )
+  }
+
+  static func covertEdgeVariation(chordIndex: Int, spanIndex: Int) -> Float {
+    covertIdentityVariation(
+      chordIndex: chordIndex,
+      spanIndex: spanIndex,
+      salt: 0x1656_67B1
+    )
+  }
+
   /// Resolves the anatomical dorsal side from fixed topology orientation.
   /// World Z is intentionally absent: a reversing wing must not swap the
   /// feather shell to its opposite physical face.
@@ -124,5 +176,21 @@ enum CrowFlightWingBodyIntegration {
 
   private static func mix(_ first: Float, _ second: Float, _ blend: Float) -> Float {
     first + blend * (second - first)
+  }
+
+  private static func covertIdentityVariation(
+    chordIndex: Int,
+    spanIndex: Int,
+    salt: UInt32
+  ) -> Float {
+    var value = UInt32(truncatingIfNeeded: chordIndex) &* 0x9E37_79B9
+    value ^= UInt32(truncatingIfNeeded: spanIndex) &* 0x85EB_CA6B
+    value ^= salt
+    value ^= value >> 16
+    value &*= 0x7FEB_352D
+    value ^= value >> 15
+    value &*= 0x846C_A68B
+    value ^= value >> 16
+    return 2 * Float(value & 0x00FF_FFFF) / Float(0x00FF_FFFF) - 1
   }
 }

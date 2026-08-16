@@ -2913,6 +2913,28 @@ private struct CrowMeshBuilder {
           left: left
         )
         let isTrailingCourse = chord == 6
+        let tipSpanFraction =
+          CrowFlightWingBodyIntegration.covertTipSpanFraction(
+            chordIndex: chord,
+            spanIndex: span
+          )
+        let widthScale = CrowFlightWingBodyIntegration.covertWidthScale(
+          chordIndex: chord,
+          spanIndex: span
+        )
+        let camberScale = CrowFlightWingBodyIntegration.covertCamberScale(
+          chordIndex: chord,
+          spanIndex: span
+        )
+        let materialVariation =
+          CrowFlightWingBodyIntegration.covertMaterialVariation(
+            chordIndex: chord,
+            spanIndex: span
+          )
+        let edgeVariation = CrowFlightWingBodyIntegration.covertEdgeVariation(
+          chordIndex: chord,
+          spanIndex: span
+        )
         let distalChordExtension =
           isTrailingCourse
           ? CrowFlightWingBodyIntegration.covertDistalChordExtension(
@@ -2923,7 +2945,7 @@ private struct CrowMeshBuilder {
           root
           + (isTrailingCourse ? 1.92 + distalChordExtension : 1.16)
             * chordVector
-          + 0.34 * spanVector
+          + tipSpanFraction * spanVector
         let spacing = max(simd_length(spanVector), 0.012)
         let attachmentOverlap =
           CrowFlightWingBodyIntegration.covertAttachmentOverlapScale(
@@ -2937,18 +2959,23 @@ private struct CrowMeshBuilder {
           tip: surfaceTip + dorsalNormal * 0.0025,
           planeNormal: dorsalNormal,
           rootWidth:
-            covertOverlap * (isTrailingCourse ? 0.44 : 0.38) * spacing,
+            widthScale * covertOverlap * (isTrailingCourse ? 0.44 : 0.38)
+            * spacing,
           maximumWidth:
-            covertOverlap * (isTrailingCourse ? 0.78 : 0.66) * spacing,
+            widthScale * covertOverlap * (isTrailingCourse ? 0.78 : 0.66)
+            * spacing,
           color: SIMD4<Float>(
-            0.008 + 0.002 * rowFraction,
-            0.012 + 0.003 * rowFraction,
-            0.021 + 0.004 * rowFraction,
-            0.18
+            (0.008 + 0.002 * rowFraction) * (1 + 0.08 * materialVariation),
+            (0.012 + 0.003 * rowFraction) * (1 + 0.06 * materialVariation),
+            (0.021 + 0.004 * rowFraction) * (1 + 0.04 * materialVariation),
+            0.18 + 0.008 * materialVariation
           ),
           sections: 7,
-          camber: 0.035 * simd_length(chordVector),
+          camber: camberScale * 0.035 * simd_length(chordVector),
           transverseCamberRatio: 0.16,
+          edgeRippleAmplitude: 0.008 + 0.010 * (0.5 + 0.5 * edgeVariation),
+          edgeRipplePhase: Float.pi * (edgeVariation + 1),
+          edgeRippleCycles: 1.25 + 0.55 * (0.5 + 0.5 * edgeVariation),
           surfaceFeatherClass: 4,
           // A fixed LOD contract preserves identical temporal topology even
           // while the measured-derived wing changes chord length slightly.
