@@ -30,6 +30,7 @@ public enum CrowShowcaseCapture {
     let standingReferenceURL: URL
     let aovAuditURL: URL?
     let temporalScale: Float
+    let cameraYawRadians: Float?
     let presentation: CrowShowcasePresentation
 
     public init(commandLine: [String]) throws {
@@ -54,6 +55,13 @@ public enum CrowShowcaseCapture {
         }
         return parsed
       }
+      func finiteFloat(after flag: String) throws -> Float? {
+        guard let raw = try value(after: flag) else { return nil }
+        guard let parsed = Float(raw), parsed.isFinite else {
+          throw CaptureError.invalidArguments("\(flag) requires a finite number")
+        }
+        return parsed
+      }
 
       guard let output = try value(after: "--capture-crow-frames") else {
         throw CaptureError.invalidArguments(
@@ -68,6 +76,7 @@ public enum CrowShowcaseCapture {
         after: "--capture-crow-temporal-scale",
         default: 1
       )
+      cameraYawRadians = try finiteFloat(after: "--capture-crow-camera-yaw")
       guard frameCount >= 2 else {
         throw CaptureError.invalidArguments("--capture-frames must be at least 2")
       }
@@ -266,6 +275,9 @@ public enum CrowShowcaseCapture {
         camera.distance = 1.05 * (1 + 0.010 * cos(orbit))
         camera.yaw = -1.06 + 0.024 * sin(orbit)
         camera.pitch = 0.18 + 0.012 * cos(orbit)
+      }
+      if let cameraYawRadians = arguments.cameraYawRadians {
+        camera.yaw = cameraYawRadians
       }
       let rendered = try renderer.render(
         phase: phase,

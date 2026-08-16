@@ -36,6 +36,10 @@ and folded-wing covert rows then break up the analytic surface. These remain
 estimated presentation geometry; they are not inferred skeletal landmarks or a
 measured body scan.
 
+Sparse diagnostic captures can set `--capture-crow-camera-yaw` in radians so a
+geometry milestone is checked from a new view without changing the release
+camera or multiplying appearance-only review frames.
+
 ## Native Metal capture
 
 The native renderer consumes both locked inputs. Its encoding, input hashes,

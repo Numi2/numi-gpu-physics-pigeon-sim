@@ -7,6 +7,7 @@ POSTER="${2:-$ROOT/Docs/Media/american-crow-hybrid-native-v1.png}"
 PRESENTATION="${3:-wingbeat}"
 AOV_AUDIT="${4:-}"
 TEMPORAL_SCALE="${5:-1}"
+CAMERA_YAW="${6:-}"
 MANIFEST="$ROOT/ValidationInputs/american-crow-hybrid-surface-v1/manifest.json"
 GENERATION_AUDIT="$ROOT/ValidationArtifacts/american-crow-hybrid-surface-generation-v1.json"
 PROFILE="$ROOT/ValidationInputs/american-crow-hybrid-visual-v1.json"
@@ -43,6 +44,10 @@ AOV_ARGUMENTS=()
 if [[ -n "$AOV_AUDIT" ]]; then
   AOV_ARGUMENTS=(--capture-crow-aov-audit "$AOV_AUDIT")
 fi
+CAMERA_ARGUMENTS=()
+if [[ -n "$CAMERA_YAW" ]]; then
+  CAMERA_ARGUMENTS=(--capture-crow-camera-yaw "$CAMERA_YAW")
+fi
 
 # The 49th frame is a seam probe equal to frame zero. The encoded movie uses
 # the first 48 frames, avoiding a duplicated endpoint pause at the loop wrap.
@@ -54,6 +59,7 @@ fi
   --capture-crow-standing-reference "$STANDING_REFERENCE" \
   --capture-crow-presentation "$PRESENTATION" \
   "${AOV_ARGUMENTS[@]}" \
+  "${CAMERA_ARGUMENTS[@]}" \
   --capture-crow-temporal-scale "$TEMPORAL_SCALE" \
   --capture-width 1280 \
   --capture-height 720 \
