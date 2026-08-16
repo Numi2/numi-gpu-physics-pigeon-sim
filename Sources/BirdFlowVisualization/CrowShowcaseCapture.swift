@@ -1561,6 +1561,12 @@ private struct CrowMeshBuilder {
       projectedPixelsPerMeter: projectedPixelsPerMeter,
       to: &vertices
     )
+    appendBodyFeatherTracts(
+      bodyCenter: posedBodyCenter,
+      headOffset: standingPose?.headOffset ?? .zero,
+      projectedPixelsPerMeter: projectedPixelsPerMeter,
+      to: &vertices
+    )
     if let standingPose {
       appendFoldedWingCoverts(
         bodyCenter: posedBodyCenter,
@@ -1719,6 +1725,39 @@ private struct CrowMeshBuilder {
           )
         }
       }
+    }
+  }
+
+  private func appendBodyFeatherTracts(
+    bodyCenter: SIMD3<Float>,
+    headOffset: SIMD3<Float>,
+    projectedPixelsPerMeter: Float,
+    to vertices: inout [ColoredVertex]
+  ) {
+    for sample in CrowBodyFeatherTracts.samples(headOffset: headOffset) {
+      let color: SIMD4<Float>
+      switch sample.region {
+      case .cervical:
+        color = SIMD4<Float>(0.006, 0.009, 0.016, 0.14)
+      case .mantle:
+        color = SIMD4<Float>(0.0065, 0.010, 0.018, 0.16)
+      case .scapular:
+        color = SIMD4<Float>(0.007, 0.011, 0.020, 0.18)
+      }
+      appendFeatherBlade(
+        root: bodyCenter + sample.rootOffset,
+        tip: bodyCenter + sample.tipOffset,
+        planeNormal: sample.planeNormal,
+        rootWidth: sample.rootWidthMeters,
+        maximumWidth: sample.maximumWidthMeters,
+        color: color,
+        sections: sample.region == .cervical ? 6 : 8,
+        camber: sample.camberMeters,
+        transverseCamberRatio: sample.region == .cervical ? 0.24 : 0.28,
+        lodLengthMeters: simd_distance(sample.rootOffset, sample.tipOffset),
+        projectedPixelsPerMeter: projectedPixelsPerMeter,
+        to: &vertices
+      )
     }
   }
 
