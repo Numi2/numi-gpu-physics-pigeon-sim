@@ -284,7 +284,7 @@ public enum CrowShowcaseCapture {
         camera.pitch = 0.075 + 0.006 * cos(orbit)
       } else {
         camera.target = SIMD3<Float>(-0.018, 0, 0.020)
-        camera.distance = 0.96 * (1 + 0.010 * cos(orbit))
+        camera.distance = 1.08 + 0.18 * abs(cos(orbit))
         camera.yaw = -0.50 + 0.06 * sin(orbit)
         // Follow the wing plane through the stroke: the inherited surface is
         // nearly vertical at both stroke reversals, so a fixed low elevation
@@ -892,7 +892,11 @@ private final class CrowShowcaseRenderer {
       projectedPixelsPerMeter: projectedPixelsPerMeter
     )
     guard vertices.count == previousVertices.count else {
-      throw VisualizationError.pipeline("crow temporal surface topology")
+      throw VisualizationError.pipeline(
+        "crow temporal surface topology current=\(vertices.count) "
+          + "previous=\(previousVertices.count) phase=\(phase) "
+          + "priorPhase=\(priorPhase)"
+      )
     }
     let temporalVertices = zip(vertices, previousVertices).enumerated().map {
       index, pair in
@@ -1513,33 +1517,34 @@ private struct CrowMeshBuilder {
         })
       {
         // The source lower reversal folds and sweeps forward like its dove
-        // scaffold, which is not a credible crow beauty silhouette. Retain one
-        // live topology state as the wing shape and articulate it about the
-        // fixed shoulder row. Solver motion remains available independently;
-        // this branch is explicitly presentation-retargeted in the overlay.
+        // scaffold, and its nominal root collapses behind the pelvis. Retain
+        // one live topology state as the distal wing shape, but loft its
+        // proximal stations onto the estimated crow shoulder and flank before
+        // articulation. Solver motion remains available independently; this
+        // branch is explicitly presentation-retargeted in the overlay.
         let localIndex = vertexIndex - wing.vertexOffset
-        let chordIndex = localIndex % 9
-        point =
+        let chordIndex = localIndex % CrowFlightWingBodyIntegration.chordCount
+        let spanIndex = localIndex / CrowFlightWingBodyIntegration.chordCount
+        let referencePoint =
           motion.point(phase: 0.25, vertexIndex: vertexIndex).position
           - referenceBodyCenter
-        let shoulder =
+        let sourceRoot =
           motion.point(
             phase: 0.25,
             vertexIndex: wing.vertexOffset + chordIndex
           ).position - referenceBodyCenter
-        let relative = point - shoulder
-        let wrappedPhase = phase - floor(phase)
-        let side: Float = partIdentifier == 2 ? 1 : -1
-        let flapAngle = side * 0.54 * cos(2 * Float.pi * wrappedPhase)
-        let cosine = cos(flapAngle)
-        let sine = sin(flapAngle)
-        point =
-          shoulder
-          + SIMD3<Float>(
-            relative.x,
-            cosine * relative.y - sine * relative.z,
-            sine * relative.y + cosine * relative.z
-          )
+        let sourceLeadingRoot =
+          motion.point(phase: 0.25, vertexIndex: wing.vertexOffset).position
+          - referenceBodyCenter
+        point = CrowFlightWingBodyIntegration.integratedPoint(
+          referencePoint: referencePoint,
+          sourceRoot: sourceRoot,
+          sourceLeadingRoot: sourceLeadingRoot,
+          spanIndex: spanIndex,
+          chordIndex: chordIndex,
+          left: partIdentifier == 2,
+          phase: phase
+        )
       }
       return point
     }

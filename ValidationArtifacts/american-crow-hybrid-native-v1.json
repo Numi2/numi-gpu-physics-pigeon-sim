@@ -24,8 +24,8 @@
   },
   "video": {
     "path": "Docs/Media/american-crow-hybrid-native-v1.mp4",
-    "sha256": "5166e308301bf533cf80ad0c714ec7157d2bdeaf49e2ae99be945575c95b9491",
-    "bytes": 247072,
+    "sha256": "83fd17ae078abd49fb195d8d6ac6d4f3334058ecdc7284c381ff0704e8870b54",
+    "bytes": 243201,
     "codec": "h264",
     "pixelFormat": "yuv420p",
     "pixelWidth": 1280,
@@ -36,8 +36,8 @@
   },
   "poster": {
     "path": "Docs/Media/american-crow-hybrid-native-v1.png",
-    "sha256": "fde2b593c35d0767a07a58e0ed669f4d470f9382532fd0a126d697cbef741ba8",
-    "bytes": 897189,
+    "sha256": "cb990bd413683767e252e85fb54d0a1a82dece1383285494476a5766418b8d81",
+    "bytes": 903967,
     "pixelWidth": 1280,
     "pixelHeight": 720,
     "sourceFrame": 30
@@ -54,7 +54,7 @@
     }
   },
   "visualConstruction": [
-    "bilaterally symmetric wing topology sampled from one estimated-hybrid solver-surface state and explicitly articulated about the fixed shoulder rows",
+    "bilaterally symmetric wing topology sampled from one estimated-hybrid solver-surface state, seated on broad scapular-to-flank root curves, and articulated outside a body-bound proximal envelope",
     "slender estimated crow body and integrated head loft",
     "volumetric tapered bill, dark eye, nostrils, and facial bristles",
     "three topology-bound wing feather courses, contour relief, and asset-length square-tail rectrices",

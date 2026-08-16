@@ -75,8 +75,8 @@ ffmpeg -v error -y \
   -pix_fmt yuv420p \
   -movflags +faststart \
   "$OUTPUT"
-# Use a solver-surface-driven mid-downstroke as the README poster rather than
-# a separate reference image or a cosmetically selected non-executable pose.
+# Use an executable presentation-retargeted mid-downstroke as the README poster
+# rather than a separate reference image or a non-rendered appearance target.
 cp "$FRAMES/frame-030.png" "$POSTER"
 
 DIMENSIONS="$(

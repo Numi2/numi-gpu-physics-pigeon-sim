@@ -58,11 +58,15 @@ reference image is rendered or stored.
 
 The flight presentation draws the complete fixed-topology wing surface as a
 dark gap-closing layer and closes the tail with asset-length rectrices. The
-solver sequence's lower reversal sweeps the
-distal dove-derived surface forward of the bill, so the beauty pass explicitly
-samples one topology state and articulates it about the fixed shoulder row. This
-presentation retarget does not alter the solver surface, prescribed simulation
-motion, or any aerodynamic result, and the frame overlay names the distinction.
+solver sequence's lower reversal sweeps the distal dove-derived surface forward
+of the bill, and its nominal wing-root row collapses behind the estimated crow
+pelvis. The beauty pass therefore samples one topology state, translates its
+distal shape into the shoulder frame, and lofts the first fourteen span stations
+onto a broad scapular-to-flank body curve. Flap rotation ramps in across the
+first twelve stations instead of rotating a point hinge, so the proximal wing
+remains seated on the torso throughout the stroke. This presentation retarget
+does not alter the solver surface, prescribed simulation motion, or any
+aerodynamic result, and the frame overlay names the distinction.
 
 Three broad covert courses are sampled from each wing's fixed `9 x 33`
 topology. Both ends of every blade follow current presentation-surface vertices,
@@ -78,9 +82,10 @@ but the wingbeat beauty pass uses the topology-bound courses above because the
 asset rest directions cross under the source's large stroke. This does not
 assert measured crow kinematics.
 
-Sparse diagnostic captures can set `--capture-crow-camera-yaw` in radians so a
-geometry milestone is checked from a new view without changing the release
-camera or multiplying appearance-only review frames.
+Sparse diagnostic captures can set `--capture-crow-camera-yaw` and
+`--capture-crow-camera-pitch` in radians so a geometry milestone is checked
+from side, front, rear, overhead, and underside views without changing the
+release camera or multiplying appearance-only review frames.
 
 Procedural contour and folded-wing feathers select quantized tessellation from
 their projected length at the final output resolution. The four asset LOD
