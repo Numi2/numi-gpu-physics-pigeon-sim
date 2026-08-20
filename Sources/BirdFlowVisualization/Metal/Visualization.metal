@@ -1623,6 +1623,31 @@ inline float crowBandLimitedSine(float phase) {
     return sin(phase)*max(boxAmplitude,0.0f)*nyquistFade;
 }
 
+/// Resolve the crossed hook-and-bow directions of interlocking barbules only
+/// while their projected phase remains sampleable. Both waves converge to
+/// zero at distance, so the unresolved vane retains its mean radiance rather
+/// than turning into moire or a glittering screen-space noise field.
+inline float2 crowInterlockingBarbuleSignal(
+    float axial,
+    float signedWidth,
+    float identityPhase,
+    float flightFeather) {
+    float interior=smoothstep(0.075f,0.18f,axial)
+        *(1.0f-smoothstep(0.86f,0.975f,axial))
+        *(1.0f-smoothstep(0.70f,0.96f,abs(signedWidth)));
+    float axialFrequency=mix(430.0f,610.0f,flightFeather);
+    float transverseFrequency=mix(54.0f,82.0f,flightFeather);
+    float hookPhase=axialFrequency*axial
+        +transverseFrequency*signedWidth+identityPhase;
+    float bowPhase=0.83f*axialFrequency*axial
+        -1.12f*transverseFrequency*signedWidth+1.37f*identityPhase;
+    float hook=crowBandLimitedSine(hookPhase);
+    float bow=crowBandLimitedSine(bowPhase);
+    float crossed=0.5f*(hook+bow)+0.25f*hook*bow;
+    float separation=0.5f*abs(hook-bow);
+    return interior*float2(crossed,separation);
+}
+
 inline float3 showcaseCrowLinearRadiance(
     float3 world,
     float3 normalInput,
@@ -1783,6 +1808,9 @@ inline float3 showcaseCrowLinearRadiance(
             +featherCoordinates.z;
     float localBarbWave=crowBandLimitedSine(localBarbAngle);
     float localBarbs=0.5f+0.5f*localBarbWave;
+    float2 interlockingBarbules=crowInterlockingBarbuleSignal(
+        axial,signedWidth,featherCoordinates.z,flightFeather
+    )*persistentVane;
     float barbPhase=520.0f*world.x+390.0f*world.y-270.0f*world.z;
     float barb=0.5f+0.5f*crowBandLimitedSine(barbPhase);
     float barbSignal=mix(barb,localBarbs,persistentVane);
@@ -1800,8 +1828,12 @@ inline float3 showcaseCrowLinearRadiance(
     );
     float bodyBarbTilt=0.052f*bodyContourVane*localBarbWave
         *(1.0f-smoothstep(0.72f,0.96f,abs(signedWidth)));
+    float barbuleTilt=mix(0.006f,0.014f,flightFeather)
+        *interlockingBarbules.x;
     float3 specularNormal=safeNormalizeCrow(
-        normal+bodyBarbTilt*bodyBarbAxis,normal
+        normal+(bodyBarbTilt+barbuleTilt)*bodyBarbAxis
+            +0.45f*barbuleTilt*featherAxis,
+        normal
     );
     float featherSpecular=pow(saturate(dot(specularNormal,halfVector)),92.0f);
     float softSpecular=pow(saturate(dot(normal,halfVector)),24.0f);
@@ -1814,6 +1846,8 @@ inline float3 showcaseCrowLinearRadiance(
         *classSheenScale;
     color+=barbMicro*classSheenScale
         *mix(float3(0.035f,0.070f,0.11f),sheen,0.45f);
+    color+=interlockingBarbules.y*grazing*classSheenScale
+        *mix(float3(0.0025f,0.0055f,0.0090f),sheen,0.28f);
     float3 sharpTint=mix(
         float3(0.075f,0.095f,0.125f),
         float3(0.030f,0.038f,0.050f),
