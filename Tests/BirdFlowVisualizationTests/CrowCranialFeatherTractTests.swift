@@ -36,6 +36,11 @@ func crowCranialContourTractsRemainAttachedAndRegionallyBounded() {
     samples.filter { $0.region == .throat }
       .allSatisfy { $0.surfaceFeatherClass == 10 }
   )
+  #expect(
+    CrowCranialFeatherTracts.circumferentialOverlapScale(for: .throat)
+      > 1.20
+        * CrowCranialFeatherTracts.circumferentialOverlapScale(for: .cheek)
+  )
   #expect(samples.filter { $0.region == .nape }.allSatisfy { $0.root.x < center.x })
   #expect(samples.allSatisfy { $0.root.x < center.x + 0.047 })
   #expect(
@@ -97,8 +102,8 @@ func crowCranialContourTractsRemainAttachedAndRegionallyBounded() {
   let throatLengths = samples.filter { $0.region == .throat }.map {
     simd_distance($0.root, $0.tip)
   }
-  #expect(throatLengths.min()! < 0.0111)
-  #expect(throatLengths.max()! > 0.0149)
+  #expect(throatLengths.min()! < 0.0119)
+  #expect(throatLengths.max()! > 0.0160)
   let lateralComponents = throatDirections.map(\.y)
   #expect(lateralComponents.min()! < -0.10)
   #expect(lateralComponents.max()! > 0.10)

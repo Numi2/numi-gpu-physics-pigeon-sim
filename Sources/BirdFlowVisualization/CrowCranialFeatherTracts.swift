@@ -37,6 +37,8 @@ enum CrowCranialFeatherTracts {
   static let coarseBillBaseApertureSineThreshold: Float = 0.50
   static let coarseAnteriorLoftLimit: Float = 0.84
   static let anteriorLoftLimit: Float = 1.02
+  static let standardCircumferentialOverlapScale: Float = 0.62
+  static let throatCircumferentialOverlapScale: Float = 0.75
 
   static var axialRings: [CrowCranialLoftRing] {
     CrowCranialAnatomy.sampledLoftRings()
@@ -226,7 +228,8 @@ enum CrowCranialFeatherTracts {
       theta: theta + 2 * angularStep
     )
     let circumferentialSpacing = simd_distance(surface, neighbour)
-    let width = min(0.0048, max(0.0024, 0.62 * circumferentialSpacing))
+    let overlapScale = circumferentialOverlapScale(for: region)
+    let width = min(0.0048, max(0.0024, overlapScale * circumferentialSpacing))
     result.append(
       CrowCranialFeatherSample(
         region: region,
@@ -260,6 +263,14 @@ enum CrowCranialFeatherTracts {
     case .throat:
       return 10
     }
+  }
+
+  static func circumferentialOverlapScale(
+    for region: CrowCranialFeatherRegion
+  ) -> Float {
+    region == .throat
+      ? throatCircumferentialOverlapScale
+      : standardCircumferentialOverlapScale
   }
 
   /// Below full output density, preserve broad head/body material bands; the
@@ -315,7 +326,7 @@ enum CrowCranialFeatherTracts {
       return 0.0145 + 0.0015 * min(max((-ring.axialFraction - 0.45) / 0.60, 0), 1)
     case .crown, .forehead: return 0.012
     case .cheek: return 0.0115
-    case .throat: return 0.013
+    case .throat: return 0.014
     }
   }
 
