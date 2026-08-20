@@ -3485,7 +3485,15 @@ private struct CrowMeshBuilder {
             spanIndex: span,
             presentationPhase: phase
           )
-        let resolvedWidthScale = widthScale * foldedSecondaryHandoffWidthScale
+        let foldedShellHandoffWidthScale =
+          CrowFlightWingBodyIntegration.covertFoldedShellHandoffWidthScale(
+            chordIndex: chord,
+            spanIndex: span,
+            presentationPhase: phase
+          )
+        let resolvedWidthScale =
+          widthScale * foldedSecondaryHandoffWidthScale
+          * foldedShellHandoffWidthScale
         let camberScale = CrowFlightWingBodyIntegration.covertCamberScale(
           chordIndex: chord,
           spanIndex: span

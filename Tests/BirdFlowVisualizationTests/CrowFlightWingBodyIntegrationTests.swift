@@ -575,6 +575,68 @@ func flightCovertCoursesDenselyCoverEveryBodyToWingStation() {
     ) == 1
   )
 
+  #expect(
+    CrowFlightWingBodyIntegration.covertFoldedShellHandoffMaximumWidthScale
+      == 1.40
+  )
+  #expect(
+    CrowFlightWingBodyIntegration.covertFoldedShellHandoffStartPhase == 0.30
+  )
+  #expect(
+    CrowFlightWingBodyIntegration.covertFoldedShellHandoffPeakPhase == 0.375
+  )
+  #expect(
+    CrowFlightWingBodyIntegration.covertFoldedShellHandoffEndPhase == 0.46
+  )
+  #expect(
+    CrowFlightWingBodyIntegration.covertFoldedShellHandoffWidthScale(
+      chordIndex: 6,
+      spanIndex: 0,
+      presentationPhase: 0.375
+    ) == 1.40
+  )
+  #expect(
+    abs(
+      CrowFlightWingBodyIntegration.covertFoldedShellHandoffWidthScale(
+        chordIndex: 6,
+        spanIndex: 0,
+        presentationPhase: 0.3375
+      ) - 1.20
+    ) < 1e-6
+  )
+  #expect(
+    abs(
+      CrowFlightWingBodyIntegration.covertFoldedShellHandoffWidthScale(
+        chordIndex: 6,
+        spanIndex: 1,
+        presentationPhase: 0.375
+      ) - 1.20
+    ) < 1e-6
+  )
+  for phase: Float in [0, 0.30, 0.46, 1] {
+    #expect(
+      CrowFlightWingBodyIntegration.covertFoldedShellHandoffWidthScale(
+        chordIndex: 6,
+        spanIndex: 0,
+        presentationPhase: phase
+      ) == 1
+    )
+  }
+  #expect(
+    CrowFlightWingBodyIntegration.covertFoldedShellHandoffWidthScale(
+      chordIndex: 5,
+      spanIndex: 0,
+      presentationPhase: 0.375
+    ) == 1
+  )
+  #expect(
+    CrowFlightWingBodyIntegration.covertFoldedShellHandoffWidthScale(
+      chordIndex: 6,
+      spanIndex: 2,
+      presentationPhase: 0.375
+    ) == 1
+  )
+
   let axillarySpans = CrowFlightWingBodyIntegration.axillaryUnderlayerSpanIndices
   #expect(axillarySpans == Array(0...8))
   #expect(axillarySpans.allSatisfy {

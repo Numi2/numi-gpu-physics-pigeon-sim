@@ -31,6 +31,7 @@ enum CrowFoldedWingCoverts {
   static let columnCount = 34
   static let shellClearanceMeters: Float = 0.0012
   static let surfaceFeatherClass: UInt32 = 4
+  static let posteriorLiveWingHandoffMaximumRootWidthScale: Float = 1.40
 
   /// The body-facing outer course overlaps the folded primary taper. Its roots
   /// and lengths remain unchanged, preserving distinct vane silhouettes.
@@ -39,6 +40,22 @@ enum CrowFoldedWingCoverts {
     let posteriorCenter = columnCount / 2
     let posteriorOverlap = max(0, 1 - Float(abs(column - posteriorCenter)) / 4)
     return 1.30 + 0.15 * posteriorOverlap
+  }
+
+  /// Broadens only the roots of the four posteroventral covert courses where
+  /// the body-seated shell meets the deploying live trailing-covert surface.
+  /// The short axial fade is inherited from the blade's root-to-maximum width
+  /// interpolation; tips, centerlines, and the remaining shell stay fixed.
+  static func posteriorLiveWingHandoffRootWidthScale(
+    row: Int,
+    column: Int
+  ) -> Float {
+    guard row >= rowCount - 4, row < rowCount,
+      column >= columnCount - 2, column < columnCount
+    else { return 1 }
+    let columnWeight = Float(column - (columnCount - 2) + 1) / 2
+    return 1
+      + (posteriorLiveWingHandoffMaximumRootWidthScale - 1) * columnWeight
   }
 
   static func visibleSamples(
@@ -187,7 +204,12 @@ enum CrowFoldedWingCoverts {
               rootOffset: root,
               tipOffset: tip,
               planeNormal: planeNormal,
-              rootWidthMeters: (0.60 + 0.08 * axillaryOverlap) * localWidth,
+              rootWidthMeters:
+                (0.60 + 0.08 * axillaryOverlap) * localWidth
+                * posteriorLiveWingHandoffRootWidthScale(
+                  row: row,
+                  column: column
+                ),
               maximumWidthMeters:
                 localWidth * (1 + 0.08 * axial) * (1 + 0.04 * shapeIdentity)
                 * outerCourseWidthScale(row: row, column: column),

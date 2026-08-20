@@ -27,6 +27,27 @@ func foldedWingCovertsFormSymmetricBodySeatedShell() {
     ) - 1.45) < 1e-6
   )
   #expect(
+    CrowFoldedWingCoverts.posteriorLiveWingHandoffMaximumRootWidthScale == 1.40
+  )
+  #expect(
+    CrowFoldedWingCoverts.posteriorLiveWingHandoffRootWidthScale(
+      row: CrowFoldedWingCoverts.rowCount - 5,
+      column: CrowFoldedWingCoverts.columnCount - 1
+    ) == 1
+  )
+  #expect(abs(
+    CrowFoldedWingCoverts.posteriorLiveWingHandoffRootWidthScale(
+      row: CrowFoldedWingCoverts.rowCount - 4,
+      column: CrowFoldedWingCoverts.columnCount - 2
+    ) - 1.20
+  ) < 1e-6)
+  #expect(abs(
+    CrowFoldedWingCoverts.posteriorLiveWingHandoffRootWidthScale(
+      row: CrowFoldedWingCoverts.rowCount - 1,
+      column: CrowFoldedWingCoverts.columnCount - 1
+    ) - 1.40
+  ) < 1e-6)
+  #expect(
     CrowFoldedWingCoverts.visibleSamples(projectedPixelsPerMeter: 800).count
       == 130
   )
@@ -54,6 +75,16 @@ func foldedWingCovertsFormSymmetricBodySeatedShell() {
   #expect(axillaryCourse.allSatisfy {
     $0.rootWidthMeters / $0.maximumWidthMeters > 0.42
   })
+  let posteriorHandoff = samples.filter {
+    $0.row >= CrowFoldedWingCoverts.rowCount - 4
+      && $0.column >= CrowFoldedWingCoverts.columnCount - 2
+  }
+  #expect(posteriorHandoff.count == 16)
+  #expect(
+    posteriorHandoff.allSatisfy {
+      $0.rootWidthMeters / $0.maximumWidthMeters > 0.48
+    }
+  )
   #expect(samples.map(\.maximumWidthMeters).max()! < 0.008)
   #expect(
     samples.allSatisfy {

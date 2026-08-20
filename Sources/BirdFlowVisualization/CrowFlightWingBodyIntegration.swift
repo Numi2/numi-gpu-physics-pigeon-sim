@@ -23,6 +23,10 @@ enum CrowFlightWingBodyIntegration {
   static let covertFoldedSecondaryHandoffMaximumWidthScale: Float = 1.70
   static let covertFoldedSecondaryHandoffReleaseStartPhase: Float = 0.25
   static let covertFoldedSecondaryHandoffReleaseEndPhase: Float = 7 / 24
+  static let covertFoldedShellHandoffMaximumWidthScale: Float = 1.40
+  static let covertFoldedShellHandoffStartPhase: Float = 0.30
+  static let covertFoldedShellHandoffPeakPhase: Float = 0.375
+  static let covertFoldedShellHandoffEndPhase: Float = 0.46
   static let covertAbdominalHandoffMaximumWidthScale: Float = 1.35
   static let covertDistalTrailingMaximumWidthScale: Float = 1.25
   static let covertDistalTrailingBodyHandoffMaximumWidthScale: Float = 1.10
@@ -171,6 +175,38 @@ enum CrowFlightWingBodyIntegration {
     return 1
       + (covertFoldedSecondaryHandoffMaximumWidthScale - 1)
         * spanWeight * phaseWeight
+  }
+
+  /// Carries the proximal live trailing-covert course beneath the last
+  /// body-seated folded coverts while the wing crosses their posterior shell.
+  /// The compact root field recovers before free articulation without moving
+  /// roots or tips.
+  static func covertFoldedShellHandoffWidthScale(
+    chordIndex: Int,
+    spanIndex: Int,
+    presentationPhase: Float
+  ) -> Float {
+    guard chordIndex == 6 else { return 1 }
+    let proximalWeight = max(0, 1 - Float(spanIndex) / 2)
+    let spanWeight = smootherstep(proximalWeight)
+    guard spanWeight > 0 else { return 1 }
+    let rise = smootherstep(
+      clamp(
+        (presentationPhase - covertFoldedShellHandoffStartPhase)
+          / (covertFoldedShellHandoffPeakPhase
+            - covertFoldedShellHandoffStartPhase)
+      )
+    )
+    let release = 1 - smootherstep(
+      clamp(
+        (presentationPhase - covertFoldedShellHandoffPeakPhase)
+          / (covertFoldedShellHandoffEndPhase
+            - covertFoldedShellHandoffPeakPhase)
+      )
+    )
+    return 1
+      + (covertFoldedShellHandoffMaximumWidthScale - 1)
+        * spanWeight * rise * release
   }
 
   /// Proximal trailing coverts bridge the body-seated scaffold boundary, then
