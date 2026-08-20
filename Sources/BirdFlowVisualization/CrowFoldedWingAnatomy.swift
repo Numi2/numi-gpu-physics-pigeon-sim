@@ -61,7 +61,9 @@ enum CrowFoldedWingAnatomy {
         side * 0.047,
         0.044 - 0.024 * fraction
       )
-      let lateralDirection = side * (0.031 + 0.003 * fraction - 0.047) / length
+      let lateralDirection =
+        side * (secondaryTipLateralOffsetMeters(fraction: fraction) - 0.047)
+        / length
       let verticalDirection = (-0.012 * fraction - rootOffset.z) / length
       direction = safeNormalize(
         SIMD3<Float>(
@@ -104,6 +106,15 @@ enum CrowFoldedWingAnatomy {
   static func primaryTipLateralOffsetMeters(fraction rawFraction: Float) -> Float {
     let fraction = min(max(rawFraction, 0), 1)
     return 0.003 + 0.001 * fraction - 0.003 * fraction * fraction * fraction
+  }
+
+  /// Posterior secondaries settle inward over the terminal primary instead of
+  /// leaving the two folded remex series edge-to-edge at their distal taper.
+  static func secondaryTipLateralOffsetMeters(
+    fraction rawFraction: Float
+  ) -> Float {
+    let fraction = min(max(rawFraction, 0), 1)
+    return 0.027 + 0.002 * fraction
   }
 
   private static func safeNormalize(

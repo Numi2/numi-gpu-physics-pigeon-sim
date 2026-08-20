@@ -273,9 +273,16 @@ func standingCrowFeatherRootsMatchMetalReference() throws {
     .primaryTipLateralOffsetMeters(fraction: 0)
   let posteriorPrimaryTipOffset = CrowFoldedWingAnatomy
     .primaryTipLateralOffsetMeters(fraction: 1)
+  let anteriorSecondaryTipOffset = CrowFoldedWingAnatomy
+    .secondaryTipLateralOffsetMeters(fraction: 0)
+  let posteriorSecondaryTipOffset = CrowFoldedWingAnatomy
+    .secondaryTipLateralOffsetMeters(fraction: 1)
   #expect(abs(CrowFoldedWingAnatomy.primaryRootLateralOffsetMeters - 0.042) < 1e-7)
   #expect(abs(anteriorPrimaryTipOffset - 0.003) < 1e-7)
   #expect(abs(posteriorPrimaryTipOffset - 0.001) < 1e-7)
+  #expect(abs(anteriorSecondaryTipOffset - 0.027) < 1e-7)
+  #expect(abs(posteriorSecondaryTipOffset - 0.029) < 1e-7)
+  #expect(posteriorSecondaryTipOffset - posteriorPrimaryTipOffset <= 0.0281)
   #expect(
     CrowFoldedWingAnatomy.primaryTipLateralOffsetMeters(fraction: 7.0 / 9.0)
       < 0.0024
