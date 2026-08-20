@@ -507,6 +507,40 @@ func rectrixWingHandoffIsCompactAndBilateral() {
   )
 }
 
+@Test("proximal trailing covert handoff recovers before articulation")
+func proximalTrailingCovertHandoffRecoversBeforeArticulation() {
+  #expect(
+    CrowFlightWingBodyIntegration
+      .covertProximalTailHandoffMaximumWidthScale == 1.35
+  )
+  #expect(
+    CrowFlightWingBodyIntegration.covertProximalTailHandoffWidthScale(
+      chordIndex: 5,
+      spanIndex: 0
+    ) == 1
+  )
+  #expect(
+    CrowFlightWingBodyIntegration.covertProximalTailHandoffWidthScale(
+      chordIndex: 6,
+      spanIndex: 0
+    ) == 1.35
+  )
+  #expect(
+    abs(
+      CrowFlightWingBodyIntegration.covertProximalTailHandoffWidthScale(
+        chordIndex: 6,
+        spanIndex: 1
+      ) - 1.175
+    ) < 1e-6
+  )
+  #expect(
+    CrowFlightWingBodyIntegration.covertProximalTailHandoffWidthScale(
+      chordIndex: 6,
+      spanIndex: 2
+    ) == 1
+  )
+}
+
 @Test("flight covert normals retain anatomical side through reversal")
 func flightCovertNormalsRetainAnatomicalSideThroughReversal() {
   let chord = SIMD3<Float>(-1, 0, 0)
