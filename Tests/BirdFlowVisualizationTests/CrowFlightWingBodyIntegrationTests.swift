@@ -230,6 +230,45 @@ func flightCovertCoursesDenselyCoverEveryBodyToWingStation() {
     }
   )
 
+  #expect(
+    CrowFlightWingBodyIntegration.covertAbdominalHandoffMaximumWidthScale
+      == 1.35
+  )
+  #expect(
+    CrowFlightWingBodyIntegration.covertAbdominalHandoffWidthScale(
+      chordIndex: 5,
+      spanIndex: 5
+    ) == 1
+  )
+  #expect(
+    abs(
+      CrowFlightWingBodyIntegration.covertAbdominalHandoffWidthScale(
+        chordIndex: 6,
+        spanIndex: 4
+      ) - 1.175
+    ) < 1e-6
+  )
+  #expect(
+    CrowFlightWingBodyIntegration.covertAbdominalHandoffWidthScale(
+      chordIndex: 6,
+      spanIndex: 5
+    ) == 1.35
+  )
+  #expect(
+    abs(
+      CrowFlightWingBodyIntegration.covertAbdominalHandoffWidthScale(
+        chordIndex: 6,
+        spanIndex: 6
+      ) - 1.175
+    ) < 1e-6
+  )
+  #expect(
+    CrowFlightWingBodyIntegration.covertAbdominalHandoffWidthScale(
+      chordIndex: 6,
+      spanIndex: 7
+    ) == 1
+  )
+
   let axillarySpans = CrowFlightWingBodyIntegration.axillaryUnderlayerSpanIndices
   #expect(axillarySpans == Array(0...8))
   #expect(axillarySpans.allSatisfy {

@@ -18,6 +18,7 @@ enum CrowFlightWingBodyIntegration {
   static let covertDistalMaximumChordExtension: Float = 0.70
   static let covertDistalAnteriorMaximumChordExtension: Float = 0.50
   static let covertProximalMaximumChordExtension: Float = 1.60
+  static let covertAbdominalHandoffMaximumWidthScale: Float = 1.35
   static let covertChordIndices = [0, 3, 4, 5, 6]
   static let axillaryUnderlayerRootChordIndex = 6
   static let axillaryUnderlayerTipChordIndex = 8
@@ -111,6 +112,20 @@ enum CrowFlightWingBodyIntegration {
       spanIndex: spanIndex,
       salt: 0x85EB_CA6B
     )
+  }
+
+  /// Broadens only the body-seated trailing covert centered on span five,
+  /// fading symmetrically into its neighbors without moving any root or tip.
+  static func covertAbdominalHandoffWidthScale(
+    chordIndex: Int,
+    spanIndex: Int
+  ) -> Float {
+    guard chordIndex == 6 else { return 1 }
+    let distance = abs(spanIndex - 5)
+    guard distance < 2 else { return 1 }
+    let weight = 1 - Float(distance) / 2
+    return 1
+      + (covertAbdominalHandoffMaximumWidthScale - 1) * smootherstep(weight)
   }
 
   static func covertCamberScale(chordIndex: Int, spanIndex: Int) -> Float {
