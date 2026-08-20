@@ -433,14 +433,18 @@ struct CrowShowcaseFrame {
         // A planted crow legitimately encloses background between its two
         // legs and between spread digits. Keep those scale-aware lower-body
         // apertures separate from plumage or body-shell defects.
+        let lowerBodyBoundaryMask: UInt32 = (1 << 0) | (1 << 7)
+        let boundedOnlyByBodyAndLegPlumage =
+          adjacentClassMask != 0
+          && adjacentClassMask & ~lowerBodyBoundaryMask == 0
         let expectedInterLegAperture =
-          adjacentClassMask == 1
+          boundedOnlyByBodyAndLegPlumage
           && componentMinimumY >= minimumY + birdHeight / 2
           && componentHeight >= max(4, birdHeight / 8)
           && componentHeight * 2 >= 3 * componentWidth
           && componentSize >= max(8, birdHeight / 2)
         let expectedPedalAperture =
-          adjacentClassMask == 1
+          boundedOnlyByBodyAndLegPlumage
           && componentMinimumY >= minimumY + 9 * birdHeight / 10
           && componentWidth >= componentHeight
           && componentSize >= 2

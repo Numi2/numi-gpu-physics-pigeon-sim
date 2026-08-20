@@ -70,6 +70,21 @@ func silhouetteAuditSeparatesPlantedInterLegApertureFromBodySlits() {
   #expect(audit.expectedLowerBodyApertureComponentCount == 2)
   #expect(audit.largestExpectedLowerBodyAperturePixelCount == 12)
 
+  var legClasses = surfaceClasses
+  for y in 9...14 {
+    legClasses[y * width + 6] = 7
+    legClasses[y * width + 9] = 7
+  }
+  let featherBounded = CrowShowcaseFrame.silhouetteHoles(
+    birdMask: bird,
+    featherClassCodes: legClasses,
+    width: width,
+    height: height
+  )
+  #expect(featherBounded.pixelCount == 0)
+  #expect(featherBounded.expectedLowerBodyAperturePixelCount == 15)
+  #expect(featherBounded.expectedLowerBodyApertureComponentCount == 2)
+
   bird[5 * width + 7] = false
   let withSlit = CrowShowcaseFrame.silhouetteHoles(
     birdMask: bird,
