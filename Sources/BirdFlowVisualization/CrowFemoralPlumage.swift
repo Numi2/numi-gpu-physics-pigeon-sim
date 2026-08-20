@@ -27,8 +27,11 @@ struct CrowFemoralPlumageFeather: Equatable {
 /// the dorsal/outer upper thigh. This deliberately changes only presentation
 /// geometry: hip, hock, ankle, and planted digital contacts remain untouched.
 enum CrowFemoralPlumage {
-  static let rowCount = 13
-  static let courseCount = 16
+  // Keep the close-view field denser than the coarse seven-by-five fallback:
+  // the smaller angular and longitudinal pitch lets neighboring flexible
+  // vanes remain interleaved as the planted body sways over either leg.
+  static let rowCount = 15
+  static let courseCount = 18
   static let shellClearanceMeters: Float = 0.0009
   static let visibleRootEnvelopeRatio: Float = 0.74
   static let surfaceFeatherClass: UInt32 = 7

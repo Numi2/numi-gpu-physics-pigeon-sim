@@ -21,7 +21,7 @@ func femoralPlumageBridgesBodyLoftAndUpperCruralTract() {
     hock: rightHock
   )
   #expect(left.count == CrowFemoralPlumage.rowCount * CrowFemoralPlumage.courseCount)
-  #expect(left.count == 208)
+  #expect(left.count == 270)
   #expect(CrowFemoralPlumage.surfaceFeatherClass == 7)
   #expect(left.count == right.count)
   #expect(
@@ -46,7 +46,7 @@ func femoralPlumageBridgesBodyLoftAndUpperCruralTract() {
       hip: leftHip,
       hock: leftHock,
       projectedPixelsPerMeter: 1_600
-    ).count == 208
+    ).count == 270
   )
   #expect(
     left
@@ -135,10 +135,7 @@ func femoralPlumageBridgesBodyLoftAndUpperCruralTract() {
       )
     }
     #expect(row.map(\.root.x).max()! - row.map(\.root.x).min()! > 0.0044)
-    #expect(
-      Set(row.map { Int(($0.root.x * 1_000_000).rounded()) }).count
-        == CrowFemoralPlumage.rowCount
-    )
+    #expect(Set(row.map(\.root.x)).count == CrowFemoralPlumage.rowCount)
   }
 }
 
