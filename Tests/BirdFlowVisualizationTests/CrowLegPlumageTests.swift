@@ -239,6 +239,11 @@ func crowTarsometatarsusTapersEllipticallyAndCarriesAnteriorScutes() {
   #expect(vertices.count == expectedShaftVertices + expectedScuteVertices)
   #expect(
     vertices.allSatisfy {
+      $0.parameters.w == Float(CrowFootAnatomy.surfaceIdentityClassCode)
+    }
+  )
+  #expect(
+    vertices.allSatisfy {
       let normal = SIMD3<Float>($0.normal.x, $0.normal.y, $0.normal.z)
       return normal.x.isFinite && normal.y.isFinite && normal.z.isFinite
         && abs(simd_length(normal) - 1) < 1e-5

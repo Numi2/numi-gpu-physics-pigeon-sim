@@ -152,3 +152,48 @@ func silhouetteAuditSeparatesPlantedInterLegApertureFromBodySlits() {
   #expect(withSlit.componentCount == 1)
   #expect(withSlit.expectedLowerBodyAperturePixelCount == 15)
 }
+
+@Test("silhouette audit preserves retracted pedal space across wing coverts")
+func silhouetteAuditPreservesRetractedPedalSpaceAcrossWingCoverts() {
+  let width = 12
+  let height = 14
+  var bird = [Bool](repeating: false, count: width * height)
+  for y in 1...12 {
+    for x in 1...10 {
+      bird[y * width + x] = true
+    }
+  }
+  for y in 7...9 {
+    for x in 5...6 {
+      bird[y * width + x] = false
+    }
+  }
+  var classes = [UInt8](repeating: 0, count: bird.count)
+  for x in 5...6 {
+    classes[6 * width + x] = 4
+    classes[10 * width + x] = 7
+  }
+  let unclassified = CrowShowcaseFrame.silhouetteHoles(
+    birdMask: bird,
+    featherClassCodes: classes,
+    width: width,
+    height: height
+  )
+  #expect(unclassified.pixelCount == 6)
+  #expect(unclassified.expectedLowerBodyAperturePixelCount == 0)
+
+  for y in 7...9 {
+    classes[y * width + 4] = UInt8(CrowFootAnatomy.surfaceIdentityClassCode)
+    classes[y * width + 7] = UInt8(CrowFootAnatomy.surfaceIdentityClassCode)
+  }
+  let classified = CrowShowcaseFrame.silhouetteHoles(
+    birdMask: bird,
+    featherClassCodes: classes,
+    width: width,
+    height: height
+  )
+  #expect(classified.pixelCount == 0)
+  #expect(classified.componentCount == 0)
+  #expect(classified.expectedLowerBodyAperturePixelCount == 6)
+  #expect(classified.expectedLowerBodyApertureComponentCount == 1)
+}

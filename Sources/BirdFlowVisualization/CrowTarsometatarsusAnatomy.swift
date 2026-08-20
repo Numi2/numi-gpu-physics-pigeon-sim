@@ -96,6 +96,11 @@ enum CrowTarsometatarsusAnatomy {
       color: scuteColor,
       to: &result
     )
+    for index in result.indices {
+      result[index].parameters.w = Float(
+        CrowFootAnatomy.surfaceIdentityClassCode
+      )
+    }
     return result
   }
 

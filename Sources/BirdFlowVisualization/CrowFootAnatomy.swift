@@ -16,6 +16,10 @@ struct CrowPlantarPad: Equatable {
 /// two-segment claw continues the distal tangent. Geometry is species-informed
 /// presentation anatomy; it does not claim tendon forces or measured joints.
 enum CrowFootAnatomy {
+  /// Semantic AOV class for exposed pedal keratin. This is intentionally
+  /// separate from body and feather classes so articulated digital negative
+  /// space remains distinguishable from a torn plumage shell.
+  static let surfaceIdentityClassCode: UInt32 = 11
   static let phalanxRadialSegments = 10
   static let phalanxAxialStations = 3
   static let padLatitudeIntervals = 6
@@ -115,6 +119,9 @@ enum CrowFootAnatomy {
       radialSegments: 8,
       to: &result
     )
+    for index in result.indices {
+      result[index].parameters.w = Float(surfaceIdentityClassCode)
+    }
     return result
   }
 

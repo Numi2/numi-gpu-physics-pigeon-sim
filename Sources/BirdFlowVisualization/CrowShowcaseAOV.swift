@@ -433,7 +433,10 @@ struct CrowShowcaseFrame {
         // A planted crow legitimately encloses background between its two
         // legs and between spread digits. Keep those scale-aware lower-body
         // apertures separate from plumage or body-shell defects.
-        let lowerBodyBoundaryMask: UInt32 = (1 << 0) | (1 << 7)
+        let pedalSurfaceMask: UInt32 = 1
+          << CrowFootAnatomy.surfaceIdentityClassCode
+        let lowerBodyBoundaryMask: UInt32 =
+          (1 << 0) | (1 << 7) | pedalSurfaceMask
         let boundedOnlyByBodyAndLegPlumage =
           adjacentClassMask != 0
           && adjacentClassMask & ~lowerBodyBoundaryMask == 0
@@ -466,9 +469,27 @@ struct CrowShowcaseFrame {
           && componentWidth >= componentHeight
           && componentSize >= 2
           && componentSize <= birdHeight
+        // During takeoff the articulated toes retract across the ventral wing
+        // projection. A compact component explicitly bounded by pedal keratin,
+        // leg plumage, and wing coverts is anatomical negative space rather
+        // than a missing body or feather surface.
+        let retractedPedalBoundaryMask = lowerBodyBoundaryMask | (1 << 4)
+        let boundedByRetractedPedalSurfaces =
+          adjacentClassMask & pedalSurfaceMask != 0
+          && legFeatherBounded
+          && adjacentClassMask & ~retractedPedalBoundaryMask == 0
+        let compactRetractedPedalBounds = max(4, birdHeight / 8)
+        let expectedRetractedPedalAperture =
+          boundedByRetractedPedalSurfaces
+          && componentMinimumY >= minimumY + birdHeight / 2
+          && componentWidth <= compactRetractedPedalBounds
+          && componentHeight <= compactRetractedPedalBounds
+          && componentSize >= 2
+          && componentSize <= birdHeight
         let expectedLowerBodyAperture =
           expectedInterLegAperture || expectedPedalAperture
           || expectedElevatedPedalAperture
+          || expectedRetractedPedalAperture
         if expectedLowerBodyAperture {
           apertureTotal += componentSize
           apertureComponents += 1

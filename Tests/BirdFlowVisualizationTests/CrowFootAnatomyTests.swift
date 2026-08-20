@@ -31,6 +31,11 @@ func crowDigitalPadsMeetSupportUnderArticulatedPhalanges() {
       #expect(vertices.count > digit.phalangealSegmentCount * 180)
       #expect(
         vertices.allSatisfy {
+          $0.parameters.w == Float(CrowFootAnatomy.surfaceIdentityClassCode)
+        }
+      )
+      #expect(
+        vertices.allSatisfy {
           let position = SIMD3<Float>($0.position.x, $0.position.y, $0.position.z)
           let normal = SIMD3<Float>($0.normal.x, $0.normal.y, $0.normal.z)
           return position.x.isFinite && position.y.isFinite && position.z.isFinite
