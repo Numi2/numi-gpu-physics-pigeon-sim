@@ -72,6 +72,11 @@ func femoralPlumageBridgesBodyLoftAndUpperCruralTract() {
   })
   #expect(left.allSatisfy { $0.bodyMaterialBlend >= 0.60 })
   #expect(left.allSatisfy { $0.bodyMaterialBlend <= 0.88 })
+  #expect(CrowFemoralPlumage.rootWidthRatio(courseFraction: -1) == 0.68)
+  #expect(CrowFemoralPlumage.rootWidthRatio(courseFraction: 0) == 0.68)
+  #expect(abs(CrowFemoralPlumage.rootWidthRatio(courseFraction: 0.5) - 0.70) < 1e-7)
+  #expect(CrowFemoralPlumage.rootWidthRatio(courseFraction: 1) == 0.76)
+  #expect(CrowFemoralPlumage.rootWidthRatio(courseFraction: 2) == 0.76)
   #expect(
     CrowFemoralPlumage.visibleSamples(
       bodyCenter: bodyCenter,

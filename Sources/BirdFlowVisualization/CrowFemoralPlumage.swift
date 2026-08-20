@@ -163,7 +163,8 @@ enum CrowFemoralPlumage {
               0.85 * localNormal + 0.15 * radial,
               fallback: localNormal
             ),
-            rootWidthMeters: 0.68 * maximumWidth,
+            rootWidthMeters: rootWidthRatio(courseFraction: courseFraction)
+              * maximumWidth,
             maximumWidthMeters: maximumWidth * (1 + 0.04 * shapeIdentity),
             camberMeters: (0.00085 + 0.00030 * courseFraction)
               * (1 + 0.08 * rootIdentity),
@@ -248,6 +249,14 @@ enum CrowFemoralPlumage {
   /// without forming the zipper-like alternating seam visible from below.
   static func courseStaggerMeters(row: Int) -> Float {
     0.00245 * sin(2.399_963 * Float(row) + 0.37)
+  }
+
+  /// Broad downy bases at the anterior femoral boundary keep the tract seated
+  /// beneath the abdominal shell while leaving the pennaceous tip silhouette
+  /// and maximum vane width unchanged.
+  static func rootWidthRatio(courseFraction: Float) -> Float {
+    let bounded = min(max(courseFraction, 0), 1)
+    return 0.68 + 0.08 * bounded * bounded
   }
 
   private static func mirroredSurfacePoint(
