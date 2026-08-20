@@ -437,19 +437,38 @@ struct CrowShowcaseFrame {
         let boundedOnlyByBodyAndLegPlumage =
           adjacentClassMask != 0
           && adjacentClassMask & ~lowerBodyBoundaryMask == 0
+        let legFeatherBounded = adjacentClassMask & (1 << 7) != 0
+        let tallInterLegAspect = componentHeight * 2 >= 3 * componentWidth
+        // A high camera elevation foreshortens the planted inter-leg opening
+        // into a wider triangle. Accept that projection only when semantic
+        // leg/femoral plumage actually bounds it; body-only slots remain
+        // defects under the stricter tall-aperture rule.
+        let elevatedInterLegAspect =
+          legFeatherBounded && componentHeight * 3 >= 2 * componentWidth
+        let scaleAwareInterLegHeight =
+          (tallInterLegAspect && componentHeight >= max(4, birdHeight / 8))
+          || (elevatedInterLegAspect
+            && componentHeight >= max(4, birdHeight / 24))
         let expectedInterLegAperture =
           boundedOnlyByBodyAndLegPlumage
           && componentMinimumY >= minimumY + birdHeight / 2
-          && componentHeight >= max(4, birdHeight / 8)
-          && componentHeight * 2 >= 3 * componentWidth
+          && scaleAwareInterLegHeight
           && componentSize >= max(8, birdHeight / 2)
         let expectedPedalAperture =
           boundedOnlyByBodyAndLegPlumage
           && componentMinimumY >= minimumY + 9 * birdHeight / 10
           && componentWidth >= componentHeight
           && componentSize >= 2
+        let expectedElevatedPedalAperture =
+          legFeatherBounded
+          && boundedOnlyByBodyAndLegPlumage
+          && componentMinimumY >= minimumY + birdHeight / 2
+          && componentWidth >= componentHeight
+          && componentSize >= 2
+          && componentSize <= birdHeight
         let expectedLowerBodyAperture =
           expectedInterLegAperture || expectedPedalAperture
+          || expectedElevatedPedalAperture
         if expectedLowerBodyAperture {
           apertureTotal += componentSize
           apertureComponents += 1

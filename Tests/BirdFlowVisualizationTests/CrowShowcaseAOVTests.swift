@@ -85,6 +85,62 @@ func silhouetteAuditSeparatesPlantedInterLegApertureFromBodySlits() {
   #expect(featherBounded.expectedLowerBodyAperturePixelCount == 15)
   #expect(featherBounded.expectedLowerBodyApertureComponentCount == 2)
 
+  let dorsalWidth = 24
+  let dorsalHeight = 18
+  var dorsalBird = [Bool](repeating: false, count: dorsalWidth * dorsalHeight)
+  for y in 1...16 {
+    for x in 1...22 {
+      dorsalBird[y * dorsalWidth + x] = true
+    }
+  }
+  for y in 9...14 {
+    for x in 8...15 {
+      dorsalBird[y * dorsalWidth + x] = false
+    }
+  }
+  var dorsalClasses = [UInt8](repeating: 0, count: dorsalBird.count)
+  for y in 9...14 {
+    dorsalClasses[y * dorsalWidth + 7] = 7
+    dorsalClasses[y * dorsalWidth + 16] = 7
+  }
+  let dorsalAudit = CrowShowcaseFrame.silhouetteHoles(
+    birdMask: dorsalBird,
+    featherClassCodes: dorsalClasses,
+    width: dorsalWidth,
+    height: dorsalHeight
+  )
+  #expect(dorsalAudit.pixelCount == 0)
+  #expect(dorsalAudit.expectedLowerBodyAperturePixelCount == 48)
+  #expect(dorsalAudit.expectedLowerBodyApertureComponentCount == 1)
+
+  let dorsalBodyOnlyAudit = CrowShowcaseFrame.silhouetteHoles(
+    birdMask: dorsalBird,
+    featherClassCodes: [UInt8](repeating: 0, count: dorsalBird.count),
+    width: dorsalWidth,
+    height: dorsalHeight
+  )
+  #expect(dorsalBodyOnlyAudit.pixelCount == 48)
+  #expect(dorsalBodyOnlyAudit.expectedLowerBodyAperturePixelCount == 0)
+
+  var elevatedPedalBird = dorsalBird
+  for x in 3...5 {
+    elevatedPedalBird[11 * dorsalWidth + x] = false
+  }
+  var elevatedPedalClasses = dorsalClasses
+  for x in 3...5 {
+    elevatedPedalClasses[10 * dorsalWidth + x] = 7
+    elevatedPedalClasses[12 * dorsalWidth + x] = 7
+  }
+  let elevatedPedalAudit = CrowShowcaseFrame.silhouetteHoles(
+    birdMask: elevatedPedalBird,
+    featherClassCodes: elevatedPedalClasses,
+    width: dorsalWidth,
+    height: dorsalHeight
+  )
+  #expect(elevatedPedalAudit.pixelCount == 0)
+  #expect(elevatedPedalAudit.expectedLowerBodyAperturePixelCount == 51)
+  #expect(elevatedPedalAudit.expectedLowerBodyApertureComponentCount == 2)
+
   bird[5 * width + 7] = false
   let withSlit = CrowShowcaseFrame.silhouetteHoles(
     birdMask: bird,
