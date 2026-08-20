@@ -3490,6 +3490,11 @@ private struct CrowMeshBuilder {
       let lateral = (f - 0.5) * 0.145
       let central = 1 - abs(2 * f - 1)
       let assetFeather = assetRectrices.isEmpty ? nil : assetRectrices[index]
+      let tailWingHandoffWidthScale =
+        CrowFlightWingBodyIntegration.rectrixWingHandoffWidthScale(
+          order: index,
+          count: count
+        )
       let featherRoot = root + SIMD3<Float>(0, lateral * 0.24, 0.006 * central)
       let proceduralTip =
         root + axis * (0.96 + 0.02 * central)
@@ -3509,8 +3514,12 @@ private struct CrowMeshBuilder {
         root: featherRoot,
         tip: featherTip,
         planeNormal: SIMD3<Float>(0, -1, 0.12),
-        rootWidth: 0.57 * (assetFeather?.maximumWidthMeters ?? 0.021),
-        maximumWidth: assetFeather?.maximumWidthMeters ?? 0.021,
+        rootWidth:
+          tailWingHandoffWidthScale * 0.57
+          * (assetFeather?.maximumWidthMeters ?? 0.021),
+        maximumWidth:
+          tailWingHandoffWidthScale
+          * (assetFeather?.maximumWidthMeters ?? 0.021),
         color: SIMD4<Float>(0.011, 0.016, 0.029, 0.23),
         sections: 9,
         camber: 0.006,

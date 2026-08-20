@@ -469,6 +469,44 @@ func flightCovertCoursesDenselyCoverEveryBodyToWingStation() {
   #expect(Set(courseMeans.map { Int(($0 * 100_000).rounded()) }).count == 5)
 }
 
+@Test("rectrix wing handoff is compact and bilateral")
+func rectrixWingHandoffIsCompactAndBilateral() {
+  let count = CrowClosedTailAnatomy.rectrixCount
+  let scales = (0..<count).map {
+    CrowFlightWingBodyIntegration.rectrixWingHandoffWidthScale(
+      order: $0,
+      count: count
+    )
+  }
+
+  #expect(
+    CrowFlightWingBodyIntegration.rectrixWingHandoffMaximumWidthScale == 1.40
+  )
+  #expect(scales[0] == 1)
+  #expect(abs(scales[1] - 1.266_666_7) < 1e-6)
+  #expect(scales[1] == scales[2])
+  #expect(scales[3] == 1)
+  #expect(scales[8] == 1)
+  #expect(scales[9] == scales[10])
+  #expect(abs(scales[10] - 1.266_666_7) < 1e-6)
+  #expect(scales[11] == 1)
+  for order in 0..<count {
+    #expect(abs(scales[order] - scales[count - 1 - order]) < 1e-7)
+  }
+  #expect(
+    CrowFlightWingBodyIntegration.rectrixWingHandoffWidthScale(
+      order: -1,
+      count: count
+    ) == 1
+  )
+  #expect(
+    CrowFlightWingBodyIntegration.rectrixWingHandoffWidthScale(
+      order: count,
+      count: count
+    ) == 1
+  )
+}
+
 @Test("flight covert normals retain anatomical side through reversal")
 func flightCovertNormalsRetainAnatomicalSideThroughReversal() {
   let chord = SIMD3<Float>(-1, 0, 0)

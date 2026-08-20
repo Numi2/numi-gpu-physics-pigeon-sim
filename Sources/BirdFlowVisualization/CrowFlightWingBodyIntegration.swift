@@ -22,6 +22,7 @@ enum CrowFlightWingBodyIntegration {
   static let covertCaudalSecondaryHandoffMaximumVaneAsymmetry: Float = 0.45
   static let covertAbdominalHandoffMaximumWidthScale: Float = 1.35
   static let covertDistalTrailingMaximumWidthScale: Float = 1.25
+  static let rectrixWingHandoffMaximumWidthScale: Float = 1.40
   static let covertAbdominalHandoffMaximumNormalLiftMeters: Float = 0.001
   static let covertChordIndices = [0, 3, 4, 5, 6]
   static let axillaryUnderlayerRootChordIndex = 6
@@ -190,6 +191,21 @@ enum CrowFlightWingBodyIntegration {
     let weight = 1 - distance / 1.5
     return 1
       + (covertDistalTrailingMaximumWidthScale - 1) * smootherstep(weight)
+  }
+
+  /// Broadens the paired sublateral rectrices where the live tail meets the
+  /// distal trailing covert course. The bilateral compact field preserves
+  /// the established roots, tips, central tail stack, and outer silhouette.
+  static func rectrixWingHandoffWidthScale(order: Int, count: Int) -> Float {
+    guard count >= 4, order >= 0, order < count else { return 1 }
+    let position = Float(order)
+    let distance = min(
+      abs(position - 1.5),
+      abs(position - (Float(count) - 2.5))
+    )
+    guard distance < 1.5 else { return 1 }
+    let weight = 1 - distance / 1.5
+    return 1 + (rectrixWingHandoffMaximumWidthScale - 1) * weight
   }
 
   static func covertCamberScale(chordIndex: Int, spanIndex: Int) -> Float {
