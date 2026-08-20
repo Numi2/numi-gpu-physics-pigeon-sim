@@ -35,6 +35,11 @@ enum CrowFemoralPlumage {
   static let shellClearanceMeters: Float = 0.0009
   static let visibleRootEnvelopeRatio: Float = 0.74
   static let surfaceFeatherClass: UInt32 = 7
+  /// Keeps the distal femoral vane course overlapped with the abdominal shell
+  /// as the upper thigh begins retracting during takeoff. The bounded length
+  /// changes presentation plumage only; hip and leg kinematics stay intact.
+  static let bridgeLengthScale: Float = 0.68
+  static let nominalMaximumLengthMeters: Float = 0.034
 
   static func visibleSamples(
     bodyCenter: SIMD3<Float>,
@@ -142,8 +147,10 @@ enum CrowFemoralPlumage {
           mix(hip, hock, targetFraction) + targetRadius * radial
         let bridgeVector = bridgeTarget - root
         let bridgeDistance = simd_length(bridgeVector)
-        let length =
-          min(0.0285, max(0.018, 0.56 * bridgeDistance))
+        let length = min(
+          nominalMaximumLengthMeters,
+          max(0.018, bridgeLengthScale * bridgeDistance)
+        )
           * (1 + 0.10 * shapeIdentity)
         let direction = normalized(
           bridgeVector + 0.20 * bridgeDistance * legAxis,

@@ -23,6 +23,8 @@ func femoralPlumageBridgesBodyLoftAndUpperCruralTract() {
   #expect(left.count == CrowFemoralPlumage.rowCount * CrowFemoralPlumage.courseCount)
   #expect(left.count == 270)
   #expect(CrowFemoralPlumage.surfaceFeatherClass == 7)
+  #expect(CrowFemoralPlumage.bridgeLengthScale == 0.68)
+  #expect(CrowFemoralPlumage.nominalMaximumLengthMeters == 0.034)
   #expect(left.count == right.count)
   #expect(
     CrowFemoralPlumage.visibleSamples(
@@ -105,13 +107,19 @@ func femoralPlumageBridgesBodyLoftAndUpperCruralTract() {
 
   let legAxis = simd_normalize(leftHock - leftHip)
   let cruralRoots = CrowLegPlumage.samples(hip: leftHip, hock: leftHock).map(\.root)
+  let femoralLengths = left.map { simd_distance($0.root, $0.tip) }
+  #expect(femoralLengths.max()! > 0.033)
+  #expect(
+    femoralLengths.max()!
+      < 1.11 * CrowFemoralPlumage.nominalMaximumLengthMeters
+  )
   for feather in left {
     let clearance = simd_distance(feather.root, feather.rootSurface)
     let length = simd_distance(feather.root, feather.tip)
     #expect(abs(clearance - CrowFemoralPlumage.shellClearanceMeters) < 1e-5)
     #expect(feather.root.y > 0)
     #expect(length > 0.015)
-    #expect(length < 0.032)
+    #expect(length < 0.038)
     #expect(simd_dot(feather.tip - feather.root, legAxis) > 0)
     #expect(feather.maximumWidthMeters > feather.rootWidthMeters)
     #expect(abs(simd_length(feather.planeNormal) - 1) < 1e-5)
