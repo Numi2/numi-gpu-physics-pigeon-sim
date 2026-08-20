@@ -40,6 +40,7 @@ enum CrowFlightWingBodyIntegration {
   static let covertChordIndices = [0, 3, 4, 5, 6]
   static let axillaryUnderlayerRootChordIndex = 6
   static let axillaryUnderlayerTipChordIndex = 8
+  static let terminalAxillaryHandoffSpanIndex = 0
   static let dorsalFoldedWingHandoffChordIndex = 6
   static let dorsalFoldedWingHandoffSpanIndices = [21, 29]
   static let dorsalFoldedWingHandoffBodyAxialIndex = 61

@@ -3224,12 +3224,95 @@ private struct CrowMeshBuilder {
       to: &vertices
     )
     if presentation == .takeoff {
+      appendTerminalAxillaryHandoffUnderlayer(
+        states: states,
+        bodyCenter: bodyCenter,
+        left: left,
+        to: &vertices
+      )
       appendDorsalFoldedWingHandoffUnderlayer(
         states: states,
         bodyCenter: bodyCenter,
         left: left,
         phase: phase,
         to: &vertices
+      )
+    }
+  }
+
+  /// A fixed bilateral lining closes the first live axillary interval against
+  /// its owning terminal folded covert. Visible feather roots, tips, and vane
+  /// topology remain unchanged above this two-triangle support surface.
+  private func appendTerminalAxillaryHandoffUnderlayer(
+    states: [SIMD3<Float>],
+    bodyCenter: SIMD3<Float>,
+    left: Bool,
+    to vertices: inout [ColoredVertex]
+  ) {
+    let partIdentifier: UInt8 = left ? 2 : 3
+    guard
+      let wing = dataset.components.first(where: {
+        $0.partIdentifier == partIdentifier
+      }), wing.vertexCount
+        == CrowFlightWingBodyIntegration.chordCount
+          * CrowFlightWingBodyIntegration.spanCount
+    else { return }
+    let folded = CrowFoldedWingCoverts.terminalAxillaryHandoffSample(left: left)
+    let chordCount = CrowFlightWingBodyIntegration.chordCount
+    func point(span: Int, chord: Int) -> SIMD3<Float> {
+      states[wing.vertexOffset + span * chordCount + chord]
+    }
+    let span = CrowFlightWingBodyIntegration.terminalAxillaryHandoffSpanIndex
+    let rootChord = CrowFlightWingBodyIntegration.axillaryUnderlayerRootChordIndex
+    let tipChord = CrowFlightWingBodyIntegration.axillaryUnderlayerTipChordIndex
+    let wingRoot = point(span: span, chord: rootChord)
+    let chordVector = point(span: span, chord: tipChord) - wingRoot
+    let spanVector = point(span: span + 1, chord: rootChord) - wingRoot
+    let chordDirection = safeNormalize(
+      chordVector,
+      fallback: SIMD3<Float>(-1, 0, 0)
+    )
+    let spanDirection = safeNormalize(
+      spanVector,
+      fallback: SIMD3<Float>(0, left ? 1 : -1, 0)
+    )
+    let wingNormal = CrowFlightWingBodyIntegration.covertSurfaceNormal(
+      chordDirection: chordDirection,
+      spanDirection: spanDirection,
+      left: left
+    )
+    let wingTip = wingRoot
+      + (1.92
+        + CrowFlightWingBodyIntegration.covertProximalChordExtension(
+          spanIndex: span
+        )) * chordVector
+      + CrowFlightWingBodyIntegration.axillaryUnderlayerTipSpanFraction(
+        spanIndex: span
+      ) * spanVector
+    let bodyRoot = bodyCenter + folded.rootOffset - 0.0003 * folded.planeNormal
+    let bodyTip = bodyCenter + folded.tipOffset - 0.0003 * folded.planeNormal
+    let normal = safeNormalize(
+      folded.planeNormal + wingNormal,
+      fallback: folded.planeNormal
+    )
+    let color = SIMD4<Float>(0.0058, 0.0088, 0.016, 0.145)
+    let bodyParameters = SIMD4<Float>(0, 0, 0, 4)
+    let wingParameters = SIMD4<Float>(1, 0, 0, 4)
+    for (position, parameters) in [
+      (bodyRoot, bodyParameters),
+      (wingRoot, wingParameters),
+      (wingTip, wingParameters),
+      (bodyRoot, bodyParameters),
+      (wingTip, wingParameters),
+      (bodyTip, bodyParameters),
+    ] {
+      vertices.append(
+        vertex(
+          position,
+          normal: normal,
+          color: color,
+          parameters: parameters
+        )
       )
     }
   }

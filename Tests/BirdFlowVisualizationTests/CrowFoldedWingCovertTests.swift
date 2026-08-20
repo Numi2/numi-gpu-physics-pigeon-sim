@@ -190,6 +190,43 @@ func foldedWingCovertsFormSymmetricBodySeatedShell() {
   }
 }
 
+@Test("terminal axillary handoff selects one exact bilateral folded covert")
+func terminalAxillaryHandoffSelectsExactBilateralFoldedCovert() {
+  let left = CrowFoldedWingCoverts.terminalAxillaryHandoffSample(left: true)
+  let right = CrowFoldedWingCoverts.terminalAxillaryHandoffSample(left: false)
+  #expect(
+    CrowFoldedWingCoverts.terminalAxillaryHandoffRow
+      == CrowFoldedWingCoverts.rowCount - 4
+  )
+  #expect(
+    CrowFoldedWingCoverts.terminalAxillaryHandoffColumn
+      == CrowFoldedWingCoverts.columnCount - 1
+  )
+  #expect(
+    [left.row, right.row].allSatisfy {
+      $0 == CrowFoldedWingCoverts.terminalAxillaryHandoffRow
+    }
+  )
+  #expect(
+    [left.column, right.column].allSatisfy {
+      $0 == CrowFoldedWingCoverts.terminalAxillaryHandoffColumn
+    }
+  )
+  #expect(left.side == 1 && right.side == -1)
+  #expect(abs(left.rootOffset.x - right.rootOffset.x) < 1e-7)
+  #expect(abs(left.rootOffset.y + right.rootOffset.y) < 1e-7)
+  #expect(abs(left.rootOffset.z - right.rootOffset.z) < 1e-7)
+  #expect(abs(left.tipOffset.x - right.tipOffset.x) < 1e-7)
+  #expect(abs(left.tipOffset.y + right.tipOffset.y) < 1e-7)
+  #expect(abs(left.tipOffset.z - right.tipOffset.z) < 1e-7)
+  #expect(CrowFlightWingBodyIntegration.terminalAxillaryHandoffSpanIndex == 0)
+  #expect(
+    CrowFlightWingBodyIntegration.axillaryUnderlayerSpanIndices.contains(
+      CrowFlightWingBodyIntegration.terminalAxillaryHandoffSpanIndex
+    )
+  )
+}
+
 @Test("folded wing coverts resolve crown-attached shafts and barb groups")
 func foldedWingCovertsResolveCrownAttachedMesostructure() {
   let samples = CrowFoldedWingCoverts.samples()

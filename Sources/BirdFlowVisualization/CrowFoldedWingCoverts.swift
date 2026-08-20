@@ -32,6 +32,9 @@ enum CrowFoldedWingCoverts {
   static let shellClearanceMeters: Float = 0.0012
   static let surfaceFeatherClass: UInt32 = 4
   static let posteriorLiveWingHandoffMaximumRootWidthScale: Float = 1.40
+  static let terminalAxillaryHandoffRow = rowCount - 4
+  static let terminalAxillaryHandoffColumn = columnCount - 1
+  private static let cachedSamples = makeSamples()
 
   /// The body-facing outer course overlaps the folded primary taper. Its roots
   /// and lengths remain unchanged, preserving distinct vane silhouettes.
@@ -66,6 +69,20 @@ enum CrowFoldedWingCoverts {
   }
 
   static func samples() -> [CrowFoldedWingCovertSample] {
+    cachedSamples
+  }
+
+  static func terminalAxillaryHandoffSample(
+    left: Bool
+  ) -> CrowFoldedWingCovertSample {
+    let sideOffset = left ? rowCount * columnCount : 0
+    return cachedSamples[
+      sideOffset + terminalAxillaryHandoffRow * columnCount
+        + terminalAxillaryHandoffColumn
+    ]
+  }
+
+  private static func makeSamples() -> [CrowFoldedWingCovertSample] {
     var result: [CrowFoldedWingCovertSample] = []
     result.reserveCapacity(2 * rowCount * columnCount)
     for side: Float in [-1, 1] {
