@@ -25,11 +25,14 @@ final class VisualizationBackend {
   let device: MTLDevice
   let queue: MTLCommandQueue
   let library: MTLLibrary
+  let fastMathEnabled: Bool
 
   private var computePipelines: [String: MTLComputePipelineState] = [:]
   private var renderPipelines: [String: MTLRenderPipelineState] = [:]
 
   init(device: MTLDevice) throws {
+    fastMathEnabled = ProcessInfo.processInfo.environment["BIRDFLOW_VIS_FAST_MATH"]
+      != "0"
     self.device = device
     guard let queue = device.makeCommandQueue() else {
       throw VisualizationError.pipeline("command queue")
@@ -46,10 +49,12 @@ final class VisualizationBackend {
         subdirectory: "Metal"
       )
     guard let url else { throw VisualizationError.resourceMissing }
+    let compileOptions = MTLCompileOptions()
+    compileOptions.fastMathEnabled = fastMathEnabled
     do {
       library = try device.makeLibrary(
         source: String(contentsOf: url, encoding: .utf8),
-        options: nil
+        options: compileOptions
       )
     } catch {
       throw VisualizationError.shader(error.localizedDescription)

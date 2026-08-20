@@ -1371,19 +1371,19 @@ fragment float4 isoFragment(
     if ((u.flags.y & 16u) != 0u
         && dot(in.world-u.sliceCenterAndOpacity.xyz,u.sliceNormalAndRange.xyz)<0.0f)
         discard_fragment();
-    float light=0.28f+0.72f*abs(dot(normalize(in.normal),normalize(float3(0.4f,-0.5f,0.75f))));
+    float light=0.28f+0.72f*abs(dot(in.normal,normalize(float3(0.4f,-0.5f,0.75f))));
     return float4(in.color.rgb*light,in.color.a);
 }
 
 fragment float4 litFragment(RasterVertex in [[stage_in]]) {
-    float light=0.28f+0.72f*abs(dot(normalize(in.normal),normalize(float3(0.4f,-0.5f,0.75f))));
+    float light=0.28f+0.72f*abs(dot(in.normal,normalize(float3(0.4f,-0.5f,0.75f))));
     return float4(in.color.rgb*light,in.color.a);
 }
 
 fragment float4 showcaseDoveFragment(
     RasterVertex in [[stage_in]],
     constant CameraUniforms& camera [[buffer(0)]]) {
-    float3 normal=normalize(in.normal);
+    float3 normal=in.normal;
     float3 view=normalize(camera.eyeAndWidth.xyz-in.world);
     float3 key=normalize(float3(0.38f,-0.48f,0.80f));
     float3 fill=normalize(float3(-0.72f,0.22f,0.46f));
@@ -1701,7 +1701,7 @@ fragment float4 showcaseCrowFragment(
 fragment CrowAOVOutput showcaseCrowAOVFragment(
     CrowRasterVertex in [[stage_in]],
     constant CrowTemporalCameraUniforms& camera [[buffer(0)]]) {
-    float3 normal=normalize(in.normal);
+    float3 normal=in.normal;
     float3 radiance=showcaseCrowLinearRadiance(
         in.world,normal,in.albedoAndMaterial,camera.eyeAndWidth.xyz,
         in.featherCoordinates,in.identity.w
