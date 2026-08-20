@@ -60,7 +60,19 @@ func crowBodyFeatherTractsOverlapNeckAndCoverWingRoots() {
   let mantleLengths = mantle.map { simd_distance($0.rootOffset, $0.tipOffset) }
   let scapularLengths = scapular.map { simd_distance($0.rootOffset, $0.tipOffset) }
   #expect(mantleLengths.min()! > 0.023)
-  #expect(mantleLengths.max()! < 0.042)
+  #expect(mantleLengths.max()! < 0.046)
+  #expect(CrowBodyFeatherTracts.mantlePosteriorLengthAdditionMeters(axial: -1) == 0)
+  #expect(CrowBodyFeatherTracts.mantlePosteriorLengthAdditionMeters(axial: 0) == 0)
+  #expect(
+    abs(CrowBodyFeatherTracts.mantlePosteriorLengthAdditionMeters(axial: 0.5) - 0.001)
+      < 1e-7
+  )
+  #expect(
+    CrowBodyFeatherTracts.mantlePosteriorLengthAdditionMeters(axial: 1) == 0.004
+  )
+  #expect(
+    CrowBodyFeatherTracts.mantlePosteriorLengthAdditionMeters(axial: 2) == 0.004
+  )
   #expect(
     mantle.allSatisfy {
       2 * $0.maximumWidthMeters

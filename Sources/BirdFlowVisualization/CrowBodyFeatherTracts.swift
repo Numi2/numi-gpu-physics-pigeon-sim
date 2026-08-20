@@ -365,7 +365,8 @@ enum CrowBodyFeatherTracts {
             0.057 - 0.011 * course - 0.010 * axial + 0.0007 * shapeIdentity
           )
           let length =
-            (0.025 + 0.010 * axial + 0.003 * course)
+            (0.025 + 0.010 * axial + 0.003 * course
+              + mantlePosteriorLengthAdditionMeters(axial: axial))
             * (1 + 0.070 * shapeIdentity + 0.032 * courseIdentity)
           let tip =
             root
@@ -661,6 +662,14 @@ enum CrowBodyFeatherTracts {
     case .humeral, .scapular:
       return 6
     }
+  }
+
+  /// Additional caudal shingling over the narrowing rump. The bounded
+  /// quadratic leaves anterior mantle proportions unchanged while extending
+  /// terminal vanes four millimetres toward the covert field.
+  static func mantlePosteriorLengthAdditionMeters(axial: Float) -> Float {
+    let bounded = min(max(axial, 0), 1)
+    return 0.004 * bounded * bounded
   }
 
   /// Breaks binary row cadence without randomizing roots independently.
