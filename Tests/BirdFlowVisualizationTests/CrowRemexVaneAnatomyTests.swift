@@ -86,6 +86,33 @@ func primaryAndSecondaryVaneProfilesAreClassSpecificBilateralMirrors() {
       count: 11
     ) == 1
   )
+  #expect(
+    CrowRemexVaneAnatomy.posteriorSecondaryOverlapMaximumWidthScale == 1.35
+  )
+  let posteriorSecondaryOverlapScales = (0..<11).map {
+    CrowRemexVaneAnatomy.posteriorSecondaryOverlapWidthScale(
+      featherClass: .secondary,
+      order: $0,
+      count: 11
+    )
+  }
+  #expect(posteriorSecondaryOverlapScales[8] == 1)
+  #expect(abs(posteriorSecondaryOverlapScales[9] - 1.175) < 1e-6)
+  #expect(posteriorSecondaryOverlapScales[10] == 1.35)
+  #expect(
+    CrowRemexVaneAnatomy.posteriorSecondaryOverlapWidthScale(
+      featherClass: .primary,
+      order: 9,
+      count: 10
+    ) == 1
+  )
+  let lastSecondaryWidth = CrowRectrixVaneAnatomy.maximumWidthMeters(
+    assetWidthMeters: 0.020,
+    featherClass: .secondary,
+    order: 10,
+    count: 11
+  )
+  #expect(abs(lastSecondaryWidth - 0.027_081) < 1e-6)
   let firstPrimaryCamber = CrowRectrixVaneAnatomy.camberMeters(
     lengthMeters: 0.155,
     featherClass: .primary,

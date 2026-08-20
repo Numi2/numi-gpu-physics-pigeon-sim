@@ -24,6 +24,7 @@ struct CrowRemexVaneProfile: Equatable {
 /// mirrored rather than independently randomized.
 enum CrowRemexVaneAnatomy {
   static let posteriorPrimaryOverlapMaximumWidthScale: Float = 1.60
+  static let posteriorSecondaryOverlapMaximumWidthScale: Float = 1.35
 
   /// Broadens only the two caudal-most primary vanes where their folded
   /// envelope meets the posterior secondary and live covert shell. Rachis
@@ -38,6 +39,20 @@ enum CrowRemexVaneAnatomy {
       / Float(max(count - 1, 1))
     let weight = min(max((fraction - 0.8) / 0.2, 0), 1)
     return 1 + (posteriorPrimaryOverlapMaximumWidthScale - 1) * weight
+  }
+
+  /// Broadens only the last secondary and its immediate neighbor where the
+  /// folded remex stack meets the outer primary, caudal covert course, and
+  /// rectrix shell. Length, rachis, camber, and all other vanes are unchanged.
+  static func posteriorSecondaryOverlapWidthScale(
+    featherClass: BirdRealityFeatherClass,
+    order: Int,
+    count: Int
+  ) -> Float {
+    guard featherClass == .secondary else { return 1 }
+    let distance = Float(max(count - 1 - order, 0))
+    let weight = max(0, 1 - distance / 2)
+    return 1 + (posteriorSecondaryOverlapMaximumWidthScale - 1) * weight
   }
 
   static func profile(

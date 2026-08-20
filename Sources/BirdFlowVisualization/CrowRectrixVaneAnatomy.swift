@@ -99,6 +99,11 @@ enum CrowRectrixVaneAnatomy {
         order: order,
         count: count
       )
+      * CrowRemexVaneAnatomy.posteriorSecondaryOverlapWidthScale(
+        featherClass: featherClass,
+        order: order,
+        count: count
+      )
   }
 
   static func camberMeters(
