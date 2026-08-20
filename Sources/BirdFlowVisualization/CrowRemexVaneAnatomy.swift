@@ -25,7 +25,7 @@ struct CrowRemexVaneProfile: Equatable {
 enum CrowRemexVaneAnatomy {
   static let posteriorPrimaryOverlapMaximumWidthScale: Float = 1.80
   static let posteriorSecondaryOverlapMaximumWidthScale: Float = 1.35
-  static let terminalPrimaryBroadEdgeMaximumScale: Float = 1.12
+  static let terminalPrimaryBroadEdgeMaximumScale: Float = 1.40
   static let terminalPrimaryFoldedJunctionMaximumScale: Float = 1.35
   static let terminalSecondaryFoldedJunctionMaximumScale: Float = 1.28
 

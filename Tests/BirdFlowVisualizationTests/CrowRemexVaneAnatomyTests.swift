@@ -236,7 +236,7 @@ func terminalPrimaryBroadEdgeOverlapIsLocalMirroredAndDifferentiable() {
   let secondaryIdentity = UInt32(2) | (UInt32(1) << 8) | (UInt32(10) << 16)
     | (UInt32(11) << 24)
 
-  #expect(CrowRemexVaneAnatomy.terminalPrimaryBroadEdgeMaximumScale == 1.12)
+  #expect(CrowRemexVaneAnatomy.terminalPrimaryBroadEdgeMaximumScale == 1.40)
   for axial: Float in [0, 0.39, 0.73, 1] {
     let terms = CrowRemexVaneAnatomy.terminalPrimaryBroadEdgeTerms(
       axial: axial,
@@ -252,7 +252,7 @@ func terminalPrimaryBroadEdgeOverlapIsLocalMirroredAndDifferentiable() {
         axial: 0.56,
         signedWidth: -1,
         packedIdentity: leftIdentity
-      ).scale - 1.12
+      ).scale - 1.40
     ) < 1e-6
   )
   #expect(

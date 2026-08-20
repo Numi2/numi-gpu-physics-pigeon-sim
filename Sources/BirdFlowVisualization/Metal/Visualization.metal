@@ -598,7 +598,7 @@ inline float3 crowTerminalPrimaryBroadEdgeTerms(
     float broadEdgeCoordinate=-signedWidth*remex.y;
     float2 edge=crowSmoothstepTerms(broadEdgeCoordinate,0.0f,1.0f);
     float edgeSignedWidthDerivative=-remex.y*edge.y;
-    constexpr float amplitude=0.12f;
+    constexpr float amplitude=0.40f;
     return float3(
         1.0f+amplitude*axialEnvelope*edge.x,
         amplitude*axialEnvelopeDerivative*edge.x,
