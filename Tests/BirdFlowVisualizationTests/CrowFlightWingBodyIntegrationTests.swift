@@ -790,7 +790,7 @@ func flightCovertNormalsRetainAnatomicalSideThroughReversal() {
 func dorsalFoldedWingHandoffIsBilateralAndCollapsesBeforeFreeFlight() {
   let spans = CrowFlightWingBodyIntegration
     .dorsalFoldedWingHandoffSpanIndices
-  #expect(spans == [28, 29])
+  #expect(spans == [21, 29])
   #expect(spans.allSatisfy {
     (0..<CrowFlightWingBodyIntegration.spanCount).contains($0)
   })

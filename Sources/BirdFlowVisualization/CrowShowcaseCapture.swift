@@ -3235,7 +3235,7 @@ private struct CrowMeshBuilder {
   }
 
   /// A topology-stable hidden bridge occupies the small folded gap between
-  /// the live trailing covert pair and its owning dorsal contour shingle. It
+  /// the live trailing covert course and its owning dorsal contour shingle. It
   /// collapses onto the wing as deployment begins, retaining a fixed vertex
   /// count without spanning the articulated free wing.
   private func appendDorsalFoldedWingHandoffUnderlayer(
