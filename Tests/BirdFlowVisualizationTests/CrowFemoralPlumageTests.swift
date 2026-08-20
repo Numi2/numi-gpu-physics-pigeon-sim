@@ -25,6 +25,7 @@ func femoralPlumageBridgesBodyLoftAndUpperCruralTract() {
   #expect(CrowFemoralPlumage.surfaceFeatherClass == 7)
   #expect(CrowFemoralPlumage.bridgeLengthScale == 0.68)
   #expect(CrowFemoralPlumage.nominalMaximumLengthMeters == 0.034)
+  #expect(CrowFemoralPlumage.pelvicAxillaryHandoffMaximumWidthScale == 1.35)
   #expect(left.count == right.count)
   #expect(
     CrowFemoralPlumage.visibleSamples(
@@ -150,6 +151,34 @@ func femoralPlumageBridgesBodyLoftAndUpperCruralTract() {
     #expect(row.map(\.root.x).max()! - row.map(\.root.x).min()! > 0.0044)
     #expect(Set(row.map(\.root.x)).count == CrowFemoralPlumage.rowCount)
   }
+}
+
+@Test("femoral pelvic-axillary handoff is compact and bilateral")
+func femoralPelvicAxillaryHandoffIsCompactAndBilateral() {
+  #expect(
+    CrowFemoralPlumage.pelvicAxillaryHandoffWidthScale(row: 8, course: 0)
+      == 1.35
+  )
+  #expect(
+    abs(
+      CrowFemoralPlumage.pelvicAxillaryHandoffWidthScale(row: 7, course: 0)
+        - 1.175
+    ) < 1e-6
+  )
+  #expect(
+    abs(
+      CrowFemoralPlumage.pelvicAxillaryHandoffWidthScale(row: 8, course: 1)
+        - 1.175
+    ) < 1e-6
+  )
+  #expect(
+    CrowFemoralPlumage.pelvicAxillaryHandoffWidthScale(row: 6, course: 0)
+      == 1
+  )
+  #expect(
+    CrowFemoralPlumage.pelvicAxillaryHandoffWidthScale(row: 8, course: 2)
+      == 1
+  )
 }
 
 @Test("femoral plumage resolves shafts and barbs with output coverage")

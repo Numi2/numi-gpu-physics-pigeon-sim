@@ -541,6 +541,58 @@ func proximalTrailingCovertHandoffRecoversBeforeArticulation() {
   )
 }
 
+@Test("leading covert ventral handoff is compact and chord-specific")
+func leadingCovertVentralHandoffIsCompactAndChordSpecific() {
+  #expect(
+    CrowFlightWingBodyIntegration
+      .covertVentralBodyHandoffMaximumWidthScale == 1.35
+  )
+  #expect(
+    CrowFlightWingBodyIntegration.covertVentralBodyHandoffWidthScale(
+      chordIndex: 3,
+      spanIndex: 13
+    ) == 1
+  )
+  #expect(
+    CrowFlightWingBodyIntegration.covertVentralBodyHandoffWidthScale(
+      chordIndex: 0,
+      spanIndex: 11
+    ) == 1
+  )
+  #expect(
+    abs(
+      CrowFlightWingBodyIntegration.covertVentralBodyHandoffWidthScale(
+        chordIndex: 0,
+        spanIndex: 12
+      ) - 1.14
+    ) < 1e-6
+  )
+  #expect(
+    abs(
+      CrowFlightWingBodyIntegration.covertVentralBodyHandoffWidthScale(
+        chordIndex: 0,
+        spanIndex: 13
+      ) - 1.28
+    ) < 1e-6
+  )
+  #expect(
+    CrowFlightWingBodyIntegration.covertVentralBodyHandoffWidthScale(
+      chordIndex: 0,
+      spanIndex: 13
+    )
+      == CrowFlightWingBodyIntegration.covertVentralBodyHandoffWidthScale(
+        chordIndex: 0,
+        spanIndex: 14
+      )
+  )
+  #expect(
+    CrowFlightWingBodyIntegration.covertVentralBodyHandoffWidthScale(
+      chordIndex: 0,
+      spanIndex: 16
+    ) == 1
+  )
+}
+
 @Test("flight covert normals retain anatomical side through reversal")
 func flightCovertNormalsRetainAnatomicalSideThroughReversal() {
   let chord = SIMD3<Float>(-1, 0, 0)

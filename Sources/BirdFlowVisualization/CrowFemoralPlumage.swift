@@ -40,6 +40,7 @@ enum CrowFemoralPlumage {
   /// changes presentation plumage only; hip and leg kinematics stay intact.
   static let bridgeLengthScale: Float = 0.68
   static let nominalMaximumLengthMeters: Float = 0.034
+  static let pelvicAxillaryHandoffMaximumWidthScale: Float = 1.35
 
   static func visibleSamples(
     bodyCenter: SIMD3<Float>,
@@ -158,6 +159,7 @@ enum CrowFemoralPlumage {
         )
         let tip = root + length * direction
         let maximumWidth = min(0.0076, max(0.0041, 0.235 * length))
+          * pelvicAxillaryHandoffWidthScale(row: row, course: course)
         result.append(
           CrowFemoralPlumageFeather(
             side: side,
@@ -189,6 +191,19 @@ enum CrowFemoralPlumage {
       }
     }
     return result
+  }
+
+  /// Broadens the compact posterior femoral field that roofs the pelvic side
+  /// of the live axillary junction. The bilateral field leaves hip, hock,
+  /// feather roots, and vane lengths unchanged.
+  static func pelvicAxillaryHandoffWidthScale(
+    row: Int,
+    course: Int
+  ) -> Float {
+    let weight =
+      max(0, 1 - abs(Float(row) - 8) / 2)
+      * max(0, 1 - Float(course) / 2)
+    return 1 + (pelvicAxillaryHandoffMaximumWidthScale - 1) * weight
   }
 
   private static func coarseSamples(

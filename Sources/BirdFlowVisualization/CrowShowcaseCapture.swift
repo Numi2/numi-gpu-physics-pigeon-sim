@@ -3381,6 +3381,10 @@ private struct CrowMeshBuilder {
           chordIndex: chord,
           spanIndex: span
         ) * caudalSecondaryHandoffWidthScale
+          * CrowFlightWingBodyIntegration.covertVentralBodyHandoffWidthScale(
+            chordIndex: chord,
+            spanIndex: span
+          )
         let camberScale = CrowFlightWingBodyIntegration.covertCamberScale(
           chordIndex: chord,
           spanIndex: span
