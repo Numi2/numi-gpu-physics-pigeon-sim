@@ -133,7 +133,15 @@ func flightCovertCoursesDenselyCoverEveryBodyToWingStation() {
   let overlapScales = (0..<CrowFlightWingBodyIntegration.spanCount).map {
     CrowFlightWingBodyIntegration.covertAttachmentOverlapScale(spanIndex: $0)
   }
-  #expect(abs(overlapScales.first! - 1.28) < 1e-6)
+  #expect(
+    abs(
+      overlapScales.first!
+        - CrowFlightWingBodyIntegration.covertAttachmentMaximumOverlapScale
+    ) < 1e-6
+  )
+  #expect(
+    CrowFlightWingBodyIntegration.covertAttachmentMaximumOverlapScale == 1.68
+  )
   #expect(
     abs(CrowFlightWingBodyIntegration.covertCourseOverlapScale - 1.24) < 1e-6
   )
@@ -142,7 +150,11 @@ func flightCovertCoursesDenselyCoverEveryBodyToWingStation() {
       < 1e-6
   )
   #expect(
-    overlapScales.dropFirst().allSatisfy { $0 >= 1 && $0 <= 1.28 }
+    overlapScales.dropFirst().allSatisfy {
+      $0 >= 1
+        && $0
+          <= CrowFlightWingBodyIntegration.covertAttachmentMaximumOverlapScale
+    }
   )
   #expect(
     zip(overlapScales, overlapScales.dropFirst()).allSatisfy { $1 <= $0 }

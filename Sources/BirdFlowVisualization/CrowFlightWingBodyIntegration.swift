@@ -14,6 +14,7 @@ enum CrowFlightWingBodyIntegration {
   static let attachmentSpanCount = 14
   static let articulationSpanCount = 12
   static let covertCourseOverlapScale: Float = 1.24
+  static let covertAttachmentMaximumOverlapScale: Float = 1.68
   static let covertChordIndices = [0, 3, 4, 5, 6]
   static let axillaryUnderlayerRootChordIndex = 6
   static let axillaryUnderlayerTipChordIndex = 8
@@ -33,10 +34,13 @@ enum CrowFlightWingBodyIntegration {
   }
 
   /// Axillary coverts overlap most strongly where the wing is body-seated,
-  /// then recover the established vane width before free articulation.
+  /// closing the rear-quarter root course before recovering the established
+  /// vane width ahead of free articulation.
   static func covertAttachmentOverlapScale(spanIndex: Int) -> Float {
     let progress = clamp(Float(spanIndex) / Float(attachmentSpanCount))
-    return 1 + 0.28 * (1 - smootherstep(progress))
+    return 1
+      + (covertAttachmentMaximumOverlapScale - 1)
+        * (1 - smootherstep(progress))
   }
 
   /// Distal trailing coverts project slightly farther across the marginal
