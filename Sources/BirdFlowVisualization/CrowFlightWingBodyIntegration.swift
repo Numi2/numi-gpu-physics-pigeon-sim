@@ -20,6 +20,7 @@ enum CrowFlightWingBodyIntegration {
   static let covertProximalMaximumChordExtension: Float = 1.60
   static let covertAbdominalHandoffMaximumWidthScale: Float = 1.35
   static let covertDistalTrailingMaximumWidthScale: Float = 1.25
+  static let covertAbdominalHandoffMaximumNormalLiftMeters: Float = 0.001
   static let covertChordIndices = [0, 3, 4, 5, 6]
   static let axillaryUnderlayerRootChordIndex = 6
   static let axillaryUnderlayerTipChordIndex = 8
@@ -127,6 +128,20 @@ enum CrowFlightWingBodyIntegration {
     let weight = 1 - Float(distance) / 2
     return 1
       + (covertAbdominalHandoffMaximumWidthScale - 1) * smootherstep(weight)
+  }
+
+  /// Lifts the seated span-five trailing covert by at most one millimetre so
+  /// its body-facing edge remains in front of the abdominal tract through the
+  /// transition. The symmetric fade leaves spans three and seven unchanged.
+  static func covertAbdominalHandoffNormalLift(
+    chordIndex: Int,
+    spanIndex: Int
+  ) -> Float {
+    guard chordIndex == 6 else { return 0 }
+    let distance = abs(spanIndex - 5)
+    guard distance < 2 else { return 0 }
+    let weight = 1 - Float(distance) / 2
+    return covertAbdominalHandoffMaximumNormalLiftMeters * smootherstep(weight)
   }
 
   /// Slightly broadens the two outer trailing coverts whose tapered vane

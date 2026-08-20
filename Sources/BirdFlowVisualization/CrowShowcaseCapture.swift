@@ -3411,6 +3411,11 @@ private struct CrowMeshBuilder {
             * chordVector
           + tipSpanFraction * spanVector
         let spacing = max(simd_length(spanVector), 0.012)
+        let abdominalHandoffNormalLift =
+          CrowFlightWingBodyIntegration.covertAbdominalHandoffNormalLift(
+            chordIndex: chord,
+            spanIndex: span
+          )
         let attachmentOverlap =
           CrowFlightWingBodyIntegration.covertAttachmentOverlapScale(
             spanIndex: span
@@ -3419,8 +3424,8 @@ private struct CrowMeshBuilder {
           CrowFlightWingBodyIntegration.covertCourseOverlapScale
           * attachmentOverlap
         appendFeatherBlade(
-          root: root + dorsalNormal * 0.0015,
-          tip: surfaceTip + dorsalNormal * 0.0025,
+          root: root + dorsalNormal * (0.0015 + abdominalHandoffNormalLift),
+          tip: surfaceTip + dorsalNormal * (0.0025 + abdominalHandoffNormalLift),
           planeNormal: dorsalNormal,
           rootWidth:
             widthScale * covertOverlap * (isTrailingCourse ? 0.44 : 0.38)
