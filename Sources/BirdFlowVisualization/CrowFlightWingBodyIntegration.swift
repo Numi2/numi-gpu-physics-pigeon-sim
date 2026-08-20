@@ -22,6 +22,10 @@ enum CrowFlightWingBodyIntegration {
   static let covertCaudalSecondaryHandoffMaximumVaneAsymmetry: Float = 0.45
   static let covertAbdominalHandoffMaximumWidthScale: Float = 1.35
   static let covertDistalTrailingMaximumWidthScale: Float = 1.25
+  static let covertDistalTrailingBodyHandoffMaximumWidthScale: Float = 1.10
+  static let covertDistalTrailingBodyHandoffStartPhase: Float = 0.20
+  static let covertDistalTrailingBodyHandoffPeakPhase: Float = 0.25
+  static let covertDistalTrailingBodyHandoffEndPhase: Float = 0.375
   static let covertProximalTailHandoffMaximumWidthScale: Float = 1.35
   static let covertVentralBodyHandoffMaximumWidthScale: Float = 1.35
   static let rectrixWingHandoffMaximumWidthScale: Float = 1.40
@@ -187,12 +191,53 @@ enum CrowFlightWingBodyIntegration {
     chordIndex: Int,
     spanIndex: Int
   ) -> Float {
-    guard chordIndex == 6 else { return 1 }
-    let distance = abs(Float(spanIndex) - 28.5)
-    guard distance < 1.5 else { return 1 }
-    let weight = 1 - distance / 1.5
+    let weight = covertDistalTrailingWeight(
+      chordIndex: chordIndex,
+      spanIndex: spanIndex
+    )
     return 1
-      + (covertDistalTrailingMaximumWidthScale - 1) * smootherstep(weight)
+      + (covertDistalTrailingMaximumWidthScale - 1) * weight
+  }
+
+  /// Adds a small symmetric overlap to the same two trailing shingles during
+  /// their initial deployment. Both vane edges remain present, and roots, tips,
+  /// chord length, and the established free-flight shape are unchanged.
+  static func covertDistalTrailingBodyHandoffWidthScale(
+    chordIndex: Int,
+    spanIndex: Int,
+    presentationPhase: Float
+  ) -> Float {
+    return 1
+      + (covertDistalTrailingBodyHandoffMaximumWidthScale - 1)
+      * covertDistalTrailingWeight(
+        chordIndex: chordIndex,
+        spanIndex: spanIndex
+      )
+      * covertDistalTrailingBodyHandoffTransitionWeight(
+        presentationPhase: presentationPhase
+      )
+  }
+
+  /// Smoothly limits the added overlap to initial wing deployment. The
+  /// folded hold and later free wing remain on their established silhouettes.
+  static func covertDistalTrailingBodyHandoffTransitionWeight(
+    presentationPhase: Float
+  ) -> Float {
+    let rise = smootherstep(
+      clamp(
+        (presentationPhase - covertDistalTrailingBodyHandoffStartPhase)
+          / (covertDistalTrailingBodyHandoffPeakPhase
+            - covertDistalTrailingBodyHandoffStartPhase)
+      )
+    )
+    let release = 1 - smootherstep(
+      clamp(
+        (presentationPhase - covertDistalTrailingBodyHandoffPeakPhase)
+          / (covertDistalTrailingBodyHandoffEndPhase
+            - covertDistalTrailingBodyHandoffPeakPhase)
+      )
+    )
+    return rise * release
   }
 
   /// Broadens only the first two body-seated trailing coverts beneath the
@@ -354,6 +399,16 @@ enum CrowFlightWingBodyIntegration {
     let distance = abs(Float(spanIndex) - 21.5)
     guard distance < 4.5 else { return 0 }
     return smootherstep(1 - distance / 4.5)
+  }
+
+  private static func covertDistalTrailingWeight(
+    chordIndex: Int,
+    spanIndex: Int
+  ) -> Float {
+    guard chordIndex == 6 else { return 0 }
+    let distance = abs(Float(spanIndex) - 28.5)
+    guard distance < 1.5 else { return 0 }
+    return smootherstep(1 - distance / 1.5)
   }
 
   private static func clamp(_ value: Float) -> Float {

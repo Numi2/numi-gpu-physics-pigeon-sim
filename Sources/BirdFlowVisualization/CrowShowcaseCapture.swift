@@ -1521,6 +1521,7 @@ private struct CrowMeshBuilder {
         states: states,
         bodyCenter: bodyCenter,
         left: true,
+        phase: phase,
         projectedPixelsPerMeter: projectedPixelsPerMeter,
         to: &vertices
       )
@@ -1528,6 +1529,7 @@ private struct CrowMeshBuilder {
         states: states,
         bodyCenter: bodyCenter,
         left: false,
+        phase: phase,
         projectedPixelsPerMeter: projectedPixelsPerMeter,
         to: &vertices
       )
@@ -3093,6 +3095,7 @@ private struct CrowMeshBuilder {
     states: [SIMD3<Float>],
     bodyCenter: SIMD3<Float>,
     left: Bool,
+    phase: Float,
     projectedPixelsPerMeter: Float,
     to vertices: inout [ColoredVertex]
   ) {
@@ -3211,6 +3214,7 @@ private struct CrowMeshBuilder {
     appendSurfaceBoundWingCoverts(
       states: states,
       left: left,
+      phase: phase,
       projectedPixelsPerMeter: projectedPixelsPerMeter,
       to: &vertices
     )
@@ -3314,6 +3318,7 @@ private struct CrowMeshBuilder {
   private func appendSurfaceBoundWingCoverts(
     states: [SIMD3<Float>],
     left: Bool,
+    phase: Float,
     projectedPixelsPerMeter: Float,
     to vertices: inout [ColoredVertex]
   ) {
@@ -3368,6 +3373,15 @@ private struct CrowMeshBuilder {
             chordIndex: chord,
             spanIndex: span
           )
+        let distalTrailingBodyHandoffWidthScale =
+          presentation == .takeoff
+          ? CrowFlightWingBodyIntegration
+            .covertDistalTrailingBodyHandoffWidthScale(
+              chordIndex: chord,
+              spanIndex: span,
+              presentationPhase: phase
+            )
+          : 1
         let widthScale = CrowFlightWingBodyIntegration.covertWidthScale(
           chordIndex: chord,
           spanIndex: span
@@ -3377,7 +3391,8 @@ private struct CrowMeshBuilder {
         ) * CrowFlightWingBodyIntegration.covertDistalTrailingWidthScale(
           chordIndex: chord,
           spanIndex: span
-        ) * CrowFlightWingBodyIntegration.covertProximalTailHandoffWidthScale(
+        ) * distalTrailingBodyHandoffWidthScale
+          * CrowFlightWingBodyIntegration.covertProximalTailHandoffWidthScale(
           chordIndex: chord,
           spanIndex: span
         ) * caudalSecondaryHandoffWidthScale

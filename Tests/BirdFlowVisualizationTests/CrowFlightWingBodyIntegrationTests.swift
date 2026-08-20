@@ -320,6 +320,54 @@ func flightCovertCoursesDenselyCoverEveryBodyToWingStation() {
       == 1.25
   )
   #expect(
+    CrowFlightWingBodyIntegration
+      .covertDistalTrailingBodyHandoffMaximumWidthScale == 1.10
+  )
+  #expect(
+    CrowFlightWingBodyIntegration.covertDistalTrailingBodyHandoffStartPhase
+      == 0.20
+  )
+  #expect(
+    CrowFlightWingBodyIntegration.covertDistalTrailingBodyHandoffPeakPhase
+      == 0.25
+  )
+  #expect(
+    CrowFlightWingBodyIntegration.covertDistalTrailingBodyHandoffEndPhase
+      == 0.375
+  )
+  #expect(
+    CrowFlightWingBodyIntegration
+      .covertDistalTrailingBodyHandoffTransitionWeight(
+        presentationPhase: 0.125
+      ) == 0
+  )
+  #expect(
+    CrowFlightWingBodyIntegration
+      .covertDistalTrailingBodyHandoffTransitionWeight(
+        presentationPhase: 0.20
+      ) == 0
+  )
+  #expect(
+    CrowFlightWingBodyIntegration
+      .covertDistalTrailingBodyHandoffTransitionWeight(
+        presentationPhase: 0.25
+      ) == 1
+  )
+  #expect(
+    abs(
+      CrowFlightWingBodyIntegration
+        .covertDistalTrailingBodyHandoffTransitionWeight(
+          presentationPhase: 0.3125
+        ) - 0.5
+    ) < 1e-6
+  )
+  #expect(
+    CrowFlightWingBodyIntegration
+      .covertDistalTrailingBodyHandoffTransitionWeight(
+        presentationPhase: 0.375
+      ) == 0
+  )
+  #expect(
     CrowFlightWingBodyIntegration.covertDistalTrailingWidthScale(
       chordIndex: 5,
       spanIndex: 28
@@ -351,6 +399,61 @@ func flightCovertCoursesDenselyCoverEveryBodyToWingStation() {
     CrowFlightWingBodyIntegration.covertDistalTrailingWidthScale(
       chordIndex: 6,
       spanIndex: 30
+    ) == 1
+  )
+  #expect(
+    CrowFlightWingBodyIntegration.covertDistalTrailingBodyHandoffWidthScale(
+      chordIndex: 5,
+      spanIndex: 28,
+      presentationPhase: 0.25
+    ) == 1
+  )
+  #expect(
+    CrowFlightWingBodyIntegration.covertDistalTrailingBodyHandoffWidthScale(
+      chordIndex: 6,
+      spanIndex: 27,
+      presentationPhase: 0.25
+    ) == 1
+  )
+  #expect(
+    abs(
+      CrowFlightWingBodyIntegration.covertDistalTrailingBodyHandoffWidthScale(
+        chordIndex: 6,
+        spanIndex: 28,
+        presentationPhase: 0.25
+      ) - 1.079_012_4
+    ) < 1e-6
+  )
+  #expect(
+    abs(
+      CrowFlightWingBodyIntegration.covertDistalTrailingBodyHandoffWidthScale(
+        chordIndex: 6,
+        spanIndex: 29,
+        presentationPhase: 0.25
+      ) - 1.079_012_4
+    ) < 1e-6
+  )
+  #expect(
+    abs(
+      CrowFlightWingBodyIntegration.covertDistalTrailingBodyHandoffWidthScale(
+        chordIndex: 6,
+        spanIndex: 28,
+        presentationPhase: 0.3125
+      ) - 1.039_506_2
+    ) < 1e-6
+  )
+  #expect(
+    CrowFlightWingBodyIntegration.covertDistalTrailingBodyHandoffWidthScale(
+      chordIndex: 6,
+      spanIndex: 30,
+      presentationPhase: 0.25
+    ) == 1
+  )
+  #expect(
+    CrowFlightWingBodyIntegration.covertDistalTrailingBodyHandoffWidthScale(
+      chordIndex: 6,
+      spanIndex: 28,
+      presentationPhase: 0.375
     ) == 1
   )
 
