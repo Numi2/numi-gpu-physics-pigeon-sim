@@ -471,7 +471,12 @@ final class CrowFeatherGeometryDeformer {
           profile: $0
         )
       } ?? 1
-    let width = baseWidth * sideScale * edgeModulation
+    let broadEdge = CrowRemexVaneAnatomy.terminalPrimaryBroadEdgeTerms(
+      axial: axial,
+      signedWidth: signedWidth,
+      packedIdentity: packedIdentity
+    )
+    let width = baseWidth * sideScale * edgeModulation * broadEdge.scale
     let camberEnvelope =
       rectrix.map {
         CrowRectrixVaneAnatomy.camberEnvelope(axial: axial, profile: $0)
@@ -574,15 +579,27 @@ final class CrowFeatherGeometryDeformer {
           profile: $0
         )
       } ?? 0
-    let width = symmetricWidth * sideScale * edgeModulation
+    let broadEdge = CrowRemexVaneAnatomy.terminalPrimaryBroadEdgeTerms(
+      axial: sampledAxial,
+      signedWidth: signedWidth,
+      packedIdentity: packedIdentity
+    )
+    let combinedModulation = edgeModulation * broadEdge.scale
+    let combinedAxialDerivative =
+      edgeAxialDerivative * broadEdge.scale
+      + edgeModulation * broadEdge.axialDerivative
+    let combinedSignedWidthDerivative =
+      edgeSignedWidthDerivative * broadEdge.scale
+      + edgeModulation * broadEdge.signedWidthDerivative
+    let width = symmetricWidth * sideScale * combinedModulation
     let widthDerivative =
       sideScale
-      * (symmetricWidthDerivative * edgeModulation
-        + symmetricWidth * edgeAxialDerivative)
+      * (symmetricWidthDerivative * combinedModulation
+        + symmetricWidth * combinedAxialDerivative)
     let widthSignedDerivative =
       symmetricWidth
-      * (-asymmetry * outerSignedWidth * edgeModulation
-        + sideScale * edgeSignedWidthDerivative)
+      * (-asymmetry * outerSignedWidth * combinedModulation
+        + sideScale * combinedSignedWidthDerivative)
     let crownEnvelope = pow(sine, 0.65)
     let crownDerivative = 0.65 * pow(sine, -0.35) * sineDerivative
     let transverseEnvelope = max(0, 1 - signedWidth * signedWidth)

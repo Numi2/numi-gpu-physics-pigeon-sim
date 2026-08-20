@@ -571,6 +571,41 @@ inline float3 crowRemexEdgeMicrostructure(
     );
 }
 
+inline float2 crowSmoothstepTerms(float value,float lower,float upper) {
+    if(value<=lower){return float2(0.0f,0.0f);}
+    if(value>=upper){return float2(1.0f,0.0f);}
+    float normalized=(value-lower)/(upper-lower);
+    return float2(
+        normalized*normalized*(3.0f-2.0f*normalized),
+        6.0f*normalized*(1.0f-normalized)/(upper-lower)
+    );
+}
+
+inline float3 crowTerminalPrimaryBroadEdgeTerms(
+    float axial,
+    float signedWidth,
+    uint packedIdentity,
+    float4 remex) {
+    uint featherClass=packedIdentity&255u;
+    uint order=(packedIdentity>>16u)&255u;
+    uint count=max((packedIdentity>>24u)&255u,1u);
+    if(featherClass!=1u||order+1u!=count){return float3(1.0f,0.0f,0.0f);}
+    axial=clamp(axial,0.0f,1.0f);
+    float2 rise=crowSmoothstepTerms(axial,0.40f,0.50f);
+    float2 fall=crowSmoothstepTerms(axial,0.625f,0.725f);
+    float axialEnvelope=rise.x*(1.0f-fall.x);
+    float axialEnvelopeDerivative=rise.y*(1.0f-fall.x)-rise.x*fall.y;
+    float broadEdgeCoordinate=-signedWidth*remex.y;
+    float2 edge=crowSmoothstepTerms(broadEdgeCoordinate,0.0f,1.0f);
+    float edgeSignedWidthDerivative=-remex.y*edge.y;
+    constexpr float amplitude=0.12f;
+    return float3(
+        1.0f+amplitude*axialEnvelope*edge.x,
+        amplitude*axialEnvelopeDerivative*edge.x,
+        amplitude*axialEnvelope*edgeSignedWidthDerivative
+    );
+}
+
 inline float3 crowRectrixEdgeMicrostructure(
     float axial,
     float signedWidth,
@@ -647,7 +682,10 @@ inline float3 crowFeatherPosition(
             ?crowRemexEdgeMicrostructure(
                 axial,signedWidth,packedIdentity,remex
             ).x:1.0f);
-    float width=symmetricWidth*sideScale*edgeModulation;
+    float broadEdgeScale=crowTerminalPrimaryBroadEdgeTerms(
+        axial,signedWidth,packedIdentity,remex
+    ).x;
+    float width=symmetricWidth*sideScale*edgeModulation*broadEdgeScale;
     float camberSkew=featherClass==3u?rectrix.w:remex.w;
     float camberEnvelope=sin(M_PI_F*axial)
         *(1.0f+camberSkew*(2.0f*axial-1.0f));
@@ -702,14 +740,22 @@ inline float3 crowFeatherNormal(
             ?crowRemexEdgeMicrostructure(
                 sampledAxial,signedWidth,packedIdentity,remex
             ):float3(1.0f,0.0f,0.0f));
-    float width=symmetricWidth*sideScale*edgeMicrostructure.x;
+    float3 broadEdge=crowTerminalPrimaryBroadEdgeTerms(
+        sampledAxial,signedWidth,packedIdentity,remex
+    );
+    float combinedModulation=edgeMicrostructure.x*broadEdge.x;
+    float combinedAxialDerivative=edgeMicrostructure.y*broadEdge.x
+        +edgeMicrostructure.x*broadEdge.y;
+    float combinedSignedWidthDerivative=edgeMicrostructure.z*broadEdge.x
+        +edgeMicrostructure.x*broadEdge.z;
+    float width=symmetricWidth*sideScale*combinedModulation;
     float widthDerivative=sideScale*(
-        symmetricWidthDerivative*edgeMicrostructure.x
-        +symmetricWidth*edgeMicrostructure.y
+        symmetricWidthDerivative*combinedModulation
+        +symmetricWidth*combinedAxialDerivative
     );
     float widthSignedDerivative=symmetricWidth*(
-        -vaneAsymmetry*narrowSignedWidth*edgeMicrostructure.x
-        +sideScale*edgeMicrostructure.z
+        -vaneAsymmetry*narrowSignedWidth*combinedModulation
+        +sideScale*combinedSignedWidthDerivative
     );
     float crownEnvelope=pow(sine,0.65f);
     float crownDerivative=0.65f*pow(sine,-0.35f)*sineDerivative;

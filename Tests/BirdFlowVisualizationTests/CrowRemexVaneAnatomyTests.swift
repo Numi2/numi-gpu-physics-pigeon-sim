@@ -224,3 +224,100 @@ func remexEdgeStructureIsBoundedMirroredAndAnalyticallyDifferentiable() {
   }
   #expect(maximumModulation - minimumModulation > 0.025)
 }
+
+@Test("terminal primary broad-edge overlap is local, mirrored, and differentiable")
+func terminalPrimaryBroadEdgeOverlapIsLocalMirroredAndDifferentiable() {
+  let leftIdentity = UInt32(1) | (UInt32(1) << 8) | (UInt32(9) << 16)
+    | (UInt32(10) << 24)
+  let rightIdentity = UInt32(1) | (UInt32(2) << 8) | (UInt32(9) << 16)
+    | (UInt32(10) << 24)
+  let penultimateIdentity = UInt32(1) | (UInt32(1) << 8) | (UInt32(8) << 16)
+    | (UInt32(10) << 24)
+  let secondaryIdentity = UInt32(2) | (UInt32(1) << 8) | (UInt32(10) << 16)
+    | (UInt32(11) << 24)
+
+  #expect(CrowRemexVaneAnatomy.terminalPrimaryBroadEdgeMaximumScale == 1.12)
+  for axial: Float in [0, 0.39, 0.73, 1] {
+    let terms = CrowRemexVaneAnatomy.terminalPrimaryBroadEdgeTerms(
+      axial: axial,
+      signedWidth: -1,
+      packedIdentity: leftIdentity
+    )
+    #expect(terms.scale == 1)
+    #expect(terms.axialDerivative == 0)
+  }
+  #expect(
+    abs(
+      CrowRemexVaneAnatomy.terminalPrimaryBroadEdgeTerms(
+        axial: 0.56,
+        signedWidth: -1,
+        packedIdentity: leftIdentity
+      ).scale - 1.12
+    ) < 1e-6
+  )
+  #expect(
+    CrowRemexVaneAnatomy.terminalPrimaryBroadEdgeTerms(
+      axial: 0.56,
+      signedWidth: 1,
+      packedIdentity: leftIdentity
+    ).scale == 1
+  )
+  #expect(
+    CrowRemexVaneAnatomy.terminalPrimaryBroadEdgeTerms(
+      axial: 0.56,
+      signedWidth: -1,
+      packedIdentity: penultimateIdentity
+    ).scale == 1
+  )
+  #expect(
+    CrowRemexVaneAnatomy.terminalPrimaryBroadEdgeTerms(
+      axial: 0.56,
+      signedWidth: -1,
+      packedIdentity: secondaryIdentity
+    ).scale == 1
+  )
+
+  let epsilon: Float = 1e-4
+  for axial: Float in [0.44, 0.56, 0.68] {
+    for signedWidth: Float in [-0.8, -0.4] {
+      let left = CrowRemexVaneAnatomy.terminalPrimaryBroadEdgeTerms(
+        axial: axial,
+        signedWidth: signedWidth,
+        packedIdentity: leftIdentity
+      )
+      let mirrored = CrowRemexVaneAnatomy.terminalPrimaryBroadEdgeTerms(
+        axial: axial,
+        signedWidth: -signedWidth,
+        packedIdentity: rightIdentity
+      )
+      #expect(abs(left.scale - mirrored.scale) < 1e-7)
+      #expect(abs(left.axialDerivative - mirrored.axialDerivative) < 1e-7)
+      #expect(abs(left.signedWidthDerivative + mirrored.signedWidthDerivative) < 1e-7)
+
+      let axialFiniteDifference =
+        (CrowRemexVaneAnatomy.terminalPrimaryBroadEdgeTerms(
+          axial: axial + epsilon,
+          signedWidth: signedWidth,
+          packedIdentity: leftIdentity
+        ).scale
+          - CrowRemexVaneAnatomy.terminalPrimaryBroadEdgeTerms(
+            axial: axial - epsilon,
+            signedWidth: signedWidth,
+            packedIdentity: leftIdentity
+          ).scale) / (2 * epsilon)
+      let widthFiniteDifference =
+        (CrowRemexVaneAnatomy.terminalPrimaryBroadEdgeTerms(
+          axial: axial,
+          signedWidth: signedWidth + epsilon,
+          packedIdentity: leftIdentity
+        ).scale
+          - CrowRemexVaneAnatomy.terminalPrimaryBroadEdgeTerms(
+            axial: axial,
+            signedWidth: signedWidth - epsilon,
+            packedIdentity: leftIdentity
+          ).scale) / (2 * epsilon)
+      #expect(abs(axialFiniteDifference - left.axialDerivative) < 0.002)
+      #expect(abs(widthFiniteDifference - left.signedWidthDerivative) < 0.002)
+    }
+  }
+}

@@ -25,6 +25,7 @@ struct CrowRemexVaneProfile: Equatable {
 enum CrowRemexVaneAnatomy {
   static let posteriorPrimaryOverlapMaximumWidthScale: Float = 1.80
   static let posteriorSecondaryOverlapMaximumWidthScale: Float = 1.35
+  static let terminalPrimaryBroadEdgeMaximumScale: Float = 1.12
 
   /// Broadens only the two caudal-most primary vanes where their folded
   /// envelope meets the posterior secondary and live covert shell. Rachis
@@ -168,6 +169,40 @@ enum CrowRemexVaneAnatomy {
     return profile.edgeAmplitude * terms.envelope * terms.waveSignedWidthDerivative
   }
 
+  /// Adds a short, smooth overlap course along the broad edge of only the
+  /// terminal primary. The mirrored dorsal axis selects the corresponding
+  /// edge on each wing, while the rachis, opposite vane, and feather tip stay
+  /// fixed.
+  static func terminalPrimaryBroadEdgeTerms(
+    axial rawAxial: Float,
+    signedWidth: Float,
+    packedIdentity: UInt32
+  ) -> (scale: Float, axialDerivative: Float, signedWidthDerivative: Float) {
+    let featherClass = packedIdentity & 255
+    let order = (packedIdentity >> 16) & 255
+    let count = max((packedIdentity >> 24) & 255, 1)
+    guard featherClass == 1, order + 1 == count,
+      let profile = profile(packedIdentity: packedIdentity)
+    else { return (1, 0, 0) }
+
+    let axial = min(max(rawAxial, 0), 1)
+    let rise = smoothstepTerms(value: axial, lower: 0.40, upper: 0.50)
+    let fall = smoothstepTerms(value: axial, lower: 0.625, upper: 0.725)
+    let axialEnvelope = rise.value * (1 - fall.value)
+    let axialEnvelopeDerivative =
+      rise.derivative * (1 - fall.value) - rise.value * fall.derivative
+
+    let broadEdgeCoordinate = -signedWidth * profile.dorsalSignedWidth
+    let edge = smoothstepTerms(value: broadEdgeCoordinate, lower: 0, upper: 1)
+    let edgeSignedWidthDerivative = -profile.dorsalSignedWidth * edge.derivative
+    let amplitude = terminalPrimaryBroadEdgeMaximumScale - 1
+    return (
+      scale: 1 + amplitude * axialEnvelope * edge.value,
+      axialDerivative: amplitude * axialEnvelopeDerivative * edge.value,
+      signedWidthDerivative: amplitude * axialEnvelope * edgeSignedWidthDerivative
+    )
+  }
+
   static func camberEnvelope(
     axial rawAxial: Float,
     profile: CrowRemexVaneProfile
@@ -217,6 +252,21 @@ enum CrowRemexVaneAnatomy {
       wave: wave,
       waveAxialDerivative: waveAxialDerivative,
       waveSignedWidthDerivative: waveSignedWidthDerivative
+    )
+  }
+
+  private static func smoothstepTerms(
+    value: Float,
+    lower: Float,
+    upper: Float
+  ) -> (value: Float, derivative: Float) {
+    guard value > lower, value < upper else {
+      return (value >= upper ? 1 : 0, 0)
+    }
+    let normalized = (value - lower) / (upper - lower)
+    return (
+      value: normalized * normalized * (3 - 2 * normalized),
+      derivative: 6 * normalized * (1 - normalized) / (upper - lower)
     )
   }
 }
