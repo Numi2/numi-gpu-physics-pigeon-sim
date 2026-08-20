@@ -94,6 +94,11 @@ enum CrowRectrixVaneAnatomy {
         order: order,
         count: count
       )?.maximumWidthScale ?? 1)
+      * CrowRemexVaneAnatomy.posteriorPrimaryOverlapWidthScale(
+        featherClass: featherClass,
+        order: order,
+        count: count
+      )
   }
 
   static func camberMeters(
