@@ -321,3 +321,127 @@ func terminalPrimaryBroadEdgeOverlapIsLocalMirroredAndDifferentiable() {
     }
   }
 }
+
+@Test("terminal folded remex junction is local, mirrored, and differentiable")
+func terminalFoldedRemexJunctionIsLocalMirroredAndDifferentiable() {
+  func identity(featherClass: UInt32, side: UInt32, order: UInt32, count: UInt32)
+    -> UInt32
+  {
+    featherClass | (side << 8) | (order << 16) | (count << 24)
+  }
+
+  let leftPrimary = identity(featherClass: 1, side: 1, order: 9, count: 10)
+  let rightPrimary = identity(featherClass: 1, side: 2, order: 9, count: 10)
+  let leftSecondary = identity(featherClass: 2, side: 1, order: 10, count: 11)
+  let rightSecondary = identity(featherClass: 2, side: 2, order: 10, count: 11)
+  let penultimatePrimary = identity(featherClass: 1, side: 1, order: 8, count: 10)
+
+  #expect(CrowRemexVaneAnatomy.terminalPrimaryFoldedJunctionMaximumScale == 1.35)
+  #expect(CrowRemexVaneAnatomy.terminalSecondaryFoldedJunctionMaximumScale == 1.28)
+  for axial: Float in [0, 0.15, 0.47, 1] {
+    #expect(
+      CrowRemexVaneAnatomy.terminalFoldedRemexJunctionTerms(
+        axial: axial,
+        signedWidth: 1,
+        packedIdentity: leftPrimary
+      ).scale == 1
+    )
+  }
+  for axial: Float in [0, 0.37, 0.85, 1] {
+    #expect(
+      CrowRemexVaneAnatomy.terminalFoldedRemexJunctionTerms(
+        axial: axial,
+        signedWidth: -1,
+        packedIdentity: leftSecondary
+      ).scale == 1
+    )
+  }
+  #expect(
+    abs(
+      CrowRemexVaneAnatomy.terminalFoldedRemexJunctionTerms(
+        axial: 0.30,
+        signedWidth: 1,
+        packedIdentity: leftPrimary
+      ).scale - 1.35
+    ) < 1e-6
+  )
+  #expect(
+    CrowRemexVaneAnatomy.terminalFoldedRemexJunctionTerms(
+      axial: 0.30,
+      signedWidth: -1,
+      packedIdentity: leftPrimary
+    ).scale == 1
+  )
+  #expect(
+    abs(
+      CrowRemexVaneAnatomy.terminalFoldedRemexJunctionTerms(
+        axial: 0.60,
+        signedWidth: -1,
+        packedIdentity: leftSecondary
+      ).scale - 1.28
+    ) < 1e-6
+  )
+  #expect(
+    CrowRemexVaneAnatomy.terminalFoldedRemexJunctionTerms(
+      axial: 0.60,
+      signedWidth: 1,
+      packedIdentity: leftSecondary
+    ).scale == 1
+  )
+  #expect(
+    CrowRemexVaneAnatomy.terminalFoldedRemexJunctionTerms(
+      axial: 0.30,
+      signedWidth: 1,
+      packedIdentity: penultimatePrimary
+    ).scale == 1
+  )
+
+  let epsilon: Float = 1e-4
+  for (packedIdentity, mirroredIdentity, axialValues, signedWidth) in [
+    (leftPrimary, rightPrimary, [Float(0.20), 0.30, 0.42], Float(0.4)),
+    (leftSecondary, rightSecondary, [Float(0.44), 0.60, 0.80], Float(-0.4)),
+  ] {
+    for axial in axialValues {
+      let terms = CrowRemexVaneAnatomy.terminalFoldedRemexJunctionTerms(
+        axial: axial,
+        signedWidth: signedWidth,
+        packedIdentity: packedIdentity
+      )
+      let mirrored = CrowRemexVaneAnatomy.terminalFoldedRemexJunctionTerms(
+        axial: axial,
+        signedWidth: -signedWidth,
+        packedIdentity: mirroredIdentity
+      )
+      #expect(abs(terms.scale - mirrored.scale) < 1e-7)
+      #expect(abs(terms.axialDerivative - mirrored.axialDerivative) < 1e-7)
+      #expect(
+        abs(terms.signedWidthDerivative + mirrored.signedWidthDerivative) < 1e-7
+      )
+
+      let axialFiniteDifference =
+        (CrowRemexVaneAnatomy.terminalFoldedRemexJunctionTerms(
+          axial: axial + epsilon,
+          signedWidth: signedWidth,
+          packedIdentity: packedIdentity
+        ).scale
+          - CrowRemexVaneAnatomy.terminalFoldedRemexJunctionTerms(
+            axial: axial - epsilon,
+            signedWidth: signedWidth,
+            packedIdentity: packedIdentity
+          ).scale) / (2 * epsilon)
+      let widthFiniteDifference =
+        (CrowRemexVaneAnatomy.terminalFoldedRemexJunctionTerms(
+          axial: axial,
+          signedWidth: signedWidth + epsilon,
+          packedIdentity: packedIdentity
+        ).scale
+          - CrowRemexVaneAnatomy.terminalFoldedRemexJunctionTerms(
+            axial: axial,
+            signedWidth: signedWidth - epsilon,
+            packedIdentity: packedIdentity
+          ).scale) / (2 * epsilon)
+      #expect(abs(axialFiniteDifference - terms.axialDerivative) < 0.003)
+      #expect(abs(widthFiniteDifference - terms.signedWidthDerivative) < 0.003)
+    }
+  }
+}

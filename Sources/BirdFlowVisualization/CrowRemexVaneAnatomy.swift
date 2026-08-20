@@ -26,6 +26,8 @@ enum CrowRemexVaneAnatomy {
   static let posteriorPrimaryOverlapMaximumWidthScale: Float = 1.80
   static let posteriorSecondaryOverlapMaximumWidthScale: Float = 1.35
   static let terminalPrimaryBroadEdgeMaximumScale: Float = 1.12
+  static let terminalPrimaryFoldedJunctionMaximumScale: Float = 1.35
+  static let terminalSecondaryFoldedJunctionMaximumScale: Float = 1.28
 
   /// Broadens only the two caudal-most primary vanes where their folded
   /// envelope meets the posterior secondary and live covert shell. Rachis
@@ -196,6 +198,56 @@ enum CrowRemexVaneAnatomy {
     let edge = smoothstepTerms(value: broadEdgeCoordinate, lower: 0, upper: 1)
     let edgeSignedWidthDerivative = -profile.dorsalSignedWidth * edge.derivative
     let amplitude = terminalPrimaryBroadEdgeMaximumScale - 1
+    return (
+      scale: 1 + amplitude * axialEnvelope * edge.value,
+      axialDerivative: amplitude * axialEnvelopeDerivative * edge.value,
+      signedWidthDerivative: amplitude * axialEnvelope * edgeSignedWidthDerivative
+    )
+  }
+
+  /// Closes the crossing course where the terminal primary's inner vane meets
+  /// the terminal secondary's outer vane in the folded stack. Each wing uses
+  /// mirrored signed edges, and both feathers retain an unchanged rachis,
+  /// opposite edge, base, and tip.
+  static func terminalFoldedRemexJunctionTerms(
+    axial rawAxial: Float,
+    signedWidth: Float,
+    packedIdentity: UInt32
+  ) -> (scale: Float, axialDerivative: Float, signedWidthDerivative: Float) {
+    let featherClass = packedIdentity & 255
+    let order = (packedIdentity >> 16) & 255
+    let count = max((packedIdentity >> 24) & 255, 1)
+    guard (featherClass == 1 || featherClass == 2), order + 1 == count,
+      let profile = profile(packedIdentity: packedIdentity)
+    else { return (1, 0, 0) }
+
+    let axial = min(max(rawAxial, 0), 1)
+    let isPrimary = featherClass == 1
+    let rise = smoothstepTerms(
+      value: axial,
+      lower: isPrimary ? 0.16 : 0.38,
+      upper: isPrimary ? 0.25 : 0.50
+    )
+    let fall = smoothstepTerms(
+      value: axial,
+      lower: isPrimary ? 0.375 : 0.75,
+      upper: isPrimary ? 0.46 : 0.84
+    )
+    let axialEnvelope = rise.value * (1 - fall.value)
+    let axialEnvelopeDerivative =
+      rise.derivative * (1 - fall.value) - rise.value * fall.derivative
+
+    let edgeSign: Float = isPrimary ? 1 : -1
+    let junctionEdgeCoordinate =
+      edgeSign * signedWidth * profile.dorsalSignedWidth
+    let edge = smoothstepTerms(value: junctionEdgeCoordinate, lower: 0, upper: 1)
+    let edgeSignedWidthDerivative =
+      edgeSign * profile.dorsalSignedWidth * edge.derivative
+    let maximumScale =
+      isPrimary
+      ? terminalPrimaryFoldedJunctionMaximumScale
+      : terminalSecondaryFoldedJunctionMaximumScale
+    let amplitude = maximumScale - 1
     return (
       scale: 1 + amplitude * axialEnvelope * edge.value,
       axialDerivative: amplitude * axialEnvelopeDerivative * edge.value,

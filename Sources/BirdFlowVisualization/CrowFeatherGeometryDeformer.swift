@@ -476,7 +476,14 @@ final class CrowFeatherGeometryDeformer {
       signedWidth: signedWidth,
       packedIdentity: packedIdentity
     )
-    let width = baseWidth * sideScale * edgeModulation * broadEdge.scale
+    let foldedJunction = CrowRemexVaneAnatomy.terminalFoldedRemexJunctionTerms(
+      axial: axial,
+      signedWidth: signedWidth,
+      packedIdentity: packedIdentity
+    )
+    let width =
+      baseWidth * sideScale * edgeModulation * broadEdge.scale
+      * foldedJunction.scale
     let camberEnvelope =
       rectrix.map {
         CrowRectrixVaneAnatomy.camberEnvelope(axial: axial, profile: $0)
@@ -584,13 +591,25 @@ final class CrowFeatherGeometryDeformer {
       signedWidth: signedWidth,
       packedIdentity: packedIdentity
     )
-    let combinedModulation = edgeModulation * broadEdge.scale
+    let foldedJunction = CrowRemexVaneAnatomy.terminalFoldedRemexJunctionTerms(
+      axial: sampledAxial,
+      signedWidth: signedWidth,
+      packedIdentity: packedIdentity
+    )
+    let identityScale = broadEdge.scale * foldedJunction.scale
+    let identityAxialDerivative =
+      broadEdge.axialDerivative * foldedJunction.scale
+      + broadEdge.scale * foldedJunction.axialDerivative
+    let identitySignedWidthDerivative =
+      broadEdge.signedWidthDerivative * foldedJunction.scale
+      + broadEdge.scale * foldedJunction.signedWidthDerivative
+    let combinedModulation = edgeModulation * identityScale
     let combinedAxialDerivative =
-      edgeAxialDerivative * broadEdge.scale
-      + edgeModulation * broadEdge.axialDerivative
+      edgeAxialDerivative * identityScale
+      + edgeModulation * identityAxialDerivative
     let combinedSignedWidthDerivative =
-      edgeSignedWidthDerivative * broadEdge.scale
-      + edgeModulation * broadEdge.signedWidthDerivative
+      edgeSignedWidthDerivative * identityScale
+      + edgeModulation * identitySignedWidthDerivative
     let width = symmetricWidth * sideScale * combinedModulation
     let widthDerivative =
       sideScale
