@@ -195,6 +195,12 @@ struct CrowStandingFeatherUniforms {
   var referenceBodyCenter: SIMD4<Float>
 }
 
+struct CrowTakeoffFeatherBlendUniforms {
+  var blendAndCount: SIMD4<Float>
+  var currentBodyTranslation: SIMD4<Float>
+  var previousBodyTranslation: SIMD4<Float>
+}
+
 /// One canonical feather-template vertex. The same retained template is
 /// expanded for every feather. X is axial fraction, y is signed vane width,
 /// z classifies vane/rachis/barb geometry, and w is the ribbon-side coordinate.

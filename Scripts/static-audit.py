@@ -105,6 +105,7 @@ REQUIRED_VISUALIZATION_KERNELS = {
     "deriveFlowDiagnostics",
     "summarizeQCriterion",
     "advectTracerRibbons",
+    "blendCrowTakeoffFeatherRoots",
     "classifyQCriterionCubes",
     "scanTriangleBlocks",
     "scanBlockSums",

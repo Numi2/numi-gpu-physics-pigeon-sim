@@ -66,15 +66,18 @@ translucent wing history and wingtip ribbons remain explicitly kinematic.
 
 ### American crow simulation
 
-[![Native Metal American-crow simulation frame](Docs/Media/american-crow-hybrid-native-v1.png)](Docs/Media/american-crow-hybrid-native-v1.mp4)
+![Native Metal simulated American crow holding a quiet stance, unfolding into takeoff, and continuing through flight](Docs/Media/american-crow-standing-to-flight-v1.gif)
 
 The American-crow study combines the locked Deetjen dove deformation scaffold,
 published crow morphometric ranges, screened public CT anatomy, current feather
-appearance measurements, and species-specific anatomy constraints. Everything
-shown above is an executable frame from the native Metal renderer—there is no
+appearance measurements, and species-specific anatomy constraints. Every frame
+shown above comes from the native Metal renderer—there is no
 crow photograph or generated target image in this README. The linked
 [Metal wingbeat](Docs/Media/american-crow-hybrid-native-v1.mp4) executes the
-estimated geometry and material on Apple silicon. A locked
+estimated geometry and material on Apple silicon. The GIF retains simulated
+topology through a quiet standing hold, geometric wing deployment, leg
+retraction, liftoff, and sustained flapping; it contains no image dissolve or
+reference footage. A locked
 `2,157`-vertex, `3,968`-triangle estimated-hybrid surface now also passes the
 live Apple-Metal geometry and production TRT moving-boundary coupling gates.
 The complete [model and evidence boundary](Docs/AMERICAN_CROW_MODEL.md) keeps

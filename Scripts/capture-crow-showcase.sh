@@ -13,8 +13,9 @@ GENERATION_AUDIT="$ROOT/ValidationArtifacts/american-crow-hybrid-surface-generat
 PROFILE="$ROOT/ValidationInputs/american-crow-hybrid-visual-v1.json"
 STANDING_REFERENCE="$ROOT/ValidationInputs/american-crow-standing-reference-v1.json"
 
-if [[ "$PRESENTATION" != "wingbeat" && "$PRESENTATION" != "standing" ]]; then
-  echo "presentation must be wingbeat or standing" >&2
+if [[ "$PRESENTATION" != "wingbeat" && "$PRESENTATION" != "standing" \
+  && "$PRESENTATION" != "takeoff" ]]; then
+  echo "presentation must be wingbeat, standing, or takeoff" >&2
   exit 1
 fi
 

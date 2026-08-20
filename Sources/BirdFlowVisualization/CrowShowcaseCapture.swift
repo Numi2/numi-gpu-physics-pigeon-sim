@@ -9,6 +9,7 @@ import simd
 enum CrowShowcasePresentation: String {
   case wingbeat
   case standing
+  case takeoff
 }
 
 /// Native Metal presentation of an explicitly estimated American-crow model.
@@ -127,7 +128,7 @@ public enum CrowShowcaseCapture {
         )
       else {
         throw CaptureError.invalidArguments(
-          "--capture-crow-presentation requires wingbeat or standing"
+          "--capture-crow-presentation requires wingbeat, standing, or takeoff"
         )
       }
       presentation = parsedPresentation
@@ -153,7 +154,7 @@ public enum CrowShowcaseCapture {
     let profileData = try Data(contentsOf: arguments.crowProfileURL)
     let profile = try JSONDecoder().decode(CrowVisualProfile.self, from: profileData)
     try profile.validate()
-    if arguments.presentation == .standing {
+    if arguments.presentation == .standing || arguments.presentation == .takeoff {
       let standingData = try Data(contentsOf: arguments.standingReferenceURL)
       let standingReference = try JSONDecoder().decode(
         CrowStandingReference.self,
@@ -266,7 +267,9 @@ public enum CrowShowcaseCapture {
     var firstFramePNG: Data?
 
     for frameIndex in 0..<arguments.frameCount {
-      let isLoopProbe = frameIndex == arguments.frameCount - 1
+      let isLoopProbe =
+        arguments.presentation != .takeoff
+        && frameIndex == arguments.frameCount - 1
       let phase =
         isLoopProbe
         ? Float.zero
@@ -282,6 +285,14 @@ public enum CrowShowcaseCapture {
         camera.distance = 0.50 * (1 + 0.004 * cos(orbit))
         camera.yaw = 1.18 + 0.018 * sin(orbit)
         camera.pitch = 0.075 + 0.006 * cos(orbit)
+      } else if arguments.presentation == .takeoff {
+        let takeoff = CrowTakeoffSequence.sample(phase: phase)
+        let framing = takeoff.transitionProgress
+        camera.target = SIMD3<Float>(0.010, 0, -0.050)
+          + SIMD3<Float>(takeoff.bodyTranslation.x, 0, takeoff.bodyTranslation.z)
+        camera.distance = 0.56 + 0.54 * framing + 0.08 * takeoff.flightProgress
+        camera.yaw = 0.92 - 1.30 * framing
+        camera.pitch = 0.11 + 0.17 * framing
       } else {
         camera.target = SIMD3<Float>(-0.018, 0, 0.020)
         camera.distance = 1.08 + 0.18 * abs(cos(orbit))
@@ -323,9 +334,16 @@ public enum CrowShowcaseCapture {
           profile: profile,
           phase: phase,
           presentation: arguments.presentation,
-          sourceDescription: arguments.presentation == .standing
-            ? "Estimated grounded pose / qualitative public-video anatomy reference"
-            : "Estimated-hybrid solver topology / presentation-retargeted wing articulation"
+          sourceDescription: {
+            switch arguments.presentation {
+            case .standing:
+              return "Estimated grounded pose / qualitative public-video anatomy reference"
+            case .takeoff:
+              return "Retained simulated topology / geometric stand-to-flight transition"
+            case .wingbeat:
+              return "Estimated-hybrid solver topology / presentation-retargeted wing articulation"
+            }
+          }()
         )
       }
       let png: Data
@@ -710,6 +728,7 @@ private final class CrowShowcaseRenderer {
   private let toneMapPipeline: MTLRenderPipelineState
   private let depthState: MTLDepthStencilState
   private let sampleCount: Int
+  private let presentation: CrowShowcasePresentation
   private let featherRootDeformer: (any CrowFeatherRootDeforming)?
   private let featherGeometryDeformer: CrowFeatherGeometryDeformer?
   private let featherRenderOffset: SIMD3<Float>
@@ -726,6 +745,7 @@ private final class CrowShowcaseRenderer {
     realityAsset: BirdRealityAsset?,
     presentation: CrowShowcasePresentation
   ) throws {
+    self.presentation = presentation
     let createdBackend = try VisualizationBackend(device: device)
     backend = createdBackend
     let createdMeshBuilder = CrowMeshBuilder(
@@ -750,6 +770,12 @@ private final class CrowShowcaseRenderer {
           asset: realityAsset,
           referenceBodyCenter: createdMeshBuilder.referenceSurfaceBodyCenter
         )
+      case .takeoff:
+        featherRootDeformer = try CrowTakeoffFeatherRootDeformer(
+          backend: createdBackend,
+          asset: realityAsset,
+          referenceBodyCenter: createdMeshBuilder.referenceSurfaceBodyCenter
+        )
       }
     } else {
       featherRootDeformer = nil
@@ -759,7 +785,7 @@ private final class CrowShowcaseRenderer {
     // surface reaches its steep downstroke; the live topology-bound beauty
     // wing below owns that silhouette instead.
     featherGeometryDeformer =
-      try presentation == .standing
+      try presentation == .standing || presentation == .takeoff
       ? realityAsset.map {
         try CrowFeatherGeometryDeformer(
           backend: createdBackend,
@@ -881,7 +907,7 @@ private final class CrowShowcaseRenderer {
     let priorPhase = historyReset ? phase : (previousPhase ?? phase)
     let projectedPixelsPerMeter = CrowFeatherCoverageLOD.projectedPixelsPerMeter(
       viewportHeight: outputHeight,
-      cameraDistanceMeters: camera.distance
+      cameraDistanceMeters: presentation == .takeoff ? 0.72 : camera.distance
     )
     let vertices = meshBuilder.vertices(
       phase: phase,
@@ -1461,10 +1487,18 @@ private struct CrowMeshBuilder {
       transformedPoint(phase: phase, vertexIndex: $0)
     }
     var vertices: [ColoredVertex] = []
-    vertices.reserveCapacity(presentation == .wingbeat ? 240_000 : 100_000)
+    vertices.reserveCapacity(presentation == .standing ? 100_000 : 240_000)
     let bodyIndices = componentIndices(partIdentifier: 1)
     let bodyPoints = bodyIndices.map { states[$0] }
-    let bodyCenter = presentation == .standing ? SIMD3<Float>.zero : average(bodyPoints)
+    let bodyCenter: SIMD3<Float>
+    switch presentation {
+    case .standing:
+      bodyCenter = .zero
+    case .takeoff:
+      bodyCenter = CrowTakeoffSequence.sample(phase: phase).bodyTranslation
+    case .wingbeat:
+      bodyCenter = average(bodyPoints)
+    }
     let bodyBounds = bounds(bodyPoints)
     appendCrowAnatomy(
       bodyCenter: bodyCenter,
@@ -1473,7 +1507,7 @@ private struct CrowMeshBuilder {
       projectedPixelsPerMeter: projectedPixelsPerMeter,
       to: &vertices
     )
-    if presentation == .wingbeat {
+    if presentation == .wingbeat || presentation == .takeoff {
       appendMeasuredScaffold(
         states,
         // The complete live surface closes the wing from shoulder to trailing
@@ -1506,12 +1540,17 @@ private struct CrowMeshBuilder {
   }
 
   private func transformedPoint(phase: Float, vertexIndex: Int) -> SIMD3<Float> {
+    let takeoff =
+      presentation == .takeoff
+      ? CrowTakeoffSequence.sample(phase: phase)
+      : nil
+    let motionPhase = takeoff?.flightPhase ?? phase
     var point =
-      motion.point(phase: phase, vertexIndex: vertexIndex).position
+      motion.point(phase: motionPhase, vertexIndex: vertexIndex).position
       - referenceBodyCenter
     if surfaceIsEstimatedCrow {
       let partIdentifier = vertexPartIdentifiers[vertexIndex]
-      if presentation == .wingbeat,
+      if presentation == .wingbeat || presentation == .takeoff,
         partIdentifier == 2 || partIdentifier == 3,
         let wing = dataset.components.first(where: {
           $0.partIdentifier == partIdentifier
@@ -1544,8 +1583,22 @@ private struct CrowMeshBuilder {
           spanIndex: spanIndex,
           chordIndex: chordIndex,
           left: partIdentifier == 2,
-          phase: phase
+          phase: motionPhase
         )
+        if let takeoff {
+          let folded = CrowTakeoffSequence.foldedWingPoint(
+            spanIndex: spanIndex,
+            chordIndex: chordIndex,
+            left: partIdentifier == 2
+          )
+          point = CrowTakeoffSequence.mix(
+            folded,
+            point,
+            takeoff.transitionProgress
+          ) + takeoff.bodyTranslation
+        }
+      } else if let takeoff {
+        point += takeoff.bodyTranslation
       }
       return point
     }
@@ -1612,10 +1665,18 @@ private struct CrowMeshBuilder {
     projectedPixelsPerMeter: Float,
     to vertices: inout [ColoredVertex]
   ) {
-    let standingPose =
-      presentation == .standing
-      ? CrowStandingPose.sample(phase: phase, referenceBodyCenter: bodyCenter)
-      : nil
+    let standingPose: CrowStandingPoseSample?
+    switch presentation {
+    case .standing:
+      standingPose = CrowStandingPose.sample(
+        phase: phase,
+        referenceBodyCenter: bodyCenter
+      )
+    case .takeoff:
+      standingPose = CrowTakeoffSequence.standingPose(phase: phase)
+    case .wingbeat:
+      standingPose = nil
+    }
     let posedBodyCenter = standingPose?.bodyCenter ?? bodyCenter
     appendCrowBodyLoft(
       center: posedBodyCenter,
@@ -1724,10 +1785,13 @@ private struct CrowMeshBuilder {
       )
       appendStandingLegsAndFeet(
         standingPose,
+        takeoffSequence: presentation == .takeoff,
         projectedPixelsPerMeter: projectedPixelsPerMeter,
         to: &vertices
       )
-      appendStandingSupport(height: standingPose.supportHeight, to: &vertices)
+      if presentation == .standing {
+        appendStandingSupport(height: standingPose.supportHeight, to: &vertices)
+      }
     }
     _ = bodyBounds
   }
@@ -2770,6 +2834,7 @@ private struct CrowMeshBuilder {
 
   private func appendStandingLegsAndFeet(
     _ pose: CrowStandingPoseSample,
+    takeoffSequence: Bool = false,
     projectedPixelsPerMeter: Float,
     to vertices: inout [ColoredVertex]
   ) {
@@ -2814,20 +2879,24 @@ private struct CrowMeshBuilder {
           rootEnvelopeRatio: feather.rootEnvelopeRatio,
           axialStartFraction: feather.pennaceousStartFraction,
           surfaceFeatherClass: CrowFemoralPlumage.surfaceFeatherClass,
-          lodLengthMeters: simd_distance(feather.root, feather.tip),
+          lodLengthMeters: takeoffSequence
+            ? 0.035
+            : simd_distance(feather.root, feather.tip),
           projectedPixelsPerMeter: projectedPixelsPerMeter,
           to: &vertices
         )
-        appendTractFeatherMesostructure(
-          CrowFeatherMesostructure.segments(
-            for: feather,
-            projectedPixelsPerMeter: projectedPixelsPerMeter
-          ),
-          bodyCenter: .zero,
-          planeNormal: feather.planeNormal,
-          material: feather.materialVariation,
-          to: &vertices
-        )
+        if !takeoffSequence {
+          appendTractFeatherMesostructure(
+            CrowFeatherMesostructure.segments(
+              for: feather,
+              projectedPixelsPerMeter: projectedPixelsPerMeter
+            ),
+            bodyCenter: .zero,
+            planeNormal: feather.planeNormal,
+            material: feather.materialVariation,
+            to: &vertices
+          )
+        }
       }
       for feather in CrowLegPlumage.visibleSamples(
         hip: foot.hip,
@@ -2855,23 +2924,27 @@ private struct CrowMeshBuilder {
           edgeRippleCycles: feather.edgeRippleCycles,
           rootEnvelopeRatio: feather.rootEnvelopeRatio,
           surfaceFeatherClass: CrowLegPlumage.surfaceFeatherClass,
-          lodLengthMeters: max(
-            simd_distance(feather.root, feather.tip),
-            CrowLegPlumage.minimumLODTessellationLengthMeters
-          ),
+          lodLengthMeters: takeoffSequence
+            ? 0.035
+            : max(
+              simd_distance(feather.root, feather.tip),
+              CrowLegPlumage.minimumLODTessellationLengthMeters
+            ),
           projectedPixelsPerMeter: projectedPixelsPerMeter,
           to: &vertices
         )
-        appendTractFeatherMesostructure(
-          CrowCruralFeatherDetail.segments(
-            for: feather,
-            projectedPixelsPerMeter: projectedPixelsPerMeter
-          ),
-          bodyCenter: .zero,
-          planeNormal: feather.planeNormal,
-          material: feather.materialVariation,
-          to: &vertices
-        )
+        if !takeoffSequence {
+          appendTractFeatherMesostructure(
+            CrowCruralFeatherDetail.segments(
+              for: feather,
+              projectedPixelsPerMeter: projectedPixelsPerMeter
+            ),
+            bodyCenter: .zero,
+            planeNormal: feather.planeNormal,
+            material: feather.materialVariation,
+            to: &vertices
+          )
+        }
       }
       vertices.append(
         contentsOf: CrowTarsometatarsusAnatomy.vertices(

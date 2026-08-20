@@ -47,6 +47,12 @@ struct CrowStandingFeatherUniforms {
     float4 referenceBodyCenter;
 };
 
+struct CrowTakeoffFeatherBlendUniforms {
+    float4 blendAndCount;
+    float4 currentBodyTranslation;
+    float4 previousBodyTranslation;
+};
+
 struct CrowFeatherTemplateVertexGPU { float4 parameters; };
 
 struct CrowFeatherVertexGPU {
@@ -412,6 +418,41 @@ kernel void poseStandingCrowFeatherRoots(
     state.currentNormalAndPadding=float4(current.normal,0);
     state.previousNormalAndPadding=float4(previous.normal,0);
     state.identity=binding.identity;
+    output[featherIndex]=state;
+}
+
+kernel void blendCrowTakeoffFeatherRoots(
+    device const CrowFeatherRootStateGPU* standing [[buffer(0)]],
+    device CrowFeatherRootStateGPU* output [[buffer(1)]],
+    constant CrowTakeoffFeatherBlendUniforms& uniforms [[buffer(2)]],
+    uint featherIndex [[thread_position_in_grid]]) {
+    uint featherCount=uint(uniforms.blendAndCount.z);
+    if(featherIndex>=featherCount){return;}
+    CrowFeatherRootStateGPU grounded=standing[featherIndex];
+    float currentBlend=uniforms.blendAndCount.x;
+    float previousBlend=uniforms.blendAndCount.y;
+    float currentFoldedVisibility=1.0f-smoothstep(0.08f,0.62f,currentBlend);
+    float previousFoldedVisibility=1.0f-smoothstep(0.08f,0.62f,previousBlend);
+    CrowFeatherRootStateGPU state;
+    state.currentPositionAndLength=float4(
+        grounded.currentPositionAndLength.xyz+uniforms.currentBodyTranslation.xyz,
+        grounded.currentPositionAndLength.w*currentFoldedVisibility
+    );
+    state.previousPositionAndWidth=float4(
+        grounded.previousPositionAndWidth.xyz+uniforms.previousBodyTranslation.xyz,
+        grounded.previousPositionAndWidth.w*previousFoldedVisibility
+    );
+    state.currentDirectionAndRachis=float4(
+        grounded.currentDirectionAndRachis.xyz,
+        grounded.currentDirectionAndRachis.w*currentFoldedVisibility
+    );
+    state.previousDirectionAndCamber=float4(
+        grounded.previousDirectionAndCamber.xyz,
+        grounded.previousDirectionAndCamber.w*previousFoldedVisibility
+    );
+    state.currentNormalAndPadding=grounded.currentNormalAndPadding;
+    state.previousNormalAndPadding=grounded.previousNormalAndPadding;
+    state.identity=grounded.identity;
     output[featherIndex]=state;
 }
 
