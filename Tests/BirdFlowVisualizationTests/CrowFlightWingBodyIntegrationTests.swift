@@ -178,10 +178,51 @@ func flightCovertCoursesDenselyCoverEveryBodyToWingStation() {
   #expect(
     zip(distalExtensions, distalExtensions.dropFirst()).allSatisfy { $1 >= $0 }
   )
+  for chordIndex in [0, 3] {
+    let anteriorExtensions = (0..<CrowFlightWingBodyIntegration.spanCount).map {
+      CrowFlightWingBodyIntegration.covertDistalAnteriorChordExtension(
+        chordIndex: chordIndex,
+        spanIndex: $0
+      )
+    }
+    #expect(
+      anteriorExtensions[CrowFlightWingBodyIntegration.spanCount - 10] == 0
+    )
+    #expect(
+      abs(
+        anteriorExtensions[CrowFlightWingBodyIntegration.spanCount - 3]
+          - CrowFlightWingBodyIntegration.covertDistalAnteriorMaximumChordExtension
+      ) < 1e-6
+    )
+    #expect(
+      zip(anteriorExtensions, anteriorExtensions.dropFirst()).allSatisfy {
+        $1 >= $0
+      }
+    )
+  }
+  #expect(
+    CrowFlightWingBodyIntegration.covertDistalAnteriorMaximumChordExtension == 0.50
+  )
+  #expect(
+    (0..<CrowFlightWingBodyIntegration.spanCount).allSatisfy {
+      CrowFlightWingBodyIntegration.covertDistalAnteriorChordExtension(
+        chordIndex: 4,
+        spanIndex: $0
+      ) == 0
+    }
+  )
   let proximalExtensions = (0..<CrowFlightWingBodyIntegration.spanCount).map {
     CrowFlightWingBodyIntegration.covertProximalChordExtension(spanIndex: $0)
   }
-  #expect(abs(proximalExtensions.first! - 1.08) < 1e-6)
+  #expect(
+    abs(
+      proximalExtensions.first!
+        - CrowFlightWingBodyIntegration.covertProximalMaximumChordExtension
+    ) < 1e-6
+  )
+  #expect(
+    CrowFlightWingBodyIntegration.covertProximalMaximumChordExtension == 1.60
+  )
   #expect(abs(proximalExtensions[8]) < 1e-6)
   #expect(
     zip(proximalExtensions, proximalExtensions.dropFirst()).allSatisfy {
