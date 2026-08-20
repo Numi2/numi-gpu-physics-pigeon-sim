@@ -240,6 +240,7 @@ func flightCovertCoursesDenselyCoverEveryBodyToWingStation() {
       spanIndex: 5
     ) == 1
   )
+
   #expect(
     abs(
       CrowFlightWingBodyIntegration.covertAbdominalHandoffWidthScale(
@@ -266,6 +267,44 @@ func flightCovertCoursesDenselyCoverEveryBodyToWingStation() {
     CrowFlightWingBodyIntegration.covertAbdominalHandoffWidthScale(
       chordIndex: 6,
       spanIndex: 7
+    ) == 1
+  )
+  #expect(
+    CrowFlightWingBodyIntegration.covertDistalTrailingMaximumWidthScale
+      == 1.25
+  )
+  #expect(
+    CrowFlightWingBodyIntegration.covertDistalTrailingWidthScale(
+      chordIndex: 5,
+      spanIndex: 28
+    ) == 1
+  )
+  #expect(
+    CrowFlightWingBodyIntegration.covertDistalTrailingWidthScale(
+      chordIndex: 6,
+      spanIndex: 27
+    ) == 1
+  )
+  #expect(
+    abs(
+      CrowFlightWingBodyIntegration.covertDistalTrailingWidthScale(
+        chordIndex: 6,
+        spanIndex: 28
+      ) - 1.197_530_9
+    ) < 1e-6
+  )
+  #expect(
+    abs(
+      CrowFlightWingBodyIntegration.covertDistalTrailingWidthScale(
+        chordIndex: 6,
+        spanIndex: 29
+      ) - 1.197_530_9
+    ) < 1e-6
+  )
+  #expect(
+    CrowFlightWingBodyIntegration.covertDistalTrailingWidthScale(
+      chordIndex: 6,
+      spanIndex: 30
     ) == 1
   )
 
