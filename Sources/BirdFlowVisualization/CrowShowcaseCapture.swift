@@ -907,7 +907,9 @@ private final class CrowShowcaseRenderer {
     let priorPhase = historyReset ? phase : (previousPhase ?? phase)
     let projectedPixelsPerMeter = CrowFeatherCoverageLOD.projectedPixelsPerMeter(
       viewportHeight: outputHeight,
-      cameraDistanceMeters: presentation == .takeoff ? 0.72 : camera.distance
+      cameraDistanceMeters: presentation == .takeoff
+        ? CrowTakeoffSequence.topologyLODReferenceCameraDistanceMeters
+        : camera.distance
     )
     let vertices = meshBuilder.vertices(
       phase: phase,

@@ -17,6 +17,13 @@ func takeoffSequenceStagesAreOrderedAndBounded() {
   #expect(flight.flightProgress == 1)
   #expect(flight.bodyTranslation.z > transition.bodyTranslation.z)
   #expect(flight.flightPhase > transition.flightPhase)
+  #expect(
+    CrowFeatherCoverageLOD.projectedPixelsPerMeter(
+      viewportHeight: 720,
+      cameraDistanceMeters:
+        CrowTakeoffSequence.topologyLODReferenceCameraDistanceMeters
+    ) >= 1_400
+  )
 }
 
 @Test("takeoff feet begin planted and finish retracted beneath the body")

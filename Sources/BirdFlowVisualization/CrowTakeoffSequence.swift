@@ -6,6 +6,12 @@ import simd
 /// body, leg, wing-surface, and persistent-feather identities are retained from
 /// the quiet hold through wing deployment and the first sustained wingbeats.
 enum CrowTakeoffSequence {
+  /// Fixes takeoff tessellation above the full-density 720p feather threshold
+  /// while the cinematic camera changes distance. Geometry topology therefore
+  /// stays temporal-stable without dropping the held standing pose to coarse
+  /// leg and body tracts.
+  static let topologyLODReferenceCameraDistanceMeters: Float = 0.55
+
   struct Sample: Equatable {
     let standingPhase: Float
     let flightPhase: Float
