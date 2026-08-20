@@ -167,8 +167,13 @@ func flightCovertCoursesDenselyCoverEveryBodyToWingStation() {
     abs(distalExtensions[CrowFlightWingBodyIntegration.spanCount - 10]) < 1e-6
   )
   #expect(
-    abs(distalExtensions[CrowFlightWingBodyIntegration.spanCount - 3] - 0.36)
-      < 1e-6
+    abs(
+      distalExtensions[CrowFlightWingBodyIntegration.spanCount - 3]
+        - CrowFlightWingBodyIntegration.covertDistalMaximumChordExtension
+    ) < 1e-6
+  )
+  #expect(
+    CrowFlightWingBodyIntegration.covertDistalMaximumChordExtension == 0.70
   )
   #expect(
     zip(distalExtensions, distalExtensions.dropFirst()).allSatisfy { $1 >= $0 }

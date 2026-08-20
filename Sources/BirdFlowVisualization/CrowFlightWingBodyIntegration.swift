@@ -15,6 +15,7 @@ enum CrowFlightWingBodyIntegration {
   static let articulationSpanCount = 12
   static let covertCourseOverlapScale: Float = 1.24
   static let covertAttachmentMaximumOverlapScale: Float = 1.68
+  static let covertDistalMaximumChordExtension: Float = 0.70
   static let covertChordIndices = [0, 3, 4, 5, 6]
   static let axillaryUnderlayerRootChordIndex = 6
   static let axillaryUnderlayerTipChordIndex = 8
@@ -43,8 +44,10 @@ enum CrowFlightWingBodyIntegration {
         * (1 - smootherstep(progress))
   }
 
-  /// Distal trailing coverts project slightly farther across the marginal
-  /// scaffold boundary instead of becoming implausibly broad.
+  /// Distal trailing coverts project across the marginal scaffold boundary
+  /// and overlap the outer rectrix course in the high rear-quarter view. The
+  /// correction adds length along the sampled chord instead of making every
+  /// exposed vane implausibly broad.
   static func covertDistalChordExtension(spanIndex: Int) -> Float {
     let firstDistalStation = spanCount - 10
     let lastCovertStation = spanCount - 3
@@ -52,7 +55,7 @@ enum CrowFlightWingBodyIntegration {
       Float(spanIndex - firstDistalStation)
         / Float(lastCovertStation - firstDistalStation)
     )
-    return 0.36 * smootherstep(progress)
+    return covertDistalMaximumChordExtension * smootherstep(progress)
   }
 
   /// Proximal trailing coverts bridge the body-seated scaffold boundary, then
