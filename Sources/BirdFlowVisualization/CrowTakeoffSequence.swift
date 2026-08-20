@@ -22,6 +22,48 @@ enum CrowTakeoffSequence {
 
   static let standingHoldEnd: Float = 0.20
   static let transitionEnd: Float = 0.56
+  static let terminalPrimaryHandoffMaximumLateralOffsetMeters: Float = 0.004
+  static let terminalPrimaryHandoffStartProgress: Float = 0.004
+  static let terminalPrimaryHandoffPeakProgress: Float = 0.018
+  static let terminalPrimaryHandoffReleaseStartProgress: Float = 0.045
+  static let terminalPrimaryHandoffEndProgress: Float = 0.080
+
+  /// Briefly carries the terminal primary toward the deploying caudal covert
+  /// shell after the standing hold. The retained vane returns to its normal
+  /// live-flight course before free articulation; bilateral roots and feather
+  /// identity remain unchanged.
+  static func terminalPrimaryHandoffLateralOffsetMeters(
+    featherClass: UInt32,
+    order: Int,
+    count: Int,
+    transitionProgress: Float
+  ) -> Float {
+    guard featherClass == 1, count > 0, order == count - 1 else { return 0 }
+    let rise = smootherstep(
+      min(
+        max(
+          (transitionProgress - terminalPrimaryHandoffStartProgress)
+            / (terminalPrimaryHandoffPeakProgress
+              - terminalPrimaryHandoffStartProgress),
+          0
+        ),
+        1
+      )
+    )
+    let release = smootherstep(
+      min(
+        max(
+          (transitionProgress - terminalPrimaryHandoffReleaseStartProgress)
+            / (terminalPrimaryHandoffEndProgress
+              - terminalPrimaryHandoffReleaseStartProgress),
+          0
+        ),
+        1
+      )
+    )
+    return terminalPrimaryHandoffMaximumLateralOffsetMeters
+      * rise * (1 - release)
+  }
 
   static func sample(phase: Float) -> Sample {
     let bounded = min(max(phase, 0), 1)

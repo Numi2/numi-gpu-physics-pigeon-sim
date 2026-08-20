@@ -23,7 +23,7 @@ struct CrowRemexVaneProfile: Equatable {
 /// counterparts reverse only the signed dorsal axis, so the physical shape is
 /// mirrored rather than independently randomized.
 enum CrowRemexVaneAnatomy {
-  static let posteriorPrimaryOverlapMaximumWidthScale: Float = 1.60
+  static let posteriorPrimaryOverlapMaximumWidthScale: Float = 1.80
   static let posteriorSecondaryOverlapMaximumWidthScale: Float = 1.35
 
   /// Broadens only the two caudal-most primary vanes where their folded

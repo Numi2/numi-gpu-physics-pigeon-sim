@@ -421,6 +421,25 @@ kernel void poseStandingCrowFeatherRoots(
     output[featherIndex]=state;
 }
 
+// Mirrors CrowTakeoffSequence's identity and transition-progress contract so
+// the live Metal root deformation follows the tested CPU schedule exactly.
+inline float crowSmootherstep01(float value) {
+    value=clamp(value,0.0f,1.0f);
+    return value*value*value*(value*(value*6.0f-15.0f)+10.0f);
+}
+
+inline float crowTerminalPrimaryHandoffLateralOffsetMeters(
+    uint packedIdentity,
+    float transitionProgress) {
+    uint featherClass=packedIdentity&255u;
+    uint order=(packedIdentity>>16u)&255u;
+    uint count=max((packedIdentity>>24u)&255u,1u);
+    if(featherClass!=1u||order+1u!=count){return 0.0f;}
+    float rise=crowSmootherstep01((transitionProgress-0.004f)/(0.018f-0.004f));
+    float release=crowSmootherstep01((transitionProgress-0.045f)/(0.080f-0.045f));
+    return 0.004f*rise*(1.0f-release);
+}
+
 kernel void blendCrowTakeoffFeatherRoots(
     device const CrowFeatherRootStateGPU* standing [[buffer(0)]],
     device CrowFeatherRootStateGPU* output [[buffer(1)]],
@@ -433,6 +452,24 @@ kernel void blendCrowTakeoffFeatherRoots(
     float previousBlend=uniforms.blendAndCount.y;
     float currentFoldedVisibility=1.0f-smoothstep(0.08f,0.62f,currentBlend);
     float previousFoldedVisibility=1.0f-smoothstep(0.08f,0.62f,previousBlend);
+    uint packedIdentity=grounded.identity.w;
+    uint sideCode=(packedIdentity>>8u)&255u;
+    float side=sideCode==1u?1.0f:(sideCode==2u?-1.0f:0.0f);
+    float inverseLength=1.0f/max(grounded.currentPositionAndLength.w,1.0e-6f);
+    float3 currentDirection=safeNormalizeCrow(
+        grounded.currentDirectionAndRachis.xyz
+            +float3(0,side*inverseLength
+                *crowTerminalPrimaryHandoffLateralOffsetMeters(
+                    packedIdentity,currentBlend),0),
+        grounded.currentDirectionAndRachis.xyz
+    );
+    float3 previousDirection=safeNormalizeCrow(
+        grounded.previousDirectionAndCamber.xyz
+            +float3(0,side*inverseLength
+                *crowTerminalPrimaryHandoffLateralOffsetMeters(
+                    packedIdentity,previousBlend),0),
+        grounded.previousDirectionAndCamber.xyz
+    );
     CrowFeatherRootStateGPU state;
     state.currentPositionAndLength=float4(
         grounded.currentPositionAndLength.xyz+uniforms.currentBodyTranslation.xyz,
@@ -443,11 +480,11 @@ kernel void blendCrowTakeoffFeatherRoots(
         grounded.previousPositionAndWidth.w*previousFoldedVisibility
     );
     state.currentDirectionAndRachis=float4(
-        grounded.currentDirectionAndRachis.xyz,
+        currentDirection,
         grounded.currentDirectionAndRachis.w*currentFoldedVisibility
     );
     state.previousDirectionAndCamber=float4(
-        grounded.previousDirectionAndCamber.xyz,
+        previousDirection,
         grounded.previousDirectionAndCamber.w*previousFoldedVisibility
     );
     state.currentNormalAndPadding=grounded.currentNormalAndPadding;

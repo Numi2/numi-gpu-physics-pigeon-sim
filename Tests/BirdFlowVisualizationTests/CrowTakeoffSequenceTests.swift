@@ -63,3 +63,33 @@ func takeoffFoldedWingTopologyIsBilateral() {
     #expect(abs(left.z - right.z) < 1e-7)
   }
 }
+
+@Test("terminal primary handoff is bounded to initial wing deployment")
+func terminalPrimaryHandoffIsBoundedToInitialWingDeployment() {
+  let offset = CrowTakeoffSequence
+    .terminalPrimaryHandoffLateralOffsetMeters(
+      featherClass:order:count:transitionProgress:
+    )
+  #expect(offset(1, 9, 10, 0) == 0)
+  #expect(
+    abs(
+      offset(1, 9, 10, 0.025)
+        - CrowTakeoffSequence.terminalPrimaryHandoffMaximumLateralOffsetMeters
+    ) < 1e-7
+  )
+  #expect(offset(1, 9, 10, 0.10) == 0)
+  #expect(offset(1, 8, 10, 0.025) == 0)
+  #expect(offset(2, 10, 11, 0.025) == 0)
+  #expect(
+    CrowTakeoffSequence.terminalPrimaryHandoffStartProgress
+      < CrowTakeoffSequence.terminalPrimaryHandoffPeakProgress
+  )
+  #expect(
+    CrowTakeoffSequence.terminalPrimaryHandoffPeakProgress
+      < CrowTakeoffSequence.terminalPrimaryHandoffReleaseStartProgress
+  )
+  #expect(
+    CrowTakeoffSequence.terminalPrimaryHandoffReleaseStartProgress
+      < CrowTakeoffSequence.terminalPrimaryHandoffEndProgress
+  )
+}
