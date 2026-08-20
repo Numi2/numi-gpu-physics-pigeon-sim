@@ -726,3 +726,39 @@ func flightCovertNormalsRetainAnatomicalSideThroughReversal() {
     #expect(simd_dot(normal, expected) > 0.999)
   }
 }
+
+@Test("dorsal folded-wing handoff is bilateral and collapses before free flight")
+func dorsalFoldedWingHandoffIsBilateralAndCollapsesBeforeFreeFlight() {
+  let spans = CrowFlightWingBodyIntegration
+    .dorsalFoldedWingHandoffSpanIndices
+  #expect(spans == [28, 29])
+  #expect(spans.allSatisfy {
+    (0..<CrowFlightWingBodyIntegration.spanCount).contains($0)
+  })
+  #expect(
+    (0..<CrowFlightWingBodyIntegration.chordCount).contains(
+      CrowFlightWingBodyIntegration.dorsalFoldedWingHandoffChordIndex
+    )
+  )
+  let bodyRadials = [true, false].map {
+    CrowFlightWingBodyIntegration
+      .dorsalFoldedWingHandoffBodyRadialIndex(left: $0)
+  }
+  #expect(bodyRadials == [19, 29])
+  #expect(bodyRadials.allSatisfy {
+    (0..<CrowBodyContourShingles.radialCount).contains($0)
+  })
+  #expect(
+    (0..<CrowBodyContourShingles.axialCount).contains(
+      CrowFlightWingBodyIntegration.dorsalFoldedWingHandoffBodyAxialIndex
+    )
+  )
+
+  let weight = CrowFlightWingBodyIntegration
+    .dorsalFoldedWingHandoffWeight(presentationPhase:)
+  #expect(abs(weight(0) - 1) < 1e-7)
+  #expect(abs(weight(0.28) - 1) < 1e-7)
+  #expect(abs(weight(0.35) - 0.5) < 1e-6)
+  #expect(abs(weight(0.42)) < 1e-7)
+  #expect(abs(weight(1)) < 1e-7)
+}

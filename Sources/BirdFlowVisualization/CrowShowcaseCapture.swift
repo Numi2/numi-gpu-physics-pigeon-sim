@@ -3223,6 +3223,85 @@ private struct CrowMeshBuilder {
       left: left,
       to: &vertices
     )
+    if presentation == .takeoff {
+      appendDorsalFoldedWingHandoffUnderlayer(
+        states: states,
+        bodyCenter: bodyCenter,
+        left: left,
+        phase: phase,
+        to: &vertices
+      )
+    }
+  }
+
+  /// A topology-stable hidden bridge occupies the small folded gap between
+  /// the live trailing covert pair and its owning dorsal contour shingle. It
+  /// collapses onto the wing as deployment begins, retaining a fixed vertex
+  /// count without spanning the articulated free wing.
+  private func appendDorsalFoldedWingHandoffUnderlayer(
+    states: [SIMD3<Float>],
+    bodyCenter: SIMD3<Float>,
+    left: Bool,
+    phase: Float,
+    to vertices: inout [ColoredVertex]
+  ) {
+    let partIdentifier: UInt8 = left ? 2 : 3
+    guard
+      let wing = dataset.components.first(where: {
+        $0.partIdentifier == partIdentifier
+      }), wing.vertexCount
+        == CrowFlightWingBodyIntegration.chordCount
+          * CrowFlightWingBodyIntegration.spanCount
+    else { return }
+    let radialIndex = CrowFlightWingBodyIntegration
+      .dorsalFoldedWingHandoffBodyRadialIndex(left: left)
+    let shingleIndex = radialIndex * CrowBodyContourShingles.axialCount
+      + CrowFlightWingBodyIntegration.dorsalFoldedWingHandoffBodyAxialIndex
+    let shingles = CrowBodyContourShingles.samples(standingPhase: phase)
+    guard shingles.indices.contains(shingleIndex) else { return }
+    let shingle = shingles[shingleIndex]
+    let spans = CrowFlightWingBodyIntegration
+      .dorsalFoldedWingHandoffSpanIndices
+    let chord = CrowFlightWingBodyIntegration
+      .dorsalFoldedWingHandoffChordIndex
+    let wingFirst = states[
+      wing.vertexOffset
+        + spans[0] * CrowFlightWingBodyIntegration.chordCount + chord
+    ]
+    let wingSecond = states[
+      wing.vertexOffset
+        + spans[1] * CrowFlightWingBodyIntegration.chordCount + chord
+    ]
+    let foldedWeight = CrowFlightWingBodyIntegration
+      .dorsalFoldedWingHandoffWeight(presentationPhase: phase)
+    let bodyFirstTarget = bodyCenter
+      + CrowBodyContourShingles.centerlinePoint(
+        for: shingle,
+        at: shingle.pennaceousStartFraction
+      )
+    let bodySecondTarget = bodyCenter + shingle.tipOffset
+    let bodyFirst = wingFirst + foldedWeight * (bodyFirstTarget - wingFirst)
+    let bodySecond = wingSecond + foldedWeight * (bodySecondTarget - wingSecond)
+    let color = SIMD4<Float>(0.0058, 0.0088, 0.016, 0.145)
+    let bodyParameters = SIMD4<Float>(0, 0, 0, 5)
+    let wingParameters = SIMD4<Float>(1, 0, 0, 4)
+    for (position, parameters) in [
+      (bodyFirst, bodyParameters),
+      (wingFirst, wingParameters),
+      (wingSecond, wingParameters),
+      (bodyFirst, bodyParameters),
+      (wingSecond, wingParameters),
+      (bodySecond, bodyParameters),
+    ] {
+      vertices.append(
+        vertex(
+          position,
+          normal: shingle.planeNormal,
+          color: color,
+          parameters: parameters
+        )
+      )
+    }
   }
 
   /// A continuous axillary covert bed sits beneath the exposed dorsal vanes.

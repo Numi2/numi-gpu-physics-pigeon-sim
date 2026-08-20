@@ -33,6 +33,13 @@ enum CrowFlightWingBodyIntegration {
   static let covertChordIndices = [0, 3, 4, 5, 6]
   static let axillaryUnderlayerRootChordIndex = 6
   static let axillaryUnderlayerTipChordIndex = 8
+  static let dorsalFoldedWingHandoffChordIndex = 6
+  static let dorsalFoldedWingHandoffSpanIndices = [28, 29]
+  static let dorsalFoldedWingHandoffBodyAxialIndex = 61
+  static let dorsalFoldedWingHandoffLeftBodyRadialIndex = 19
+  static let dorsalFoldedWingHandoffRightBodyRadialIndex = 29
+  static let dorsalFoldedWingHandoffReleaseStartPhase: Float = 0.28
+  static let dorsalFoldedWingHandoffReleaseEndPhase: Float = 0.42
 
   /// Nine body-seated stations bound the continuous axillary covert bed. Its
   /// eight topology intervals close projection slots without widening or
@@ -46,6 +53,26 @@ enum CrowFlightWingBodyIntegration {
   /// avoid hiding sparse-plumage slots with implausibly broad vanes.
   static var covertSpanIndices: [Int] {
     Array(0...(spanCount - 3))
+  }
+
+  static func dorsalFoldedWingHandoffBodyRadialIndex(left: Bool) -> Int {
+    left
+      ? dorsalFoldedWingHandoffLeftBodyRadialIndex
+      : dorsalFoldedWingHandoffRightBodyRadialIndex
+  }
+
+  /// Keeps the compact dorsal handoff seated through early deployment, then
+  /// collapses it smoothly onto its two live wing stations before the wing is
+  /// freely articulated. The fixed topology remains present at zero area.
+  static func dorsalFoldedWingHandoffWeight(
+    presentationPhase: Float
+  ) -> Float {
+    let release = clamp(
+      (presentationPhase - dorsalFoldedWingHandoffReleaseStartPhase)
+        / (dorsalFoldedWingHandoffReleaseEndPhase
+          - dorsalFoldedWingHandoffReleaseStartPhase)
+    )
+    return 1 - release * release * (3 - 2 * release)
   }
 
   /// Axillary coverts overlap most strongly where the wing is body-seated,
