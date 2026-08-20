@@ -80,7 +80,15 @@ func crowBodyFeatherTractsOverlapNeckAndCoverWingRoots() {
     }
   )
   #expect(scapularLengths.min()! > 0.026)
-  #expect(scapularLengths.max()! < 0.049)
+  #expect(scapularLengths.max()! < 0.053)
+  #expect(CrowBodyFeatherTracts.scapularOuterLengthAdditionMeters(course: -1) == 0)
+  #expect(CrowBodyFeatherTracts.scapularOuterLengthAdditionMeters(course: 0) == 0)
+  #expect(
+    abs(CrowBodyFeatherTracts.scapularOuterLengthAdditionMeters(course: 0.5) - 0.001)
+      < 1e-7
+  )
+  #expect(CrowBodyFeatherTracts.scapularOuterLengthAdditionMeters(course: 1) == 0.004)
+  #expect(CrowBodyFeatherTracts.scapularOuterLengthAdditionMeters(course: 2) == 0.004)
   #expect(
     scapular.allSatisfy {
       2 * $0.maximumWidthMeters

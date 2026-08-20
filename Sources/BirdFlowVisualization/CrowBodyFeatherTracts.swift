@@ -604,7 +604,8 @@ enum CrowBodyFeatherTracts {
             0.048 - 0.025 * course - 0.009 * axial + 0.0008 * shapeIdentity
           )
           let length =
-            (0.028 + 0.013 * axial + 0.004 * course)
+            (0.028 + 0.013 * axial + 0.004 * course
+              + scapularOuterLengthAdditionMeters(course: course))
             * (1 + 0.050 * shapeIdentity + 0.020 * courseIdentity)
           let tip =
             root
@@ -669,6 +670,14 @@ enum CrowBodyFeatherTracts {
   /// terminal vanes four millimetres toward the covert field.
   static func mantlePosteriorLengthAdditionMeters(axial: Float) -> Float {
     let bounded = min(max(axial, 0), 1)
+    return 0.004 * bounded * bounded
+  }
+
+  /// Additional body-to-wing shingling along the outer scapular course. The
+  /// quadratic preserves medial proportions and carries the lateral tips four
+  /// millimetres beneath the folded covert stack.
+  static func scapularOuterLengthAdditionMeters(course: Float) -> Float {
+    let bounded = min(max(course, 0), 1)
     return 0.004 * bounded * bounded
   }
 
