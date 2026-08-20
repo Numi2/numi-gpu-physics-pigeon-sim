@@ -43,8 +43,8 @@ enum CrowBodyFeatherTracts {
   static let cervicalMaximumAngleRadians: Float = 1.54
   static let mantleRowCount = 20
   static let mantleColumnCount = 24
-  static let humeralRowCount = 3
-  static let humeralColumnCount = 24
+  static let humeralRowCount = 5
+  static let humeralColumnCount = 30
   static let scapularRowCount = 22
   static let scapularColumnCount = 24
 

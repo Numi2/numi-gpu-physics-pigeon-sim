@@ -24,7 +24,7 @@ func crowBodyFeatherTractsOverlapNeckAndCoverWingRoots() {
   let scapular = samples.filter { $0.region == .scapular }
   #expect(cervical.count == 480)
   #expect(mantle.count == 960)
-  #expect(humeral.count == 144)
+  #expect(humeral.count == 300)
   #expect(scapular.count == 1_056)
   #expect(Set(cervical.map(\.surfaceFeatherClass)) == Set([5, 6]))
   #expect(mantle.allSatisfy { $0.surfaceFeatherClass == 5 })
@@ -248,16 +248,27 @@ func crowBodyFeatherTractsOverlapNeckAndCoverWingRoots() {
     }
   }
 
-  for region in [CrowBodyFeatherTractRegion.mantle, .scapular] {
+  for region in [CrowBodyFeatherTractRegion.mantle, .humeral, .scapular] {
     let regionSamples = samples.filter { $0.region == region }
-    let rowCount =
-      region == .mantle
-      ? CrowBodyFeatherTracts.mantleRowCount
-      : CrowBodyFeatherTracts.scapularRowCount
-    let columnCount =
-      region == .mantle
-      ? CrowBodyFeatherTracts.mantleColumnCount
-      : CrowBodyFeatherTracts.scapularColumnCount
+    let rowCount: Int
+    let columnCount: Int
+    let axialSpan: Float
+    switch region {
+    case .mantle:
+      rowCount = CrowBodyFeatherTracts.mantleRowCount
+      columnCount = CrowBodyFeatherTracts.mantleColumnCount
+      axialSpan = 0.154
+    case .humeral:
+      rowCount = CrowBodyFeatherTracts.humeralRowCount
+      columnCount = CrowBodyFeatherTracts.humeralColumnCount
+      axialSpan = 0.160
+    case .scapular:
+      rowCount = CrowBodyFeatherTracts.scapularRowCount
+      columnCount = CrowBodyFeatherTracts.scapularColumnCount
+      axialSpan = 0.164
+    case .cervical:
+      preconditionFailure("cervical tract has a separate fixed-boundary phase contract")
+    }
     for side: Float in [-1, 1] {
       let phases = (0..<rowCount).map {
         CrowBodyFeatherTracts.tractStaggerFraction(
@@ -268,8 +279,12 @@ func crowBodyFeatherTractsOverlapNeckAndCoverWingRoots() {
       }
       let quantizedPhases = Set(phases.map { Int(($0 * 1_000).rounded()) })
       #expect(quantizedPhases.count == rowCount)
-      #expect(phases.min()! < 0.12)
-      #expect(phases.max()! > 0.88)
+      if region == .humeral {
+        #expect(phases.max()! - phases.min()! > 0.60)
+      } else {
+        #expect(phases.min()! < 0.12)
+        #expect(phases.max()! > 0.88)
+      }
       for pair in zip(phases, phases.dropFirst()) {
         let linearDistance = abs(pair.0 - pair.1)
         let circularDistance = min(linearDistance, 1 - linearDistance)
@@ -286,7 +301,6 @@ func crowBodyFeatherTractsOverlapNeckAndCoverWingRoots() {
             simd_distance(pair.0.rootOffset, pair.1.rootOffset)
               < pair.0.maximumWidthMeters + pair.1.maximumWidthMeters
           )
-          let axialSpan: Float = region == .mantle ? 0.154 : 0.164
           let axialSpacing = axialSpan / Float(columnCount - 1)
           #expect(
             abs(pair.0.rootOffset.x - pair.1.rootOffset.x)
@@ -319,15 +333,15 @@ func crowBodyFeatherTractsOverlapNeckAndCoverWingRoots() {
   #expect(low.filter { $0.region == .mantle }.count == 240)
   #expect(medium.filter { $0.region == .mantle }.count == 480)
   #expect(full.filter { $0.region == .mantle }.count == 960)
-  #expect(low.filter { $0.region == .humeral }.count == 48)
-  #expect(medium.filter { $0.region == .humeral }.count == 72)
-  #expect(full.filter { $0.region == .humeral }.count == 144)
+  #expect(low.filter { $0.region == .humeral }.count == 90)
+  #expect(medium.filter { $0.region == .humeral }.count == 150)
+  #expect(full.filter { $0.region == .humeral }.count == 300)
   #expect(low.filter { $0.region == .scapular }.count == 264)
   #expect(medium.filter { $0.region == .scapular }.count == 528)
   #expect(full.filter { $0.region == .scapular }.count == 1_056)
-  #expect(low.count == 792)
-  #expect(medium.count == 1_320)
-  #expect(full.count == 2_640)
+  #expect(low.count == 834)
+  #expect(medium.count == 1_398)
+  #expect(full.count == 2_796)
 }
 
 @Test("quiet head motion bends the cervical tract without moving the mantle")
