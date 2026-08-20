@@ -18,6 +18,8 @@ enum CrowFlightWingBodyIntegration {
   static let covertDistalMaximumChordExtension: Float = 0.70
   static let covertDistalAnteriorMaximumChordExtension: Float = 0.50
   static let covertProximalMaximumChordExtension: Float = 1.60
+  static let covertCaudalSecondaryHandoffMaximumWidthScale: Float = 1.40
+  static let covertCaudalSecondaryHandoffMaximumVaneAsymmetry: Float = 0.45
   static let covertAbdominalHandoffMaximumWidthScale: Float = 1.35
   static let covertDistalTrailingMaximumWidthScale: Float = 1.25
   static let covertAbdominalHandoffMaximumNormalLiftMeters: Float = 0.001
@@ -78,6 +80,37 @@ enum CrowFlightWingBodyIntegration {
         / Float(lastCovertStation - firstDistalStation)
     )
     return covertDistalAnteriorMaximumChordExtension * smootherstep(progress)
+  }
+
+  /// Broadens the penultimate live covert course across the caudal secondary
+  /// handoff while the retained folded remex is still visible. The compact
+  /// field fades out before free distal articulation and leaves other courses
+  /// untouched.
+  static func covertCaudalSecondaryHandoffWidthScale(
+    chordIndex: Int,
+    spanIndex: Int
+  ) -> Float {
+    return 1
+      + (covertCaudalSecondaryHandoffMaximumWidthScale - 1)
+        * covertCaudalSecondaryHandoffWeight(
+          chordIndex: chordIndex,
+          spanIndex: spanIndex
+        )
+  }
+
+  /// Directs the added vane area toward the retained secondary instead of
+  /// widening both exposed edges equally. Bilateral signs mirror the shape.
+  static func covertCaudalSecondaryHandoffVaneAsymmetry(
+    chordIndex: Int,
+    spanIndex: Int,
+    left: Bool
+  ) -> Float {
+    return (left ? 1 : -1)
+      * covertCaudalSecondaryHandoffMaximumVaneAsymmetry
+      * covertCaudalSecondaryHandoffWeight(
+        chordIndex: chordIndex,
+        spanIndex: spanIndex
+      )
   }
 
   /// Proximal trailing coverts bridge the body-seated scaffold boundary, then
@@ -265,6 +298,16 @@ enum CrowFlightWingBodyIntegration {
 
   private static func smootherstep(_ value: Float) -> Float {
     value * value * value * (value * (value * 6 - 15) + 10)
+  }
+
+  private static func covertCaudalSecondaryHandoffWeight(
+    chordIndex: Int,
+    spanIndex: Int
+  ) -> Float {
+    guard chordIndex == 5 else { return 0 }
+    let distance = abs(Float(spanIndex) - 21.5)
+    guard distance < 4.5 else { return 0 }
+    return smootherstep(1 - distance / 4.5)
   }
 
   private static func clamp(_ value: Float) -> Float {

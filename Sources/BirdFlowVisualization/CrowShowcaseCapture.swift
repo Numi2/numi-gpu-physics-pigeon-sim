@@ -3363,6 +3363,11 @@ private struct CrowMeshBuilder {
             chordIndex: chord,
             spanIndex: span
           )
+        let caudalSecondaryHandoffWidthScale =
+          CrowFlightWingBodyIntegration.covertCaudalSecondaryHandoffWidthScale(
+            chordIndex: chord,
+            spanIndex: span
+          )
         let widthScale = CrowFlightWingBodyIntegration.covertWidthScale(
           chordIndex: chord,
           spanIndex: span
@@ -3372,7 +3377,7 @@ private struct CrowMeshBuilder {
         ) * CrowFlightWingBodyIntegration.covertDistalTrailingWidthScale(
           chordIndex: chord,
           spanIndex: span
-        )
+        ) * caudalSecondaryHandoffWidthScale
         let camberScale = CrowFlightWingBodyIntegration.covertCamberScale(
           chordIndex: chord,
           spanIndex: span
@@ -3423,6 +3428,13 @@ private struct CrowMeshBuilder {
         let covertOverlap =
           CrowFlightWingBodyIntegration.covertCourseOverlapScale
           * attachmentOverlap
+        let caudalSecondaryHandoffVaneAsymmetry =
+          CrowFlightWingBodyIntegration
+          .covertCaudalSecondaryHandoffVaneAsymmetry(
+            chordIndex: chord,
+            spanIndex: span,
+            left: left
+          )
         appendFeatherBlade(
           root: root + dorsalNormal * (0.0015 + abdominalHandoffNormalLift),
           tip: surfaceTip + dorsalNormal * (0.0025 + abdominalHandoffNormalLift),
@@ -3442,6 +3454,7 @@ private struct CrowMeshBuilder {
           sections: 7,
           camber: camberScale * 0.035 * simd_length(chordVector),
           transverseCamberRatio: 0.16,
+          vaneAsymmetry: caudalSecondaryHandoffVaneAsymmetry,
           edgeRippleAmplitude: 0.008 + 0.010 * (0.5 + 0.5 * edgeVariation),
           edgeRipplePhase: Float.pi * (edgeVariation + 1),
           edgeRippleCycles: 1.25 + 0.55 * (0.5 + 0.5 * edgeVariation),

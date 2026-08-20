@@ -354,6 +354,65 @@ func flightCovertCoursesDenselyCoverEveryBodyToWingStation() {
     ) == 1
   )
 
+  #expect(
+    CrowFlightWingBodyIntegration.covertCaudalSecondaryHandoffMaximumWidthScale
+      == 1.40
+  )
+  #expect(
+    CrowFlightWingBodyIntegration
+      .covertCaudalSecondaryHandoffMaximumVaneAsymmetry == 0.45
+  )
+  #expect(
+    CrowFlightWingBodyIntegration.covertCaudalSecondaryHandoffWidthScale(
+      chordIndex: 6,
+      spanIndex: 21
+    ) == 1
+  )
+  let caudalHandoffWidths = (0..<CrowFlightWingBodyIntegration.spanCount).map {
+    CrowFlightWingBodyIntegration.covertCaudalSecondaryHandoffWidthScale(
+      chordIndex: 5,
+      spanIndex: $0
+    )
+  }
+  #expect(caudalHandoffWidths[17] == 1)
+  #expect(caudalHandoffWidths[18] > 1)
+  #expect(abs(caudalHandoffWidths[21] - 1.395_386_9) < 1e-6)
+  #expect(caudalHandoffWidths[21] == caudalHandoffWidths[22])
+  #expect(caudalHandoffWidths[25] > 1)
+  #expect(caudalHandoffWidths[26] == 1)
+  for span in 0..<CrowFlightWingBodyIntegration.spanCount {
+    let left = CrowFlightWingBodyIntegration
+      .covertCaudalSecondaryHandoffVaneAsymmetry(
+        chordIndex: 5,
+        spanIndex: span,
+        left: true
+      )
+    let right = CrowFlightWingBodyIntegration
+      .covertCaudalSecondaryHandoffVaneAsymmetry(
+        chordIndex: 5,
+        spanIndex: span,
+        left: false
+      )
+    #expect(abs(left + right) < 1e-7)
+  }
+  #expect(
+    abs(
+      CrowFlightWingBodyIntegration
+        .covertCaudalSecondaryHandoffVaneAsymmetry(
+          chordIndex: 5,
+          spanIndex: 21,
+          left: true
+        ) - 0.444_810_24
+    ) < 1e-6
+  )
+  #expect(
+    CrowFlightWingBodyIntegration.covertCaudalSecondaryHandoffVaneAsymmetry(
+      chordIndex: 5,
+      spanIndex: 26,
+      left: true
+    ) == 0
+  )
+
   let axillarySpans = CrowFlightWingBodyIntegration.axillaryUnderlayerSpanIndices
   #expect(axillarySpans == Array(0...8))
   #expect(axillarySpans.allSatisfy {
