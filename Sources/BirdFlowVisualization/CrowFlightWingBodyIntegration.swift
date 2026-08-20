@@ -20,6 +20,9 @@ enum CrowFlightWingBodyIntegration {
   static let covertProximalMaximumChordExtension: Float = 1.60
   static let covertCaudalSecondaryHandoffMaximumWidthScale: Float = 1.40
   static let covertCaudalSecondaryHandoffMaximumVaneAsymmetry: Float = 0.45
+  static let covertFoldedSecondaryHandoffMaximumWidthScale: Float = 1.70
+  static let covertFoldedSecondaryHandoffReleaseStartPhase: Float = 0.25
+  static let covertFoldedSecondaryHandoffReleaseEndPhase: Float = 7 / 24
   static let covertAbdominalHandoffMaximumWidthScale: Float = 1.35
   static let covertDistalTrailingMaximumWidthScale: Float = 1.25
   static let covertDistalTrailingBodyHandoffMaximumWidthScale: Float = 1.10
@@ -145,6 +148,29 @@ enum CrowFlightWingBodyIntegration {
         chordIndex: chordIndex,
         spanIndex: spanIndex
       )
+  }
+
+  /// Adds folded-phase overlap where the two live trailing covert courses meet
+  /// the retained secondary fan. The compact mid-wing field returns exactly to
+  /// the established width before free articulation.
+  static func covertFoldedSecondaryHandoffWidthScale(
+    chordIndex: Int,
+    spanIndex: Int,
+    presentationPhase: Float
+  ) -> Float {
+    guard chordIndex == 5 || chordIndex == 6 else { return 1 }
+    let distance = abs(Float(spanIndex) - 16)
+    guard distance < 5 else { return 1 }
+    let spanWeight = smootherstep(1 - distance / 5)
+    let release = clamp(
+      (presentationPhase - covertFoldedSecondaryHandoffReleaseStartPhase)
+        / (covertFoldedSecondaryHandoffReleaseEndPhase
+          - covertFoldedSecondaryHandoffReleaseStartPhase)
+    )
+    let phaseWeight = 1 - release * release * (3 - 2 * release)
+    return 1
+      + (covertFoldedSecondaryHandoffMaximumWidthScale - 1)
+        * spanWeight * phaseWeight
   }
 
   /// Proximal trailing coverts bridge the body-seated scaffold boundary, then

@@ -3479,6 +3479,13 @@ private struct CrowMeshBuilder {
             chordIndex: chord,
             spanIndex: span
           )
+        let foldedSecondaryHandoffWidthScale =
+          CrowFlightWingBodyIntegration.covertFoldedSecondaryHandoffWidthScale(
+            chordIndex: chord,
+            spanIndex: span,
+            presentationPhase: phase
+          )
+        let resolvedWidthScale = widthScale * foldedSecondaryHandoffWidthScale
         let camberScale = CrowFlightWingBodyIntegration.covertCamberScale(
           chordIndex: chord,
           spanIndex: span
@@ -3541,10 +3548,10 @@ private struct CrowMeshBuilder {
           tip: surfaceTip + dorsalNormal * (0.0025 + abdominalHandoffNormalLift),
           planeNormal: dorsalNormal,
           rootWidth:
-            widthScale * covertOverlap * (isTrailingCourse ? 0.44 : 0.38)
+            resolvedWidthScale * covertOverlap * (isTrailingCourse ? 0.44 : 0.38)
             * spacing,
           maximumWidth:
-            widthScale * covertOverlap * (isTrailingCourse ? 0.78 : 0.66)
+            resolvedWidthScale * covertOverlap * (isTrailingCourse ? 0.78 : 0.66)
             * spacing,
           color: SIMD4<Float>(
             (0.008 + 0.002 * rowFraction) * (1 + 0.08 * materialVariation),

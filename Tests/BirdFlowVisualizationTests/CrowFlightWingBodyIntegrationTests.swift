@@ -516,6 +516,65 @@ func flightCovertCoursesDenselyCoverEveryBodyToWingStation() {
     ) == 0
   )
 
+  #expect(
+    CrowFlightWingBodyIntegration
+      .covertFoldedSecondaryHandoffMaximumWidthScale == 1.70
+  )
+  #expect(
+    CrowFlightWingBodyIntegration
+      .covertFoldedSecondaryHandoffReleaseStartPhase == 0.25
+  )
+  #expect(
+    CrowFlightWingBodyIntegration
+      .covertFoldedSecondaryHandoffReleaseEndPhase == Float(7) / 24
+  )
+  for chord in [5, 6] {
+    #expect(
+      CrowFlightWingBodyIntegration.covertFoldedSecondaryHandoffWidthScale(
+        chordIndex: chord,
+        spanIndex: 16,
+        presentationPhase: 0
+      ) == 1.70
+    )
+    #expect(
+      abs(
+        CrowFlightWingBodyIntegration.covertFoldedSecondaryHandoffWidthScale(
+          chordIndex: chord,
+          spanIndex: 16,
+          presentationPhase: 13 / 48
+        ) - 1.35
+      ) < 1e-6
+    )
+    #expect(
+      CrowFlightWingBodyIntegration.covertFoldedSecondaryHandoffWidthScale(
+        chordIndex: chord,
+        spanIndex: 16,
+        presentationPhase: 7 / 24
+      ) == 1
+    )
+  }
+  #expect(
+    CrowFlightWingBodyIntegration.covertFoldedSecondaryHandoffWidthScale(
+      chordIndex: 4,
+      spanIndex: 16,
+      presentationPhase: 0
+    ) == 1
+  )
+  #expect(
+    CrowFlightWingBodyIntegration.covertFoldedSecondaryHandoffWidthScale(
+      chordIndex: 5,
+      spanIndex: 11,
+      presentationPhase: 0
+    ) == 1
+  )
+  #expect(
+    CrowFlightWingBodyIntegration.covertFoldedSecondaryHandoffWidthScale(
+      chordIndex: 6,
+      spanIndex: 21,
+      presentationPhase: 0
+    ) == 1
+  )
+
   let axillarySpans = CrowFlightWingBodyIntegration.axillaryUnderlayerSpanIndices
   #expect(axillarySpans == Array(0...8))
   #expect(axillarySpans.allSatisfy {
