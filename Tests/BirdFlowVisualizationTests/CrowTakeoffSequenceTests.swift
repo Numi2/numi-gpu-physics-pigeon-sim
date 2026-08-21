@@ -145,18 +145,32 @@ func terminalPrimaryHandoffIsBoundedToInitialWingDeployment() {
   )
 }
 
-@Test("terminal primary releases before the remaining folded remex stack")
-func terminalPrimaryReleasesBeforeRemainingFoldedRemexStack() {
+@Test("folded remiges release progressively from distal identities inward")
+func foldedRemigesReleaseProgressivelyFromDistalIdentitiesInward() {
   let visibility = CrowTakeoffSequence.retainedRemexVisibility(
     featherClass:order:count:transitionProgress:
   )
+  let end = CrowTakeoffSequence.retainedRemexHandoffEndProgress(
+    featherClass:order:count:
+  )
   #expect(CrowTakeoffSequence.terminalPrimaryRetainedEndProgress == 0.20)
+  #expect(end(1, 9, 10) == 0.20)
+  #expect(end(1, 8, 10) == 0.28)
+  #expect(end(1, 7, 10) == 0.36)
+  #expect(end(1, 3, 10) == 0.62)
+  #expect(end(2, 10, 11) == 0.30)
+  #expect(end(2, 9, 11) == 0.36)
+  #expect(end(2, 5, 11) == 0.60)
+  #expect(end(2, 4, 11) == 0.62)
   #expect(visibility(1, 9, 10, 0.08) == 1)
   #expect(abs(visibility(1, 9, 10, 0.14) - 0.5) < 1e-6)
   #expect(visibility(1, 9, 10, 0.20) == 0)
-  #expect(visibility(1, 8, 10, 0.20) > 0.84)
-  #expect(visibility(2, 10, 11, 0.20) > 0.84)
-  #expect(visibility(1, 8, 10, 0.62) == 0)
+  #expect(abs(visibility(1, 8, 10, 0.18) - 0.5) < 1e-6)
+  #expect(visibility(1, 8, 10, 0.28) == 0)
+  #expect(visibility(2, 10, 11, 0.18) > 0.56)
+  #expect(visibility(2, 10, 11, 0.30) == 0)
+  #expect(visibility(1, 3, 10, 0.62) == 0)
+  #expect(visibility(2, 4, 11, 0.62) == 0)
   #expect(visibility(2, 10, 11, 0.14) > visibility(1, 9, 10, 0.14))
 }
 

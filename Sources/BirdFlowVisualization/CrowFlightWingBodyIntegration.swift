@@ -50,13 +50,15 @@ enum CrowFlightWingBodyIntegration {
   static let axillaryUnderlayerRootChordIndex = 6
   static let axillaryUnderlayerTipChordIndex = 8
   static let terminalAxillaryHandoffSpanIndex = 0
+  static let terminalAxillaryHandoffReleaseStartProgress: Float = 0.16
+  static let terminalAxillaryHandoffReleaseEndProgress: Float = 0.30
   static let dorsalFoldedWingHandoffChordIndex = 6
   static let dorsalFoldedWingHandoffSpanIndices = [21, 29]
   static let dorsalFoldedWingHandoffBodyAxialIndex = 61
   static let dorsalFoldedWingHandoffLeftBodyRadialIndex = 19
   static let dorsalFoldedWingHandoffRightBodyRadialIndex = 29
-  static let dorsalFoldedWingHandoffReleaseStartPhase: Float = 0.28
-  static let dorsalFoldedWingHandoffReleaseEndPhase: Float = 0.42
+  static let dorsalFoldedWingHandoffReleaseStartPhase: Float = 0.20
+  static let dorsalFoldedWingHandoffReleaseEndPhase: Float = 0.30
 
   /// Nine body-seated stations bound the continuous axillary covert bed. Its
   /// eight topology intervals close projection slots without widening or
@@ -92,16 +94,20 @@ enum CrowFlightWingBodyIntegration {
     return smootherstep(progress)
   }
 
-  /// Keeps the folded axillary bridge only until the reverse-face covert bed
-  /// owns the same interval. Both bridge triangles then collapse onto their
-  /// live wing edge, preserving fixed topology without leaving a broad slab
-  /// attached to the freely deploying wing.
+  /// Keeps the folded axillary bridge through the first live-wing opening,
+  /// then collapses both triangles onto their wing edge after the reverse-face
+  /// covert bed has full coverage. This schedule intentionally overlaps the
+  /// underwing deployment rather than sharing its endpoint: otherwise removal
+  /// of the folded remex oracle reveals a small dorsal root aperture.
   static func terminalAxillaryHandoffWeight(
     transitionProgress: Float
   ) -> Float {
-    1 - underwingCovertDeploymentWeight(
-      transitionProgress: transitionProgress
+    let release = clamp(
+      (transitionProgress - terminalAxillaryHandoffReleaseStartProgress)
+        / (terminalAxillaryHandoffReleaseEndProgress
+          - terminalAxillaryHandoffReleaseStartProgress)
     )
+    return 1 - smootherstep(release)
   }
 
   /// Passerine primary coverts are relatively short; the caudal course seals

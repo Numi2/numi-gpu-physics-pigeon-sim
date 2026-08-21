@@ -1026,9 +1026,9 @@ func dorsalFoldedWingHandoffIsBilateralAndCollapsesBeforeFreeFlight() {
   let weight = CrowFlightWingBodyIntegration
     .dorsalFoldedWingHandoffWeight(presentationPhase:)
   #expect(abs(weight(0) - 1) < 1e-7)
-  #expect(abs(weight(0.28) - 1) < 1e-7)
-  #expect(abs(weight(0.35) - 0.5) < 1e-6)
-  #expect(abs(weight(0.42)) < 1e-7)
+  #expect(abs(weight(0.20) - 1) < 1e-7)
+  #expect(abs(weight(0.25) - 0.5) < 1e-6)
+  #expect(abs(weight(0.30)) < 1e-7)
   #expect(abs(weight(1)) < 1e-7)
 }
 
@@ -1037,9 +1037,9 @@ func terminalAxillaryBridgeCollapsesWithUnderwingDeployment() {
   let weight = CrowFlightWingBodyIntegration
     .terminalAxillaryHandoffWeight(transitionProgress:)
   #expect(abs(weight(0) - 1) < 1e-7)
-  #expect(abs(weight(0.01) - 1) < 1e-7)
-  #expect(abs(weight(0.105) - 0.5) < 1e-6)
-  #expect(abs(weight(0.20)) < 1e-7)
+  #expect(abs(weight(0.16) - 1) < 1e-7)
+  #expect(abs(weight(0.23) - 0.5) < 1e-6)
+  #expect(abs(weight(0.30)) < 1e-7)
   #expect(abs(weight(1)) < 1e-7)
 }
 

@@ -474,8 +474,13 @@ inline float crowRetainedRemexVisibility(
     uint featherClass=packedIdentity&255u;
     uint order=(packedIdentity>>16u)&255u;
     uint count=max((packedIdentity>>24u)&255u,1u);
-    bool isTerminalPrimary=featherClass==1u&&order+1u==count;
-    float endProgress=isTerminalPrimary?0.20f:0.62f;
+    float distanceFromTerminal=float(count-1u-min(order,count-1u));
+    float endProgress=0.62f;
+    if(featherClass==1u){
+        endProgress=min(0.62f,0.20f+0.08f*distanceFromTerminal);
+    }else if(featherClass==2u){
+        endProgress=min(0.62f,0.30f+0.06f*distanceFromTerminal);
+    }
     float normalized=clamp(
         (transitionProgress-0.08f)/(endProgress-0.08f),0.0f,1.0f
     );

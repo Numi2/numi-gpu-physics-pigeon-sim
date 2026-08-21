@@ -38,6 +38,9 @@ enum CrowTakeoffSequence {
   /// The enlarged terminal primary transfers first so its folded overlap vane
   /// cannot remain as a second spear beside the opening live-wing sheet.
   static let terminalPrimaryRetainedEndProgress: Float = 0.20
+  static let primaryRetainedEndProgressStep: Float = 0.08
+  static let terminalSecondaryRetainedEndProgress: Float = 0.30
+  static let secondaryRetainedEndProgressStep: Float = 0.06
   /// The folded live-wing sheet stays broad over the flank, then converges
   /// smoothly into the retained primary/rectrix stack instead of ending as a
   /// pair of constant-width topology blades.
@@ -151,10 +154,11 @@ enum CrowTakeoffSequence {
     count: Int,
     transitionProgress: Float
   ) -> Float {
-    let isTerminalPrimary = featherClass == 1 && count > 0 && order == count - 1
-    let end = isTerminalPrimary
-      ? terminalPrimaryRetainedEndProgress
-      : retainedFeatherHandoffEndProgress
+    let end = retainedRemexHandoffEndProgress(
+      featherClass: featherClass,
+      order: order,
+      count: count
+    )
     let normalized = min(
       max(
         (transitionProgress - retainedFeatherHandoffStartProgress)
@@ -165,6 +169,37 @@ enum CrowTakeoffSequence {
     )
     let deployment = normalized * normalized * (3 - 2 * normalized)
     return 1 - deployment
+  }
+
+  /// Releases the folded remex stack from the exposed distal identities
+  /// inward as the fixed live wing takes over coverage. Proximal feathers
+  /// retain the original endpoint; stable records collapse to zero area and
+  /// are never removed from the temporal topology.
+  static func retainedRemexHandoffEndProgress(
+    featherClass: UInt32,
+    order: Int,
+    count: Int
+  ) -> Float {
+    guard count > 0, order >= 0, order < count else {
+      return retainedFeatherHandoffEndProgress
+    }
+    let distanceFromTerminal = Float(count - 1 - order)
+    switch featherClass {
+    case 1:
+      return min(
+        retainedFeatherHandoffEndProgress,
+        terminalPrimaryRetainedEndProgress
+          + primaryRetainedEndProgressStep * distanceFromTerminal
+      )
+    case 2:
+      return min(
+        retainedFeatherHandoffEndProgress,
+        terminalSecondaryRetainedEndProgress
+          + secondaryRetainedEndProgressStep * distanceFromTerminal
+      )
+    default:
+      return retainedFeatherHandoffEndProgress
+    }
   }
 
   /// Topology-stable target for one retained rectrix during takeoff.

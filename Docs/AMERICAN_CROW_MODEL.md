@@ -158,12 +158,17 @@ wingbeat presentation. Independent Swift parity checks cover the retained GPU
 state at four phases. This is a continuity and coverage result, not measured
 rectrix deployment kinematics.
 
-The overlap-expanded terminal primary on each side now transfers to the live
-wing over transition progress `0.08...0.20`; the remaining folded remiges keep
-their `0.08...0.62` visibility schedule. This removes a redundant retained
-blade while the same pointed primary is already represented by the opening
+The folded remex stack now transfers to the live wing from the exposed distal
+identities inward. Primary endpoints begin at `0.20` and advance by `0.08` per
+identity; secondary endpoints begin at `0.30` and advance by `0.06`. Both
+courses cap at the original `0.62` proximal endpoint. This removes redundant
+crossing vanes as the same feather courses become represented by the opening
 topology-bound wing. It does not blunt primary tips, change standing geometry,
-or alter the rectrix deployment. Crow AOV schema `9` carries exact visible and
+or alter rectrix deployment. The dorsal folded-wing quad collapses over
+presentation phase `0.20...0.30`, while the narrow terminal axillary bridge
+overlaps live underwing deployment until progress `0.30`; this prevents either
+bridge from becoming a free-flight slab or exposing the root aperture. Crow AOV
+schema `9` carries exact visible and
 fully covered pixels plus image bounds per persistent feather, wing-surface
 cell, and topology-bound dorsal-covert identity. Ownership can therefore be
 traced to class/side/order or side/chord/span without inferring it from a beauty
