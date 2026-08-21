@@ -53,6 +53,7 @@ struct CrowRectrixVaneProfile: Equatable {
 /// estimates and do not alter retained length, stable ID, or solver geometry.
 enum CrowRectrixVaneAnatomy {
   static let terminalShapeStartAxialFraction: Float = 0.84
+  static let sublateralTerminalHandoffWidthRatioIncrease: Float = 0.055
 
   static func profile(order: Int, count: Int) -> CrowRectrixVaneProfile {
     let safeCount = max(count, 1)
@@ -148,11 +149,26 @@ enum CrowRectrixVaneAnatomy {
     profile: CrowRectrixVaneProfile
   ) -> Float {
     let axial = min(max(rawAxial, 0), 1)
-    let terminalRatio = 0.13 + 0.03 * (1 - profile.radialFraction)
+    let terminalRatio =
+      0.13 + 0.03 * (1 - profile.radialFraction)
+      + sublateralTerminalHandoffWidthRatioIncrease
+      * sublateralTerminalHandoffWeight(profile: profile)
     return max(
       widthEnvelope(axial: axial),
       terminalRatio * terminalShapeWeight(axial: axial)
     )
+  }
+
+  /// Broadens only the three sublateral bilateral pairs whose tips hand off
+  /// beneath the folded/deploying wing. The medial pairs keep their closed-tail
+  /// stack and the outermost pair keeps the terminal silhouette unchanged.
+  static func sublateralTerminalHandoffWeight(
+    profile: CrowRectrixVaneProfile
+  ) -> Float {
+    let radial = profile.radialFraction
+    let inner = smoothstep(min(max((radial - 0.34) / 0.12, 0), 1))
+    let outer = smoothstep(min(max((0.96 - radial) / 0.12, 0), 1))
+    return inner * outer
   }
 
   /// Rounds the retained tip in geometry while leaving the rachis centerline at
@@ -294,5 +310,9 @@ enum CrowRectrixVaneAnatomy {
       1
     )
     return progress * progress * (3 - 2 * progress)
+  }
+
+  private static func smoothstep(_ value: Float) -> Float {
+    value * value * (3 - 2 * value)
   }
 }

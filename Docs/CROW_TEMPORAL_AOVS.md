@@ -90,7 +90,7 @@ audit path and temporal scale:
   /tmp/crow.mp4 /tmp/crow.png standing /tmp/crow-aov-audit.json 2
 ```
 
-The schema-11 JSON report records format and coordinate conventions plus per-frame
+The schema-12 JSON report records format and coordinate conventions plus per-frame
 finite-pixel count, HDR values above one, exact active IDs, visible feather IDs,
 fully covered samples, unit-normal error, depth range, moving-pixel count,
 maximum motion, and bird/support vertical centroids. It also records exact
@@ -102,7 +102,10 @@ full packed anatomical identities. Visible feather classes retain scene-linear
 luminance mean, standard deviation, maximum, and same-class neighbour variation
 before tone mapping. At most four samples per axis and
 ordered class pair are retained, so one large projection cannot erase other
-anatomical owners.
+anatomical owners. For the largest enclosed component, schema `12` also
+retains the sorted packed identities adjacent to its boundary. This resolves a
+gap directly to persistent class/side/order/count or live covert ownership
+without inferring the owner from color or a temporary debug render.
 These runs expose shoulder and feather-course slots that diagonal exterior
 flooding intentionally excludes from enclosed-hole counts. They are
 localization evidence, not a rule that every silhouette concavity should be

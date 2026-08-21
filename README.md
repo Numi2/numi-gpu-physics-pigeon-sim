@@ -115,16 +115,18 @@ throat, body-feather, and foot classes but no femoral/crural class, and it
 disappears under small yaw/pitch changes. Filling it with torso geometry would
 therefore be anatomically incorrect. This is estimated presentation geometry,
 not a measured folded-wing width.
-The retained rectrices also keep a narrow `13-16%` terminal width envelope
-instead of collapsing to generic needle points. Their centerline tips remain at
-full asset length while lateral vane vertices round back by `1.0-1.4%` of
-length (`1.7-2.3 mm` for the current `166 mm` geometry). Swift and Metal compute
-the same profile on the persistent template; three steep 17-frame A/B probes
-changed worst enclosed-hole counts only `38 -> 39`, `42 -> 41`, and
-`291 -> 291` pixels. These are bounded simulated morphology and raster checks,
-not measured American-crow tip dimensions.
+The retained rectrices keep nonzero terminal vanes instead of collapsing to
+generic needle points. Medial and outermost pairs retain the original
+`13-16%` envelope, while only the three sublateral bilateral pairs broaden to
+`19.0-20.1%` where their tips hand off beneath the folded/deploying wing. Their
+centerline tips remain at full asset length, lateral vertices retain the
+`1.0-1.4%` roundback, and stable identity/topology are unchanged. In the
+rear-port 17-frame stress audit, enclosed-hole pixels/components/worst channel
+fall from `593/157/28` to `165/121/8`; a new rear-port grazing view remains
+discrete rather than forming a tail plate. These are bounded simulated
+morphology and raster checks, not measured American-crow tip dimensions.
 The exact identity AOV now also reports visible and fully covered pixels for
-every persistent primary, secondary, and rectrix as schema `10`. The same
+every persistent primary, secondary, and rectrix as schema `12`. The same
 report retains the longest exterior-connected row/column slots with exact
 boundary classes, packed identities, and procedural owners, so open shoulder
 gaps are traceable without treating every silhouette concavity as a defect.

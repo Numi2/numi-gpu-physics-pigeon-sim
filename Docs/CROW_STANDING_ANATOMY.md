@@ -190,7 +190,7 @@ inspection shows denser caudal surface breakup without a diagonal bridge or a
 new wing-tail membrane. This qualifies simulated contour density, not measured
 American-crow rump-feather counts.
 
-The native AOV report schema is now version `11`. Each frame records
+The native AOV report schema is now version `12`. Each frame records
 scene-linear luminance mean, standard deviation, maximum, and mean absolute
 same-class neighbour difference for every visible bird feather class. These
 statistics are computed before display tone mapping and exclude the support and
@@ -785,6 +785,25 @@ geometry priority at `593/157/28`. On the same fresh-view workload, mean and
 median GPU duration increase by `14.92%` and `17.16%`. That measured cost is
 accepted for the future-compute appearance path; it is not a performance win
 or a claim of perceptual realism.
+
+Schema `12` resolves that rear-port priority to exact packed identities around
+the largest enclosed component. The early `21-28`-pixel channels are bounded
+by rectrix orders `1`, `2`, and `3`; only frames `2-3` additionally touch the
+outermost proximal trailing covert. A broad presentation-tail width experiment
+left every metric exact and was rejected. The retained correction instead adds
+a terminal-only `5.5%` maximum-width envelope to those three sublateral pairs
+and their bilateral counterparts. Medial and outermost rectrices retain their
+prior shape; length, rachis, root pose, stable identity, and template topology
+remain exact.
+
+At the same 17-frame yaw/pitch `(-2.28,0.16)` stress view, enclosed-hole
+pixels/components/worst component fall from `593/157/28` to `165/121/8`.
+The previously unused rear-port grazing view `(-2.56,0.34)` records
+`74/44/10`, and the opposite rear-starboard safety view `(2.36,-0.24)` records
+`55/35/4`. Rendered inspection at the new view retains individual tail tips
+without an inflated plate or membrane. These gates establish deterministic
+simulated terminal ownership and raster continuity, not measured rectrix
+morphology or perceptual realism.
 
 The canonical README sequence is fully simulated and contains the native hold,
 transition, and flight path: `800 x 450`, `72` frames at `24 fps`, `8,090,749`

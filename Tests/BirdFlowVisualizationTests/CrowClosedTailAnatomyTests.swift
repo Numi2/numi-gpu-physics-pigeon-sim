@@ -127,7 +127,7 @@ func rectrixTerminalsRetainNarrowRoundedVanesWithoutShorteningRachis() {
       axial: 1,
       profile: profile
     )
-    #expect(terminalEnvelope >= 0.13 && terminalEnvelope <= 0.16)
+    #expect(terminalEnvelope >= 0.13 && terminalEnvelope <= 0.215)
     #expect(
       abs(
         terminalEnvelope
@@ -135,7 +135,7 @@ func rectrixTerminalsRetainNarrowRoundedVanesWithoutShorteningRachis() {
             axial: 1,
             profile: counterpart
           )
-      ) < 1e-7
+      ) < 2e-7
     )
     #expect(
       abs(
@@ -177,7 +177,36 @@ func rectrixTerminalsRetainNarrowRoundedVanesWithoutShorteningRachis() {
       signedWidth: 1,
       profile: profile
     )
-    #expect(terminalHalfWidth > 0.0022 && terminalHalfWidth < 0.0032)
+    #expect(terminalHalfWidth > 0.0022 && terminalHalfWidth < 0.0043)
+  }
+}
+
+@Test("rectrix terminal handoff is bilateral and limited to sublateral pairs")
+func rectrixTerminalHandoffIsBilateralAndLimitedToSublateralPairs() {
+  let count = CrowClosedTailAnatomy.rectrixCount
+  let widenedOrders = Set([1, 2, 3, 8, 9, 10])
+  for order in 0..<count {
+    let profile = CrowRectrixVaneAnatomy.profile(order: order, count: count)
+    let counterpart = CrowRectrixVaneAnatomy.profile(
+      order: count - 1 - order,
+      count: count
+    )
+    let weight = CrowRectrixVaneAnatomy.sublateralTerminalHandoffWeight(
+      profile: profile
+    )
+    #expect(
+      abs(
+        weight
+          - CrowRectrixVaneAnatomy.sublateralTerminalHandoffWeight(
+            profile: counterpart
+          )
+      ) < 2e-7
+    )
+    if widenedOrders.contains(order) {
+      #expect(weight > 0.99)
+    } else {
+      #expect(weight < 1e-6)
+    }
   }
 }
 

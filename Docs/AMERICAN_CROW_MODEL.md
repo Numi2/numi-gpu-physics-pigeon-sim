@@ -183,19 +183,21 @@ or alter rectrix deployment. The dorsal folded-wing quad collapses over
 presentation phase `0.20...0.30`, while the narrow terminal axillary bridge
 overlaps live underwing deployment until progress `0.30`; this prevents either
 bridge from becoming a free-flight slab or exposing the root aperture. Crow AOV
-schema `10` carries exact visible and
+schema `12` carries exact visible and
 fully covered pixels plus image bounds per persistent feather, wing-surface
 cell, and topology-bound dorsal-covert identity. Ownership can therefore be
 traced to class/side/order or side/chord/span without inferring it from a beauty
 image.
 
-The retained rectrix surface now preserves a narrow `13-16%` width envelope
-over its terminal `16%` of length. Lateral vane vertices retreat quadratically
-by at most `1.0-1.4%` of length while the rachis centerline retains the exact
-asset tip. This replaces a generic zero-width needle termination with a rounded,
-identity-varying simulated rectrix end without changing stable IDs, root poses,
-or storage topology. Full-chord finite-difference normals run in both Swift and
-Metal and retain the existing `< 1e-5` CPU/GPU normal-parity gate.
+The retained rectrix surface preserves a nonzero width envelope over its
+terminal `16%` of length. Medial and outermost pairs remain at `13-16%`; a
+smooth radial mask raises only the three sublateral bilateral pairs to
+`19.0-20.1%` at the exact wing-tip handoff exposed by the packed-identity AOV.
+Lateral vane vertices still retreat quadratically by at most `1.0-1.4%` of
+length while the rachis centerline retains the exact asset tip. This retains
+discrete, rounded simulated rectrix ends without changing stable IDs, root
+poses, or storage topology. Full-chord finite-difference normals run in both
+Swift and Metal and retain the existing `< 1e-5` CPU/GPU normal-parity gate.
 
 The closed rectrix stack now graduates from `0.166 m` medially to `0.160 m`
 laterally and returns continuously to the retained open-flight lengths during

@@ -750,7 +750,11 @@ inline float crowRectrixTerminalShapeWeight(float axial) {
 }
 
 inline float crowRectrixTerminalWidthEnvelope(float axial,float4 rectrix) {
-    float terminalRatio=0.13f+0.03f*(1.0f-rectrix.x);
+    float inner=smoothstep(0.34f,0.46f,rectrix.x);
+    float outer=smoothstep(0.84f,0.96f,rectrix.x);
+    float handoffWeight=inner*(1.0f-outer);
+    float terminalRatio=0.13f+0.03f*(1.0f-rectrix.x)
+        +0.055f*handoffWeight;
     return max(
         crowFeatherWidthEnvelope(axial),
         terminalRatio*crowRectrixTerminalShapeWeight(axial)

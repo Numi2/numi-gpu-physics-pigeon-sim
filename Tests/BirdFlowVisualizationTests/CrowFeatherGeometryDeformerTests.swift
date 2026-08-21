@@ -203,8 +203,30 @@ func crowFeatherTemplateGPUDeformationMatchesCPUReference() throws {
     let positiveRetreat = simd_dot(centerline - positive, direction)
     #expect(negativeRetreat > 0.0015 && negativeRetreat < 0.0025)
     #expect(positiveRetreat > 0.0015 && positiveRetreat < 0.0025)
-    #expect(simd_distance(negative, positive) > 0.004)
-    #expect(simd_distance(negative, positive) < 0.007)
+    let profile = CrowRectrixVaneAnatomy.profile(
+      packedIdentity: feather.identity.w
+    )!
+    let edgeAxial = 1 - CrowRectrixVaneAnatomy.terminalRoundbackFraction(
+      axial: 1,
+      signedWidth: 1,
+      profile: profile
+    )
+    let expectedTerminalSpan =
+      CrowRectrixVaneAnatomy.halfWidthMeters(
+        maximumWidthMeters: feather.previousPositionAndWidth.w,
+        axial: edgeAxial,
+        signedWidth: -1,
+        profile: profile
+      )
+      + CrowRectrixVaneAnatomy.halfWidthMeters(
+        maximumWidthMeters: feather.previousPositionAndWidth.w,
+        axial: edgeAxial,
+        signedWidth: 1,
+        profile: profile
+      )
+    let terminalSpan = simd_distance(negative, positive)
+    #expect(terminalSpan > 0.004 && terminalSpan < 0.008)
+    #expect(abs(terminalSpan - expectedTerminalSpan) < 2e-6)
   }
 
   for feather in movingRoots.filter({ ($0.identity.w & 255) <= 3 }) {
