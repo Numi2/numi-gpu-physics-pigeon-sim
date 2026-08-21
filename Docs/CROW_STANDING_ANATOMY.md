@@ -261,11 +261,11 @@ as the nape, so the visible transition cannot collapse into a narrow static
 collar while the head moves.
 
 The pelvic-to-leg transition uses a distinct estimated femoral tract before the
-existing crural tract. Nine body-surface-rooted rows cross the dorsal/outer
-upper thigh in twelve overlapping courses and advance toward the proximal
+existing crural tract. Fifteen body-surface-rooted rows cross the dorsal/outer
+upper thigh in eighteen overlapping courses and advance toward the proximal
 fourteen-by-seven crural envelope without converging onto one cylindrical tip
 ring. Identity-stable root, length, radial phase,
-width, and camber variation breaks the former broad cuff into `108` femoral and
+width, and camber variation breaks the former broad cuff into `270` femoral and
 `98` crural vanes per side without changing hip, hock, ankle, or digital support
 coordinates. This organization follows the corvid pterylography reported
 for Clark's Nutcracker by
@@ -308,7 +308,7 @@ neighbour overlaps, and bounded course, length, tip-sweep, width, and camber
 variation prevents a regular tiled plate from replacing the former sparse grid.
 Final-output coverage keeps the proven coarse `130` folded-coverts plus `35`
 femoral and `50` crural vanes per side below `1400 px/m`, then switches to all
-`360`, `108`, and `98` identities at full density. The full `1280 x 720`
+`360`, `270`, and `98` identities at full density. The full `1280 x 720`
 standing view clears that gate and retains every high-quality identity.
 
 The standing-to-flight presentation now preserves that body coverage while
@@ -390,6 +390,24 @@ class `6` to class `7`; no silhouette pixel changed. The nine visually inspected
 hold/mid-transition/flight frames had SSIM `>= 0.999997` against the prior CPU
 expansion. This is executable raster and parity evidence, not a performance
 claim or an anatomical measurement.
+
+The next body-gap trace separated an actual femoral insertion seam from the
+larger intentional spaces bounded by class-`11` retracting toes. At high-side
+phase `0.3125`, the temporal identity AOV mapped the nine-pixel class-`0`/
+class-`7` opening to far-side femoral rows `6...11`, courses `8...9`. A bounded
+overlap envelope now reaches `1.36x` vane width and `1.06x` tip length only in
+that window, tapering to `1x` outside it. Roots, hip/hock/ankle/digit
+coordinates, the `270`-vane-per-side inventory, and identities remain fixed.
+The 17-frame high-side audit improves from `145` enclosed pixels in `75`
+components to `135` in `73`; frame `5` improves from `19`/`9` to `9`/`2`, and
+the targeted nine-pixel opening disappears without becoming an expected
+aperture. The `33`-pixel articulated-foot maximum and zero expected-aperture
+pixels remain exact. Underbody remains `117` pixels in `70` components with a
+five-pixel maximum; front-starboard remains `102` in `71`, two expected-aperture
+pixels, and a four-pixel maximum. Visual inspection of hold, transition, and
+flight frames at all three angles found no padded thigh outline or covered
+digital articulation. These are deterministic simulated-raster results, not
+measured feather overlap.
 
 Run the presentation with:
 

@@ -116,6 +116,16 @@ Metal expansion into `74,496` temporal/AOV vertices instead of authoring those
 tubes on the CPU. The continuity and barb oracle remains in the accepted body
 surface stream; future meshlet or hardware-curve emission can consume the same
 records without reducing the `1,304`-feather ventral inventory.
+The body-to-leg transition now retains the same `270` estimated femoral vanes
+per side but gives only rows `6...11` at mid-thigh courses `8...9` a bounded
+width-and-tip overlap. Those exact owners were localized from the temporal
+identity AOV rather than by filling the much larger, intentional spaces between
+retracting toes. In the high-side 17-frame probe this closes the nine-pixel
+insertion opening: aggregate enclosed holes fall from `145` pixels in `75`
+components to `135` in `73`, while the zero expected-aperture count and
+`33`-pixel worst articulated-foot hole remain unchanged. Underbody and
+front-starboard hole totals remain exact. Feather roots, hip/hock/ankle/digit
+coordinates, inventory, and identities do not change.
 A locked
 `2,157`-vertex, `3,968`-triangle estimated-hybrid surface now also passes the
 live Apple-Metal geometry and production TRT moving-boundary coupling gates.

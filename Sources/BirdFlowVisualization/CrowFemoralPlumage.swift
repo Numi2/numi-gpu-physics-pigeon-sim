@@ -41,6 +41,10 @@ enum CrowFemoralPlumage {
   static let bridgeLengthScale: Float = 0.68
   static let nominalMaximumLengthMeters: Float = 0.034
   static let pelvicAxillaryHandoffMaximumWidthScale: Float = 1.35
+  /// A bounded mid-course expansion roofs the camera-visible femoral insertion
+  /// without adding a new row, moving roots, or changing leg articulation.
+  static let insertionSeamMaximumWidthScale: Float = 1.36
+  static let insertionSeamMaximumLengthScale: Float = 1.06
 
   static func visibleSamples(
     bodyCenter: SIMD3<Float>,
@@ -153,6 +157,7 @@ enum CrowFemoralPlumage {
           max(0.018, bridgeLengthScale * bridgeDistance)
         )
           * (1 + 0.10 * shapeIdentity)
+          * insertionSeamLengthScale(row: row, course: course)
         let direction = normalized(
           bridgeVector + 0.20 * bridgeDistance * legAxis,
           fallback: legAxis
@@ -160,6 +165,7 @@ enum CrowFemoralPlumage {
         let tip = root + length * direction
         let maximumWidth = min(0.0076, max(0.0041, 0.235 * length))
           * pelvicAxillaryHandoffWidthScale(row: row, course: course)
+          * insertionSeamWidthScale(row: row, course: course)
         result.append(
           CrowFemoralPlumageFeather(
             side: side,
@@ -204,6 +210,27 @@ enum CrowFemoralPlumage {
       max(0, 1 - abs(Float(row) - 8) / 2)
       * max(0, 1 - Float(course) / 2)
     return 1 + (pelvicAxillaryHandoffMaximumWidthScale - 1) * weight
+  }
+
+  /// Smooth-edged plateau over the exact rows and courses adjacent to the
+  /// lower-body insertion seam in the temporal identity AOV. Rows 7...10 and
+  /// courses 8...9 receive the full expansion; rows 6 and 11 taper it out.
+  static func insertionSeamWidthScale(row: Int, course: Int) -> Float {
+    let weight = insertionSeamWeight(row: row, course: course)
+    return 1 + (insertionSeamMaximumWidthScale - 1) * weight
+  }
+
+  static func insertionSeamLengthScale(row: Int, course: Int) -> Float {
+    let weight = insertionSeamWeight(row: row, course: course)
+    return 1 + (insertionSeamMaximumLengthScale - 1) * weight
+  }
+
+  private static func insertionSeamWeight(row: Int, course: Int) -> Float {
+    let rowDistance = abs(Float(row) - 8.5)
+    let rowWeight = max(0, min(1, 1 - (rowDistance - 1.5) / 2))
+    let courseDistance = abs(Float(course) - 8.5)
+    let courseWeight = max(0, min(1, 1 - (courseDistance - 0.5)))
+    return rowWeight * courseWeight
   }
 
   private static func coarseSamples(

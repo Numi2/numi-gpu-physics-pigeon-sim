@@ -108,6 +108,13 @@ ankles move by millimetres.
    oracle in the accepted surface stream. The next future-compute step is GPU
    visibility selection and indirect meshlet or hardware-curve emission from
    the same `1,304`-feather tract inventory.
+   The `270`-identity-per-side femoral field now has a compact, AOV-localized
+   insertion-overlap oracle over rows `6...11`, courses `8...9`; the bounded
+   width/tip envelope closes a transition seam without moving follicles or leg
+   joints. The future-compute path should retain those root/vane records on the
+   GPU, visibility-cull them into indirect curve or meshlet work, and replace
+   the prescribed envelope with per-feather contact and bending while matching
+   the accepted three-angle silhouette oracle.
 
 3. **Measured appearance, bounded claims.** Implement an energy-bounded,
    anisotropic feather BSDF with separate eumelanin absorption, longitudinal

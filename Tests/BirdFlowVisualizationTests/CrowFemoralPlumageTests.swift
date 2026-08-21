@@ -109,10 +109,18 @@ func femoralPlumageBridgesBodyLoftAndUpperCruralTract() {
   let legAxis = simd_normalize(leftHock - leftHip)
   let cruralRoots = CrowLegPlumage.samples(hip: leftHip, hock: leftHock).map(\.root)
   let femoralLengths = left.map { simd_distance($0.root, $0.tip) }
+  let unscaledFemoralLengths = left.filter {
+    CrowFemoralPlumage.insertionSeamLengthScale(row: $0.row, course: $0.course)
+      == 1
+  }.map { simd_distance($0.root, $0.tip) }
   #expect(femoralLengths.max()! > 0.033)
   #expect(
-    femoralLengths.max()!
+    unscaledFemoralLengths.max()!
       < 1.11 * CrowFemoralPlumage.nominalMaximumLengthMeters
+  )
+  #expect(
+    femoralLengths.max()!
+      < 1.18 * CrowFemoralPlumage.nominalMaximumLengthMeters
   )
   for feather in left {
     let clearance = simd_distance(feather.root, feather.rootSurface)
@@ -179,6 +187,24 @@ func femoralPelvicAxillaryHandoffIsCompactAndBilateral() {
     CrowFemoralPlumage.pelvicAxillaryHandoffWidthScale(row: 8, course: 2)
       == 1
   )
+  #expect(CrowFemoralPlumage.insertionSeamMaximumWidthScale == 1.36)
+  #expect(CrowFemoralPlumage.insertionSeamMaximumLengthScale == 1.06)
+  #expect(CrowFemoralPlumage.insertionSeamWidthScale(row: 8, course: 8) == 1.36)
+  #expect(CrowFemoralPlumage.insertionSeamWidthScale(row: 10, course: 9) == 1.36)
+  #expect(CrowFemoralPlumage.insertionSeamLengthScale(row: 8, course: 8) == 1.06)
+  #expect(CrowFemoralPlumage.insertionSeamLengthScale(row: 10, course: 9) == 1.06)
+  #expect(
+    abs(CrowFemoralPlumage.insertionSeamWidthScale(row: 6, course: 8) - 1.18)
+      < 1e-6
+  )
+  #expect(
+    abs(CrowFemoralPlumage.insertionSeamWidthScale(row: 11, course: 9) - 1.18)
+      < 1e-6
+  )
+  #expect(CrowFemoralPlumage.insertionSeamWidthScale(row: 8, course: 7) == 1)
+  #expect(CrowFemoralPlumage.insertionSeamWidthScale(row: 5, course: 8) == 1)
+  #expect(CrowFemoralPlumage.insertionSeamLengthScale(row: 8, course: 7) == 1)
+  #expect(CrowFemoralPlumage.insertionSeamLengthScale(row: 5, course: 8) == 1)
 }
 
 @Test("femoral plumage resolves shafts and barbs with output coverage")

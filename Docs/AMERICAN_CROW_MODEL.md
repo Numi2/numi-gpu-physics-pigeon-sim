@@ -186,6 +186,17 @@ therefore emits `3,104` intervals and `74,496` vertices without CPU triangle
 construction. The paired continuity/crown hierarchy remains an estimated
 rendering model, not evidence of measured American-crow rachis depth.
 
+The estimated femoral field keeps its `15 x 18` body-surface-rooted inventory
+(`270` vanes per side) and all root and joint coordinates. A temporal-identity
+trace of the high-side transition opening localized the owning geometry to
+far-side rows `6...11`, courses `8...9`. Only that compact window receives a
+smooth-edged overlap envelope: width reaches at most `1.36x`, tip length at most
+`1.06x`, and both taper to exactly `1x` outside the window. The bounded change
+closes the nine-pixel body/femoral opening without adding a row or covering the
+intentional negative space between articulated digits. It is a presentation
+continuity estimate, not measured American-crow femoral dimensions or contact
+mechanics.
+
 ## Native Metal capture
 
 The native renderer consumes both locked inputs. Its encoding, input hashes,
