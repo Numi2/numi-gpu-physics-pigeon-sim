@@ -124,7 +124,11 @@ changed worst enclosed-hole counts only `38 -> 39`, `42 -> 41`, and
 `291 -> 291` pixels. These are bounded simulated morphology and raster checks,
 not measured American-crow tip dimensions.
 The exact identity AOV now also reports visible and fully covered pixels for
-every persistent primary, secondary, and rectrix as schema `8`. That census
+every persistent primary, secondary, and rectrix as schema `10`. The same
+report retains the longest exterior-connected row/column slots with exact
+boundary classes, packed identities, and procedural owners, so open shoulder
+gaps are traceable without treating every silhouette concavity as a defect.
+That census
 traced the early takeoff double-spear to the overlap-expanded terminal primary
 on each side, not to generic primary-tip anatomy. Those two folded oracles now
 transfer over progress `0.08...0.28`; all other remiges retain the existing
@@ -156,6 +160,13 @@ Metal expansion into `74,496` temporal/AOV vertices instead of authoring those
 tubes on the CPU. The continuity and barb oracle remains in the accepted body
 surface stream; future meshlet or hardware-curve emission can consume the same
 records without reducing the `1,304`-feather ventral inventory.
+The caudal body shell now carries `168` rump-to-rectrix contour vanes in seven
+overlapping rows instead of `120` in five. They retain the existing tube,
+clearance, material, and projected-size hierarchy, including future rachis,
+barb, and barbule tiers. Three fixed underbody/dorsal audits keep every
+silhouette-slot, enclosed-hole, and expected-aperture metric exact; the added
+density remains on the rump surface rather than filling the real open
+wing-tail separation with a sheet.
 The body-to-leg transition now retains the same `270` estimated femoral vanes
 per side but gives only rows `6...11` at mid-thigh courses `8...9` a bounded
 width-and-tip overlap. Those exact owners were localized from the temporal

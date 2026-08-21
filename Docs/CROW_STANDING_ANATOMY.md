@@ -166,6 +166,18 @@ near-vertical underside probe reduced the folded junction's largest component
 from `72` pixels to `1-3` pixels. These are presentation-geometry checks, not
 evidence for measured American-crow underplumage dimensions.
 
+The persistent rump-to-rectrix contour shell now resolves `168` vanes in seven
+axial rows of `24`, up from `120` in five rows. Root stations span `5-62%` of
+the same underlayer axis and the overlapping tips reach `35-92%`; tube radii,
+shell clearance, material model, and underlayer bounds remain unchanged. Every
+added vane inherits the existing deterministic camber, edge ripple, rachis,
+barb, and future close-up barbule hierarchy. At the frozen 17-frame left-under,
+right-under, and dorsal-quarter audits, all exterior class-`4`/class-`3` slot,
+enclosed-hole, and expected leg-aperture metrics remain exact. Frame-`5`
+inspection shows denser caudal surface breakup without a diagonal bridge or a
+new wing-tail membrane. This qualifies simulated contour density, not measured
+American-crow rump-feather counts.
+
 The twelve procedural wingbeat rectrices resolve an LOD-selected,
 piecewise-tapered rachis inside each coverage-preserving vane. Depending on
 final-output coverage, the shaft is omitted or represented by `4`, `8`, or `12`

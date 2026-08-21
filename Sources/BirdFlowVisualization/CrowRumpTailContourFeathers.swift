@@ -27,7 +27,7 @@ struct CrowRumpTailContourFeatherSample: Equatable {
 /// successive rows overlap axially while each circumferential course overlaps
 /// its neighbours, and their roots and tips remain outside the same tube.
 enum CrowRumpTailContourFeathers {
-  static let rowCount = 5
+  static let rowCount = 7
   static let columnCount = 24
   static let shellClearanceMeters: Float = 0.0007
   static let rootEnvelopeRatio: Float = 0.58
@@ -53,8 +53,8 @@ enum CrowRumpTailContourFeathers {
     var result: [CrowRumpTailContourFeatherSample] = []
     result.reserveCapacity(rowCount * columnCount)
     for row in 0..<rowCount {
-      let rootFraction = 0.05 + 0.13 * Float(row)
-      let tipFraction = rootFraction + 0.29
+      let rootFraction = 0.05 + 0.095 * Float(row)
+      let tipFraction = rootFraction + 0.30
       let phase = Float(row % 2) * Float.pi / Float(columnCount)
       for column in 0..<columnCount {
         let identity = row * columnCount + column

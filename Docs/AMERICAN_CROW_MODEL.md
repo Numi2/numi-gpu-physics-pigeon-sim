@@ -174,7 +174,7 @@ or alter rectrix deployment. The dorsal folded-wing quad collapses over
 presentation phase `0.20...0.30`, while the narrow terminal axillary bridge
 overlaps live underwing deployment until progress `0.30`; this prevents either
 bridge from becoming a free-flight slab or exposing the root aperture. Crow AOV
-schema `9` carries exact visible and
+schema `10` carries exact visible and
 fully covered pixels plus image bounds per persistent feather, wing-surface
 cell, and topology-bound dorsal-covert identity. Ownership can therefore be
 traced to class/side/order or side/chord/span without inferring it from a beauty
@@ -205,6 +205,15 @@ detached decoration. Current and previous temporal geometry share one tier for
 stable motion vectors. The crow material derives a local feather axis from
 live vane coordinates where present and uses a surface-projected fallback on
 the body for a restrained anisotropic black-feather highlight.
+
+The rump-to-rectrix shell uses seven overlapping axial rows rather than five,
+raising its deterministic inventory from `120` to `168` contour vanes while
+retaining `24` circumferential courses, the same underlayer, and the same
+projected-length LOD policy. Root/tip axis fractions are `0.05...0.62` and
+`0.35...0.92`, respectively, so the added rows densify the existing body
+surface instead of spanning the intentional open space between wing and tail.
+At future close-up tiers the new vanes inherit the same rachis, paired-barb,
+and barbule hierarchy as the prior shell.
 
 Posterior class-`5` plumage now carries a topology-stable deployment relief.
 Beyond `30%` of the dorsal contour tract, crown settles smoothly to `58%` at

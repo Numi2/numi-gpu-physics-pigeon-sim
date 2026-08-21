@@ -7,6 +7,8 @@ import simd
 func rumpTailContourVanesCoverUnderlayer() {
   let samples = CrowRumpTailContourFeathers.samples()
   #expect(samples == CrowRumpTailContourFeathers.samples())
+  #expect(CrowRumpTailContourFeathers.rowCount == 7)
+  #expect(samples.count == 168)
   #expect(
     samples.count
       == CrowRumpTailContourFeathers.rowCount

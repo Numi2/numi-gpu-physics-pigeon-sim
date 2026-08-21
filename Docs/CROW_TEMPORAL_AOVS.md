@@ -90,12 +90,21 @@ audit path and temporal scale:
   /tmp/crow.mp4 /tmp/crow.png standing /tmp/crow-aov-audit.json 2
 ```
 
-The schema-9 JSON report records format and coordinate conventions plus per-frame
+The schema-10 JSON report records format and coordinate conventions plus per-frame
 finite-pixel count, HDR values above one, exact active IDs, visible feather IDs,
 fully covered samples, unit-normal error, depth range, moving-pixel count,
 maximum motion, and bird/support vertical centroids. It also records exact
 visible/full-coverage counts and screen bounds for every persistent feather,
-wing-surface cell, and topology-bound dorsal covert. When temporal scaling is
+wing-surface cell, and topology-bound dorsal covert. Up to `128` longest
+exterior-connected background runs bracketed by bird pixels on image rows or
+columns retain both boundary class codes and surface-primitive identifiers,
+plus full packed anatomical identities. At most four samples per axis and
+ordered class pair are retained, so one large projection cannot erase other
+anatomical owners.
+These runs expose shoulder and feather-course slots that diagonal exterior
+flooding intentionally excludes from enclosed-hole counts. They are
+localization evidence, not a rule that every silhouette concavity should be
+filled. When temporal scaling is
 active, the audit also renders a separate full-resolution native oracle and
 records whole-frame RMSE, bird-foreground RMSE, maximum channel error, and bird
 silhouette intersection-over-union plus foreground gradient-energy retention.

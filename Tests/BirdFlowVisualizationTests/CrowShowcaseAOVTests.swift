@@ -101,6 +101,66 @@ func silhouetteHoleAuditDistinguishesEnclosedAndExteriorBackground() {
   )
 }
 
+@Test("exterior silhouette slot audit retains bracket ownership")
+func exteriorSilhouetteSlotAuditRetainsBracketOwnership() {
+  let width = 9
+  let height = 9
+  var bird = [Bool](repeating: false, count: width * height)
+  var classes = [UInt8](repeating: 0, count: bird.count)
+  var primitives = [UInt32](repeating: 0, count: bird.count)
+  var packedIdentities = [UInt32](repeating: 0, count: bird.count)
+  for y in 1...7 {
+    let first = y * width + 1
+    let second = y * width + 7
+    bird[first] = true
+    bird[second] = true
+    classes[first] = 2
+    classes[second] = 11
+    primitives[first] = 101
+    primitives[second] = 202
+    packedIdentities[first] = 0x0102_0302
+    packedIdentities[second] = 0x0405_060B
+  }
+  let open = CrowShowcaseFrame.exteriorSilhouetteSlotRuns(
+    birdMask: bird,
+    featherClassCodes: classes,
+    surfacePrimitiveIdentifiers: primitives,
+    packedSurfaceIdentities: packedIdentities,
+    width: width,
+    height: height
+  )
+  #expect(open.count == 4)
+  #expect(
+    open.first
+      == CrowExteriorSilhouetteSlotRunAudit(
+        axis: "horizontal",
+        pixelCount: 5,
+        minimumX: 2,
+        maximumX: 6,
+        minimumY: 1,
+        maximumY: 1,
+        firstBoundaryFeatherClassCode: 2,
+        secondBoundaryFeatherClassCode: 11,
+        firstBoundarySurfacePrimitiveIdentifier: 101,
+        secondBoundarySurfacePrimitiveIdentifier: 202,
+        firstBoundaryPackedIdentity: 0x0102_0302,
+        secondBoundaryPackedIdentity: 0x0405_060B
+      )
+  )
+
+  for x in 1...7 {
+    bird[1 * width + x] = true
+    bird[7 * width + x] = true
+  }
+  #expect(
+    CrowShowcaseFrame.exteriorSilhouetteSlotRuns(
+      birdMask: bird,
+      width: width,
+      height: height
+    ).isEmpty
+  )
+}
+
 @Test("silhouette audit separates the planted inter-leg aperture from body slits")
 func silhouetteAuditSeparatesPlantedInterLegApertureFromBodySlits() {
   let width = 16

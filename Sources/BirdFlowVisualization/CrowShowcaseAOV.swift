@@ -85,6 +85,7 @@ struct CrowShowcaseFrame {
     var birdMask = [Bool](repeating: false, count: pixelCount)
     var featherClassCodes = [UInt8](repeating: 0, count: pixelCount)
     var surfacePrimitiveIdentifiers = [UInt32](repeating: 0, count: pixelCount)
+    var packedSurfaceIdentities = [UInt32](repeating: 0, count: pixelCount)
 
     for pixel in 0..<pixelCount {
       let hdrOffset = pixel * 4
@@ -116,6 +117,7 @@ struct CrowShowcaseFrame {
       birdMask[pixel] = Self.birdIdentity(identity, offset: identityOffset)
       featherClassCodes[pixel] = UInt8(truncatingIfNeeded: id3 & 255)
       surfacePrimitiveIdentifiers[pixel] = id0 == UInt32.max ? id1 : 0
+      packedSurfaceIdentities[pixel] = id3
       if active {
         activeIdentityPixelCount += 1
         let featherClass = Int(min(id3 & 255, 31))
@@ -224,6 +226,14 @@ struct CrowShowcaseFrame {
       birdMask: birdMask,
       featherClassCodes: featherClassCodes,
       surfacePrimitiveIdentifiers: surfacePrimitiveIdentifiers,
+      width: width,
+      height: height
+    )
+    let exteriorSilhouetteSlotRuns = Self.exteriorSilhouetteSlotRuns(
+      birdMask: birdMask,
+      featherClassCodes: featherClassCodes,
+      surfacePrimitiveIdentifiers: surfacePrimitiveIdentifiers,
+      packedSurfaceIdentities: packedSurfaceIdentities,
       width: width,
       height: height
     )
@@ -344,6 +354,7 @@ struct CrowShowcaseFrame {
         silhouetteHoles.expectedLowerBodyApertureComponentCount,
       largestExpectedLowerBodyAperturePixelCount:
         silhouetteHoles.largestExpectedLowerBodyAperturePixelCount,
+      exteriorBirdSilhouetteSlotRuns: exteriorSilhouetteSlotRuns,
       movingFullyCoveredPixelCount: movingActivePixelCount,
       maximumHDRComponent: maximumHDRComponent,
       maximumMotionPixels: maximumMotionPixels,
@@ -465,25 +476,20 @@ struct CrowShowcaseFrame {
     return active && !support
   }
 
-  /// Finds background components enclosed by the bird identity silhouette.
-  /// Eight-connected exterior flooding is deliberately conservative: a
-  /// diagonal path to open background is not reported as an anatomical hole.
-  static func silhouetteHoles(
+  private static func silhouetteExterior(
     birdMask: [Bool],
-    featherClassCodes: [UInt8] = [],
-    surfacePrimitiveIdentifiers: [UInt32] = [],
     width: Int,
     height: Int
-  ) -> CrowSilhouetteHoleAudit {
-    precondition(width >= 0 && height >= 0 && birdMask.count == width * height)
-    precondition(featherClassCodes.isEmpty || featherClassCodes.count == birdMask.count)
-    precondition(
-      surfacePrimitiveIdentifiers.isEmpty
-        || surfacePrimitiveIdentifiers.count == birdMask.count
-    )
-    guard width > 0, height > 0 else { return .zero }
+  ) -> (
+    minimumX: Int,
+    maximumX: Int,
+    minimumY: Int,
+    maximumY: Int,
+    exterior: [Bool]
+  )? {
+    guard width > 0, height > 0 else { return nil }
     let birdPixels = birdMask.indices.filter { birdMask[$0] }
-    guard let first = birdPixels.first else { return .zero }
+    guard let first = birdPixels.first else { return nil }
     var minimumX = first % width
     var maximumX = minimumX
     var minimumY = first / width
@@ -530,6 +536,165 @@ struct CrowShowcaseFrame {
         }
       }
     }
+    return (minimumX, maximumX, minimumY, maximumY, exterior)
+  }
+
+  /// Reports exterior-connected background runs bracketed by bird ownership
+  /// along image rows or columns. Unlike enclosed-hole counts, these runs keep
+  /// shoulder, axillary, and feather-course slots visible to an audit even
+  /// when they open diagonally onto the surrounding background. Runs are
+  /// evidence for localization, not an assertion that every concavity is a
+  /// defect; boundary class and primitive owners are retained explicitly.
+  static func exteriorSilhouetteSlotRuns(
+    birdMask: [Bool],
+    featherClassCodes: [UInt8] = [],
+    surfacePrimitiveIdentifiers: [UInt32] = [],
+    packedSurfaceIdentities: [UInt32] = [],
+    width: Int,
+    height: Int
+  ) -> [CrowExteriorSilhouetteSlotRunAudit] {
+    precondition(width >= 0 && height >= 0 && birdMask.count == width * height)
+    precondition(featherClassCodes.isEmpty || featherClassCodes.count == birdMask.count)
+    precondition(
+      surfacePrimitiveIdentifiers.isEmpty
+        || surfacePrimitiveIdentifiers.count == birdMask.count
+    )
+    precondition(
+      packedSurfaceIdentities.isEmpty
+        || packedSurfaceIdentities.count == birdMask.count
+    )
+    guard let silhouette = silhouetteExterior(
+      birdMask: birdMask,
+      width: width,
+      height: height
+    ) else { return [] }
+
+    func classCode(_ pixel: Int) -> UInt8 {
+      featherClassCodes.isEmpty ? 0 : featherClassCodes[pixel]
+    }
+    func primitive(_ pixel: Int) -> UInt32 {
+      surfacePrimitiveIdentifiers.isEmpty ? 0 : surfacePrimitiveIdentifiers[pixel]
+    }
+    func packedIdentity(_ pixel: Int) -> UInt32 {
+      packedSurfaceIdentities.isEmpty ? 0 : packedSurfaceIdentities[pixel]
+    }
+    var runs: [CrowExteriorSilhouetteSlotRunAudit] = []
+    for y in silhouette.minimumY...silhouette.maximumY {
+      var x = silhouette.minimumX
+      while x <= silhouette.maximumX {
+        guard !birdMask[y * width + x] else {
+          x += 1
+          continue
+        }
+        let startX = x
+        while x <= silhouette.maximumX && !birdMask[y * width + x] { x += 1 }
+        let endX = x - 1
+        guard startX > silhouette.minimumX, x <= silhouette.maximumX,
+          silhouette.exterior[y * width + startX]
+        else { continue }
+        let firstBoundary = y * width + startX - 1
+        let secondBoundary = y * width + x
+        runs.append(
+          CrowExteriorSilhouetteSlotRunAudit(
+            axis: "horizontal",
+            pixelCount: endX - startX + 1,
+            minimumX: startX,
+            maximumX: endX,
+            minimumY: y,
+            maximumY: y,
+            firstBoundaryFeatherClassCode: classCode(firstBoundary),
+            secondBoundaryFeatherClassCode: classCode(secondBoundary),
+            firstBoundarySurfacePrimitiveIdentifier: primitive(firstBoundary),
+            secondBoundarySurfacePrimitiveIdentifier: primitive(secondBoundary),
+            firstBoundaryPackedIdentity: packedIdentity(firstBoundary),
+            secondBoundaryPackedIdentity: packedIdentity(secondBoundary)
+          )
+        )
+      }
+    }
+    for x in silhouette.minimumX...silhouette.maximumX {
+      var y = silhouette.minimumY
+      while y <= silhouette.maximumY {
+        guard !birdMask[y * width + x] else {
+          y += 1
+          continue
+        }
+        let startY = y
+        while y <= silhouette.maximumY && !birdMask[y * width + x] { y += 1 }
+        let endY = y - 1
+        guard startY > silhouette.minimumY, y <= silhouette.maximumY,
+          silhouette.exterior[startY * width + x]
+        else { continue }
+        let firstBoundary = (startY - 1) * width + x
+        let secondBoundary = y * width + x
+        runs.append(
+          CrowExteriorSilhouetteSlotRunAudit(
+            axis: "vertical",
+            pixelCount: endY - startY + 1,
+            minimumX: x,
+            maximumX: x,
+            minimumY: startY,
+            maximumY: endY,
+            firstBoundaryFeatherClassCode: classCode(firstBoundary),
+            secondBoundaryFeatherClassCode: classCode(secondBoundary),
+            firstBoundarySurfacePrimitiveIdentifier: primitive(firstBoundary),
+            secondBoundarySurfacePrimitiveIdentifier: primitive(secondBoundary),
+            firstBoundaryPackedIdentity: packedIdentity(firstBoundary),
+            secondBoundaryPackedIdentity: packedIdentity(secondBoundary)
+          )
+        )
+      }
+    }
+    let sortedRuns = runs.sorted {
+      if $0.pixelCount != $1.pixelCount {
+        return $0.pixelCount > $1.pixelCount
+      }
+      if $0.axis != $1.axis { return $0.axis < $1.axis }
+      return ($0.minimumY, $0.minimumX, $0.maximumY, $0.maximumX)
+        < ($1.minimumY, $1.minimumX, $1.maximumY, $1.maximumX)
+    }
+    var pairCounts: [UInt32: Int] = [:]
+    var selected: [CrowExteriorSilhouetteSlotRunAudit] = []
+    for run in sortedRuns {
+      let axisCode: UInt32 = run.axis == "vertical" ? 1 : 0
+      let pairKey =
+        (axisCode << 16)
+        | (UInt32(run.firstBoundaryFeatherClassCode) << 8)
+        | UInt32(run.secondBoundaryFeatherClassCode)
+      guard pairCounts[pairKey, default: 0] < 4 else { continue }
+      pairCounts[pairKey, default: 0] += 1
+      selected.append(run)
+      if selected.count == 128 { break }
+    }
+    return selected
+  }
+
+  /// Finds background components enclosed by the bird identity silhouette.
+  /// Eight-connected exterior flooding is deliberately conservative: a
+  /// diagonal path to open background is not reported as an anatomical hole.
+  static func silhouetteHoles(
+    birdMask: [Bool],
+    featherClassCodes: [UInt8] = [],
+    surfacePrimitiveIdentifiers: [UInt32] = [],
+    width: Int,
+    height: Int
+  ) -> CrowSilhouetteHoleAudit {
+    precondition(width >= 0 && height >= 0 && birdMask.count == width * height)
+    precondition(featherClassCodes.isEmpty || featherClassCodes.count == birdMask.count)
+    precondition(
+      surfacePrimitiveIdentifiers.isEmpty
+        || surfacePrimitiveIdentifiers.count == birdMask.count
+    )
+    guard let silhouette = silhouetteExterior(
+      birdMask: birdMask,
+      width: width,
+      height: height
+    ) else { return .zero }
+    let minimumX = silhouette.minimumX
+    let maximumX = silhouette.maximumX
+    let minimumY = silhouette.minimumY
+    let maximumY = silhouette.maximumY
+    let exterior = silhouette.exterior
 
     var visited = exterior
     var total = 0
@@ -821,6 +986,21 @@ struct CrowSilhouetteSurfacePrimitiveReference: Codable, Equatable, Hashable {
   let featherClassCode: UInt8
 }
 
+struct CrowExteriorSilhouetteSlotRunAudit: Codable, Equatable {
+  let axis: String
+  let pixelCount: Int
+  let minimumX: Int
+  let maximumX: Int
+  let minimumY: Int
+  let maximumY: Int
+  let firstBoundaryFeatherClassCode: UInt8
+  let secondBoundaryFeatherClassCode: UInt8
+  let firstBoundarySurfacePrimitiveIdentifier: UInt32
+  let secondBoundarySurfacePrimitiveIdentifier: UInt32
+  let firstBoundaryPackedIdentity: UInt32
+  let secondBoundaryPackedIdentity: UInt32
+}
+
 struct CrowShowcaseAOVFrameAudit: Codable, Equatable {
   let frameIndex: Int
   let width: Int
@@ -874,6 +1054,10 @@ struct CrowShowcaseAOVFrameAudit: Codable, Equatable {
   let expectedLowerBodyAperturePixelCount: Int
   let expectedLowerBodyApertureComponentCount: Int
   let largestExpectedLowerBodyAperturePixelCount: Int
+  /// Up to 128 longest exterior-connected background runs bracketed by bird
+  /// ownership on an image row or column. At most four samples per axis and
+  /// ordered boundary-class pair preserve semantic diversity.
+  let exteriorBirdSilhouetteSlotRuns: [CrowExteriorSilhouetteSlotRunAudit]
   let movingFullyCoveredPixelCount: Int
   let maximumHDRComponent: Float
   let maximumMotionPixels: Float
@@ -994,7 +1178,7 @@ struct CrowShowcaseAOVAuditReport: Codable, Equatable {
   let frames: [CrowShowcaseAOVFrameAudit]
 
   init(frames: [CrowShowcaseAOVFrameAudit]) {
-    schemaVersion = 9
+    schemaVersion = 10
     colorSpace = "scene-linear extended range; display output is tone mapped separately"
     motionConvention =
       "current pixel to previous pixel in upper-left-origin pixel units; MetalFX scale 1"
