@@ -149,6 +149,17 @@ ordering transfers here. All vane asymmetry, width, crown, and camber values are
 bounded estimates rather than American-crow measurements. Full asset length,
 stable ID/hash, and solver geometry remain unchanged.
 
+The initial takeoff hold also retains a paired `8 mm` deep-underplumage lobe
+from the existing rump volume into each folded outer-wing/rectrix junction.
+The lobes remain at full area through presentation phase `0.125` and collapse
+smoothly to zero area by phase `0.375`, before free distal articulation. They
+do not widen an exposed vane, move a feather root or tip, or enter the solver.
+A 253-frame, 13-view native AOV audit introduced no silhouette-hole or expected
+leg-aperture regression (`1,950 -> 1,923` total enclosed pixels); a separate
+near-vertical underside probe reduced the folded junction's largest component
+from `72` pixels to `1-3` pixels. These are presentation-geometry checks, not
+evidence for measured American-crow underplumage dimensions.
+
 The cranial surface is not transported as a detached rigid shell during quiet
 standing. Points buried in the trunk-facing nape remain body-anchored, a cubic
 coupling field deforms the visible neck, and the field reaches rigid-head motion

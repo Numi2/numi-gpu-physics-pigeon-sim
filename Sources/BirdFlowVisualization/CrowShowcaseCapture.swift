@@ -1768,6 +1768,13 @@ private struct CrowMeshBuilder {
       bodyCenter: posedBodyCenter,
       to: &vertices
     )
+    if presentation == .takeoff {
+      appendFoldedWingTailUnderlayer(
+        bodyCenter: posedBodyCenter,
+        phase: phase,
+        to: &vertices
+      )
+    }
     let radiiRaw = profile.visualTransform.headRadiusXYZMeters
     let radii =
       SIMD3<Float>(radiiRaw[0], radiiRaw[1], radiiRaw[2])
@@ -2123,6 +2130,31 @@ private struct CrowMeshBuilder {
       radialSegments: 18,
       to: &vertices
     )
+  }
+
+  private func appendFoldedWingTailUnderlayer(
+    bodyCenter: SIMD3<Float>,
+    phase: Float,
+    to vertices: inout [ColoredVertex]
+  ) {
+    let weight = CrowRumpTailUnderlayer.foldedWingTailWeight(
+      presentationPhase: phase
+    )
+    let anchor = bodyCenter + CrowRumpTailUnderlayer.segment().endOffset
+    for left in [true, false] {
+      let segment = CrowRumpTailUnderlayer.foldedWingTailSegment(left: left)
+      let startTarget = bodyCenter + segment.startOffset
+      let endTarget = bodyCenter + segment.endOffset
+      appendTaperedTube(
+        from: anchor + weight * (startTarget - anchor),
+        to: anchor + weight * (endTarget - anchor),
+        startRadius: weight * segment.startRadiusMeters,
+        endRadius: weight * segment.endRadiusMeters,
+        color: SIMD4<Float>(0.0048, 0.0068, 0.0115, 0.11),
+        radialSegments: 18,
+        to: &vertices
+      )
+    }
   }
 
   private func appendBodyContourUnderlayer(
