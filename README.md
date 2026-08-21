@@ -77,7 +77,9 @@ crow photograph or generated target image in this README. The linked
 estimated geometry and material on Apple silicon. The GIF retains simulated
 topology through a quiet standing hold, geometric wing deployment, leg
 retraction, liftoff, and sustained flapping; it contains no image dissolve or
-reference footage. A locked
+reference footage. The live dorsal covert courses now add LOD-selected,
+vane-contained rachis ribbons without changing the simulated wing silhouette.
+A locked
 `2,157`-vertex, `3,968`-triangle estimated-hybrid surface now also passes the
 live Apple-Metal geometry and production TRT moving-boundary coupling gates.
 The complete [model and evidence boundary](Docs/AMERICAN_CROW_MODEL.md) keeps

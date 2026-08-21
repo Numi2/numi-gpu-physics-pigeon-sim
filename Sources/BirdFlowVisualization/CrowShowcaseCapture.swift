@@ -3180,6 +3180,7 @@ private struct CrowMeshBuilder {
     endHalfWidth: Float,
     surfaceNormal: SIMD3<Float>,
     color: SIMD4<Float>,
+    surfaceFeatherClass: UInt32 = 0,
     to vertices: inout [ColoredVertex]
   ) {
     let axis = safeNormalize(end - start, fallback: SIMD3<Float>(-1, 0, 0))
@@ -3196,7 +3197,14 @@ private struct CrowMeshBuilder {
     let c = end + across * endHalfWidth
     let d = end - across * endHalfWidth
     for point in [a, b, c, a, c, d] {
-      vertices.append(vertex(point, normal: normal, color: color))
+      vertices.append(
+        vertex(
+          point,
+          normal: normal,
+          color: color,
+          parameters: SIMD4<Float>(0.5, 0, 0, Float(surfaceFeatherClass))
+        )
+      )
     }
   }
 
@@ -3743,6 +3751,7 @@ private struct CrowMeshBuilder {
             spanIndex: span,
             left: left
           )
+        let featherCamber = camberScale * 0.035 * simd_length(chordVector)
         appendFeatherBlade(
           root: root + dorsalNormal * (0.0015 + abdominalHandoffNormalLift),
           tip: surfaceTip + dorsalNormal * (0.0025 + abdominalHandoffNormalLift),
@@ -3760,7 +3769,7 @@ private struct CrowMeshBuilder {
             0.18 + 0.008 * materialVariation
           ),
           sections: 7,
-          camber: camberScale * 0.035 * simd_length(chordVector),
+          camber: featherCamber,
           transverseCamberRatio: 0.16,
           vaneAsymmetry: caudalSecondaryHandoffVaneAsymmetry,
           edgeRippleAmplitude: 0.008 + 0.010 * (0.5 + 0.5 * edgeVariation),
@@ -3773,6 +3782,32 @@ private struct CrowMeshBuilder {
           projectedPixelsPerMeter: projectedPixelsPerMeter,
           to: &vertices
         )
+        let rachisColor = SIMD4<Float>(
+          (0.0095 + 0.002 * rowFraction) * (1 + 0.08 * materialVariation),
+          (0.0140 + 0.003 * rowFraction) * (1 + 0.06 * materialVariation),
+          (0.0240 + 0.004 * rowFraction) * (1 + 0.04 * materialVariation),
+          0.25 + 0.008 * materialVariation
+        )
+        for segment in CrowWingCovertRachisDetail.segments(
+          root: root + dorsalNormal * (0.0015 + abdominalHandoffNormalLift),
+          tip: surfaceTip + dorsalNormal * (0.0025 + abdominalHandoffNormalLift),
+          planeNormal: dorsalNormal,
+          camberMeters: featherCamber,
+          baseRadiusMeters: min(0.00024, max(0.00010, 0.018 * spacing)),
+          lodLengthMeters: 0.12,
+          projectedPixelsPerMeter: projectedPixelsPerMeter
+        ) {
+          appendTaperedRibbon(
+            from: segment.start,
+            to: segment.end,
+            startHalfWidth: segment.startRadiusMeters,
+            endHalfWidth: segment.endRadiusMeters,
+            surfaceNormal: dorsalNormal,
+            color: rachisColor,
+            surfaceFeatherClass: 4,
+            to: &vertices
+          )
+        }
       }
     }
   }

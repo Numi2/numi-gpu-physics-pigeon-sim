@@ -175,6 +175,21 @@ it exposed pre-existing body-wing cavities as large as `100` pixels from other
 angles. The retained shaft radius, fan pose, and material variation remain
 presentation estimates rather than measured American-crow microstructure.
 
+The topology-bound dorsal flight coverts now carry the same contained-detail
+principle. Each CPU vane adds a longitudinally cambered rachis only when its
+final-output coverage selects a shaft tier; the shaft begins at `4%` chord,
+ends at `96.5%`, and tapers to `16%` of its estimated base radius. It retains
+feather-class `4` ownership and is generated from the same root, tip, normal,
+and camber as the owning vane. Across the established 253-frame, 13-view orbit,
+active and fully covered identity pixels, enclosed-hole totals, largest holes,
+component counts, and expected lower-body apertures remained exact. Only `163`
+already-covered class-`4` pixels changed visible surface ownership to the
+brighter shaft triangles. A larger experiment that deployed 42 retained remex
+identities on the articulated wing was rejected before publication: it left a
+new `6-8` pixel primary/covert junction slot and did not replace the dominant
+broad covert silhouettes. The shaft radii and color contrast are presentation
+estimates, not measured American-crow feather microstructure.
+
 The cranial surface is not transported as a detached rigid shell during quiet
 standing. Points buried in the trunk-facing nape remain body-anchored, a cubic
 coupling field deforms the visible neck, and the field reaches rigid-head motion
