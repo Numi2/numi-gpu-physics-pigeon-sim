@@ -56,6 +56,14 @@ the standing tail closes to a narrow caudal stack. These all-angle attachment
 constraints were qualified from simulated front and near-rear cameras; no
 reference image is rendered or stored.
 
+The separate folded live-wing topology now retains its full `9 x 33` inventory
+while narrowing laterally from `52%` through `94%` span. Its distal chord
+stations converge to a `10-14 mm` envelope beside the retained primary and
+rectrix stack instead of carrying the proximal `40-50 mm` envelope to a pair of
+isolated tips. Every surface-bound covert follows the same positions and stable
+submission order. The taper is an all-angle presentation correction, not a
+measured American-crow folded-wing profile or a solver-surface change.
+
 The flight presentation draws the complete fixed-topology wing surface as a
 dark gap-closing layer and closes the tail with asset-length rectrices. The
 solver sequence's lower reversal sweeps the distal dove-derived surface forward

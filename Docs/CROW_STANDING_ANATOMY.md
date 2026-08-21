@@ -344,6 +344,18 @@ largest high-front component belongs to planted leg/foot articulation. These
 are deterministic raster and implementation gates, not measured feather motion
 or proof of perceptual realism.
 
+The folded live-wing sheet now converges into that retained stack rather than
+remaining constant-width at its distal topology stations. A smooth spanwise
+taper begins at `52%`, reaches its terminal `10-14 mm` lateral envelope by
+`94%`, and transports every existing topology-bound covert without changing the
+`9 x 33` inventory or its deployment endpoint. Three new 17-frame probes at
+yaw/pitch `(-0.50,0.78)`, `(0.12,0.88)`, and `(0.62,0.72)` remove the paired
+outer blade silhouette and reduce aggregate enclosed pixels from `1,019` to
+`1,010`. Components change from `330` to `331`, zero expected apertures remain
+exact, and the unchanged `156`-pixel worst component is traced to lower-body
+femoral/pedal articulation rather than the tapered wing. This qualifies the
+simulated raster transition only; the taper values are not measured anatomy.
+
 The deployed chord-`3` live covert course now settles its proximal camber and
 dorsal clearance to `48%` at the root, recovering to full relief across `12`
 span stations while the folded hold, vane width, chord, and every feather

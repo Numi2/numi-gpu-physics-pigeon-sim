@@ -35,6 +35,11 @@ enum CrowTakeoffSequence {
   /// These values mirror `blendCrowTakeoffFeatherRoots` in Metal.
   static let retainedFeatherHandoffStartProgress: Float = 0.08
   static let retainedFeatherHandoffEndProgress: Float = 0.62
+  /// The folded live-wing sheet stays broad over the flank, then converges
+  /// smoothly into the retained primary/rectrix stack instead of ending as a
+  /// pair of constant-width topology blades.
+  static let foldedWingDistalTaperStartFraction: Float = 0.52
+  static let foldedWingDistalTaperEndFraction: Float = 0.94
   static let terminalPrimaryHandoffMaximumLateralOffsetMeters: Float = 0.004
   static let terminalPrimaryHandoffStartProgress: Float = 0.004
   static let terminalPrimaryHandoffPeakProgress: Float = 0.018
@@ -237,9 +242,23 @@ enum CrowTakeoffSequence {
     let chord = Float(chordIndex) / Float(CrowFlightWingBodyIntegration.chordCount - 1)
     let side: Float = left ? 1 : -1
     let root = CrowFlightWingBodyIntegration.bodyRoot(chordIndex: chordIndex, left: left)
+    let untaperedLateral = 0.040 + 0.010 * chord + 0.004 * sin(Float.pi * span)
+    let distalTaperProgress = min(
+      max(
+        (span - foldedWingDistalTaperStartFraction)
+          / (foldedWingDistalTaperEndFraction
+            - foldedWingDistalTaperStartFraction),
+        0
+      ),
+      1
+    )
+    let distalTaper = smootherstep(distalTaperProgress)
+    let foldedTipLateral = 0.010 + 0.004 * chord
     return SIMD3<Float>(
       root.x - 0.205 * span + 0.020 * chord * span,
-      side * (0.040 + 0.010 * chord + 0.004 * sin(Float.pi * span)),
+      side
+        * (untaperedLateral
+          + distalTaper * (foldedTipLateral - untaperedLateral)),
       root.z - 0.030 * span + 0.008 * chord
     )
   }

@@ -76,6 +76,43 @@ func takeoffFoldedWingTopologyIsBilateral() {
     #expect(abs(left.y + right.y) < 1e-7)
     #expect(abs(left.z - right.z) < 1e-7)
   }
+
+  #expect(CrowTakeoffSequence.foldedWingDistalTaperStartFraction == 0.52)
+  #expect(CrowTakeoffSequence.foldedWingDistalTaperEndFraction == 0.94)
+  for chord in 0..<CrowFlightWingBodyIntegration.chordCount {
+    let root = CrowTakeoffSequence.foldedWingPoint(
+      spanIndex: 0,
+      chordIndex: chord,
+      left: true
+    )
+    let mid = CrowTakeoffSequence.foldedWingPoint(
+      spanIndex: 16,
+      chordIndex: chord,
+      left: true
+    )
+    let tip = CrowTakeoffSequence.foldedWingPoint(
+      spanIndex: CrowFlightWingBodyIntegration.spanCount - 1,
+      chordIndex: chord,
+      left: true
+    )
+    #expect(root.y >= 0.040 && root.y <= 0.0501)
+    #expect(mid.y >= 0.040)
+    #expect(tip.y >= 0.010 && tip.y <= 0.0141)
+    #expect(tip.y < mid.y - 0.025)
+
+    let taperedPoints = (17..<CrowFlightWingBodyIntegration.spanCount).map {
+      CrowTakeoffSequence.foldedWingPoint(
+        spanIndex: $0,
+        chordIndex: chord,
+        left: true
+      )
+    }
+    for (current, next) in zip(taperedPoints, taperedPoints.dropFirst()) {
+      #expect(next.x < current.x)
+      #expect(next.y <= current.y + 1e-7)
+      #expect(current.y - next.y < 0.006)
+    }
+  }
 }
 
 @Test("terminal primary handoff is bounded to initial wing deployment")

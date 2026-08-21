@@ -47,6 +47,11 @@ open-flight endpoint on Metal, while remiges use a complementary zero-area
 handoff to the articulated surface. This removes duplicate CPU tail ownership
 without changing the compact record contract that future mesh, curve, or
 ray-tracing emitters will consume.
+The folded live-wing surface now preserves its complete `9 x 33` topology while
+converging its distal lateral envelope into the retained feather stack. Because
+all topology-bound covert identities inherit that deformation, a future GPU
+surface evaluator can reproduce the same taper without adding a third feather
+inventory or view-dependent patch geometry.
 
 ## Ordered milestones
 

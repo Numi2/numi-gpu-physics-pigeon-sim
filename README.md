@@ -102,6 +102,15 @@ Across rear-level, right-low-quarter, and high-front 17-frame audits, enclosed
 hole pixels fall from `535` to `359`, components from `198` to `190`, and the
 largest hole from `38` to `29` pixels while the `4` expected lower-body pixels
 remain exact. The targeted `38`-pixel high-front tail/wing cavity is absent.
+The folded live-wing sheet now also narrows smoothly from `52%` to `94%` span,
+ending in a `10-14 mm` lateral envelope shared by every topology-bound covert.
+Previously its `40-50 mm` width continued to the distal station and appeared as
+two upright blades above the tail from overhead views. Three new 17-frame
+left-high, overhead, and right-high probes remove those outer blades, reduce
+aggregate enclosed pixels from `1,019` to `1,010`, preserve zero expected
+apertures, and leave the separate `156`-pixel lower-body articulation component
+unchanged. This is estimated presentation geometry, not a measured folded-wing
+width.
 The middle live covert course also retains its full folded relief, then seats
 its deployed root camber and clearance to `48%` across the first `12` span
 stations; vane width, chord, identity, and the caudal handoff remain unchanged.
