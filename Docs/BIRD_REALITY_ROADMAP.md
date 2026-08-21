@@ -41,6 +41,12 @@ The grounded-pose path now proves that identity contract across a second motion
 regime: it folds the same inventory on Metal rather than treating quiet standing
 as a slowed flight loop, and keeps toe contacts fixed while the body, head, and
 ankles move by millimetres.
+The takeoff path now extends that contract through a third regime: the `12`
+retained rectrices unfold continuously from their closed stack into the
+open-flight endpoint on Metal, while remiges use a complementary zero-area
+handoff to the articulated surface. This removes duplicate CPU tail ownership
+without changing the compact record contract that future mesh, curve, or
+ray-tracing emitters will consume.
 
 ## Ordered milestones
 

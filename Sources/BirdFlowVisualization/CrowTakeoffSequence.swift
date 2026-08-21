@@ -31,6 +31,10 @@ enum CrowTakeoffSequence {
   static let transitionEnd: Float = 0.56
   static let foldedShellCollapseStartProgress: Float = 0.16
   static let foldedShellCollapseEndProgress: Float = 0.82
+  /// Retained remiges collapse while the same retained rectrix records unfold.
+  /// These values mirror `blendCrowTakeoffFeatherRoots` in Metal.
+  static let retainedFeatherHandoffStartProgress: Float = 0.08
+  static let retainedFeatherHandoffEndProgress: Float = 0.62
   static let terminalPrimaryHandoffMaximumLateralOffsetMeters: Float = 0.004
   static let terminalPrimaryHandoffStartProgress: Float = 0.004
   static let terminalPrimaryHandoffPeakProgress: Float = 0.018
@@ -109,6 +113,58 @@ enum CrowTakeoffSequence {
       1
     )
     return 1 - smootherstep(normalized)
+  }
+
+  /// Complement of the retained folded-remex visibility used by Metal.
+  /// Rectrices remain full-sized and interpolate from their closed stack to
+  /// their open-flight fan; this weight controls pose, never raster blending.
+  static func liveRectrixDeploymentWeight(
+    transitionProgress: Float
+  ) -> Float {
+    let normalized = min(
+      max(
+        (transitionProgress - retainedFeatherHandoffStartProgress)
+          / (retainedFeatherHandoffEndProgress
+            - retainedFeatherHandoffStartProgress),
+        0
+      ),
+      1
+    )
+    return normalized * normalized * (3 - 2 * normalized)
+  }
+
+  /// Topology-stable target for one retained rectrix during takeoff.
+  static func transitionRectrixPose(
+    order: Int,
+    count: Int,
+    transitionProgress: Float
+  ) -> FlightRectrixPose {
+    let deployment = liveRectrixDeploymentWeight(
+      transitionProgress: transitionProgress
+    )
+    let fraction = Float(order) / Float(max(count - 1, 1))
+    let closed = CrowClosedTailAnatomy.pose(fraction: fraction)
+    if deployment <= 0 {
+      return FlightRectrixPose(
+        rootOffset: closed.rootOffset,
+        tipOffset: closed.tipOffset,
+        direction: closed.direction,
+        normal: closed.normal
+      )
+    }
+    let flight = flightRectrixPose(order: order, count: count)
+    if deployment >= 1 { return flight }
+    let root = mix(closed.rootOffset, flight.rootOffset, deployment)
+    let tip = mix(closed.tipOffset, flight.tipOffset, deployment)
+    return FlightRectrixPose(
+      rootOffset: root,
+      tipOffset: tip,
+      direction: safeNormalize(tip - root, fallback: closed.direction),
+      normal: safeNormalize(
+        mix(closed.normal, flight.normal, deployment),
+        fallback: closed.normal
+      )
+    )
   }
 
   /// Open-flight target for one presentation rectrix. Centralizing the fan

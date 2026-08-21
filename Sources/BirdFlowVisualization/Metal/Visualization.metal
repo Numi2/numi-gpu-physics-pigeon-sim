@@ -451,6 +451,75 @@ inline float crowSmootherstep01(float value) {
     return value*value*value*(value*(value*6.0f-15.0f)+10.0f);
 }
 
+inline float crowLiveRectrixDeploymentWeight(float transitionProgress) {
+    float normalized=clamp((transitionProgress-0.08f)/(0.62f-0.08f),0.0f,1.0f);
+    return normalized*normalized*(3.0f-2.0f*normalized);
+}
+
+struct CrowTakeoffRectrixPose {
+    float3 rootOffset;
+    float3 direction;
+    float3 normal;
+};
+
+inline CrowTakeoffRectrixPose crowTakeoffRectrixPose(
+    uint packedIdentity,
+    float transitionProgress) {
+    uint order=(packedIdentity>>16u)&255u;
+    uint count=max((packedIdentity>>24u)&255u,1u);
+    float fraction=float(min(order,count-1u))/float(max(count-1u,1u));
+    float centered=2.0f*fraction-1.0f;
+    float radialFraction=abs(centered);
+    float sideSign=centered==0.0f?0.0f:(centered>0.0f?1.0f:-1.0f);
+    float3 closedRoot=float3(
+        -0.154f+0.003f*radialFraction,
+        0.006f*centered,
+        0.0065f-0.004f*radialFraction
+    );
+    float verticalDirection=
+        (-0.025f-0.006f*radialFraction-closedRoot.z)/0.166f;
+    float3 closedDirection=safeNormalizeCrow(
+        float3(
+            -sqrt(max(0.0f,1.0f-verticalDirection*verticalDirection)),
+            0,
+            verticalDirection
+        ),
+        float3(-1,0,0)
+    );
+    float3 closedTip=closedRoot+0.166f*closedDirection;
+    float3 closedNormal=safeNormalizeCrow(
+        float3(0.04f,sideSign*(0.045f+0.110f*radialFraction),1),
+        float3(0,0,1)
+    );
+
+    float lateral=(fraction-0.5f)*0.145f;
+    float central=1.0f-abs(centered);
+    float3 flightRoot=float3(
+        -0.125f,
+        lateral*0.24f,
+        0.005f+0.006f*central
+    );
+    float3 flightTip=float3(-0.125f,0,0.005f)
+        +float3(-0.190f,0,-0.018f)*(0.96f+0.02f*central)
+        +float3(
+            -0.002f*central,
+            lateral,
+            (fraction-0.5f)*0.036f-0.003f*radialFraction
+        );
+    float3 flightNormal=safeNormalizeCrow(
+        float3(0,-1,0.12f),
+        float3(0,-1,0)
+    );
+    float deployment=crowLiveRectrixDeploymentWeight(transitionProgress);
+    float3 rootOffset=mix(closedRoot,flightRoot,deployment);
+    float3 tipOffset=mix(closedTip,flightTip,deployment);
+    CrowTakeoffRectrixPose pose;
+    pose.rootOffset=rootOffset;
+    pose.direction=safeNormalizeCrow(tipOffset-rootOffset,closedDirection);
+    pose.normal=safeNormalizeCrow(mix(closedNormal,flightNormal,deployment),closedNormal);
+    return pose;
+}
+
 inline float crowTerminalPrimaryHandoffLateralOffsetMeters(
     uint packedIdentity,
     float transitionProgress) {
@@ -476,6 +545,41 @@ kernel void blendCrowTakeoffFeatherRoots(
     float currentFoldedVisibility=1.0f-smoothstep(0.08f,0.62f,currentBlend);
     float previousFoldedVisibility=1.0f-smoothstep(0.08f,0.62f,previousBlend);
     uint packedIdentity=grounded.identity.w;
+    uint featherClass=packedIdentity&255u;
+    if(featherClass==3u){
+        CrowTakeoffRectrixPose closed=crowTakeoffRectrixPose(packedIdentity,0.0f);
+        CrowTakeoffRectrixPose current=crowTakeoffRectrixPose(
+            packedIdentity,currentBlend
+        );
+        CrowTakeoffRectrixPose previous=crowTakeoffRectrixPose(
+            packedIdentity,previousBlend
+        );
+        CrowFeatherRootStateGPU state;
+        state.currentPositionAndLength=float4(
+            grounded.currentPositionAndLength.xyz
+                +uniforms.currentBodyTranslation.xyz
+                +(current.rootOffset-closed.rootOffset),
+            grounded.currentPositionAndLength.w
+        );
+        state.previousPositionAndWidth=float4(
+            grounded.previousPositionAndWidth.xyz
+                +uniforms.previousBodyTranslation.xyz
+                +(previous.rootOffset-closed.rootOffset),
+            grounded.previousPositionAndWidth.w
+        );
+        state.currentDirectionAndRachis=float4(
+            current.direction,grounded.currentDirectionAndRachis.w
+        );
+        state.previousDirectionAndCamber=float4(
+            previous.direction,grounded.previousDirectionAndCamber.w
+        );
+        state.currentNormalAndPadding=float4(current.normal,0);
+        state.previousNormalAndPadding=float4(previous.normal,0);
+        state.previousMorphology=grounded.previousMorphology;
+        state.identity=grounded.identity;
+        output[featherIndex]=state;
+        return;
+    }
     uint sideCode=(packedIdentity>>8u)&255u;
     float side=sideCode==1u?1.0f:(sideCode==2u?-1.0f:0.0f);
     float inverseLength=1.0f/max(grounded.currentPositionAndLength.w,1.0e-6f);

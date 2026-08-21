@@ -1,4 +1,5 @@
 import Testing
+import simd
 
 @testable import BirdFlowVisualization
 
@@ -131,4 +132,78 @@ func openFlightRectrixTargetsRetainConnectedRootFan() {
   #expect(poses.first!.tipOffset.y < -0.07)
   #expect(poses.last!.tipOffset.y > 0.07)
   #expect(poses.last!.tipOffset.z - poses.first!.tipOffset.z > 0.035)
+}
+
+@Test("retained rectrices unfold continuously from the closed stack")
+func retainedRectricesUnfoldContinuouslyFromClosedStack() {
+  #expect(CrowTakeoffSequence.retainedFeatherHandoffStartProgress == 0.08)
+  #expect(CrowTakeoffSequence.retainedFeatherHandoffEndProgress == 0.62)
+  #expect(
+    CrowTakeoffSequence.liveRectrixDeploymentWeight(transitionProgress: 0.08)
+      == 0
+  )
+  #expect(
+    abs(
+      CrowTakeoffSequence.liveRectrixDeploymentWeight(
+        transitionProgress: 0.35
+      ) - 0.5
+    ) < 1e-6
+  )
+  #expect(
+    CrowTakeoffSequence.liveRectrixDeploymentWeight(transitionProgress: 0.62)
+      == 1
+  )
+
+  let count = CrowClosedTailAnatomy.rectrixCount
+  for order in 0..<count {
+    let fraction = Float(order) / Float(count - 1)
+    let closed = CrowClosedTailAnatomy.pose(fraction: fraction)
+    let held = CrowTakeoffSequence.transitionRectrixPose(
+      order: order,
+      count: count,
+      transitionProgress: 0
+    )
+    let flight = CrowTakeoffSequence.flightRectrixPose(
+      order: order,
+      count: count
+    )
+    let deployed = CrowTakeoffSequence.transitionRectrixPose(
+      order: order,
+      count: count,
+      transitionProgress: 1
+    )
+    #expect(held.rootOffset == closed.rootOffset)
+    #expect(held.tipOffset == closed.tipOffset)
+    #expect(held.direction == closed.direction)
+    #expect(held.normal == closed.normal)
+    #expect(deployed == flight)
+
+    let middle = CrowTakeoffSequence.transitionRectrixPose(
+      order: order,
+      count: count,
+      transitionProgress: 0.35
+    )
+    #expect(abs(simd_length(middle.direction) - 1) < 1e-6)
+    #expect(abs(simd_length(middle.normal) - 1) < 1e-6)
+    #expect(
+      simd_distance(middle.rootOffset, closed.rootOffset)
+        < simd_distance(flight.rootOffset, closed.rootOffset)
+    )
+  }
+
+  for order in 0..<(count / 2) {
+    let right = CrowTakeoffSequence.transitionRectrixPose(
+      order: order,
+      count: count,
+      transitionProgress: 0.35
+    )
+    let left = CrowTakeoffSequence.transitionRectrixPose(
+      order: count - 1 - order,
+      count: count,
+      transitionProgress: 0.35
+    )
+    #expect(abs(right.rootOffset.x - left.rootOffset.x) < 1e-7)
+    #expect(abs(right.rootOffset.y + left.rootOffset.y) < 1e-7)
+    #expect(abs(right.tipOffset.y + left.tipOffset.y) < 1e-7)
+  }
 }

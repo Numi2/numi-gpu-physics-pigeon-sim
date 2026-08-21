@@ -1670,12 +1670,14 @@ private struct CrowMeshBuilder {
         projectedPixelsPerMeter: projectedPixelsPerMeter,
         to: &vertices
       )
-      appendTailFeathers(
-        states: states,
-        bodyCenter: bodyCenter,
-        projectedPixelsPerMeter: projectedPixelsPerMeter,
-        to: &vertices
-      )
+      if presentation == .wingbeat {
+        appendTailFeathers(
+          states: states,
+          bodyCenter: bodyCenter,
+          projectedPixelsPerMeter: projectedPixelsPerMeter,
+          to: &vertices
+        )
+      }
     }
     return vertices
   }

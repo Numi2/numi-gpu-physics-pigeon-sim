@@ -139,6 +139,16 @@ supports the general role of covert linkages and smooth muscle in a morphing
 avian wing, but its rock-pigeon anatomy does not provide American-crow
 attachment coordinates or the encoded blend weights.
 
+All `12` retained rectrix identities also remain authoritative through takeoff.
+Metal blends each root, direction, and normal from the closed standing stack to
+the existing open-flight target over transition progress `0.08...0.62`, while
+length, width, rachis, camber, morphology, and current/previous state stay
+continuous. Primaries and secondaries still collapse on their complementary
+handoff schedule, and the separate procedural tail is emitted only in the
+wingbeat presentation. Independent Swift parity checks cover the retained GPU
+state at four phases. This is a continuity and coverage result, not measured
+rectrix deployment kinematics.
+
 Procedural contour and folded-wing feathers select quantized tessellation from
 their projected length at the final output resolution. The four asset LOD
 thresholds drive silhouette, curved vane shell, rachis, paired-barb, and
@@ -224,10 +234,12 @@ It verifies the reality asset, crow-surface manifest, generating profile, and
 their SHA-256 locks before rendering. One retained Metal pass evaluates current
 and previous part frames for all `54` persistent flight/tail feather roots.
 Standing expands those roots through the shared `48 x 8` vane template, rachis,
-and barb ribbons into `145,152` renderable vertices. Wingbeat keeps the retained
-asset root-state path diagnostic-only while Metal expands the separate live
-wing-covert inventory, including the two exposed dorsal trailing ranks; the
-remaining coherent topology-bound wing courses and asset-length tail rectrices
+and barb ribbons into `145,152` renderable vertices. Takeoff keeps the retained
+rectrix subset live and unfolds it continuously while its retained remiges hand
+off to the articulated wing. Wingbeat keeps the retained asset root-state path
+diagnostic-only while Metal expands the separate live wing-covert inventory,
+including the two exposed dorsal trailing ranks; the remaining coherent
+topology-bound wing courses and asset-length procedural wingbeat rectrices
 remain presentation geometry. The fixed-topology
 wing surface supplies a dark gap-closing layer, while the smooth body/head,
 coverts, and contour feathers

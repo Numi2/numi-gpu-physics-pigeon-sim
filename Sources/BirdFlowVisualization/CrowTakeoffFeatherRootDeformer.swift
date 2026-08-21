@@ -12,6 +12,7 @@ final class CrowTakeoffFeatherRootDeformer: CrowFeatherRootDeforming {
   private let standing: CrowStandingFeatherRootDeformer
   private let pipeline: MTLComputePipelineState
   private let outputBuffers: [MTLBuffer]
+  private let readbackBuffers: [MTLBuffer]
   private var nextSlot = 0
 
   let featherCount: Int
@@ -32,6 +33,9 @@ final class CrowTakeoffFeatherRootDeformer: CrowFeatherRootDeforming {
     let byteCount = MemoryLayout<CrowFeatherRootStateGPU>.stride * featherCount
     outputBuffers = try (0..<Self.bufferedFrameCount).map { _ in
       try backend.buffer(length: byteCount)
+    }
+    readbackBuffers = try (0..<Self.bufferedFrameCount).map { _ in
+      try backend.buffer(length: byteCount, shared: true)
     }
   }
 
@@ -75,6 +79,20 @@ final class CrowTakeoffFeatherRootDeformer: CrowFeatherRootDeforming {
     )
     backend.dispatch1D(encoder, pipeline: pipeline, count: featherCount)
     encoder.endEncoding()
+    if auditReadback {
+      guard let blit = commandBuffer.makeBlitCommandEncoder() else {
+        throw VisualizationError.pipeline("takeoff feather-root readback encoder")
+      }
+      blit.label = "Takeoff crow feather-root audit readback"
+      blit.copy(
+        from: output,
+        sourceOffset: 0,
+        to: readbackBuffers[slot],
+        destinationOffset: 0,
+        size: MemoryLayout<CrowFeatherRootStateGPU>.stride * featherCount
+      )
+      blit.endEncoding()
+    }
     return CrowFeatherRootFrame(
       slot: slot,
       readbackReady: auditReadback,
@@ -82,5 +100,159 @@ final class CrowTakeoffFeatherRootDeformer: CrowFeatherRootDeforming {
       currentPhase: currentPhase,
       previousPhase: previousPhase
     )
+  }
+
+  func states(for frame: CrowFeatherRootFrame) -> [CrowFeatherRootStateGPU] {
+    precondition(frame.readbackReady, "takeoff feather roots lack audit readback")
+    let pointer = readbackBuffers[frame.slot].contents().bindMemory(
+      to: CrowFeatherRootStateGPU.self,
+      capacity: featherCount
+    )
+    return Array(UnsafeBufferPointer(start: pointer, count: featherCount))
+  }
+
+  func referenceStates(
+    currentPhase: Float,
+    previousPhase: Float
+  ) -> [CrowFeatherRootStateGPU] {
+    let current = CrowTakeoffSequence.sample(phase: currentPhase)
+    let previous = CrowTakeoffSequence.sample(phase: previousPhase)
+    return standing.referenceStates(
+      currentPhase: current.standingPhase,
+      previousPhase: previous.standingPhase
+    ).map {
+      Self.blendedState($0, current: current, previous: previous)
+    }
+  }
+
+  private static func blendedState(
+    _ grounded: CrowFeatherRootStateGPU,
+    current: CrowTakeoffSequence.Sample,
+    previous: CrowTakeoffSequence.Sample
+  ) -> CrowFeatherRootStateGPU {
+    let packedIdentity = grounded.identity.w
+    let featherClass = packedIdentity & 255
+    if featherClass == 3 {
+      let order = Int((packedIdentity >> 16) & 255)
+      let count = max(Int((packedIdentity >> 24) & 255), 1)
+      let fraction = Float(order) / Float(max(count - 1, 1))
+      let closed = CrowClosedTailAnatomy.pose(fraction: fraction)
+      let currentPose = CrowTakeoffSequence.transitionRectrixPose(
+        order: order,
+        count: count,
+        transitionProgress: current.transitionProgress
+      )
+      let previousPose = CrowTakeoffSequence.transitionRectrixPose(
+        order: order,
+        count: count,
+        transitionProgress: previous.transitionProgress
+      )
+      let currentRoot = xyz(grounded.currentPositionAndLength)
+        + current.bodyTranslation
+        + (currentPose.rootOffset - closed.rootOffset)
+      let previousRoot = xyz(grounded.previousPositionAndWidth)
+        + previous.bodyTranslation
+        + (previousPose.rootOffset - closed.rootOffset)
+      return CrowFeatherRootStateGPU(
+        currentPositionAndLength: SIMD4<Float>(
+          currentRoot,
+          grounded.currentPositionAndLength.w
+        ),
+        previousPositionAndWidth: SIMD4<Float>(
+          previousRoot,
+          grounded.previousPositionAndWidth.w
+        ),
+        currentDirectionAndRachis: SIMD4<Float>(
+          currentPose.direction,
+          grounded.currentDirectionAndRachis.w
+        ),
+        previousDirectionAndCamber: SIMD4<Float>(
+          previousPose.direction,
+          grounded.previousDirectionAndCamber.w
+        ),
+        currentNormalAndPadding: SIMD4<Float>(currentPose.normal, 0),
+        previousNormalAndPadding: SIMD4<Float>(previousPose.normal, 0),
+        previousMorphology: grounded.previousMorphology,
+        identity: grounded.identity
+      )
+    }
+
+    let currentFoldedVisibility = 1 - CrowTakeoffSequence
+      .liveRectrixDeploymentWeight(
+        transitionProgress: current.transitionProgress
+      )
+    let previousFoldedVisibility = 1 - CrowTakeoffSequence
+      .liveRectrixDeploymentWeight(
+        transitionProgress: previous.transitionProgress
+      )
+    let sideCode = (packedIdentity >> 8) & 255
+    let side: Float = sideCode == 1 ? 1 : (sideCode == 2 ? -1 : 0)
+    let inverseLength = 1 / max(grounded.currentPositionAndLength.w, 1e-6)
+    let currentDirection = normalized(
+      xyz(grounded.currentDirectionAndRachis)
+        + SIMD3<Float>(
+          0,
+          side * inverseLength
+            * CrowTakeoffSequence.terminalPrimaryHandoffLateralOffsetMeters(
+              featherClass: featherClass,
+              order: Int((packedIdentity >> 16) & 255),
+              count: max(Int((packedIdentity >> 24) & 255), 1),
+              transitionProgress: current.transitionProgress
+            ),
+          0
+        ),
+      fallback: xyz(grounded.currentDirectionAndRachis)
+    )
+    let previousDirection = normalized(
+      xyz(grounded.previousDirectionAndCamber)
+        + SIMD3<Float>(
+          0,
+          side * inverseLength
+            * CrowTakeoffSequence.terminalPrimaryHandoffLateralOffsetMeters(
+              featherClass: featherClass,
+              order: Int((packedIdentity >> 16) & 255),
+              count: max(Int((packedIdentity >> 24) & 255), 1),
+              transitionProgress: previous.transitionProgress
+            ),
+          0
+        ),
+      fallback: xyz(grounded.previousDirectionAndCamber)
+    )
+    return CrowFeatherRootStateGPU(
+      currentPositionAndLength: SIMD4<Float>(
+        xyz(grounded.currentPositionAndLength)
+          + current.bodyTranslation,
+        grounded.currentPositionAndLength.w * currentFoldedVisibility
+      ),
+      previousPositionAndWidth: SIMD4<Float>(
+        xyz(grounded.previousPositionAndWidth)
+          + previous.bodyTranslation,
+        grounded.previousPositionAndWidth.w * previousFoldedVisibility
+      ),
+      currentDirectionAndRachis: SIMD4<Float>(
+        currentDirection,
+        grounded.currentDirectionAndRachis.w * currentFoldedVisibility
+      ),
+      previousDirectionAndCamber: SIMD4<Float>(
+        previousDirection,
+        grounded.previousDirectionAndCamber.w * previousFoldedVisibility
+      ),
+      currentNormalAndPadding: grounded.currentNormalAndPadding,
+      previousNormalAndPadding: grounded.previousNormalAndPadding,
+      previousMorphology: grounded.previousMorphology * previousFoldedVisibility,
+      identity: grounded.identity
+    )
+  }
+
+  private static func normalized(
+    _ value: SIMD3<Float>,
+    fallback: SIMD3<Float>
+  ) -> SIMD3<Float> {
+    let length = simd_length(value)
+    return length > 1e-8 ? value / length : fallback
+  }
+
+  private static func xyz(_ value: SIMD4<Float>) -> SIMD3<Float> {
+    SIMD3<Float>(value.x, value.y, value.z)
   }
 }

@@ -314,3 +314,141 @@ func standingCrowFeatherRootsMatchMetalReference() throws {
   #expect(abs(centerTailTip.z + 0.025) < 1e-5)
   #expect(abs(edgeTailTip.z + 0.031) < 1e-5)
 }
+
+@Test("takeoff unfolds retained rectrices on Metal while remiges collapse")
+func takeoffRetainedRectricesMatchMetalReference() throws {
+  guard let device = MTLCreateSystemDefaultDevice() else { return }
+  let root = URL(fileURLWithPath: #filePath)
+    .deletingLastPathComponent()
+    .deletingLastPathComponent()
+    .deletingLastPathComponent()
+  let asset = try BirdRealityAssetLoader.load(
+    assetURL: root.appendingPathComponent(
+      "ValidationInputs/american-crow-hybrid-reality-v1.json"
+    ),
+    repositoryRootURL: root
+  )
+  let surface = try MeasuredBirdSurfaceSequenceLoader.load(
+    manifestURL: root.appendingPathComponent(
+      "ValidationInputs/american-crow-hybrid-surface-v1/manifest.json"
+    )
+  )
+  let body = surface.components.first { $0.partIdentifier == 1 }!
+  var bodyCenter = SIMD3<Float>.zero
+  for index in body.vertexOffset..<(body.vertexOffset + body.vertexCount) {
+    bodyCenter += surface.vertex(frame: 0, index: index)
+  }
+  bodyCenter /= Float(body.vertexCount)
+
+  let backend = try VisualizationBackend(device: device)
+  let deformer = try CrowTakeoffFeatherRootDeformer(
+    backend: backend,
+    asset: asset,
+    referenceBodyCenter: bodyCenter
+  )
+  #expect(MemoryLayout<CrowTakeoffFeatherBlendUniforms>.stride == 48)
+  #expect(deformer.featherCount == 54)
+
+  for phases: (Float, Float) in [(0, 0), (0.36, 0.34), (0.56, 0.54), (1, 0.98)] {
+    guard let commandBuffer = backend.queue.makeCommandBuffer() else {
+      Issue.record("unable to allocate takeoff crow command buffer")
+      return
+    }
+    let frame = try deformer.encode(
+      currentPhase: phases.0,
+      previousPhase: phases.1,
+      commandBuffer: commandBuffer,
+      auditReadback: true
+    )
+    commandBuffer.commit()
+    commandBuffer.waitUntilCompleted()
+    #expect(commandBuffer.status == .completed)
+    let actual = deformer.states(for: frame)
+    let expected = deformer.referenceStates(
+      currentPhase: phases.0,
+      previousPhase: phases.1
+    )
+    #expect(actual.count == expected.count)
+    for (gpu, cpu) in zip(actual, expected) {
+      #expect(
+        simd_length(gpu.currentPositionAndLength - cpu.currentPositionAndLength)
+          < 4e-7
+      )
+      #expect(
+        simd_length(gpu.previousPositionAndWidth - cpu.previousPositionAndWidth)
+          < 4e-7
+      )
+      #expect(
+        simd_length(gpu.currentDirectionAndRachis - cpu.currentDirectionAndRachis)
+          < 4e-6
+      )
+      #expect(
+        simd_length(gpu.previousDirectionAndCamber - cpu.previousDirectionAndCamber)
+          < 4e-6
+      )
+      #expect(
+        simd_length(gpu.currentNormalAndPadding - cpu.currentNormalAndPadding)
+          < 4e-6
+      )
+      #expect(
+        simd_length(gpu.previousNormalAndPadding - cpu.previousNormalAndPadding)
+          < 4e-6
+      )
+      #expect(gpu.identity == cpu.identity)
+    }
+  }
+
+  let held = deformer.referenceStates(currentPhase: 0, previousPhase: 0)
+  let flight = deformer.referenceStates(currentPhase: 1, previousPhase: 1)
+  let heldRectrices = held.filter { $0.identity.w & 255 == 3 }
+  let flightRectrices = flight.filter { $0.identity.w & 255 == 3 }
+  #expect(heldRectrices.count == 12)
+  #expect(flightRectrices.count == 12)
+  #expect(
+    zip(heldRectrices, flightRectrices).allSatisfy {
+      $0.currentPositionAndLength.w == $1.currentPositionAndLength.w
+        && $0.previousPositionAndWidth.w == $1.previousPositionAndWidth.w
+        && $0.currentDirectionAndRachis.w == $1.currentDirectionAndRachis.w
+        && $0.previousDirectionAndCamber.w == $1.previousDirectionAndCamber.w
+    }
+  )
+  #expect(
+    zip(heldRectrices, flightRectrices).contains {
+      simd_length(
+        SIMD3<Float>(
+          $0.currentPositionAndLength.x,
+          $0.currentPositionAndLength.y,
+          $0.currentPositionAndLength.z
+        ) - SIMD3<Float>(
+          $1.currentPositionAndLength.x,
+          $1.currentPositionAndLength.y,
+          $1.currentPositionAndLength.z
+        )
+      ) > 0.02
+    }
+  )
+  let flightTips = flightRectrices.map {
+    SIMD3<Float>(
+      $0.currentPositionAndLength.x,
+      $0.currentPositionAndLength.y,
+      $0.currentPositionAndLength.z
+    ) + $0.currentPositionAndLength.w * SIMD3<Float>(
+      $0.currentDirectionAndRachis.x,
+      $0.currentDirectionAndRachis.y,
+      $0.currentDirectionAndRachis.z
+    )
+  }
+  #expect(flightTips.map(\.y).max()! - flightTips.map(\.y).min()! > 0.125)
+
+  let collapsedRemiges = flight.filter {
+    let featherClass = $0.identity.w & 255
+    return featherClass == 1 || featherClass == 2
+  }
+  #expect(collapsedRemiges.count == 42)
+  #expect(collapsedRemiges.allSatisfy {
+    $0.currentPositionAndLength.w == 0
+      && $0.previousPositionAndWidth.w == 0
+      && $0.currentDirectionAndRachis.w == 0
+      && $0.previousDirectionAndCamber.w == 0
+  })
+}

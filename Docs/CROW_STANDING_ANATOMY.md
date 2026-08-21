@@ -160,7 +160,7 @@ near-vertical underside probe reduced the folded junction's largest component
 from `72` pixels to `1-3` pixels. These are presentation-geometry checks, not
 evidence for measured American-crow underplumage dimensions.
 
-The twelve procedural open-flight rectrices now resolve an LOD-selected,
+The twelve procedural wingbeat rectrices resolve an LOD-selected,
 piecewise-tapered rachis inside each coverage-preserving vane. Depending on
 final-output coverage, the shaft is omitted or represented by `4`, `8`, or `12`
 connected segments; it ends at `98.5%` chord and tapers to `18%` of its retained
@@ -170,10 +170,12 @@ readable and auditable. Across the fixed 253-frame, 13-view orbit, enclosed-hole
 largest-hole, component, and expected lower-body aperture metrics remained
 exact; the added interior shafts changed active coverage by only `240` pixels in
 aggregate, with a maximum per-frame increase of `0.028%`. A proposed replacement
-that kept the persistent standing rectrices open throughout flight was rejected:
-it exposed pre-existing body-wing cavities as large as `100` pixels from other
-angles. The retained shaft radius, fan pose, and material variation remain
-presentation estimates rather than measured American-crow microstructure.
+that held the persistent rectrices in one open pose throughout flight was
+rejected: it exposed pre-existing body-wing cavities as large as `100` pixels
+from other angles. The accepted takeoff path instead evolves the same stable
+identities from the closed stack to that open endpoint, as described below. The
+retained shaft radius, fan pose, and material variation remain presentation
+estimates rather than measured American-crow microstructure.
 
 The topology-bound dorsal flight coverts now carry the same contained-detail
 principle. Each CPU vane adds a longitudinally cambered rachis only when its
@@ -326,6 +328,21 @@ under-rear, and front-starboard probes reduced combined holes from `312` to
 `310` and components from `218` to `216`, preserved the `6` expected-aperture
 pixels, and kept the largest hole at `33` pixels. These are raster coverage
 checks, not measured feather dynamics or proof of perceptual realism.
+
+Tail ownership now follows the same continuity rule. The `12` persistent
+rectrices keep full vane morphology while Metal blends their closed standing
+root, direction, and normal into the open-flight endpoint from transition
+progress `0.08` through `0.62`; their stable IDs and current/previous records do
+not change. Only persistent primaries and secondaries collapse during the wing
+handoff, and no second CPU tail is appended during takeoff. Against the prior
+renderer, three complete 17-frame probes at yaw/pitch `(-3.05,0.05)`,
+`(1.65,-0.38)`, and `(-0.15,0.68)` reduce aggregate enclosed-hole pixels from
+`535` to `359`, components from `198` to `190`, and the largest hole from `38`
+to `29` pixels. The `4` expected lower-body pixels remain exact, and the traced
+`38`-pixel high-front class-`0`/`3`/`4` tail-wing cavity is gone. The remaining
+largest high-front component belongs to planted leg/foot articulation. These
+are deterministic raster and implementation gates, not measured feather motion
+or proof of perceptual realism.
 
 The deployed chord-`3` live covert course now settles its proximal camber and
 dorsal clearance to `48%` at the root, recovering to full relief across `12`

@@ -93,6 +93,15 @@ records but collapses to zero area as the articulated wing takes ownership, and
 showcase-scale humeral/scapular vanes promote their edge bundles into contained
 interior barb bundles. These are simulated presentation constraints, not
 measured American-crow feather linkages.
+The same retained path now owns all `12` rectrices throughout takeoff. Their
+stable roots unfold from the compact standing stack into the open-flight pose
+over transition progress `0.08...0.62`, while preserving full vane morphology
+and current/previous state. The former second CPU-authored takeoff tail has been
+removed; the procedural tail remains only as the sustained-wingbeat oracle.
+Across rear-level, right-low-quarter, and high-front 17-frame audits, enclosed
+hole pixels fall from `535` to `359`, components from `198` to `190`, and the
+largest hole from `38` to `29` pixels while the `4` expected lower-body pixels
+remain exact. The targeted `38`-pixel high-front tail/wing cavity is absent.
 The middle live covert course also retains its full folded relief, then seats
 its deployed root camber and clearance to `48%` across the first `12` span
 stations; vane width, chord, identity, and the caudal handoff remain unchanged.

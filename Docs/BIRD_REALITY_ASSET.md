@@ -77,6 +77,15 @@ it does not misuse a slowed, outstretched flight frame. The visible leg, digit,
 hallux, claw, and support-contact contract is documented in
 [`CROW_STANDING_ANATOMY.md`](CROW_STANDING_ANATOMY.md).
 
+Takeoff passes the same `54` records through
+`blendCrowTakeoffFeatherRoots`. Its `12` rectrices retain complete morphology
+and stable IDs while their closed roots and frames unfold to the open-flight
+endpoint over transition progress `0.08...0.62`. The `42` remiges instead
+collapse on the complementary handoff schedule as the articulated wing becomes
+authoritative. Triple-buffered audit readback is checked against an independent
+Swift deformation oracle at multiple phases; sustained wingbeat continues to
+use the topology-bound wing and procedural tail presentation paths.
+
 Both GPU stages are qualified against independent CPU interpolation and
 deformation paths at multiple phases. Gates cover exact identity, finite state,
 unit directions, current/previous motion, a bounded `0.75 m` radial envelope,
