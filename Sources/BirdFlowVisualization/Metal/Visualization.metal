@@ -27,6 +27,7 @@ struct CrowFeatherRootStateGPU {
     float4 previousDirectionAndCamber;
     float4 currentNormalAndPadding;
     float4 previousNormalAndPadding;
+    float4 previousMorphology;
     uint4 identity;
 };
 
@@ -278,6 +279,10 @@ kernel void deformCrowFeatherRoots(
     );
     state.currentNormalAndPadding=float4(current.normal,0);
     state.previousNormalAndPadding=float4(previous.normal,0);
+    state.previousMorphology=float4(
+        binding.localDirectionAndLength.w,
+        binding.widthRachisAndPadding.xyz
+    );
     state.identity=uint4(
         featherIndex,
         binding.sourceIndicesAndHash.w,
@@ -417,6 +422,7 @@ kernel void poseStandingCrowFeatherRoots(
     state.previousDirectionAndCamber=float4(previous.direction,binding.morphology.w);
     state.currentNormalAndPadding=float4(current.normal,0);
     state.previousNormalAndPadding=float4(previous.normal,0);
+    state.previousMorphology=binding.morphology;
     state.identity=binding.identity;
     output[featherIndex]=state;
 }
@@ -489,6 +495,7 @@ kernel void blendCrowTakeoffFeatherRoots(
     );
     state.currentNormalAndPadding=grounded.currentNormalAndPadding;
     state.previousNormalAndPadding=grounded.previousNormalAndPadding;
+    state.previousMorphology=grounded.previousMorphology*previousFoldedVisibility;
     state.identity=grounded.identity;
     output[featherIndex]=state;
 }
@@ -681,7 +688,13 @@ inline float crowFeatherCrownRatio(uint packedIdentity) {
             ?0.122f-0.018f*fraction
             :0.158f-0.012f*fraction;
     }
+    if(featherClass==12u||featherClass==13u){return 0.04f;}
     return featherClass==1u?0.13f:(featherClass==2u?0.16f:0.14f);
+}
+
+inline float crowFeatherRootWidthRatio(uint packedIdentity) {
+    uint featherClass=packedIdentity&255u;
+    return featherClass==12u||featherClass==13u?0.60f:0.55f;
 }
 
 inline float3 crowFeatherPosition(
@@ -701,7 +714,10 @@ inline float3 crowFeatherPosition(
     float3 widthAxis=safeNormalizeCrow(
         cross(orthogonalNormal,tangent),float3(0,1,0)
     );
-    float symmetricWidth=mix(0.55f*maximumWidthMeters,maximumWidthMeters,axial)
+    float rootWidthRatio=crowFeatherRootWidthRatio(packedIdentity);
+    float symmetricWidth=mix(
+        rootWidthRatio*maximumWidthMeters,maximumWidthMeters,axial
+    )
         *crowFeatherWidthEnvelope(axial);
     uint featherClass=packedIdentity&255u;
     float4 rectrix=crowRectrixVaneProfile(packedIdentity);
@@ -759,8 +775,10 @@ inline float3 crowFeatherNormal(
     float bodyDerivative=0.68f*0.58f*pow(sine,-0.42f)*sineDerivative;
     float tipTaper=1.0f-0.985f*pow(sampledAxial,3.2f);
     float tipDerivative=-0.985f*3.2f*pow(sampledAxial,2.2f);
-    float baseWidth=maximumWidthMeters*(0.55f+0.45f*sampledAxial);
-    float baseWidthDerivative=0.45f*maximumWidthMeters;
+    float rootWidthRatio=crowFeatherRootWidthRatio(packedIdentity);
+    float baseWidth=maximumWidthMeters
+        *(rootWidthRatio+(1.0f-rootWidthRatio)*sampledAxial);
+    float baseWidthDerivative=(1.0f-rootWidthRatio)*maximumWidthMeters;
     float symmetricWidth=baseWidth*bodyEnvelope*tipTaper;
     float symmetricWidthDerivative=baseWidthDerivative*bodyEnvelope*tipTaper
         +baseWidth*bodyDerivative*tipTaper
@@ -927,11 +945,17 @@ kernel void deformCrowFeatherTemplates(
     float lengthMeters=root.currentPositionAndLength.w;
     float maximumWidthMeters=root.previousPositionAndWidth.w;
     float camberMeters=root.previousDirectionAndCamber.w;
+    float previousLengthMeters=root.previousMorphology.x;
+    float previousMaximumWidthMeters=root.previousMorphology.y;
+    float previousRachisRadiusMeters=root.previousMorphology.z;
+    float previousCamberMeters=root.previousMorphology.w;
     uint packedIdentity=root.identity.w;
     uint featherClass=packedIdentity&255u;
+    bool isUnderwingCovert=featherClass==12u||featherClass==13u;
+    bool temporallyVariableMorphology=isUnderwingCovert;
     bool detailEnabled=parameter.z<0.5f
         ||(uniforms.renderOffsetAndDetailScale.w>0.0f
-            &&(featherClass==1u||featherClass==2u));
+            &&(featherClass==1u||featherClass==2u||isUnderwingCovert));
     float3 current=detailEnabled
         ?crowFeatherDetailPosition(
             root.currentPositionAndLength.xyz,currentDirection,currentNormal,
@@ -943,8 +967,13 @@ kernel void deformCrowFeatherTemplates(
     float3 previous=detailEnabled
         ?crowFeatherDetailPosition(
             root.previousPositionAndWidth.xyz,previousDirection,previousNormal,
-            lengthMeters,maximumWidthMeters,camberMeters,
-            root.currentDirectionAndRachis.w,parameter.x,parameter.y,
+            temporallyVariableMorphology?previousLengthMeters:lengthMeters,
+            temporallyVariableMorphology
+                ?previousMaximumWidthMeters:maximumWidthMeters,
+            temporallyVariableMorphology?previousCamberMeters:camberMeters,
+            temporallyVariableMorphology
+                ?previousRachisRadiusMeters:root.currentDirectionAndRachis.w,
+            parameter.x,parameter.y,
             parameter.z,parameter.w,packedIdentity
         )
         :root.previousPositionAndWidth.xyz;
@@ -956,16 +985,21 @@ kernel void deformCrowFeatherTemplates(
             camberMeters,parameter.x,parameter.y,parameter.z,parameter.w,
             packedIdentity
         ):currentNormal;
-    float material=featherClass==1u?0.25f:(featherClass==2u?0.22f:0.23f);
-    float shade=0.0075f+0.00045f*float(root.identity.x%11u);
+    float material=featherClass==1u?0.25f:
+        (featherClass==2u?0.22f:(isUnderwingCovert?0.17f:0.23f));
+    float shade=isUnderwingCovert
+        ?0.0066f+0.00022f*float(root.identity.x%9u)
+        :0.0075f+0.00045f*float(root.identity.x%11u);
+    float greenScale=isUnderwingCovert?1.45f:1.28f;
+    float blueScale=isUnderwingCovert?2.55f:1.72f;
     float detailShadeScale=parameter.z>0.5f
         ?(parameter.z<1.5f?1.18f:1.08f):1.0f;
     CrowFeatherVertexGPU result;
     result.position=float4(current,1);
     result.normal=float4(deformedNormal,0);
     result.color=float4(
-        shade*detailShadeScale,shade*1.28f*detailShadeScale,
-        shade*1.72f*detailShadeScale,material
+        shade*detailShadeScale,shade*greenScale*detailShadeScale,
+        shade*blueScale*detailShadeScale,material
     );
     result.previousPosition=float4(previous,1);
     result.identity=root.identity;
@@ -1528,8 +1562,13 @@ vertex CrowRasterVertex crowFeatherAOVVertex(
     uint vid [[vertex_id]]) {
     CrowFeatherVertexGPU source=vertices[vid];
     CrowRasterVertex out;
-    out.position=camera.viewProjection*source.position;
-    out.previousClipPosition=camera.previousViewProjection*source.previousPosition;
+    uint featherClass=source.identity.w&255u;
+    out.position=crowSurfaceBiasedClipPosition(
+        camera.viewProjection*source.position,featherClass
+    );
+    out.previousClipPosition=crowSurfaceBiasedClipPosition(
+        camera.previousViewProjection*source.previousPosition,featherClass
+    );
     out.world=source.position.xyz;
     out.normal=normalize(source.normal.xyz);
     out.albedoAndMaterial=source.color;

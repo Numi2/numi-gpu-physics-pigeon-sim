@@ -33,7 +33,11 @@ final class CrowFeatherGeometryDeformer {
   private let templateVertices: [CrowFeatherTemplateVertexGPU]
   private let templateBuffer: MTLBuffer
   private let outputBuffers: [MTLBuffer]
-  private let readbackBuffers: [MTLBuffer]
+  private let outputByteCount: Int
+  /// Audit mirrors are allocated per slot only when a caller requests them.
+  /// Production capture otherwise avoids retaining another complete copy of
+  /// the future-density geometry stream in unified memory.
+  private var readbackBuffers: [MTLBuffer?]
   private var nextSlot = 0
 
   let featherCount: Int
@@ -50,12 +54,11 @@ final class CrowFeatherGeometryDeformer {
     )
     vertexCount = featherCount * templateVertices.count
     let outputBytes = MemoryLayout<CrowFeatherVertexGPU>.stride * vertexCount
+    outputByteCount = outputBytes
     outputBuffers = try (0..<Self.bufferedFrameCount).map { _ in
       try backend.buffer(length: outputBytes)
     }
-    readbackBuffers = try (0..<Self.bufferedFrameCount).map { _ in
-      try backend.buffer(length: outputBytes, shared: true)
-    }
+    readbackBuffers = Array(repeating: nil, count: Self.bufferedFrameCount)
   }
 
   func encode(
@@ -96,6 +99,14 @@ final class CrowFeatherGeometryDeformer {
     encoder.endEncoding()
 
     if auditReadback {
+      let readback: MTLBuffer
+      if let existing = readbackBuffers[slot] {
+        readback = existing
+      } else {
+        let created = try backend.buffer(length: outputByteCount, shared: true)
+        readbackBuffers[slot] = created
+        readback = created
+      }
       guard let blit = commandBuffer.makeBlitCommandEncoder() else {
         throw VisualizationError.pipeline("crow feather geometry readback encoder")
       }
@@ -103,7 +114,7 @@ final class CrowFeatherGeometryDeformer {
       blit.copy(
         from: output,
         sourceOffset: 0,
-        to: readbackBuffers[slot],
+        to: readback,
         destinationOffset: 0,
         size: MemoryLayout<CrowFeatherVertexGPU>.stride * vertexCount
       )
@@ -119,7 +130,10 @@ final class CrowFeatherGeometryDeformer {
 
   func vertices(for frame: CrowFeatherGeometryFrame) -> [CrowFeatherVertexGPU] {
     precondition(frame.readbackReady, "feather geometry was not encoded for readback")
-    let pointer = readbackBuffers[frame.slot].contents().bindMemory(
+    guard let readback = readbackBuffers[frame.slot] else {
+      preconditionFailure("feather geometry audit buffer is unavailable")
+    }
+    let pointer = readback.contents().bindMemory(
       to: CrowFeatherVertexGPU.self,
       capacity: vertexCount
     )
@@ -146,16 +160,26 @@ final class CrowFeatherGeometryDeformer {
         let lengthMeters = root.currentPositionAndLength.w
         let maximumWidthMeters = root.previousPositionAndWidth.w
         let camberMeters = root.previousDirectionAndCamber.w
+        let previousLengthMeters = root.previousMorphology.x
+        let previousMaximumWidthMeters = root.previousMorphology.y
+        let previousRachisRadiusMeters = root.previousMorphology.z
+        let previousCamberMeters = root.previousMorphology.w
         let packedIdentity = root.identity.w
         let featherClass = packedIdentity & 255
+        let isUnderwingCovert = featherClass == 12 || featherClass == 13
+        let temporallyVariableMorphology = isUnderwingCovert
         let material: Float =
-          featherClass == 1 ? 0.25 : (featherClass == 2 ? 0.22 : 0.23)
-        let shade = 0.0075 + 0.00045 * Float(root.identity.x % 11)
+          featherClass == 1 ? 0.25
+          : (featherClass == 2 ? 0.22 : (isUnderwingCovert ? 0.17 : 0.23))
+        let shade = isUnderwingCovert
+          ? 0.0066 + 0.00022 * Float(root.identity.x % 9)
+          : 0.0075 + 0.00045 * Float(root.identity.x % 11)
         let currentRoot = Self.xyz(root.currentPositionAndLength)
         let previousRoot = Self.xyz(root.previousPositionAndWidth)
         let detailEnabled =
           detailKind == TemplateKind.vane.rawValue
-          || (detailScale > 0 && (featherClass == 1 || featherClass == 2))
+          || (detailScale > 0
+            && (featherClass == 1 || featherClass == 2 || isUnderwingCovert))
         let currentPosition = detailEnabled
           ? Self.detailPosition(
             root: currentRoot,
@@ -177,10 +201,14 @@ final class CrowFeatherGeometryDeformer {
             root: previousRoot,
             direction: previousDirection,
             surfaceNormal: previousNormal,
-            lengthMeters: lengthMeters,
-            maximumWidthMeters: maximumWidthMeters,
-            camberMeters: camberMeters,
-            rachisRadiusMeters: root.currentDirectionAndRachis.w,
+            lengthMeters: temporallyVariableMorphology
+              ? previousLengthMeters : lengthMeters,
+            maximumWidthMeters: temporallyVariableMorphology
+              ? previousMaximumWidthMeters : maximumWidthMeters,
+            camberMeters: temporallyVariableMorphology
+              ? previousCamberMeters : camberMeters,
+            rachisRadiusMeters: temporallyVariableMorphology
+              ? previousRachisRadiusMeters : root.currentDirectionAndRachis.w,
             axial: axial,
             signedWidth: signedWidth,
             detailKind: detailKind,
@@ -205,6 +233,8 @@ final class CrowFeatherGeometryDeformer {
         let detailShadeScale: Float =
           detailKind == TemplateKind.rachis.rawValue ? 1.18
           : (detailKind == TemplateKind.barb.rawValue ? 1.08 : 1)
+        let greenScale: Float = isUnderwingCovert ? 1.45 : 1.28
+        let blueScale: Float = isUnderwingCovert ? 2.55 : 1.72
         return CrowFeatherVertexGPU(
           position: SIMD4<Float>(
             currentPosition + renderOffset,
@@ -213,8 +243,8 @@ final class CrowFeatherGeometryDeformer {
           normal: SIMD4<Float>(deformedNormal, 0),
           color: SIMD4<Float>(
             shade * detailShadeScale,
-            shade * 1.28 * detailShadeScale,
-            shade * 1.72 * detailShadeScale,
+            shade * greenScale * detailShadeScale,
+            shade * blueScale * detailShadeScale,
             material
           ),
           previousPosition: SIMD4<Float>(
@@ -447,8 +477,9 @@ final class CrowFeatherGeometryDeformer {
     )
     let bodyEnvelope = 0.32 + 0.68 * pow(max(sin(Float.pi * axial), 0), 0.58)
     let tipTaper = 1 - 0.985 * pow(axial, 3.2)
+    let rootWidthRatio = rootWidthRatio(packedIdentity: packedIdentity)
     let baseWidth =
-      (0.55 * maximumWidthMeters * (1 - axial)
+      (rootWidthRatio * maximumWidthMeters * (1 - axial)
         + maximumWidthMeters * axial) * bodyEnvelope * tipTaper
     let rectrix = CrowRectrixVaneAnatomy.profile(packedIdentity: packedIdentity)
     let remex = CrowRemexVaneAnatomy.profile(packedIdentity: packedIdentity)
@@ -529,8 +560,10 @@ final class CrowFeatherGeometryDeformer {
     let bodyDerivative = 0.68 * 0.58 * pow(sine, -0.42) * sineDerivative
     let tipTaper = 1 - 0.985 * pow(sampledAxial, 3.2)
     let tipDerivative = -0.985 * 3.2 * pow(sampledAxial, 2.2)
-    let baseWidth = maximumWidthMeters * (0.55 + 0.45 * sampledAxial)
-    let baseWidthDerivative = 0.45 * maximumWidthMeters
+    let rootWidthRatio = rootWidthRatio(packedIdentity: packedIdentity)
+    let baseWidth = maximumWidthMeters
+      * (rootWidthRatio + (1 - rootWidthRatio) * sampledAxial)
+    let baseWidthDerivative = (1 - rootWidthRatio) * maximumWidthMeters
     let symmetricWidth = baseWidth * bodyEnvelope * tipTaper
     let symmetricWidthDerivative =
       baseWidthDerivative * bodyEnvelope * tipTaper
@@ -660,8 +693,14 @@ final class CrowFeatherGeometryDeformer {
     case 1: return 0.13
     case 2: return 0.16
     case 3: return 0.11
+    case 12, 13: return 0.04
     default: return 0.14
     }
+  }
+
+  private static func rootWidthRatio(packedIdentity: UInt32) -> Float {
+    let featherClass = packedIdentity & 255
+    return featherClass == 12 || featherClass == 13 ? 0.60 : 0.55
   }
 
   private static func safeNormalize(

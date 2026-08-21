@@ -35,7 +35,7 @@ func crowFeatherRootGPUDeformationMatchesCPUReference() throws {
   )
 
   #expect(MemoryLayout<CrowFeatherRootBindingGPU>.stride == 64)
-  #expect(MemoryLayout<CrowFeatherRootStateGPU>.stride == 112)
+  #expect(MemoryLayout<CrowFeatherRootStateGPU>.stride == 128)
   #expect(MemoryLayout<CrowFeatherDeformationUniforms>.stride == 48)
   #expect(deformer.featherCount == 54)
 

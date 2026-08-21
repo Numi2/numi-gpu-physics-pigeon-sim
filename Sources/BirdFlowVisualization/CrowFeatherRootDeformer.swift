@@ -236,6 +236,12 @@ final class CrowFeatherRootDeformer {
           ),
           currentNormalAndPadding: SIMD4<Float>(current.normal, 0),
           previousNormalAndPadding: SIMD4<Float>(previous.normal, 0),
+          previousMorphology: SIMD4<Float>(
+            feather.lengthMeters,
+            binding.widthRachisAndPadding.x,
+            feather.rachisRadiusMeters,
+            binding.widthRachisAndPadding.z
+          ),
           identity: SIMD4<UInt32>(
             UInt32(index),
             hash,

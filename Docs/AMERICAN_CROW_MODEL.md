@@ -75,6 +75,15 @@ chordwise and spanwise. This replaces the crossed persistent-vane comb that was
 visible at the steep stroke reversal. The coverts remain estimated presentation
 geometry and do not enter the moving-boundary, force, or power calculation.
 
+The reverse face adds four inset marginal/median/greater/primary-covert courses
+per wing: `216` stable bilateral roots in total. The CPU uploads one `128`-byte
+record per root with current and previous position, direction, normal, and
+morphology. Metal then expands the shared `48 x 8` vane template plus rachis
+and paired-barb ribbons into `580,608` vertices. This replaces twice-per-frame
+CPU tessellation, preserves geometric standstill-to-flight deployment, and
+keeps the density contract ready for indirect draws, mesh shaders, or
+ray-tracing geometry without changing feather identity.
+
 Persistent flight-feather roots remain attached to their exact fixed-topology
 solver vertices and continue to evaluate current and previous phases on Metal.
 Their long vane shells are retained for standing and diagnostic deformation,
@@ -123,11 +132,13 @@ swift build -c release --product birdflow-viewer
 It verifies the reality asset, crow-surface manifest, generating profile, and
 their SHA-256 locks before rendering. One retained Metal pass evaluates current
 and previous part frames for all `54` persistent flight/tail feather roots.
-Standing expands those roots through the shared twelve-by-four-section vane
-template into `15,552` renderable vertices; wingbeat keeps the root-state path
-but renders the coherent topology-bound wing courses and asset-length tail
-rectrices instead. The fixed-topology wing surface supplies a dark gap-closing
-layer, while the smooth body/head, coverts, and contour feathers
+Standing expands those roots through the shared `48 x 8` vane template, rachis,
+and barb ribbons into `145,152` renderable vertices. Wingbeat keeps the retained
+asset root-state path diagnostic-only while Metal expands the separate live
+underwing root inventory; the coherent dorsal topology-bound wing courses and
+asset-length tail rectrices remain presentation geometry. The fixed-topology
+wing surface supplies a dark gap-closing layer, while the smooth body/head,
+coverts, and contour feathers
 remain procedural estimates. Four-sample Metal rasterization and a dedicated
 eumelanin shader provide view-dependent cool sheen while keeping the bird
 neutral-black instead of allowing the warm key light to dominate its very low

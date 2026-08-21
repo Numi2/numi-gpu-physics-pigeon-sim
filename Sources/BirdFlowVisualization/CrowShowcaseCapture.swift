@@ -731,6 +731,8 @@ private final class CrowShowcaseRenderer {
   private let presentation: CrowShowcasePresentation
   private let featherRootDeformer: (any CrowFeatherRootDeforming)?
   private let featherGeometryDeformer: CrowFeatherGeometryDeformer?
+  private let liveCovertRootBuffer: CrowLiveWingCovertRootBuffer?
+  private let liveCovertGeometryDeformer: CrowFeatherGeometryDeformer?
   private let featherRenderOffset: SIMD3<Float>
   private var previousPhase: Float?
   private var previousCamera: CameraState?
@@ -793,6 +795,20 @@ private final class CrowShowcaseRenderer {
         )
       }
       : nil
+    if presentation == .wingbeat || presentation == .takeoff {
+      let roots = try CrowLiveWingCovertRootBuffer(
+        backend: createdBackend,
+        dataset: dataset
+      )
+      liveCovertRootBuffer = roots
+      liveCovertGeometryDeformer = try CrowFeatherGeometryDeformer(
+        backend: createdBackend,
+        featherCount: roots.featherCount
+      )
+    } else {
+      liveCovertRootBuffer = nil
+      liveCovertGeometryDeformer = nil
+    }
     featherRenderOffset = createdMeshBuilder.featherRenderOffset
     let createdSampleCount = device.supportsTextureSampleCount(4) ? 4 : 1
     sampleCount = createdSampleCount
@@ -809,14 +825,15 @@ private final class CrowShowcaseRenderer {
       colorFormats: aovFormats,
       sampleCount: createdSampleCount
     )
-    featherAOVPipeline = try realityAsset.map { _ in
-      try createdBackend.render(
+    featherAOVPipeline = try
+      realityAsset != nil || liveCovertGeometryDeformer != nil
+      ? createdBackend.render(
         vertex: "crowFeatherAOVVertex",
         fragment: "showcaseCrowAOVFragment",
         colorFormats: aovFormats,
         sampleCount: createdSampleCount
       )
-    }
+      : nil
     backgroundAOVPipeline = try backend.render(
       vertex: "showcaseBackgroundVertex",
       fragment: "showcaseCrowBackgroundAOVFragment",
@@ -828,13 +845,14 @@ private final class CrowShowcaseRenderer {
       fragment: "showcaseCrowIdentityFragment",
       colorFormat: .rgba32Uint
     )
-    featherIdentityPipeline = try realityAsset.map { _ in
-      try createdBackend.render(
+    featherIdentityPipeline = try
+      realityAsset != nil || liveCovertGeometryDeformer != nil
+      ? createdBackend.render(
         vertex: "crowFeatherAOVVertex",
         fragment: "showcaseCrowIdentityFragment",
         colorFormat: .rgba32Uint
       )
-    }
+      : nil
     normalResolvePipeline = try backend.render(
       vertex: "showcasePostVertex",
       fragment: "showcaseCrowNormalResolveFragment",
@@ -911,11 +929,15 @@ private final class CrowShowcaseRenderer {
         ? CrowTakeoffSequence.topologyLODReferenceCameraDistanceMeters
         : camera.distance
     )
+    let surfaceStates = meshBuilder.surfaceStates(phase: phase)
+    let previousSurfaceStates = meshBuilder.surfaceStates(phase: priorPhase)
     let vertices = meshBuilder.vertices(
+      states: surfaceStates,
       phase: phase,
       projectedPixelsPerMeter: projectedPixelsPerMeter
     )
     let previousVertices = meshBuilder.vertices(
+      states: previousSurfaceStates,
       phase: priorPhase,
       projectedPixelsPerMeter: projectedPixelsPerMeter
     )
@@ -1086,16 +1108,47 @@ private final class CrowShowcaseRenderer {
       commandBuffer: commandBuffer,
       auditReadback: false
     )
-    let featherFrame: CrowFeatherGeometryFrame?
+    var featherFrames: [CrowFeatherGeometryFrame] = []
     if let rootFrame, let featherGeometryDeformer {
-      featherFrame = try featherGeometryDeformer.encode(
-        rootFrame: rootFrame,
-        renderOffset: featherRenderOffset,
-        projectedPixelsPerMeter: projectedPixelsPerMeter,
-        commandBuffer: commandBuffer
+      featherFrames.append(
+        try featherGeometryDeformer.encode(
+          rootFrame: rootFrame,
+          renderOffset: featherRenderOffset,
+          projectedPixelsPerMeter: projectedPixelsPerMeter,
+          commandBuffer: commandBuffer
+        )
       )
-    } else {
-      featherFrame = nil
+    }
+    if let liveCovertRootBuffer, let liveCovertGeometryDeformer {
+      let deployment: (Float, Float)
+      if presentation == .takeoff {
+        deployment = (
+          CrowFlightWingBodyIntegration.underwingCovertDeploymentWeight(
+            transitionProgress: CrowTakeoffSequence.sample(phase: phase)
+              .transitionProgress
+          ),
+          CrowFlightWingBodyIntegration.underwingCovertDeploymentWeight(
+            transitionProgress: CrowTakeoffSequence.sample(phase: priorPhase)
+              .transitionProgress
+          )
+        )
+      } else {
+        deployment = (1, 1)
+      }
+      let liveRootFrame = try liveCovertRootBuffer.upload(
+        currentStates: surfaceStates,
+        previousStates: previousSurfaceStates,
+        currentDeployment: deployment.0,
+        previousDeployment: deployment.1
+      )
+      featherFrames.append(
+        try liveCovertGeometryDeformer.encode(
+          rootFrame: liveRootFrame,
+          renderOffset: .zero,
+          projectedPixelsPerMeter: projectedPixelsPerMeter,
+          commandBuffer: commandBuffer
+        )
+      )
     }
 
     let pass = MTLRenderPassDescriptor()
@@ -1188,9 +1241,8 @@ private final class CrowShowcaseRenderer {
       vertexStart: 0,
       vertexCount: temporalVertices.count
     )
-    if let featherFrame, let featherAOVPipeline {
+    if let featherAOVPipeline {
       encoder.setRenderPipelineState(featherAOVPipeline)
-      encoder.setVertexBuffer(featherFrame.outputBuffer, offset: 0, index: 0)
       encoder.setVertexBytes(
         &cameraUniforms,
         length: MemoryLayout<CrowTemporalCameraUniforms>.stride,
@@ -1201,11 +1253,14 @@ private final class CrowShowcaseRenderer {
         length: MemoryLayout<CrowTemporalCameraUniforms>.stride,
         index: 0
       )
-      encoder.drawPrimitives(
-        type: .triangle,
-        vertexStart: 0,
-        vertexCount: featherFrame.vertexCount
-      )
+      for featherFrame in featherFrames {
+        encoder.setVertexBuffer(featherFrame.outputBuffer, offset: 0, index: 0)
+        encoder.drawPrimitives(
+          type: .triangle,
+          vertexStart: 0,
+          vertexCount: featherFrame.vertexCount
+        )
+      }
     }
     encoder.endEncoding()
 
@@ -1240,19 +1295,25 @@ private final class CrowShowcaseRenderer {
       vertexStart: 0,
       vertexCount: temporalVertices.count
     )
-    if let featherFrame, let featherIdentityPipeline {
+    if let featherIdentityPipeline {
       identityEncoder.setRenderPipelineState(featherIdentityPipeline)
-      identityEncoder.setVertexBuffer(featherFrame.outputBuffer, offset: 0, index: 0)
       identityEncoder.setVertexBytes(
         &cameraUniforms,
         length: MemoryLayout<CrowTemporalCameraUniforms>.stride,
         index: 1
       )
-      identityEncoder.drawPrimitives(
-        type: .triangle,
-        vertexStart: 0,
-        vertexCount: featherFrame.vertexCount
-      )
+      for featherFrame in featherFrames {
+        identityEncoder.setVertexBuffer(
+          featherFrame.outputBuffer,
+          offset: 0,
+          index: 0
+        )
+        identityEncoder.drawPrimitives(
+          type: .triangle,
+          vertexStart: 0,
+          vertexCount: featherFrame.vertexCount
+        )
+      }
     }
     identityEncoder.endEncoding()
 
@@ -1485,9 +1546,24 @@ private struct CrowMeshBuilder {
     phase: Float,
     projectedPixelsPerMeter: Float
   ) -> [ColoredVertex] {
-    let states = (0..<dataset.vertexCount).map {
+    vertices(
+      states: surfaceStates(phase: phase),
+      phase: phase,
+      projectedPixelsPerMeter: projectedPixelsPerMeter
+    )
+  }
+
+  func surfaceStates(phase: Float) -> [SIMD3<Float>] {
+    (0..<dataset.vertexCount).map {
       transformedPoint(phase: phase, vertexIndex: $0)
     }
+  }
+
+  func vertices(
+    states: [SIMD3<Float>],
+    phase: Float,
+    projectedPixelsPerMeter: Float
+  ) -> [ColoredVertex] {
     var vertices: [ColoredVertex] = []
     vertices.reserveCapacity(presentation == .standing ? 100_000 : 240_000)
     let bodyIndices = componentIndices(partIdentifier: 1)
@@ -1536,22 +1612,6 @@ private struct CrowMeshBuilder {
       appendTailFeathers(
         states: states,
         bodyCenter: bodyCenter,
-        projectedPixelsPerMeter: projectedPixelsPerMeter,
-        to: &vertices
-      )
-      // Append new reverse-face courses after all established surface geometry
-      // so every pre-existing primitive retains its exact audit identity.
-      appendSurfaceBoundUnderwingCoverts(
-        states: states,
-        left: true,
-        phase: phase,
-        projectedPixelsPerMeter: projectedPixelsPerMeter,
-        to: &vertices
-      )
-      appendSurfaceBoundUnderwingCoverts(
-        states: states,
-        left: false,
-        phase: phase,
         projectedPixelsPerMeter: projectedPixelsPerMeter,
         to: &vertices
       )
@@ -3677,136 +3737,6 @@ private struct CrowMeshBuilder {
           // A fixed LOD contract preserves identical temporal topology even
           // while the measured-derived wing changes chord length slightly.
           lodLengthMeters: 0.12,
-          projectedPixelsPerMeter: projectedPixelsPerMeter,
-          to: &vertices
-        )
-      }
-    }
-  }
-
-  /// Three interleaved courses of lower marginal, median, and greater coverts
-  /// articulate the reverse face of the live wing. Every root and target is
-  /// sampled from the immutable 9 x 33 scaffold, and the tract stays one
-  /// station inside its perimeter so it cannot replace the aerodynamic outline.
-  private func appendSurfaceBoundUnderwingCoverts(
-    states: [SIMD3<Float>],
-    left: Bool,
-    phase: Float,
-    projectedPixelsPerMeter: Float,
-    to vertices: inout [ColoredVertex]
-  ) {
-    let partIdentifier: UInt8 = left ? 2 : 3
-    guard
-      let wing = dataset.components.first(where: {
-        $0.partIdentifier == partIdentifier
-      }), wing.vertexCount
-        == CrowFlightWingBodyIntegration.chordCount
-          * CrowFlightWingBodyIntegration.spanCount
-    else { return }
-    let chordCount = CrowFlightWingBodyIntegration.chordCount
-    func point(span: Int, chord: Int) -> SIMD3<Float> {
-      states[wing.vertexOffset + span * chordCount + chord]
-    }
-    let deploymentWeight: Float =
-      presentation == .takeoff
-      ? CrowFlightWingBodyIntegration.underwingCovertDeploymentWeight(
-        transitionProgress: CrowTakeoffSequence.sample(phase: phase)
-          .transitionProgress
-      )
-      : 1
-    for chord in CrowFlightWingBodyIntegration.underwingCovertChordIndices {
-      let rowFraction = Float(chord) / Float(chordCount - 1)
-      for span in CrowFlightWingBodyIntegration.underwingCovertSpanIndices {
-        let root = point(span: span, chord: chord)
-        let chordTarget = point(span: span, chord: chord + 2)
-        let spanTarget = point(span: span + 2, chord: chord)
-        let chordVector = chordTarget - root
-        let spanVector = spanTarget - root
-        let chordDirection = safeNormalize(
-          chordVector,
-          fallback: SIMD3<Float>(-1, 0, 0)
-        )
-        let spanDirection = safeNormalize(
-          spanVector,
-          fallback: SIMD3<Float>(0, left ? 1 : -1, 0)
-        )
-        let ventralNormal =
-          CrowFlightWingBodyIntegration.underwingCovertSurfaceNormal(
-            chordDirection: chordDirection,
-            spanDirection: spanDirection,
-            left: left
-          )
-        let tipSpanFraction =
-          CrowFlightWingBodyIntegration.underwingCovertTipSpanFraction(
-            chordIndex: chord,
-            spanIndex: span
-          )
-        let surfaceTip = root
-          + CrowFlightWingBodyIntegration.underwingCovertChordTargetScale(
-            chordIndex: chord
-          )
-            * chordVector
-          + tipSpanFraction * spanVector
-        let deployedSurfaceTip = root
-          + deploymentWeight * (surfaceTip - root)
-        let spacing = max(0.5 * simd_length(spanVector), 0.006)
-        let widthScale =
-          CrowFlightWingBodyIntegration.underwingCovertWidthScale(
-            chordIndex: chord,
-            spanIndex: span
-          )
-          * CrowFlightWingBodyIntegration.underwingCovertCourseWidthScale(
-            chordIndex: chord
-          )
-        let camberScale =
-          CrowFlightWingBodyIntegration.underwingCovertCamberScale(
-            chordIndex: chord,
-            spanIndex: span
-          )
-        let materialVariation =
-          CrowFlightWingBodyIntegration.underwingCovertMaterialVariation(
-            chordIndex: chord,
-            spanIndex: span
-          )
-        let edgeVariation =
-          CrowFlightWingBodyIntegration.underwingCovertEdgeVariation(
-            chordIndex: chord,
-            spanIndex: span
-          )
-        appendFeatherBlade(
-          root: root
-            + ventralNormal
-              * CrowFlightWingBodyIntegration
-                .underwingCovertRootClearanceMeters * deploymentWeight,
-          tip: deployedSurfaceTip
-            + ventralNormal
-              * CrowFlightWingBodyIntegration
-                .underwingCovertTipClearanceMeters * deploymentWeight,
-          planeNormal: ventralNormal,
-          rootWidth: deploymentWeight * widthScale * 0.34 * spacing,
-          maximumWidth: deploymentWeight * widthScale * 0.58 * spacing,
-          color: SIMD4<Float>(
-            (0.0065 + 0.0015 * rowFraction)
-              * (1 + 0.07 * materialVariation),
-            (0.0095 + 0.0020 * rowFraction)
-              * (1 + 0.05 * materialVariation),
-            (0.0170 + 0.0030 * rowFraction)
-              * (1 + 0.04 * materialVariation),
-            0.17 + 0.007 * materialVariation
-          ),
-          sections: 7,
-          camber: deploymentWeight * camberScale * 0.004
-            * simd_length(chordVector),
-          transverseCamberRatio: 0.04,
-          edgeRippleAmplitude: 0.006
-            + 0.008 * (0.5 + 0.5 * edgeVariation),
-          edgeRipplePhase: Float.pi * (edgeVariation + 1),
-          edgeRippleCycles: 1.10 + 0.45 * (0.5 + 0.5 * edgeVariation),
-          surfaceFeatherClass:
-            CrowFlightWingBodyIntegration.underwingCovertClassCode(
-              chordIndex: chord
-            ),
-          lodLengthMeters: 0.10,
           projectedPixelsPerMeter: projectedPixelsPerMeter,
           to: &vertices
         )

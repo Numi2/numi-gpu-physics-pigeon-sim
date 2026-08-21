@@ -174,6 +174,12 @@ struct CrowFeatherRootStateGPU: Equatable {
   var previousDirectionAndCamber: SIMD4<Float>
   var currentNormalAndPadding: SIMD4<Float>
   var previousNormalAndPadding: SIMD4<Float>
+  /// Previous length, maximum half-width, rachis radius, and camber.
+  ///
+  /// Persistent feathers normally repeat their immutable morphology here.
+  /// Live topology-bound tracts use it to collapse or deploy without applying
+  /// current-frame dimensions to the previous temporal sample.
+  var previousMorphology: SIMD4<Float>
   var identity: SIMD4<UInt32>
 }
 

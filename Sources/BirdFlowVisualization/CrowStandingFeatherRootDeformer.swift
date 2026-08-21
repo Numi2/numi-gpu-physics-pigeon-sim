@@ -173,6 +173,7 @@ final class CrowStandingFeatherRootDeformer: CrowFeatherRootDeforming {
         previousDirectionAndCamber: SIMD4<Float>(previous.direction, binding.morphology.w),
         currentNormalAndPadding: SIMD4<Float>(current.normal, 0),
         previousNormalAndPadding: SIMD4<Float>(previous.normal, 0),
+        previousMorphology: binding.morphology,
         identity: binding.identity
       )
     }
