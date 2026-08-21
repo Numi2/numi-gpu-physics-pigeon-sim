@@ -150,14 +150,14 @@ func terminalPrimaryReleasesBeforeRemainingFoldedRemexStack() {
   let visibility = CrowTakeoffSequence.retainedRemexVisibility(
     featherClass:order:count:transitionProgress:
   )
-  #expect(CrowTakeoffSequence.terminalPrimaryRetainedEndProgress == 0.28)
+  #expect(CrowTakeoffSequence.terminalPrimaryRetainedEndProgress == 0.20)
   #expect(visibility(1, 9, 10, 0.08) == 1)
-  #expect(abs(visibility(1, 9, 10, 0.18) - 0.5) < 1e-6)
-  #expect(visibility(1, 9, 10, 0.28) == 0)
-  #expect(visibility(1, 8, 10, 0.28) > 0.68)
-  #expect(visibility(2, 10, 11, 0.28) > 0.68)
+  #expect(abs(visibility(1, 9, 10, 0.14) - 0.5) < 1e-6)
+  #expect(visibility(1, 9, 10, 0.20) == 0)
+  #expect(visibility(1, 8, 10, 0.20) > 0.84)
+  #expect(visibility(2, 10, 11, 0.20) > 0.84)
   #expect(visibility(1, 8, 10, 0.62) == 0)
-  #expect(visibility(2, 10, 11, 0.18) > visibility(1, 9, 10, 0.18))
+  #expect(visibility(2, 10, 11, 0.14) > visibility(1, 9, 10, 0.14))
 }
 
 @Test("open-flight rectrix targets retain a connected root fan")

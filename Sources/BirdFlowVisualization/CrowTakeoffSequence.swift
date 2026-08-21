@@ -37,7 +37,7 @@ enum CrowTakeoffSequence {
   static let retainedFeatherHandoffEndProgress: Float = 0.62
   /// The enlarged terminal primary transfers first so its folded overlap vane
   /// cannot remain as a second spear beside the opening live-wing sheet.
-  static let terminalPrimaryRetainedEndProgress: Float = 0.28
+  static let terminalPrimaryRetainedEndProgress: Float = 0.20
   /// The folded live-wing sheet stays broad over the flank, then converges
   /// smoothly into the retained primary/rectrix stack instead of ending as a
   /// pair of constant-width topology blades.

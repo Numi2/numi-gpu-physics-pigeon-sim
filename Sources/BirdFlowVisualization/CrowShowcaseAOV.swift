@@ -58,6 +58,28 @@ struct CrowShowcaseFrame {
     var featherHashes: Set<UInt32> = []
     var persistentFeatherVisiblePixels: [SIMD4<UInt32>: Int] = [:]
     var persistentFeatherFullyCoveredPixels: [SIMD4<UInt32>: Int] = [:]
+    var persistentFeatherMinimumX: [SIMD4<UInt32>: Int] = [:]
+    var persistentFeatherMaximumX: [SIMD4<UInt32>: Int] = [:]
+    var persistentFeatherMinimumY: [SIMD4<UInt32>: Int] = [:]
+    var persistentFeatherMaximumY: [SIMD4<UInt32>: Int] = [:]
+    var persistentFeatherXTotal: [SIMD4<UInt32>: Int] = [:]
+    var persistentFeatherYTotal: [SIMD4<UInt32>: Int] = [:]
+    var wingSurfaceCellVisiblePixels: [UInt32: Int] = [:]
+    var wingSurfaceCellFullyCoveredPixels: [UInt32: Int] = [:]
+    var wingSurfaceCellMinimumX: [UInt32: Int] = [:]
+    var wingSurfaceCellMaximumX: [UInt32: Int] = [:]
+    var wingSurfaceCellMinimumY: [UInt32: Int] = [:]
+    var wingSurfaceCellMaximumY: [UInt32: Int] = [:]
+    var wingSurfaceCellXTotal: [UInt32: Int] = [:]
+    var wingSurfaceCellYTotal: [UInt32: Int] = [:]
+    var wingCovertVisiblePixels: [UInt32: Int] = [:]
+    var wingCovertFullyCoveredPixels: [UInt32: Int] = [:]
+    var wingCovertMinimumX: [UInt32: Int] = [:]
+    var wingCovertMaximumX: [UInt32: Int] = [:]
+    var wingCovertMinimumY: [UInt32: Int] = [:]
+    var wingCovertMaximumY: [UInt32: Int] = [:]
+    var wingCovertXTotal: [UInt32: Int] = [:]
+    var wingCovertYTotal: [UInt32: Int] = [:]
     var visibleFeatherClassPixelCounts = [Int](repeating: 0, count: 32)
     var fullyCoveredFeatherClassPixelCounts = [Int](repeating: 0, count: 32)
     var birdMask = [Bool](repeating: false, count: pixelCount)
@@ -100,7 +122,50 @@ struct CrowShowcaseFrame {
         visibleFeatherClassPixelCounts[featherClass] += 1
         if id0 != UInt32.max { featherHashes.insert(id1) }
         if id0 != UInt32.max && (1...3).contains(id3 & 255) {
-          persistentFeatherVisiblePixels[SIMD4(id0, id1, id2, id3), default: 0] += 1
+          let featherIdentity = SIMD4(id0, id1, id2, id3)
+          persistentFeatherVisiblePixels[featherIdentity, default: 0] += 1
+          let x = pixel % width
+          let y = pixel / width
+          persistentFeatherMinimumX[featherIdentity] = min(
+            persistentFeatherMinimumX[featherIdentity] ?? x,
+            x
+          )
+          persistentFeatherMaximumX[featherIdentity] = max(
+            persistentFeatherMaximumX[featherIdentity] ?? x,
+            x
+          )
+          persistentFeatherMinimumY[featherIdentity] = min(
+            persistentFeatherMinimumY[featherIdentity] ?? y,
+            y
+          )
+          persistentFeatherMaximumY[featherIdentity] = max(
+            persistentFeatherMaximumY[featherIdentity] ?? y,
+            y
+          )
+          persistentFeatherXTotal[featherIdentity, default: 0] += x
+          persistentFeatherYTotal[featherIdentity, default: 0] += y
+        }
+        if id0 == UInt32.max && CrowWingSurfaceCellIdentity.isPacked(id3) {
+          wingSurfaceCellVisiblePixels[id3, default: 0] += 1
+          let x = pixel % width
+          let y = pixel / width
+          wingSurfaceCellMinimumX[id3] = min(wingSurfaceCellMinimumX[id3] ?? x, x)
+          wingSurfaceCellMaximumX[id3] = max(wingSurfaceCellMaximumX[id3] ?? x, x)
+          wingSurfaceCellMinimumY[id3] = min(wingSurfaceCellMinimumY[id3] ?? y, y)
+          wingSurfaceCellMaximumY[id3] = max(wingSurfaceCellMaximumY[id3] ?? y, y)
+          wingSurfaceCellXTotal[id3, default: 0] += x
+          wingSurfaceCellYTotal[id3, default: 0] += y
+        }
+        if id0 == UInt32.max && CrowWingCovertIdentity.isPacked(id3) {
+          wingCovertVisiblePixels[id3, default: 0] += 1
+          let x = pixel % width
+          let y = pixel / width
+          wingCovertMinimumX[id3] = min(wingCovertMinimumX[id3] ?? x, x)
+          wingCovertMaximumX[id3] = max(wingCovertMaximumX[id3] ?? x, x)
+          wingCovertMinimumY[id3] = min(wingCovertMinimumY[id3] ?? y, y)
+          wingCovertMaximumY[id3] = max(wingCovertMaximumY[id3] ?? y, y)
+          wingCovertXTotal[id3, default: 0] += x
+          wingCovertYTotal[id3, default: 0] += y
         }
         if id0 == UInt32.max && id2 == 6 {
           supportYTotal += Float(pixel / width)
@@ -124,6 +189,12 @@ struct CrowShowcaseFrame {
         if id0 != UInt32.max && (1...3).contains(id3 & 255) {
           persistentFeatherFullyCoveredPixels[SIMD4(id0, id1, id2, id3), default: 0]
             += 1
+        }
+        if id0 == UInt32.max && CrowWingSurfaceCellIdentity.isPacked(id3) {
+          wingSurfaceCellFullyCoveredPixels[id3, default: 0] += 1
+        }
+        if id0 == UInt32.max && CrowWingCovertIdentity.isPacked(id3) {
+          wingCovertFullyCoveredPixels[id3, default: 0] += 1
         }
       }
       let speed = hypot(motionX, motionY)
@@ -172,11 +243,57 @@ struct CrowShowcaseFrame {
         physicsSurfacePartIdentifier: identity.z,
         packedIdentity: identity.w,
         visiblePixelCount: visiblePixelCount,
-        fullyCoveredPixelCount: persistentFeatherFullyCoveredPixels[identity, default: 0]
+        fullyCoveredPixelCount: persistentFeatherFullyCoveredPixels[identity, default: 0],
+        minimumX: persistentFeatherMinimumX[identity, default: 0],
+        maximumX: persistentFeatherMaximumX[identity, default: 0],
+        minimumY: persistentFeatherMinimumY[identity, default: 0],
+        maximumY: persistentFeatherMaximumY[identity, default: 0],
+        centroidX: Float(persistentFeatherXTotal[identity, default: 0])
+          / Float(visiblePixelCount),
+        centroidY: Float(persistentFeatherYTotal[identity, default: 0])
+          / Float(visiblePixelCount)
       )
     }.sorted {
       ($0.featherClass, $0.sideCode, $0.order, $0.stableIdentifierHash)
         < ($1.featherClass, $1.sideCode, $1.order, $1.stableIdentifierHash)
+    }
+    let wingSurfaceCellIdentities = wingSurfaceCellVisiblePixels.map {
+      identity, visiblePixelCount in
+      CrowWingSurfaceCellIdentityAudit(
+        packedIdentity: identity,
+        visiblePixelCount: visiblePixelCount,
+        fullyCoveredPixelCount: wingSurfaceCellFullyCoveredPixels[identity, default: 0],
+        minimumX: wingSurfaceCellMinimumX[identity, default: 0],
+        maximumX: wingSurfaceCellMaximumX[identity, default: 0],
+        minimumY: wingSurfaceCellMinimumY[identity, default: 0],
+        maximumY: wingSurfaceCellMaximumY[identity, default: 0],
+        centroidX: Float(wingSurfaceCellXTotal[identity, default: 0])
+          / Float(visiblePixelCount),
+        centroidY: Float(wingSurfaceCellYTotal[identity, default: 0])
+          / Float(visiblePixelCount)
+      )
+    }.sorted {
+      ($0.partIdentifier, $0.spanIndex, $0.chordIndex, $0.upperTriangle ? 1 : 0)
+        < ($1.partIdentifier, $1.spanIndex, $1.chordIndex, $1.upperTriangle ? 1 : 0)
+    }
+    let wingCovertIdentities = wingCovertVisiblePixels.map {
+      identity, visiblePixelCount in
+      CrowWingCovertIdentityAudit(
+        packedIdentity: identity,
+        visiblePixelCount: visiblePixelCount,
+        fullyCoveredPixelCount: wingCovertFullyCoveredPixels[identity, default: 0],
+        minimumX: wingCovertMinimumX[identity, default: 0],
+        maximumX: wingCovertMaximumX[identity, default: 0],
+        minimumY: wingCovertMinimumY[identity, default: 0],
+        maximumY: wingCovertMaximumY[identity, default: 0],
+        centroidX: Float(wingCovertXTotal[identity, default: 0])
+          / Float(visiblePixelCount),
+        centroidY: Float(wingCovertYTotal[identity, default: 0])
+          / Float(visiblePixelCount)
+      )
+    }.sorted {
+      ($0.sideCode, $0.chordIndex, $0.spanIndex)
+        < ($1.sideCode, $1.chordIndex, $1.spanIndex)
     }
     return CrowShowcaseAOVFrameAudit(
       frameIndex: frameIndex,
@@ -203,6 +320,8 @@ struct CrowShowcaseFrame {
       fullyCoveredActiveIdentityPixelCount: fullyCoveredActiveIdentityPixelCount,
       visibleFeatherIdentityCount: featherHashes.count,
       persistentFeatherIdentities: persistentFeatherIdentities,
+      wingSurfaceCellIdentities: wingSurfaceCellIdentities,
+      wingCovertIdentities: wingCovertIdentities,
       visibleFeatherClassPixelCounts: visibleFeatherClassPixelCounts,
       fullyCoveredFeatherClassPixelCounts: fullyCoveredFeatherClassPixelCounts,
       enclosedBirdSilhouetteHolePixelCount: silhouetteHoles.pixelCount,
@@ -729,6 +848,13 @@ struct CrowShowcaseAOVFrameAudit: Codable, Equatable {
   /// rectrix identities. Procedural surface primitives retain separate AOV
   /// ownership and are intentionally excluded.
   let persistentFeatherIdentities: [CrowPersistentFeatherIdentityAudit]
+  /// Exact visible-pixel census for the fixed 32 by 8 cells of each retained
+  /// wing surface. This maps coarse silhouette evidence back to owning
+  /// topology without storing an image-space target.
+  let wingSurfaceCellIdentities: [CrowWingSurfaceCellIdentityAudit]
+  /// Exact visible-pixel and image-bound census for each topology-bound dorsal
+  /// covert. Vane, rachis, and barb primitives retain one anatomical owner.
+  let wingCovertIdentities: [CrowWingCovertIdentityAudit]
   /// Exact visible identity-AOV pixels binned by the low five class bits.
   let visibleFeatherClassPixelCounts: [Int]
   /// The same 32-bin census restricted to full geometric sample coverage.
@@ -772,11 +898,91 @@ struct CrowPersistentFeatherIdentityAudit: Codable, Equatable {
   let packedIdentity: UInt32
   let visiblePixelCount: Int
   let fullyCoveredPixelCount: Int
+  let minimumX: Int
+  let maximumX: Int
+  let minimumY: Int
+  let maximumY: Int
+  let centroidX: Float
+  let centroidY: Float
 
   var featherClass: UInt32 { packedIdentity & 255 }
   var sideCode: UInt32 { (packedIdentity >> 8) & 255 }
   var order: UInt32 { (packedIdentity >> 16) & 255 }
   var count: UInt32 { (packedIdentity >> 24) & 255 }
+}
+
+enum CrowWingSurfaceCellIdentity {
+  static let featherClassCode: UInt32 = 11
+
+  static func pack(
+    partIdentifier: UInt8,
+    spanIndex: Int,
+    chordIndex: Int,
+    upperTriangle: Bool
+  ) -> UInt32 {
+    precondition(partIdentifier == 2 || partIdentifier == 3)
+    precondition((0..<CrowFlightWingBodyIntegration.spanCount - 1).contains(spanIndex))
+    precondition((0..<CrowFlightWingBodyIntegration.chordCount - 1).contains(chordIndex))
+    return featherClassCode
+      | UInt32(partIdentifier - 2) << 8
+      | UInt32(spanIndex) << 9
+      | UInt32(chordIndex) << 15
+      | UInt32(upperTriangle ? 1 : 0) << 19
+  }
+
+  static func isPacked(_ identity: UInt32) -> Bool {
+    identity & 255 == featherClassCode
+  }
+}
+
+struct CrowWingSurfaceCellIdentityAudit: Codable, Equatable {
+  let packedIdentity: UInt32
+  let visiblePixelCount: Int
+  let fullyCoveredPixelCount: Int
+  let minimumX: Int
+  let maximumX: Int
+  let minimumY: Int
+  let maximumY: Int
+  let centroidX: Float
+  let centroidY: Float
+
+  var partIdentifier: UInt8 { UInt8((packedIdentity >> 8) & 1) + 2 }
+  var spanIndex: Int { Int((packedIdentity >> 9) & 63) }
+  var chordIndex: Int { Int((packedIdentity >> 15) & 15) }
+  var upperTriangle: Bool { (packedIdentity >> 19) & 1 == 1 }
+}
+
+enum CrowWingCovertIdentity {
+  static let featherClassCode: UInt32 = 4
+
+  static func pack(left: Bool, chordIndex: Int, spanIndex: Int) -> UInt32 {
+    precondition(CrowFlightWingBodyIntegration.covertChordIndices.contains(chordIndex))
+    precondition(CrowFlightWingBodyIntegration.covertSpanIndices.contains(spanIndex))
+    return featherClassCode
+      | UInt32(left ? 1 : 2) << 8
+      | UInt32(chordIndex) << 10
+      | UInt32(spanIndex) << 14
+  }
+
+  static func isPacked(_ identity: UInt32) -> Bool {
+    identity > 255 && identity & 255 == featherClassCode
+  }
+}
+
+struct CrowWingCovertIdentityAudit: Codable, Equatable {
+  let packedIdentity: UInt32
+  let visiblePixelCount: Int
+  let fullyCoveredPixelCount: Int
+  let minimumX: Int
+  let maximumX: Int
+  let minimumY: Int
+  let maximumY: Int
+  let centroidX: Float
+  let centroidY: Float
+
+  var sideCode: Int { Int((packedIdentity >> 8) & 3) }
+  var chordIndex: Int { Int((packedIdentity >> 10) & 15) }
+  var spanIndex: Int { Int((packedIdentity >> 14) & 63) }
 }
 
 struct CrowShowcaseAOVAuditReport: Codable, Equatable {
@@ -788,7 +994,7 @@ struct CrowShowcaseAOVAuditReport: Codable, Equatable {
   let frames: [CrowShowcaseAOVFrameAudit]
 
   init(frames: [CrowShowcaseAOVFrameAudit]) {
-    schemaVersion = 8
+    schemaVersion = 9
     colorSpace = "scene-linear extended range; display output is tone mapped separately"
     motionConvention =
       "current pixel to previous pixel in upper-left-origin pixel units; MetalFX scale 1"

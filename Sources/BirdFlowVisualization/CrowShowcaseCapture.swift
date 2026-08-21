@@ -1781,6 +1781,30 @@ private struct CrowMeshBuilder {
       let triangle = dataset.triangle(triangleIndex)
       let indices = [Int(triangle.x), Int(triangle.y), Int(triangle.z)]
       let points = indices.map { states[$0] }
+      let semanticIdentity: UInt32 = {
+        guard part == 2 || part == 3,
+          let wing = dataset.components.first(where: {
+            $0.partIdentifier == part
+          })
+        else { return 0 }
+        let localIndices = indices.map { $0 - wing.vertexOffset }
+        let minimumSpan = localIndices.map {
+          $0 / CrowFlightWingBodyIntegration.chordCount
+        }.min() ?? 0
+        let minimumChord = localIndices.map {
+          $0 % CrowFlightWingBodyIntegration.chordCount
+        }.min() ?? 0
+        let upperTriangle = localIndices.contains {
+          $0 / CrowFlightWingBodyIntegration.chordCount > minimumSpan
+            && $0 % CrowFlightWingBodyIntegration.chordCount == minimumChord
+        }
+        return CrowWingSurfaceCellIdentity.pack(
+          partIdentifier: part,
+          spanIndex: minimumSpan,
+          chordIndex: minimumChord,
+          upperTriangle: upperTriangle
+        )
+      }()
       let color: SIMD4<Float>
       switch part {
       case 2:
@@ -1797,7 +1821,14 @@ private struct CrowMeshBuilder {
           smoothNormals[indices[corner]],
           fallback: faceNormal(points[0], points[1], points[2])
         )
-        vertices.append(vertex(point, normal: normal, color: color))
+        vertices.append(
+          vertex(
+            point,
+            normal: normal,
+            color: color,
+            parameters: SIMD4<Float>(0, 0, 0, Float(semanticIdentity))
+          )
+        )
       }
     }
   }
@@ -3572,6 +3603,7 @@ private struct CrowMeshBuilder {
         states: states,
         bodyCenter: bodyCenter,
         left: left,
+        phase: phase,
         to: &vertices
       )
       appendDorsalFoldedWingHandoffUnderlayer(
@@ -3591,6 +3623,7 @@ private struct CrowMeshBuilder {
     states: [SIMD3<Float>],
     bodyCenter: SIMD3<Float>,
     left: Bool,
+    phase: Float,
     to vertices: inout [ColoredVertex]
   ) {
     let partIdentifier: UInt8 = left ? 2 : 3
@@ -3635,8 +3668,16 @@ private struct CrowMeshBuilder {
       + CrowFlightWingBodyIntegration.axillaryUnderlayerTipSpanFraction(
         spanIndex: span
       ) * spanVector
-    let bodyRoot = bodyCenter + folded.rootOffset - 0.0003 * folded.planeNormal
-    let bodyTip = bodyCenter + folded.tipOffset - 0.0003 * folded.planeNormal
+    let foldedRoot = bodyCenter + folded.rootOffset - 0.0003 * folded.planeNormal
+    let foldedTip = bodyCenter + folded.tipOffset - 0.0003 * folded.planeNormal
+    let transitionProgress = CrowTakeoffSequence.sample(phase: phase)
+      .transitionProgress
+    let handoffWeight = CrowFlightWingBodyIntegration
+      .terminalAxillaryHandoffWeight(
+        transitionProgress: transitionProgress
+      )
+    let bodyRoot = wingRoot + handoffWeight * (foldedRoot - wingRoot)
+    let bodyTip = wingTip + handoffWeight * (foldedTip - wingTip)
     let normal = safeNormalize(
       folded.planeNormal + wingNormal,
       fallback: folded.planeNormal
@@ -3860,6 +3901,11 @@ private struct CrowMeshBuilder {
     for chord in CrowFlightWingBodyIntegration.covertChordIndices {
       let rowFraction = Float(chord) / 8
       for span in CrowFlightWingBodyIntegration.covertSpanIndices {
+        let surfaceIdentity = CrowWingCovertIdentity.pack(
+          left: left,
+          chordIndex: chord,
+          spanIndex: span
+        )
         let root = point(span: span, chord: chord)
         let chordTarget = point(span: span, chord: min(chord + 2, 8))
         let spanTarget = point(span: span + 2, chord: chord)
@@ -3973,7 +4019,10 @@ private struct CrowMeshBuilder {
           )
         let surfaceTip =
           root
-          + (isTrailingCourse
+          + CrowFlightWingBodyIntegration.covertDistalTrailingChordScale(
+            chordIndex: chord,
+            spanIndex: span
+          ) * (isTrailingCourse
             ? 1.92 + proximalChordExtension + distalChordExtension
             : 1.16 + anteriorChordExtension)
           * chordVector
@@ -4066,7 +4115,12 @@ private struct CrowMeshBuilder {
             edgeRippleAmplitude: edgeRippleAmplitude,
             edgeRipplePhase: edgeRipplePhase,
             edgeRippleCycles: edgeRippleCycles,
-            surfaceFeatherClass: 4,
+            terminalWidthRatio:
+              CrowFlightWingBodyIntegration.covertTerminalWidthRatio(
+                chordIndex: chord,
+                spanIndex: span
+              ),
+            surfaceFeatherClass: surfaceIdentity,
             lodLengthMeters: 0.12,
             projectedPixelsPerMeter: projectedPixelsPerMeter,
             to: &vertices
@@ -4085,7 +4139,7 @@ private struct CrowMeshBuilder {
               edgeRippleAmplitude: edgeRippleAmplitude,
               edgeRipplePhase: edgeRipplePhase,
               edgeRippleCycles: edgeRippleCycles,
-              surfaceFeatherClass: 4,
+              surfaceFeatherClass: surfaceIdentity,
               deployment: trailingRankDeployment,
               lodLengthMeters: 0.12,
               projectedPixelsPerMeter: projectedPixelsPerMeter,
@@ -4107,7 +4161,12 @@ private struct CrowMeshBuilder {
             edgeRippleAmplitude: edgeRippleAmplitude,
             edgeRipplePhase: edgeRipplePhase,
             edgeRippleCycles: edgeRippleCycles,
-            surfaceFeatherClass: 4,
+            terminalWidthRatio:
+              CrowFlightWingBodyIntegration.covertTerminalWidthRatio(
+                chordIndex: chord,
+                spanIndex: span
+              ),
+            surfaceFeatherClass: surfaceIdentity,
             // A fixed LOD contract preserves identical temporal topology even
             // while the measured-derived wing changes chord length slightly.
             lodLengthMeters: 0.12,
@@ -4137,7 +4196,7 @@ private struct CrowMeshBuilder {
             endHalfWidth: segment.endRadiusMeters,
             surfaceNormal: dorsalNormal,
             color: rachisColor,
-            surfaceFeatherClass: 4,
+            surfaceFeatherClass: surfaceIdentity,
             to: &vertices
           )
         }
@@ -4169,7 +4228,7 @@ private struct CrowMeshBuilder {
             endHalfWidth: segment.endRadiusMeters,
             surfaceNormal: dorsalNormal,
             color: barbColor,
-            surfaceFeatherClass: 4,
+            surfaceFeatherClass: surfaceIdentity,
             to: &vertices
           )
         }
@@ -4199,7 +4258,7 @@ private struct CrowMeshBuilder {
               endHalfWidth: segment.endRadiusMeters,
               surfaceNormal: dorsalNormal,
               color: segment.kind == .rachis ? rachisColor : barbColor,
-              surfaceFeatherClass: 4,
+            surfaceFeatherClass: surfaceIdentity,
               to: &vertices
             )
           }
@@ -4470,6 +4529,7 @@ private struct CrowMeshBuilder {
     edgeRipplePhase: Float = 0,
     edgeRippleCycles: Float = 1.5,
     rootEnvelopeRatio: Float = 0.32,
+    terminalWidthRatio: Float = 0.015,
     axialStartFraction: Float = 0,
     surfaceFeatherClass: UInt32 = 0,
     lodLengthMeters: Float? = nil,
@@ -4496,7 +4556,8 @@ private struct CrowMeshBuilder {
       let bodyEnvelope =
         rootEnvelope
         + (1 - rootEnvelope) * pow(max(sin(Float.pi * t), 0), 0.58)
-      let tipTaper = 1 - 0.985 * pow(t, 3.2)
+      let boundedTerminalWidthRatio = min(max(terminalWidthRatio, 0), 1)
+      let tipTaper = 1 - (1 - boundedTerminalWidthRatio) * pow(t, 3.2)
       let envelope = bodyEnvelope * tipTaper
       let rippleEnvelope = pow(max(sin(Float.pi * t), 0), 2)
       let edgeRipple =

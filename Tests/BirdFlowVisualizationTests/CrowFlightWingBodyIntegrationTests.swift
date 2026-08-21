@@ -1031,3 +1031,34 @@ func dorsalFoldedWingHandoffIsBilateralAndCollapsesBeforeFreeFlight() {
   #expect(abs(weight(0.42)) < 1e-7)
   #expect(abs(weight(1)) < 1e-7)
 }
+
+@Test("terminal axillary bridge collapses as reverse-face coverts deploy")
+func terminalAxillaryBridgeCollapsesWithUnderwingDeployment() {
+  let weight = CrowFlightWingBodyIntegration
+    .terminalAxillaryHandoffWeight(transitionProgress:)
+  #expect(abs(weight(0) - 1) < 1e-7)
+  #expect(abs(weight(0.01) - 1) < 1e-7)
+  #expect(abs(weight(0.105) - 0.5) < 1e-6)
+  #expect(abs(weight(0.20)) < 1e-7)
+  #expect(abs(weight(1)) < 1e-7)
+}
+
+@Test("distal trailing covert tips converge while other courses retain coverage")
+func distalTrailingCovertTipsConvergeWithoutChangingOtherCourses() {
+  let terminalRatio = CrowFlightWingBodyIntegration.covertTerminalWidthRatio(
+    chordIndex:spanIndex:
+  )
+  #expect(abs(terminalRatio(6, 26) - 0.015) < 1e-7)
+  #expect(terminalRatio(6, 27) == 0)
+  #expect(terminalRatio(6, 30) == 0)
+  #expect(abs(terminalRatio(5, 30) - 0.015) < 1e-7)
+
+  let chordScale = CrowFlightWingBodyIntegration
+    .covertDistalTrailingChordScale(chordIndex:spanIndex:)
+  #expect(chordScale(6, 26) == 1)
+  #expect(abs(chordScale(6, 27) - 0.88) < 1e-7)
+  #expect(abs(chordScale(6, 28) - 0.80) < 1e-7)
+  #expect(abs(chordScale(6, 29) - 0.72) < 1e-7)
+  #expect(abs(chordScale(6, 30) - 0.64) < 1e-7)
+  #expect(chordScale(5, 30) == 1)
+}

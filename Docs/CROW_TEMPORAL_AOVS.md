@@ -60,7 +60,10 @@ audit. Its presentation PNG is canonicalized to frame zero after that audit so
 device-level MetalFX reset variance cannot create an encoded loop seam when
 the pose, camera, topology, and audited buffers have closed.
 
-Surface identity is `(UInt32.max, triangle + 1, materialCode, 0)`. Feather
+Surface identity is `(UInt32.max, triangle + 1, materialCode, packedClass)`.
+Wing-scaffold triangles pack part/span/chord cell ownership, and procedural
+dorsal coverts pack side/chord/span ownership while keeping the class in the
+low byte. Other procedural surfaces retain a zero or class-only fourth word. Feather
 identity retains the inventory index, deterministic ID, surface ownership, and
 packed class/side/order/count record. Reality-asset feathers use their locked
 hash; live underwing coverts use topology-derived side/course/span IDs. Both
@@ -87,10 +90,12 @@ audit path and temporal scale:
   /tmp/crow.mp4 /tmp/crow.png standing /tmp/crow-aov-audit.json 2
 ```
 
-The JSON report records format and coordinate conventions plus per-frame
+The schema-9 JSON report records format and coordinate conventions plus per-frame
 finite-pixel count, HDR values above one, exact active IDs, visible feather IDs,
 fully covered samples, unit-normal error, depth range, moving-pixel count,
-maximum motion, and bird/support vertical centroids. When temporal scaling is
+maximum motion, and bird/support vertical centroids. It also records exact
+visible/full-coverage counts and screen bounds for every persistent feather,
+wing-surface cell, and topology-bound dorsal covert. When temporal scaling is
 active, the audit also renders a separate full-resolution native oracle and
 records whole-frame RMSE, bird-foreground RMSE, maximum channel error, and bird
 silhouette intersection-over-union plus foreground gradient-energy retention.

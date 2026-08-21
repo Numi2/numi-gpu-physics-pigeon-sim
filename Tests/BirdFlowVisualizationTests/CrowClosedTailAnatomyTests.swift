@@ -32,9 +32,24 @@ func closedRectricesOverlapInMedialToLateralTent() {
         && abs(simd_length($0.normal) - 1) < 1e-6
         && abs(
           simd_distance($0.rootOffset, $0.tipOffset)
-            - CrowClosedTailAnatomy.rectrixLengthMeters
+            - CrowClosedTailAnatomy.lengthMeters(
+              radialFraction: $0.radialFraction
+            )
         ) < 1e-6
     }
+  )
+  #expect(
+    abs(
+      simd_distance(poses[5].rootOffset, poses[5].tipOffset)
+        - CrowClosedTailAnatomy.rectrixLengthMeters
+    ) < 0.0003
+  )
+  #expect(
+    abs(
+      simd_distance(poses[0].rootOffset, poses[0].tipOffset)
+        - (CrowClosedTailAnatomy.rectrixLengthMeters
+          - CrowClosedTailAnatomy.lateralRectrixLengthReductionMeters)
+    ) < 1e-6
   )
   #expect(poses[5].normal.y < 0)
   #expect(poses[6].normal.y > 0)

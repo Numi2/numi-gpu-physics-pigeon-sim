@@ -2,6 +2,58 @@ import Testing
 
 @testable import BirdFlowVisualization
 
+@Test("wing surface identity retains exact fixed-topology cell ownership")
+func wingSurfaceIdentityRetainsExactCellOwnership() {
+  let packed = CrowWingSurfaceCellIdentity.pack(
+    partIdentifier: 3,
+    spanIndex: 31,
+    chordIndex: 7,
+    upperTriangle: true
+  )
+  let audit = CrowWingSurfaceCellIdentityAudit(
+    packedIdentity: packed,
+    visiblePixelCount: 19,
+    fullyCoveredPixelCount: 11,
+    minimumX: 3,
+    maximumX: 9,
+    minimumY: 4,
+    maximumY: 12,
+    centroidX: 6,
+    centroidY: 8
+  )
+  #expect(CrowWingSurfaceCellIdentity.isPacked(packed))
+  #expect(packed < 1 << 24)
+  #expect(audit.partIdentifier == 3)
+  #expect(audit.spanIndex == 31)
+  #expect(audit.chordIndex == 7)
+  #expect(audit.upperTriangle)
+}
+
+@Test("wing covert identity retains exact side and topology station")
+func wingCovertIdentityRetainsExactTopologyStation() {
+  let packed = CrowWingCovertIdentity.pack(
+    left: false,
+    chordIndex: 6,
+    spanIndex: 30
+  )
+  let audit = CrowWingCovertIdentityAudit(
+    packedIdentity: packed,
+    visiblePixelCount: 23,
+    fullyCoveredPixelCount: 17,
+    minimumX: 4,
+    maximumX: 19,
+    minimumY: 5,
+    maximumY: 13,
+    centroidX: 11,
+    centroidY: 9
+  )
+  #expect(CrowWingCovertIdentity.isPacked(packed))
+  #expect(packed < 1 << 24)
+  #expect(audit.sideCode == 2)
+  #expect(audit.chordIndex == 6)
+  #expect(audit.spanIndex == 30)
+}
+
 @Test("silhouette hole audit distinguishes enclosed and exterior background")
 func silhouetteHoleAuditDistinguishesEnclosedAndExteriorBackground() {
   let width = 7

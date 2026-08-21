@@ -17,6 +17,7 @@ struct CrowClosedTailPose: Equatable {
 enum CrowClosedTailAnatomy {
   static let rectrixCount = 12
   static let rectrixLengthMeters: Float = 0.166
+  static let lateralRectrixLengthReductionMeters: Float = 0.006
   static let lateralSpanMeters: Float = 0.012
   static let rootLayerDepthMeters: Float = 0.004
   static let tipLayerDepthMeters: Float = 0.006
@@ -26,6 +27,7 @@ enum CrowClosedTailAnatomy {
     let centered = 2 * fraction - 1
     let radialFraction = abs(centered)
     let side: Float = centered == 0 ? 0 : (centered > 0 ? 1 : -1)
+    let rectrixLength = lengthMeters(radialFraction: radialFraction)
     let rootOffset = SIMD3<Float>(
       -0.154 + 0.003 * radialFraction,
       0.5 * lateralSpanMeters * centered,
@@ -36,7 +38,7 @@ enum CrowClosedTailAnatomy {
       rootOffset.y,
       -0.025 - tipLayerDepthMeters * radialFraction
     )
-    let verticalDirection = (tipOffset.z - rootOffset.z) / rectrixLengthMeters
+    let verticalDirection = (tipOffset.z - rootOffset.z) / rectrixLength
     let direction = normalized(
       SIMD3<Float>(
         -sqrt(max(0, 1 - verticalDirection * verticalDirection)),
@@ -45,7 +47,7 @@ enum CrowClosedTailAnatomy {
       ),
       fallback: SIMD3<Float>(-1, 0, 0)
     )
-    let resolvedTip = rootOffset + rectrixLengthMeters * direction
+    let resolvedTip = rootOffset + rectrixLength * direction
     let normal = normalized(
       SIMD3<Float>(
         0.04,
@@ -61,6 +63,12 @@ enum CrowClosedTailAnatomy {
       direction: direction,
       normal: normal
     )
+  }
+
+  static func lengthMeters(radialFraction rawRadialFraction: Float) -> Float {
+    let radialFraction = min(max(rawRadialFraction, 0), 1)
+    return rectrixLengthMeters
+      - lateralRectrixLengthReductionMeters * pow(radialFraction, 1.35)
   }
 
   private static func normalized(

@@ -147,6 +147,17 @@ final class CrowTakeoffFeatherRootDeformer: CrowFeatherRootDeforming {
         count: count,
         transitionProgress: previous.transitionProgress
       )
+      let closedLengthScale = CrowClosedTailAnatomy.lengthMeters(
+        radialFraction: closed.radialFraction
+      ) / CrowClosedTailAnatomy.rectrixLengthMeters
+      let currentLengthScale = closedLengthScale
+        + CrowTakeoffSequence.liveRectrixDeploymentWeight(
+          transitionProgress: current.transitionProgress
+        ) * (1 - closedLengthScale)
+      let previousLengthScale = closedLengthScale
+        + CrowTakeoffSequence.liveRectrixDeploymentWeight(
+          transitionProgress: previous.transitionProgress
+        ) * (1 - closedLengthScale)
       let currentRoot = xyz(grounded.currentPositionAndLength)
         + current.bodyTranslation
         + (currentPose.rootOffset - closed.rootOffset)
@@ -157,6 +168,7 @@ final class CrowTakeoffFeatherRootDeformer: CrowFeatherRootDeforming {
         currentPositionAndLength: SIMD4<Float>(
           currentRoot,
           grounded.currentPositionAndLength.w
+            * currentLengthScale / closedLengthScale
         ),
         previousPositionAndWidth: SIMD4<Float>(
           previousRoot,
@@ -172,7 +184,13 @@ final class CrowTakeoffFeatherRootDeformer: CrowFeatherRootDeforming {
         ),
         currentNormalAndPadding: SIMD4<Float>(currentPose.normal, 0),
         previousNormalAndPadding: SIMD4<Float>(previousPose.normal, 0),
-        previousMorphology: grounded.previousMorphology,
+        previousMorphology: SIMD4<Float>(
+          grounded.previousMorphology.x
+            * previousLengthScale / closedLengthScale,
+          grounded.previousMorphology.y,
+          grounded.previousMorphology.z,
+          grounded.previousMorphology.w
+        ),
         identity: grounded.identity
       )
     }

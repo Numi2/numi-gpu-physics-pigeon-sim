@@ -92,6 +92,18 @@ enum CrowFlightWingBodyIntegration {
     return smootherstep(progress)
   }
 
+  /// Keeps the folded axillary bridge only until the reverse-face covert bed
+  /// owns the same interval. Both bridge triangles then collapse onto their
+  /// live wing edge, preserving fixed topology without leaving a broad slab
+  /// attached to the freely deploying wing.
+  static func terminalAxillaryHandoffWeight(
+    transitionProgress: Float
+  ) -> Float {
+    1 - underwingCovertDeploymentWeight(
+      transitionProgress: transitionProgress
+    )
+  }
+
   /// Passerine primary coverts are relatively short; the caudal course seals
   /// remex bases without extending to the established trailing-wing outline.
   static func underwingCovertChordTargetScale(chordIndex: Int) -> Float {
@@ -420,6 +432,31 @@ enum CrowFlightWingBodyIntegration {
     )
     return 1
       + (covertDistalTrailingMaximumWidthScale - 1) * weight
+  }
+
+  /// Resolves the last four trailing covert vanes to an actual feather point.
+  /// The generic shell keeps a small terminal width for coverage, but that
+  /// width makes neighboring distal tips merge into a rectangular block at
+  /// rear oblique views where the marginal scaffold already owns coverage.
+  static func covertTerminalWidthRatio(
+    chordIndex: Int,
+    spanIndex: Int
+  ) -> Float {
+    chordIndex == 6 && spanIndex >= spanCount - 6 ? 0 : 0.015
+  }
+
+  /// Shortens the caudal distal course toward the wingtip instead of letting
+  /// its final four coverts end on one common rectangular line. Their discrete
+  /// 12, 20, 28, and 36 percent length steps retain a roof-tile overlap while
+  /// the scaffold remains the gap-coverage owner beneath the staggered tips.
+  static func covertDistalTrailingChordScale(
+    chordIndex: Int,
+    spanIndex: Int
+  ) -> Float {
+    guard chordIndex == 6 else { return 1 }
+    let firstTaperedSpan = spanCount - 6
+    guard spanIndex >= firstTaperedSpan else { return 1 }
+    return max(0.64, 0.88 - 0.08 * Float(spanIndex - firstTaperedSpan))
   }
 
   /// Adds a small symmetric overlap to the same two trailing shingles during

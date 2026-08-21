@@ -309,6 +309,10 @@ kernel void deformCrowFeatherRoots(
     output[featherIndex]=state;
 }
 
+inline float crowClosedRectrixLengthScale(float radialFraction) {
+    return (0.166f-0.006f*pow(clamp(radialFraction,0.0f,1.0f),1.35f))/0.166f;
+}
+
 struct CrowStandingRootPose {
     float3 root;
     float3 direction;
@@ -389,7 +393,7 @@ inline CrowStandingRootPose crowStandingRootPose(
             0.006f*centered,
             0.0065f-0.004f*radialFraction
         );
-        float featherLength=0.166f;
+        float featherLength=0.166f*crowClosedRectrixLengthScale(radialFraction);
         float targetZ=-0.025f-0.006f*radialFraction;
         float verticalDirection=(targetZ-(result.root.z-center.z))/featherLength;
         result.direction=safeNormalizeCrow(
@@ -433,13 +437,21 @@ kernel void poseStandingCrowFeatherRoots(
         binding,uniforms.phaseAndCount.y,uniforms.referenceBodyCenter.xyz
     );
     CrowFeatherRootStateGPU state;
-    state.currentPositionAndLength=float4(current.root,binding.morphology.x);
+    uint featherClass=binding.orderCountClassSide.z;
+    uint count=max(binding.orderCountClassSide.y,1u);
+    float fraction=float(binding.orderCountClassSide.x)/float(max(count-1u,1u));
+    float lengthScale=featherClass==3u
+        ?crowClosedRectrixLengthScale(abs(2.0f*fraction-1.0f)):1.0f;
+    state.currentPositionAndLength=float4(
+        current.root,binding.morphology.x*lengthScale
+    );
     state.previousPositionAndWidth=float4(previous.root,binding.morphology.y);
     state.currentDirectionAndRachis=float4(current.direction,binding.morphology.z);
     state.previousDirectionAndCamber=float4(previous.direction,binding.morphology.w);
     state.currentNormalAndPadding=float4(current.normal,0);
     state.previousNormalAndPadding=float4(previous.normal,0);
     state.previousMorphology=binding.morphology;
+    state.previousMorphology.x*=lengthScale;
     state.identity=binding.identity;
     output[featherIndex]=state;
 }
@@ -463,7 +475,7 @@ inline float crowRetainedRemexVisibility(
     uint order=(packedIdentity>>16u)&255u;
     uint count=max((packedIdentity>>24u)&255u,1u);
     bool isTerminalPrimary=featherClass==1u&&order+1u==count;
-    float endProgress=isTerminalPrimary?0.28f:0.62f;
+    float endProgress=isTerminalPrimary?0.20f:0.62f;
     float normalized=clamp(
         (transitionProgress-0.08f)/(endProgress-0.08f),0.0f,1.0f
     );
@@ -491,8 +503,9 @@ inline CrowTakeoffRectrixPose crowTakeoffRectrixPose(
         0.006f*centered,
         0.0065f-0.004f*radialFraction
     );
+    float closedLength=0.166f*crowClosedRectrixLengthScale(radialFraction);
     float verticalDirection=
-        (-0.025f-0.006f*radialFraction-closedRoot.z)/0.166f;
+        (-0.025f-0.006f*radialFraction-closedRoot.z)/closedLength;
     float3 closedDirection=safeNormalizeCrow(
         float3(
             -sqrt(max(0.0f,1.0f-verticalDirection*verticalDirection)),
@@ -501,7 +514,7 @@ inline CrowTakeoffRectrixPose crowTakeoffRectrixPose(
         ),
         float3(-1,0,0)
     );
-    float3 closedTip=closedRoot+0.166f*closedDirection;
+    float3 closedTip=closedRoot+closedLength*closedDirection;
     float3 closedNormal=safeNormalizeCrow(
         float3(0.04f,sideSign*(0.045f+0.110f*radialFraction),1),
         float3(0,0,1)
@@ -567,12 +580,25 @@ kernel void blendCrowTakeoffFeatherRoots(
         CrowTakeoffRectrixPose previous=crowTakeoffRectrixPose(
             packedIdentity,previousBlend
         );
+        uint order=(packedIdentity>>16u)&255u;
+        uint count=max((packedIdentity>>24u)&255u,1u);
+        float fraction=float(min(order,count-1u))/float(max(count-1u,1u));
+        float closedLengthScale=crowClosedRectrixLengthScale(
+            abs(2.0f*fraction-1.0f)
+        );
+        float currentLengthScale=mix(
+            closedLengthScale,1.0f,crowLiveRectrixDeploymentWeight(currentBlend)
+        );
+        float previousLengthScale=mix(
+            closedLengthScale,1.0f,crowLiveRectrixDeploymentWeight(previousBlend)
+        );
         CrowFeatherRootStateGPU state;
         state.currentPositionAndLength=float4(
             grounded.currentPositionAndLength.xyz
                 +uniforms.currentBodyTranslation.xyz
                 +(current.rootOffset-closed.rootOffset),
             grounded.currentPositionAndLength.w
+                *currentLengthScale/closedLengthScale
         );
         state.previousPositionAndWidth=float4(
             grounded.previousPositionAndWidth.xyz
@@ -589,6 +615,7 @@ kernel void blendCrowTakeoffFeatherRoots(
         state.currentNormalAndPadding=float4(current.normal,0);
         state.previousNormalAndPadding=float4(previous.normal,0);
         state.previousMorphology=grounded.previousMorphology;
+        state.previousMorphology.x*=previousLengthScale/closedLengthScale;
         state.identity=grounded.identity;
         output[featherIndex]=state;
         return;

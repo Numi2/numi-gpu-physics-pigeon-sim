@@ -150,21 +150,24 @@ attachment coordinates or the encoded blend weights.
 All `12` retained rectrix identities also remain authoritative through takeoff.
 Metal blends each root, direction, and normal from the closed standing stack to
 the existing open-flight target over transition progress `0.08...0.62`, while
-length, width, rachis, camber, morphology, and current/previous state stay
-continuous. Primaries and secondaries still collapse on their complementary
+the closed tail's identity-specific length graduation returns continuously to
+the open-flight asset lengths; width, rachis, camber, morphology, and
+current/previous state remain continuous. Primaries and secondaries still collapse on their complementary
 handoff schedule, and the separate procedural tail is emitted only in the
 wingbeat presentation. Independent Swift parity checks cover the retained GPU
 state at four phases. This is a continuity and coverage result, not measured
 rectrix deployment kinematics.
 
 The overlap-expanded terminal primary on each side now transfers to the live
-wing over transition progress `0.08...0.28`; the remaining folded remiges keep
+wing over transition progress `0.08...0.20`; the remaining folded remiges keep
 their `0.08...0.62` visibility schedule. This removes a redundant retained
 blade while the same pointed primary is already represented by the opening
 topology-bound wing. It does not blunt primary tips, change standing geometry,
-or alter the rectrix deployment. Crow AOV schema `8` carries exact visible and
-fully covered pixels per persistent feather identity so this ownership boundary
-can be traced without inferring identity from a beauty image.
+or alter the rectrix deployment. Crow AOV schema `9` carries exact visible and
+fully covered pixels plus image bounds per persistent feather, wing-surface
+cell, and topology-bound dorsal-covert identity. Ownership can therefore be
+traced to class/side/order or side/chord/span without inferring it from a beauty
+image.
 
 The retained rectrix surface now preserves a narrow `13-16%` width envelope
 over its terminal `16%` of length. Lateral vane vertices retreat quadratically
@@ -173,6 +176,14 @@ asset tip. This replaces a generic zero-width needle termination with a rounded,
 identity-varying simulated rectrix end without changing stable IDs, root poses,
 or storage topology. Full-chord finite-difference normals run in both Swift and
 Metal and retain the existing `< 1e-5` CPU/GPU normal-parity gate.
+
+The closed rectrix stack now graduates from `0.166 m` medially to `0.160 m`
+laterally and returns continuously to the retained open-flight lengths during
+deployment. This replaces the camera-dependent straight terminal bar with a
+shallow rounded tail edge while preserving all `12` identities. The last four
+dorsal trailing coverts also converge to pointed tips and shorten in discrete
+roof-tile steps toward the wingtip; the fixed wing surface remains their
+coverage owner.
 
 Procedural contour and folded-wing feathers select quantized tessellation from
 their projected length at the final output resolution. The four asset LOD

@@ -308,7 +308,8 @@ func standingCrowFeatherRootsMatchMetalReference() throws {
   #expect(centerTail.direction.z < 0)
   let tailLength: Float = 0.166
   let centerTailTip = centerTail.rootOffset + tailLength * centerTail.direction
-  let edgeTailTip = edgeTail.rootOffset + tailLength * edgeTail.direction
+  let edgeTailTip = edgeTail.rootOffset
+    + CrowClosedTailAnatomy.lengthMeters(radialFraction: 1) * edgeTail.direction
   #expect(abs(centerTailTip.y) < 1e-6)
   #expect(abs(edgeTailTip.y) <= 0.0061)
   #expect(abs(centerTailTip.z + 0.025) < 1e-5)
@@ -406,10 +407,15 @@ func takeoffRetainedRectricesMatchMetalReference() throws {
   #expect(flightRectrices.count == 12)
   #expect(
     zip(heldRectrices, flightRectrices).allSatisfy {
-      $0.currentPositionAndLength.w == $1.currentPositionAndLength.w
+      $0.currentPositionAndLength.w <= $1.currentPositionAndLength.w
         && $0.previousPositionAndWidth.w == $1.previousPositionAndWidth.w
         && $0.currentDirectionAndRachis.w == $1.currentDirectionAndRachis.w
         && $0.previousDirectionAndCamber.w == $1.previousDirectionAndCamber.w
+    }
+  )
+  #expect(
+    zip(heldRectrices, flightRectrices).contains {
+      $1.currentPositionAndLength.w - $0.currentPositionAndLength.w > 0.005
     }
   )
   #expect(
