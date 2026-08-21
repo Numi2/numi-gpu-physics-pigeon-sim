@@ -134,18 +134,20 @@ enum CrowFeatherMesostructure {
   ) -> [CrowFeatherMesostructureSegment] {
     segments(
       frame: Frame(feather: feather),
-      projectedPixelsPerMeter: projectedPixelsPerMeter
+      projectedPixelsPerMeter: projectedPixelsPerMeter,
+      lodLengthMeters: CrowFemoralPlumage.topologyLODReferenceLengthMeters
     )
   }
 
   private static func segments(
     frame: Frame,
     projectedPixelsPerMeter: Float,
+    lodLengthMeters: Float? = nil,
     containPromotedInteriorBarbs: Bool = false,
     promoteInteriorBarbs: Bool = false
   ) -> [CrowFeatherMesostructureSegment] {
     let tessellation = CrowFeatherCoverageLOD.tessellation(
-      lengthMeters: frame.referenceLengthMeters,
+      lengthMeters: lodLengthMeters ?? frame.referenceLengthMeters,
       projectedPixelsPerMeter: projectedPixelsPerMeter,
       baseAxialSections: 7
     )

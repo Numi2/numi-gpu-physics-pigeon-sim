@@ -247,14 +247,16 @@ enum CrowAxillaryWingRootIntegration {
     wingNormal: SIMD3<Float>,
     transitionProgress: Float
   ) -> CrowAxillaryFeatherSample {
+    guard deploymentWeight(transitionProgress: transitionProgress) > 0 else {
+      return sample
+    }
     let rowFraction =
       Float(sample.row)
       / Float(max(CrowAxillaryFeatherTracts.rowCount - 1, 1))
     let rowCoupling =
       maximumRowCoupling
       + (minimumRowCoupling - maximumRowCoupling) * rowFraction
-    let weight =
-      deploymentWeight(transitionProgress: transitionProgress)
+    let weight = deploymentWeight(transitionProgress: transitionProgress)
       * rowCoupling
     let originalVector = sample.tipOffset - sample.rootOffset
     let length = simd_length(originalVector)

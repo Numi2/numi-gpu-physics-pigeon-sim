@@ -575,10 +575,27 @@ front-low view and `-6.65%/-4.45%/-0.35%` in the high-quarter view. This is
 deterministic simulated-raster material evidence, not measured feather optics
 or a perceptual-realism qualification.
 
+The pectoral-volume pass then relaxes lower-flank narrowing only through the
+sternum and fades the field before the caudal pelvis. All axial ring stations,
+vertical radii, hip/hock/foot coordinates, feather identities, and inventories
+remain fixed. One femoral feather crossed the `24 px` detail threshold during
+quiet pose motion at the small topology test resolution; standing and takeoff
+now use the same `0.035 m` representative femoral LOD length, restoring exact
+current/previous vertex counts while retaining the higher detail tier.
+
+Across fresh 17-frame front-starboard and ventral-port audits at yaw/pitch
+`(-0.32,0.06)` and `(0.66,-0.34)`, enclosed-hole pixels stay `6 -> 6` and
+improve `36 -> 35`; components improve `5 -> 4` and `17 -> 16`; and the worst
+components remain exactly `2` and `5` pixels. Fully covered active identity
+pixels rise `0.396%` and `0.226%`, while fully covered class-`7` pectoral,
+abdominal, and femoral pixels rise `1.493%` and `1.226%`. Expected lower-body
+apertures remain zero in both views. These are simulated-raster continuity and
+coverage results, not measured external dimensions or perceptual realism.
+
 The canonical README sequence is fully simulated and contains the native hold,
-transition, and flight path: `800 x 450`, `72` frames at `24 fps`, `8,153,326`
+transition, and flight path: `800 x 450`, `72` frames at `24 fps`, `8,095,378`
 bytes, SHA-256
-`b3dca08ceac026a9e243028daeb02203a87e69a6d8b9003768de0b80db6ee1b7`.
+`97f093147c02969cc21ebbf6468b1ae707adc5d9d8adb4e479e6577699b5f4d2`.
 
 Run the presentation with:
 

@@ -3254,9 +3254,7 @@ private struct CrowMeshBuilder {
           rootEnvelopeRatio: feather.rootEnvelopeRatio,
           axialStartFraction: feather.pennaceousStartFraction,
           surfaceFeatherClass: CrowFemoralPlumage.surfaceFeatherClass,
-          lodLengthMeters: takeoffSequence
-            ? 0.035
-            : simd_distance(feather.root, feather.tip),
+          lodLengthMeters: CrowFemoralPlumage.topologyLODReferenceLengthMeters,
           projectedPixelsPerMeter: projectedPixelsPerMeter,
           to: &vertices
         )

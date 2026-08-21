@@ -166,6 +166,14 @@ Metal expansion into `74,496` temporal/AOV vertices instead of authoring those
 tubes on the CPU. The continuity and barb oracle remains in the accepted body
 surface stream; future meshlet or hardware-curve emission can consume the same
 records without reducing the `1,304`-feather ventral inventory.
+The shared trunk loft now preserves a broader ventrolateral pectoral envelope
+through the sternum and fades that relief before the caudal pelvis. It moves
+the body surface and its already-attached contour follicles together while
+leaving every anatomical ring station, hip, hock, foot contact, and feather
+inventory unchanged. Femoral vanes also use one `0.035 m` topology-LOD
+reference in standing and takeoff, so quiet pose motion cannot promote a single
+feather into a different detail tier. This is an estimated presentation shape,
+not a measured American-crow body cross-section.
 The caudal body shell now carries `168` rump-to-rectrix contour vanes in seven
 overlapping rows instead of `120` in five. They retain the existing tube,
 clearance, material, and projected-size hierarchy, including future rachis,

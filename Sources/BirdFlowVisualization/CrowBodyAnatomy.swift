@@ -123,13 +123,20 @@ enum CrowBodyAnatomy {
     ring: CrowBodyLoftRing
   ) -> Float {
     let shoulderWeight = clamp(1 - abs(ring.x - 0.030) / 0.120)
+    let pectoralWeight = clamp(1 - abs(ring.x + 0.025) / 0.115)
     let pelvicWeight = clamp((-ring.x - 0.035) / 0.130)
     let upperFlankWeight = clamp(1 - abs(sine - 0.30) / 0.70)
     let lowerFlankWeight = clamp(1 - abs(sine + 0.45) / 0.55)
+    // Retain the paired pectoralis as a broad ventrolateral mass through the
+    // sternum instead of pinching every lower ring toward the keel. The field
+    // fades before the caudal pelvis, preserving the established pelvic taper
+    // and the negative space between the planted legs.
+    let lowerFlankNarrowing =
+      0.18 + 0.08 * pelvicWeight - 0.075 * pectoralWeight
     return max(
       0.68,
-      1 + 0.10 * shoulderWeight * upperFlankWeight
-        - (0.18 + 0.08 * pelvicWeight) * lowerFlankWeight
+      1 + 0.12 * shoulderWeight * upperFlankWeight
+        - lowerFlankNarrowing * lowerFlankWeight
     )
   }
 

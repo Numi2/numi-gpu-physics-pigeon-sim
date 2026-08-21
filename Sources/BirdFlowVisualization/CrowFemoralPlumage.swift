@@ -40,6 +40,9 @@ enum CrowFemoralPlumage {
   /// changes presentation plumage only; hip and leg kinematics stay intact.
   static let bridgeLengthScale: Float = 0.68
   static let nominalMaximumLengthMeters: Float = 0.034
+  /// Stable representative length for both standing and takeoff tessellation.
+  /// Pose-dependent root-to-tip distance must not change temporal topology.
+  static let topologyLODReferenceLengthMeters: Float = 0.035
   static let pelvicAxillaryHandoffMaximumWidthScale: Float = 1.35
   /// A bounded mid-course expansion roofs the camera-visible femoral insertion
   /// without adding a new row, moving roots, or changing leg articulation.

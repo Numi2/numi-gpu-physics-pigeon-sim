@@ -25,6 +25,7 @@ func femoralPlumageBridgesBodyLoftAndUpperCruralTract() {
   #expect(CrowFemoralPlumage.surfaceFeatherClass == 7)
   #expect(CrowFemoralPlumage.bridgeLengthScale == 0.68)
   #expect(CrowFemoralPlumage.nominalMaximumLengthMeters == 0.034)
+  #expect(CrowFemoralPlumage.topologyLODReferenceLengthMeters == 0.035)
   #expect(CrowFemoralPlumage.pelvicAxillaryHandoffMaximumWidthScale == 1.35)
   #expect(left.count == right.count)
   #expect(

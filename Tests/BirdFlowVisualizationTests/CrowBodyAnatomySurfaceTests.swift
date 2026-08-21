@@ -21,7 +21,8 @@ func crowTrunkCrossSectionSeparatesAnatomicalRegions() {
   let pelvisLower = CrowBodyAnatomy.surfacePoint(ring: pelvis, theta: -0.62)
   let sternumNormalizedWidth = abs(sternumLower.y) / sternum.halfWidth
   let pelvisNormalizedWidth = abs(pelvisLower.y) / pelvis.halfWidth
-  #expect(pelvisNormalizedWidth < sternumNormalizedWidth)
+  #expect(sternumNormalizedWidth > 0.73)
+  #expect(sternumNormalizedWidth > 1.08 * pelvisNormalizedWidth)
 
   let visibleAnterior =
     CrowBodyAnatomy.loftRings[CrowBodyAnatomy.visibleAnteriorRingIndex]

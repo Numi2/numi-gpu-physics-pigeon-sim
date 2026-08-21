@@ -37,6 +37,15 @@ an intersection seam. Overlapping contour and folded-wing covert rows then
 break up the analytic surface. These remain estimated presentation geometry;
 they are not inferred skeletal landmarks or a measured body scan.
 
+The lower-flank field now retains more of that width through the sternum before
+tapering toward the pelvis, while the upper shoulder coefficient rises only
+from `0.10` to `0.12`. Jackson and Dial report pectoralis mass averaging
+`14.7%` of body mass across their four corvid species, supporting a substantial
+ventral flight-muscle envelope but not determining its external cross-section.
+Accordingly, the bounded `0.075` pectoral relief coefficient remains an
+estimated visual constraint; ring stations, vertical radii, and skeletal joint
+coordinates stay unchanged.
+
 The grounded silhouette keeps the folded primaries, secondaries, and rectrices
 in compact, nearly parallel stacks instead of fanning a flight pose downward.
 The body envelope is intentionally horizontal, with a distinct elevated neck
