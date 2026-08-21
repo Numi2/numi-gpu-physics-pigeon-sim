@@ -173,6 +173,12 @@ air/keratin/melanin film response. It records comparative glossy-corvid
 constraints independently from the renderer's American-crow estimates, so the
 subtler sheen is reproducible without presenting a figure trace, photograph,
 or related species as measured target data.
+Its view-dependent barb, proximal-barbule, distal-barbule, and transmission
+weights now use a constant-time analytic discontinuity-ray mask ported from the
+authors' MIT reference implementation. The previous projected-area
+approximation remains a deterministic fallback. The construction is exact for
+that idealized regular cross section, not for measured American-crow anatomy or
+explicit individual feather curves.
 The shared trunk loft now preserves a broader ventrolateral pectoral envelope
 through the sternum and fades that relief before the caudal pelvis. It moves
 the body surface and its already-attached contour follicles together while

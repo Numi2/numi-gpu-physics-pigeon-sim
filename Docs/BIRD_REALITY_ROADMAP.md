@@ -154,24 +154,25 @@ inventory or view-dependent patch geometry.
    angular half-vector paths rather than sharing a normal-incidence or
    key-light result; an on-GPU probe matches independent FP64
    normal-through-grazing reference cases.
-   A second versioned profile block drives a constant-cost projected-area
-   approximation for barb, proximal barbule, distal barbule, and transmission
-   visibility. Its Metal probe enforces normalized weights, bilateral mirror
-   exchange, and monotonic gap transmission. This is a far-field regular
-   cross-section estimate derived from the Padrón-Griffe et al. construction,
-   not their exact analytic self-occlusion solver and not measured crow anatomy.
-   Its bounded loop and tables are deliberately replaceable by denser samples
-   on future GPUs. The local thickness variation, coherence blend, volume
+   A second versioned profile block drives normalized barb, proximal barbule,
+   distal barbule, and transmission visibility. Its promoted path is a
+   constant-time MSL port of Padrón-Griffe et al.'s analytic discontinuity-ray
+   mask, source-pinned to the authors' MIT implementation. Independent barb and
+   barbule interval probes match that implementation, while a dense spherical
+   sweep enforces finite, nonnegative, bounded, normalized output. The previous
+   projected-area regular-cross-section approximation remains a deterministic
+   fallback. Analytic exactness applies to the paper's idealized cross section,
+   not measured crow anatomy or explicit individual barb curves. The local
+   thickness variation, coherence blend, volume
    return, and target-species mapping remain estimates: this is a
    wavelength-domain deterministic fallback, not a measured American-crow
    BSDF. The next material milestone is same-specimen American-crow
    gonioreflectance and cortex microscopy under measured illumination, followed
    by a fitted angular cortex/medulla/transmission model. Before that data
-   exists, the next renderer milestone is an exact constant-time analytic mask
-   with barb/barbule discontinuity rays, followed by a hybrid handoff to
-   explicit curve geometry when individual barbs exceed a projected-size
-   threshold. Do not substitute further hand tuning for either measurement or
-   geometry-aware visibility.
+   exists, the next renderer milestone is a projected-size hybrid handoff to
+   explicit curve geometry and curve-aware self-shadowing when individual barbs
+   exceed a pixel threshold. Do not substitute further hand tuning for either
+   measurement or geometry-aware visibility.
 
 4. **Physical light transport.** Add image-based lighting, multiple scattering,
    soft self-shadowing, and curve/triangle ray geometry. Metal supports curve
@@ -223,5 +224,6 @@ and the separation between solver boundary and beauty geometry. Promotion needs:
   and [Metal feature-set tables](https://developer.apple.com/metal/capabilities/).
 - Apple, [Metal Performance Primitives programming guide](https://developer.apple.com/download/files/Metal-Performance-Primitives-Programming-Guide.pdf).
 - Huang et al., [Rendering Iridescent Rock Dove Neck Feathers](https://light.informatik.uni-bonn.de/rendering-iridescent-rock-dove-neck-feathers/), SIGGRAPH 2022.
+- Padrón-Griffe et al., [A Surface-based Appearance Model for Pennaceous Feathers](https://doi.org/10.1111/cgf.15235), *Computer Graphics Forum* 43(4), 2024, and the authors' [MIT reference implementation](https://github.com/juanraul8/PennaceousFeathersRendering).
 - Harvey et al., [Measuring Spatially- and Directionally-varying Light Scattering from Biological Material](https://doi.org/10.3791/50254), *Journal of Visualized Experiments* 75 (2013).
 - Zeltner et al., [Real-Time Neural Appearance Models](https://research.nvidia.com/labs/rtr/neural_appearance_models/), SIGGRAPH 2024.

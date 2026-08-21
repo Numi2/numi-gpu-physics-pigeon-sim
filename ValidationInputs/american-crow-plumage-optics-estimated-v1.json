@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "profileIdentifier": "american-crow-plumage-optics-estimated-v1",
   "targetTaxon": "Corvus brachyrhynchos",
   "evidenceClass": "comparative-corvid-constrained-render-estimate",
@@ -14,11 +14,12 @@
     "rawSpectraAvailable": false
   },
   "visibilitySource": {
-    "title": "A Practical Appearance Model for Pennaceous Feathers",
+    "title": "A Surface-based Appearance Model for Pennaceous Feathers",
     "doi": "10.1111/cgf.15235",
     "implementationURL": "https://github.com/juanraul8/PennaceousFeathersRendering",
+    "implementationRevision": "9af1a04722f78a7275b62afb492ea8d074499128",
     "implementationLicense": "MIT",
-    "modelClass": "projected-area-regular-cross-section-approximation"
+    "modelClass": "analytic-discontinuity-ray-regular-cross-section"
   },
   "publishedConstraints": {
     "wavelengthRangeNanometers": [300.0, 700.0],
@@ -56,7 +57,8 @@
     "barbuleInclinationDegrees": 18.0,
     "barbuleRelativeLength": 5.0,
     "barbuleRelativeSeparation": 0.55,
-    "projectedVisibilityStrength": 0.62
+    "projectedVisibilityStrength": 0.62,
+    "analyticMaskStrength": 1.0
   },
   "calibrationStatus": "not calibrated to an American-crow specimen",
   "excludedClaims": [
@@ -66,6 +68,6 @@
     "calibrated illumination spectrum",
     "species-specific ultraviolet response",
     "measured American-crow barb or barbule cross sections",
-    "exact analytic barb and barbule self-occlusion"
+    "explicit individual barb and barbule curve geometry"
   ]
 }

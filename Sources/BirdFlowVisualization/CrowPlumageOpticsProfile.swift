@@ -31,6 +31,7 @@ struct CrowPlumageOpticsProfile: Decodable, Equatable {
     let title: String
     let doi: String
     let implementationURL: String
+    let implementationRevision: String
     let implementationLicense: String
     let modelClass: String
   }
@@ -64,6 +65,7 @@ struct CrowPlumageOpticsProfile: Decodable, Equatable {
     let barbuleRelativeLength: Float
     let barbuleRelativeSeparation: Float
     let projectedVisibilityStrength: Float
+    let analyticMaskStrength: Float
   }
 
   let schemaVersion: Int
@@ -117,7 +119,7 @@ struct CrowPlumageOpticsProfile: Decodable, Equatable {
 
     let published = publishedConstraints
     let render = renderParameters
-    guard schemaVersion == 1,
+    guard schemaVersion == 2,
       profileIdentifier == "american-crow-plumage-optics-estimated-v1",
       targetTaxon == "Corvus brachyrhynchos",
       evidenceClass == "comparative-corvid-constrained-render-estimate",
@@ -129,9 +131,11 @@ struct CrowPlumageOpticsProfile: Decodable, Equatable {
       visibilitySource.doi == "10.1111/cgf.15235",
       visibilitySource.implementationURL
         == "https://github.com/juanraul8/PennaceousFeathersRendering",
+      visibilitySource.implementationRevision
+        == "9af1a04722f78a7275b62afb492ea8d074499128",
       visibilitySource.implementationLicense == "MIT",
       visibilitySource.modelClass
-        == "projected-area-regular-cross-section-approximation",
+        == "analytic-discontinuity-ray-regular-cross-section",
       calibrationStatus == "not calibrated to an American-crow specimen",
       excludedClaims.count >= 4
     else {
@@ -215,7 +219,10 @@ struct CrowPlumageOpticsProfile: Decodable, Equatable {
       render.barbuleRelativeSeparation <= 4,
       render.projectedVisibilityStrength.isFinite,
       render.projectedVisibilityStrength >= 0,
-      render.projectedVisibilityStrength <= 1
+      render.projectedVisibilityStrength <= 1,
+      render.analyticMaskStrength.isFinite,
+      render.analyticMaskStrength >= 0,
+      render.analyticMaskStrength <= 1
     else {
       throw invalid("renderer visibility estimates are outside the bounded contract")
     }
@@ -259,7 +266,7 @@ struct CrowPlumageOpticsProfile: Decodable, Equatable {
         render.barbuleRelativeLength,
         render.barbuleRelativeSeparation,
         render.projectedVisibilityStrength,
-        0
+        render.analyticMaskStrength
       )
     )
   }

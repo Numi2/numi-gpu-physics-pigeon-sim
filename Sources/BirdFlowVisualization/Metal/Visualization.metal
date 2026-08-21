@@ -2665,13 +2665,507 @@ inline float crowProjectedSegmentLength(float2 segment,float2 direction) {
     return abs(segment.x*direction.y-segment.y*direction.x);
 }
 
+// Constant-time 2D primitives for the differential projected-area mask in
+// Padrón-Griffe et al. The discontinuity rays begin at ellipse tangencies,
+// intersect the neighboring ellipse/barbule segments, and partition only the
+// visible intervals. This is an MSL port of the authors' MIT masking model;
+// it is not a sampled shadow approximation or explicit curve geometry.
+inline float2 crowMaskEllipsePoint(
+    float2 center,float2 axes,float parameter) {
+    return center+axes*float2(cos(parameter),sin(parameter));
+}
+
+inline float crowMaskEllipseTangentParameter(float2 axes,float2 direction) {
+    return atan2(-axes.y*direction.x,axes.x*direction.y);
+}
+
+inline float crowMaskEllipseParameterAt(
+    float2 point,float2 center,float2 axes) {
+    return atan2((point.y-center.y)/axes.y,(point.x-center.x)/axes.x);
+}
+
+inline float crowMaskEllipseProjectedArea(
+    float2 axes,float2 direction,float first,float second) {
+    return abs(
+        direction.x*axes.y*(sin(first)-sin(second))
+        +direction.y*axes.x*(cos(second)-cos(first))
+    );
+}
+
+inline bool crowMaskEllipseRayNearestPositive(
+    float2 origin,float2 direction,float2 center,float2 axes,
+    thread float& nearest) {
+    float2 scaledDirection=direction/axes;
+    float2 scaledOffset=(origin-center)/axes;
+    float a=dot(scaledDirection,scaledDirection);
+    if(a<1.0e-12f){return false;}
+    float b=2.0f*dot(scaledDirection,scaledOffset);
+    float c=dot(scaledOffset,scaledOffset)-1.0f;
+    float discriminant=b*b-4.0f*a*c;
+    if(discriminant<0.0f){return false;}
+    float root=sqrt(max(discriminant,0.0f));
+    float inverse=0.5f/a;
+    float first=(-b-root)*inverse;
+    float second=(-b+root)*inverse;
+    nearest=INFINITY;
+    if(first>0.0f){nearest=first;}
+    if(second>0.0f){nearest=min(nearest,second);}
+    return isfinite(nearest);
+}
+
+inline float2 crowMaskSegmentNormal(float2 first,float2 second) {
+    float2 perpendicular=float2(first.y-second.y,second.x-first.x);
+    float magnitude=length(perpendicular);
+    return magnitude>1.0e-12f
+        ?perpendicular/magnitude
+        :float2(0.0f,1.0f);
+}
+
+inline bool crowMaskSegmentRayUnbounded(
+    float2 first,float2 second,float2 origin,float2 direction,
+    thread float& rayParameter) {
+    float2 normal=crowMaskSegmentNormal(first,second);
+    float denominator=dot(normal,direction);
+    if(abs(denominator)<1.0e-8f){return false;}
+    rayParameter=dot(normal,first-origin)/denominator;
+    return isfinite(rayParameter);
+}
+
+inline float crowMaskSegmentParameterAt(
+    float2 first,float2 second,float2 point) {
+    uint axis=abs(first.y-second.y)>abs(first.x-second.x)?1u:0u;
+    float denominator=second[axis]-first[axis];
+    if(abs(denominator)<1.0e-8f){return 0.0f;}
+    return (2.0f*point[axis]-first[axis]-second[axis])/denominator;
+}
+
+inline bool crowMaskSegmentRayHit(
+    float2 first,float2 second,float2 origin,float2 direction) {
+    float rayParameter=0.0f;
+    if(!crowMaskSegmentRayUnbounded(
+        first,second,origin,direction,rayParameter
+    )||rayParameter<=0.0f){return false;}
+    float segmentParameter=crowMaskSegmentParameterAt(
+        first,second,origin+rayParameter*direction
+    );
+    return segmentParameter>=-1.0f&&segmentParameter<=1.0f;
+}
+
+inline float crowMaskSegmentProjectedArea(
+    float2 first,float2 second,float2 direction,
+    float firstParameter,float secondParameter) {
+    float2 firstPoint=mix(first,second,0.5f*(1.0f+firstParameter));
+    float2 secondPoint=mix(first,second,0.5f*(1.0f+secondParameter));
+    return length(secondPoint-firstPoint)
+        *abs(dot(direction,crowMaskSegmentNormal(first,second)));
+}
+
+struct CrowBarbuleDiscontinuityMask {
+    float transmission;
+    float hMinimum;
+    float hMaximum;
+};
+
+inline CrowBarbuleDiscontinuityMask crowExactBarbuleMask(
+    float2 direction,float aspect,float separation) {
+    float2 d=abs(direction);
+    if(dot(d,d)<1.0e-10f){return {1.0f,-1.0f,1.0f};}
+    float factor=1.0f/(2.0f+2.0f*max(separation,0.0f));
+    float2 axes=float2(factor,factor*max(aspect,1.0f));
+    float2 firstCenter=float2(0.0f);
+    float2 secondCenter=float2(1.0f,0.0f);
+    float2 separationFirst=float2(factor,0.0f);
+    float2 separationSecond=float2(
+        factor*(1.0f+2.0f*max(separation,0.0f)),0.0f
+    );
+    float tangent=crowMaskEllipseTangentParameter(axes,d);
+    float thetaInitial=tangent-M_PI_F;
+    float thetaEnd=thetaInitial+M_PI_F;
+    float2 rayOrigin=crowMaskEllipsePoint(firstCenter,axes,thetaEnd);
+    float totalBarbule=crowMaskEllipseProjectedArea(
+        axes,d,thetaInitial,thetaEnd
+    );
+    float hit=0.0f;
+    if(crowMaskEllipseRayNearestPositive(
+        rayOrigin,d,secondCenter,axes,hit
+    )) {
+        float thetaShadow=crowMaskEllipseParameterAt(
+            rayOrigin+hit*d,secondCenter,axes
+        );
+        if(thetaShadow>thetaEnd){thetaShadow-=2.0f*M_PI_F;}
+        float shadow=crowMaskEllipseProjectedArea(
+            axes,d,thetaInitial,thetaShadow
+        );
+        float hMinimum=2.0f*shadow/max(totalBarbule,1.0e-8f)-1.0f;
+        return {0.0f,clamp(hMinimum,-1.0f,1.0f),1.0f};
+    }
+
+    float firstRayParameter=0.0f;
+    float secondRayParameter=0.0f;
+    float2 reverseOrigin=crowMaskEllipsePoint(
+        secondCenter,axes,tangent+M_PI_F
+    );
+    bool firstValid=crowMaskSegmentRayUnbounded(
+        separationFirst,separationSecond,rayOrigin,d,firstRayParameter
+    );
+    bool secondValid=crowMaskSegmentRayUnbounded(
+        separationFirst,separationSecond,reverseOrigin,-d,secondRayParameter
+    );
+    if(!firstValid||!secondValid){return {1.0f,-1.0f,1.0f};}
+    float separationArea=length(
+        (rayOrigin+firstRayParameter*d)
+        -(reverseOrigin-secondRayParameter*d)
+    )*d.y;
+    float transmission=separationArea
+        /max(separationArea+totalBarbule,1.0e-8f);
+    return {saturate(transmission),-1.0f,1.0f};
+}
+
+inline float crowExactBarbIntervalRate(
+    float2 axes,float2 direction,float thetaMinimum,float thetaMaximum,
+    float thetaInitial,float thetaEnd,float factor) {
+    if(factor<=0.0f||thetaMinimum>=thetaMaximum){return 0.0f;}
+    return factor*crowMaskEllipseProjectedArea(
+        axes,direction,thetaMinimum,thetaMaximum
+    );
+}
+
+inline float4 crowExactBarbMaskRates(
+    float2 direction,float aspect,float inclination,float relativeLength,
+    float firstTransparency,float secondTransparency) {
+    float2 d=direction;
+    float angle=inclination;
+    if(d.y<0.0f){d.y=-d.y;angle=-angle;}
+    bool flip=false;
+    float leftTransparency=firstTransparency;
+    float rightTransparency=secondTransparency;
+    if(d.x<0.0f){
+        d.x=-d.x;
+        flip=true;
+        float swapValue=leftTransparency;
+        leftTransparency=rightTransparency;
+        rightTransparency=swapValue;
+    }
+    if(dot(d,d)<1.0e-10f){return float4(0.0f,0.0f,0.0f,1.0f);}
+
+    float lengthScale=max(relativeLength,1.0f);
+    float factor=1.0f/(2.0f*(1.0f+lengthScale*cos(angle)));
+    float2 axes=float2(factor,factor*max(aspect,1.0f));
+    float2 firstCenter=float2(factor,0.0f);
+    float2 secondCenter=float2(1.0f+factor,0.0f);
+    float2 corner=float2(
+        factor*(2.0f+lengthScale*cos(angle)),
+        factor*lengthScale*sin(angle)
+    );
+    float2 rightFirst=float2(2.0f*factor,0.0f);
+    float2 leftFirst=float2(1.0f,0.0f);
+    float2 rightSecond=float2(1.0f+2.0f*factor,0.0f);
+    float2 leftSecond=float2(2.0f,0.0f);
+    float2 nextCorner=corner+float2(1.0f,0.0f);
+
+    float thetaInitial=crowMaskEllipseTangentParameter(axes,d)-M_PI_F;
+    float thetaEnd=thetaInitial+M_PI_F;
+    float2 barbRayOrigin=crowMaskEllipsePoint(
+        firstCenter,axes,thetaEnd
+    );
+    float2 barbuleRayOrigin=corner;
+    float thetaHardShadow=thetaInitial;
+    float thetaLeftShadow=-M_PI_F;
+    float thetaRightShadow=thetaInitial;
+    float hit=0.0f;
+    if(crowMaskEllipseRayNearestPositive(
+        barbRayOrigin,d,secondCenter,axes,hit
+    )) {
+        float theta=crowMaskEllipseParameterAt(
+            barbRayOrigin+hit*d,secondCenter,axes
+        );
+        if(theta>thetaEnd){theta-=2.0f*M_PI_F;}
+        thetaHardShadow=max(thetaHardShadow,theta);
+    }
+    if(crowMaskEllipseRayNearestPositive(
+        barbuleRayOrigin,d,secondCenter,axes,hit
+    )) {
+        float theta=crowMaskEllipseParameterAt(
+            barbuleRayOrigin+hit*d,secondCenter,axes
+        );
+        if(theta>thetaEnd){theta-=2.0f*M_PI_F;}
+        thetaRightShadow=max(thetaRightShadow,theta);
+    } else {
+        float2 top=crowMaskEllipsePoint(
+            secondCenter,axes,-0.5f*M_PI_F
+        );
+        if(corner.y<top.y){
+            float2 other=top;
+            other.y+=2.0f*(corner.y-top.y);
+            if(crowMaskSegmentRayHit(top,other,barbuleRayOrigin,d)){
+                thetaRightShadow=thetaEnd;
+            }
+        }
+    }
+
+    float barbRate=0.0f;
+    if(thetaHardShadow<thetaLeftShadow
+        &&thetaHardShadow<thetaRightShadow) {
+        if(thetaLeftShadow<thetaRightShadow) {
+            barbRate+=crowExactBarbIntervalRate(
+                axes,d,thetaRightShadow,thetaEnd,thetaInitial,thetaEnd,1.0f
+            );
+            barbRate+=crowExactBarbIntervalRate(
+                axes,d,thetaLeftShadow,thetaRightShadow,thetaInitial,thetaEnd,
+                leftTransparency*rightTransparency
+            );
+            barbRate+=crowExactBarbIntervalRate(
+                axes,d,thetaHardShadow,thetaLeftShadow,thetaInitial,thetaEnd,
+                rightTransparency
+            );
+        } else {
+            barbRate+=crowExactBarbIntervalRate(
+                axes,d,thetaLeftShadow,thetaEnd,thetaInitial,thetaEnd,1.0f
+            );
+            barbRate+=crowExactBarbIntervalRate(
+                axes,d,thetaRightShadow,thetaLeftShadow,thetaInitial,thetaEnd,
+                leftTransparency
+            );
+            barbRate+=crowExactBarbIntervalRate(
+                axes,d,thetaHardShadow,thetaRightShadow,thetaInitial,thetaEnd,
+                rightTransparency
+            );
+        }
+    } else if(thetaHardShadow<thetaLeftShadow) {
+        barbRate+=crowExactBarbIntervalRate(
+            axes,d,thetaLeftShadow,thetaEnd,thetaInitial,thetaEnd,1.0f
+        );
+        barbRate+=crowExactBarbIntervalRate(
+            axes,d,thetaHardShadow,thetaLeftShadow,thetaInitial,thetaEnd,
+            leftTransparency
+        );
+    } else if(thetaHardShadow<thetaRightShadow) {
+        barbRate+=crowExactBarbIntervalRate(
+            axes,d,thetaRightShadow,thetaEnd,thetaInitial,thetaEnd,1.0f
+        );
+        barbRate+=crowExactBarbIntervalRate(
+            axes,d,thetaHardShadow,thetaRightShadow,thetaInitial,thetaEnd,
+            leftTransparency*rightTransparency
+        );
+    } else {
+        barbRate+=crowExactBarbIntervalRate(
+            axes,d,thetaHardShadow,thetaEnd,thetaInitial,thetaEnd,1.0f
+        );
+    }
+
+    float tRightMinimum=-1.0f;
+    float tRightSelfShadowMinimum=-1.0f;
+    float rayParameter=0.0f;
+    if(!crowMaskSegmentRayUnbounded(
+        rightFirst,corner,barbRayOrigin,d,rayParameter
+    )||dot(d,crowMaskSegmentNormal(rightFirst,corner))<0.0f) {
+        tRightMinimum=1.0f;
+    } else {
+        tRightMinimum=clamp(crowMaskSegmentParameterAt(
+            rightFirst,corner,barbRayOrigin+rayParameter*d
+        ),-1.0f,1.0f);
+    }
+    if(!crowMaskSegmentRayUnbounded(
+        rightSecond,nextCorner,barbuleRayOrigin,d,rayParameter
+    )) {
+        tRightSelfShadowMinimum=1.0f;
+    } else {
+        tRightSelfShadowMinimum=clamp(crowMaskSegmentParameterAt(
+            rightSecond,nextCorner,barbuleRayOrigin+rayParameter*d
+        ),-1.0f,1.0f);
+    }
+    tRightSelfShadowMinimum=max(
+        tRightSelfShadowMinimum,tRightMinimum
+    );
+    float rightRate=(1.0f-rightTransparency)
+        *crowMaskSegmentProjectedArea(
+            rightFirst,corner,d,tRightSelfShadowMinimum,1.0f
+        );
+    rightRate+=leftTransparency*rightTransparency
+        *crowMaskSegmentProjectedArea(
+            rightFirst,corner,d,tRightMinimum,tRightSelfShadowMinimum
+        );
+
+    float leftRate=0.0f;
+    float tLeftTransparencyMaximum=1.0f;
+    if(dot(d,crowMaskSegmentNormal(leftFirst,corner))<0.0f) {
+        float tLeftMaximum=1.0f;
+        if(!crowMaskSegmentRayUnbounded(
+            leftFirst,corner,barbRayOrigin,d,rayParameter
+        )) {
+            tLeftMaximum=-1.0f;
+        } else {
+            tLeftMaximum=clamp(crowMaskSegmentParameterAt(
+                leftFirst,corner,barbRayOrigin+rayParameter*d
+            ),-1.0f,1.0f);
+        }
+        if(!crowMaskSegmentRayUnbounded(
+            leftSecond,nextCorner,barbuleRayOrigin,d,rayParameter
+        )) {
+            tLeftTransparencyMaximum=-1.0f;
+        } else {
+            tLeftTransparencyMaximum=clamp(crowMaskSegmentParameterAt(
+                leftSecond,nextCorner,barbuleRayOrigin+rayParameter*d
+            ),-1.0f,1.0f);
+        }
+        tLeftTransparencyMaximum=min(
+            tLeftTransparencyMaximum,tLeftMaximum
+        );
+        leftRate+=(1.0f-leftTransparency)
+            *crowMaskSegmentProjectedArea(
+                leftFirst,corner,d,-1.0f,tLeftTransparencyMaximum
+            );
+        leftRate+=leftTransparency*rightTransparency
+            *crowMaskSegmentProjectedArea(
+                leftFirst,corner,d,tLeftTransparencyMaximum,tLeftMaximum
+            );
+    } else {
+        tLeftTransparencyMaximum=-1.0f;
+        float tLeftMinimum=-1.0f;
+        float tLeftTransparencyMinimum=-1.0f;
+        if(!crowMaskSegmentRayUnbounded(
+            leftFirst,corner,barbRayOrigin,d,rayParameter
+        )) {
+            tLeftMinimum=1.0f;
+        } else {
+            tLeftMinimum=clamp(crowMaskSegmentParameterAt(
+                leftFirst,corner,barbRayOrigin+rayParameter*d
+            ),-1.0f,1.0f);
+        }
+        if(!crowMaskSegmentRayUnbounded(
+            leftSecond,nextCorner,barbuleRayOrigin,d,rayParameter
+        )) {
+            tLeftTransparencyMinimum=1.0f;
+        } else {
+            tLeftTransparencyMinimum=clamp(crowMaskSegmentParameterAt(
+                leftSecond,nextCorner,barbuleRayOrigin+rayParameter*d
+            ),-1.0f,1.0f);
+        }
+        tLeftTransparencyMinimum=max(
+            tLeftTransparencyMinimum,tLeftMinimum
+        );
+        leftRate+=rightTransparency*(1.0f-leftTransparency)
+            *crowMaskSegmentProjectedArea(
+                leftFirst,corner,d,tLeftTransparencyMinimum,1.0f
+            );
+        leftRate+=rightTransparency*leftTransparency*rightTransparency
+            *crowMaskSegmentProjectedArea(
+                leftFirst,corner,d,tLeftMinimum,tLeftTransparencyMinimum
+            );
+    }
+
+    float2 backOrigin=crowMaskEllipsePoint(
+        secondCenter,axes,thetaInitial
+    );
+    float2 backDirection=-d;
+    float transparencyRate=0.0f;
+    if(crowMaskSegmentRayUnbounded(
+        rightFirst,corner,backOrigin,backDirection,rayParameter
+    )) {
+        float maximum=clamp(crowMaskSegmentParameterAt(
+            rightFirst,corner,backOrigin+rayParameter*backDirection
+        ),-1.0f,1.0f);
+        if(tRightSelfShadowMinimum<maximum) {
+            transparencyRate+=rightTransparency
+                *crowMaskSegmentProjectedArea(
+                    rightFirst,corner,d,tRightSelfShadowMinimum,maximum
+                );
+        }
+    }
+    if(crowMaskSegmentRayUnbounded(
+        leftFirst,corner,backOrigin,backDirection,rayParameter
+    )) {
+        float minimum=clamp(crowMaskSegmentParameterAt(
+            leftFirst,corner,backOrigin+rayParameter*backDirection
+        ),-1.0f,1.0f);
+        if(minimum<tLeftTransparencyMaximum) {
+            transparencyRate+=leftTransparency
+                *crowMaskSegmentProjectedArea(
+                    leftFirst,corner,d,minimum,tLeftTransparencyMaximum
+                );
+        }
+    }
+
+    if(flip){
+        float swapValue=leftRate;
+        leftRate=rightRate;
+        rightRate=swapValue;
+    }
+    return max(
+        float4(barbRate,leftRate,rightRate,transparencyRate),
+        float4(0.0f)
+    );
+}
+
+inline float4 crowExactBarbMask(
+    float2 direction,float aspect,float inclination,float relativeLength,
+    float firstTransparency,float secondTransparency) {
+    float4 rates=crowExactBarbMaskRates(
+        direction,aspect,inclination,relativeLength,
+        firstTransparency,secondTransparency
+    );
+    float total=dot(rates,float4(1.0f));
+    if(total<1.0e-8f){return float4(0.0f,0.0f,0.0f,1.0f);}
+    return rates/total;
+}
+
+inline float4 crowExactFeatherVisibilityLocal(
+    float3 viewDirection,float4 visibilityShape,float4 visibilityLayout) {
+    float3 view=safeNormalizeCrow(
+        viewDirection,float3(0.0f,1.0f,0.0f)
+    );
+    float azimuth=visibilityShape.z;
+    float inclination=visibilityShape.w;
+    float cosineAzimuth=cos(azimuth);
+    float sineAzimuth=sin(azimuth);
+    float cosineInclination=cos(inclination);
+    float sineInclination=sin(inclination);
+    float3 crossNormal=float3(0.0f,1.0f,0.0f);
+    float3 proximalAxis=normalize(float3(
+        -cosineInclination*sineAzimuth,
+        sineInclination,
+        cosineInclination*cosineAzimuth
+    ));
+    float3 distalAxis=normalize(float3(
+        cosineInclination*sineAzimuth,
+        sineInclination,
+        cosineInclination*cosineAzimuth
+    ));
+    float3 proximalCross=safeNormalizeCrow(
+        cross(crossNormal,proximalAxis),float3(1.0f,0.0f,0.0f)
+    );
+    float3 distalCross=safeNormalizeCrow(
+        cross(crossNormal,distalAxis),float3(1.0f,0.0f,0.0f)
+    );
+    float3 proximalNormal=cross(proximalAxis,proximalCross);
+    float3 distalNormal=cross(distalAxis,distalCross);
+    // Match the reference implementation's inverse of its row-basis matrix.
+    // Its first two returned components define the 2D barbule cross section.
+    float3 proximalDirection3=proximalCross*view.x
+        +proximalNormal*view.y+proximalAxis*view.z;
+    float3 distalDirection3=distalCross*view.x
+        +distalNormal*view.y+distalAxis*view.z;
+    float2 proximalDirection=proximalDirection3.xy;
+    float2 distalDirection=distalDirection3.xy;
+    CrowBarbuleDiscontinuityMask proximal=crowExactBarbuleMask(
+        proximalDirection,visibilityShape.y,visibilityLayout.y
+    );
+    CrowBarbuleDiscontinuityMask distal=crowExactBarbuleMask(
+        distalDirection,visibilityShape.y,visibilityLayout.y
+    );
+    return crowExactBarbMask(
+        view.xy,visibilityShape.x,inclination,visibilityLayout.x,
+        proximal.transmission,distal.transmission
+    );
+}
+
 /// Constant-cost far-field mixture for a regular pennaceous cross section.
 /// The four normalized channels are barb, proximal barbule, distal barbule,
 /// and transmission. Unlike the exact discontinuity-ray construction in the
 /// cited model, this renderer approximation retains only projected ellipses,
 /// projected barbule segments, and their local gap transmission. Parameters
 /// are versioned estimates; explicit feather geometry remains authoritative.
-inline float4 crowProjectedFeatherVisibilityLocal(
+inline float4 crowProjectedFeatherVisibilityApproximateLocal(
     float3 viewDirection,
     float4 visibilityShape,
     float4 visibilityLayout) {
@@ -2753,6 +3247,20 @@ inline float4 crowProjectedFeatherVisibilityLocal(
     return max(areas/total,float4(0.0f));
 }
 
+inline float4 crowProjectedFeatherVisibilityLocal(
+    float3 viewDirection,float4 visibilityShape,float4 visibilityLayout) {
+    float4 approximate=crowProjectedFeatherVisibilityApproximateLocal(
+        viewDirection,visibilityShape,visibilityLayout
+    );
+    float exactStrength=saturate(visibilityLayout.w);
+    if(exactStrength<=0.0f){return approximate;}
+    float4 exact=crowExactFeatherVisibilityLocal(
+        viewDirection,visibilityShape,visibilityLayout
+    );
+    float4 result=mix(approximate,exact,exactStrength);
+    return max(result/max(dot(result,float4(1.0f)),1.0e-8f),float4(0.0f));
+}
+
 kernel void probeCrowProjectedFeatherVisibility(
     device const float4* directions [[buffer(0)]],
     constant float4& visibilityShape [[buffer(1)]],
@@ -2761,6 +3269,33 @@ kernel void probeCrowProjectedFeatherVisibility(
     uint index [[thread_position_in_grid]]) {
     outputs[index]=crowProjectedFeatherVisibilityLocal(
         directions[index].xyz,visibilityShape,visibilityLayout
+    );
+}
+
+kernel void probeCrowAnalyticBarbuleMask(
+    device const float4* directions [[buffer(0)]],
+    constant float4& visibilityShape [[buffer(1)]],
+    constant float4& visibilityLayout [[buffer(2)]],
+    device float4* outputs [[buffer(3)]],
+    uint index [[thread_position_in_grid]]) {
+    CrowBarbuleDiscontinuityMask mask=crowExactBarbuleMask(
+        directions[index].xy,visibilityShape.y,visibilityLayout.y
+    );
+    outputs[index]=float4(
+        mask.transmission,mask.hMinimum,mask.hMaximum,0.0f
+    );
+}
+
+kernel void probeCrowAnalyticBarbMaskRates(
+    device const float4* directionsAndTransparency [[buffer(0)]],
+    constant float4& visibilityShape [[buffer(1)]],
+    constant float4& visibilityLayout [[buffer(2)]],
+    device float4* outputs [[buffer(3)]],
+    uint index [[thread_position_in_grid]]) {
+    float4 input=directionsAndTransparency[index];
+    outputs[index]=crowExactBarbMaskRates(
+        input.xy,visibilityShape.x,visibilityShape.w,visibilityLayout.x,
+        input.z,input.w
     );
 }
 

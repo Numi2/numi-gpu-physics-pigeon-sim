@@ -36,6 +36,18 @@
 - M. E. Deetjen et al., “High-speed surface reconstruction of a flying bird using structured light,” J. Exp. Biol. 220 (2017): https://doi.org/10.1242/jeb.149708
 - C. Berg and J. M. V. Rayner, “The moment of inertia of bird wings and the inertial power requirement for flapping flight,” J. Exp. Biol. 198 (1995): https://doi.org/10.1242/jeb.198.8.1655
 
+## Feather appearance and visibility
+
+- J. R. Padrón-Griffe et al., “A Surface-based Appearance Model for Pennaceous Feathers,” *Computer Graphics Forum* 43(4), 2024: https://doi.org/10.1111/cgf.15235
+- Project page and supplemental material: https://graphics.unizar.es/projects/FeathersAppearance_2024/
+- Authors' MIT reference implementation, inspected at revision `9af1a04722f78a7275b62afb492ea8d074499128`: https://github.com/juanraul8/PennaceousFeathersRendering
+
+The Metal renderer ports the reference implementation's bounded analytic
+barb/barbule discontinuity-ray masking construction. It does not copy assets or
+claim the renderer's regular-cross-section parameters as measured
+American-crow anatomy. The older projected-area approximation remains a
+fallback and parity boundary.
+
 The committed `ValidationInputs/deetjen-ob-f03-surface-v1` files are a
 provenance-locked CC0 derivative of the selected Dryad flight. The uncompressed
 MATLAB source remains outside this repository; the manifest records both source

@@ -757,34 +757,37 @@ AOV fields remain exact on the fresh view and all five established 17-frame
 safety views. These are deterministic optical-coherence checks, not a claim of
 measured American-crow reflectance or perceptual realism.
 
-The projected-feather-visibility pass separates two physical direction
-dependencies that the earlier shader conflated. The keratin-cortex-melanin
-spectrum is now evaluated independently for the key, fill, and sun half
-vectors. A second view-only calculation returns normalized barb, proximal
-barbule, distal barbule, and transmission weights from projected elliptical
-cross sections, projected barbule segments, and their local gaps. The
-construction follows the projected-area basis of Padrón-Griffe et al.'s
-[pennaceous-feather model](https://doi.org/10.1111/cgf.15235) and its
-[MIT implementation](https://github.com/juanraul8/PennaceousFeathersRendering),
-but it is deliberately labelled a constant-cost regular-cross-section
-approximation: it does not claim their exact discontinuity-ray self-occlusion.
-All shape values in the profile remain renderer estimates rather than measured
-American-crow anatomy.
+The feather-visibility path separates two physical direction dependencies that
+the earlier shader conflated. The keratin-cortex-melanin spectrum is evaluated
+independently for the key, fill, and sun half vectors. A second view-only
+calculation returns normalized barb, proximal barbule, distal barbule, and
+transmission weights. The initial projected-ellipse and projected-segment
+approximation remains available as a deterministic fallback.
 
-The live Metal probe matches four independent reference cases within `2e-5`,
-keeps all weights finite and normalized, swaps proximal/distal weights under a
-bilateral view reflection, and increases transmission when the estimated gap
-widens. A previously unused high-starboard view at yaw/pitch `(1.72,0.72)`
-keeps every nonappearance AOV field exact against parent `fcb549a` across 17
-takeoff frames after excluding luminance, HDR, and duration fields. Its
-aggregate `172` enclosed pixels in `106` components, `12`-pixel worst hole, and
-`3` expected lower-body aperture pixels therefore expose pre-existing geometry,
-not an optics regression. The five safety views total `1,137` enclosed pixels
-in `392` components with a `33`-pixel worst hole; rear-port remains the next
-geometry priority at `593/157/28`. On the same fresh-view workload, mean and
-median GPU duration increase by `14.92%` and `17.16%`. That measured cost is
-accepted for the future-compute appearance path; it is not a performance win
-or a claim of perceptual realism.
+The promoted path now ports the constant-time analytic discontinuity-ray mask
+from Padrón-Griffe et al.'s
+[pennaceous-feather model](https://doi.org/10.1111/cgf.15235) and the authors'
+[MIT implementation](https://github.com/juanraul8/PennaceousFeathersRendering)
+at source revision `9af1a04`. Ellipse tangencies partition neighboring barb
+and barbule intervals into visible, transmitted, and occluded projected area.
+This is exact for the paper's idealized regular-cross-section construction; it
+does not claim measured American-crow cross sections or explicit individual
+curve self-occlusion. All profile shape values remain renderer estimates.
+
+The live Metal probes match four complete authors-reference mixtures plus eight
+barbule intervals and four unnormalized barb interval cases within `2e-5`. A
+`1,088`-direction spherical sweep keeps every channel finite, nonnegative,
+bounded, and normalized. At a previously unused high front-port yaw/pitch
+`(0.88,0.96)`, exact and fallback 17-frame takeoff captures keep every
+nonappearance AOV field identical after excluding luminance, HDR, and duration.
+The exact path changes `24,749` of `360,000` beauty pixels at the inspected
+mid-transition frame while preserving geometry, depth, motion, identity,
+support, and silhouette metrics. The fresh view totals `73` enclosed pixels in
+`54` components, with a `22`-pixel per-frame maximum and `19`-pixel largest
+component. On the same Apple-M4 workload, exact masking costs `15.10%` more
+mean GPU time and `10.13%` more median GPU time after the warm-up frame. That
+cost is accepted for the future-compute appearance tier; it is not a
+performance win or a claim of perceptual realism.
 
 Schema `12` resolves that rear-port priority to exact packed identities around
 the largest enclosed component. The early `21-28`-pixel channels are bounded

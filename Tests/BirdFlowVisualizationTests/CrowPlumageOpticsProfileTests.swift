@@ -39,8 +39,13 @@ func crowPlumageOpticsProfilePreservesEvidenceBoundary() throws {
   )
   #expect(profile.renderParameters.thinFilmCoherence == 0.08)
   #expect(profile.visibilitySource.doi == "10.1111/cgf.15235")
+  #expect(
+    profile.visibilitySource.implementationRevision
+      == "9af1a04722f78a7275b62afb492ea8d074499128"
+  )
   #expect(profile.renderParameters.barbuleAzimuthDegrees == 45)
   #expect(profile.renderParameters.barbuleRelativeSeparation == 0.55)
+  #expect(profile.renderParameters.analyticMaskStrength == 1)
   #expect(
     profile.calibrationStatus == "not calibrated to an American-crow specimen"
   )
@@ -54,7 +59,7 @@ func crowPlumageOpticsProfilePreservesEvidenceBoundary() throws {
     simd_length(gpu.visibilityShape - SIMD4<Float>(2.4, 3.2, .pi / 4, .pi / 10))
       < 1e-5
   )
-  #expect(gpu.visibilityLayout == SIMD4<Float>(5, 0.55, 0.62, 0))
+  #expect(gpu.visibilityLayout == SIMD4<Float>(5, 0.55, 0.62, 1))
   #expect(MemoryLayout<CrowPlumageOpticsGPUParameters>.stride == 96)
 }
 
@@ -153,8 +158,8 @@ func crowThinFilmOpticsMatchesReferenceCases() throws {
   #expect(abs(actual[1].x - actual[1].y) < 2e-6)
 }
 
-@Test("crow projected feather visibility is normalized and mirror stable")
-func crowProjectedFeatherVisibilityMatchesReferenceCases() throws {
+@Test("crow analytic feather mask matches the authors' discontinuity rays")
+func crowAnalyticFeatherMaskMatchesReferenceCases() throws {
   guard let device = MTLCreateSystemDefaultDevice() else { return }
   let backend = try VisualizationBackend(device: device)
   let pipeline = try backend.compute("probeCrowProjectedFeatherVisibility")
@@ -165,6 +170,12 @@ func crowProjectedFeatherVisibilityMatchesReferenceCases() throws {
     SIMD4<Float>(0.4, 0.5, 0.76811457, 0),
   ]
   let expected: [SIMD4<Float>] = [
+    SIMD4<Float>(0.17375341, 0.33081371, 0.33081371, 0.16461918),
+    SIMD4<Float>(0.26576680, 0.51379722, 0.20613001, 0.01430596),
+    SIMD4<Float>(0.26576680, 0.20613001, 0.51379722, 0.01430596),
+    SIMD4<Float>(0.30135849, 0.38466427, 0.20454295, 0.10943432),
+  ]
+  let approximateExpected: [SIMD4<Float>] = [
     SIMD4<Float>(0.22922675, 0.30226402, 0.30226402, 0.16624521),
     SIMD4<Float>(0.37979913, 0.36226826, 0.18215278, 0.07577983),
     SIMD4<Float>(0.37979913, 0.18215278, 0.36226826, 0.07577983),
@@ -172,13 +183,17 @@ func crowProjectedFeatherVisibilityMatchesReferenceCases() throws {
   ]
   var shape = SIMD4<Float>(2.4, 3.2, .pi / 4, .pi / 10)
 
-  func evaluate(separation: Float) throws -> [SIMD4<Float>] {
-    var layout = SIMD4<Float>(5, separation, 0.62, 0)
+  func evaluate(
+    _ inputDirections: [SIMD4<Float>] = directions,
+    separation: Float,
+    analyticMaskStrength: Float = 1
+  ) throws -> [SIMD4<Float>] {
+    var layout = SIMD4<Float>(5, separation, 0.62, analyticMaskStrength)
     let inputBuffer = try backend.buffer(
-      length: MemoryLayout<SIMD4<Float>>.stride * directions.count,
+      length: MemoryLayout<SIMD4<Float>>.stride * inputDirections.count,
       shared: true
     )
-    _ = directions.withUnsafeBytes { bytes in
+    _ = inputDirections.withUnsafeBytes { bytes in
       memcpy(inputBuffer.contents(), bytes.baseAddress!, bytes.count)
     }
     let shapeBuffer = try backend.buffer(
@@ -196,7 +211,7 @@ func crowProjectedFeatherVisibilityMatchesReferenceCases() throws {
       memcpy(layoutBuffer.contents(), bytes.baseAddress!, bytes.count)
     }
     let outputBuffer = try backend.buffer(
-      length: MemoryLayout<SIMD4<Float>>.stride * directions.count,
+      length: MemoryLayout<SIMD4<Float>>.stride * inputDirections.count,
       shared: true
     )
     guard let commandBuffer = backend.queue.makeCommandBuffer(),
@@ -209,16 +224,16 @@ func crowProjectedFeatherVisibilityMatchesReferenceCases() throws {
     encoder.setBuffer(shapeBuffer, offset: 0, index: 1)
     encoder.setBuffer(layoutBuffer, offset: 0, index: 2)
     encoder.setBuffer(outputBuffer, offset: 0, index: 3)
-    backend.dispatch1D(encoder, pipeline: pipeline, count: directions.count)
+    backend.dispatch1D(encoder, pipeline: pipeline, count: inputDirections.count)
     encoder.endEncoding()
     commandBuffer.commit()
     commandBuffer.waitUntilCompleted()
     #expect(commandBuffer.status == .completed)
     let pointer = outputBuffer.contents().bindMemory(
       to: SIMD4<Float>.self,
-      capacity: directions.count
+      capacity: inputDirections.count
     )
-    return Array(UnsafeBufferPointer(start: pointer, count: directions.count))
+    return Array(UnsafeBufferPointer(start: pointer, count: inputDirections.count))
   }
 
   let actual = try evaluate(separation: 0.55)
@@ -234,10 +249,176 @@ func crowProjectedFeatherVisibilityMatchesReferenceCases() throws {
   #expect(abs(actual[1].z - actual[2].y) < 2e-6)
   #expect(abs(actual[1].w - actual[2].w) < 2e-6)
 
+  let approximate = try evaluate(separation: 0.55, analyticMaskStrength: 0)
+  for (measured, reference) in zip(approximate, approximateExpected) {
+    #expect(simd_length(measured - reference) < 2e-5)
+  }
+
   let closed = try evaluate(separation: 0)
   let open = try evaluate(separation: 1.5)
   for (closedWeights, openWeights) in zip(closed, open) {
-    #expect(closedWeights.w == 0)
+    #expect(closedWeights.w < 1e-6)
     #expect(openWeights.w > closedWeights.w)
+  }
+
+  let denseDirections: [SIMD4<Float>] = (0..<17).flatMap { elevationIndex in
+    let elevation = -Float.pi / 2
+      + Float.pi * Float(elevationIndex) / 16
+    return (0..<64).map { azimuthIndex in
+      let azimuth = 2 * Float.pi * Float(azimuthIndex) / 64
+      return SIMD4<Float>(
+        cos(elevation) * cos(azimuth),
+        sin(elevation),
+        cos(elevation) * sin(azimuth),
+        0
+      )
+    }
+  }
+  let dense = try evaluate(denseDirections, separation: 0.55)
+  #expect(dense.count == 1_088)
+  for weights in dense {
+    #expect(weights.x.isFinite && weights.y.isFinite)
+    #expect(weights.z.isFinite && weights.w.isFinite)
+    #expect(abs(weights.x + weights.y + weights.z + weights.w - 1) < 3e-5)
+    #expect(min(weights.x, min(weights.y, min(weights.z, weights.w))) >= 0)
+    #expect(max(weights.x, max(weights.y, max(weights.z, weights.w))) <= 1)
+  }
+}
+
+@Test("crow barbule discontinuity intervals match the authors' ray construction")
+func crowBarbuleDiscontinuityIntervalsMatchReferenceCases() throws {
+  guard let device = MTLCreateSystemDefaultDevice() else { return }
+  let backend = try VisualizationBackend(device: device)
+  let pipeline = try backend.compute("probeCrowAnalyticBarbuleMask")
+  let directions: [SIMD4<Float>] = [
+    SIMD4<Float>(0.21850802, 0.95105654, 0, 0),
+    SIMD4<Float>(-0.21850802, 0.95105654, 0, 0),
+    SIMD4<Float>(0.59907055, 0.76084524, 0, 0),
+    SIMD4<Float>(0.24945769, 0.76084524, 0, 0),
+    SIMD4<Float>(-0.24945769, 0.76084524, 0, 0),
+    SIMD4<Float>(-0.59907055, 0.76084524, 0, 0),
+    SIMD4<Float>(-0.12445918, 0.71288872, 0, 0),
+    SIMD4<Float>(0.69014466, 0.71288872, 0, 0),
+  ]
+  let expected: [SIMD4<Float>] = [
+    SIMD4<Float>(0.19923735, -1, 1, 0),
+    SIMD4<Float>(0.19923735, -1, 1, 0),
+    SIMD4<Float>(0, -0.14357781, 1, 0),
+    SIMD4<Float>(0.06489849, -1, 1, 0),
+    SIMD4<Float>(0.06489849, -1, 1, 0),
+    SIMD4<Float>(0, -0.14357781, 1, 0),
+    SIMD4<Float>(0.26098415, -1, 1, 0),
+    SIMD4<Float>(0, 0.04770923, 1, 0),
+  ]
+  var shape = SIMD4<Float>(2.4, 3.2, .pi / 4, .pi / 10)
+  var layout = SIMD4<Float>(5, 0.55, 0.62, 1)
+  let input = try backend.buffer(
+    length: MemoryLayout<SIMD4<Float>>.stride * directions.count,
+    shared: true
+  )
+  _ = directions.withUnsafeBytes { bytes in
+    memcpy(input.contents(), bytes.baseAddress!, bytes.count)
+  }
+  let shapeBuffer = try backend.buffer(
+    length: MemoryLayout<SIMD4<Float>>.stride,
+    shared: true
+  )
+  _ = withUnsafeBytes(of: &shape) { bytes in
+    memcpy(shapeBuffer.contents(), bytes.baseAddress!, bytes.count)
+  }
+  let layoutBuffer = try backend.buffer(
+    length: MemoryLayout<SIMD4<Float>>.stride,
+    shared: true
+  )
+  _ = withUnsafeBytes(of: &layout) { bytes in
+    memcpy(layoutBuffer.contents(), bytes.baseAddress!, bytes.count)
+  }
+  let output = try backend.buffer(
+    length: MemoryLayout<SIMD4<Float>>.stride * directions.count,
+    shared: true
+  )
+  let commandBuffer = try #require(backend.queue.makeCommandBuffer())
+  let encoder = try #require(commandBuffer.makeComputeCommandEncoder())
+  encoder.setBuffer(input, offset: 0, index: 0)
+  encoder.setBuffer(shapeBuffer, offset: 0, index: 1)
+  encoder.setBuffer(layoutBuffer, offset: 0, index: 2)
+  encoder.setBuffer(output, offset: 0, index: 3)
+  backend.dispatch1D(encoder, pipeline: pipeline, count: directions.count)
+  encoder.endEncoding()
+  commandBuffer.commit()
+  commandBuffer.waitUntilCompleted()
+  #expect(commandBuffer.status == .completed)
+  let pointer = output.contents().bindMemory(
+    to: SIMD4<Float>.self,
+    capacity: directions.count
+  )
+  let actual = Array(UnsafeBufferPointer(start: pointer, count: directions.count))
+  for (measured, reference) in zip(actual, expected) {
+    #expect(simd_length(measured - reference) < 2e-5)
+  }
+}
+
+@Test("crow barb discontinuity intervals match the authors' ray construction")
+func crowBarbDiscontinuityIntervalsMatchReferenceCases() throws {
+  guard let device = MTLCreateSystemDefaultDevice() else { return }
+  let backend = try VisualizationBackend(device: device)
+  let pipeline = try backend.compute("probeCrowAnalyticBarbMaskRates")
+  let inputs: [SIMD4<Float>] = [
+    SIMD4<Float>(0, 1, 0.19923735, 0.19923735),
+    SIMD4<Float>(0.6, 0.8, 0, 0.06489849),
+    SIMD4<Float>(-0.6, 0.8, 0.06489849, 0),
+    SIMD4<Float>(0.4, 0.5, 0.26098415, 0),
+  ]
+  let expected: [SIMD4<Float>] = [
+    SIMD4<Float>(0.17375341, 0.33081371, 0.33081371, 0.16461918),
+    SIMD4<Float>(0.212613, 0.411038, 0.164904, 0.0114448),
+    SIMD4<Float>(0.212613, 0.164904, 0.411038, 0.0114448),
+    SIMD4<Float>(0.150679, 0.192332, 0.102271, 0.0547172),
+  ]
+  var shape = SIMD4<Float>(2.4, 3.2, .pi / 4, .pi / 10)
+  var layout = SIMD4<Float>(5, 0.55, 0.62, 1)
+  let input = try backend.buffer(
+    length: MemoryLayout<SIMD4<Float>>.stride * inputs.count,
+    shared: true
+  )
+  _ = inputs.withUnsafeBytes { bytes in
+    memcpy(input.contents(), bytes.baseAddress!, bytes.count)
+  }
+  let shapeBuffer = try backend.buffer(
+    length: MemoryLayout<SIMD4<Float>>.stride,
+    shared: true
+  )
+  _ = withUnsafeBytes(of: &shape) { bytes in
+    memcpy(shapeBuffer.contents(), bytes.baseAddress!, bytes.count)
+  }
+  let layoutBuffer = try backend.buffer(
+    length: MemoryLayout<SIMD4<Float>>.stride,
+    shared: true
+  )
+  _ = withUnsafeBytes(of: &layout) { bytes in
+    memcpy(layoutBuffer.contents(), bytes.baseAddress!, bytes.count)
+  }
+  let output = try backend.buffer(
+    length: MemoryLayout<SIMD4<Float>>.stride * inputs.count,
+    shared: true
+  )
+  let commandBuffer = try #require(backend.queue.makeCommandBuffer())
+  let encoder = try #require(commandBuffer.makeComputeCommandEncoder())
+  encoder.setBuffer(input, offset: 0, index: 0)
+  encoder.setBuffer(shapeBuffer, offset: 0, index: 1)
+  encoder.setBuffer(layoutBuffer, offset: 0, index: 2)
+  encoder.setBuffer(output, offset: 0, index: 3)
+  backend.dispatch1D(encoder, pipeline: pipeline, count: inputs.count)
+  encoder.endEncoding()
+  commandBuffer.commit()
+  commandBuffer.waitUntilCompleted()
+  #expect(commandBuffer.status == .completed)
+  let pointer = output.contents().bindMemory(
+    to: SIMD4<Float>.self,
+    capacity: inputs.count
+  )
+  let actual = Array(UnsafeBufferPointer(start: pointer, count: inputs.count))
+  for (measured, reference) in zip(actual, expected) {
+    #expect(simd_length(measured - reference) < 2e-5)
   }
 }
