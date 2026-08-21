@@ -155,16 +155,28 @@ ordering transfers here. All vane asymmetry, width, crown, and camber values are
 bounded estimates rather than American-crow measurements. Full asset length,
 stable ID/hash, and solver geometry remain unchanged.
 
-The initial takeoff hold also retains a paired `8 mm` deep-underplumage lobe
-from the existing rump volume into each folded outer-wing/rectrix junction.
-The lobes remain at full area through presentation phase `0.125` and collapse
-smoothly to zero area by phase `0.375`, before free distal articulation. They
-do not widen an exposed vane, move a feather root or tip, or enter the solver.
+The initial takeoff hold also retains a paired deep-underplumage lobe from the
+existing rump volume into each folded outer-wing/rectrix junction. Each lobe
+now converges from an `8 mm` proximal radius to `1.5 mm` distally instead of
+ending as an exposed constant-radius cylinder. Semantic class `16` keeps this
+deep optical backing distinct from exposed ventral vanes: its cortex, sharp,
+and anisotropic energy are suppressed, and a small rearward depth bias lets
+nearly coincident remiges and coverts own the visible sample. The lobes remain
+at full area through presentation phase `0.125` and collapse smoothly to zero
+area by phase `0.375`, before free distal articulation. They do not widen an
+exposed vane, move a feather root or tip, or enter the solver.
 A 253-frame, 13-view native AOV audit introduced no silhouette-hole or expected
 leg-aperture regression (`1,950 -> 1,923` total enclosed pixels); a separate
 near-vertical underside probe reduced the folded junction's largest component
 from `72` pixels to `1-3` pixels. These are presentation-geometry checks, not
 evidence for measured American-crow underplumage dimensions.
+Fresh 17-frame rear-starboard `(2.36,-0.24)` and low rear-port
+`(-2.42,-0.36)` audits preserve their enclosed-hole totals exactly at
+`45/29` and `53/40` pixels/components. Active identity coverage changes by
+`-0.225%` and `-0.248%` as the former exposed tube ends retract; selected
+phase-zero frames no longer show the bright oval and central slit produced by
+those ends. This is deterministic raster ownership plus visual inspection of
+two simulated views, not a perceptual-realism qualification.
 
 The persistent rump-to-rectrix contour shell now resolves `168` vanes in seven
 axial rows of `24`, up from `120` in five rows. Root stations span `5-62%` of

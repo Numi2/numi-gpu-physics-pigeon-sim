@@ -2285,6 +2285,7 @@ private struct CrowMeshBuilder {
         endRadius: weight * segment.endRadiusMeters,
         color: SIMD4<Float>(0.0048, 0.0068, 0.0115, 0.11),
         radialSegments: 18,
+        surfaceFeatherClass: CrowRumpTailUnderlayer.foldedWingTailSurfaceFeatherClass,
         to: &vertices
       )
     }

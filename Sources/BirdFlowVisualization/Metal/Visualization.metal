@@ -2135,6 +2135,11 @@ vertex RasterVertex crowFeatherVertex(
 inline float4 crowSurfaceBiasedClipPosition(float4 clipPosition,uint featherClass){
     if(crowIsLiveCovert(featherClass)){
         clipPosition.z-=2.0e-5f*clipPosition.w;
+    }else if(featherClass==16u){
+        // The folded wing-tail lobe is a deep optical backing, not an exposed
+        // surface. Let every nearly coincident remex/covert sample win depth
+        // while the lobe remains available only in an actual image-space gap.
+        clipPosition.z+=2.0e-4f*clipPosition.w;
     }
     return clipPosition;
 }
@@ -2395,6 +2400,7 @@ inline float3 showcaseCrowLinearRadiance(
     float headNeckVane=featherClass==8u?persistentVane:0.0f;
     float foreheadVane=featherClass==9u?persistentVane:0.0f;
     float gularVane=featherClass==10u?persistentVane:0.0f;
+    float deepUnderplumageVane=featherClass==16u?persistentVane:0.0f;
     float bodyContourVane=max(
         max(dorsalBodyVane,max(flankBodyVane,ventralBodyVane)),
         max(headNeckVane,max(foreheadVane,gularVane))
@@ -2415,6 +2421,7 @@ inline float3 showcaseCrowLinearRadiance(
     classSheenScale=mix(classSheenScale,0.60f,headNeckVane);
     classSheenScale=mix(classSheenScale,0.38f,foreheadVane);
     classSheenScale=mix(classSheenScale,0.52f,gularVane);
+    classSheenScale=mix(classSheenScale,0.12f,deepUnderplumageVane);
     float3 featherAxis=crowFeatherAxis(
         world,normal,featherCoordinates.xy
     );
@@ -2632,10 +2639,12 @@ inline float3 showcaseCrowLinearRadiance(
     classSharpScale=mix(classSharpScale,0.28f,headNeckVane);
     classSharpScale=mix(classSharpScale,0.20f,foreheadVane);
     classSharpScale=mix(classSharpScale,0.24f,gularVane);
+    classSharpScale=mix(classSharpScale,0.08f,deepUnderplumageVane);
     color+=sharpTint*featherSpecular*mix(0.30f,1.0f,flightFeather)
         *classSharpScale;
     color+=softTint*softSpecular;
-    float classAnisotropicScale=mix(1.0f,0.40f,bodyContourVane);
+    float classAnisotropicScale=mix(1.0f,0.40f,bodyContourVane)
+        *mix(1.0f,0.12f,deepUnderplumageVane);
     color+=classAnisotropicScale*anisotropicSpecular
         *mix(float3(0.020f,0.030f,0.046f),float3(0.012f,0.020f,0.034f),flightFeather);
     color*=1.0f-0.055f*persistentVane*(1.0f-localBarbs);
@@ -2655,6 +2664,10 @@ inline float3 showcaseCrowLinearRadiance(
     color+=nds*float3(0.004f,0.006f,0.010f);
     color+=rim*mix(1.0f,classSheenScale,persistentVane)
         *float3(0.022f,0.040f,0.065f);
+    // This analytic lobe stands in only for shadowed feather volume inside the
+    // folded wing-tail junction. Suppress exposed-cortex energy so a grazing
+    // rear camera cannot turn the hidden gap fill into a glossy capsule.
+    color*=mix(1.0f,0.30f,deepUnderplumageVane);
     return 1.68f*color;
 }
 

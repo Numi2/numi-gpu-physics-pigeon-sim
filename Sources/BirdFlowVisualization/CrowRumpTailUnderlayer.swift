@@ -20,6 +20,9 @@ struct CrowFoldedWingTailUnderlayerSegment: Equatable {
 enum CrowRumpTailUnderlayer {
   static let foldedWingTailReleaseStartPhase: Float = 0.125
   static let foldedWingTailReleaseEndPhase: Float = 0.375
+  /// Deep optical underplumage has its own AOV/material class: it closes a
+  /// crevice but must not inherit the exposed-vane sheen of the coverts above.
+  static let foldedWingTailSurfaceFeatherClass: UInt32 = 16
 
   static func segment() -> CrowRumpTailUnderlayerSegment {
     let centerRectrix = CrowClosedTailAnatomy.pose(fraction: 0.5)
@@ -32,8 +35,10 @@ enum CrowRumpTailUnderlayer {
   }
 
   /// A paired deep underplumage lobe runs from the rump volume into the folded
-  /// outer rectrix/wing junction. It is entirely optical and collapses inside
-  /// the rump before the distal wing articulates freely.
+  /// outer rectrix/wing junction. Its distal end converges beneath the remex
+  /// stack instead of exposing a cylindrical cross-section to rear cameras. It
+  /// is entirely optical and collapses inside the rump before the distal wing
+  /// articulates freely.
   static func foldedWingTailSegment(
     left: Bool
   ) -> CrowFoldedWingTailUnderlayerSegment {
@@ -41,7 +46,7 @@ enum CrowRumpTailUnderlayer {
       startOffset: segment().endOffset,
       endOffset: SIMD3<Float>(-0.245, left ? 0.047 : -0.047, -0.031),
       startRadiusMeters: 0.008,
-      endRadiusMeters: 0.008
+      endRadiusMeters: 0.0015
     )
   }
 
