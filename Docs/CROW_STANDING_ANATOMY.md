@@ -160,6 +160,21 @@ near-vertical underside probe reduced the folded junction's largest component
 from `72` pixels to `1-3` pixels. These are presentation-geometry checks, not
 evidence for measured American-crow underplumage dimensions.
 
+The twelve procedural open-flight rectrices now resolve an LOD-selected,
+piecewise-tapered rachis inside each coverage-preserving vane. Depending on
+final-output coverage, the shaft is omitted or represented by `4`, `8`, or `12`
+connected segments; it ends at `98.5%` chord and tapers to `18%` of its retained
+asset radius so it cannot become a second tail silhouette. Pair-aware eumelanin
+variation and feather-class `3` AOV ownership keep individual tail feathers
+readable and auditable. Across the fixed 253-frame, 13-view orbit, enclosed-hole,
+largest-hole, component, and expected lower-body aperture metrics remained
+exact; the added interior shafts changed active coverage by only `240` pixels in
+aggregate, with a maximum per-frame increase of `0.028%`. A proposed replacement
+that kept the persistent standing rectrices open throughout flight was rejected:
+it exposed pre-existing body-wing cavities as large as `100` pixels from other
+angles. The retained shaft radius, fan pose, and material variation remain
+presentation estimates rather than measured American-crow microstructure.
+
 The cranial surface is not transported as a detached rigid shell during quiet
 standing. Points buried in the trunk-facing nape remain body-anchored, a cubic
 coupling field deforms the visible neck, and the field reaches rigid-head motion

@@ -3784,8 +3784,6 @@ private struct CrowMeshBuilder {
     to vertices: inout [ColoredVertex]
   ) {
     _ = states
-    let root = bodyCenter + SIMD3<Float>(-0.125, 0, 0.005)
-    let axis = SIMD3<Float>(-0.190, 0, -0.018)
     let assetRectrices = persistentFeathers.filter {
       $0.featherClass == .tail
     }
@@ -3794,45 +3792,96 @@ private struct CrowMeshBuilder {
       ? profile.visualTransform.tailFeatherCount
       : assetRectrices.count
     for index in 0..<count {
-      let f = Float(index) / Float(max(count - 1, 1))
-      let lateral = (f - 0.5) * 0.145
-      let central = 1 - abs(2 * f - 1)
+      let pose = CrowTakeoffSequence.flightRectrixPose(
+        order: index,
+        count: count
+      )
+      let vaneProfile = CrowRectrixVaneAnatomy.profile(
+        order: index,
+        count: count
+      )
       let assetFeather = assetRectrices.isEmpty ? nil : assetRectrices[index]
+      let referenceLength = assetFeather?.lengthMeters ?? 0.19
+      let anatomicalMaximumWidth = assetFeather?.maximumWidthMeters ?? 0.021
       let tailWingHandoffWidthScale =
         CrowFlightWingBodyIntegration.rectrixWingHandoffWidthScale(
           order: index,
           count: count
         )
-      let featherRoot = root + SIMD3<Float>(0, lateral * 0.24, 0.006 * central)
-      let proceduralTip =
-        root + axis * (0.96 + 0.02 * central)
-        + SIMD3<Float>(
-          -0.002 * central,
-          lateral,
-          (f - 0.5) * 0.036 - 0.003 * abs(2 * f - 1)
-        )
+      let featherRoot = bodyCenter + pose.rootOffset
+      let proceduralTip = bodyCenter + pose.tipOffset
       let featherTip =
         assetFeather.map {
           featherRoot + safeNormalize(
             proceduralTip - featherRoot,
-            fallback: SIMD3<Float>(-1, 0, 0)
+            fallback: pose.direction
           ) * $0.lengthMeters
         } ?? proceduralTip
       appendFeatherBlade(
         root: featherRoot,
         tip: featherTip,
-        planeNormal: SIMD3<Float>(0, -1, 0.12),
+        planeNormal: pose.normal,
         rootWidth:
           tailWingHandoffWidthScale * 0.57
-          * (assetFeather?.maximumWidthMeters ?? 0.021),
+          * anatomicalMaximumWidth,
         maximumWidth:
           tailWingHandoffWidthScale
-          * (assetFeather?.maximumWidthMeters ?? 0.021),
-        color: SIMD4<Float>(0.011, 0.016, 0.029, 0.23),
+          * anatomicalMaximumWidth,
+        color: SIMD4<Float>(
+          0.0105 * (1 + 0.07 * vaneProfile.radialFraction),
+          0.0155 * (1 + 0.05 * vaneProfile.radialFraction),
+          0.0285 * (1 + 0.035 * vaneProfile.radialFraction),
+          0.23
+        ),
         sections: 9,
         camber: 0.006,
-        lodLengthMeters: assetFeather?.lengthMeters ?? 0.19,
+        rootEnvelopeRatio: 0.32,
+        surfaceFeatherClass: 3,
+        lodLengthMeters: referenceLength,
         projectedPixelsPerMeter: projectedPixelsPerMeter,
+        to: &vertices
+      )
+      appendFlightRectrixRachis(
+        root: featherRoot,
+        tip: featherTip,
+        planeNormal: pose.normal,
+        baseRadiusMeters: assetFeather?.rachisRadiusMeters ?? 0.00048,
+        radialFraction: vaneProfile.radialFraction,
+        projectedPixelsPerMeter: projectedPixelsPerMeter,
+        to: &vertices
+      )
+    }
+  }
+
+  private func appendFlightRectrixRachis(
+    root: SIMD3<Float>,
+    tip: SIMD3<Float>,
+    planeNormal: SIMD3<Float>,
+    baseRadiusMeters: Float,
+    radialFraction: Float,
+    projectedPixelsPerMeter: Float,
+    to vertices: inout [ColoredVertex]
+  ) {
+    let color = SIMD4<Float>(
+      0.014 * (1 + 0.06 * radialFraction),
+      0.019 * (1 + 0.04 * radialFraction),
+      0.029 * (1 + 0.03 * radialFraction),
+      0.20
+    )
+    for segment in CrowFlightRectrixDetail.rachisSegments(
+      root: root,
+      tip: tip,
+      planeNormal: planeNormal,
+      baseRadiusMeters: baseRadiusMeters,
+      projectedPixelsPerMeter: projectedPixelsPerMeter
+    ) {
+      appendTaperedTube(
+        from: segment.start,
+        to: segment.end,
+        startRadius: segment.startRadiusMeters,
+        endRadius: segment.endRadiusMeters,
+        color: color,
+        radialSegments: 5,
         to: &vertices
       )
     }

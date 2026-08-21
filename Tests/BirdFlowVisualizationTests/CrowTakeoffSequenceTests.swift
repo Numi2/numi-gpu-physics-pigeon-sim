@@ -93,3 +93,28 @@ func terminalPrimaryHandoffIsBoundedToInitialWingDeployment() {
       < CrowTakeoffSequence.terminalPrimaryHandoffEndProgress
   )
 }
+
+@Test("open-flight rectrix targets retain a connected root fan")
+func openFlightRectrixTargetsRetainConnectedRootFan() {
+  let count = CrowClosedTailAnatomy.rectrixCount
+  let poses = (0..<count).map {
+    CrowTakeoffSequence.flightRectrixPose(order: $0, count: count)
+  }
+  for index in 0..<(count / 2) {
+    let right = poses[index]
+    let left = poses[count - 1 - index]
+    #expect(abs(right.rootOffset.x - left.rootOffset.x) < 1e-7)
+    #expect(abs(right.rootOffset.y + left.rootOffset.y) < 1e-7)
+    #expect(abs(right.rootOffset.z - left.rootOffset.z) < 1e-7)
+    #expect(abs(right.tipOffset.x - left.tipOffset.x) < 1e-7)
+    #expect(abs(right.tipOffset.y + left.tipOffset.y) < 1e-7)
+  }
+  let sortedRoots = poses.map(\.rootOffset.y).sorted()
+  let maximumRootGap = zip(sortedRoots, sortedRoots.dropFirst())
+    .map { $1 - $0 }
+    .max() ?? 0
+  #expect(maximumRootGap < 0.004)
+  #expect(poses.first!.tipOffset.y < -0.07)
+  #expect(poses.last!.tipOffset.y > 0.07)
+  #expect(poses.last!.tipOffset.z - poses.first!.tipOffset.z > 0.035)
+}

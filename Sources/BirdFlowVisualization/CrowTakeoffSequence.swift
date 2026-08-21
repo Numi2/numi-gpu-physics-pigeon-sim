@@ -20,6 +20,13 @@ enum CrowTakeoffSequence {
     let bodyTranslation: SIMD3<Float>
   }
 
+  struct FlightRectrixPose: Equatable {
+    let rootOffset: SIMD3<Float>
+    let tipOffset: SIMD3<Float>
+    let direction: SIMD3<Float>
+    let normal: SIMD3<Float>
+  }
+
   static let standingHoldEnd: Float = 0.20
   static let transitionEnd: Float = 0.56
   static let terminalPrimaryHandoffMaximumLateralOffsetMeters: Float = 0.004
@@ -84,6 +91,41 @@ enum CrowTakeoffSequence {
     )
   }
 
+  /// Open-flight target for one presentation rectrix. Centralizing the fan
+  /// geometry keeps the CPU vane course, coverage tests, and future retained
+  /// topology handoff on one deterministic anatomical contract.
+  static func flightRectrixPose(order: Int, count: Int) -> FlightRectrixPose {
+    let boundedCount = max(count, 1)
+    let fraction = Float(order) / Float(max(boundedCount - 1, 1))
+    let lateral = (fraction - 0.5) * 0.145
+    let central = 1 - abs(2 * fraction - 1)
+    let rootOffset = SIMD3<Float>(
+      -0.125,
+      lateral * 0.24,
+      0.005 + 0.006 * central
+    )
+    let tipOffset =
+      SIMD3<Float>(-0.125, 0, 0.005)
+      + SIMD3<Float>(-0.190, 0, -0.018) * (0.96 + 0.02 * central)
+      + SIMD3<Float>(
+        -0.002 * central,
+        lateral,
+        (fraction - 0.5) * 0.036 - 0.003 * abs(2 * fraction - 1)
+      )
+    return FlightRectrixPose(
+      rootOffset: rootOffset,
+      tipOffset: tipOffset,
+      direction: safeNormalize(
+        tipOffset - rootOffset,
+        fallback: SIMD3<Float>(-1, 0, 0)
+      ),
+      normal: safeNormalize(
+        SIMD3<Float>(0, -1, 0.12),
+        fallback: SIMD3<Float>(0, -1, 0)
+      )
+    )
+  }
+
   static func standingPose(phase: Float) -> CrowStandingPoseSample {
     let sequence = sample(phase: phase)
     let planted = CrowStandingPose.sample(phase: sequence.standingPhase)
@@ -130,6 +172,14 @@ enum CrowTakeoffSequence {
     -> SIMD3<Float>
   {
     first + blend * (second - first)
+  }
+
+  private static func safeNormalize(
+    _ value: SIMD3<Float>,
+    fallback: SIMD3<Float>
+  ) -> SIMD3<Float> {
+    let length = simd_length(value)
+    return length > 1e-12 ? value / length : fallback
   }
 
   private static func retract(
