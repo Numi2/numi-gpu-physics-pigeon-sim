@@ -173,6 +173,15 @@ vane geometry, follicle and centerline-tip positions, widths, stable identities,
 inventory, and mesostructure record counts remain exact. This relief is an
 estimated presentation constraint, not measured scapular contact mechanics.
 
+The class-`7` pectoral and abdominal tracts now resolve shaft depth explicitly.
+All `1,304` ventral vanes preserve their established subvane continuity rachis;
+the `776` interior records, excluding two boundary rows and two terminal axial
+courses on every side, add a second four-segment rachis at the visible `0.10`
+transverse crown. Edge-barb aggregates, vane geometry, roots, tips, identities,
+LOD thresholds, and boundary silhouettes remain unchanged. The paired compact
+curve records are an estimated rendering hierarchy for future GPU curve or
+meshlet expansion, not evidence of measured American-crow rachis depth.
+
 ## Native Metal capture
 
 The native renderer consumes both locked inputs. Its encoding, input hashes,

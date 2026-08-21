@@ -315,7 +315,10 @@ func ventralTractFeathersResolveMesostructure() {
       projectedPixelsPerMeter: 48 / length
     )
     #expect(silhouette.isEmpty)
-    #expect(resolved.filter { $0.kind == .rachis }.count == 4)
+    #expect(
+      resolved.filter { $0.kind == .rachis }.count
+        == (CrowVentralFeatherTracts.retainsCrownRachis(feather) ? 8 : 4)
+    )
     #expect(resolved.filter { $0.kind == .edgeBarbGroup }.count == 25)
     #expect(
       resolved.allSatisfy {
@@ -328,4 +331,37 @@ func ventralTractFeathersResolveMesostructure() {
       }
     )
   }
+}
+
+@Test("ventral tract detail follows its visible transverse crown")
+func ventralTractDetailFollowsVisibleTransverseCrown() throws {
+  let feather = try #require(
+    CrowVentralFeatherTracts.samples().first(
+      where: CrowVentralFeatherTracts.retainsCrownRachis
+    )
+  )
+  let length = simd_distance(feather.rootOffset, feather.tipOffset)
+  let flat = CrowFeatherMesostructure.segments(
+    for: feather,
+    projectedPixelsPerMeter: 48 / length,
+    transverseCamberRatio: 0
+  )
+  let crowned = CrowFeatherMesostructure.segments(
+    for: feather,
+    projectedPixelsPerMeter: 48 / length
+  )
+  #expect(crowned.count == flat.count + 4)
+  #expect(Array(crowned.prefix(flat.count)) == flat)
+  let direction = simd_normalize(feather.tipOffset - feather.rootOffset)
+  let normal = simd_normalize(
+    feather.planeNormal - direction * simd_dot(feather.planeNormal, direction)
+  )
+  let flatRachis = flat.filter { $0.kind == .rachis }
+  let crownRachis = crowned.suffix(4)
+  #expect(crownRachis.allSatisfy { $0.kind == .rachis })
+  let normalLifts = zip(crownRachis, flatRachis).map {
+    simd_dot($0.start - $1.start, normal)
+  }
+  #expect(normalLifts.max()! > 0.00020)
+  #expect(normalLifts.min()! >= -1e-7)
 }

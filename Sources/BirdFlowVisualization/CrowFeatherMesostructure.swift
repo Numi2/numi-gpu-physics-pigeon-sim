@@ -80,12 +80,30 @@ enum CrowFeatherMesostructure {
 
   static func segments(
     for feather: CrowVentralFeatherTractSample,
-    projectedPixelsPerMeter: Float
+    projectedPixelsPerMeter: Float,
+    transverseCamberRatio: Float? = nil
   ) -> [CrowFeatherMesostructureSegment] {
-    segments(
-      frame: Frame(feather: feather),
+    let resolvedTransverseCamberRatio = transverseCamberRatio
+      ?? (CrowVentralFeatherTracts.retainsCrownRachis(feather)
+        ? CrowVentralFeatherTracts.retainedRachisTransverseCamberRatio : 0)
+    // Preserve a subvane continuity shaft as a deterministic occluded oracle;
+    // eligible interior feathers add a second shaft on the visible crown.
+    let continuity = segments(
+      frame: Frame(
+        feather: feather,
+        transverseCamberRatio: 0
+      ),
       projectedPixelsPerMeter: projectedPixelsPerMeter
     )
+    guard resolvedTransverseCamberRatio > 0 else { return continuity }
+    let crownRachis = segments(
+      frame: Frame(
+        feather: feather,
+        transverseCamberRatio: resolvedTransverseCamberRatio
+      ),
+      projectedPixelsPerMeter: projectedPixelsPerMeter
+    ).filter { $0.kind == .rachis }
+    return continuity + crownRachis
   }
 
   static func segments(
@@ -168,6 +186,7 @@ enum CrowFeatherMesostructure {
     let maximumWidthMeters: Float
     let camberMeters: Float
     let transverseCamberRatio: Float
+    let barbTransverseCamberRatio: Float
     let rootEnvelopeRatio: Float
     let pennaceousStartFraction: Float
     let vaneAsymmetry: Float
@@ -198,6 +217,7 @@ enum CrowFeatherMesostructure {
       maximumWidthMeters = feather.maximumWidthMeters
       camberMeters = feather.camberMeters
       transverseCamberRatio = 0
+      barbTransverseCamberRatio = 0
       rootEnvelopeRatio = 0.32
       pennaceousStartFraction = feather.pennaceousStartFraction
       vaneAsymmetry = feather.vaneAsymmetry
@@ -233,6 +253,7 @@ enum CrowFeatherMesostructure {
       maximumWidthMeters = feather.maximumWidthMeters
       camberMeters = feather.camberMeters * camberScale
       self.transverseCamberRatio = transverseCamberRatio
+      barbTransverseCamberRatio = transverseCamberRatio
       rootEnvelopeRatio = feather.rootEnvelopeRatio
       pennaceousStartFraction = feather.pennaceousStartFraction
       vaneAsymmetry = feather.vaneAsymmetry
@@ -243,7 +264,10 @@ enum CrowFeatherMesostructure {
       identitySecond = feather.column + (feather.side < 0 ? 97 : 0)
     }
 
-    init(feather: CrowVentralFeatherTractSample) {
+    init(
+      feather: CrowVentralFeatherTractSample,
+      transverseCamberRatio: Float
+    ) {
       root = feather.rootOffset
       tip = feather.tipOffset
       referenceLengthMeters = simd_distance(feather.rootOffset, feather.tipOffset)
@@ -263,7 +287,8 @@ enum CrowFeatherMesostructure {
       rootWidthMeters = feather.rootWidthMeters
       maximumWidthMeters = feather.maximumWidthMeters
       camberMeters = feather.camberMeters
-      transverseCamberRatio = 0
+      self.transverseCamberRatio = transverseCamberRatio
+      barbTransverseCamberRatio = 0
       rootEnvelopeRatio = feather.rootEnvelopeRatio
       pennaceousStartFraction = feather.pennaceousStartFraction
       vaneAsymmetry = feather.vaneAsymmetry
@@ -295,6 +320,7 @@ enum CrowFeatherMesostructure {
       maximumWidthMeters = feather.maximumWidthMeters
       camberMeters = feather.camberMeters
       transverseCamberRatio = 0
+      barbTransverseCamberRatio = 0
       rootEnvelopeRatio = feather.rootEnvelopeRatio
       pennaceousStartFraction = 0
       vaneAsymmetry = feather.vaneAsymmetry
@@ -326,6 +352,7 @@ enum CrowFeatherMesostructure {
       maximumWidthMeters = feather.maximumWidthMeters
       camberMeters = feather.camberMeters
       transverseCamberRatio = 0
+      barbTransverseCamberRatio = 0
       rootEnvelopeRatio = feather.rootEnvelopeRatio
       pennaceousStartFraction = 0
       vaneAsymmetry = feather.vaneAsymmetry
@@ -357,6 +384,7 @@ enum CrowFeatherMesostructure {
       maximumWidthMeters = feather.maximumWidthMeters
       camberMeters = feather.camberMeters
       transverseCamberRatio = 0
+      barbTransverseCamberRatio = 0
       rootEnvelopeRatio = feather.rootEnvelopeRatio
       pennaceousStartFraction = feather.pennaceousStartFraction
       vaneAsymmetry = feather.vaneAsymmetry
@@ -368,6 +396,17 @@ enum CrowFeatherMesostructure {
     }
 
     func center(at axial: Float) -> SIMD3<Float> {
+      center(at: axial, transverseCamberRatio: transverseCamberRatio)
+    }
+
+    func barbCenter(at axial: Float) -> SIMD3<Float> {
+      center(at: axial, transverseCamberRatio: barbTransverseCamberRatio)
+    }
+
+    private func center(
+      at axial: Float,
+      transverseCamberRatio: Float
+    ) -> SIMD3<Float> {
       let t = clamp(axial)
       return root
         + (tip - root) * t
@@ -454,7 +493,7 @@ enum CrowFeatherMesostructure {
             + side * 1.371
         )
         let start =
-          frame.center(at: axial)
+          frame.barbCenter(at: axial)
           + side * frame.widthAxis * frame.halfWidth(at: axial, signedWidth: side)
           * (coarseEdgeOnly ? 0.72 : 0)
           + frame.normal * (coarseEdgeOnly ? 0.00010 : 0.00005)
@@ -467,7 +506,7 @@ enum CrowFeatherMesostructure {
           ? 0.97 * reachHalfWidth
           : reachHalfWidth + edgeExtension
         let end =
-          frame.center(at: reachAxial)
+          frame.barbCenter(at: reachAxial)
           + side * frame.widthAxis
           * lateralReach
           + frame.normal * (coarseEdgeOnly ? 0.00018 : 0.00008)
@@ -514,7 +553,7 @@ enum CrowFeatherMesostructure {
     let rootHalfWidth = frame.halfWidth(at: rootAxial)
     for lane: Float in [-1, -0.5, 0, 0.5, 1] {
       let root =
-        frame.center(at: rootAxial)
+        frame.barbCenter(at: rootAxial)
         + lane * frame.widthAxis * rootHalfWidth * 0.42
         + frame.normal * 0.00012
       let laneIdentity = sin(

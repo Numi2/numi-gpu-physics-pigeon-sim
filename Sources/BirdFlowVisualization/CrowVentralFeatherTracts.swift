@@ -39,6 +39,22 @@ enum CrowVentralFeatherTracts {
   static let abdominalRowCount = 10
   static let abdominalColumnCount = 22
   static let shellClearanceMeters: Float = 0.0008
+  static let transverseCamberRatio: Float = 0.10
+  static let retainedRachisTransverseCamberRatio: Float = 0.10
+
+  /// Only interior body-surface records receive a second crown rachis. Boundary
+  /// rows and terminal axial courses retain the continuity shaft alone so a
+  /// detail curve cannot become a new silhouette owner.
+  static func retainsCrownRachis(
+    _ feather: CrowVentralFeatherTractSample
+  ) -> Bool {
+    let rowCount = feather.region == .pectoral
+      ? pectoralRowCount : abdominalRowCount
+    let columnCount = feather.region == .pectoral
+      ? pectoralColumnCount : abdominalColumnCount
+    return feather.row >= 2 && feather.row < rowCount - 2
+      && feather.column >= 2 && feather.column < columnCount - 2
+  }
 
   static func visibleSamples(
     projectedPixelsPerMeter: Float

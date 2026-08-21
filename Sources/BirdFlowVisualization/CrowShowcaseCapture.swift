@@ -2452,7 +2452,7 @@ private struct CrowMeshBuilder {
         color: color,
         sections: 7,
         camber: sample.camberMeters,
-        transverseCamberRatio: 0.10,
+        transverseCamberRatio: CrowVentralFeatherTracts.transverseCamberRatio,
         vaneAsymmetry: sample.vaneAsymmetry,
         edgeRippleAmplitude: sample.edgeRippleAmplitude,
         edgeRipplePhase: sample.edgeRipplePhase,

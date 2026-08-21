@@ -364,6 +364,18 @@ dorsal-rear, and front-starboard gap counts stayed exact; under-rear improved
 from `92` to `87` pixels and `50` to `47` components. These are deterministic
 raster-coverage checks for simulated geometry, not measured feather anatomy.
 
+Interior class-`7` pectoral and abdominal records now keep their established
+subvane continuity shaft and add a crown-following four-segment rachis, while
+boundary rows, terminal axial courses, and edge-barb aggregates remain exact.
+In a new 17-frame underbody view at yaw `0.20`, pitch `-0.65`, holes remained
+`117` pixels in `70` components. Across that view plus the established
+high-side, low-rear, dorsal-rear, under-rear, and front-starboard probes,
+aggregate holes improved from `831` to `830` pixels and components from `430`
+to `429`; expected apertures stayed `10` pixels in `4` components and the
+worst hole stayed `44` pixels. Front-starboard supplied the one-pixel and
+one-component improvement; the other five views were exact. This qualifies
+simulated raster coverage, not anatomical rachis measurements.
+
 Run the presentation with:
 
 ```bash

@@ -100,6 +100,11 @@ ankles move by millimetres.
    GPU-resident curve or meshlet expansion, visibility-cull emitted detail, and
    replace the prescribed transverse blend with per-feather contact, bending,
    and airflow without reducing identity density or changing the AOV oracle.
+   Class-`7` ventral body feathers now expose separate stable subvane-continuity
+   and visible-crown rachis records for `776` interior feathers, while boundary
+   records preserve the accepted silhouette. A future indirect curve pass can
+   emit the visible layer, retain the continuity layer as an occlusion oracle,
+   and visibility-cull both from the same `1,304`-feather tract inventory.
 
 3. **Measured appearance, bounded claims.** Implement an energy-bounded,
    anisotropic feather BSDF with separate eumelanin absorption, longitudinal

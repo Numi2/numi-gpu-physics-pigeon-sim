@@ -16,6 +16,9 @@ func crowVentralTractsCoverBreastAndAbdomenAtFullResolution() {
         * CrowVentralFeatherTracts.abdominalColumnCount)
   )
   #expect(samples.count == 1_304)
+  #expect(CrowVentralFeatherTracts.transverseCamberRatio == 0.10)
+  #expect(CrowVentralFeatherTracts.retainedRachisTransverseCamberRatio == 0.10)
+  #expect(samples.filter(CrowVentralFeatherTracts.retainsCrownRachis).count == 776)
   #expect(
     CrowVentralFeatherTracts.visibleSamples(projectedPixelsPerMeter: 1_000).isEmpty
   )

@@ -106,6 +106,12 @@ remaining on a buried centerline. Interior barbs stop at `97%` of the owning
 vane width, five bounded terminal bundles complete each tip, and all emitted
 detail keeps the parent class-`6` AOV identity. Follicles, centerline tips,
 widths, inventory, and standing anatomy remain unchanged.
+Interior class-`7` pectoral and abdominal feathers now retain a subvane
+continuity shaft and add a second four-segment rachis on the visible `0.10`
+transverse crown. Boundary rows, terminal courses, and all edge-barb aggregates
+remain unchanged, so higher-quality breast detail cannot become a new body
+silhouette. The two stable curve layers are ready for later GPU curve or
+meshlet emission without reducing the `1,304`-feather ventral inventory.
 A locked
 `2,157`-vertex, `3,968`-triangle estimated-hybrid surface now also passes the
 live Apple-Metal geometry and production TRT moving-boundary coupling gates.
