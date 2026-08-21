@@ -29,8 +29,6 @@ enum CrowTrailingCovertRanks {
   static let rankSurfaceClearanceMeters: Float = 0.00002
   static let maximumLayerSeparationMeters: Float = 0.00016
   static let visibleRankWidthScale: Float = 0.98
-  static let deploymentStartProgress: Float = 0.25
-  static let deploymentEndProgress: Float = 0.85
 
   static func range(for rank: Rank) -> Range {
     switch rank {
@@ -94,10 +92,11 @@ enum CrowTrailingCovertRanks {
   }
 
   static func deploymentWeight(transitionProgress: Float) -> Float {
-    smoothstep(
-      (transitionProgress - deploymentStartProgress)
-        / (deploymentEndProgress - deploymentStartProgress)
-    )
+    _ = transitionProgress
+    // These coverts are anatomical plumage, not a wing-opening effect. Their
+    // retained Metal records must remain visible through the folded hold so
+    // the class-4 continuity bed never becomes the exposed rear-wing surface.
+    return 1
   }
 
   private static func smoothstep(_ value: Float) -> Float {

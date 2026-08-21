@@ -666,10 +666,28 @@ low rear-port `(-2.42,-0.36)` qualification views also remain exact at
 remains exact at `25/11/9`. This qualifies hidden simulated backing and raster
 continuity, not perceptual realism.
 
+The retained trailing-covert pass removes an artificial deployment dependency
+from the two anatomical dorsal ranks. Their stable class-`14` and class-`15`
+Metal records now remain visible through the folded hold and the entire
+standing-to-flight transition instead of appearing only after wing opening.
+Roots, rank intervals, vane widths, surface clearance, identity count, and
+expanded topology remain unchanged; the already-retained class-`4` continuity
+bed stays underneath rather than becoming the exposed rear-wing surface. This
+is a simulated feather-layer ownership correction, not measured covert motion.
+
+Fresh 17-frame elevated-port and low-starboard audits at yaw/pitch
+`(-2.92,0.52)` and `(2.94,-0.18)` produce aggregate enclosed-hole
+pixels/components/worst component of `56/28/6` and `12/9/2`; expected
+lower-body apertures remain `0/0` and `4/1`. Earlier safety views improve from
+`187/141/4` to `165/120/4` at rear-port, `45/29/4` to `35/25/3` at
+rear-starboard, and `25/11/9` to `20/10/9` at the steep underside. This
+qualifies deterministic simulated raster continuity and retained feather
+ownership, not perceptual realism.
+
 The canonical README sequence is fully simulated and contains the native hold,
-transition, and flight path: `800 x 450`, `72` frames at `24 fps`, `8,149,257`
+transition, and flight path: `800 x 450`, `72` frames at `24 fps`, `8,204,168`
 bytes, SHA-256
-`45c404247bc06ba8d44ffc616dc2f65e70cfd54e1c5a2c2ebb81c9d3a4f47d20`.
+`ef41208d6683f383e04bb725f8b0704d453a8567e5604e57be083382213e8275`.
 
 Run the presentation with:
 

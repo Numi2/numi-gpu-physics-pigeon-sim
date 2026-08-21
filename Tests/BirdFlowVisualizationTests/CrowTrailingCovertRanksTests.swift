@@ -42,20 +42,15 @@ func trailingCovertRanksOverlapWithoutWeakeningEnvelope() {
       axialFraction: 0.5
     ) == CrowTrailingCovertRanks.rankSurfaceClearanceMeters
   )
-  #expect(CrowTrailingCovertRanks.deploymentWeight(transitionProgress: 0) == 0)
+  #expect(CrowTrailingCovertRanks.deploymentWeight(transitionProgress: 0) == 1)
   #expect(
-    CrowTrailingCovertRanks.deploymentWeight(transitionProgress: 0.25) == 0
+    CrowTrailingCovertRanks.deploymentWeight(transitionProgress: 0.25) == 1
   )
   #expect(
     CrowTrailingCovertRanks.deploymentWeight(transitionProgress: 0.85) == 1
   )
   #expect(CrowTrailingCovertRanks.deploymentWeight(transitionProgress: 1) == 1)
-  #expect(
-    abs(
-      CrowTrailingCovertRanks.deploymentWeight(transitionProgress: 0.55)
-        - 0.5
-    ) < 0.0001
-  )
+  #expect(CrowTrailingCovertRanks.deploymentWeight(transitionProgress: 0.55) == 1)
 }
 
 @Test("trailing covert retained templates map local coordinates to rank intervals")

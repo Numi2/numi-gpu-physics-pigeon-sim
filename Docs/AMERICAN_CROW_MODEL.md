@@ -343,6 +343,13 @@ support contact. The qualitative source observations and exclusions are in
 [`CROW_STANDING_ANATOMY.md`](CROW_STANDING_ANATOMY.md); no source-media bytes
 are stored or displayed.
 
+The two exposed trailing-covert ranks are retained anatomical Metal records,
+not a deployment effect. They remain visible from the folded hold through
+takeoff and flight, preserving stable class-`14`/class-`15` identities above
+the hidden class-`4` continuity bed. The transition's still frame therefore
+uses the same feather hierarchy as open flight without changing roots, rank
+intervals, vane widths, or expanded topology.
+
 ```bash
 ./Scripts/capture-crow-showcase.sh \
   /tmp/american-crow-standing.mp4 \

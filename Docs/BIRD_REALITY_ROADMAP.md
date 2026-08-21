@@ -111,6 +111,11 @@ inventory or view-dependent patch geometry.
    GPU-resident curve or meshlet expansion, visibility-cull emitted detail, and
    replace the prescribed transverse blend with per-feather contact, bending,
    and airflow without reducing identity density or changing the AOV oracle.
+   The class-`14`/class-`15` trailing-covert ranks now remain retained through
+   the folded hold rather than deploying over an exposed continuity bed.
+   Future per-feather contact should replace this always-present prescribed
+   ownership while preserving the same identities, rank intervals, and exact
+   expanded topology.
    Class-`7` ventral body feathers now expose separate stable subvane-continuity
    and visible-crown rachis records for `776` interior feathers, while boundary
    records preserve the accepted silhouette. The visible layer now uses
