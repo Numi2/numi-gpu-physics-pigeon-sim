@@ -108,9 +108,21 @@ Previously its `40-50 mm` width continued to the distal station and appeared as
 two upright blades above the tail from overhead views. Three new 17-frame
 left-high, overhead, and right-high probes remove those outer blades, reduce
 aggregate enclosed pixels from `1,019` to `1,010`, preserve zero expected
-apertures, and leave the separate `156`-pixel lower-body articulation component
-unchanged. This is estimated presentation geometry, not a measured folded-wing
-width.
+apertures, and leave the separate `156`-pixel near-vertical component unchanged.
+Identity-class tracing resolves that component
+as a view-specific cranial-to-pedal projection aperture: it touches head,
+throat, body-feather, and foot classes but no femoral/crural class, and it
+disappears under small yaw/pitch changes. Filling it with torso geometry would
+therefore be anatomically incorrect. This is estimated presentation geometry,
+not a measured folded-wing width.
+The retained rectrices also keep a narrow `13-16%` terminal width envelope
+instead of collapsing to generic needle points. Their centerline tips remain at
+full asset length while lateral vane vertices round back by `1.0-1.4%` of
+length (`1.7-2.3 mm` for the current `166 mm` geometry). Swift and Metal compute
+the same profile on the persistent template; three steep 17-frame A/B probes
+changed worst enclosed-hole counts only `38 -> 39`, `42 -> 41`, and
+`291 -> 291` pixels. These are bounded simulated morphology and raster checks,
+not measured American-crow tip dimensions.
 The middle live covert course also retains its full folded relief, then seats
 its deployed root camber and clearance to `48%` across the first `12` span
 stations; vane width, chord, identity, and the caudal handoff remain unchanged.

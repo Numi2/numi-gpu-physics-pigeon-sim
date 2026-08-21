@@ -52,6 +52,8 @@ struct CrowRectrixVaneProfile: Equatable {
 /// gently narrower, flatter, and more asymmetric. These are presentation
 /// estimates and do not alter retained length, stable ID, or solver geometry.
 enum CrowRectrixVaneAnatomy {
+  static let terminalShapeStartAxialFraction: Float = 0.84
+
   static func profile(order: Int, count: Int) -> CrowRectrixVaneProfile {
     let safeCount = max(count, 1)
     let fraction =
@@ -139,13 +141,43 @@ enum CrowRectrixVaneAnatomy {
     return body * (1 - 0.985 * pow(axial, 3.2))
   }
 
+  /// Preserves a narrow, identity-varying terminal vane instead of collapsing
+  /// every rectrix into the generic needle tip used by remiges and coverts.
+  static func terminalWidthEnvelope(
+    axial rawAxial: Float,
+    profile: CrowRectrixVaneProfile
+  ) -> Float {
+    let axial = min(max(rawAxial, 0), 1)
+    let terminalRatio = 0.13 + 0.03 * (1 - profile.radialFraction)
+    return max(
+      widthEnvelope(axial: axial),
+      terminalRatio * terminalShapeWeight(axial: axial)
+    )
+  }
+
+  /// Rounds the retained tip in geometry while leaving the rachis centerline at
+  /// full asset length. Lateral vane vertices retreat by at most 1.7-2.3 mm on
+  /// the current 166 mm rectrices.
+  static func terminalRoundbackFraction(
+    axial rawAxial: Float,
+    signedWidth: Float,
+    profile: CrowRectrixVaneProfile
+  ) -> Float {
+    let axial = min(max(rawAxial, 0), 1)
+    let boundedWidth = min(max(signedWidth, -1), 1)
+    let maximumRoundback = 0.010 + 0.004 * profile.radialFraction
+    return terminalShapeWeight(axial: axial) * maximumRoundback
+      * boundedWidth * boundedWidth
+  }
+
   static func halfWidthMeters(
     maximumWidthMeters: Float,
     axial: Float,
     signedWidth: Float,
     profile: CrowRectrixVaneProfile
   ) -> Float {
-    let base = maximumWidthMeters * (0.55 + 0.45 * axial) * widthEnvelope(axial: axial)
+    let base = maximumWidthMeters * (0.55 + 0.45 * axial)
+      * terminalWidthEnvelope(axial: axial, profile: profile)
     let sideScale = 1 - profile.vaneAsymmetry * signedWidth * profile.outerSignedWidth
     return base * sideScale
       * edgeModulation(
@@ -253,5 +285,14 @@ enum CrowRectrixVaneAnatomy {
       waveAxialDerivative: waveAxialDerivative,
       waveSignedWidthDerivative: waveSignedWidthDerivative
     )
+  }
+
+  private static func terminalShapeWeight(axial: Float) -> Float {
+    let shapeSpan = 1 - terminalShapeStartAxialFraction
+    let progress = min(
+      max((axial - terminalShapeStartAxialFraction) / shapeSpan, 0),
+      1
+    )
+    return progress * progress * (3 - 2 * progress)
   }
 }

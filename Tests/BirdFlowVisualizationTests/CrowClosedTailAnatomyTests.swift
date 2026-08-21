@@ -99,6 +99,73 @@ func rectrixPairsRetainIdentitySpecificAsymmetricVaneProfiles() {
   }
 }
 
+@Test("rectrix terminals retain narrow rounded vanes without shortening the rachis")
+func rectrixTerminalsRetainNarrowRoundedVanesWithoutShorteningRachis() {
+  let count = CrowClosedTailAnatomy.rectrixCount
+  for order in 0..<count {
+    let profile = CrowRectrixVaneAnatomy.profile(order: order, count: count)
+    let counterpart = CrowRectrixVaneAnatomy.profile(
+      order: count - 1 - order,
+      count: count
+    )
+    let terminalEnvelope = CrowRectrixVaneAnatomy.terminalWidthEnvelope(
+      axial: 1,
+      profile: profile
+    )
+    #expect(terminalEnvelope >= 0.13 && terminalEnvelope <= 0.16)
+    #expect(
+      abs(
+        terminalEnvelope
+          - CrowRectrixVaneAnatomy.terminalWidthEnvelope(
+            axial: 1,
+            profile: counterpart
+          )
+      ) < 1e-7
+    )
+    #expect(
+      abs(
+        CrowRectrixVaneAnatomy.terminalRoundbackFraction(
+          axial: 1,
+          signedWidth: 0,
+          profile: profile
+        )
+      ) < 1e-7
+    )
+    let edgeRoundback = CrowRectrixVaneAnatomy.terminalRoundbackFraction(
+      axial: 1,
+      signedWidth: 1,
+      profile: profile
+    )
+    #expect(edgeRoundback >= 0.010 && edgeRoundback <= 0.0141)
+    #expect(
+      abs(
+        edgeRoundback
+          - CrowRectrixVaneAnatomy.terminalRoundbackFraction(
+            axial: 1,
+            signedWidth: -1,
+            profile: profile
+          )
+      ) < 1e-7
+    )
+    #expect(
+      CrowRectrixVaneAnatomy.terminalRoundbackFraction(
+        axial: CrowRectrixVaneAnatomy.terminalShapeStartAxialFraction,
+        signedWidth: 1,
+        profile: profile
+      ) == 0
+    )
+
+    let maximumWidth = 0.019 * profile.maximumWidthScale
+    let terminalHalfWidth = CrowRectrixVaneAnatomy.halfWidthMeters(
+      maximumWidthMeters: maximumWidth,
+      axial: 1,
+      signedWidth: 1,
+      profile: profile
+    )
+    #expect(terminalHalfWidth > 0.0022 && terminalHalfWidth < 0.0032)
+  }
+}
+
 @Test("rectrix edge microstructure is paired, bounded, and analytically differentiable")
 func rectrixEdgeMicrostructureIsPairedBoundedAndDifferentiable() {
   let count = CrowClosedTailAnatomy.rectrixCount

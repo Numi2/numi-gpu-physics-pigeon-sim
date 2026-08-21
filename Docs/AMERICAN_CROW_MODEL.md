@@ -157,6 +157,14 @@ wingbeat presentation. Independent Swift parity checks cover the retained GPU
 state at four phases. This is a continuity and coverage result, not measured
 rectrix deployment kinematics.
 
+The retained rectrix surface now preserves a narrow `13-16%` width envelope
+over its terminal `16%` of length. Lateral vane vertices retreat quadratically
+by at most `1.0-1.4%` of length while the rachis centerline retains the exact
+asset tip. This replaces a generic zero-width needle termination with a rounded,
+identity-varying simulated rectrix end without changing stable IDs, root poses,
+or storage topology. Full-chord finite-difference normals run in both Swift and
+Metal and retain the existing `< 1e-5` CPU/GPU normal-parity gate.
+
 Procedural contour and folded-wing feathers select quantized tessellation from
 their projected length at the final output resolution. The four asset LOD
 thresholds drive silhouette, curved vane shell, rachis, paired-barb, and

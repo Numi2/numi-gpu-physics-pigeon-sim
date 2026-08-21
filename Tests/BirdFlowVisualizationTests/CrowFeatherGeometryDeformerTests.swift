@@ -180,6 +180,33 @@ func crowFeatherTemplateGPUDeformationMatchesCPUReference() throws {
     }
   )
 
+  for feather in movingRoots.filter({ ($0.identity.w & 255) == 3 }) {
+    let vertices = movingVertices.filter { $0.identity.x == feather.identity.x }
+    func terminalPoint(signedWidth: Float) -> SIMD3<Float> {
+      let vertex = vertices.first {
+        abs($0.parameters.x - 1) < 1e-7
+          && abs($0.parameters.y - signedWidth) < 1e-7
+      }!
+      return SIMD3<Float>(vertex.position.x, vertex.position.y, vertex.position.z)
+    }
+    let direction = simd_normalize(
+      SIMD3<Float>(
+        feather.currentDirectionAndRachis.x,
+        feather.currentDirectionAndRachis.y,
+        feather.currentDirectionAndRachis.z
+      )
+    )
+    let negative = terminalPoint(signedWidth: -1)
+    let centerline = terminalPoint(signedWidth: 0)
+    let positive = terminalPoint(signedWidth: 1)
+    let negativeRetreat = simd_dot(centerline - negative, direction)
+    let positiveRetreat = simd_dot(centerline - positive, direction)
+    #expect(negativeRetreat > 0.0015 && negativeRetreat < 0.0025)
+    #expect(positiveRetreat > 0.0015 && positiveRetreat < 0.0025)
+    #expect(simd_distance(negative, positive) > 0.004)
+    #expect(simd_distance(negative, positive) < 0.007)
+  }
+
   for feather in movingRoots.filter({ ($0.identity.w & 255) <= 3 }) {
     let vertices = movingVertices.filter { $0.identity.x == feather.identity.x }
     func point(axial: Float, signedWidth: Float) -> SIMD3<Float> {

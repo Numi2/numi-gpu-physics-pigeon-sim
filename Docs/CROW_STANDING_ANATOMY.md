@@ -143,6 +143,12 @@ symmetric envelope, so the added feather identities cannot reopen the closed
 tail. The denser `24 x 6` canonical surface resolves the curvature and crown as
 geometry while remaining a conventional triangle fallback for future mesh or
 ray-tracing paths.
+The retained template now preserves a narrow terminal vane rather than
+converging every rectrix to a needle. A smooth envelope begins at `84%` length
+and retains `13-16%` of maximum half-width at the tip. The centerline keeps the
+exact `166 mm` asset length while lateral edge vertices retreat quadratically
+by `1.7-2.3 mm`, yielding a rounded end without changing the closed-tail root or
+deployment schedule.
 This ordering follows the general folded-tail overlap described by
 [Clark (2010)](https://academic.oup.com/auk/article/127/1/44/5148514); only the
 ordering transfers here. All vane asymmetry, width, crown, and camber values are
@@ -352,9 +358,18 @@ taper begins at `52%`, reaches its terminal `10-14 mm` lateral envelope by
 yaw/pitch `(-0.50,0.78)`, `(0.12,0.88)`, and `(0.62,0.72)` remove the paired
 outer blade silhouette and reduce aggregate enclosed pixels from `1,019` to
 `1,010`. Components change from `330` to `331`, zero expected apertures remain
-exact, and the unchanged `156`-pixel worst component is traced to lower-body
-femoral/pedal articulation rather than the tapered wing. This qualifies the
-simulated raster transition only; the taper values are not measured anatomy.
+exact, and the unchanged `156`-pixel worst component is not part of the tapered
+wing. A subsequent identity trace found classes `0`, `6`, `8`, `10`, and `11`
+around that near-vertical aperture but no femoral/crural class `7`; three small
+camera changes removed it. It is therefore a cranial-to-pedal projection
+aperture, not a body seam to fill. This qualifies the simulated raster
+transition only; the taper values are not measured anatomy.
+
+In steep-left, steep-right, and rear-overhead 17-frame A/B audits, the rounded
+rectrix terminals change worst enclosed-hole counts only `38 -> 39`, `42 ->
+41`, and `291 -> 291` pixels. Swift/Metal positions remain within `3e-6` and
+normals within `1e-5`; these gates establish implementation parity and raster
+continuity, not measured American-crow terminal morphology.
 
 The deployed chord-`3` live covert course now settles its proximal camber and
 dorsal clearance to `48%` at the root, recovering to full relief across `12`

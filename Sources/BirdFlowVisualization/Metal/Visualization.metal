@@ -642,6 +642,26 @@ inline float4 crowRectrixVaneProfile(uint packedIdentity) {
     );
 }
 
+inline float crowRectrixTerminalShapeWeight(float axial) {
+    float progress=clamp((axial-0.84f)/(1.0f-0.84f),0.0f,1.0f);
+    return progress*progress*(3.0f-2.0f*progress);
+}
+
+inline float crowRectrixTerminalWidthEnvelope(float axial,float4 rectrix) {
+    float terminalRatio=0.13f+0.03f*(1.0f-rectrix.x);
+    return max(
+        crowFeatherWidthEnvelope(axial),
+        terminalRatio*crowRectrixTerminalShapeWeight(axial)
+    );
+}
+
+inline float crowRectrixTerminalRoundback(
+    float axial,float signedWidth,float4 rectrix) {
+    float boundedWidth=clamp(signedWidth,-1.0f,1.0f);
+    return crowRectrixTerminalShapeWeight(axial)
+        *(0.010f+0.004f*rectrix.x)*boundedWidth*boundedWidth;
+}
+
 inline float4 crowRemexVaneProfile(uint packedIdentity) {
     uint featherClass=packedIdentity&255u;
     if(featherClass!=1u&&featherClass!=2u){return float4(0);}
@@ -955,6 +975,16 @@ inline float3 crowFeatherPosition(
     uint packedIdentity) {
     uint featherClass=packedIdentity&255u;
     float geometryAxial=crowTrailingCovertGlobalAxial(featherClass,axial);
+    float4 rectrix=crowRectrixVaneProfile(packedIdentity);
+    float4 remex=crowRemexVaneProfile(packedIdentity);
+    float4 covert=crowCovertVaneProfile0(packedIdentity);
+    float4 covertMorphology=crowCovertVaneProfile1(covert);
+    float shapedAxial=max(
+        0.0f,
+        geometryAxial-(featherClass==3u
+            ?crowRectrixTerminalRoundback(geometryAxial,signedWidth,rectrix)
+            :0.0f)
+    );
     float3 tangent=safeNormalizeCrow(direction,float3(1,0,0));
     float3 orthogonalNormal=safeNormalizeCrow(
         surfaceNormal-tangent*dot(surfaceNormal,tangent),surfaceNormal
@@ -964,13 +994,11 @@ inline float3 crowFeatherPosition(
     );
     float rootWidthRatio=crowFeatherRootWidthRatio(packedIdentity);
     float symmetricWidth=mix(
-        rootWidthRatio*maximumWidthMeters,maximumWidthMeters,geometryAxial
+        rootWidthRatio*maximumWidthMeters,maximumWidthMeters,shapedAxial
     )
-        *crowFeatherWidthEnvelope(geometryAxial);
-    float4 rectrix=crowRectrixVaneProfile(packedIdentity);
-    float4 remex=crowRemexVaneProfile(packedIdentity);
-    float4 covert=crowCovertVaneProfile0(packedIdentity);
-    float4 covertMorphology=crowCovertVaneProfile1(covert);
+        *(featherClass==3u
+            ?crowRectrixTerminalWidthEnvelope(shapedAxial,rectrix)
+            :crowFeatherWidthEnvelope(shapedAxial));
     float vaneAsymmetry=featherClass==3u?rectrix.z:
         ((featherClass==1u||featherClass==2u)?remex.z:
             (crowIsLiveCovert(featherClass)?covert.w:0.0f));
@@ -979,13 +1007,13 @@ inline float3 crowFeatherPosition(
             (crowIsLiveCovert(featherClass)?covert.z:0.0f));
     float sideScale=1.0f-vaneAsymmetry*signedWidth*narrowSignedWidth;
     float edgeModulation=featherClass==3u
-        ?crowRectrixEdgeMicrostructure(geometryAxial,signedWidth,rectrix).x
+        ?crowRectrixEdgeMicrostructure(shapedAxial,signedWidth,rectrix).x
         :((featherClass==1u||featherClass==2u)
             ?crowRemexEdgeMicrostructure(
-                geometryAxial,signedWidth,packedIdentity,remex
+                shapedAxial,signedWidth,packedIdentity,remex
             ).x:(crowIsLiveCovert(featherClass)
                 ?crowCovertEdgeMicrostructure(
-                    geometryAxial,signedWidth,covert,covertMorphology
+                    shapedAxial,signedWidth,covert,covertMorphology
                 ).x:1.0f));
     float broadEdgeScale=crowTerminalPrimaryBroadEdgeTerms(
         geometryAxial,signedWidth,packedIdentity,remex
@@ -999,13 +1027,13 @@ inline float3 crowFeatherPosition(
         ((featherClass==1u||featherClass==2u)
             ?remex.w:(crowIsLiveCovert(featherClass)
                 ?covertMorphology.x:0.0f));
-    float camberEnvelope=sin(M_PI_F*geometryAxial)
-        *(1.0f+camberSkew*(2.0f*geometryAxial-1.0f));
-    float3 center=root+tangent*(lengthMeters*geometryAxial)
+    float camberEnvelope=sin(M_PI_F*shapedAxial)
+        *(1.0f+camberSkew*(2.0f*shapedAxial-1.0f));
+    float3 center=root+tangent*(lengthMeters*shapedAxial)
         +orthogonalNormal*(camberMeters*camberEnvelope
             +crowTrailingCovertNormalOffset(featherClass,axial));
     float transverseEnvelope=max(0.0f,1.0f-signedWidth*signedWidth);
-    float crownEnvelope=pow(max(sin(M_PI_F*geometryAxial),0.0f),0.65f);
+    float crownEnvelope=pow(max(sin(M_PI_F*shapedAxial),0.0f),0.65f);
     float crown=crowFeatherCrownRatio(packedIdentity)*width
         *transverseEnvelope*crownEnvelope;
     return center+widthAxis*(signedWidth*width)+orthogonalNormal*crown;
@@ -1021,12 +1049,15 @@ inline float3 crowFeatherNormal(
     float signedWidth,
     uint packedIdentity) {
     uint featherClass=packedIdentity&255u;
-    if(crowIsTrailingCovertRank(featherClass)){
-        constexpr float epsilon=0.0005f;
-        float firstAxial=max(0.0f,axial-epsilon);
-        float secondAxial=min(1.0f,axial+epsilon);
-        float firstWidth=max(-1.0f,signedWidth-epsilon);
-        float secondWidth=min(1.0f,signedWidth+epsilon);
+    if(featherClass==3u||crowIsTrailingCovertRank(featherClass)){
+        // Match the retained mesh chord instead of a cancellation-prone
+        // sub-vertex delta at rounded terminal edges.
+        float axialEpsilon=featherClass==3u?1.0f/48.0f:0.0005f;
+        float widthEpsilon=featherClass==3u?1.0f:0.0005f;
+        float firstAxial=max(0.0f,axial-axialEpsilon);
+        float secondAxial=min(1.0f,axial+axialEpsilon);
+        float firstWidth=max(-1.0f,signedWidth-widthEpsilon);
+        float secondWidth=min(1.0f,signedWidth+widthEpsilon);
         float3 axialFirst=crowFeatherPosition(
             float3(0),direction,surfaceNormal,lengthMeters,
             maximumWidthMeters,camberMeters,firstAxial,signedWidth,

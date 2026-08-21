@@ -584,6 +584,18 @@ final class CrowFeatherGeometryDeformer {
       localAxialFraction: axial,
       featherClass: featherClass
     )
+    let rectrix = CrowRectrixVaneAnatomy.profile(packedIdentity: packedIdentity)
+    let shapedAxial = max(
+      0,
+      geometryAxial
+        - (rectrix.map {
+          CrowRectrixVaneAnatomy.terminalRoundbackFraction(
+            axial: geometryAxial,
+            signedWidth: signedWidth,
+            profile: $0
+          )
+        } ?? 0)
+    )
     let tangent = safeNormalize(direction, fallback: SIMD3<Float>(1, 0, 0))
     let orthogonalNormal = safeNormalize(
       surfaceNormal - tangent * simd_dot(surfaceNormal, tangent),
@@ -595,13 +607,18 @@ final class CrowFeatherGeometryDeformer {
     )
     let bodyEnvelope =
       0.32
-      + 0.68 * pow(max(sin(Float.pi * geometryAxial), 0), 0.58)
-    let tipTaper = 1 - 0.985 * pow(geometryAxial, 3.2)
+      + 0.68 * pow(max(sin(Float.pi * shapedAxial), 0), 0.58)
+    let tipTaper = 1 - 0.985 * pow(shapedAxial, 3.2)
+    let widthEnvelope = rectrix.map {
+      CrowRectrixVaneAnatomy.terminalWidthEnvelope(
+        axial: shapedAxial,
+        profile: $0
+      )
+    } ?? (bodyEnvelope * tipTaper)
     let rootWidthRatio = rootWidthRatio(packedIdentity: packedIdentity)
     let baseWidth =
-      (rootWidthRatio * maximumWidthMeters * (1 - geometryAxial)
-        + maximumWidthMeters * geometryAxial) * bodyEnvelope * tipTaper
-    let rectrix = CrowRectrixVaneAnatomy.profile(packedIdentity: packedIdentity)
+      (rootWidthRatio * maximumWidthMeters * (1 - shapedAxial)
+        + maximumWidthMeters * shapedAxial) * widthEnvelope
     let remex = CrowRemexVaneAnatomy.profile(packedIdentity: packedIdentity)
     let covert = CrowCovertVaneAnatomy.profile(packedIdentity: packedIdentity)
     let sideScale =
@@ -613,21 +630,21 @@ final class CrowFeatherGeometryDeformer {
     let edgeModulation =
       rectrix.map {
         CrowRectrixVaneAnatomy.edgeModulation(
-          axial: geometryAxial,
+          axial: shapedAxial,
           signedWidth: signedWidth,
           profile: $0
         )
       }
       ?? remex.map {
         CrowRemexVaneAnatomy.edgeModulation(
-          axial: geometryAxial,
+          axial: shapedAxial,
           signedWidth: signedWidth,
           profile: $0
         )
       }
       ?? covert.map {
         CrowCovertVaneAnatomy.edgeModulation(
-          axial: geometryAxial,
+          axial: shapedAxial,
           signedWidth: signedWidth,
           profile: $0
         )
@@ -651,16 +668,16 @@ final class CrowFeatherGeometryDeformer {
       )
     let camberEnvelope =
       rectrix.map {
-        CrowRectrixVaneAnatomy.camberEnvelope(axial: geometryAxial, profile: $0)
+        CrowRectrixVaneAnatomy.camberEnvelope(axial: shapedAxial, profile: $0)
       }
       ?? remex.map {
-        CrowRemexVaneAnatomy.camberEnvelope(axial: geometryAxial, profile: $0)
+        CrowRemexVaneAnatomy.camberEnvelope(axial: shapedAxial, profile: $0)
       }
       ?? covert.map {
-        CrowCovertVaneAnatomy.camberEnvelope(axial: geometryAxial, profile: $0)
-      } ?? sin(Float.pi * geometryAxial)
+        CrowCovertVaneAnatomy.camberEnvelope(axial: shapedAxial, profile: $0)
+      } ?? sin(Float.pi * shapedAxial)
     let center =
-      root + tangent * (lengthMeters * geometryAxial)
+      root + tangent * (lengthMeters * shapedAxial)
       + orthogonalNormal
       * (camberMeters * camberEnvelope
         + CrowCovertVaneAnatomy.rankNormalOffsetMeters(
@@ -668,7 +685,7 @@ final class CrowFeatherGeometryDeformer {
           featherClass: featherClass
         ))
     let transverseEnvelope = max(0, 1 - signedWidth * signedWidth)
-    let crownEnvelope = pow(max(sin(Float.pi * geometryAxial), 0), 0.65)
+    let crownEnvelope = pow(max(sin(Float.pi * shapedAxial), 0), 0.65)
     let crown =
       crownRatio(packedIdentity: packedIdentity) * width
       * transverseEnvelope * crownEnvelope
@@ -686,9 +703,11 @@ final class CrowFeatherGeometryDeformer {
     packedIdentity: UInt32
   ) -> SIMD3<Float> {
     let featherClass = packedIdentity & 255
-    if CrowCovertVaneAnatomy.isTrailingRankClass(featherClass) {
-      let axialEpsilon: Float = 0.0005
-      let widthEpsilon: Float = 0.0005
+    if featherClass == 3 || CrowCovertVaneAnatomy.isTrailingRankClass(featherClass) {
+      // Resolve the full vane chord so rounded terminal normals remain stable
+      // across Swift and Metal instead of amplifying sub-vertex cancellation.
+      let axialEpsilon: Float = featherClass == 3 ? 1.0 / 48.0 : 0.0005
+      let widthEpsilon: Float = featherClass == 3 ? 1 : 0.0005
       let firstAxial = max(0, axial - axialEpsilon)
       let secondAxial = min(1, axial + axialEpsilon)
       let firstWidth = max(-1, signedWidth - widthEpsilon)
