@@ -33,8 +33,29 @@ func foldedWingTailUnderplumageIsBilateralAndReleasesBeforeArticulation() {
   #expect(left.endRadiusMeters == 0.0015)
   #expect(left.endRadiusMeters < left.startRadiusMeters)
   #expect(CrowRumpTailUnderlayer.foldedWingTailSurfaceFeatherClass == 16)
-  #expect(abs(left.endOffset.y - 0.047) < 1e-7)
-  #expect(abs(left.endOffset.z + 0.031) < 1e-7)
+  let terminalPrimary = CrowFoldedWingAnatomy.pose(
+    featherClass: 1,
+    side: 1,
+    fraction: 1
+  )
+  let terminalPrimaryCenterline =
+    terminalPrimary.rootOffset
+    + CrowRumpTailUnderlayer.foldedWingTailPrimaryAxialDistanceMeters
+      * terminalPrimary.direction
+  #expect(
+    simd_distance(
+      left.endOffset,
+      terminalPrimaryCenterline
+        - CrowRumpTailUnderlayer.foldedWingTailNormalInsetMeters
+          * terminalPrimary.normal
+    ) < 1e-7
+  )
+  #expect(
+    simd_distance(left.endOffset, terminalPrimaryCenterline)
+      < CrowRumpTailUnderlayer.foldedWingTailNormalInsetMeters + 1e-7
+  )
+  #expect(abs(left.endOffset.y) < 0.012)
+  #expect(left.endOffset.z > -0.020)
   #expect(left.endOffset.x < CrowRumpTailUnderlayer.segment().endOffset.x)
   #expect(
     CrowRumpTailUnderlayer.foldedWingTailWeight(presentationPhase: 0) == 1

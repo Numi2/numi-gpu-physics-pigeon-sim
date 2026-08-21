@@ -644,10 +644,32 @@ large countable nape scallops into a finer overlapping contour field without a
 ventral-rear silhouette regression. This qualifies deterministic simulated
 raster continuity and apparent feather scale, not perceptual realism.
 
+The folded underplumage seating pass removes a detached class-`16` lobe that
+became visible outside the tail from previously unused rear-port and steep
+dorsal-starboard views. A temporary ownership render proved that the dark rod
+was neither leg nor rectrix geometry: its hard-coded distal point remained at
+`47 mm` lateral while the folded terminal primary had already swept inward.
+The endpoint now follows the live terminal-primary centerline at `158 mm`
+axial distance with a `3.5 mm` underside-normal inset. Bilateral symmetry,
+`8 -> 1.5 mm` taper, release phases, class, vertex inventory, and the rump
+anchor remain unchanged. These offsets are presentation estimates, not
+measured underplumage anatomy.
+
+Across fresh 17-frame rear-port and dorsal-starboard audits at yaw/pitch
+`(-2.28,0.16)` and `(1.34,0.60)`, enclosed-hole pixels/components and worst
+components remain exactly `187/141/4` and `24/15/5`; expected aperture totals
+remain `7/3` and `1,300/6`. Active identity coverage changes
+`334,522 -> 334,385` (`-0.041%`) and `416,242 -> 416,001` (`-0.058%`) as the
+exposed backing disappears. The original rear-starboard `(2.36,-0.24)` and
+low rear-port `(-2.42,-0.36)` qualification views also remain exact at
+`45/29/4` and `52/39/4`, and a steep underside `(2.65,-0.88)` stress view
+remains exact at `25/11/9`. This qualifies hidden simulated backing and raster
+continuity, not perceptual realism.
+
 The canonical README sequence is fully simulated and contains the native hold,
-transition, and flight path: `800 x 450`, `72` frames at `24 fps`, `8,186,513`
+transition, and flight path: `800 x 450`, `72` frames at `24 fps`, `8,149,257`
 bytes, SHA-256
-`0341b533039a289f8f45f88dff94a0a79c69ffbab669d7bbdc89a735cf78355b`.
+`45c404247bc06ba8d44ffc616dc2f65e70cfd54e1c5a2c2ebb81c9d3a4f47d20`.
 
 Run the presentation with:
 
