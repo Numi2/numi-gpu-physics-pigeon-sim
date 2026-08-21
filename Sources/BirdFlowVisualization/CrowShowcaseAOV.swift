@@ -56,6 +56,8 @@ struct CrowShowcaseFrame {
     var supportYTotal: Float = 0
     var supportPixelCount = 0
     var featherHashes: Set<UInt32> = []
+    var persistentFeatherVisiblePixels: [SIMD4<UInt32>: Int] = [:]
+    var persistentFeatherFullyCoveredPixels: [SIMD4<UInt32>: Int] = [:]
     var visibleFeatherClassPixelCounts = [Int](repeating: 0, count: 32)
     var fullyCoveredFeatherClassPixelCounts = [Int](repeating: 0, count: 32)
     var birdMask = [Bool](repeating: false, count: pixelCount)
@@ -97,6 +99,9 @@ struct CrowShowcaseFrame {
         let featherClass = Int(min(id3 & 255, 31))
         visibleFeatherClassPixelCounts[featherClass] += 1
         if id0 != UInt32.max { featherHashes.insert(id1) }
+        if id0 != UInt32.max && (1...3).contains(id3 & 255) {
+          persistentFeatherVisiblePixels[SIMD4(id0, id1, id2, id3), default: 0] += 1
+        }
         if id0 == UInt32.max && id2 == 6 {
           supportYTotal += Float(pixel / width)
           supportPixelCount += 1
@@ -116,6 +121,10 @@ struct CrowShowcaseFrame {
         fullyCoveredActiveIdentityPixelCount += 1
         let featherClass = Int(min(id3 & 255, 31))
         fullyCoveredFeatherClassPixelCounts[featherClass] += 1
+        if id0 != UInt32.max && (1...3).contains(id3 & 255) {
+          persistentFeatherFullyCoveredPixels[SIMD4(id0, id1, id2, id3), default: 0]
+            += 1
+        }
       }
       let speed = hypot(motionX, motionY)
       maximumMotionPixels = max(maximumMotionPixels, speed)
@@ -155,6 +164,20 @@ struct CrowShowcaseFrame {
         referenceIdentity: $0.identityTexture
       )
     }
+    let persistentFeatherIdentities = persistentFeatherVisiblePixels.map {
+      identity, visiblePixelCount in
+      CrowPersistentFeatherIdentityAudit(
+        featherIndex: identity.x,
+        stableIdentifierHash: identity.y,
+        physicsSurfacePartIdentifier: identity.z,
+        packedIdentity: identity.w,
+        visiblePixelCount: visiblePixelCount,
+        fullyCoveredPixelCount: persistentFeatherFullyCoveredPixels[identity, default: 0]
+      )
+    }.sorted {
+      ($0.featherClass, $0.sideCode, $0.order, $0.stableIdentifierHash)
+        < ($1.featherClass, $1.sideCode, $1.order, $1.stableIdentifierHash)
+    }
     return CrowShowcaseAOVFrameAudit(
       frameIndex: frameIndex,
       width: width,
@@ -179,6 +202,7 @@ struct CrowShowcaseFrame {
       fullyCoveredAOVPixelCount: fullyCoveredAOVPixelCount,
       fullyCoveredActiveIdentityPixelCount: fullyCoveredActiveIdentityPixelCount,
       visibleFeatherIdentityCount: featherHashes.count,
+      persistentFeatherIdentities: persistentFeatherIdentities,
       visibleFeatherClassPixelCounts: visibleFeatherClassPixelCounts,
       fullyCoveredFeatherClassPixelCounts: fullyCoveredFeatherClassPixelCounts,
       enclosedBirdSilhouetteHolePixelCount: silhouetteHoles.pixelCount,
@@ -701,6 +725,10 @@ struct CrowShowcaseAOVFrameAudit: Codable, Equatable {
   let fullyCoveredAOVPixelCount: Int
   let fullyCoveredActiveIdentityPixelCount: Int
   let visibleFeatherIdentityCount: Int
+  /// Exact visible-pixel census for the 54 persistent primary, secondary, and
+  /// rectrix identities. Procedural surface primitives retain separate AOV
+  /// ownership and are intentionally excluded.
+  let persistentFeatherIdentities: [CrowPersistentFeatherIdentityAudit]
   /// Exact visible identity-AOV pixels binned by the low five class bits.
   let visibleFeatherClassPixelCounts: [Int]
   /// The same 32-bin census restricted to full geometric sample coverage.
@@ -737,6 +765,20 @@ struct CrowShowcaseAOVFrameAudit: Codable, Equatable {
   let nativeForegroundGradientEnergyRatio: Float?
 }
 
+struct CrowPersistentFeatherIdentityAudit: Codable, Equatable {
+  let featherIndex: UInt32
+  let stableIdentifierHash: UInt32
+  let physicsSurfacePartIdentifier: UInt32
+  let packedIdentity: UInt32
+  let visiblePixelCount: Int
+  let fullyCoveredPixelCount: Int
+
+  var featherClass: UInt32 { packedIdentity & 255 }
+  var sideCode: UInt32 { (packedIdentity >> 8) & 255 }
+  var order: UInt32 { (packedIdentity >> 16) & 255 }
+  var count: UInt32 { (packedIdentity >> 24) & 255 }
+}
+
 struct CrowShowcaseAOVAuditReport: Codable, Equatable {
   let schemaVersion: Int
   let colorSpace: String
@@ -746,7 +788,7 @@ struct CrowShowcaseAOVAuditReport: Codable, Equatable {
   let frames: [CrowShowcaseAOVFrameAudit]
 
   init(frames: [CrowShowcaseAOVFrameAudit]) {
-    schemaVersion = 7
+    schemaVersion = 8
     colorSpace = "scene-linear extended range; display output is tone mapped separately"
     motionConvention =
       "current pixel to previous pixel in upper-left-origin pixel units; MetalFX scale 1"

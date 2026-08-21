@@ -157,6 +157,15 @@ wingbeat presentation. Independent Swift parity checks cover the retained GPU
 state at four phases. This is a continuity and coverage result, not measured
 rectrix deployment kinematics.
 
+The overlap-expanded terminal primary on each side now transfers to the live
+wing over transition progress `0.08...0.28`; the remaining folded remiges keep
+their `0.08...0.62` visibility schedule. This removes a redundant retained
+blade while the same pointed primary is already represented by the opening
+topology-bound wing. It does not blunt primary tips, change standing geometry,
+or alter the rectrix deployment. Crow AOV schema `8` carries exact visible and
+fully covered pixels per persistent feather identity so this ownership boundary
+can be traced without inferring identity from a beauty image.
+
 The retained rectrix surface now preserves a narrow `13-16%` width envelope
 over its terminal `16%` of length. Lateral vane vertices retreat quadratically
 by at most `1.0-1.4%` of length while the rachis centerline retains the exact

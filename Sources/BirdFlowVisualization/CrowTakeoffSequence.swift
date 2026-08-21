@@ -35,6 +35,9 @@ enum CrowTakeoffSequence {
   /// These values mirror `blendCrowTakeoffFeatherRoots` in Metal.
   static let retainedFeatherHandoffStartProgress: Float = 0.08
   static let retainedFeatherHandoffEndProgress: Float = 0.62
+  /// The enlarged terminal primary transfers first so its folded overlap vane
+  /// cannot remain as a second spear beside the opening live-wing sheet.
+  static let terminalPrimaryRetainedEndProgress: Float = 0.28
   /// The folded live-wing sheet stays broad over the flank, then converges
   /// smoothly into the retained primary/rectrix stack instead of ending as a
   /// pair of constant-width topology blades.
@@ -136,6 +139,32 @@ enum CrowTakeoffSequence {
       1
     )
     return normalized * normalized * (3 - 2 * normalized)
+  }
+
+  /// Identity-specific visibility for the folded primary/secondary oracle.
+  /// The terminal primary is deliberately released ahead of the other remiges
+  /// because its overlap-expanded vane is already represented by the opening
+  /// topology-bound wing. Rectrix visibility is never controlled here.
+  static func retainedRemexVisibility(
+    featherClass: UInt32,
+    order: Int,
+    count: Int,
+    transitionProgress: Float
+  ) -> Float {
+    let isTerminalPrimary = featherClass == 1 && count > 0 && order == count - 1
+    let end = isTerminalPrimary
+      ? terminalPrimaryRetainedEndProgress
+      : retainedFeatherHandoffEndProgress
+    let normalized = min(
+      max(
+        (transitionProgress - retainedFeatherHandoffStartProgress)
+          / (end - retainedFeatherHandoffStartProgress),
+        0
+      ),
+      1
+    )
+    let deployment = normalized * normalized * (3 - 2 * normalized)
+    return 1 - deployment
   }
 
   /// Topology-stable target for one retained rectrix during takeoff.

@@ -371,6 +371,16 @@ rectrix terminals change worst enclosed-hole counts only `38 -> 39`, `42 ->
 normals within `1e-5`; these gates establish implementation parity and raster
 continuity, not measured American-crow terminal morphology.
 
+Three additional lateral/rear cameras traced the early deployment comb by
+stable identity rather than silhouette alone. At the stressed frame, the two
+terminal primary `9/10` records account for `593`, `8,633`, and `1,913` visible
+pixels. Their identity-specific retained visibility now ends at progress
+`0.28`, ahead of the generic remex endpoint `0.62`, reducing those counts to
+`206`, `1,122`, and `126`. Across the same complete 17-frame sequences, hole
+pixels/components/largest component remain exactly `152/73/46`, `143/71/17`,
+and `53/33/3`. The pointed topology-bound live primaries remain unchanged;
+only the duplicate folded presentation oracle transfers earlier.
+
 The deployed chord-`3` live covert course now settles its proximal camber and
 dorsal clearance to `48%` at the root, recovering to full relief across `12`
 span stations while the folded hold, vane width, chord, and every feather

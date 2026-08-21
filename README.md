@@ -109,8 +109,8 @@ two upright blades above the tail from overhead views. Three new 17-frame
 left-high, overhead, and right-high probes remove those outer blades, reduce
 aggregate enclosed pixels from `1,019` to `1,010`, preserve zero expected
 apertures, and leave the separate `156`-pixel near-vertical component unchanged.
-Identity-class tracing resolves that component
-as a view-specific cranial-to-pedal projection aperture: it touches head,
+Identity-class tracing resolves that component as a view-specific
+cranial-to-pedal projection aperture: it touches head,
 throat, body-feather, and foot classes but no femoral/crural class, and it
 disappears under small yaw/pitch changes. Filling it with torso geometry would
 therefore be anatomically incorrect. This is estimated presentation geometry,
@@ -123,6 +123,16 @@ the same profile on the persistent template; three steep 17-frame A/B probes
 changed worst enclosed-hole counts only `38 -> 39`, `42 -> 41`, and
 `291 -> 291` pixels. These are bounded simulated morphology and raster checks,
 not measured American-crow tip dimensions.
+The exact identity AOV now also reports visible and fully covered pixels for
+every persistent primary, secondary, and rectrix as schema `8`. That census
+traced the early takeoff double-spear to the overlap-expanded terminal primary
+on each side, not to generic primary-tip anatomy. Those two folded oracles now
+transfer over progress `0.08...0.28`; all other remiges retain the existing
+`0.08...0.62` handoff, and topology-bound live primaries stay pointed. At the
+stressed frame, terminal-primary visibility falls `593 -> 206`, `8,633 ->
+1,122`, and `1,913 -> 126` pixels across three new lateral/rear views while
+their complete hole pixel/component/largest-component metrics remain exact.
+This is an estimated presentation ownership schedule, not measured deployment.
 The middle live covert course also retains its full folded relief, then seats
 its deployed root camber and clearance to `48%` across the first `12` span
 stations; vane width, chord, identity, and the caudal handoff remain unchanged.

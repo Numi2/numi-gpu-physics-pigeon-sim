@@ -456,6 +456,21 @@ inline float crowLiveRectrixDeploymentWeight(float transitionProgress) {
     return normalized*normalized*(3.0f-2.0f*normalized);
 }
 
+inline float crowRetainedRemexVisibility(
+    uint packedIdentity,
+    float transitionProgress) {
+    uint featherClass=packedIdentity&255u;
+    uint order=(packedIdentity>>16u)&255u;
+    uint count=max((packedIdentity>>24u)&255u,1u);
+    bool isTerminalPrimary=featherClass==1u&&order+1u==count;
+    float endProgress=isTerminalPrimary?0.28f:0.62f;
+    float normalized=clamp(
+        (transitionProgress-0.08f)/(endProgress-0.08f),0.0f,1.0f
+    );
+    float deployment=normalized*normalized*(3.0f-2.0f*normalized);
+    return 1.0f-deployment;
+}
+
 struct CrowTakeoffRectrixPose {
     float3 rootOffset;
     float3 direction;
@@ -542,8 +557,6 @@ kernel void blendCrowTakeoffFeatherRoots(
     CrowFeatherRootStateGPU grounded=standing[featherIndex];
     float currentBlend=uniforms.blendAndCount.x;
     float previousBlend=uniforms.blendAndCount.y;
-    float currentFoldedVisibility=1.0f-smoothstep(0.08f,0.62f,currentBlend);
-    float previousFoldedVisibility=1.0f-smoothstep(0.08f,0.62f,previousBlend);
     uint packedIdentity=grounded.identity.w;
     uint featherClass=packedIdentity&255u;
     if(featherClass==3u){
@@ -580,6 +593,12 @@ kernel void blendCrowTakeoffFeatherRoots(
         output[featherIndex]=state;
         return;
     }
+    float currentFoldedVisibility=crowRetainedRemexVisibility(
+        packedIdentity,currentBlend
+    );
+    float previousFoldedVisibility=crowRetainedRemexVisibility(
+        packedIdentity,previousBlend
+    );
     uint sideCode=(packedIdentity>>8u)&255u;
     float side=sideCode==1u?1.0f:(sideCode==2u?-1.0f:0.0f);
     float inverseLength=1.0f/max(grounded.currentPositionAndLength.w,1.0e-6f);

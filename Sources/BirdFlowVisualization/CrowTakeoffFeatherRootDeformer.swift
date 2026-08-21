@@ -177,14 +177,20 @@ final class CrowTakeoffFeatherRootDeformer: CrowFeatherRootDeforming {
       )
     }
 
-    let currentFoldedVisibility = 1 - CrowTakeoffSequence
-      .liveRectrixDeploymentWeight(
-        transitionProgress: current.transitionProgress
-      )
-    let previousFoldedVisibility = 1 - CrowTakeoffSequence
-      .liveRectrixDeploymentWeight(
-        transitionProgress: previous.transitionProgress
-      )
+    let order = Int((packedIdentity >> 16) & 255)
+    let count = max(Int((packedIdentity >> 24) & 255), 1)
+    let currentFoldedVisibility = CrowTakeoffSequence.retainedRemexVisibility(
+      featherClass: featherClass,
+      order: order,
+      count: count,
+      transitionProgress: current.transitionProgress
+    )
+    let previousFoldedVisibility = CrowTakeoffSequence.retainedRemexVisibility(
+      featherClass: featherClass,
+      order: order,
+      count: count,
+      transitionProgress: previous.transitionProgress
+    )
     let sideCode = (packedIdentity >> 8) & 255
     let side: Float = sideCode == 1 ? 1 : (sideCode == 2 ? -1 : 0)
     let inverseLength = 1 / max(grounded.currentPositionAndLength.w, 1e-6)
@@ -195,8 +201,8 @@ final class CrowTakeoffFeatherRootDeformer: CrowFeatherRootDeforming {
           side * inverseLength
             * CrowTakeoffSequence.terminalPrimaryHandoffLateralOffsetMeters(
               featherClass: featherClass,
-              order: Int((packedIdentity >> 16) & 255),
-              count: max(Int((packedIdentity >> 24) & 255), 1),
+              order: order,
+              count: count,
               transitionProgress: current.transitionProgress
             ),
           0
@@ -210,8 +216,8 @@ final class CrowTakeoffFeatherRootDeformer: CrowFeatherRootDeforming {
           side * inverseLength
             * CrowTakeoffSequence.terminalPrimaryHandoffLateralOffsetMeters(
               featherClass: featherClass,
-              order: Int((packedIdentity >> 16) & 255),
-              count: max(Int((packedIdentity >> 24) & 255), 1),
+              order: order,
+              count: count,
               transitionProgress: previous.transitionProgress
             ),
           0
