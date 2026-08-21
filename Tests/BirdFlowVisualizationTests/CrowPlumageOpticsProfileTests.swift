@@ -1,5 +1,7 @@
 import Foundation
+import Metal
 import Testing
+import simd
 
 @testable import BirdFlowVisualization
 
@@ -67,4 +69,78 @@ func crowPlumageOpticsProfileRejectsInventedRawData() throws {
   #expect(throws: CrowPlumageOpticsProfileError.self) {
     _ = try CrowPlumageOpticsProfile.load(url: temporaryURL)
   }
+}
+
+@Test("crow film optics matches polarized complex Airy reference cases")
+func crowThinFilmOpticsMatchesReferenceCases() throws {
+  guard let device = MTLCreateSystemDefaultDevice() else { return }
+  let backend = try VisualizationBackend(device: device)
+  let pipeline = try backend.compute("probeCrowThinFilmOptics")
+
+  // wavelength nm, cosine from the microfacet normal, thickness nm, reserved.
+  let inputs: [SIMD4<Float>] = [
+    SIMD4<Float>(400, 1.00, 160, 0),
+    SIMD4<Float>(520, 1.00, 160, 0),
+    SIMD4<Float>(520, 0.75, 160, 0),
+    SIMD4<Float>(680, 0.25, 160, 0),
+    SIMD4<Float>(400, 0.05, 160, 0),
+  ]
+  // Independent FP64 evaluation of OpenPBR equations 112-118 using the
+  // profile's complex keratin and melanin indices. Components are Rs, Rp, R.
+  let expected: [SIMD3<Float>] = [
+    SIMD3<Float>(0.03150801, 0.03150801, 0.03150801),
+    SIMD3<Float>(0.13996549, 0.13996549, 0.13996549),
+    SIMD3<Float>(0.22733259, 0.07402370, 0.15067815),
+    SIMD3<Float>(0.39137994, 0.13279829, 0.26208910),
+    SIMD3<Float>(0.89969766, 0.62692965, 0.76331365),
+  ]
+  var complexIndices = SIMD4<Float>(1.56, 0.03, 2.0, 0.6)
+  let inputBuffer = try backend.buffer(
+    length: MemoryLayout<SIMD4<Float>>.stride * inputs.count,
+    shared: true
+  )
+  _ = inputs.withUnsafeBytes { bytes in
+    memcpy(inputBuffer.contents(), bytes.baseAddress!, bytes.count)
+  }
+  let indexBuffer = try backend.buffer(
+    length: MemoryLayout<SIMD4<Float>>.stride,
+    shared: true
+  )
+  _ = withUnsafeBytes(of: &complexIndices) { bytes in
+    memcpy(indexBuffer.contents(), bytes.baseAddress!, bytes.count)
+  }
+  let outputBuffer = try backend.buffer(
+    length: MemoryLayout<SIMD4<Float>>.stride * inputs.count,
+    shared: true
+  )
+
+  guard let commandBuffer = backend.queue.makeCommandBuffer(),
+    let encoder = commandBuffer.makeComputeCommandEncoder()
+  else {
+    Issue.record("unable to allocate crow thin-film probe command")
+    return
+  }
+  encoder.setBuffer(inputBuffer, offset: 0, index: 0)
+  encoder.setBuffer(indexBuffer, offset: 0, index: 1)
+  encoder.setBuffer(outputBuffer, offset: 0, index: 2)
+  backend.dispatch1D(encoder, pipeline: pipeline, count: inputs.count)
+  encoder.endEncoding()
+  commandBuffer.commit()
+  commandBuffer.waitUntilCompleted()
+  #expect(commandBuffer.status == .completed)
+
+  let pointer = outputBuffer.contents().bindMemory(
+    to: SIMD4<Float>.self,
+    capacity: inputs.count
+  )
+  let actual = Array(UnsafeBufferPointer(start: pointer, count: inputs.count))
+  for (measured, reference) in zip(actual, expected) {
+    let result = SIMD3<Float>(measured.x, measured.y, measured.z)
+    #expect(simd_length(result - reference) < 2e-4)
+    #expect(min(result.x, min(result.y, result.z)) >= 0)
+    #expect(max(result.x, max(result.y, result.z)) <= 1)
+    #expect(abs(measured.z - 0.5 * (measured.x + measured.y)) < 2e-6)
+  }
+  #expect(abs(actual[0].x - actual[0].y) < 2e-6)
+  #expect(abs(actual[1].x - actual[1].y) < 2e-6)
 }

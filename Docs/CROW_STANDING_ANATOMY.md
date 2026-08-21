@@ -221,9 +221,10 @@ normalized CIE 1931/linear-sRGB quadrature weights, so a flat spectrum remains
 neutral. The versioned optics profile keeps two evidence classes explicit.
 Published comparative constraints supply complex keratin `1.56 - 0.03i` and
 melanin `2.00 - 0.60i` indices plus a glossy-cortex `110...180 nm` interval;
-the live shader uses them in a normal-incidence air/keratin/melanin transfer
-matrix. Renderer estimates separately set a `160 +/- 18 nm` feather-local
-thickness field, `0.08` coherent-film blend, eumelanin extinction
+the live shader uses them with complex Snell refraction, separate s/p Fresnel
+amplitudes, and an Airy internal-reflection sum at the key-light half-vector.
+Renderer estimates separately set a `160 +/- 18 nm` feather-local thickness
+field, `0.08` coherent-film blend, eumelanin extinction
 `1.32...0.88`, density `1.62...1.84`, and cortex scale `0.92...1.04`. Existing
 barb-bank lobes still determine direction. This removes the former view-phase
 interpolation between chosen blue and violet RGB endpoints. Maia et al.
@@ -241,6 +242,28 @@ profile-driven transfer-matrix path (`+0.99%`). All non-appearance AOV fields
 remained exact. Across inspected still, transition, and flight frames,
 changed-pixel display-RGB chroma fell by `2.76%`, `2.82%`, and `2.86%`; this is
 a renderer comparison, not a match to real-crow imagery.
+
+The next angular-film pass replaces that normal-incidence film term without
+changing the profile estimates. A Metal compute probe matches five independent
+FP64 reference cases from normal incidence through cosine `0.05`, including
+separate s/p powers and their unpolarized mean. The implementation follows the
+complex Snell/Fresnel/Airy construction collected in the
+[OpenPBR implementation notes](https://blog.selfshadow.com/publications/s2025-shading-course/openpbr/s2025_pbs_openpbr_notes_v1.3.pdf),
+building on the microfacet thin-film treatment of
+[Belcour and Barla 2017](https://belcour.github.io/blog/research/publication/2017/05/01/brdf-thin-film.html).
+At a previously unused low
+front-port camera `(-0.82,-0.62)`, four alternating nine-frame captures measure
+pooled post-warm-up medians of `13.533 ms` for the normal-incidence film and
+`13.888 ms` for the complex angular Airy path (`+2.62%`; pooled mean overhead
+`+2.06%`). In inspected still, transition, and flight anchors, changed-pixel
+display-RGB chroma increases by `4.39%`, `4.30%`, and `4.46%`; mean per-channel
+changes remain below one display code and no isolated colored patch appears.
+This is a physically motivated renderer delta, not target-image agreement.
+Geometry and all non-appearance AOV fields remain exact at the fresh camera.
+The five established 17-frame safety views likewise differ only in
+feather-class luminance and GPU duration; their hole, component, expected
+aperture, identity, depth, normal, motion, support, and coverage fields remain
+exact.
 
 Five established 17-frame safety views were also rerendered at `1280 x 720`:
 elevated-port `(-2.92,0.52)`, low-starboard `(2.94,-0.18)`, rear-port
@@ -735,9 +758,9 @@ safety views. These are deterministic optical-coherence checks, not a claim of
 measured American-crow reflectance or perceptual realism.
 
 The canonical README sequence is fully simulated and contains the native hold,
-transition, and flight path: `800 x 450`, `72` frames at `24 fps`, `7,926,879`
+transition, and flight path: `800 x 450`, `72` frames at `24 fps`, `8,051,010`
 bytes, SHA-256
-`1bc0355d6cc4d978452be5c929a1c68f78eeff956d265c43aea1b04a10983b09`.
+`d091018c9db468810097999e3373b9c7ff31e210e64385029a037c88c32858e0`.
 
 Run the presentation with:
 

@@ -2325,38 +2325,222 @@ inline float2 crowComplexDivide(float2 numerator,float2 denominator) {
     );
 }
 
-/// Normal-incidence air/keratin/melanin transfer-matrix upper bound used by
-/// the source paper. Positive imaginary components are extinction magnitudes;
-/// the round trip therefore decays rather than amplifies inside the cortex.
-inline float crowThinFilmReflectanceAtWavelength(
+inline float2 crowComplexSquareRoot(float2 value) {
+    float magnitude=length(value);
+    float realPart=sqrt(max(0.0f,0.5f*(magnitude+value.x)));
+    float imaginaryMagnitude=sqrt(max(0.0f,0.5f*(magnitude-value.x)));
+    float imaginaryPart=copysign(imaginaryMagnitude,value.y);
+    return float2(realPart,imaginaryPart);
+}
+
+inline float2 crowForwardTransmittedCosine(
+    float2 transmittedSine,
+    float2 mediumIndex) {
+    float2 transmittedCosine=crowComplexSquareRoot(
+        float2(1.0f,0.0f)
+            -crowComplexMultiply(transmittedSine,transmittedSine)
+    );
+    // Choose the square-root branch whose transmitted wave decays into an
+    // absorbing medium rather than growing away from the interface.
+    if(crowComplexMultiply(mediumIndex,transmittedCosine).y<0.0f){
+        transmittedCosine=-transmittedCosine;
+    }
+    return transmittedCosine;
+}
+
+inline float2 crowComplexExponentialI(float2 phase) {
+    float attenuation=exp(clamp(-phase.y,-80.0f,0.0f));
+    return attenuation*float2(cos(phase.x),sin(phase.x));
+}
+
+inline float2 crowFresnelReflectionS(
+    float2 incidentIndex,
+    float2 transmittedIndex,
+    float2 incidentCosine,
+    float2 transmittedCosine) {
+    float2 incidentAdmittance=crowComplexMultiply(
+        incidentIndex,incidentCosine
+    );
+    float2 transmittedAdmittance=crowComplexMultiply(
+        transmittedIndex,transmittedCosine
+    );
+    return crowComplexDivide(
+        incidentAdmittance-transmittedAdmittance,
+        incidentAdmittance+transmittedAdmittance
+    );
+}
+
+inline float2 crowFresnelTransmissionS(
+    float2 incidentIndex,
+    float2 transmittedIndex,
+    float2 incidentCosine,
+    float2 transmittedCosine) {
+    float2 incidentAdmittance=crowComplexMultiply(
+        incidentIndex,incidentCosine
+    );
+    float2 transmittedAdmittance=crowComplexMultiply(
+        transmittedIndex,transmittedCosine
+    );
+    return crowComplexDivide(
+        2.0f*incidentAdmittance,
+        incidentAdmittance+transmittedAdmittance
+    );
+}
+
+inline float2 crowFresnelReflectionP(
+    float2 incidentIndex,
+    float2 transmittedIndex,
+    float2 incidentCosine,
+    float2 transmittedCosine) {
+    float2 transmittedIncident=crowComplexMultiply(
+        transmittedIndex,incidentCosine
+    );
+    float2 incidentTransmitted=crowComplexMultiply(
+        incidentIndex,transmittedCosine
+    );
+    return crowComplexDivide(
+        transmittedIncident-incidentTransmitted,
+        transmittedIncident+incidentTransmitted
+    );
+}
+
+inline float2 crowFresnelTransmissionP(
+    float2 incidentIndex,
+    float2 transmittedIndex,
+    float2 incidentCosine,
+    float2 transmittedCosine) {
+    float2 denominator=crowComplexMultiply(
+        transmittedIndex,incidentCosine
+    )+crowComplexMultiply(incidentIndex,transmittedCosine);
+    return crowComplexDivide(
+        2.0f*crowComplexMultiply(incidentIndex,incidentCosine),
+        denominator
+    );
+}
+
+inline float2 crowAiryReflectionAmplitude(
+    float2 directReflection,
+    float2 directTransmission,
+    float2 substrateReflection,
+    float2 reverseTransmission,
+    float2 roundTripPhase) {
+    float2 internalReflection=crowComplexMultiply(
+        crowComplexMultiply(
+            crowComplexMultiply(directTransmission,substrateReflection),
+            reverseTransmission
+        ),
+        roundTripPhase
+    );
+    float2 reverseReflection=-directReflection;
+    float2 denominator=float2(1.0f,0.0f)-crowComplexMultiply(
+        crowComplexMultiply(reverseReflection,substrateReflection),
+        roundTripPhase
+    );
+    return directReflection+crowComplexDivide(
+        internalReflection,denominator
+    );
+}
+
+/// Per-light-path air/keratin/melanin Airy reflectance. Complex Snell angles,
+/// s/p Fresnel amplitudes, and the complete internal-reflection series keep
+/// the film response physical away from normal incidence. Positive imaginary
+/// indices are extinction magnitudes, so the round trip decays in the cortex.
+inline float2 crowThinFilmPolarizedReflectanceAtWavelength(
     float wavelengthNanometers,
     float cortexThicknessNanometers,
+    float interfaceCosine,
     float4 complexIndices) {
     float2 airIndex=float2(1.0f,0.0f);
     float2 keratinIndex=complexIndices.xy;
     float2 melaninIndex=complexIndices.zw;
-    float2 airKeratin=crowComplexDivide(
-        airIndex-keratinIndex,airIndex+keratinIndex
+    float incidentCosine=max(saturate(interfaceCosine),1.0e-4f);
+    float incidentSine=sqrt(max(0.0f,1.0f-incidentCosine*incidentCosine));
+    float2 airCosine=float2(incidentCosine,0.0f);
+    float2 keratinSine=crowComplexDivide(
+        incidentSine*airIndex,keratinIndex
     );
-    float2 keratinMelanin=crowComplexDivide(
-        keratinIndex-melaninIndex,keratinIndex+melaninIndex
+    float2 melaninSine=crowComplexDivide(
+        incidentSine*airIndex,melaninIndex
     );
-    float roundTripReal=4.0f*M_PI_F*keratinIndex.x
-        *cortexThicknessNanometers/wavelengthNanometers;
-    float roundTripAttenuation=exp(
-        -4.0f*M_PI_F*keratinIndex.y
-            *cortexThicknessNanometers/wavelengthNanometers
+    float2 keratinCosine=crowForwardTransmittedCosine(
+        keratinSine,keratinIndex
     );
-    float2 roundTrip=roundTripAttenuation
-        *float2(cos(roundTripReal),sin(roundTripReal));
-    float2 reflectedSubstrate=crowComplexMultiply(
-        keratinMelanin,roundTrip
+    float2 melaninCosine=crowForwardTransmittedCosine(
+        melaninSine,melaninIndex
     );
-    float2 numerator=airKeratin+reflectedSubstrate;
-    float2 denominator=float2(1.0f,0.0f)
-        +crowComplexMultiply(airKeratin,reflectedSubstrate);
-    float2 amplitude=crowComplexDivide(numerator,denominator);
-    return saturate(dot(amplitude,amplitude));
+
+    float2 airKeratinReflectionS=crowFresnelReflectionS(
+        airIndex,keratinIndex,airCosine,keratinCosine
+    );
+    float2 airKeratinTransmissionS=crowFresnelTransmissionS(
+        airIndex,keratinIndex,airCosine,keratinCosine
+    );
+    float2 keratinMelaninReflectionS=crowFresnelReflectionS(
+        keratinIndex,melaninIndex,keratinCosine,melaninCosine
+    );
+    float2 airKeratinReflectionP=crowFresnelReflectionP(
+        airIndex,keratinIndex,airCosine,keratinCosine
+    );
+    float2 airKeratinTransmissionP=crowFresnelTransmissionP(
+        airIndex,keratinIndex,airCosine,keratinCosine
+    );
+    float2 keratinMelaninReflectionP=crowFresnelReflectionP(
+        keratinIndex,melaninIndex,keratinCosine,melaninCosine
+    );
+
+    float2 reverseTransmissionRatio=crowComplexDivide(
+        crowComplexMultiply(keratinIndex,keratinCosine),
+        crowComplexMultiply(airIndex,airCosine)
+    );
+    float2 reverseTransmissionS=crowComplexMultiply(
+        airKeratinTransmissionS,reverseTransmissionRatio
+    );
+    float2 reverseTransmissionP=crowComplexMultiply(
+        airKeratinTransmissionP,reverseTransmissionRatio
+    );
+    float roundTripScale=4.0f*M_PI_F*cortexThicknessNanometers
+        /wavelengthNanometers;
+    float2 roundTripPhase=crowComplexExponentialI(
+        roundTripScale*crowComplexMultiply(keratinIndex,keratinCosine)
+    );
+    float2 totalReflectionS=crowAiryReflectionAmplitude(
+        airKeratinReflectionS,airKeratinTransmissionS,
+        keratinMelaninReflectionS,reverseTransmissionS,roundTripPhase
+    );
+    float2 totalReflectionP=crowAiryReflectionAmplitude(
+        airKeratinReflectionP,airKeratinTransmissionP,
+        keratinMelaninReflectionP,reverseTransmissionP,roundTripPhase
+    );
+    return saturate(float2(
+        dot(totalReflectionS,totalReflectionS),
+        dot(totalReflectionP,totalReflectionP)
+    ));
+}
+
+inline float crowThinFilmReflectanceAtWavelength(
+    float wavelengthNanometers,
+    float cortexThicknessNanometers,
+    float interfaceCosine,
+    float4 complexIndices) {
+    float2 polarized=crowThinFilmPolarizedReflectanceAtWavelength(
+        wavelengthNanometers,cortexThicknessNanometers,interfaceCosine,
+        complexIndices
+    );
+    return 0.5f*(polarized.x+polarized.y);
+}
+
+kernel void probeCrowThinFilmOptics(
+    device const float4* inputs [[buffer(0)]],
+    constant float4& complexIndices [[buffer(1)]],
+    device float4* outputs [[buffer(2)]],
+    uint index [[thread_position_in_grid]]) {
+    float4 input=inputs[index];
+    float2 polarized=crowThinFilmPolarizedReflectanceAtWavelength(
+        input.x,input.z,input.y,complexIndices
+    );
+    outputs[index]=float4(
+        polarized,0.5f*(polarized.x+polarized.y),0.0f
+    );
 }
 
 inline float crowGlossyBlackReflectanceAtWavelength(
@@ -2384,7 +2568,7 @@ inline float crowGlossyBlackReflectanceAtWavelength(
     float dielectricInterfaceReflectance=interfaceF0
         +(1.0f-interfaceF0)*pow(oneMinusCosine,5.0f);
     float idealThinFilmReflectance=crowThinFilmReflectanceAtWavelength(
-        wavelengthNanometers,cortexThicknessNanometers,
+        wavelengthNanometers,cortexThicknessNanometers,interfaceCosine,
         plumageComplexIndices
     );
     float interfaceReflectance=mix(

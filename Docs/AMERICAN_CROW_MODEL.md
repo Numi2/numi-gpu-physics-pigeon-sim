@@ -334,11 +334,14 @@ then projects a keratin-film/eumelanin-volume response to linear sRGB with
 equal-energy-normalized CIE 1931 weights. The versioned
 `american-crow-plumage-optics-estimated-v1.json` profile keeps published
 comparative-corvid constraints separate from renderer estimates. Its live
-normal-incidence air/keratin/melanin transfer matrix uses the published complex
-indices and `110...180 nm` glossy-cortex interval; the `160 +/- 18 nm` local
-thickness field, `0.08` coherence blend, and volume parameters remain bounded
-simulation choices. This replaces a direct blue/violet RGB blend, but it is
-not a measured American-crow spectrum, measured angular BSDF, calibrated
+air/keratin/melanin solver uses complex Snell refraction, separate s/p Fresnel
+amplitudes, and an Airy internal-reflection sum at the key-light half-vector.
+The published complex indices and `110...180 nm` glossy-cortex interval remain
+inputs; the `160 +/- 18 nm` local thickness field, `0.08` coherence blend, and
+volume parameters remain bounded simulation choices. An on-GPU probe locks
+normal, oblique, and grazing cases to independent FP64 evaluations of the
+angular equations. This replaces a direct blue/violet RGB blend, but it is not
+a measured American-crow spectrum, measured angular BSDF, calibrated
 illumination path, or ultraviolet model. The native result is an executable
 motion and material estimate, not a photograph.
 Before display tone mapping, the same pass emits a scene-linear HDR image and

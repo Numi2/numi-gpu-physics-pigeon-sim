@@ -148,16 +148,21 @@ inventory or view-dependent patch geometry.
    broadband eumelanin absorption and a final normalized CIE 1931/linear-sRGB
    projection. A versioned profile separates Maia et al.'s comparative
    glossy-corvid constraints from renderer-only estimates, and the live shader
-   evaluates an air/keratin/melanin transfer-matrix upper bound using the
-   published complex refractive indices and `110...180 nm` cortex interval.
+   evaluates complex Snell refraction, polarized Fresnel amplitudes, and an Airy
+   internal-reflection sum using the published complex refractive indices and
+   `110...180 nm` cortex interval. The key-light path is now angular rather than
+   reusing a normal-incidence upper bound; an on-GPU probe matches independent
+   FP64 normal-through-grazing reference cases.
    Its bounded loop and tables are deliberately replaceable by denser samples
    on future GPUs. The local thickness variation, coherence blend, volume
    return, and target-species mapping remain estimates: this is a
    wavelength-domain deterministic fallback, not a measured American-crow
    BSDF. The next material milestone is same-specimen American-crow
    gonioreflectance and cortex microscopy under measured illumination, followed
-   by a fitted angular cortex/medulla/transmission model rather than further
-   hand-tuning.
+   by a fitted angular cortex/medulla/transmission model. Before that data
+   exists, extend the same spectral evaluation to every explicit light path and
+   add barb/barbule projected-area masking; do not substitute further hand
+   tuning for either measurement or geometry-aware visibility.
 
 4. **Physical light transport.** Add image-based lighting, multiple scattering,
    soft self-shadowing, and curve/triangle ray geometry. Metal supports curve
