@@ -231,6 +231,7 @@ struct CrowShowcaseFrame {
       birdMask: birdMask,
       featherClassCodes: featherClassCodes,
       surfacePrimitiveIdentifiers: surfacePrimitiveIdentifiers,
+      packedSurfaceIdentities: packedSurfaceIdentities,
       width: width,
       height: height
     )
@@ -361,6 +362,8 @@ struct CrowShowcaseFrame {
         silhouetteHoles.adjacentFeatherClassMask,
       largestEnclosedBirdSilhouetteHoleAdjacentSurfacePrimitives:
         silhouetteHoles.adjacentSurfacePrimitives,
+      largestEnclosedBirdSilhouetteHoleAdjacentPackedIdentities:
+        silhouetteHoles.adjacentPackedIdentities,
       expectedLowerBodyAperturePixelCount:
         silhouetteHoles.expectedLowerBodyAperturePixelCount,
       expectedLowerBodyApertureComponentCount:
@@ -762,6 +765,7 @@ struct CrowShowcaseFrame {
     birdMask: [Bool],
     featherClassCodes: [UInt8] = [],
     surfacePrimitiveIdentifiers: [UInt32] = [],
+    packedSurfaceIdentities: [UInt32] = [],
     width: Int,
     height: Int
   ) -> CrowSilhouetteHoleAudit {
@@ -770,6 +774,10 @@ struct CrowShowcaseFrame {
     precondition(
       surfacePrimitiveIdentifiers.isEmpty
         || surfacePrimitiveIdentifiers.count == birdMask.count
+    )
+    precondition(
+      packedSurfaceIdentities.isEmpty
+        || packedSurfaceIdentities.count == birdMask.count
     )
     guard let silhouette = silhouetteExterior(
       birdMask: birdMask,
@@ -798,6 +806,7 @@ struct CrowShowcaseFrame {
     var largestAdjacentClassMask: UInt32 = 0
     var largestAdjacentSurfacePrimitives:
       [CrowSilhouetteSurfacePrimitiveReference] = []
+    var largestAdjacentPackedIdentities: [UInt32] = []
     for y in minimumY...maximumY {
       for x in minimumX...maximumX {
         let start = y * width + x
@@ -815,6 +824,7 @@ struct CrowShowcaseFrame {
         var adjacentClassMask: UInt32 = 0
         var adjacentSurfacePrimitives:
           Set<CrowSilhouetteSurfacePrimitiveReference> = []
+        var adjacentPackedIdentities: Set<UInt32> = []
         while componentHead < componentQueue.count {
           let pixel = componentQueue[componentHead]
           componentHead += 1
@@ -849,6 +859,12 @@ struct CrowShowcaseFrame {
                         featherClassCode: UInt8(classCode)
                       )
                     )
+                  }
+                }
+                if !packedSurfaceIdentities.isEmpty {
+                  let packedIdentity = packedSurfaceIdentities[neighbor]
+                  if packedIdentity != 0 {
+                    adjacentPackedIdentities.insert(packedIdentity)
                   }
                 }
                 continue
@@ -950,6 +966,9 @@ struct CrowShowcaseFrame {
                 : $0.identifier < $1.identifier
             }.prefix(16)
           )
+          largestAdjacentPackedIdentities = Array(
+            adjacentPackedIdentities.sorted().prefix(32)
+          )
         }
       }
     }
@@ -965,6 +984,7 @@ struct CrowShowcaseFrame {
       centroidY: largestCentroidY,
       adjacentFeatherClassMask: largestAdjacentClassMask,
       adjacentSurfacePrimitives: largestAdjacentSurfacePrimitives,
+      adjacentPackedIdentities: largestAdjacentPackedIdentities,
       expectedLowerBodyAperturePixelCount: apertureTotal,
       expectedLowerBodyApertureComponentCount: apertureComponents,
       largestExpectedLowerBodyAperturePixelCount: largestAperture
@@ -1045,6 +1065,7 @@ struct CrowSilhouetteHoleAudit: Equatable {
   let centroidY: Float
   let adjacentFeatherClassMask: UInt32
   let adjacentSurfacePrimitives: [CrowSilhouetteSurfacePrimitiveReference]
+  let adjacentPackedIdentities: [UInt32]
   let expectedLowerBodyAperturePixelCount: Int
   let expectedLowerBodyApertureComponentCount: Int
   let largestExpectedLowerBodyAperturePixelCount: Int
@@ -1061,6 +1082,7 @@ struct CrowSilhouetteHoleAudit: Equatable {
     centroidY: 0,
     adjacentFeatherClassMask: 0,
     adjacentSurfacePrimitives: [],
+    adjacentPackedIdentities: [],
     expectedLowerBodyAperturePixelCount: 0,
     expectedLowerBodyApertureComponentCount: 0,
     largestExpectedLowerBodyAperturePixelCount: 0
@@ -1149,6 +1171,10 @@ struct CrowShowcaseAOVFrameAudit: Codable, Equatable {
   let largestEnclosedBirdSilhouetteHoleAdjacentFeatherClassMask: UInt32
   let largestEnclosedBirdSilhouetteHoleAdjacentSurfacePrimitives:
     [CrowSilhouetteSurfacePrimitiveReference]
+  /// Sorted semantic identities touching the largest enclosed component. This
+  /// retains rank/order ownership for procedural feathers whose primitive ID
+  /// channel is intentionally zero.
+  let largestEnclosedBirdSilhouetteHoleAdjacentPackedIdentities: [UInt32]
   let expectedLowerBodyAperturePixelCount: Int
   let expectedLowerBodyApertureComponentCount: Int
   let largestExpectedLowerBodyAperturePixelCount: Int
@@ -1276,7 +1302,7 @@ struct CrowShowcaseAOVAuditReport: Codable, Equatable {
   let frames: [CrowShowcaseAOVFrameAudit]
 
   init(frames: [CrowShowcaseAOVFrameAudit]) {
-    schemaVersion = 11
+    schemaVersion = 12
     colorSpace = "scene-linear extended range; display output is tone mapped separately"
     motionConvention =
       "current pixel to previous pixel in upper-left-origin pixel units; MetalFX scale 1"

@@ -66,13 +66,16 @@ func silhouetteHoleAuditDistinguishesEnclosedAndExteriorBackground() {
   }
   let classCodes = closed.map { $0 ? UInt8(2) : UInt8(0) }
   let primitiveIdentifiers = closed.map { $0 ? UInt32(77) : UInt32(0) }
+  let packedIdentities = closed.map { $0 ? UInt32(0x1F02) : UInt32(0) }
   let enclosed = CrowShowcaseFrame.silhouetteHoles(
     birdMask: closed,
     featherClassCodes: classCodes,
     surfacePrimitiveIdentifiers: primitiveIdentifiers,
+    packedSurfaceIdentities: packedIdentities,
     width: width,
     height: height
   )
+  #expect(enclosed.adjacentPackedIdentities == [0x1F02])
   #expect(enclosed.pixelCount == 9)
   #expect(enclosed.componentCount == 1)
   #expect(enclosed.largestComponentPixelCount == 9)
