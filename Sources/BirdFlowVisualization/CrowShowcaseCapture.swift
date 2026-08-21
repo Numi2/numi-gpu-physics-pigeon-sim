@@ -2525,6 +2525,9 @@ private struct CrowMeshBuilder {
         0.016 * (1 + 0.04 * material),
         0.15 + 0.008 * material
       )
+      let transverseCamberRatio =
+        CrowVentralFeatherTracts.transverseCamberRatio
+        * CrowVentralFeatherTracts.transverseCamberScale(for: sample)
       appendFeatherBlade(
         root: bodyCenter + sample.rootOffset,
         tip: bodyCenter + sample.tipOffset,
@@ -2535,7 +2538,7 @@ private struct CrowMeshBuilder {
         sections: 7,
         camber: sample.camberMeters,
         lateralSweep: sample.lateralSweepMeters,
-        transverseCamberRatio: CrowVentralFeatherTracts.transverseCamberRatio,
+        transverseCamberRatio: transverseCamberRatio,
         vaneAsymmetry: sample.vaneAsymmetry,
         edgeRippleAmplitude: sample.edgeRippleAmplitude,
         edgeRipplePhase: sample.edgeRipplePhase,

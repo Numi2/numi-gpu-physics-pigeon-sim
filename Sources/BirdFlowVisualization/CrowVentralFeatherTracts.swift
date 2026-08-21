@@ -64,6 +64,26 @@ enum CrowVentralFeatherTracts {
     return samples()
   }
 
+  /// Breaks a mechanically uniform breast crown without changing the tract's
+  /// average depth. The same stable value drives the visible vane and retained
+  /// rachis, and remains bounded below the previously qualified `0.10` crown.
+  static func transverseCamberScale(
+    for feather: CrowVentralFeatherTractSample
+  ) -> Float {
+    let regionPhase: Float = feather.region == .pectoral ? 0.43 : 1.19
+    let coherent = 0.12 * sin(
+      Float(feather.row) * 0.83 + Float(feather.column) * 0.47
+        + regionPhase + 0.31 * feather.side
+    )
+    let identity = 0.10 * identityVariation(
+      region: feather.region,
+      row: feather.row,
+      column: feather.column,
+      salt: 0xD1B5_4A35
+    )
+    return clamp(1 + coherent + identity, lower: 0.78, upper: 1.22)
+  }
+
   static func samples() -> [CrowVentralFeatherTractSample] {
     var result: [CrowVentralFeatherTractSample] = []
     result.reserveCapacity(

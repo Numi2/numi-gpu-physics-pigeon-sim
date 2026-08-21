@@ -50,10 +50,10 @@ enum CrowBodyFeatherTracts {
   static let humeralColumnCount = 30
   static let scapularRowCount = 22
   static let scapularColumnCount = 24
-  static let cervicalTransverseCamberRatio: Float = 0.18
-  static let bodyTractTransverseCamberRatio: Float = 0.18
+  static let cervicalTransverseCamberRatio: Float = 0.12
+  static let bodyTractTransverseCamberRatio: Float = 0.12
   static let scapularFlightTransverseCamberStartCourseFraction: Float = 0.40
-  static let scapularFlightOuterTransverseCamberRatio: Float = 0.12
+  static let scapularFlightOuterTransverseCamberRatio: Float = 0.08
   static let retainedDetailCrownInsetScale: Float = 0.96
 
   static func visibleSamples(

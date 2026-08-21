@@ -144,7 +144,7 @@ Posterior class-`5` body plumage now follows the same deployment state: dorsal
 contour and mantle crown settle into the closed torso while showcase-scale
 dorsal vanes replace coarse edge aggregates with contained interior barb pairs.
 The exposed outer class-`6` scapular field now seats beneath the live wing root
-as deployment advances: its transverse crown settles from `0.18` to `0.12`,
+as deployment advances: its transverse crown settles from `0.12` to `0.08`,
 and retained rachis/barb geometry follows the same vane envelope instead of
 remaining on a buried centerline. Interior barbs stop at `97%` of the owning
 vane width, five bounded terminal bundles complete each tip, and all emitted
@@ -155,8 +155,12 @@ continuity shaft and add a second four-segment rachis on the visible `0.07`
 transverse crown. Boundary rows, terminal courses, and all edge-barb aggregates
 remain unchanged, so higher-quality breast detail cannot become a new body
 silhouette. Identity-stable lateral centerline sweeps break coherent transverse
-highlight rows while returning exactly to each root and tip. The `776` visible
-crown shafts are now retained as `112`-byte
+highlight rows while returning exactly to each root and tip. A bounded
+`0.78...1.22` identity-stable crown scale breaks the remaining breast-row
+specular lock while driving both the visible vane and retained rachis. The body
+material resolves paired optical barb banks about the same feather-local axis;
+these future-compute lobes alter roughness response without adding silhouette
+geometry. The `776` visible crown shafts are now retained as `112`-byte
 analytic records. At showcase LOD a compact `3,104`-interval work list drives
 Metal expansion into `74,496` temporal/AOV vertices instead of authoring those
 tubes on the CPU. The continuity and barb oracle remains in the accepted body

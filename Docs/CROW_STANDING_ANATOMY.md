@@ -549,7 +549,7 @@ to straight, uniformly crowned cervical, mantle, scapular, and ventral tracts.
 Every root, tip, identity, inventory, and LOD threshold stays fixed, but each
 vane now receives an identity-stable lateral sweep that returns to zero at both
 ends. Lower contour shingles stay below `1.06 mm` sweep; body transverse crown
-is `0.18`, deployed outer scapular crown is `0.12`, and ventral crown is `0.07`.
+is `0.12`, deployed outer scapular crown is `0.08`, and ventral crown is `0.07`.
 Rachises and barb groups follow the same curved centerline, including the
 retained Metal-expanded ventral records.
 
@@ -563,10 +563,22 @@ low view and `-8.66%/-12.87%/-4.81%` in the dorsal view. This is deterministic
 simulated-raster evidence for reduced row coherence and continuity, not a
 measurement of feather anatomy or proof of perceptual realism.
 
+The subsequent body-optics pass keeps that topology and all follicle endpoints
+fixed. A bounded `0.78...1.22` identity-stable scale varies the ventral crown
+while driving both visible vanes and retained crown shafts, and paired
+feather-local optical barb banks replace a single coherent body highlight.
+Across fresh 17-frame front-low and front-high-quarter audits at yaw/pitch
+`(0.08,-0.10)` and `(0.48,0.32)`, expected apertures, enclosed-hole pixels,
+component counts, and worst components remain exact. Mean same-class neighbour
+luminance variation changes by class `5/6/7` by `-1.96%/-0.89%/-0.002%` in the
+front-low view and `-6.65%/-4.45%/-0.35%` in the high-quarter view. This is
+deterministic simulated-raster material evidence, not measured feather optics
+or a perceptual-realism qualification.
+
 The canonical README sequence is fully simulated and contains the native hold,
-transition, and flight path: `800 x 450`, `72` frames at `24 fps`, `8,169,877`
+transition, and flight path: `800 x 450`, `72` frames at `24 fps`, `8,153,326`
 bytes, SHA-256
-`801f8e43f1cb310f14992d1bd8ca1e91cf9e596dc9b852938c83f4be13b6a738`.
+`b3dca08ceac026a9e243028daeb02203a87e69a6d8b9003768de0b80db6ee1b7`.
 
 Run the presentation with:
 

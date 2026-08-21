@@ -55,6 +55,12 @@ func crowVentralTractsCoverBreastAndAbdomenAtFullResolution() {
       abs($0.lateralSweepMeters) < 0.38 * $0.maximumWidthMeters
     }
   )
+  let crownScales = samples.map(CrowVentralFeatherTracts.transverseCamberScale)
+  #expect(crownScales.min()! >= 0.78)
+  #expect(crownScales.max()! <= 1.22)
+  #expect(crownScales.min()! < 0.80)
+  #expect(crownScales.max()! > 1.20)
+  #expect(Set(crownScales.map { Int(($0 * 10_000).rounded()) }).count > 750)
   #expect(
     Set(samples.map { Int(($0.edgeRipplePhase * 100_000).rounded()) }).count
       > 510

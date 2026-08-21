@@ -85,7 +85,9 @@ enum CrowFeatherMesostructure {
   ) -> [CrowFeatherMesostructureSegment] {
     let resolvedTransverseCamberRatio = transverseCamberRatio
       ?? (CrowVentralFeatherTracts.retainsCrownRachis(feather)
-        ? CrowVentralFeatherTracts.retainedRachisTransverseCamberRatio : 0)
+        ? CrowVentralFeatherTracts.retainedRachisTransverseCamberRatio
+          * CrowVentralFeatherTracts.transverseCamberScale(for: feather)
+        : 0)
     // Preserve a subvane continuity shaft as a deterministic occluded oracle;
     // eligible interior feathers add a second shaft on the visible crown.
     let continuity = segments(

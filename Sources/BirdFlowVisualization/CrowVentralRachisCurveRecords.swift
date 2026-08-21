@@ -35,6 +35,7 @@ enum CrowVentralRachisCurveRecords {
         normalAndTransverseCamber: SIMD4<Float>(
           normal,
           CrowVentralFeatherTracts.retainedRachisTransverseCamberRatio
+            * CrowVentralFeatherTracts.transverseCamberScale(for: feather)
         ),
         widthsEnvelopeAndAsymmetry: SIMD4<Float>(
           feather.rootWidthMeters,

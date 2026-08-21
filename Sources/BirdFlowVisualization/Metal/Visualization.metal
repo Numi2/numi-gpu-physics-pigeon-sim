@@ -2418,6 +2418,45 @@ inline float3 showcaseCrowLinearRadiance(
     float3 featherAxis=crowFeatherAxis(
         world,normal,featherCoordinates.xy
     );
+    // Short body feathers do not present one shared polished rachis direction.
+    // Resolve two optical barb banks around a small, identity-stable tangent
+    // turn. The phase is carried by the retained vane, so the microfacet field
+    // follows the feather through standing motion and takeoff instead of
+    // swimming in world space. Geometry and silhouette ownership stay exact.
+    float bodyOpticalIdentity=crowBandLimitedSine(
+        1.63f*featherCoordinates.z+0.41f*float(featherClass)
+    );
+    float bodyOpticalDrift=crowBandLimitedSine(
+        2.17f*featherCoordinates.z+1.31f*axial
+            +0.29f*float(featherClass)
+    );
+    float bodyOpticalTurn=bodyContourVane
+        *(0.055f*bodyOpticalIdentity+0.018f*bodyOpticalDrift);
+    float3 featherBarbAxis=safeNormalizeCrow(
+        cross(normal,featherAxis),float3(0.0f,1.0f,0.0f)
+    );
+    float3 bodyOpticalAxis=safeNormalizeCrow(
+        featherAxis*cos(bodyOpticalTurn)
+            +featherBarbAxis*sin(bodyOpticalTurn),
+        featherAxis
+    );
+    float bankIdentity=0.5f+0.5f*crowBandLimitedSine(
+        2.39f*featherCoordinates.z+0.67f*float(featherClass)
+    );
+    float bodyBankSpread=bodyContourVane*(0.105f+0.030f*bankIdentity);
+    float3 opticalBarbAxis=safeNormalizeCrow(
+        cross(normal,bodyOpticalAxis),featherBarbAxis
+    );
+    float3 firstBodyBank=safeNormalizeCrow(
+        bodyOpticalAxis*cos(bodyBankSpread)
+            +opticalBarbAxis*sin(bodyBankSpread),
+        bodyOpticalAxis
+    );
+    float3 secondBodyBank=safeNormalizeCrow(
+        bodyOpticalAxis*cos(bodyBankSpread)
+            -opticalBarbAxis*sin(bodyBankSpread),
+        bodyOpticalAxis
+    );
     float vaneAnisotropy=mix(
         0.18f,
         mix(0.52f,1.0f,flightFeather),
@@ -2444,22 +2483,36 @@ inline float3 showcaseCrowLinearRadiance(
     longitudinalRoughness=mix(longitudinalRoughness,0.360f,headNeckVane);
     longitudinalRoughness=mix(longitudinalRoughness,0.390f,foreheadVane);
     longitudinalRoughness=mix(longitudinalRoughness,0.370f,gularVane);
-    transverseRoughness=mix(transverseRoughness,0.118f,dorsalBodyVane);
-    transverseRoughness=mix(transverseRoughness,0.122f,flankBodyVane);
-    transverseRoughness=mix(transverseRoughness,0.126f,ventralBodyVane);
-    transverseRoughness=mix(transverseRoughness,0.132f,headNeckVane);
-    transverseRoughness=mix(transverseRoughness,0.145f,foreheadVane);
-    transverseRoughness=mix(transverseRoughness,0.138f,gularVane);
+    transverseRoughness=mix(transverseRoughness,0.142f,dorsalBodyVane);
+    transverseRoughness=mix(transverseRoughness,0.148f,flankBodyVane);
+    transverseRoughness=mix(transverseRoughness,0.154f,ventralBodyVane);
+    transverseRoughness=mix(transverseRoughness,0.156f,headNeckVane);
+    transverseRoughness=mix(transverseRoughness,0.165f,foreheadVane);
+    transverseRoughness=mix(transverseRoughness,0.160f,gularVane);
     longitudinalRoughness=mix(
         longitudinalRoughness,0.325f,underwingCovertVane
     );
     transverseRoughness=mix(
         transverseRoughness,0.105f,underwingCovertVane
     );
-    float anisotropicSpecular=featherMaterial*vaneAnisotropy
-        *crowFeatherAnisotropicLobe(
+    float genericAnisotropicSpecular=crowFeatherAnisotropicLobe(
         normal,featherAxis,halfVector,
         longitudinalRoughness,transverseRoughness
+    );
+    float bodyBankAnisotropicSpecular=0.5f*(
+        crowFeatherAnisotropicLobe(
+            normal,firstBodyBank,halfVector,
+            longitudinalRoughness,transverseRoughness
+        )
+        +crowFeatherAnisotropicLobe(
+            normal,secondBodyBank,halfVector,
+            longitudinalRoughness,transverseRoughness
+        )
+    );
+    float anisotropicSpecular=featherMaterial*vaneAnisotropy*mix(
+        genericAnisotropicSpecular,
+        bodyBankAnisotropicSpecular,
+        bodyContourVane
     );
     float genericRachisAxial=smoothstep(0.035f,0.16f,axial)
         *(1.0f-smoothstep(0.80f,0.985f,axial));
@@ -2523,7 +2576,7 @@ inline float3 showcaseCrowLinearRadiance(
     // phase carried by the procedural vane. Body contours keep a bounded
     // 1.4-degree normal perturbation; flight-feather barbules remain unchanged.
     float3 bodyBarbAxis=safeNormalizeCrow(
-        cross(normal,featherAxis),float3(0.0f,1.0f,0.0f)
+        cross(normal,bodyOpticalAxis),float3(0.0f,1.0f,0.0f)
     );
     float bodyBarbTilt=0.024f*bodyContourVane*localBarbWave
         *(1.0f-smoothstep(0.72f,0.96f,abs(signedWidth)));
@@ -2582,7 +2635,7 @@ inline float3 showcaseCrowLinearRadiance(
     color+=sharpTint*featherSpecular*mix(0.30f,1.0f,flightFeather)
         *classSharpScale;
     color+=softTint*softSpecular;
-    float classAnisotropicScale=mix(1.0f,0.46f,bodyContourVane);
+    float classAnisotropicScale=mix(1.0f,0.40f,bodyContourVane);
     color+=classAnisotropicScale*anisotropicSpecular
         *mix(float3(0.020f,0.030f,0.046f),float3(0.012f,0.020f,0.034f),flightFeather);
     color*=1.0f-0.055f*persistentVane*(1.0f-localBarbs);
