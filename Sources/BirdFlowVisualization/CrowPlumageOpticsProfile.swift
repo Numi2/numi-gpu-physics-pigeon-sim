@@ -27,6 +27,14 @@ struct CrowPlumageOpticsProfile: Decodable, Equatable {
     let rawSpectraAvailable: Bool
   }
 
+  struct VisibilitySource: Decodable, Equatable {
+    let title: String
+    let doi: String
+    let implementationURL: String
+    let implementationLicense: String
+    let modelClass: String
+  }
+
   struct PublishedConstraints: Decodable, Equatable {
     let wavelengthRangeNanometers: [Float]
     let interpolatedBinWidthNanometers: Float
@@ -49,6 +57,13 @@ struct CrowPlumageOpticsProfile: Decodable, Equatable {
     let melaninDensityRange: [Float]
     let incoherentKeratinScatterRange: [Float]
     let cortexScaleRange: [Float]
+    let barbAspectRatio: Float
+    let barbuleAspectRatio: Float
+    let barbuleAzimuthDegrees: Float
+    let barbuleInclinationDegrees: Float
+    let barbuleRelativeLength: Float
+    let barbuleRelativeSeparation: Float
+    let projectedVisibilityStrength: Float
   }
 
   let schemaVersion: Int
@@ -56,6 +71,7 @@ struct CrowPlumageOpticsProfile: Decodable, Equatable {
   let targetTaxon: String
   let evidenceClass: String
   let source: Source
+  let visibilitySource: VisibilitySource
   let publishedConstraints: PublishedConstraints
   let renderParameters: RenderParameters
   let calibrationStatus: String
@@ -110,6 +126,12 @@ struct CrowPlumageOpticsProfile: Decodable, Equatable {
       source.sourceTaxa.contains("Corvus corax"),
       source.sourceTaxa.contains("Corvus ossifragus"),
       !source.rawSpectraAvailable,
+      visibilitySource.doi == "10.1111/cgf.15235",
+      visibilitySource.implementationURL
+        == "https://github.com/juanraul8/PennaceousFeathersRendering",
+      visibilitySource.implementationLicense == "MIT",
+      visibilitySource.modelClass
+        == "projected-area-regular-cross-section-approximation",
       calibrationStatus == "not calibrated to an American-crow specimen",
       excludedClaims.count >= 4
     else {
@@ -172,6 +194,31 @@ struct CrowPlumageOpticsProfile: Decodable, Equatable {
     else {
       throw invalid("renderer estimates are outside the bounded optics contract")
     }
+
+    guard render.barbAspectRatio.isFinite,
+      render.barbAspectRatio >= 1,
+      render.barbAspectRatio <= 8,
+      render.barbuleAspectRatio.isFinite,
+      render.barbuleAspectRatio >= 1,
+      render.barbuleAspectRatio <= 8,
+      render.barbuleAzimuthDegrees.isFinite,
+      render.barbuleAzimuthDegrees >= 25,
+      render.barbuleAzimuthDegrees <= 65,
+      render.barbuleInclinationDegrees.isFinite,
+      render.barbuleInclinationDegrees >= 0,
+      render.barbuleInclinationDegrees <= 45,
+      render.barbuleRelativeLength.isFinite,
+      render.barbuleRelativeLength >= 1,
+      render.barbuleRelativeLength <= 12,
+      render.barbuleRelativeSeparation.isFinite,
+      render.barbuleRelativeSeparation >= 0,
+      render.barbuleRelativeSeparation <= 4,
+      render.projectedVisibilityStrength.isFinite,
+      render.projectedVisibilityStrength >= 0,
+      render.projectedVisibilityStrength <= 1
+    else {
+      throw invalid("renderer visibility estimates are outside the bounded contract")
+    }
   }
 
   var gpuParameters: CrowPlumageOpticsGPUParameters {
@@ -201,6 +248,18 @@ struct CrowPlumageOpticsProfile: Decodable, Equatable {
         render.incoherentKeratinScatterRange[1],
         render.cortexScaleRange[0],
         render.cortexScaleRange[1]
+      ),
+      visibilityShape: SIMD4<Float>(
+        render.barbAspectRatio,
+        render.barbuleAspectRatio,
+        render.barbuleAzimuthDegrees * .pi / 180,
+        render.barbuleInclinationDegrees * .pi / 180
+      ),
+      visibilityLayout: SIMD4<Float>(
+        render.barbuleRelativeLength,
+        render.barbuleRelativeSeparation,
+        render.projectedVisibilityStrength,
+        0
       )
     )
   }
@@ -215,4 +274,6 @@ struct CrowPlumageOpticsGPUParameters: Equatable {
   var complexIndices: SIMD4<Float>
   var melanin: SIMD4<Float>
   var cortex: SIMD4<Float>
+  var visibilityShape: SIMD4<Float>
+  var visibilityLayout: SIMD4<Float>
 }

@@ -38,6 +38,9 @@ func crowPlumageOpticsProfilePreservesEvidenceBoundary() throws {
       == [400, 440, 480, 520, 560, 600, 640, 680]
   )
   #expect(profile.renderParameters.thinFilmCoherence == 0.08)
+  #expect(profile.visibilitySource.doi == "10.1111/cgf.15235")
+  #expect(profile.renderParameters.barbuleAzimuthDegrees == 45)
+  #expect(profile.renderParameters.barbuleRelativeSeparation == 0.55)
   #expect(
     profile.calibrationStatus == "not calibrated to an American-crow specimen"
   )
@@ -47,7 +50,12 @@ func crowPlumageOpticsProfilePreservesEvidenceBoundary() throws {
   #expect(gpu.complexIndices == SIMD4<Float>(1.56, 0.03, 2.0, 0.6))
   #expect(gpu.melanin == SIMD4<Float>(1.32, 0.88, 1.62, 1.84))
   #expect(gpu.cortex == SIMD4<Float>(0.00492, 0.006, 0.92, 1.04))
-  #expect(MemoryLayout<CrowPlumageOpticsGPUParameters>.stride == 64)
+  #expect(
+    simd_length(gpu.visibilityShape - SIMD4<Float>(2.4, 3.2, .pi / 4, .pi / 10))
+      < 1e-5
+  )
+  #expect(gpu.visibilityLayout == SIMD4<Float>(5, 0.55, 0.62, 0))
+  #expect(MemoryLayout<CrowPlumageOpticsGPUParameters>.stride == 96)
 }
 
 @Test("crow plumage optics rejects invented raw spectral provenance")
@@ -143,4 +151,93 @@ func crowThinFilmOpticsMatchesReferenceCases() throws {
   }
   #expect(abs(actual[0].x - actual[0].y) < 2e-6)
   #expect(abs(actual[1].x - actual[1].y) < 2e-6)
+}
+
+@Test("crow projected feather visibility is normalized and mirror stable")
+func crowProjectedFeatherVisibilityMatchesReferenceCases() throws {
+  guard let device = MTLCreateSystemDefaultDevice() else { return }
+  let backend = try VisualizationBackend(device: device)
+  let pipeline = try backend.compute("probeCrowProjectedFeatherVisibility")
+  let directions: [SIMD4<Float>] = [
+    SIMD4<Float>(0, 1, 0, 0),
+    SIMD4<Float>(0.6, 0.8, 0, 0),
+    SIMD4<Float>(-0.6, 0.8, 0, 0),
+    SIMD4<Float>(0.4, 0.5, 0.76811457, 0),
+  ]
+  let expected: [SIMD4<Float>] = [
+    SIMD4<Float>(0.22922675, 0.30226402, 0.30226402, 0.16624521),
+    SIMD4<Float>(0.37979913, 0.36226826, 0.18215278, 0.07577983),
+    SIMD4<Float>(0.37979913, 0.18215278, 0.36226826, 0.07577983),
+    SIMD4<Float>(0.39165753, 0.39973484, 0.17972022, 0.02888741),
+  ]
+  var shape = SIMD4<Float>(2.4, 3.2, .pi / 4, .pi / 10)
+
+  func evaluate(separation: Float) throws -> [SIMD4<Float>] {
+    var layout = SIMD4<Float>(5, separation, 0.62, 0)
+    let inputBuffer = try backend.buffer(
+      length: MemoryLayout<SIMD4<Float>>.stride * directions.count,
+      shared: true
+    )
+    _ = directions.withUnsafeBytes { bytes in
+      memcpy(inputBuffer.contents(), bytes.baseAddress!, bytes.count)
+    }
+    let shapeBuffer = try backend.buffer(
+      length: MemoryLayout<SIMD4<Float>>.stride,
+      shared: true
+    )
+    _ = withUnsafeBytes(of: &shape) { bytes in
+      memcpy(shapeBuffer.contents(), bytes.baseAddress!, bytes.count)
+    }
+    let layoutBuffer = try backend.buffer(
+      length: MemoryLayout<SIMD4<Float>>.stride,
+      shared: true
+    )
+    _ = withUnsafeBytes(of: &layout) { bytes in
+      memcpy(layoutBuffer.contents(), bytes.baseAddress!, bytes.count)
+    }
+    let outputBuffer = try backend.buffer(
+      length: MemoryLayout<SIMD4<Float>>.stride * directions.count,
+      shared: true
+    )
+    guard let commandBuffer = backend.queue.makeCommandBuffer(),
+      let encoder = commandBuffer.makeComputeCommandEncoder()
+    else {
+      Issue.record("unable to allocate crow projected-visibility probe command")
+      return []
+    }
+    encoder.setBuffer(inputBuffer, offset: 0, index: 0)
+    encoder.setBuffer(shapeBuffer, offset: 0, index: 1)
+    encoder.setBuffer(layoutBuffer, offset: 0, index: 2)
+    encoder.setBuffer(outputBuffer, offset: 0, index: 3)
+    backend.dispatch1D(encoder, pipeline: pipeline, count: directions.count)
+    encoder.endEncoding()
+    commandBuffer.commit()
+    commandBuffer.waitUntilCompleted()
+    #expect(commandBuffer.status == .completed)
+    let pointer = outputBuffer.contents().bindMemory(
+      to: SIMD4<Float>.self,
+      capacity: directions.count
+    )
+    return Array(UnsafeBufferPointer(start: pointer, count: directions.count))
+  }
+
+  let actual = try evaluate(separation: 0.55)
+  #expect(actual.count == expected.count)
+  for (measured, reference) in zip(actual, expected) {
+    #expect(simd_length(measured - reference) < 2e-5)
+    #expect(abs(measured.x + measured.y + measured.z + measured.w - 1) < 2e-6)
+    #expect(min(measured.x, min(measured.y, min(measured.z, measured.w))) >= 0)
+    #expect(max(measured.x, max(measured.y, max(measured.z, measured.w))) <= 1)
+  }
+  #expect(abs(actual[1].x - actual[2].x) < 2e-6)
+  #expect(abs(actual[1].y - actual[2].z) < 2e-6)
+  #expect(abs(actual[1].z - actual[2].y) < 2e-6)
+  #expect(abs(actual[1].w - actual[2].w) < 2e-6)
+
+  let closed = try evaluate(separation: 0)
+  let open = try evaluate(separation: 1.5)
+  for (closedWeights, openWeights) in zip(closed, open) {
+    #expect(closedWeights.w == 0)
+    #expect(openWeights.w > closedWeights.w)
+  }
 }

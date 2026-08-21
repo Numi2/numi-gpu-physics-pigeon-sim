@@ -1251,7 +1251,9 @@ private final class CrowShowcaseRenderer {
       plumageFilm: plumageOptics.film,
       plumageComplexIndices: plumageOptics.complexIndices,
       plumageMelanin: plumageOptics.melanin,
-      plumageCortex: plumageOptics.cortex
+      plumageCortex: plumageOptics.cortex,
+      plumageVisibilityShape: plumageOptics.visibilityShape,
+      plumageVisibilityLayout: plumageOptics.visibilityLayout
     )
     var backgroundOptions = SIMD4<Float>(
       phase,

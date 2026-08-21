@@ -106,6 +106,8 @@ struct CrowTemporalCameraUniforms {
     float4 plumageComplexIndices;
     float4 plumageMelanin;
     float4 plumageCortex;
+    float4 plumageVisibilityShape;
+    float4 plumageVisibilityLayout;
 };
 
 struct VisualizationUniforms {
@@ -2645,6 +2647,119 @@ inline float2 crowInterlockingBarbuleSignal(
     return interior*float2(crossed,separation);
 }
 
+/// Project the full diameter of an elliptical fiber cross section toward an
+/// unnormalised 2D view direction. This is the closed-form full-ellipse case
+/// of the projected-area expression used by Padrón-Griffe et al. (2024).
+inline float crowProjectedEllipseDiameter(
+    float2 direction,
+    float2 axes) {
+    float2 scaled=float2(axes.y*direction.x,axes.x*direction.y);
+    return 2.0f*length(scaled);
+}
+
+inline float crowProjectedSegmentLength(float2 segment,float2 direction) {
+    return abs(segment.x*direction.y-segment.y*direction.x);
+}
+
+/// Constant-cost far-field mixture for a regular pennaceous cross section.
+/// The four normalized channels are barb, proximal barbule, distal barbule,
+/// and transmission. Unlike the exact discontinuity-ray construction in the
+/// cited model, this renderer approximation retains only projected ellipses,
+/// projected barbule segments, and their local gap transmission. Parameters
+/// are versioned estimates; explicit feather geometry remains authoritative.
+inline float4 crowProjectedFeatherVisibilityLocal(
+    float3 viewDirection,
+    float4 visibilityShape,
+    float4 visibilityLayout) {
+    float3 view=safeNormalizeCrow(viewDirection,float3(0.0f,1.0f,0.0f));
+    float barbAspect=max(visibilityShape.x,1.0f);
+    float barbuleAspect=max(visibilityShape.y,1.0f);
+    float azimuth=visibilityShape.z;
+    float inclination=visibilityShape.w;
+    float relativeLength=max(visibilityLayout.x,1.0f);
+    float relativeSeparation=max(visibilityLayout.y,0.0f);
+
+    float cosineAzimuth=cos(azimuth);
+    float sineAzimuth=sin(azimuth);
+    float cosineInclination=cos(inclination);
+    float sineInclination=sin(inclination);
+    float3 crossNormal=float3(0.0f,1.0f,0.0f);
+    float3 proximalAxis=normalize(float3(
+        -cosineInclination*sineAzimuth,
+        sineInclination,
+        cosineInclination*cosineAzimuth
+    ));
+    float3 distalAxis=normalize(float3(
+        cosineInclination*sineAzimuth,
+        sineInclination,
+        cosineInclination*cosineAzimuth
+    ));
+    float3 proximalCross=safeNormalizeCrow(
+        cross(crossNormal,proximalAxis),float3(1.0f,0.0f,0.0f)
+    );
+    float3 distalCross=safeNormalizeCrow(
+        cross(crossNormal,distalAxis),float3(1.0f,0.0f,0.0f)
+    );
+    float3 proximalNormal=cross(proximalAxis,proximalCross);
+    float3 distalNormal=cross(distalAxis,distalCross);
+
+    float2 barbDirection=view.xy;
+    float2 proximalDirection=float2(
+        dot(view,proximalCross),dot(view,proximalNormal)
+    );
+    float2 distalDirection=float2(
+        dot(view,distalCross),dot(view,distalNormal)
+    );
+    float barbArea=crowProjectedEllipseDiameter(
+        barbDirection,float2(1.0f,barbAspect)
+    );
+    float proximalBarbuleArea=crowProjectedEllipseDiameter(
+        proximalDirection,float2(1.0f,barbuleAspect)
+    );
+    float distalBarbuleArea=crowProjectedEllipseDiameter(
+        distalDirection,float2(1.0f,barbuleAspect)
+    );
+    float proximalGap=relativeSeparation*abs(proximalDirection.y);
+    float distalGap=relativeSeparation*abs(distalDirection.y);
+    float proximalTransmission=proximalGap
+        /max(proximalGap+proximalBarbuleArea,1.0e-6f);
+    float distalTransmission=distalGap
+        /max(distalGap+distalBarbuleArea,1.0e-6f);
+
+    float2 proximalSegment=relativeLength*float2(
+        -cosineInclination*sineAzimuth,sineInclination
+    );
+    float2 distalSegment=relativeLength*float2(
+        cosineInclination*sineAzimuth,sineInclination
+    );
+    float proximalProjected=crowProjectedSegmentLength(
+        proximalSegment,barbDirection
+    );
+    float distalProjected=crowProjectedSegmentLength(
+        distalSegment,barbDirection
+    );
+    float4 areas=float4(
+        barbArea,
+        proximalProjected*(1.0f-proximalTransmission),
+        distalProjected*(1.0f-distalTransmission),
+        proximalProjected*proximalTransmission
+            +distalProjected*distalTransmission
+    );
+    float total=max(areas.x+areas.y+areas.z+areas.w,1.0e-6f);
+    return max(areas/total,float4(0.0f));
+}
+
+kernel void probeCrowProjectedFeatherVisibility(
+    device const float4* directions [[buffer(0)]],
+    constant float4& visibilityShape [[buffer(1)]],
+    constant float4& visibilityLayout [[buffer(2)]],
+    device float4* outputs [[buffer(3)]],
+    uint index [[thread_position_in_grid]]) {
+    outputs[index]=crowProjectedFeatherVisibilityLocal(
+        directions[index].xyz,visibilityShape,visibilityLayout
+    );
+}
+
 inline float3 showcaseCrowLinearRadiance(
     float3 world,
     float3 normalInput,
@@ -2655,7 +2770,9 @@ inline float3 showcaseCrowLinearRadiance(
     float4 plumageFilm,
     float4 plumageComplexIndices,
     float4 plumageMelanin,
-    float4 plumageCortex) {
+    float4 plumageCortex,
+    float4 plumageVisibilityShape,
+    float4 plumageVisibilityLayout) {
     float3 normal=normalize(normalInput);
     float3 view=normalize(eyePosition-world);
     float material=albedoAndMaterial.a;
@@ -2668,6 +2785,8 @@ inline float3 showcaseCrowLinearRadiance(
     float ndv=saturate(abs(dot(normal,view)));
     float rim=pow(1.0f-ndv,2.2f);
     float3 halfVector=normalize(key+view);
+    float3 fillHalfVector=normalize(fill+view);
+    float3 sunHalfVector=normalize(sun+view);
 
     // The standing presentation support is deliberately neutral and separate
     // from the bird material bands.
@@ -2729,9 +2848,21 @@ inline float3 showcaseCrowLinearRadiance(
     );
     float cortexThicknessNanometers=plumageFilm.x
         +plumageFilm.y*thicknessIdentity;
-    float interfaceCosine=saturate(abs(dot(view,halfVector)));
-    float3 sheen=crowGlossyBlackSpectrum(
-        interfaceCosine,melaninDensity,cortexScale,
+    float keyInterfaceCosine=saturate(abs(dot(view,halfVector)));
+    float fillInterfaceCosine=saturate(abs(dot(view,fillHalfVector)));
+    float sunInterfaceCosine=saturate(abs(dot(view,sunHalfVector)));
+    float3 keySheen=crowGlossyBlackSpectrum(
+        keyInterfaceCosine,melaninDensity,cortexScale,
+        cortexThicknessNanometers,plumageFilm,plumageComplexIndices,
+        plumageMelanin,plumageCortex
+    );
+    float3 fillSheen=crowGlossyBlackSpectrum(
+        fillInterfaceCosine,melaninDensity,cortexScale,
+        cortexThicknessNanometers,plumageFilm,plumageComplexIndices,
+        plumageMelanin,plumageCortex
+    );
+    float3 sunSheen=crowGlossyBlackSpectrum(
+        sunInterfaceCosine,melaninDensity,cortexScale,
         cortexThicknessNanometers,plumageFilm,plumageComplexIndices,
         plumageMelanin,plumageCortex
     );
@@ -2792,6 +2923,42 @@ inline float3 showcaseCrowLinearRadiance(
         *(0.105f*bodyOpticalIdentity+0.035f*bodyOpticalDrift);
     float3 featherBarbAxis=safeNormalizeCrow(
         cross(normal,featherAxis),float3(0.0f,1.0f,0.0f)
+    );
+    float3 barbCrossAxis=safeNormalizeCrow(
+        cross(normal,featherBarbAxis),featherAxis
+    );
+    float3 viewInBarbFrame=float3(
+        dot(view,barbCrossAxis),
+        dot(view,normal),
+        dot(view,featherBarbAxis)
+    );
+    float4 projectedVisibility=crowProjectedFeatherVisibilityLocal(
+        viewInBarbFrame,plumageVisibilityShape,plumageVisibilityLayout
+    );
+    float projectedVisibilityStrength=
+        saturate(plumageVisibilityLayout.z)*persistentVane;
+    float opaqueProjectedVisibility=max(
+        projectedVisibility.x+projectedVisibility.y+projectedVisibility.z,
+        1.0e-5f
+    );
+    float normalizedBarbVisibility=
+        projectedVisibility.x/opaqueProjectedVisibility;
+    float normalizedBarbuleVisibility=
+        (projectedVisibility.y+projectedVisibility.z)
+            /opaqueProjectedVisibility;
+    float visibilityEnergy=mix(
+        1.0f,
+        projectedVisibility.x
+            +0.92f*(projectedVisibility.y+projectedVisibility.z),
+        projectedVisibilityStrength
+    );
+    float barbVisibility=mix(
+        1.0f,0.78f+0.44f*normalizedBarbVisibility,
+        projectedVisibilityStrength
+    );
+    float barbuleVisibility=mix(
+        1.0f,0.78f+0.44f*normalizedBarbuleVisibility,
+        projectedVisibilityStrength
     );
     float3 bodyOpticalAxis=safeNormalizeCrow(
         featherAxis*cos(bodyOpticalTurn)
@@ -2859,11 +3026,11 @@ inline float3 showcaseCrowLinearRadiance(
     // to the retained local feather coordinates through motion and takeoff.
     longitudinalRoughness*=1.0f+0.10f*bodyContourVane*bodyOpticalIdentity;
     transverseRoughness*=1.0f+0.12f*bodyContourVane*bodyOpticalDrift;
-    float genericAnisotropicSpecular=crowFeatherAnisotropicLobe(
+    float genericKeyAnisotropicSpecular=crowFeatherAnisotropicLobe(
         normal,featherAxis,halfVector,
         longitudinalRoughness,transverseRoughness
     );
-    float bodyBankAnisotropicSpecular=0.5f*(
+    float bodyBankKeyAnisotropicSpecular=0.5f*(
         crowFeatherAnisotropicLobe(
             normal,firstBodyBank,halfVector,
             longitudinalRoughness,transverseRoughness
@@ -2873,10 +3040,53 @@ inline float3 showcaseCrowLinearRadiance(
             longitudinalRoughness,transverseRoughness
         )
     );
-    float anisotropicSpecular=featherMaterial*vaneAnisotropy*mix(
-        genericAnisotropicSpecular,
-        bodyBankAnisotropicSpecular,
+    float genericFillAnisotropicSpecular=crowFeatherAnisotropicLobe(
+        normal,featherAxis,fillHalfVector,
+        longitudinalRoughness,transverseRoughness
+    );
+    float bodyBankFillAnisotropicSpecular=0.5f*(
+        crowFeatherAnisotropicLobe(
+            normal,firstBodyBank,fillHalfVector,
+            longitudinalRoughness,transverseRoughness
+        )
+        +crowFeatherAnisotropicLobe(
+            normal,secondBodyBank,fillHalfVector,
+            longitudinalRoughness,transverseRoughness
+        )
+    );
+    float genericSunAnisotropicSpecular=crowFeatherAnisotropicLobe(
+        normal,featherAxis,sunHalfVector,
+        longitudinalRoughness,transverseRoughness
+    );
+    float bodyBankSunAnisotropicSpecular=0.5f*(
+        crowFeatherAnisotropicLobe(
+            normal,firstBodyBank,sunHalfVector,
+            longitudinalRoughness,transverseRoughness
+        )
+        +crowFeatherAnisotropicLobe(
+            normal,secondBodyBank,sunHalfVector,
+            longitudinalRoughness,transverseRoughness
+        )
+    );
+    float keyAnisotropicSpecular=mix(
+        genericKeyAnisotropicSpecular,
+        bodyBankKeyAnisotropicSpecular,
         bodyContourVane
+    );
+    float fillAnisotropicSpecular=mix(
+        genericFillAnisotropicSpecular,
+        bodyBankFillAnisotropicSpecular,
+        bodyContourVane
+    );
+    float sunAnisotropicSpecular=mix(
+        genericSunAnisotropicSpecular,
+        bodyBankSunAnisotropicSpecular,
+        bodyContourVane
+    );
+    float anisotropicSpecular=featherMaterial*vaneAnisotropy*(
+        0.78f*keyAnisotropicSpecular
+            +0.14f*fillAnisotropicSpecular
+            +0.08f*sunAnisotropicSpecular
     );
     float genericRachisAxial=smoothstep(0.035f,0.16f,axial)
         *(1.0f-smoothstep(0.80f,0.985f,axial));
@@ -2958,21 +3168,32 @@ inline float3 showcaseCrowLinearRadiance(
     // whole-bird distance. Preserve the tight exponent on exposed flight
     // feathers while preventing every body vane from becoming a silver rib.
     float sharpExponent=mix(92.0f,44.0f,bodyContourVane);
-    float featherSpecular=pow(
-        saturate(dot(specularNormal,halfVector)),sharpExponent
-    );
-    float softSpecular=pow(saturate(dot(normal,halfVector)),24.0f);
+    float featherSpecular=
+        0.78f*pow(saturate(dot(specularNormal,halfVector)),sharpExponent)
+        +0.14f*pow(saturate(dot(specularNormal,fillHalfVector)),sharpExponent)
+        +0.08f*pow(saturate(dot(specularNormal,sunHalfVector)),sharpExponent);
+    float softSpecular=
+        0.78f*pow(saturate(dot(normal,halfVector)),24.0f)
+        +0.14f*pow(saturate(dot(normal,fillHalfVector)),24.0f)
+        +0.08f*pow(saturate(dot(normal,sunHalfVector)),24.0f);
     float diffuse=0.28f+0.62f*ndk+0.16f*ndf+0.10f*nds;
     float flightDarkening=mix(1.0f,0.58f,flightFeather);
     float3 color=albedoAndMaterial.rgb*diffuse*flightDarkening;
+    color*=visibilityEnergy;
     color*=mix(1.0f,0.82f,foreheadVane);
-    color+=sheen*(0.022f+0.125f*grazing)*(0.36f+0.64f*ndk)
+    float3 pathSheen=
+        keySheen*(0.31f+0.50f*ndk)
+        +fillSheen*(0.10f*ndf)
+        +sunSheen*(0.09f*nds);
+    float3 meanSheen=
+        0.78f*keySheen+0.14f*fillSheen+0.08f*sunSheen;
+    color+=pathSheen*(0.022f+0.125f*grazing)
         *flightDarkening*(0.72f+0.28f*anisotropicSpecular)
-        *classSheenScale;
-    color+=barbMicro*classSheenScale
-        *mix(float3(0.035f,0.070f,0.11f),sheen,0.45f);
-    color+=interlockingBarbules.y*grazing*classSheenScale
-        *mix(float3(0.0025f,0.0055f,0.0090f),sheen,0.28f);
+        *classSheenScale*visibilityEnergy;
+    color+=barbMicro*barbVisibility*classSheenScale
+        *mix(float3(0.035f,0.070f,0.11f),meanSheen,0.45f);
+    color+=interlockingBarbules.y*barbuleVisibility*grazing*classSheenScale
+        *mix(float3(0.0025f,0.0055f,0.0090f),meanSheen,0.28f);
     float3 sharpTint=mix(
         float3(0.075f,0.095f,0.125f),
         float3(0.030f,0.038f,0.050f),
@@ -3039,7 +3260,9 @@ fragment float4 showcaseCrowFragment(
         float4(160.0f,18.0f,0.08f,0.016f),
         float4(1.56f,0.03f,2.00f,0.60f),
         float4(1.32f,0.88f,1.62f,1.84f),
-        float4(0.00492f,0.006f,0.92f,1.04f)
+        float4(0.00492f,0.006f,0.92f,1.04f),
+        float4(2.4f,3.2f,0.78539816f,0.31415927f),
+        float4(5.0f,0.55f,0.62f,0.0f)
     );
     return float4(1.0f-exp(-radiance),1.0f);
 }
@@ -3052,7 +3275,8 @@ fragment CrowAOVOutput showcaseCrowAOVFragment(
         in.world,normal,in.albedoAndMaterial,camera.eyeAndWidth.xyz,
         in.featherCoordinates,in.identity.w,
         camera.plumageFilm,camera.plumageComplexIndices,
-        camera.plumageMelanin,camera.plumageCortex
+        camera.plumageMelanin,camera.plumageCortex,
+        camera.plumageVisibilityShape,camera.plumageVisibilityLayout
     );
     float inversePreviousW=1.0f/in.previousClipPosition.w;
     float2 previousNDC=in.previousClipPosition.xy*inversePreviousW;

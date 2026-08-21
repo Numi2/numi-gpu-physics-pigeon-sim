@@ -286,4 +286,6 @@ struct CrowTemporalCameraUniforms {
   var plumageComplexIndices: SIMD4<Float>
   var plumageMelanin: SIMD4<Float>
   var plumageCortex: SIMD4<Float>
+  var plumageVisibilityShape: SIMD4<Float>
+  var plumageVisibilityLayout: SIMD4<Float>
 }
