@@ -185,10 +185,23 @@ active and fully covered identity pixels, enclosed-hole totals, largest holes,
 component counts, and expected lower-body apertures remained exact. Only `163`
 already-covered class-`4` pixels changed visible surface ownership to the
 brighter shaft triangles. A larger experiment that deployed 42 retained remex
-identities on the articulated wing was rejected before publication: it left a
-new `6-8` pixel primary/covert junction slot and did not replace the dominant
-broad covert silhouettes. The shaft radii and color contrast are presentation
-estimates, not measured American-crow feather microstructure.
+identities on the articulated wing was rejected before publication. Although a
+single underside diagnostic improved, the fixed orbit exposed the opposite
+result: enclosed-hole pixels rose from `1,923` to `7,399` and the largest hole
+rose from `36` to `1,147` pixels as the new fan closed exterior concavities into
+cavities. It also did not replace the dominant broad covert silhouettes.
+
+The retained covert geometry instead resolves paired aggregate-barb ribbons
+inside each accepted vane. Their roots follow the cambered rachis crown; their
+tips stop at `82%` of the local asymmetric, rippled half-width, and their count
+quantizes from zero to `10`, `9`, or `18` pairs with final-output coverage.
+Across the same 253-frame, 13-view orbit, expected apertures and hole-component
+counts remained exact. One lower opposite-rear hole contracted from `6` to `5`
+pixels; only `13` active and `11` fully covered identity pixels were added over
+the full matrix, while `126` already-covered pixels changed to class-`4` detail
+ownership. The ribbons are aggregate optical bundles, not a claim that
+individual American-crow barbs have been measured. Shaft radii, bundle radii,
+and color contrast remain presentation estimates.
 
 The cranial surface is not transported as a detached rigid shell during quiet
 standing. Points buried in the trunk-facing nape remain body-anchored, a cubic

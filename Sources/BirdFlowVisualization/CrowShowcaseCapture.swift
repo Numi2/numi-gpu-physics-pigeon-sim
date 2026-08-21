@@ -3752,16 +3752,27 @@ private struct CrowMeshBuilder {
             left: left
           )
         let featherCamber = camberScale * 0.035 * simd_length(chordVector)
+        let rootWidthMeters =
+          resolvedWidthScale * covertOverlap * (isTrailingCourse ? 0.44 : 0.38)
+          * spacing
+        let maximumWidthMeters =
+          resolvedWidthScale * covertOverlap * (isTrailingCourse ? 0.78 : 0.66)
+          * spacing
+        let edgeRippleAmplitude = 0.008
+          + 0.010 * (0.5 + 0.5 * edgeVariation)
+        let edgeRipplePhase = Float.pi * (edgeVariation + 1)
+        let edgeRippleCycles = 1.25
+          + 0.55 * (0.5 + 0.5 * edgeVariation)
+        let vaneRoot = root
+          + dorsalNormal * (0.0015 + abdominalHandoffNormalLift)
+        let vaneTip = surfaceTip
+          + dorsalNormal * (0.0025 + abdominalHandoffNormalLift)
         appendFeatherBlade(
-          root: root + dorsalNormal * (0.0015 + abdominalHandoffNormalLift),
-          tip: surfaceTip + dorsalNormal * (0.0025 + abdominalHandoffNormalLift),
+          root: vaneRoot,
+          tip: vaneTip,
           planeNormal: dorsalNormal,
-          rootWidth:
-            resolvedWidthScale * covertOverlap * (isTrailingCourse ? 0.44 : 0.38)
-            * spacing,
-          maximumWidth:
-            resolvedWidthScale * covertOverlap * (isTrailingCourse ? 0.78 : 0.66)
-            * spacing,
+          rootWidth: rootWidthMeters,
+          maximumWidth: maximumWidthMeters,
           color: SIMD4<Float>(
             (0.008 + 0.002 * rowFraction) * (1 + 0.08 * materialVariation),
             (0.012 + 0.003 * rowFraction) * (1 + 0.06 * materialVariation),
@@ -3772,9 +3783,9 @@ private struct CrowMeshBuilder {
           camber: featherCamber,
           transverseCamberRatio: 0.16,
           vaneAsymmetry: caudalSecondaryHandoffVaneAsymmetry,
-          edgeRippleAmplitude: 0.008 + 0.010 * (0.5 + 0.5 * edgeVariation),
-          edgeRipplePhase: Float.pi * (edgeVariation + 1),
-          edgeRippleCycles: 1.25 + 0.55 * (0.5 + 0.5 * edgeVariation),
+          edgeRippleAmplitude: edgeRippleAmplitude,
+          edgeRipplePhase: edgeRipplePhase,
+          edgeRippleCycles: edgeRippleCycles,
           surfaceFeatherClass: 4,
           // A fixed LOD contract preserves identical temporal topology even
           // while the measured-derived wing changes chord length slightly.
@@ -3789,8 +3800,8 @@ private struct CrowMeshBuilder {
           0.25 + 0.008 * materialVariation
         )
         for segment in CrowWingCovertRachisDetail.segments(
-          root: root + dorsalNormal * (0.0015 + abdominalHandoffNormalLift),
-          tip: surfaceTip + dorsalNormal * (0.0025 + abdominalHandoffNormalLift),
+          root: vaneRoot,
+          tip: vaneTip,
           planeNormal: dorsalNormal,
           camberMeters: featherCamber,
           baseRadiusMeters: min(0.00024, max(0.00010, 0.018 * spacing)),
@@ -3804,6 +3815,38 @@ private struct CrowMeshBuilder {
             endHalfWidth: segment.endRadiusMeters,
             surfaceNormal: dorsalNormal,
             color: rachisColor,
+            surfaceFeatherClass: 4,
+            to: &vertices
+          )
+        }
+        let barbColor = SIMD4<Float>(
+          (0.0088 + 0.0018 * rowFraction) * (1 + 0.06 * materialVariation),
+          (0.0132 + 0.0026 * rowFraction) * (1 + 0.05 * materialVariation),
+          (0.0228 + 0.0036 * rowFraction) * (1 + 0.04 * materialVariation),
+          0.21 + 0.006 * materialVariation
+        )
+        for segment in CrowWingCovertBarbDetail.segments(
+          root: vaneRoot,
+          tip: vaneTip,
+          planeNormal: dorsalNormal,
+          rootWidthMeters: rootWidthMeters,
+          maximumWidthMeters: maximumWidthMeters,
+          camberMeters: featherCamber,
+          transverseCamberRatio: 0.16,
+          vaneAsymmetry: caudalSecondaryHandoffVaneAsymmetry,
+          edgeRippleAmplitude: edgeRippleAmplitude,
+          edgeRipplePhase: edgeRipplePhase,
+          edgeRippleCycles: edgeRippleCycles,
+          lodLengthMeters: 0.12,
+          projectedPixelsPerMeter: projectedPixelsPerMeter
+        ) {
+          appendTaperedRibbon(
+            from: segment.start,
+            to: segment.end,
+            startHalfWidth: segment.startRadiusMeters,
+            endHalfWidth: segment.endRadiusMeters,
+            surfaceNormal: dorsalNormal,
+            color: barbColor,
             surfaceFeatherClass: 4,
             to: &vertices
           )
