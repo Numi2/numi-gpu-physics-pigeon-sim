@@ -494,6 +494,65 @@ struct CrowTakeoffRectrixPose {
     float3 normal;
 };
 
+inline float3 crowFlightRectrixCenterlinePoint(
+    float rawFraction,
+    float rawChordFraction) {
+    float fraction=clamp(rawFraction,0.0f,1.0f);
+    float chordFraction=clamp(rawChordFraction,0.0f,1.0f);
+    float centered=2.0f*fraction-1.0f;
+    float lateral=(fraction-0.5f)*0.145f;
+    float central=1.0f-abs(centered);
+    float3 root=float3(
+        -0.125f,
+        lateral*0.24f,
+        0.005f+0.006f*central
+    );
+    float3 tip=float3(-0.125f,0,0.005f)
+        +float3(-0.190f,0,-0.018f)*(0.96f+0.02f*central)
+        +float3(
+            -0.002f*central,
+            lateral,
+            (fraction-0.5f)*0.036f-0.003f*abs(centered)
+        );
+    return mix(root,tip,chordFraction);
+}
+
+inline float3 crowFlightRectrixCenterlineDerivative(
+    float rawFraction,
+    float rawChordFraction) {
+    float fraction=clamp(rawFraction,0.0f,1.0f);
+    float chordFraction=clamp(rawChordFraction,0.0f,1.0f);
+    float centered=2.0f*fraction-1.0f;
+    float side=centered>0.0f?1.0f:(centered<0.0f?-1.0f:0.0f);
+    float centralDerivative=-2.0f*side;
+    float radialDerivative=2.0f*side;
+    float3 rootDerivative=float3(
+        0.0f,
+        0.145f*0.24f,
+        0.006f*centralDerivative
+    );
+    float3 tipDerivative=float3(
+        (-0.190f*0.02f-0.002f)*centralDerivative,
+        0.145f,
+        -0.018f*0.02f*centralDerivative+0.036f
+            -0.003f*radialDerivative
+    );
+    return mix(rootDerivative,tipDerivative,chordFraction);
+}
+
+inline float3 crowFlightRectrixSurfaceNormal(float rawFraction) {
+    float fraction=clamp(rawFraction,0.0f,1.0f);
+    float3 spanTangent=crowFlightRectrixCenterlineDerivative(
+        fraction,0.55f
+    );
+    float3 root=crowFlightRectrixCenterlinePoint(fraction,0.0f);
+    float3 tip=crowFlightRectrixCenterlinePoint(fraction,1.0f);
+    float3 normal=safeNormalizeCrow(
+        cross(spanTangent,tip-root),float3(0,0,1)
+    );
+    return normal.z<0.0f?-normal:normal;
+}
+
 inline CrowTakeoffRectrixPose crowTakeoffRectrixPose(
     uint packedIdentity,
     float transitionProgress) {
@@ -525,24 +584,9 @@ inline CrowTakeoffRectrixPose crowTakeoffRectrixPose(
         float3(0,0,1)
     );
 
-    float lateral=(fraction-0.5f)*0.145f;
-    float central=1.0f-abs(centered);
-    float3 flightRoot=float3(
-        -0.125f,
-        lateral*0.24f,
-        0.005f+0.006f*central
-    );
-    float3 flightTip=float3(-0.125f,0,0.005f)
-        +float3(-0.190f,0,-0.018f)*(0.96f+0.02f*central)
-        +float3(
-            -0.002f*central,
-            lateral,
-            (fraction-0.5f)*0.036f-0.003f*radialFraction
-        );
-    float3 flightNormal=safeNormalizeCrow(
-        float3(0,-1,0.12f),
-        float3(0,-1,0)
-    );
+    float3 flightRoot=crowFlightRectrixCenterlinePoint(fraction,0.0f);
+    float3 flightTip=crowFlightRectrixCenterlinePoint(fraction,1.0f);
+    float3 flightNormal=crowFlightRectrixSurfaceNormal(fraction);
     float deployment=crowLiveRectrixDeploymentWeight(transitionProgress);
     float3 rootOffset=mix(closedRoot,flightRoot,deployment);
     float3 tipOffset=mix(closedTip,flightTip,deployment);

@@ -463,6 +463,21 @@ flight frames at all three angles found no padded thigh outline or covered
 digital articulation. These are deterministic simulated-raster results, not
 measured feather overlap.
 
+The retained open-tail target now derives every rectrix plane from its local
+fan geometry. At `55%` chord, the closed-form spanwise centerline derivative is
+crossed with the root-to-tip tangent and oriented dorsally; all `12` normals
+remain unit length, orthogonal to both local directions, and retain
+`z = 0.950...0.992`. This replaces the prior constant `(0,-1,0.12)` target,
+which rotated width toward a lateral plane as the tail deployed. In three fresh
+17-frame probes at yaw/pitch `(3.14,0.08)`, `(-2.72,0.30)`, and
+`(2.58,-0.34)`, aggregate hole pixels/components improve from `4/4` to `4/4`,
+`18/12` to `15/9`, and `28/18` to `20/16`; the worst components improve from
+`4`, `17`, and `22` pixels to `4`, `14`, and `13`. At stressed frame `5`,
+visible rectrix pixels change from `1,289`, `2,333`, and `1,740` to `1,296`,
+`2,253`, and `1,657`; by frame `10` they fall from `421`, `912`, and `637` to
+`379`, `788`, and `325`. This qualifies the simulated fan orientation and
+raster continuity, not measured rectrix kinematics or perceptual realism.
+
 Run the presentation with:
 
 ```bash

@@ -152,11 +152,17 @@ Metal blends each root, direction, and normal from the closed standing stack to
 the existing open-flight target over transition progress `0.08...0.62`, while
 the closed tail's identity-specific length graduation returns continuously to
 the open-flight asset lengths; width, rachis, camber, morphology, and
-current/previous state remain continuous. Primaries and secondaries still collapse on their complementary
-handoff schedule, and the separate procedural tail is emitted only in the
-wingbeat presentation. Independent Swift parity checks cover the retained GPU
-state at four phases. This is a continuity and coverage result, not measured
-rectrix deployment kinematics.
+current/previous state remain continuous. The open target's dorsal vane normal
+is reconstructed at `55%` chord from the analytic spanwise derivative of the
+continuous tail fan and its longitudinal feather tangent. This replaces the
+prior nearly lateral constant with identity-specific normals whose
+current `z` components span `0.950...0.992`, so future denser vane templates
+inherit the same curved semantic surface instead of a view-facing sheet.
+Primaries and secondaries still collapse on their complementary handoff
+schedule, and the separate procedural tail is emitted only in the wingbeat
+presentation. Independent Swift parity checks cover the retained GPU state at
+four phases. This is a continuity and coverage result, not measured rectrix
+deployment kinematics.
 
 The folded remex stack now transfers to the live wing from the exposed distal
 identities inward. Primary endpoints begin at `0.20` and advance by `0.08` per

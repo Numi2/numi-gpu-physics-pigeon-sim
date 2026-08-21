@@ -41,6 +41,11 @@ enum CrowTakeoffSequence {
   static let primaryRetainedEndProgressStep: Float = 0.08
   static let terminalSecondaryRetainedEndProgress: Float = 0.30
   static let secondaryRetainedEndProgressStep: Float = 0.06
+  /// The flight rectrix plane is reconstructed analytically from the local fan
+  /// centerline at mid-vane rather than assigned a view-facing normal. Keeping
+  /// this sample semantic and resolution-independent lets denser future
+  /// templates inherit the same tail surface without changing persistent IDs.
+  static let flightRectrixNormalChordFraction: Float = 0.55
   /// The folded live-wing sheet stays broad over the flank, then converges
   /// smoothly into the retained primary/rectrix stack instead of ending as a
   /// pair of constant-width topology blades.
@@ -242,21 +247,14 @@ enum CrowTakeoffSequence {
   static func flightRectrixPose(order: Int, count: Int) -> FlightRectrixPose {
     let boundedCount = max(count, 1)
     let fraction = Float(order) / Float(max(boundedCount - 1, 1))
-    let lateral = (fraction - 0.5) * 0.145
-    let central = 1 - abs(2 * fraction - 1)
-    let rootOffset = SIMD3<Float>(
-      -0.125,
-      lateral * 0.24,
-      0.005 + 0.006 * central
+    let rootOffset = flightRectrixCenterlinePoint(
+      fraction: fraction,
+      chordFraction: 0
     )
-    let tipOffset =
-      SIMD3<Float>(-0.125, 0, 0.005)
-      + SIMD3<Float>(-0.190, 0, -0.018) * (0.96 + 0.02 * central)
-      + SIMD3<Float>(
-        -0.002 * central,
-        lateral,
-        (fraction - 0.5) * 0.036 - 0.003 * abs(2 * fraction - 1)
-      )
+    let tipOffset = flightRectrixCenterlinePoint(
+      fraction: fraction,
+      chordFraction: 1
+    )
     return FlightRectrixPose(
       rootOffset: rootOffset,
       tipOffset: tipOffset,
@@ -264,11 +262,89 @@ enum CrowTakeoffSequence {
         tipOffset - rootOffset,
         fallback: SIMD3<Float>(-1, 0, 0)
       ),
-      normal: safeNormalize(
-        SIMD3<Float>(0, -1, 0.12),
-        fallback: SIMD3<Float>(0, -1, 0)
-      )
+      normal: flightRectrixSurfaceNormal(fraction: fraction)
     )
+  }
+
+  /// Evaluates the continuous root-to-tip centerline for one location across
+  /// the open tail fan. This remains independent of vane tessellation.
+  static func flightRectrixCenterlinePoint(
+    fraction rawFraction: Float,
+    chordFraction rawChordFraction: Float
+  ) -> SIMD3<Float> {
+    let fraction = min(max(rawFraction, 0), 1)
+    let chordFraction = min(max(rawChordFraction, 0), 1)
+    let centered = 2 * fraction - 1
+    let lateral = (fraction - 0.5) * 0.145
+    let central = 1 - abs(centered)
+    let root = SIMD3<Float>(
+      -0.125,
+      lateral * 0.24,
+      0.005 + 0.006 * central
+    )
+    let tip =
+      SIMD3<Float>(-0.125, 0, 0.005)
+      + SIMD3<Float>(-0.190, 0, -0.018) * (0.96 + 0.02 * central)
+      + SIMD3<Float>(
+        -0.002 * central,
+        lateral,
+        (fraction - 0.5) * 0.036 - 0.003 * abs(centered)
+      )
+    return mix(root, tip, chordFraction)
+  }
+
+  /// Closed-form spanwise derivative of `flightRectrixCenterlinePoint`.
+  /// Avoiding a small finite difference keeps Swift/Metal parity beneath the
+  /// existing micrometre-scale root-state gate on future high-density meshes.
+  static func flightRectrixCenterlineDerivative(
+    fraction rawFraction: Float,
+    chordFraction rawChordFraction: Float
+  ) -> SIMD3<Float> {
+    let fraction = min(max(rawFraction, 0), 1)
+    let chordFraction = min(max(rawChordFraction, 0), 1)
+    let centered = 2 * fraction - 1
+    let side: Float = centered > 0 ? 1 : (centered < 0 ? -1 : 0)
+    let centralDerivative = -2 * side
+    let radialDerivative = 2 * side
+    let rootDerivative = SIMD3<Float>(
+      0,
+      0.145 * 0.24,
+      0.006 * centralDerivative
+    )
+    let tipDerivative = SIMD3<Float>(
+      (-0.190 * 0.02 - 0.002) * centralDerivative,
+      0.145,
+      -0.018 * 0.02 * centralDerivative + 0.036
+        - 0.003 * radialDerivative
+    )
+    return mix(rootDerivative, tipDerivative, chordFraction)
+  }
+
+  /// Reconstructs the local dorsal normal from the centerline tangent across
+  /// the continuous fan and the longitudinal feather tangent. The prior
+  /// lateral constant rotated vane width into a vertical sheet.
+  static func flightRectrixSurfaceNormal(
+    fraction rawFraction: Float
+  ) -> SIMD3<Float> {
+    let fraction = min(max(rawFraction, 0), 1)
+    let spanTangent = flightRectrixCenterlineDerivative(
+      fraction: fraction,
+      chordFraction: flightRectrixNormalChordFraction
+    )
+    let root = flightRectrixCenterlinePoint(
+      fraction: fraction,
+      chordFraction: 0
+    )
+    let tip = flightRectrixCenterlinePoint(
+      fraction: fraction,
+      chordFraction: 1
+    )
+    var normal = safeNormalize(
+      simd_cross(spanTangent, tip - root),
+      fallback: SIMD3<Float>(0, 0, 1)
+    )
+    if normal.z < 0 { normal = -normal }
+    return normal
   }
 
   static func standingPose(phase: Float) -> CrowStandingPoseSample {

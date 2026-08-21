@@ -200,6 +200,28 @@ func openFlightRectrixTargetsRetainConnectedRootFan() {
   #expect(poses.last!.tipOffset.z - poses.first!.tipOffset.z > 0.035)
 }
 
+@Test("open-flight rectrix normals follow the local dorsal fan surface")
+func openFlightRectrixNormalsFollowLocalDorsalFanSurface() {
+  let count = CrowClosedTailAnatomy.rectrixCount
+  #expect(CrowTakeoffSequence.flightRectrixNormalChordFraction == 0.55)
+  for order in 0..<count {
+    let fraction = Float(order) / Float(count - 1)
+    let pose = CrowTakeoffSequence.flightRectrixPose(
+      order: order,
+      count: count
+    )
+    let spanTangent = CrowTakeoffSequence.flightRectrixCenterlineDerivative(
+      fraction: fraction,
+      chordFraction: CrowTakeoffSequence.flightRectrixNormalChordFraction
+    )
+    #expect(abs(simd_length(pose.normal) - 1) < 1e-6)
+    #expect(pose.normal.z > 0.94)
+    #expect(abs(pose.normal.y) < 0.31)
+    #expect(abs(simd_dot(pose.normal, pose.direction)) < 1e-5)
+    #expect(abs(simd_dot(pose.normal, spanTangent)) < 1e-7)
+  }
+}
+
 @Test("retained rectrices unfold continuously from the closed stack")
 func retainedRectricesUnfoldContinuouslyFromClosedStack() {
   #expect(CrowTakeoffSequence.retainedFeatherHandoffStartProgress == 0.08)
