@@ -2502,14 +2502,14 @@ inline float3 showcaseCrowLinearRadiance(
         *grazing*mix(0.25f,1.0f,flightFeather);
     float vaneEdge=persistentVane*smoothstep(0.78f,0.98f,abs(signedWidth))
         *mix(0.35f,1.0f,flightFeather);
-    // Body vane barbs are not a single polished plate. Tilt only the tight
-    // specular sample across the resolved barb direction, using the stable
-    // per-feather phase carried by the procedural vane. The three-degree
-    // bound preserves the owning geometric normal and all AOV contracts.
+    // Body vane barbs are not a single polished plate. Tilt only the specular
+    // sample across the resolved barb direction, using the stable per-feather
+    // phase carried by the procedural vane. Body contours keep a bounded
+    // 1.4-degree normal perturbation; flight-feather barbules remain unchanged.
     float3 bodyBarbAxis=safeNormalizeCrow(
         cross(normal,featherAxis),float3(0.0f,1.0f,0.0f)
     );
-    float bodyBarbTilt=0.052f*bodyContourVane*localBarbWave
+    float bodyBarbTilt=0.024f*bodyContourVane*localBarbWave
         *(1.0f-smoothstep(0.72f,0.96f,abs(signedWidth)));
     float barbuleTilt=mix(0.006f,0.014f,flightFeather)
         *interlockingBarbules.x;
@@ -2518,7 +2518,13 @@ inline float3 showcaseCrowLinearRadiance(
             +0.45f*barbuleTilt*featherAxis,
         normal
     );
-    float featherSpecular=pow(saturate(dot(specularNormal,halfVector)),92.0f);
+    // Overlapping body contours form a broader collective cortex response at
+    // whole-bird distance. Preserve the tight exponent on exposed flight
+    // feathers while preventing every body vane from becoming a silver rib.
+    float sharpExponent=mix(92.0f,44.0f,bodyContourVane);
+    float featherSpecular=pow(
+        saturate(dot(specularNormal,halfVector)),sharpExponent
+    );
     float softSpecular=pow(saturate(dot(normal,halfVector)),24.0f);
     float diffuse=0.28f+0.62f*ndk+0.16f*ndf+0.10f*nds;
     float flightDarkening=mix(1.0f,0.58f,flightFeather);
@@ -2551,16 +2557,17 @@ inline float3 showcaseCrowLinearRadiance(
     classSharpScale=mix(classSharpScale,0.72f,rectrixVane);
     classSharpScale=mix(classSharpScale,0.48f,greaterCovertVane);
     classSharpScale=mix(classSharpScale,0.42f,underwingCovertVane);
-    classSharpScale=mix(classSharpScale,0.98f,dorsalBodyVane);
-    classSharpScale=mix(classSharpScale,0.94f,flankBodyVane);
-    classSharpScale=mix(classSharpScale,0.88f,ventralBodyVane);
-    classSharpScale=mix(classSharpScale,0.60f,headNeckVane);
-    classSharpScale=mix(classSharpScale,0.38f,foreheadVane);
-    classSharpScale=mix(classSharpScale,0.52f,gularVane);
+    classSharpScale=mix(classSharpScale,0.32f,dorsalBodyVane);
+    classSharpScale=mix(classSharpScale,0.30f,flankBodyVane);
+    classSharpScale=mix(classSharpScale,0.28f,ventralBodyVane);
+    classSharpScale=mix(classSharpScale,0.28f,headNeckVane);
+    classSharpScale=mix(classSharpScale,0.20f,foreheadVane);
+    classSharpScale=mix(classSharpScale,0.24f,gularVane);
     color+=sharpTint*featherSpecular*mix(0.30f,1.0f,flightFeather)
         *classSharpScale;
     color+=softTint*softSpecular;
-    color+=anisotropicSpecular
+    float classAnisotropicScale=mix(1.0f,0.46f,bodyContourVane);
+    color+=classAnisotropicScale*anisotropicSpecular
         *mix(float3(0.020f,0.030f,0.046f),float3(0.012f,0.020f,0.034f),flightFeather);
     color*=1.0f-0.055f*persistentVane*(1.0f-localBarbs);
     color+=rachis*mix(0.20f,1.0f,flightFeather)

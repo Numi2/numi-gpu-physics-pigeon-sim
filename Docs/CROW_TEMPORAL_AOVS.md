@@ -90,15 +90,17 @@ audit path and temporal scale:
   /tmp/crow.mp4 /tmp/crow.png standing /tmp/crow-aov-audit.json 2
 ```
 
-The schema-10 JSON report records format and coordinate conventions plus per-frame
+The schema-11 JSON report records format and coordinate conventions plus per-frame
 finite-pixel count, HDR values above one, exact active IDs, visible feather IDs,
 fully covered samples, unit-normal error, depth range, moving-pixel count,
 maximum motion, and bird/support vertical centroids. It also records exact
 visible/full-coverage counts and screen bounds for every persistent feather,
 wing-surface cell, and topology-bound dorsal covert. Up to `128` longest
 exterior-connected background runs bracketed by bird pixels on image rows or
-columns retain both boundary class codes and surface-primitive identifiers,
-plus full packed anatomical identities. At most four samples per axis and
+columns retain both boundary class codes, surface-primitive identifiers, and
+full packed anatomical identities. Visible feather classes retain scene-linear
+luminance mean, standard deviation, maximum, and same-class neighbour variation
+before tone mapping. At most four samples per axis and
 ordered class pair are retained, so one large projection cannot erase other
 anatomical owners.
 These runs expose shoulder and feather-course slots that diagonal exterior

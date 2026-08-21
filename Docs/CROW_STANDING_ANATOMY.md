@@ -178,6 +178,42 @@ inspection shows denser caudal surface breakup without a diagonal bridge or a
 new wing-tail membrane. This qualifies simulated contour density, not measured
 American-crow rump-feather counts.
 
+The native AOV report schema is now version `11`. Each frame records
+scene-linear luminance mean, standard deviation, maximum, and mean absolute
+same-class neighbour difference for every visible bird feather class. These
+statistics are computed before display tone mapping and exclude the support and
+environment, allowing body-highlight refinements to be compared without
+embedding or optimizing against a real-crow image.
+
+The body-contour material now evaluates a broader, lower-energy sharp lobe than
+the exposed flight feathers: its exponent is `44` rather than `92`, its
+per-class amplitude is bounded to `0.20-0.32`, and its procedural barb-normal
+tilt is reduced from `0.052` to `0.024` radians. Its additive anisotropic lobe
+is scaled to `0.46` while the broader cortex sheen remains intact. The
+flight-feather lobe, barbule direction signal, geometry, identities, and albedo
+remain unchanged.
+This preserves gloss instead of making the plumage matte: comparative glossy
+black-feather measurements associate the response with a thin regular keratin
+cortex over a continuous melanin layer
+([Maia et al. 2011](https://pubmed.ncbi.nlm.nih.gov/21123257/)). The choice to
+broaden the whole-bird body response is also consistent with a surface feather
+model in which far-field appearance and subtle goniochromatism emerge from
+angular masking between barbs and barbules
+([Padrón-Griffe et al. 2024](https://graphics.unizar.es/projects/FeathersAppearance_2024/)).
+The exact lobe bounds remain simulated presentation estimates, not measured
+American-crow optical parameters.
+
+At frozen frame `1` in the new rear-low, front-low, and dorsal-rear captures,
+all body-class pixel counts remain exact. The first two low-light views retain
+their scene-linear distributions within `0.49%`. In the revealing dorsal-rear
+view, class-`5` luminance standard deviation falls `30.47%`, its maximum falls
+`22.23%`, and same-class neighbour variation falls `24.65%`; class-`6`
+standard deviation and neighbour variation fall `26.07%` and `24.19%` while
+its mean falls `5.86%`. Frozen-frame inspection retains the black body volume,
+flight-feather contrast, and silhouette while reducing the repeated silver-rib
+response. These are renderer diagnostics at three simulated cameras, not a
+perceptual equivalence claim.
+
 The twelve procedural wingbeat rectrices resolve an LOD-selected,
 piecewise-tapered rachis inside each coverage-preserving vane. Depending on
 final-output coverage, the shaft is omitted or represented by `4`, `8`, or `12`

@@ -84,6 +84,7 @@ struct CrowShowcaseFrame {
     var fullyCoveredFeatherClassPixelCounts = [Int](repeating: 0, count: 32)
     var birdMask = [Bool](repeating: false, count: pixelCount)
     var featherClassCodes = [UInt8](repeating: 0, count: pixelCount)
+    var linearLuminances = [Float](repeating: 0, count: pixelCount)
     var surfacePrimitiveIdentifiers = [UInt32](repeating: 0, count: pixelCount)
     var packedSurfaceIdentities = [UInt32](repeating: 0, count: pixelCount)
 
@@ -106,6 +107,10 @@ struct CrowShowcaseFrame {
         && deviceDepthValue.isFinite
       if allFinite { finitePixelCount += 1 }
       let hdrMaximum = hdrPixel.prefix(3).max() ?? 0
+      linearLuminances[pixel] =
+        0.2126 * hdr[hdrOffset]
+        + 0.7152 * hdr[hdrOffset + 1]
+        + 0.0722 * hdr[hdrOffset + 2]
       maximumHDRComponent = max(maximumHDRComponent, hdrMaximum)
       if hdrMaximum > 1 { aboveOneHDRPixelCount += 1 }
 
@@ -237,6 +242,13 @@ struct CrowShowcaseFrame {
       width: width,
       height: height
     )
+    let featherClassLuminanceAudits = Self.featherClassLuminanceAudits(
+      birdMask: birdMask,
+      featherClassCodes: featherClassCodes,
+      linearLuminances: linearLuminances,
+      width: width,
+      height: height
+    )
     let parity = nativeReference.map {
       Self.displayError(
         displayTexture,
@@ -334,6 +346,7 @@ struct CrowShowcaseFrame {
       wingCovertIdentities: wingCovertIdentities,
       visibleFeatherClassPixelCounts: visibleFeatherClassPixelCounts,
       fullyCoveredFeatherClassPixelCounts: fullyCoveredFeatherClassPixelCounts,
+      featherClassLuminanceAudits: featherClassLuminanceAudits,
       enclosedBirdSilhouetteHolePixelCount: silhouetteHoles.pixelCount,
       enclosedBirdSilhouetteHoleComponentCount: silhouetteHoles.componentCount,
       largestEnclosedBirdSilhouetteHolePixelCount:
@@ -371,6 +384,79 @@ struct CrowShowcaseFrame {
       nativeBirdSilhouetteIntersectionOverUnion: parity?.silhouetteIntersectionOverUnion,
       nativeForegroundGradientEnergyRatio: parity?.foregroundGradientEnergyRatio
     )
+  }
+
+  /// Summarizes scene-linear brightness by semantic feather class. The
+  /// right/down neighbor census counts every same-class edge once and exposes
+  /// repeated high-frequency vane highlights without depending on a target
+  /// photograph or display tone mapping.
+  static func featherClassLuminanceAudits(
+    birdMask: [Bool],
+    featherClassCodes: [UInt8],
+    linearLuminances: [Float],
+    width: Int,
+    height: Int
+  ) -> [CrowFeatherClassLuminanceAudit] {
+    let pixelCount = width * height
+    precondition(width >= 0 && height >= 0 && birdMask.count == pixelCount)
+    precondition(featherClassCodes.count == pixelCount)
+    precondition(linearLuminances.count == pixelCount)
+
+    var counts = [Int](repeating: 0, count: 32)
+    var sums = [Double](repeating: 0, count: 32)
+    var squaredSums = [Double](repeating: 0, count: 32)
+    var maxima = [Float](repeating: 0, count: 32)
+    var neighborCounts = [Int](repeating: 0, count: 32)
+    var neighborDifferenceSums = [Double](repeating: 0, count: 32)
+
+    for pixel in 0..<pixelCount where birdMask[pixel] {
+      let featherClass = Int(min(featherClassCodes[pixel], 31))
+      let luminance = linearLuminances[pixel]
+      counts[featherClass] += 1
+      sums[featherClass] += Double(luminance)
+      squaredSums[featherClass] += Double(luminance * luminance)
+      maxima[featherClass] = max(maxima[featherClass], luminance)
+
+      let x = pixel % width
+      let y = pixel / width
+      if x + 1 < width {
+        let neighbor = pixel + 1
+        if birdMask[neighbor] && featherClassCodes[neighbor] == featherClassCodes[pixel] {
+          neighborCounts[featherClass] += 1
+          neighborDifferenceSums[featherClass] +=
+            Double(abs(luminance - linearLuminances[neighbor]))
+        }
+      }
+      if y + 1 < height {
+        let neighbor = pixel + width
+        if birdMask[neighbor] && featherClassCodes[neighbor] == featherClassCodes[pixel] {
+          neighborCounts[featherClass] += 1
+          neighborDifferenceSums[featherClass] +=
+            Double(abs(luminance - linearLuminances[neighbor]))
+        }
+      }
+    }
+
+    return (0..<counts.count).compactMap { featherClass in
+      let count = counts[featherClass]
+      guard count > 0 else { return nil }
+      let mean = sums[featherClass] / Double(count)
+      let variance = max(0, squaredSums[featherClass] / Double(count) - mean * mean)
+      return CrowFeatherClassLuminanceAudit(
+        featherClassCode: UInt8(featherClass),
+        pixelCount: count,
+        meanLinearLuminance: Float(mean),
+        standardDeviationLinearLuminance: Float(sqrt(variance)),
+        maximumLinearLuminance: maxima[featherClass],
+        meanSameClassNeighborAbsoluteLuminanceDifference:
+          neighborCounts[featherClass] > 0
+            ? Float(
+              neighborDifferenceSums[featherClass]
+                / Double(neighborCounts[featherClass])
+            )
+            : 0
+      )
+    }
   }
 
   private static func displayError(
@@ -1001,6 +1087,15 @@ struct CrowExteriorSilhouetteSlotRunAudit: Codable, Equatable {
   let secondBoundaryPackedIdentity: UInt32
 }
 
+struct CrowFeatherClassLuminanceAudit: Codable, Equatable {
+  let featherClassCode: UInt8
+  let pixelCount: Int
+  let meanLinearLuminance: Float
+  let standardDeviationLinearLuminance: Float
+  let maximumLinearLuminance: Float
+  let meanSameClassNeighborAbsoluteLuminanceDifference: Float
+}
+
 struct CrowShowcaseAOVFrameAudit: Codable, Equatable {
   let frameIndex: Int
   let width: Int
@@ -1039,6 +1134,9 @@ struct CrowShowcaseAOVFrameAudit: Codable, Equatable {
   let visibleFeatherClassPixelCounts: [Int]
   /// The same 32-bin census restricted to full geometric sample coverage.
   let fullyCoveredFeatherClassPixelCounts: [Int]
+  /// Scene-linear luminance distribution and local variation for each visible
+  /// bird feather class. Support and environment identities are excluded.
+  let featherClassLuminanceAudits: [CrowFeatherClassLuminanceAudit]
   let enclosedBirdSilhouetteHolePixelCount: Int
   let enclosedBirdSilhouetteHoleComponentCount: Int
   let largestEnclosedBirdSilhouetteHolePixelCount: Int
@@ -1178,7 +1276,7 @@ struct CrowShowcaseAOVAuditReport: Codable, Equatable {
   let frames: [CrowShowcaseAOVFrameAudit]
 
   init(frames: [CrowShowcaseAOVFrameAudit]) {
-    schemaVersion = 10
+    schemaVersion = 11
     colorSpace = "scene-linear extended range; display output is tone mapped separately"
     motionConvention =
       "current pixel to previous pixel in upper-left-origin pixel units; MetalFX scale 1"

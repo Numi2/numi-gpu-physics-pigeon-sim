@@ -462,6 +462,30 @@ func CrowCaptureAcceptsBoundedCameraOverrides() throws {
   }
 }
 
+@Test("Crow AOV audit measures feather-class linear luminance")
+func crowAOVAuditMeasuresFeatherClassLinearLuminance() {
+  let audits = CrowShowcaseFrame.featherClassLuminanceAudits(
+    birdMask: [true, true, false, true, true, true],
+    featherClassCodes: [5, 5, 0, 5, 6, 6],
+    linearLuminances: [1, 3, 0, 5, 2, 6],
+    width: 3,
+    height: 2
+  )
+  #expect(audits.map(\.featherClassCode) == [5, 6])
+  let body = audits[0]
+  #expect(body.pixelCount == 3)
+  #expect(abs(body.meanLinearLuminance - 3) < 1e-6)
+  #expect(abs(body.standardDeviationLinearLuminance - sqrt(8 / 3)) < 1e-5)
+  #expect(body.maximumLinearLuminance == 5)
+  #expect(abs(body.meanSameClassNeighborAbsoluteLuminanceDifference - 3) < 1e-6)
+  let adjacentClass = audits[1]
+  #expect(adjacentClass.pixelCount == 2)
+  #expect(adjacentClass.meanLinearLuminance == 4)
+  #expect(adjacentClass.standardDeviationLinearLuminance == 2)
+  #expect(adjacentClass.maximumLinearLuminance == 6)
+  #expect(adjacentClass.meanSameClassNeighborAbsoluteLuminanceDifference == 4)
+}
+
 @Test("estimated crow body loft preserves asymmetric anatomical regions")
 func estimatedCrowBodyLoftPreservesAnatomicalRegions() {
   let rings = CrowBodyAnatomy.loftRings
@@ -665,7 +689,7 @@ func estimatedStandingCrowCaptureProducesLoopClosedFrames() throws {
     CrowShowcaseAOVAuditReport.self,
     from: Data(contentsOf: aovAuditURL)
   )
-  #expect(audit.schemaVersion == 10)
+  #expect(audit.schemaVersion == 11)
   #expect(audit.formats["hdrColor"] == "rgba16Float")
   #expect(audit.formats["normalCoverage"] == "rgba16Float")
   #expect(audit.formats["deviceDepth"] == "depth32Float")
@@ -720,6 +744,18 @@ func estimatedStandingCrowCaptureProducesLoopClosedFrames() throws {
     }
   )
   #expect(audit.frames.allSatisfy { $0.visibleFeatherClassPixelCounts.count == 32 })
+  #expect(audit.frames.allSatisfy { !$0.featherClassLuminanceAudits.isEmpty })
+  #expect(
+    audit.frames.allSatisfy { frame in
+      frame.featherClassLuminanceAudits.allSatisfy {
+        $0.pixelCount > 0
+          && $0.meanLinearLuminance.isFinite
+          && $0.standardDeviationLinearLuminance.isFinite
+          && $0.maximumLinearLuminance.isFinite
+          && $0.meanSameClassNeighborAbsoluteLuminanceDifference.isFinite
+      }
+    }
+  )
   #expect(
     audit.frames.allSatisfy {
       $0.visibleFeatherClassPixelCounts.reduce(0, +)
