@@ -80,6 +80,10 @@ ankles move by millimetres.
    showcase coverage; it deliberately remains a deterministic triangle oracle,
    while a future indirect meshlet path should visibility-cull the same records
    rather than lowering anatomical density to recover frame time.
+   Showcase-scale humeral and scapular vanes now reuse that hierarchy but
+   promote edge-only aggregates into paired interior barb bundles at `40 px`
+   projected length. The topology-stable fallback is deliberately more costly;
+   a future curve/meshlet path should emit and cull the same stable records.
 
 3. **Measured appearance, bounded claims.** Implement an energy-bounded,
    anisotropic feather BSDF with separate eumelanin absorption, longitudinal

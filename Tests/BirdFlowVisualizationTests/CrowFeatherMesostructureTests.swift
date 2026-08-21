@@ -17,8 +17,7 @@ func bodyFeatherMesostructureResolvesHierarchy() {
   )
   let vane = CrowFeatherMesostructure.segments(
     for: feather,
-    projectedPixelsPerMeter:
-      (CrowFeatherMesostructure.bodyContourEdgeDetailThresholdPixels + 1)
+    projectedPixelsPerMeter: (CrowFeatherMesostructure.bodyContourEdgeDetailThresholdPixels + 1)
       / feather.referenceLengthMeters
   )
   let barbs = CrowFeatherMesostructure.segments(
@@ -63,8 +62,7 @@ func bodyFeatherEdgeGroupsCrossClosedVaneOutline() {
     let length = simd_distance(feather.rootOffset, feather.tipOffset)
     let segments = CrowFeatherMesostructure.segments(
       for: feather,
-      projectedPixelsPerMeter:
-        (CrowFeatherMesostructure.bodyContourEdgeDetailThresholdPixels + 1)
+      projectedPixelsPerMeter: (CrowFeatherMesostructure.bodyContourEdgeDetailThresholdPixels + 1)
         / feather.referenceLengthMeters
     ).filter { $0.kind == .edgeBarbGroup }
     #expect(segments.count == 25)
@@ -88,7 +86,8 @@ func bodyFeatherEdgeGroupsCrossClosedVaneOutline() {
       #expect(simd_distance(segment.start, segment.end) < 0.012)
 
       if endAxial < 0.99 {
-        let signedSide: Float = simd_dot(segment.end - feather.rootOffset, widthAxis) < 0
+        let signedSide: Float =
+          simd_dot(segment.end - feather.rootOffset, widthAxis) < 0
           ? -1 : 1
         let endLateral = abs(simd_dot(segment.end - feather.rootOffset, widthAxis))
         let vaneEdge = CrowBodyContourShingles.vaneHalfWidth(
@@ -138,7 +137,13 @@ func bodyTractFeathersResolveMesostructure() {
     )
     #expect(silhouette.isEmpty)
     #expect(resolved.filter { $0.kind == .rachis }.count == 4)
-    #expect(resolved.filter { $0.kind == .edgeBarbGroup }.count == 25)
+    if feather.region == .humeral || feather.region == .scapular {
+      #expect(resolved.filter { $0.kind == .barb }.count == 20)
+      #expect(resolved.filter { $0.kind == .edgeBarbGroup }.count == 5)
+    } else {
+      #expect(resolved.filter { $0.kind == .barb }.isEmpty)
+      #expect(resolved.filter { $0.kind == .edgeBarbGroup }.count == 25)
+    }
     #expect(
       resolved.allSatisfy {
         $0.start.x.isFinite && $0.start.y.isFinite && $0.start.z.isFinite

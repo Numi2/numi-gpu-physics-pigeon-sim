@@ -1596,6 +1596,7 @@ private struct CrowMeshBuilder {
     }
     let bodyBounds = bounds(bodyPoints)
     appendCrowAnatomy(
+      states: states,
       bodyCenter: bodyCenter,
       bodyBounds: bodyBounds,
       phase: phase,
@@ -1757,6 +1758,7 @@ private struct CrowMeshBuilder {
   }
 
   private func appendCrowAnatomy(
+    states: [SIMD3<Float>],
     bodyCenter: SIMD3<Float>,
     bodyBounds: (minimum: SIMD3<Float>, maximum: SIMD3<Float>),
     phase: Float,
@@ -1872,19 +1874,37 @@ private struct CrowMeshBuilder {
       projectedPixelsPerMeter: projectedPixelsPerMeter,
       to: &vertices
     )
+    appendAxillaryFeatherTracts(
+      states: states,
+      bodyCenter: posedBodyCenter,
+      transitionProgress: {
+        switch presentation {
+        case .standing: 0
+        case .takeoff:
+          CrowTakeoffSequence.sample(phase: phase).transitionProgress
+        case .wingbeat: 1
+        }
+      }(),
+      projectedPixelsPerMeter: projectedPixelsPerMeter,
+      to: &vertices
+    )
     if let standingPose {
-      appendAxillaryFeatherTracts(
-        bodyCenter: posedBodyCenter,
-        projectedPixelsPerMeter: projectedPixelsPerMeter,
-        to: &vertices
-      )
+      let foldedShellScale: Float = {
+        guard presentation == .takeoff else { return 1 }
+        return CrowTakeoffSequence.foldedShellScale(
+          transitionProgress:
+            CrowTakeoffSequence.sample(phase: phase).transitionProgress
+        )
+      }()
       appendFoldedWingCoverts(
         bodyCenter: posedBodyCenter,
+        deploymentScale: foldedShellScale,
         projectedPixelsPerMeter: projectedPixelsPerMeter,
         to: &vertices
       )
       appendFoldedFlightCoverts(
         bodyCenter: posedBodyCenter,
+        deploymentScale: foldedShellScale,
         projectedPixelsPerMeter: projectedPixelsPerMeter,
         to: &vertices
       )
@@ -2815,6 +2835,7 @@ private struct CrowMeshBuilder {
 
   private func appendFoldedWingCoverts(
     bodyCenter: SIMD3<Float>,
+    deploymentScale: Float,
     projectedPixelsPerMeter: Float,
     to vertices: inout [ColoredVertex]
   ) {
@@ -2843,13 +2864,14 @@ private struct CrowMeshBuilder {
       }
       appendFeatherBlade(
         root: bodyCenter + sample.rootOffset,
-        tip: bodyCenter + sample.tipOffset,
+        tip: bodyCenter + sample.rootOffset
+          + deploymentScale * (sample.tipOffset - sample.rootOffset),
         planeNormal: sample.planeNormal,
-        rootWidth: sample.rootWidthMeters,
-        maximumWidth: sample.maximumWidthMeters,
+        rootWidth: deploymentScale * sample.rootWidthMeters,
+        maximumWidth: deploymentScale * sample.maximumWidthMeters,
         color: color,
         sections: 10,
-        camber: sample.camberMeters,
+        camber: deploymentScale * sample.camberMeters,
         transverseCamberRatio: 0.26,
         vaneAsymmetry: sample.vaneAsymmetry,
         edgeRippleAmplitude: sample.edgeRippleAmplitude,
@@ -2863,9 +2885,13 @@ private struct CrowMeshBuilder {
         to: &vertices
       )
       appendTractFeatherMesostructure(
-        CrowFoldedWingCovertDetail.segments(
-          for: sample,
-          projectedPixelsPerMeter: projectedPixelsPerMeter
+        scaledMesostructureSegments(
+          CrowFoldedWingCovertDetail.segments(
+            for: sample,
+            projectedPixelsPerMeter: projectedPixelsPerMeter
+          ),
+          around: sample.rootOffset,
+          scale: deploymentScale
         ),
         bodyCenter: bodyCenter,
         planeNormal: sample.planeNormal,
@@ -2876,13 +2902,30 @@ private struct CrowMeshBuilder {
   }
 
   private func appendAxillaryFeatherTracts(
+    states: [SIMD3<Float>],
     bodyCenter: SIMD3<Float>,
+    transitionProgress: Float,
     projectedPixelsPerMeter: Float,
     to vertices: inout [ColoredVertex]
   ) {
-    for sample in CrowAxillaryFeatherTracts.visibleSamples(
+    for standingSample in CrowAxillaryFeatherTracts.visibleSamples(
       projectedPixelsPerMeter: projectedPixelsPerMeter
     ) {
+      let sample: CrowAxillaryFeatherSample
+      if let target = axillaryWingTarget(
+        for: standingSample,
+        states: states,
+        bodyCenter: bodyCenter
+      ) {
+        sample = CrowAxillaryWingRootIntegration.retargetedSample(
+          standingSample,
+          wingTargetOffset: target.positionOffset,
+          wingNormal: target.normal,
+          transitionProgress: transitionProgress
+        )
+      } else {
+        sample = standingSample
+      }
       let material = sample.materialVariation
       let color = SIMD4<Float>(
         0.0060 * (1 + 0.08 * material),
@@ -2924,8 +2967,74 @@ private struct CrowMeshBuilder {
     }
   }
 
+  private func axillaryWingTarget(
+    for sample: CrowAxillaryFeatherSample,
+    states: [SIMD3<Float>],
+    bodyCenter: SIMD3<Float>
+  ) -> (positionOffset: SIMD3<Float>, normal: SIMD3<Float>)? {
+    let left = sample.side > 0
+    let partIdentifier: UInt8 = left ? 2 : 3
+    guard
+      let wing = dataset.components.first(where: {
+        $0.partIdentifier == partIdentifier
+      }),
+      wing.vertexCount
+        == CrowFlightWingBodyIntegration.chordCount
+        * CrowFlightWingBodyIntegration.spanCount
+    else { return nil }
+    let chordCoordinate =
+      Float(sample.column)
+      / Float(max(CrowAxillaryFeatherTracts.columnCount - 1, 1))
+      * Float(CrowFlightWingBodyIntegration.chordCount - 1)
+    let firstChord = min(Int(chordCoordinate.rounded(.down)), 7)
+    let chordBlend = chordCoordinate - Float(firstChord)
+    let rowFraction =
+      Float(sample.row)
+      / Float(max(CrowAxillaryFeatherTracts.rowCount - 1, 1))
+    let span = min(
+      max(Int((1 + 4 * (1 - rowFraction)).rounded()), 1),
+      CrowFlightWingBodyIntegration.spanCount - 2
+    )
+    func point(span: Int, chord: Int) -> SIMD3<Float> {
+      states[
+        wing.vertexOffset
+          + span * CrowFlightWingBodyIntegration.chordCount + chord
+      ]
+    }
+    func interpolated(span: Int) -> SIMD3<Float> {
+      point(span: span, chord: firstChord)
+        + chordBlend
+        * (point(span: span, chord: firstChord + 1)
+          - point(span: span, chord: firstChord))
+    }
+    let target = interpolated(span: span)
+    let chordVector =
+      point(span: span, chord: firstChord + 1)
+      - point(span: span, chord: firstChord)
+    let spanVector =
+      interpolated(span: span + 1)
+      - interpolated(span: span - 1)
+    let chordDirection = safeNormalize(
+      chordVector,
+      fallback: SIMD3<Float>(-1, 0, 0)
+    )
+    let spanDirection = safeNormalize(
+      spanVector,
+      fallback: SIMD3<Float>(0, left ? 1 : -1, 0)
+    )
+    return (
+      target - bodyCenter,
+      CrowFlightWingBodyIntegration.underwingCovertSurfaceNormal(
+        chordDirection: chordDirection,
+        spanDirection: spanDirection,
+        left: left
+      )
+    )
+  }
+
   private func appendFoldedFlightCoverts(
     bodyCenter: SIMD3<Float>,
+    deploymentScale: Float,
     projectedPixelsPerMeter: Float,
     to vertices: inout [ColoredVertex]
   ) {
@@ -2942,13 +3051,14 @@ private struct CrowMeshBuilder {
       )
       appendFeatherBlade(
         root: bodyCenter + sample.rootOffset,
-        tip: bodyCenter + sample.tipOffset,
+        tip: bodyCenter + sample.rootOffset
+          + deploymentScale * (sample.tipOffset - sample.rootOffset),
         planeNormal: sample.planeNormal,
-        rootWidth: sample.rootWidthMeters,
-        maximumWidth: sample.maximumWidthMeters,
+        rootWidth: deploymentScale * sample.rootWidthMeters,
+        maximumWidth: deploymentScale * sample.maximumWidthMeters,
         color: color,
         sections: 10,
-        camber: sample.camberMeters,
+        camber: deploymentScale * sample.camberMeters,
         transverseCamberRatio: 0.20,
         vaneAsymmetry: sample.vaneAsymmetry,
         edgeRippleAmplitude: sample.edgeRippleAmplitude,
@@ -2958,6 +3068,22 @@ private struct CrowMeshBuilder {
         lodLengthMeters: simd_distance(sample.rootOffset, sample.tipOffset),
         projectedPixelsPerMeter: projectedPixelsPerMeter,
         to: &vertices
+      )
+    }
+  }
+
+  private func scaledMesostructureSegments(
+    _ segments: [CrowFeatherMesostructureSegment],
+    around root: SIMD3<Float>,
+    scale: Float
+  ) -> [CrowFeatherMesostructureSegment] {
+    segments.map { segment in
+      CrowFeatherMesostructureSegment(
+        kind: segment.kind,
+        start: root + scale * (segment.start - root),
+        end: root + scale * (segment.end - root),
+        startRadiusMeters: scale * segment.startRadiusMeters,
+        endRadiusMeters: scale * segment.endRadiusMeters
       )
     }
   }

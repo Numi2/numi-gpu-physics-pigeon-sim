@@ -1,4 +1,5 @@
 import Testing
+
 @testable import BirdFlowVisualization
 
 @Test("takeoff sequence holds, unfolds, and enters sustained flight")
@@ -17,6 +18,18 @@ func takeoffSequenceStagesAreOrderedAndBounded() {
   #expect(flight.flightProgress == 1)
   #expect(flight.bodyTranslation.z > transition.bodyTranslation.z)
   #expect(flight.flightPhase > transition.flightPhase)
+  #expect(CrowTakeoffSequence.foldedShellScale(transitionProgress: 0) == 1)
+  #expect(
+    CrowTakeoffSequence.foldedShellScale(
+      transitionProgress: CrowTakeoffSequence.foldedShellCollapseStartProgress
+    ) == 1
+  )
+  #expect(
+    CrowTakeoffSequence.foldedShellScale(
+      transitionProgress: CrowTakeoffSequence.foldedShellCollapseEndProgress
+    ) == 0
+  )
+  #expect(CrowTakeoffSequence.foldedShellScale(transitionProgress: 1) == 0)
   #expect(
     CrowFeatherCoverageLOD.projectedPixelsPerMeter(
       viewportHeight: 720,
@@ -110,7 +123,8 @@ func openFlightRectrixTargetsRetainConnectedRootFan() {
     #expect(abs(right.tipOffset.y + left.tipOffset.y) < 1e-7)
   }
   let sortedRoots = poses.map(\.rootOffset.y).sorted()
-  let maximumRootGap = zip(sortedRoots, sortedRoots.dropFirst())
+  let maximumRootGap =
+    zip(sortedRoots, sortedRoots.dropFirst())
     .map { $1 - $0 }
     .max() ?? 0
   #expect(maximumRootGap < 0.004)

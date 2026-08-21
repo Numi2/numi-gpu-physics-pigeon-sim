@@ -29,6 +29,8 @@ enum CrowTakeoffSequence {
 
   static let standingHoldEnd: Float = 0.20
   static let transitionEnd: Float = 0.56
+  static let foldedShellCollapseStartProgress: Float = 0.16
+  static let foldedShellCollapseEndProgress: Float = 0.82
   static let terminalPrimaryHandoffMaximumLateralOffsetMeters: Float = 0.004
   static let terminalPrimaryHandoffStartProgress: Float = 0.004
   static let terminalPrimaryHandoffPeakProgress: Float = 0.018
@@ -89,6 +91,24 @@ enum CrowTakeoffSequence {
       flightProgress: flight,
       bodyTranslation: SIMD3<Float>(forward, 0, lift)
     )
+  }
+
+  /// Collapses the body-seated folded-wing shell as the live wing deploys.
+  ///
+  /// Geometry records are retained at zero area after the handoff so current
+  /// and previous takeoff meshes keep identical topology. This is an estimated
+  /// presentation transition rather than feather-level deployment dynamics.
+  static func foldedShellScale(transitionProgress: Float) -> Float {
+    let normalized = min(
+      max(
+        (transitionProgress - foldedShellCollapseStartProgress)
+          / (foldedShellCollapseEndProgress
+            - foldedShellCollapseStartProgress),
+        0
+      ),
+      1
+    )
+    return 1 - smootherstep(normalized)
   }
 
   /// Open-flight target for one presentation rectrix. Centralizing the fan

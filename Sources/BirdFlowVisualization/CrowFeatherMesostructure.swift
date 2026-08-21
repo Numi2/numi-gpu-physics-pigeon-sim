@@ -22,6 +22,7 @@ struct CrowFeatherMesostructureSegment: Equatable {
 enum CrowFeatherMesostructure {
   static let bodyContourEdgeDetailThresholdPixels: Float = 96
   static let dorsalBodyContourDetailThresholdPixels: Float = 48
+  static let shoulderInteriorBarbThresholdPixels: Float = 40
 
   static func segments(
     for feather: CrowBodyContourShingle,
@@ -47,7 +48,10 @@ enum CrowFeatherMesostructure {
   ) -> [CrowFeatherMesostructureSegment] {
     segments(
       frame: Frame(feather: feather),
-      projectedPixelsPerMeter: projectedPixelsPerMeter
+      projectedPixelsPerMeter: projectedPixelsPerMeter,
+      promoteInteriorBarbs: (feather.region == .humeral || feather.region == .scapular)
+        && simd_distance(feather.rootOffset, feather.tipOffset)
+          * projectedPixelsPerMeter >= shoulderInteriorBarbThresholdPixels
     )
   }
 
@@ -93,7 +97,8 @@ enum CrowFeatherMesostructure {
 
   private static func segments(
     frame: Frame,
-    projectedPixelsPerMeter: Float
+    projectedPixelsPerMeter: Float,
+    promoteInteriorBarbs: Bool = false
   ) -> [CrowFeatherMesostructureSegment] {
     let tessellation = CrowFeatherCoverageLOD.tessellation(
       lengthMeters: frame.referenceLengthMeters,
@@ -115,7 +120,9 @@ enum CrowFeatherMesostructure {
       to: &result
     )
     appendBarbs(
-      pairCount: tessellation.barbPairs,
+      pairCount: promoteInteriorBarbs
+        ? max(tessellation.barbPairs, tessellation.edgeBarbPairs)
+        : tessellation.barbPairs,
       edgePairCount: tessellation.edgeBarbPairs,
       barbulesPerBarb: tessellation.barbulesPerBarb,
       projectedPixelsPerMeter: projectedPixelsPerMeter,
@@ -333,7 +340,8 @@ enum CrowFeatherMesostructure {
 
     func halfWidth(at axial: Float, signedWidth: Float = 0) -> Float {
       let t = clamp(axial)
-      let bodyEnvelope = rootEnvelopeRatio
+      let bodyEnvelope =
+        rootEnvelopeRatio
         + (1 - rootEnvelopeRatio) * pow(max(sin(Float.pi * t), 0), 0.58)
       let tipTaper = 1 - 0.985 * pow(t, 3.2)
       let rippleEnvelope = pow(max(sin(Float.pi * t), 0), 2)
@@ -407,13 +415,13 @@ enum CrowFeatherMesostructure {
         let start =
           frame.center(at: axial)
           + side * frame.widthAxis * frame.halfWidth(at: axial, signedWidth: side)
-            * (coarseEdgeOnly ? 0.72 : 0)
+          * (coarseEdgeOnly ? 0.72 : 0)
           + frame.normal * (coarseEdgeOnly ? 0.00010 : 0.00005)
         let edgeExtension = baseExtension * (0.86 + 0.14 * identity)
         let end =
           frame.center(at: reachAxial)
           + side * frame.widthAxis
-            * (frame.halfWidth(at: reachAxial, signedWidth: side) + edgeExtension)
+          * (frame.halfWidth(at: reachAxial, signedWidth: side) + edgeExtension)
           + frame.normal * (coarseEdgeOnly ? 0.00018 : 0.00008)
         result.append(
           CrowFeatherMesostructureSegment(

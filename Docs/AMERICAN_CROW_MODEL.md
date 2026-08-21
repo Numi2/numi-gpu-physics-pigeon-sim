@@ -120,6 +120,17 @@ Sparse diagnostic captures can set `--capture-crow-camera-yaw` and
 from side, front, rear, overhead, and underside views without changing the
 release camera or multiplying appearance-only review frames.
 
+During takeoff, body-owned axillary follicles retain their exact roots and
+estimated lengths while their vane direction and normal rotate toward targets
+sampled from the live inner-wing topology. Dorsal rows carry more of this
+bounded handoff than ventral rows. The folded body-seated shell simultaneously
+collapses in area while retaining its vertex inventory, avoiding a temporal
+topology change when the articulated wing becomes visible. This is an
+estimated presentation coupling. [Hieronymus (2016)](https://pmc.ncbi.nlm.nih.gov/articles/PMC5055087/)
+supports the general role of covert linkages and smooth muscle in a morphing
+avian wing, but its rock-pigeon anatomy does not provide American-crow
+attachment coordinates or the encoded blend weights.
+
 Procedural contour and folded-wing feathers select quantized tessellation from
 their projected length at the final output resolution. The four asset LOD
 thresholds drive silhouette, curved vane shell, rachis, paired-barb, and

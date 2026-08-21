@@ -311,6 +311,22 @@ femoral and `50` crural vanes per side below `1400 px/m`, then switches to all
 `360`, `108`, and `98` identities at full density. The full `1280 x 720`
 standing view clears that gate and retains every high-quality identity.
 
+The standing-to-flight presentation now preserves that body coverage while
+changing ownership at the shoulder. Axillary roots and vane lengths remain
+fixed to the trunk, but deployment rotates their directions and normals toward
+the live inner wing with a stronger dorsal than ventral coupling. Folded-wing
+coverts keep a topology-stable zero-area record after their visual handoff
+instead of remaining as a second expanded shell beneath the open wing.
+Humeral and scapular vanes whose projected length reaches `40 px` promote their
+coarse edge aggregates into paired interior barb bundles without moving the
+owning vane edge. In a new low rear-quarter 25-frame audit, enclosed-hole pixels
+fell from `105` to `99` and components from `67` to `65`; the expected lower
+body aperture remained `34,028` pixels. Three additional 17-frame dorsal-rear,
+under-rear, and front-starboard probes reduced combined holes from `312` to
+`310` and components from `218` to `216`, preserved the `6` expected-aperture
+pixels, and kept the largest hole at `33` pixels. These are raster coverage
+checks, not measured feather dynamics or proof of perceptual realism.
+
 Run the presentation with:
 
 ```bash

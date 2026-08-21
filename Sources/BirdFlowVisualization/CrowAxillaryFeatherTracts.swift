@@ -128,7 +128,8 @@ enum CrowAxillaryFeatherTracts {
               side: side
             )
           )
-          let maximumWidth = max(0.0060, 1.32 * circumferentialSpacing)
+          let maximumWidth =
+            max(0.0060, 1.32 * circumferentialSpacing)
             * (1 + 0.055 * shapeIdentity)
           result.append(
             CrowAxillaryFeatherSample(
@@ -212,5 +213,96 @@ enum CrowAxillaryFeatherTracts {
     value &*= 0x846C_A68B
     value ^= value >> 16
     return 2 * Float(value & 0x00FF_FFFF) / Float(0x00FF_FFFF) - 1
+  }
+}
+
+/// Couples body-owned axillary feathers to the live inner wing without moving
+/// their follicles or stretching their estimated lengths.
+///
+/// The standing tract points caudally along the flank. During deployment its
+/// direction and vane normal rotate toward topology-derived inner-wing targets,
+/// with the dorsal axillary rows following more strongly than the ventral rows.
+/// This is a presentation constraint, not a measured crow linkage model.
+enum CrowAxillaryWingRootIntegration {
+  static let deploymentStartProgress: Float = 0.20
+  static let deploymentEndProgress: Float = 0.72
+  static let minimumRowCoupling: Float = 0.36
+  static let maximumRowCoupling: Float = 0.92
+
+  static func deploymentWeight(transitionProgress: Float) -> Float {
+    let normalized = min(
+      max(
+        (transitionProgress - deploymentStartProgress)
+          / (deploymentEndProgress - deploymentStartProgress),
+        0
+      ),
+      1
+    )
+    return normalized * normalized * (3 - 2 * normalized)
+  }
+
+  static func retargetedSample(
+    _ sample: CrowAxillaryFeatherSample,
+    wingTargetOffset: SIMD3<Float>,
+    wingNormal: SIMD3<Float>,
+    transitionProgress: Float
+  ) -> CrowAxillaryFeatherSample {
+    let rowFraction =
+      Float(sample.row)
+      / Float(max(CrowAxillaryFeatherTracts.rowCount - 1, 1))
+    let rowCoupling =
+      maximumRowCoupling
+      + (minimumRowCoupling - maximumRowCoupling) * rowFraction
+    let weight =
+      deploymentWeight(transitionProgress: transitionProgress)
+      * rowCoupling
+    let originalVector = sample.tipOffset - sample.rootOffset
+    let length = simd_length(originalVector)
+    let originalDirection = normalized(
+      originalVector,
+      fallback: SIMD3<Float>(-1, 0, 0)
+    )
+    let targetDirection = normalized(
+      wingTargetOffset - sample.rootOffset,
+      fallback: originalDirection
+    )
+    let direction = normalized(
+      originalDirection + weight * (targetDirection - originalDirection),
+      fallback: originalDirection
+    )
+    let resolvedNormal = normalized(
+      sample.planeNormal + weight * (wingNormal - sample.planeNormal),
+      fallback: sample.planeNormal
+    )
+    return CrowAxillaryFeatherSample(
+      side: sample.side,
+      row: sample.row,
+      column: sample.column,
+      rootThetaRadians: sample.rootThetaRadians,
+      tipThetaRadians: sample.tipThetaRadians,
+      rootSurfaceOffset: sample.rootSurfaceOffset,
+      rootOffset: sample.rootOffset,
+      tipOffset: sample.rootOffset + length * direction,
+      planeNormal: resolvedNormal,
+      rootWidthMeters: sample.rootWidthMeters,
+      maximumWidthMeters: sample.maximumWidthMeters,
+      camberMeters: sample.camberMeters,
+      vaneAsymmetry: sample.vaneAsymmetry,
+      edgeRippleAmplitude: sample.edgeRippleAmplitude,
+      edgeRipplePhase: sample.edgeRipplePhase,
+      edgeRippleCycles: sample.edgeRippleCycles,
+      rootEnvelopeRatio: sample.rootEnvelopeRatio,
+      pennaceousStartFraction: sample.pennaceousStartFraction,
+      materialVariation: sample.materialVariation,
+      surfaceFeatherClass: sample.surfaceFeatherClass
+    )
+  }
+
+  private static func normalized(
+    _ value: SIMD3<Float>,
+    fallback: SIMD3<Float>
+  ) -> SIMD3<Float> {
+    let length = simd_length(value)
+    return length > 1e-8 ? value / length : fallback
   }
 }

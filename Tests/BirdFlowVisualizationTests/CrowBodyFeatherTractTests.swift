@@ -3,6 +3,34 @@ import simd
 
 @testable import BirdFlowVisualization
 
+@Test("showcase-scale shoulder vanes resolve interior barb bundles")
+func showcaseScaleShoulderVanesResolveInteriorBarbBundles() throws {
+  let sample = try #require(
+    CrowBodyFeatherTracts.samples().first {
+      $0.region == .scapular && $0.side == 1
+    }
+  )
+  let length = simd_distance(sample.rootOffset, sample.tipOffset)
+  let below = CrowFeatherMesostructure.segments(
+    for: sample,
+    projectedPixelsPerMeter: (CrowFeatherMesostructure.shoulderInteriorBarbThresholdPixels - 1)
+      / length
+  )
+  let promoted = CrowFeatherMesostructure.segments(
+    for: sample,
+    projectedPixelsPerMeter:
+      CrowFeatherMesostructure.shoulderInteriorBarbThresholdPixels / length
+  )
+  #expect(below.contains { $0.kind == .edgeBarbGroup })
+  #expect(!below.contains { $0.kind == .barb })
+  #expect(promoted.contains { $0.kind == .barb })
+  #expect(
+    promoted.filter { $0.kind == .edgeBarbGroup }.count
+      < below.filter { $0.kind == .edgeBarbGroup }.count
+  )
+  #expect(promoted.count == below.count)
+}
+
 @Test("crow body feather tracts overlap the neck and cover both wing roots")
 func crowBodyFeatherTractsOverlapNeckAndCoverWingRoots() {
   let samples = CrowBodyFeatherTracts.samples()
@@ -244,7 +272,8 @@ func crowBodyFeatherTractsOverlapNeckAndCoverWingRoots() {
       )
     }
     for row in 0..<CrowBodyFeatherTracts.humeralRowCount {
-      let course = sideHumeral
+      let course =
+        sideHumeral
         .filter { $0.row == row }
         .sorted { $0.column < $1.column }
       #expect(course.count == CrowBodyFeatherTracts.humeralColumnCount)
@@ -256,7 +285,8 @@ func crowBodyFeatherTractsOverlapNeckAndCoverWingRoots() {
       }
     }
     for column in 0..<CrowBodyFeatherTracts.humeralColumnCount {
-      let crossCourse = sideHumeral
+      let crossCourse =
+        sideHumeral
         .filter { $0.column == column }
         .sorted { $0.row < $1.row }
       for pair in zip(crossCourse, crossCourse.dropFirst()) {

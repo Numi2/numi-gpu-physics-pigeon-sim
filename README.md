@@ -85,6 +85,14 @@ owns its own contained shafts and barb bundles. In takeoff and flight, those
 two exposed ranks are now generated from `124` stable current/previous root
 records by the retained Metal template path instead of being rebuilt as CPU
 triangles; the darker continuity bed remains underneath them.
+The body-to-wing handoff now also follows deployment instead of leaving every
+axillary vane in its grounded caudal direction: follicles and estimated lengths
+remain body-owned while the vane directions and normals blend toward the live
+inner-wing topology. The body-seated folded shell retains stable geometry
+records but collapses to zero area as the articulated wing takes ownership, and
+showcase-scale humeral/scapular vanes promote their edge bundles into contained
+interior barb bundles. These are simulated presentation constraints, not
+measured American-crow feather linkages.
 A locked
 `2,157`-vertex, `3,968`-triangle estimated-hybrid surface now also passes the
 live Apple-Metal geometry and production TRT moving-boundary coupling gates.

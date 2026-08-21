@@ -10,7 +10,7 @@ func axillaryFeathersFormBodySeatedFoldedWingLining() {
   #expect(
     samples.count
       == 2 * CrowAxillaryFeatherTracts.rowCount
-        * CrowAxillaryFeatherTracts.columnCount
+      * CrowAxillaryFeatherTracts.columnCount
   )
   #expect(samples.count == 392)
   #expect(
@@ -51,7 +51,8 @@ func axillaryFeathersFormBodySeatedFoldedWingLining() {
   #expect(samples.map(\.pennaceousStartFraction).max()! == 0.23)
 
   for sample in samples {
-    let rowFraction = Float(sample.row)
+    let rowFraction =
+      Float(sample.row)
       / Float(CrowAxillaryFeatherTracts.rowCount - 1)
     let expectedClearance =
       CrowAxillaryFeatherTracts.shellClearanceMeters
@@ -151,4 +152,89 @@ func axillaryVanesResolveFullDensityMesostructure() {
       }
     )
   }
+}
+
+@Test("axillary deployment follows the live inner wing without moving roots")
+func axillaryDeploymentFollowsLiveInnerWingWithoutMovingRoots() throws {
+  #expect(
+    CrowAxillaryWingRootIntegration.deploymentWeight(
+      transitionProgress: 0
+    ) == 0
+  )
+  #expect(
+    CrowAxillaryWingRootIntegration.deploymentWeight(
+      transitionProgress:
+        CrowAxillaryWingRootIntegration.deploymentStartProgress
+    ) == 0
+  )
+  #expect(
+    CrowAxillaryWingRootIntegration.deploymentWeight(
+      transitionProgress:
+        CrowAxillaryWingRootIntegration.deploymentEndProgress
+    ) == 1
+  )
+  let samples = CrowAxillaryFeatherTracts.samples()
+  let dorsal = try #require(
+    samples.first { $0.side == 1 && $0.row == 0 && $0.column == 13 }
+  )
+  let ventral = try #require(
+    samples.first {
+      $0.side == 1
+        && $0.row == CrowAxillaryFeatherTracts.rowCount - 1
+        && $0.column == 13
+    }
+  )
+  let target = dorsal.rootOffset + SIMD3<Float>(-0.004, 0.060, 0.018)
+  let normal = simd_normalize(SIMD3<Float>(0.08, 0.30, -0.95))
+  let standing = CrowAxillaryWingRootIntegration.retargetedSample(
+    dorsal,
+    wingTargetOffset: target,
+    wingNormal: normal,
+    transitionProgress: 0
+  )
+  #expect(standing == dorsal)
+
+  func deployed(_ sample: CrowAxillaryFeatherSample) -> CrowAxillaryFeatherSample {
+    CrowAxillaryWingRootIntegration.retargetedSample(
+      sample,
+      wingTargetOffset: sample.rootOffset + SIMD3<Float>(-0.004, 0.060, 0.018),
+      wingNormal: normal,
+      transitionProgress: 1
+    )
+  }
+  let dorsalFlight = deployed(dorsal)
+  let ventralFlight = deployed(ventral)
+  for pair in [(dorsal, dorsalFlight), (ventral, ventralFlight)] {
+    #expect(pair.0.rootOffset == pair.1.rootOffset)
+    #expect(
+      abs(
+        simd_distance(pair.0.rootOffset, pair.0.tipOffset)
+          - simd_distance(pair.1.rootOffset, pair.1.tipOffset)
+      ) < 1e-7
+    )
+    #expect(abs(simd_length(pair.1.planeNormal) - 1) < 1e-6)
+    #expect(pair.0.rootWidthMeters == pair.1.rootWidthMeters)
+    #expect(pair.0.maximumWidthMeters == pair.1.maximumWidthMeters)
+    #expect(pair.0.surfaceFeatherClass == pair.1.surfaceFeatherClass)
+  }
+  let targetDirection = simd_normalize(target - dorsal.rootOffset)
+  let dorsalOriginalDirection = simd_normalize(dorsal.tipOffset - dorsal.rootOffset)
+  let dorsalFlightDirection = simd_normalize(
+    dorsalFlight.tipOffset - dorsalFlight.rootOffset
+  )
+  #expect(
+    simd_dot(dorsalFlightDirection, targetDirection)
+      > simd_dot(dorsalOriginalDirection, targetDirection)
+  )
+  let ventralTargetDirection = simd_normalize(
+    ventral.rootOffset + SIMD3<Float>(-0.004, 0.060, 0.018)
+      - ventral.rootOffset
+  )
+  let ventralFlightDirection = simd_normalize(
+    ventralFlight.tipOffset - ventralFlight.rootOffset
+  )
+  #expect(
+    simd_dot(dorsalFlightDirection, targetDirection)
+      > simd_dot(ventralFlightDirection, ventralTargetDirection)
+  )
 }
