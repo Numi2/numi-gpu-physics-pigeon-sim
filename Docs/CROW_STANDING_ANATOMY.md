@@ -327,6 +327,17 @@ under-rear, and front-starboard probes reduced combined holes from `312` to
 pixels, and kept the largest hole at `33` pixels. These are raster coverage
 checks, not measured feather dynamics or proof of perceptual realism.
 
+The deployed chord-`3` live covert course now settles its proximal camber and
+dorsal clearance to `48%` at the root, recovering to full relief across `12`
+span stations while the folded hold, vane width, chord, and every feather
+identity remain exact. A separate 17-frame low rear-quarter probe preserved
+`264` enclosed-hole pixels, `72` components, `4` expected-aperture pixels, and
+the `44`-pixel worst hole while increasing fully covered active pixels by `3`.
+Across the prior three stress views it preserved `310` hole pixels, `216`
+components, `6` expected-aperture pixels, and the `33`-pixel worst hole while
+increasing fully covered active pixels by `13`. These are deterministic raster
+coverage gates, not anatomical measurements.
+
 Run the presentation with:
 
 ```bash

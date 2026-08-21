@@ -3760,6 +3760,14 @@ private struct CrowMeshBuilder {
       }), wing.vertexCount == 9 * 33
     else { return }
     let chordCount = 9
+    let proximalDeploymentProgress: Float = {
+      switch presentation {
+      case .standing: 0
+      case .takeoff:
+        CrowTakeoffSequence.sample(phase: phase).transitionProgress
+      case .wingbeat: 1
+      }
+    }()
     func point(span: Int, chord: Int) -> SIMD3<Float> {
       states[wing.vertexOffset + span * chordCount + chord]
     }
@@ -3906,7 +3914,15 @@ private struct CrowMeshBuilder {
             spanIndex: span,
             left: left
           )
-        let featherCamber = camberScale * 0.035 * simd_length(chordVector)
+        let proximalReliefScale =
+          CrowFlightWingBodyIntegration.covertProximalReliefScale(
+            chordIndex: chord,
+            spanIndex: span,
+            deploymentProgress: proximalDeploymentProgress
+          )
+        let featherCamber =
+          proximalReliefScale * camberScale * 0.035
+          * simd_length(chordVector)
         let rootWidthMeters =
           resolvedWidthScale * covertOverlap * (isTrailingCourse ? 0.44 : 0.38)
           * spacing
@@ -3922,10 +3938,14 @@ private struct CrowMeshBuilder {
           + 0.55 * (0.5 + 0.5 * edgeVariation)
         let vaneRoot =
           root
-          + dorsalNormal * (0.0015 + abdominalHandoffNormalLift)
+          + dorsalNormal
+          * proximalReliefScale
+          * (0.0015 + abdominalHandoffNormalLift)
         let vaneTip =
           surfaceTip
-          + dorsalNormal * (0.0025 + abdominalHandoffNormalLift)
+          + dorsalNormal
+          * proximalReliefScale
+          * (0.0025 + abdominalHandoffNormalLift)
         let vaneColor = SIMD4<Float>(
           (0.008 + 0.002 * rowFraction) * (1 + 0.08 * materialVariation),
           (0.012 + 0.003 * rowFraction) * (1 + 0.06 * materialVariation),

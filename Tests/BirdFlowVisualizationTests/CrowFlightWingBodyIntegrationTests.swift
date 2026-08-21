@@ -160,6 +160,45 @@ func flightCovertCoursesDenselyCoverEveryBodyToWingStation() {
     zip(overlapScales, overlapScales.dropFirst()).allSatisfy { $1 <= $0 }
   )
 
+  let proximalReliefs = (0..<CrowFlightWingBodyIntegration.spanCount).map {
+    CrowFlightWingBodyIntegration.covertProximalReliefScale(
+      chordIndex: 3,
+      spanIndex: $0,
+      deploymentProgress: 1
+    )
+  }
+  #expect(abs(proximalReliefs.first! - 0.48) < 1e-6)
+  #expect(proximalReliefs.allSatisfy { $0 > 0 && $0 <= 1 })
+  #expect(
+    zip(proximalReliefs, proximalReliefs.dropFirst()).allSatisfy { $1 >= $0 }
+  )
+  #expect(
+    proximalReliefs[
+      CrowFlightWingBodyIntegration.covertProximalSeatingSpanCount
+    ] == 1
+  )
+  #expect(proximalReliefs.last == 1)
+  for span in 0..<CrowFlightWingBodyIntegration.spanCount {
+    #expect(
+      CrowFlightWingBodyIntegration.covertProximalReliefScale(
+        chordIndex: 3,
+        spanIndex: span,
+        deploymentProgress: 0
+      ) == 1
+    )
+  }
+  for chord in [5, 6] {
+    #expect(
+      (0..<CrowFlightWingBodyIntegration.spanCount).allSatisfy {
+        CrowFlightWingBodyIntegration.covertProximalReliefScale(
+          chordIndex: chord,
+          spanIndex: $0,
+          deploymentProgress: 1
+        ) == 1
+      }
+    )
+  }
+
   let distalExtensions = (0..<CrowFlightWingBodyIntegration.spanCount).map {
     CrowFlightWingBodyIntegration.covertDistalChordExtension(spanIndex: $0)
   }

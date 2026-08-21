@@ -84,6 +84,10 @@ ankles move by millimetres.
    promote edge-only aggregates into paired interior barb bundles at `40 px`
    projected length. The topology-stable fallback is deliberately more costly;
    a future curve/meshlet path should emit and cull the same stable records.
+   Live chord-`3` covert relief now settles against the proximal wing during
+   deployment without changing width, chord, or identity. Future per-feather
+   rachis/contact dynamics should replace this bounded presentation blend while
+   preserving the same deterministic geometry and coverage oracle.
 
 3. **Measured appearance, bounded claims.** Implement an energy-bounded,
    anisotropic feather BSDF with separate eumelanin absorption, longitudinal

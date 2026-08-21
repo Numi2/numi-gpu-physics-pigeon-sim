@@ -93,6 +93,9 @@ records but collapses to zero area as the articulated wing takes ownership, and
 showcase-scale humeral/scapular vanes promote their edge bundles into contained
 interior barb bundles. These are simulated presentation constraints, not
 measured American-crow feather linkages.
+The middle live covert course also retains its full folded relief, then seats
+its deployed root camber and clearance to `48%` across the first `12` span
+stations; vane width, chord, identity, and the caudal handoff remain unchanged.
 A locked
 `2,157`-vertex, `3,968`-triangle estimated-hybrid surface now also passes the
 live Apple-Metal geometry and production TRT moving-boundary coupling gates.

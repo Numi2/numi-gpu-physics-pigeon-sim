@@ -15,6 +15,8 @@ enum CrowFlightWingBodyIntegration {
   static let articulationSpanCount = 12
   static let covertCourseOverlapScale: Float = 1.24
   static let covertAttachmentMaximumOverlapScale: Float = 1.68
+  static let covertProximalSeatingSpanCount = 12
+  static let covertProximalRootReliefScale: Float = 0.48
   static let covertDistalMaximumChordExtension: Float = 0.70
   static let covertDistalAnteriorMaximumChordExtension: Float = 0.50
   static let covertProximalMaximumChordExtension: Float = 1.60
@@ -134,6 +136,28 @@ enum CrowFlightWingBodyIntegration {
     return 1
       + (covertAttachmentMaximumOverlapScale - 1)
         * (1 - smootherstep(progress))
+  }
+
+  /// Seats the broadest live covert roots into the shoulder volume before
+  /// recovering the established free-wing morphology outside attachment.
+  /// The closed measured-derived wing surface remains the coverage owner.
+  static func covertProximalSeatingWeight(spanIndex: Int) -> Float {
+    smootherstep(
+      clamp(Float(spanIndex) / Float(covertProximalSeatingSpanCount))
+    )
+  }
+
+  static func covertProximalReliefScale(
+    chordIndex: Int,
+    spanIndex: Int,
+    deploymentProgress: Float
+  ) -> Float {
+    guard chordIndex == 3 else { return 1 }
+    let weight = covertProximalSeatingWeight(spanIndex: spanIndex)
+    let deployed =
+      covertProximalRootReliefScale
+      + (1 - covertProximalRootReliefScale) * weight
+    return 1 + smootherstep(clamp(deploymentProgress)) * (deployed - 1)
   }
 
   /// Distal trailing coverts project across the marginal scaffold boundary

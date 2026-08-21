@@ -95,6 +95,14 @@ changing feather identity.
 The full tier preserves the established root-major submission order exactly;
 only reduced tiers switch to the triangle-major density prefixes.
 
+Deployment now settles only the chord-`3` live covert course into the proximal
+wing surface. Its camber and dorsal clearance blend from the unchanged folded
+state to `48%` at the root and recover smoothly to `100%` by span station `12`.
+The operation does not change vane width, chord, root/tip identity, vertex
+inventory, or the caudal chord-`5`/`6` handoff; the closed wing surface remains
+the coverage owner. This is presentation-only relief, not measured covert
+compression or a solver-boundary change.
+
 Those `340` root identities select bounded vane profiles in the shared
 Swift/Metal geometry path. The three reverse secondary-covert courses, one
 reverse primary-covert course, and two dorsal rank classes vary inner/outer
