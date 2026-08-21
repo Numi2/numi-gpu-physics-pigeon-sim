@@ -1790,13 +1790,32 @@ inline float3 showcaseCrowLinearRadiance(
         normal,featherAxis,halfVector,
         longitudinalRoughness,transverseRoughness
     );
-    float rachis=persistentVane
+    float rachis=persistentVane*(1.0f-greaterCovertVane)
         *smoothstep(0.035f,0.16f,axial)
         *(1.0f-smoothstep(0.80f,0.985f,axial))
         *exp2(-42.0f*abs(signedWidth));
+    // Greater coverts are long enough to expose a seated shaft but too short
+    // for a bright remex-style rachis. Resolve a narrow central core, broader
+    // shoulder, and shallow lateral groove entirely inside the owning vane.
+    // This improves close-up structure without adding geometry that can alter
+    // the proven body-wing silhouette at grazing angles.
+    float greaterCovertRachisEnvelope=greaterCovertVane
+        *smoothstep(0.060f,0.16f,axial)
+        *(1.0f-smoothstep(0.76f,0.95f,axial));
+    float greaterCovertRachisCore=greaterCovertRachisEnvelope
+        *exp2(-118.0f*abs(signedWidth));
+    float greaterCovertRachisShoulder=greaterCovertRachisEnvelope
+        *exp2(-46.0f*abs(signedWidth));
+    float greaterCovertRachisGroove=greaterCovertRachisEnvelope
+        *max(
+            exp2(-24.0f*abs(signedWidth))
+                -exp2(-72.0f*abs(signedWidth)),
+            0.0f
+        );
     float barbFrequency=178.0f;
     barbFrequency=mix(barbFrequency,214.0f,primaryVane);
     barbFrequency=mix(barbFrequency,190.0f,secondaryVane);
+    barbFrequency=mix(barbFrequency,186.0f,greaterCovertVane);
     barbFrequency=mix(barbFrequency,180.0f,dorsalBodyVane);
     barbFrequency=mix(barbFrequency,176.0f,flankBodyVane);
     barbFrequency=mix(barbFrequency,172.0f,ventralBodyVane);
@@ -1809,7 +1828,8 @@ inline float3 showcaseCrowLinearRadiance(
     float localBarbWave=crowBandLimitedSine(localBarbAngle);
     float localBarbs=0.5f+0.5f*localBarbWave;
     float2 interlockingBarbules=crowInterlockingBarbuleSignal(
-        axial,signedWidth,featherCoordinates.z,flightFeather
+        axial,signedWidth,featherCoordinates.z,
+        max(flightFeather,0.55f*greaterCovertVane)
     )*persistentVane;
     float barbPhase=520.0f*world.x+390.0f*world.y-270.0f*world.z;
     float barb=0.5f+0.5f*crowBandLimitedSine(barbPhase);
@@ -1881,6 +1901,11 @@ inline float3 showcaseCrowLinearRadiance(
     color*=1.0f-0.055f*persistentVane*(1.0f-localBarbs);
     color+=rachis*mix(0.20f,1.0f,flightFeather)
         *(0.012f+0.025f*ndk)*float3(0.42f,0.56f,0.74f);
+    color*=1.0f-0.022f*greaterCovertRachisGroove;
+    color+=greaterCovertRachisShoulder*(0.004f+0.010f*ndk)
+        *float3(0.24f,0.34f,0.48f);
+    color+=greaterCovertRachisCore*(0.006f+0.016f*ndk)
+        *float3(0.38f,0.50f,0.68f);
     color+=vaneEdge*grazing*classSheenScale
         *float3(0.010f,0.022f,0.042f);
     // Adult crow plumage should remain neutral-black under the warm key. A
