@@ -604,10 +604,29 @@ abdominal, and femoral pixels rise `1.493%` and `1.226%`. Expected lower-body
 apertures remain zero in both views. These are simulated-raster continuity and
 coverage results, not measured external dimensions or perceptual realism.
 
+The upper-leg breakup pass adds deterministic, identity-seeded tip lift,
+tangential splay, and signed centerline curvature to the full-density femoral
+and crural vane fields. Femoral centerline sweep stays below `0.15x` vane width;
+crural sweep stays below `0.17x`. The four anterior femoral junction vanes at
+rows `5...6`, courses `16...17`, remain seated because they roof the projected
+body/gular handoff during takeoff. Feather roots, counts, hip/hock/ankle/digit
+coordinates, and topology remain unchanged. These amplitudes are bounded
+presentation estimates, not measured American-crow feather geometry.
+
+Fresh 17-frame hind-port and ventral-starboard audits at yaw/pitch
+`(-2.05,-0.12)` and `(2.82,-0.52)` preserve enclosed-hole pixels/components
+exactly at `81/41` and `7/7`. Active identity coverage changes
+`364,982 -> 365,074` (`+0.025%`) and `339,311 -> 339,438` (`+0.037%`);
+fully covered AOV pixels change `357,291 -> 357,412` (`+0.034%`) and
+`333,257 -> 333,376` (`+0.036%`). A temporary primitive-ownership trace
+identified and eliminated a one-pixel body/class-`7`/gular-class-`10` handoff
+regression before publication. This qualifies simulated raster continuity, not
+perceptual realism.
+
 The canonical README sequence is fully simulated and contains the native hold,
-transition, and flight path: `800 x 450`, `72` frames at `24 fps`, `8,095,378`
+transition, and flight path: `800 x 450`, `72` frames at `24 fps`, `8,118,994`
 bytes, SHA-256
-`97f093147c02969cc21ebbf6468b1ae707adc5d9d8adb4e479e6577699b5f4d2`.
+`ade9c9d1104c5247b4f757c709dbd6ee73740a8b5ebcbe00eb23179e70acc43a`.
 
 Run the presentation with:
 

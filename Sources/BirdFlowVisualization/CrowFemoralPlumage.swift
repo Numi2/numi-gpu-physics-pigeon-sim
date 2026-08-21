@@ -11,6 +11,7 @@ struct CrowFemoralPlumageFeather: Equatable {
   let rootWidthMeters: Float
   let maximumWidthMeters: Float
   let camberMeters: Float
+  let lateralSweepMeters: Float
   let vaneAsymmetry: Float
   let edgeRippleAmplitude: Float
   let edgeRipplePhase: Float
@@ -103,6 +104,16 @@ enum CrowFemoralPlumage {
           course: course,
           salt: 0xD3A2_646C
         )
+        let sweepIdentity = identityVariation(
+          row: row,
+          course: course,
+          salt: 0xA511_E9B3
+        )
+        let liftIdentity = identityVariation(
+          row: row,
+          course: course,
+          salt: 0x63D8_35F1
+        )
         let rowStep = 1 / Float(rowCount - 1)
         let rowFraction = min(
           1,
@@ -145,14 +156,35 @@ enum CrowFemoralPlumage {
             - legAxis * simd_dot(rootRelativeToHip, legAxis),
           fallback: SIMD3<Float>(0, side, 0)
         )
+        let tangential = normalized(
+          simd_cross(legAxis, radial),
+          fallback: SIMD3<Float>(1, 0, 0)
+        )
         let targetFraction =
           0.035 + 0.195 * courseFraction
           + 0.008 * sin(2.35 * Float(row) + 0.61)
         let targetRadius =
           (0.0142 - 0.0011 * courseFraction)
           * (1 + 0.025 * rootIdentity)
+        let breakupScale = anteriorGularHandoffBreakupScale(
+          row: row,
+          course: course
+        )
+        // Submillimetre lift and signed sweep keep neighboring tips from
+        // collapsing into one conical cuff at presentation resolution. Roots
+        // and the broad vane envelopes remain seated on the body shell.
+        let tipRadialLift =
+          (0.00025 + 0.00065 * (0.5 + 0.5 * liftIdentity))
+          * (0.35 + 0.65 * courseFraction)
+          * breakupScale
+        let tipTangentialSweep = side * (
+          0.00075 * sweepIdentity
+            + 0.00035 * sin(1.71 * Float(row) + 0.83 * Float(course))
+        ) * breakupScale
         let bridgeTarget =
-          mix(hip, hock, targetFraction) + targetRadius * radial
+          mix(hip, hock, targetFraction)
+          + (targetRadius + tipRadialLift) * radial
+          + tipTangentialSweep * tangential
         let bridgeVector = bridgeTarget - root
         let bridgeDistance = simd_length(bridgeVector)
         let length = min(
@@ -169,6 +201,10 @@ enum CrowFemoralPlumage {
         let maximumWidth = min(0.0076, max(0.0041, 0.235 * length))
           * pelvicAxillaryHandoffWidthScale(row: row, course: course)
           * insertionSeamWidthScale(row: row, course: course)
+        let lateralSweep = maximumWidth * (
+          0.10 * sweepIdentity
+            + 0.035 * sin(2.17 * Float(row) + 0.59 * Float(course))
+        ) * breakupScale
         result.append(
           CrowFemoralPlumageFeather(
             side: side,
@@ -186,6 +222,7 @@ enum CrowFemoralPlumage {
             maximumWidthMeters: maximumWidth * (1 + 0.04 * shapeIdentity),
             camberMeters: (0.00085 + 0.00030 * courseFraction)
               * (1 + 0.08 * rootIdentity),
+            lateralSweepMeters: lateralSweep,
             vaneAsymmetry: 0.040 * vaneIdentity,
             edgeRippleAmplitude:
               0.010 + 0.014 * (0.5 + 0.5 * edgeIdentity),
@@ -282,6 +319,7 @@ enum CrowFemoralPlumage {
             rootWidthMeters: 0.56 * maximumWidth,
             maximumWidthMeters: maximumWidth,
             camberMeters: 0.0012 + 0.0004 * courseFraction,
+            lateralSweepMeters: 0,
             vaneAsymmetry: 0,
             edgeRippleAmplitude: 0,
             edgeRipplePhase: 0,
@@ -301,6 +339,13 @@ enum CrowFemoralPlumage {
   /// without forming the zipper-like alternating seam visible from below.
   static func courseStaggerMeters(row: Int) -> Float {
     0.00245 * sin(2.399_963 * Float(row) + 0.37)
+  }
+
+  /// The anterior courses at rows 5...6 roof the body/gular projection during
+  /// takeoff. Keep these four boundary vanes seated while neighboring femoral
+  /// feathers retain their non-repeating lift and centerline curvature.
+  static func anteriorGularHandoffBreakupScale(row: Int, course: Int) -> Float {
+    row >= 5 && row <= 6 && course >= 16 ? 0 : 1
   }
 
   /// Broad downy bases at the anterior femoral boundary keep the tract seated

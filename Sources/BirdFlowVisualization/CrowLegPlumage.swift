@@ -9,6 +9,7 @@ struct CrowLegPlumageFeather: Equatable {
   let rootWidthMeters: Float
   let maximumWidthMeters: Float
   let camberMeters: Float
+  let lateralSweepMeters: Float
   let vaneAsymmetry: Float
   let edgeRippleAmplitude: Float
   let edgeRipplePhase: Float
@@ -45,6 +46,7 @@ enum CrowLegPlumage {
     hip: SIMD3<Float>,
     hock: SIMD3<Float>
   ) -> [CrowLegPlumageFeather] {
+    let side: Float = hip.y >= 0 ? 1 : -1
     let axis = normalized(hock - hip, fallback: SIMD3<Float>(0, 0, -1))
     let helper: SIMD3<Float> =
       abs(axis.z) < 0.82
@@ -82,6 +84,16 @@ enum CrowLegPlumage {
           stationIndex: stationIndex,
           salt: 0x27D4_EB2F
         )
+        let sweepIdentity = identityVariation(
+          radialIndex: radialIndex,
+          stationIndex: stationIndex,
+          salt: 0xA511_E9B3
+        )
+        let liftIdentity = identityVariation(
+          radialIndex: radialIndex,
+          stationIndex: stationIndex,
+          salt: 0x63D8_35F1
+        )
         let baseTheta = 2 * Float.pi * Float(radialIndex) / Float(radialCount)
         let theta =
           baseTheta
@@ -103,22 +115,43 @@ enum CrowLegPlumage {
         let rootRadius = radius(at: rootFraction)
         let tipRadius = radius(at: tipFraction)
         let root = mix(hip, hock, rootFraction) + rootRadius * radial
-        let tip = mix(hip, hock, tipFraction) + tipRadius * radial
+        let tangential = normalized(
+          simd_cross(axis, radial),
+          fallback: second
+        )
+        let tipAngularSweep = side
+          * (0.055 * shapeIdentity + 0.085 * sweepIdentity)
+          * (0.55 + 0.45 * distalFringeWeight)
+        let tipRadial = normalized(
+          cos(tipAngularSweep) * radial + sin(tipAngularSweep) * tangential,
+          fallback: radial
+        )
+        let tipRadialLift =
+          (0.00015 + 0.00065 * (0.5 + 0.5 * liftIdentity))
+          * (0.35 + 0.65 * distalFringeWeight)
+        let tip = mix(hip, hock, tipFraction)
+          + (tipRadius + tipRadialLift) * tipRadial
         let circumferentialSpacing =
           2 * Float.pi * rootRadius / Float(radialCount)
         let maximumWidth =
           max(0.0022, 0.76 * circumferentialSpacing)
           * (1 + 0.04 * shapeIdentity)
+        let lateralSweep = maximumWidth * (
+          0.12 * sweepIdentity
+            + 0.04
+            * sin(1.93 * Float(radialIndex) + 0.71 * Float(stationIndex))
+        )
         result.append(
           CrowLegPlumageFeather(
             radialIndex: radialIndex,
             stationIndex: stationIndex,
             root: root,
             tip: tip,
-            planeNormal: radial,
+            planeNormal: normalized(0.82 * radial + 0.18 * tipRadial, fallback: radial),
             rootWidthMeters: 0.54 * maximumWidth,
             maximumWidthMeters: maximumWidth,
             camberMeters: 0.00040 * (1 + 0.10 * shapeIdentity),
+            lateralSweepMeters: lateralSweep,
             vaneAsymmetry: 0.045 * tipIdentity,
             edgeRippleAmplitude: 0.012 + 0.018 * (0.5 + 0.5 * edgeIdentity),
             edgeRipplePhase: Float.pi * (edgeIdentity + 1),
@@ -176,6 +209,7 @@ enum CrowLegPlumage {
             rootWidthMeters: 0.58 * maximumWidth,
             maximumWidthMeters: maximumWidth,
             camberMeters: 0.00045,
+            lateralSweepMeters: 0,
             vaneAsymmetry: 0,
             edgeRippleAmplitude: 0,
             edgeRipplePhase: 0,

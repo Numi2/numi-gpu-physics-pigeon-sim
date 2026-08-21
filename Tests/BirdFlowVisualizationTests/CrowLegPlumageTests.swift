@@ -38,6 +38,13 @@ func crowCruralPlumageOverlapsLegAndCrossesHockBoundary() {
   #expect(samples.map(\.materialVariation).max()! > 0.90)
   #expect(samples.map(\.vaneAsymmetry).min()! < -0.040)
   #expect(samples.map(\.vaneAsymmetry).max()! > 0.040)
+  #expect(samples.map(\.lateralSweepMeters).min()! < -0.00030)
+  #expect(samples.map(\.lateralSweepMeters).max()! > 0.00030)
+  #expect(
+    samples.allSatisfy {
+      abs($0.lateralSweepMeters) < 0.17 * $0.maximumWidthMeters
+    }
+  )
   #expect(samples.allSatisfy { $0.edgeRippleAmplitude >= 0.012 })
   #expect(samples.allSatisfy { $0.edgeRippleAmplitude <= 0.030 })
   #expect(samples.allSatisfy { $0.edgeRipplePhase >= 0 })

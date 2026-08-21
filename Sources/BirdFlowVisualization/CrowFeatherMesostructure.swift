@@ -393,7 +393,7 @@ enum CrowFeatherMesostructure {
       rootWidthMeters = feather.rootWidthMeters
       maximumWidthMeters = feather.maximumWidthMeters
       camberMeters = feather.camberMeters
-      lateralSweepMeters = 0
+      lateralSweepMeters = feather.lateralSweepMeters
       transverseCamberRatio = 0
       barbTransverseCamberRatio = 0
       rootEnvelopeRatio = feather.rootEnvelopeRatio

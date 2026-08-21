@@ -64,6 +64,13 @@ func femoralPlumageBridgesBodyLoftAndUpperCruralTract() {
   #expect(left.map(\.materialVariation).max()! > 0.90)
   #expect(left.map(\.vaneAsymmetry).min()! < -0.035)
   #expect(left.map(\.vaneAsymmetry).max()! > 0.035)
+  #expect(left.map(\.lateralSweepMeters).min()! < -0.00045)
+  #expect(left.map(\.lateralSweepMeters).max()! > 0.00045)
+  #expect(
+    left.allSatisfy {
+      abs($0.lateralSweepMeters) < 0.15 * $0.maximumWidthMeters
+    }
+  )
   #expect(left.allSatisfy { $0.edgeRippleAmplitude >= 0.010 })
   #expect(left.allSatisfy { $0.edgeRippleAmplitude <= 0.024 })
   #expect(left.allSatisfy { $0.edgeRipplePhase >= 0 })
@@ -81,6 +88,10 @@ func femoralPlumageBridgesBodyLoftAndUpperCruralTract() {
   #expect(abs(CrowFemoralPlumage.rootWidthRatio(courseFraction: 0.5) - 0.70) < 1e-7)
   #expect(CrowFemoralPlumage.rootWidthRatio(courseFraction: 1) == 0.76)
   #expect(CrowFemoralPlumage.rootWidthRatio(courseFraction: 2) == 0.76)
+  #expect(CrowFemoralPlumage.anteriorGularHandoffBreakupScale(row: 5, course: 16) == 0)
+  #expect(CrowFemoralPlumage.anteriorGularHandoffBreakupScale(row: 6, course: 17) == 0)
+  #expect(CrowFemoralPlumage.anteriorGularHandoffBreakupScale(row: 4, course: 16) == 1)
+  #expect(CrowFemoralPlumage.anteriorGularHandoffBreakupScale(row: 5, course: 15) == 1)
   #expect(
     CrowFemoralPlumage.visibleSamples(
       bodyCenter: bodyCenter,

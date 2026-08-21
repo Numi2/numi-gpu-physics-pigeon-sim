@@ -28,6 +28,7 @@ enum CrowCruralFeatherDetail {
     )
     func center(at fraction: Float) -> SIMD3<Float> {
       feather.root + fraction * (feather.tip - feather.root)
+        + widthAxis * (feather.lateralSweepMeters * sin(Float.pi * fraction))
         + normal * (feather.camberMeters * sin(Float.pi * fraction) + 0.00007)
     }
     func halfWidth(at fraction: Float) -> Float {
