@@ -50,7 +50,7 @@ func crowBodyFeatherTractsOverlapNeckAndCoverWingRoots() {
   let mantle = samples.filter { $0.region == .mantle }
   let humeral = samples.filter { $0.region == .humeral }
   let scapular = samples.filter { $0.region == .scapular }
-  #expect(cervical.count == 480)
+  #expect(cervical.count == 896)
   #expect(mantle.count == 960)
   #expect(humeral.count == 300)
   #expect(scapular.count == 1_056)
@@ -59,6 +59,10 @@ func crowBodyFeatherTractsOverlapNeckAndCoverWingRoots() {
   #expect(humeral.allSatisfy { $0.surfaceFeatherClass == 6 })
   #expect(scapular.allSatisfy { $0.surfaceFeatherClass == 6 })
   #expect(samples.allSatisfy { $0.surfaceFeatherClass == 5 || $0.surfaceFeatherClass == 6 })
+  let cervicalLengths = cervical.map { simd_distance($0.rootOffset, $0.tipOffset) }
+  #expect(cervicalLengths.min()! > 0.014)
+  #expect(cervicalLengths.max()! < 0.020)
+  #expect(cervical.map(\.maximumWidthMeters).max()! < 0.0035)
   let lateralSweeps = samples.map(\.lateralSweepMeters)
   #expect(lateralSweeps.min()! < -0.00160)
   #expect(lateralSweeps.max()! > 0.00160)
@@ -374,10 +378,13 @@ func crowBodyFeatherTractsOverlapNeckAndCoverWingRoots() {
     }
   )
   let cervicalInteriorStaggers = (0..<CrowBodyFeatherTracts.cervicalRowCount).map {
-    CrowBodyFeatherTracts.cervicalAxialStaggerMeters(row: $0, column: 5)
+    CrowBodyFeatherTracts.cervicalAxialStaggerMeters(
+      row: $0,
+      column: CrowBodyFeatherTracts.cervicalColumnCount / 2
+    )
   }
-  #expect(cervicalInteriorStaggers.min()! <= -0.00196)
-  #expect(cervicalInteriorStaggers.max()! > 0.00180)
+  #expect(cervicalInteriorStaggers.min()! < -0.00145)
+  #expect(cervicalInteriorStaggers.max()! > 0.00135)
   #expect(
     (0..<CrowBodyFeatherTracts.cervicalRowCount).allSatisfy {
       CrowBodyFeatherTracts.cervicalAxialStaggerMeters(row: $0, column: 0) == 0
@@ -512,9 +519,9 @@ func crowBodyFeatherTractsOverlapNeckAndCoverWingRoots() {
   let low = CrowBodyFeatherTracts.visibleSamples(projectedPixelsPerMeter: 800)
   let medium = CrowBodyFeatherTracts.visibleSamples(projectedPixelsPerMeter: 1_000)
   let full = CrowBodyFeatherTracts.visibleSamples(projectedPixelsPerMeter: 1_600)
-  #expect(low.filter { $0.region == .cervical }.count == 240)
-  #expect(medium.filter { $0.region == .cervical }.count == 240)
-  #expect(full.filter { $0.region == .cervical }.count == 480)
+  #expect(low.filter { $0.region == .cervical }.count == 448)
+  #expect(medium.filter { $0.region == .cervical }.count == 448)
+  #expect(full.filter { $0.region == .cervical }.count == 896)
   #expect(low.filter { $0.region == .mantle }.count == 240)
   #expect(medium.filter { $0.region == .mantle }.count == 480)
   #expect(full.filter { $0.region == .mantle }.count == 960)
@@ -524,9 +531,9 @@ func crowBodyFeatherTractsOverlapNeckAndCoverWingRoots() {
   #expect(low.filter { $0.region == .scapular }.count == 264)
   #expect(medium.filter { $0.region == .scapular }.count == 528)
   #expect(full.filter { $0.region == .scapular }.count == 1_056)
-  #expect(low.count == 834)
-  #expect(medium.count == 1_398)
-  #expect(full.count == 2_796)
+  #expect(low.count == 1_042)
+  #expect(medium.count == 1_606)
+  #expect(full.count == 3_212)
 }
 
 @Test("quiet head motion bends the cervical tract without moving the mantle")

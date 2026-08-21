@@ -623,10 +623,31 @@ identified and eliminated a one-pixel body/class-`7`/gular-class-`10` handoff
 regression before publication. This qualifies simulated raster continuity, not
 perceptual realism.
 
+The cervical-density pass replaces the coarse `24 x 10` root lattice on each
+side with a `32 x 14` field over the same anatomical neck span. Full-resolution
+cervical inventory rises from `480` to `896` deterministic vanes. Individual
+vanes narrow from about `4.2 mm` to below `3.5 mm` maximum half-width and
+shorten modestly, while a coprime 16/33 course phase prevents repeated axial
+stations. The shoulder and cranial boundary roots, shell clearance, surface
+classes, head coupling, and pose-time inventory remain fixed. This is a
+future-compute presentation refinement, not measured American-crow follicle
+density or feather dimensions.
+
+Fresh 17-frame dorsal-port and ventral-rear audits at yaw/pitch
+`(-1.36,0.42)` and `(1.72,-0.44)` preserve the complete enclosed-hole time
+series: aggregate pixels/components remain exactly `13/12` and `5/3`.
+Expected lower-body aperture series are also exact. Active identity coverage
+changes `348,190 -> 347,945` (`-0.070%`) and `399,833 -> 399,740`
+(`-0.023%`); fully covered active pixels change `341,009 -> 340,786`
+(`-0.065%`) and `392,469 -> 392,399` (`-0.018%`). The dorsal-port A/B changes
+large countable nape scallops into a finer overlapping contour field without a
+ventral-rear silhouette regression. This qualifies deterministic simulated
+raster continuity and apparent feather scale, not perceptual realism.
+
 The canonical README sequence is fully simulated and contains the native hold,
-transition, and flight path: `800 x 450`, `72` frames at `24 fps`, `8,118,994`
+transition, and flight path: `800 x 450`, `72` frames at `24 fps`, `8,186,513`
 bytes, SHA-256
-`ade9c9d1104c5247b4f757c709dbd6ee73740a8b5ebcbe00eb23179e70acc43a`.
+`0341b533039a289f8f45f88dff94a0a79c69ffbab669d7bbdc89a735cf78355b`.
 
 Run the presentation with:
 

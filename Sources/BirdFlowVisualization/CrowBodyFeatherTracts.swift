@@ -37,8 +37,8 @@ struct CrowBodyFeatherTractSample: Equatable {
 }
 
 enum CrowBodyFeatherTracts {
-  static let cervicalRowCount = 24
-  static let cervicalColumnCount = 10
+  static let cervicalRowCount = 32
+  static let cervicalColumnCount = 14
   static let cervicalShellClearanceMeters: Float = 0.0012
   static let cervicalMinimumAngleRadians: Float = -1.05
   static let cervicalMaximumAngleRadians: Float = 1.54
@@ -159,7 +159,7 @@ enum CrowBodyFeatherTracts {
           let unposedRoot =
             unposedRootSurface + cervicalShellClearanceMeters * unposedNormal
           let length =
-            (0.0215 - 0.0035 * axial)
+            (0.0183 - 0.0032 * axial)
             * (1 + 0.060 * shapeIdentity + 0.025 * lengthIdentity)
           let unposedTip =
             unposedRoot
@@ -199,16 +199,16 @@ enum CrowBodyFeatherTracts {
               rootOffset: root,
               tipOffset: tip,
               planeNormal: planeNormal,
-              rootWidthMeters: 0.0024 * (1 + 0.070 * rootIdentity),
-              maximumWidthMeters: 1.03 * (0.00420 - 0.00045 * axial)
+              rootWidthMeters: 0.00185 * (1 + 0.080 * rootIdentity),
+              maximumWidthMeters: 1.03 * (0.00318 - 0.00034 * axial)
                 * (1 + 0.020 * sin(Float(row) * 2.07 + Float(column) * 1.31))
                 * (1 + 0.045 * shapeIdentity),
               camberMeters:
-                0.0010
+                0.00080
                 * (1 + 0.06 * sin(Float(row) * 1.49 - Float(column) * 2.11)),
               lateralSweepMeters:
-                0.00024 * sin(Float(row) * 0.79 + Float(column) * 1.37)
-                + 0.00082 * vaneIdentity,
+                0.00018 * sin(Float(row) * 0.79 + Float(column) * 1.37)
+                + 0.00062 * vaneIdentity,
               vaneAsymmetry: 0.040 * vaneIdentity,
               edgeRippleAmplitude: 0.010 + 0.016 * (0.5 + 0.5 * edgeIdentity),
               edgeRipplePhase: Float.pi * (edgeIdentity + 1),
@@ -255,17 +255,17 @@ enum CrowBodyFeatherTracts {
     return SIMD3<Float>(normal.x, side * normal.y, normal.z)
   }
 
-  /// Distributes the 24 cervical courses over one axial root interval without
-  /// the repeated transverse stations of a rectangular neck grid. Eleven and
-  /// twenty-five are coprime, so every row receives a unique phase while each
+  /// Distributes the 32 cervical courses over one axial root interval without
+  /// the repeated transverse stations of a rectangular neck grid. Sixteen and
+  /// thirty-three are coprime, so every row receives a unique phase while each
   /// neighboring row stays almost half an interval away.
   static func cervicalCoursePhase(row: Int) -> Float {
     let boundedRow = min(max(row, 0), cervicalRowCount - 1)
-    return Float((boundedRow * 11) % 25) / 25
+    return Float((boundedRow * 16) % 33) / 33
   }
 
   /// Tapers course staggering to zero at the fixed shoulder and cranial
-  /// boundaries. The four-millimetre interior span breaks tiled highlights
+  /// boundaries. The three-millimetre interior span breaks tiled highlights
   /// while retaining root order and cross-course vane overlap.
   static func cervicalAxialStaggerMeters(row: Int, column: Int) -> Float {
     let boundedColumn = min(max(column, 0), cervicalColumnCount - 1)
@@ -273,7 +273,7 @@ enum CrowBodyFeatherTracts {
       return 0
     }
     let axial = Float(boundedColumn) / Float(cervicalColumnCount - 1)
-    return 0.0040
+    return 0.0030
       * (cervicalCoursePhase(row: row) - 0.5)
       * sin(Float.pi * axial)
   }
