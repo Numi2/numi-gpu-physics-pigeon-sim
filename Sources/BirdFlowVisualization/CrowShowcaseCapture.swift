@@ -803,7 +803,8 @@ private final class CrowShowcaseRenderer {
       liveCovertRootBuffer = roots
       liveCovertGeometryDeformer = try CrowFeatherGeometryDeformer(
         backend: createdBackend,
-        featherCount: roots.featherCount
+        featherCount: roots.featherCount,
+        gpuSelectedDetailDensity: true
       )
     } else {
       liveCovertRootBuffer = nil
@@ -1257,8 +1258,8 @@ private final class CrowShowcaseRenderer {
         encoder.setVertexBuffer(featherFrame.outputBuffer, offset: 0, index: 0)
         encoder.drawPrimitives(
           type: .triangle,
-          vertexStart: 0,
-          vertexCount: featherFrame.vertexCount
+          indirectBuffer: featherFrame.indirectDrawBuffer,
+          indirectBufferOffset: 0
         )
       }
     }
@@ -1310,8 +1311,8 @@ private final class CrowShowcaseRenderer {
         )
         identityEncoder.drawPrimitives(
           type: .triangle,
-          vertexStart: 0,
-          vertexCount: featherFrame.vertexCount
+          indirectBuffer: featherFrame.indirectDrawBuffer,
+          indirectBufferOffset: 0
         )
       }
     }

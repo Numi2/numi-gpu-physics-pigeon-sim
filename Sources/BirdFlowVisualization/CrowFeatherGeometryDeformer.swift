@@ -6,20 +6,23 @@ struct CrowFeatherGeometryFrame {
   fileprivate let slot: Int
   fileprivate let readbackReady: Bool
   let outputBuffer: MTLBuffer
+  let indirectDrawBuffer: MTLBuffer
   let vertexCount: Int
 }
 
 /// Expands one retained canonical vane template for every persistent feather.
 ///
-/// The output is a conventional triangle stream so the current renderer can
-/// consume it directly. The compact template and root-state contract can also
-/// feed mesh shaders or ray-tracing geometry without changing asset identity.
+/// A GPU prepass converts final-output coverage into triangle-safe vane,
+/// vane-plus-rachis, or full-barb prefixes and writes both indirect compute and
+/// draw arguments. The compact template and stable root contract can also feed
+/// mesh shaders or ray-tracing geometry without changing feather identity.
 final class CrowFeatherGeometryDeformer {
   private static let bufferedFrameCount = 3
   private static let sectionCount = 48
   private static let widthSectionCount = 8
   private static let rachisSectionCount = 24
   private static let barbPairCount = 20
+  private static let rachisDetailPixelsPerMeter: Float = 1_050
   private static let fullDetailPixelsPerMeter: Float = 1_400
 
   private enum TemplateKind: Float {
@@ -29,10 +32,14 @@ final class CrowFeatherGeometryDeformer {
   }
 
   private let backend: VisualizationBackend
+  private let gpuSelectedDetailDensity: Bool
+  private let indirectPipeline: MTLComputePipelineState
   private let pipeline: MTLComputePipelineState
   private let templateVertices: [CrowFeatherTemplateVertexGPU]
   private let templateBuffer: MTLBuffer
   private let outputBuffers: [MTLBuffer]
+  private let indirectDrawBuffers: [MTLBuffer]
+  private let indirectDispatchBuffers: [MTLBuffer]
   private let outputByteCount: Int
   /// Audit mirrors are allocated per slot only when a caller requests them.
   /// Production capture otherwise avoids retaining another complete copy of
@@ -43,9 +50,15 @@ final class CrowFeatherGeometryDeformer {
   let featherCount: Int
   let vertexCount: Int
 
-  init(backend: VisualizationBackend, featherCount: Int) throws {
+  init(
+    backend: VisualizationBackend,
+    featherCount: Int,
+    gpuSelectedDetailDensity: Bool = false
+  ) throws {
     self.backend = backend
     self.featherCount = featherCount
+    self.gpuSelectedDetailDensity = gpuSelectedDetailDensity
+    indirectPipeline = try backend.compute("prepareCrowFeatherIndirectWork")
     pipeline = try backend.compute("deformCrowFeatherTemplates")
     templateVertices = Self.makeTemplateVertices()
     templateBuffer = try Self.sharedBuffer(
@@ -57,6 +70,15 @@ final class CrowFeatherGeometryDeformer {
     outputByteCount = outputBytes
     outputBuffers = try (0..<Self.bufferedFrameCount).map { _ in
       try backend.buffer(length: outputBytes)
+    }
+    indirectDrawBuffers = try (0..<Self.bufferedFrameCount).map { _ in
+      try backend.buffer(
+        length: MemoryLayout<DrawPrimitivesIndirectArguments>.stride,
+        shared: true
+      )
+    }
+    indirectDispatchBuffers = try (0..<Self.bufferedFrameCount).map { _ in
+      try backend.buffer(length: 3 * MemoryLayout<UInt32>.stride, shared: true)
     }
     readbackBuffers = Array(repeating: nil, count: Self.bufferedFrameCount)
   }
@@ -71,18 +93,48 @@ final class CrowFeatherGeometryDeformer {
     let slot = nextSlot
     nextSlot = (nextSlot + 1) % Self.bufferedFrameCount
     let output = outputBuffers[slot]
+    let indirectDraw = indirectDrawBuffers[slot]
+    let indirectDispatch = indirectDispatchBuffers[slot]
+    let detailTier: Float = gpuSelectedDetailDensity
+      ? (projectedPixelsPerMeter >= Self.fullDetailPixelsPerMeter ? 2
+        : (projectedPixelsPerMeter >= Self.rachisDetailPixelsPerMeter ? 1 : 0))
+      : (projectedPixelsPerMeter >= Self.fullDetailPixelsPerMeter ? 2 : 0)
     var uniforms = CrowFeatherGeometryUniforms(
       counts: SIMD4<UInt32>(
         UInt32(featherCount),
         UInt32(templateVertices.count),
         UInt32(vertexCount),
-        0
+        gpuSelectedDetailDensity
+          ? UInt32(Self.sectionCount * Self.widthSectionCount * 6) : 0
       ),
       renderOffsetAndDetailScale: SIMD4<Float>(
         renderOffset,
-        projectedPixelsPerMeter >= Self.fullDetailPixelsPerMeter ? 1 : 0
+        detailTier
       )
     )
+    var threadsPerThreadgroup = UInt32(
+      min(pipeline.maxTotalThreadsPerThreadgroup, pipeline.threadExecutionWidth)
+    )
+    guard let indirectEncoder = commandBuffer.makeComputeCommandEncoder() else {
+      throw VisualizationError.pipeline("crow feather indirect-work encoder")
+    }
+    indirectEncoder.label = "GPU-selected crow feather detail density"
+    indirectEncoder.setComputePipelineState(indirectPipeline)
+    indirectEncoder.setBuffer(indirectDraw, offset: 0, index: 0)
+    indirectEncoder.setBuffer(indirectDispatch, offset: 0, index: 1)
+    indirectEncoder.setBytes(
+      &uniforms,
+      length: MemoryLayout<CrowFeatherGeometryUniforms>.stride,
+      index: 2
+    )
+    indirectEncoder.setBytes(
+      &threadsPerThreadgroup,
+      length: MemoryLayout<UInt32>.stride,
+      index: 3
+    )
+    backend.dispatch1D(indirectEncoder, pipeline: indirectPipeline, count: 1)
+    indirectEncoder.endEncoding()
+
     guard let encoder = commandBuffer.makeComputeCommandEncoder() else {
       throw VisualizationError.pipeline("crow feather geometry compute encoder")
     }
@@ -95,7 +147,20 @@ final class CrowFeatherGeometryDeformer {
       length: MemoryLayout<CrowFeatherGeometryUniforms>.stride,
       index: 3
     )
-    backend.dispatch1D(encoder, pipeline: pipeline, count: vertexCount)
+    if auditReadback {
+      backend.dispatch1D(encoder, pipeline: pipeline, count: vertexCount)
+    } else {
+      encoder.setComputePipelineState(pipeline)
+      encoder.dispatchThreadgroups(
+        indirectBuffer: indirectDispatch,
+        indirectBufferOffset: 0,
+        threadsPerThreadgroup: MTLSize(
+          width: Int(threadsPerThreadgroup),
+          height: 1,
+          depth: 1
+        )
+      )
+    }
     encoder.endEncoding()
 
     if auditReadback {
@@ -124,8 +189,18 @@ final class CrowFeatherGeometryDeformer {
       slot: slot,
       readbackReady: auditReadback,
       outputBuffer: output,
+      indirectDrawBuffer: indirectDraw,
       vertexCount: vertexCount
     )
+  }
+
+  func drawArguments(
+    for frame: CrowFeatherGeometryFrame
+  ) -> DrawPrimitivesIndirectArguments {
+    frame.indirectDrawBuffer.contents().bindMemory(
+      to: DrawPrimitivesIndirectArguments.self,
+      capacity: 1
+    ).pointee
   }
 
   func vertices(for frame: CrowFeatherGeometryFrame) -> [CrowFeatherVertexGPU] {
@@ -146,8 +221,9 @@ final class CrowFeatherGeometryDeformer {
     projectedPixelsPerMeter: Float = 0
   ) -> [CrowFeatherVertexGPU] {
     let detailScale: Float =
-      projectedPixelsPerMeter >= Self.fullDetailPixelsPerMeter ? 1 : 0
-    return roots.flatMap { root in
+      projectedPixelsPerMeter >= Self.fullDetailPixelsPerMeter ? 2
+      : (projectedPixelsPerMeter >= Self.rachisDetailPixelsPerMeter ? 1 : 0)
+    let rootMajor = roots.flatMap { root in
       templateVertices.map { template in
         let axial = template.parameters.x
         let signedWidth = template.parameters.y
@@ -178,7 +254,7 @@ final class CrowFeatherGeometryDeformer {
         let previousRoot = Self.xyz(root.previousPositionAndWidth)
         let detailEnabled =
           detailKind == TemplateKind.vane.rawValue
-          || (detailScale > 0
+          || (detailScale >= detailKind
             && (featherClass == 1 || featherClass == 2 || isUnderwingCovert))
         let currentPosition = detailEnabled
           ? Self.detailPosition(
@@ -261,6 +337,16 @@ final class CrowFeatherGeometryDeformer {
         )
       }
     }
+    guard gpuSelectedDetailDensity, detailScale < 2 else { return rootMajor }
+    var triangleMajor: [CrowFeatherVertexGPU] = []
+    triangleMajor.reserveCapacity(rootMajor.count)
+    for templateTriangle in 0..<(templateVertices.count / 3) {
+      for featherIndex in roots.indices {
+        let source = featherIndex * templateVertices.count + templateTriangle * 3
+        triangleMajor.append(contentsOf: rootMajor[source..<(source + 3)])
+      }
+    }
+    return triangleMajor
   }
 
   private static func makeTemplateVertices() -> [CrowFeatherTemplateVertexGPU] {

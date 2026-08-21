@@ -88,7 +88,8 @@ func liveUnderwingCovertGeometryMatchesMetal() throws {
   )
   let geometry = try CrowFeatherGeometryDeformer(
     backend: backend,
-    featherCount: covertRoots.featherCount
+    featherCount: covertRoots.featherCount,
+    gpuSelectedDetailDensity: true
   )
   let states = Array(surface.verticesMeters.prefix(surface.vertexCount))
   guard let commandBuffer = backend.queue.makeCommandBuffer() else {
@@ -137,8 +138,102 @@ func liveUnderwingCovertGeometryMatchesMetal() throws {
   #expect(maximumPreviousPositionDifference < 3e-6)
   #expect(actual.contains { $0.parameters.w == 1 })
   #expect(actual.contains { $0.parameters.w == 2 })
+  #expect(geometry.drawArguments(for: frame).vertexCount == UInt32(actual.count))
   #expect(actual.allSatisfy {
     let featherClass = $0.identity.w & 255
     return featherClass == 12 || featherClass == 13
   })
+}
+
+@Test("GPU selects complete live covert detail prefixes for indirect compute and draw")
+func liveCovertGPUSelectsCompleteIndirectDetailPrefixes() throws {
+  guard let device = MTLCreateSystemDefaultDevice() else { return }
+  let root = URL(fileURLWithPath: #filePath)
+    .deletingLastPathComponent()
+    .deletingLastPathComponent()
+    .deletingLastPathComponent()
+  let surface = try MeasuredBirdSurfaceSequenceLoader.load(
+    manifestURL: root.appendingPathComponent(
+      "ValidationInputs/american-crow-hybrid-surface-v1/manifest.json"
+    )
+  )
+  let backend = try VisualizationBackend(device: device)
+  let covertRoots = try CrowLiveWingCovertRootBuffer(
+    backend: backend,
+    dataset: surface
+  )
+  let geometry = try CrowFeatherGeometryDeformer(
+    backend: backend,
+    featherCount: covertRoots.featherCount,
+    gpuSelectedDetailDensity: true
+  )
+  let states = Array(surface.verticesMeters.prefix(surface.vertexCount))
+  let expectedVertexCounts = [
+    (pixelsPerMeter: Float(900), vertexCount: 216 * 48 * 8 * 6),
+    (pixelsPerMeter: Float(1_100), vertexCount: 216 * (48 * 8 * 6 + 24 * 6)),
+    (
+      pixelsPerMeter: Float(1_600),
+      vertexCount: 216 * (48 * 8 * 6 + 24 * 6 + 20 * 2 * 6)
+    ),
+  ]
+
+  for expected in expectedVertexCounts {
+    guard let commandBuffer = backend.queue.makeCommandBuffer() else {
+      Issue.record("unable to allocate indirect covert command buffer")
+      return
+    }
+    let roots = try covertRoots.upload(
+      currentStates: states,
+      previousStates: states,
+      currentDeployment: 1,
+      previousDeployment: 1
+    )
+    let frame = try geometry.encode(
+      rootFrame: roots,
+      renderOffset: .zero,
+      projectedPixelsPerMeter: expected.pixelsPerMeter,
+      commandBuffer: commandBuffer
+    )
+    commandBuffer.commit()
+    commandBuffer.waitUntilCompleted()
+    #expect(commandBuffer.status == .completed)
+    let arguments = geometry.drawArguments(for: frame)
+    #expect(arguments.vertexCount == UInt32(expected.vertexCount))
+    #expect(arguments.instanceCount == 1)
+    #expect(arguments.vertexStart == 0)
+    #expect(arguments.baseInstance == 0)
+    #expect(expected.vertexCount.isMultiple(of: 3 * covertRoots.featherCount))
+  }
+
+  guard let prefixCommandBuffer = backend.queue.makeCommandBuffer() else {
+    Issue.record("unable to allocate covert prefix-audit command buffer")
+    return
+  }
+  let prefixRoots = try covertRoots.upload(
+    currentStates: states,
+    previousStates: states,
+    currentDeployment: 1,
+    previousDeployment: 1
+  )
+  let prefixFrame = try geometry.encode(
+    rootFrame: prefixRoots,
+    renderOffset: .zero,
+    projectedPixelsPerMeter: 1_100,
+    commandBuffer: prefixCommandBuffer,
+    auditReadback: true
+  )
+  prefixCommandBuffer.commit()
+  prefixCommandBuffer.waitUntilCompleted()
+  #expect(prefixCommandBuffer.status == .completed)
+  let vertices = geometry.vertices(for: prefixFrame)
+  let vaneVertexCount = 216 * 48 * 8 * 6
+  let rachisVertexCount = 216 * 24 * 6
+  let vanePrefix = vertices.prefix(vaneVertexCount)
+  let rachisPrefix = vertices[
+    vaneVertexCount..<(vaneVertexCount + rachisVertexCount)
+  ]
+  #expect(vanePrefix.allSatisfy { $0.parameters.w == 0 })
+  #expect(rachisPrefix.allSatisfy { $0.parameters.w == 1 })
+  #expect(Set(vanePrefix.map { $0.identity.y }).count == 216)
+  #expect(Set(rachisPrefix.map { $0.identity.y }).count == 216)
 }

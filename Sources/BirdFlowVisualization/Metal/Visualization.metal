@@ -1029,6 +1029,38 @@ inline float3 crowFeatherDetailNormal(
     );
 }
 
+struct CrowFeatherDrawArguments {
+    uint vertexCount; uint instanceCount; uint vertexStart; uint baseInstance;
+};
+
+struct CrowFeatherDispatchArguments {
+    uint threadgroupsPerGrid[3];
+};
+
+kernel void prepareCrowFeatherIndirectWork(
+    device CrowFeatherDrawArguments* drawArguments [[buffer(0)]],
+    device CrowFeatherDispatchArguments* dispatchArguments [[buffer(1)]],
+    constant CrowFeatherGeometryUniforms& uniforms [[buffer(2)]],
+    constant uint& threadsPerThreadgroup [[buffer(3)]],
+    uint gid [[thread_position_in_grid]]) {
+    if(gid!=0u){return;}
+    float detailTier=uniforms.renderOffsetAndDetailScale.w;
+    bool gpuSelectedDetailDensity=uniforms.counts.w>0u;
+    uint selectedTemplateVertexCount=!gpuSelectedDetailDensity
+        ?uniforms.counts.y
+        :(detailTier>=1.5f?uniforms.counts.y:
+            (detailTier>=0.5f?uniforms.counts.w+24u*6u:uniforms.counts.w));
+    uint selectedVertexCount=uniforms.counts.x*selectedTemplateVertexCount;
+    drawArguments[0].vertexCount=selectedVertexCount;
+    drawArguments[0].instanceCount=1u;
+    drawArguments[0].vertexStart=0u;
+    drawArguments[0].baseInstance=0u;
+    dispatchArguments[0].threadgroupsPerGrid[0]=
+        (selectedVertexCount+threadsPerThreadgroup-1u)/threadsPerThreadgroup;
+    dispatchArguments[0].threadgroupsPerGrid[1]=1u;
+    dispatchArguments[0].threadgroupsPerGrid[2]=1u;
+}
+
 kernel void deformCrowFeatherTemplates(
     device const CrowFeatherTemplateVertexGPU* templateVertices [[buffer(0)]],
     device const CrowFeatherRootStateGPU* roots [[buffer(1)]],
@@ -1037,9 +1069,17 @@ kernel void deformCrowFeatherTemplates(
     uint outputIndex [[thread_position_in_grid]]) {
     uint outputCount=uniforms.counts.z;
     if(outputIndex>=outputCount){return;}
+    uint featherCount=uniforms.counts.x;
     uint templateVertexCount=uniforms.counts.y;
-    uint featherIndex=outputIndex/templateVertexCount;
-    uint templateIndex=outputIndex-featherIndex*templateVertexCount;
+    bool gpuSelectedDetailDensity=uniforms.counts.w>0u;
+    bool densityOrdered=gpuSelectedDetailDensity
+        &&uniforms.renderOffsetAndDetailScale.w<1.5f;
+    uint triangleInstance=outputIndex/3u;
+    uint featherIndex=densityOrdered
+        ?triangleInstance%featherCount:outputIndex/templateVertexCount;
+    uint templateIndex=densityOrdered
+        ?(triangleInstance/featherCount)*3u+outputIndex%3u
+        :outputIndex-featherIndex*templateVertexCount;
     CrowFeatherRootStateGPU root=roots[featherIndex];
     float4 parameter=templateVertices[templateIndex].parameters;
     float3 currentDirection=root.currentDirectionAndRachis.xyz;
@@ -1058,7 +1098,7 @@ kernel void deformCrowFeatherTemplates(
     bool isUnderwingCovert=featherClass==12u||featherClass==13u;
     bool temporallyVariableMorphology=isUnderwingCovert;
     bool detailEnabled=parameter.z<0.5f
-        ||(uniforms.renderOffsetAndDetailScale.w>0.0f
+        ||(uniforms.renderOffsetAndDetailScale.w>=parameter.z
             &&(featherClass==1u||featherClass==2u||isUnderwingCovert));
     float3 current=detailEnabled
         ?crowFeatherDetailPosition(

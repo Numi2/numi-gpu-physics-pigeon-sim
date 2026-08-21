@@ -80,9 +80,15 @@ per wing: `216` stable bilateral roots in total. The CPU uploads one `128`-byte
 record per root with current and previous position, direction, normal, and
 morphology. Metal then expands the shared `48 x 8` vane template plus rachis
 and paired-barb ribbons into `580,608` vertices. This replaces twice-per-frame
-CPU tessellation, preserves geometric standstill-to-flight deployment, and
-keeps the density contract ready for indirect draws, mesh shaders, or
-ray-tracing geometry without changing feather identity.
+CPU tessellation and preserves geometric standstill-to-flight deployment. A
+Metal prepass now quantizes final-output coverage into triangle-major prefixes:
+vane only (`497,664` live-covert vertices), vane plus rachis (`528,768`), or
+the full paired-barb stream (`580,608`). It writes both indirect compute and
+draw arguments, so unresolved detail is neither deformed nor rasterized while
+all `216` stable roots remain present. The same compact contract remains ready
+for mesh shaders or ray-tracing geometry without changing feather identity.
+The full tier preserves the established root-major submission order exactly;
+only reduced tiers switch to the triangle-major density prefixes.
 
 Those `216` root identities now also select a bounded vane profile in the
 shared Swift/Metal geometry path. The three secondary-covert courses and one

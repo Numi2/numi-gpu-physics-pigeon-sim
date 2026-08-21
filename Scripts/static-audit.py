@@ -110,6 +110,7 @@ REQUIRED_VISUALIZATION_KERNELS = {
     "scanTriangleBlocks",
     "scanBlockSums",
     "addTriangleBlockOffsets",
+    "prepareCrowFeatherIndirectWork",
     "prepareQCriterionIndirectDraw",
     "emitQCriterionCubes",
 }
