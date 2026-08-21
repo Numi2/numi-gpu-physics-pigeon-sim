@@ -38,6 +38,13 @@ enum CrowFlightWingBodyIntegration {
   static let rectrixWingHandoffMaximumWidthScale: Float = 1.40
   static let covertAbdominalHandoffMaximumNormalLiftMeters: Float = 0.001
   static let covertChordIndices = [0, 3, 4, 5, 6]
+  static let underwingCovertChordIndices = [1, 3, 5]
+  static let underwingCovertSurfaceFeatherClass: UInt32 = 11
+  static let underwingCovertChordTargetScale: Float = 0.86
+  static let underwingCovertRootClearanceMeters: Float = 0.0001
+  static let underwingCovertTipClearanceMeters: Float = 0.00015
+  static let underwingCovertDeploymentStartProgress: Float = 0.01
+  static let underwingCovertDeploymentEndProgress: Float = 0.20
   static let axillaryUnderlayerRootChordIndex = 6
   static let axillaryUnderlayerTipChordIndex = 8
   static let terminalAxillaryHandoffSpanIndex = 0
@@ -61,6 +68,26 @@ enum CrowFlightWingBodyIntegration {
   /// avoid hiding sparse-plumage slots with implausibly broad vanes.
   static var covertSpanIndices: [Int] {
     Array(0...(spanCount - 3))
+  }
+
+  /// Keeps the ventral tract two topology stations inside every wing boundary.
+  /// Its feather vanes can break up the reverse-side scaffold without becoming
+  /// a new leading, trailing, root, or tip silhouette.
+  static var underwingCovertSpanIndices: [Int] {
+    Array(2...(spanCount - 5))
+  }
+
+  /// Deploys the reverse-face vanes after the folded hold. Width and clearance
+  /// collapse to zero without deleting vertices, preserving temporal identity.
+  static func underwingCovertDeploymentWeight(
+    transitionProgress: Float
+  ) -> Float {
+    let progress = clamp(
+      (transitionProgress - underwingCovertDeploymentStartProgress)
+        / (underwingCovertDeploymentEndProgress
+          - underwingCovertDeploymentStartProgress)
+    )
+    return smootherstep(progress)
   }
 
   static func dorsalFoldedWingHandoffBodyRadialIndex(left: Bool) -> Int {
@@ -246,6 +273,71 @@ enum CrowFlightWingBodyIntegration {
     )
   }
 
+  /// Short, interleaved ventral tips remain inside the convex topology cell:
+  /// the chord and span weights always sum to less than one.
+  static func underwingCovertTipSpanFraction(
+    chordIndex: Int,
+    spanIndex: Int
+  ) -> Float {
+    let coursePhase: Float
+    switch chordIndex {
+    case 1: coursePhase = -0.012
+    case 3: coursePhase = 0.010
+    case 5: coursePhase = -0.002
+    default: coursePhase = 0
+    }
+    return 0.10 + coursePhase
+      + 0.010 * covertIdentityVariation(
+        chordIndex: chordIndex,
+        spanIndex: spanIndex,
+        salt: 0xD3A2_646C
+      )
+  }
+
+  static func underwingCovertWidthScale(
+    chordIndex: Int,
+    spanIndex: Int
+  ) -> Float {
+    0.94 + 0.055 * covertIdentityVariation(
+      chordIndex: chordIndex,
+      spanIndex: spanIndex,
+      salt: 0xA24B_AED4
+    )
+  }
+
+  static func underwingCovertCamberScale(
+    chordIndex: Int,
+    spanIndex: Int
+  ) -> Float {
+    0.90 + 0.075 * covertIdentityVariation(
+      chordIndex: chordIndex,
+      spanIndex: spanIndex,
+      salt: 0x9FB2_1C65
+    )
+  }
+
+  static func underwingCovertMaterialVariation(
+    chordIndex: Int,
+    spanIndex: Int
+  ) -> Float {
+    covertIdentityVariation(
+      chordIndex: chordIndex,
+      spanIndex: spanIndex,
+      salt: 0xC13F_A9A9
+    )
+  }
+
+  static func underwingCovertEdgeVariation(
+    chordIndex: Int,
+    spanIndex: Int
+  ) -> Float {
+    covertIdentityVariation(
+      chordIndex: chordIndex,
+      spanIndex: spanIndex,
+      salt: 0x91E1_0DA5
+    )
+  }
+
   /// Broadens only the body-seated trailing covert centered on span five,
   /// fading symmetrically into its neighbors without moving any root or tip.
   static func covertAbdominalHandoffWidthScale(
@@ -418,6 +510,20 @@ enum CrowFlightWingBodyIntegration {
     let fallback = SIMD3<Float>(0, 0, -1)
     let length = simd_length(cross)
     return length > 1e-8 ? cross / length : fallback
+  }
+
+  /// The underwing tract is locked to the physical reverse face even when a
+  /// stroke crosses world-horizontal and the wing's world-space Z reverses.
+  static func underwingCovertSurfaceNormal(
+    chordDirection: SIMD3<Float>,
+    spanDirection: SIMD3<Float>,
+    left: Bool
+  ) -> SIMD3<Float> {
+    -covertSurfaceNormal(
+      chordDirection: chordDirection,
+      spanDirection: spanDirection,
+      left: left
+    )
   }
 
   static func bodyRoot(chordIndex: Int, left: Bool) -> SIMD3<Float> {

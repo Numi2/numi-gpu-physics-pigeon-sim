@@ -1491,14 +1491,27 @@ vertex RasterVertex crowFeatherVertex(
     return out;
 }
 
+// Surface-bound underwing coverts are anatomical decals over the closed live
+// scaffold. Bias depth only, never clip X/Y, so they remain visible without
+// creating a second projected silhouette at grazing camera angles.
+inline float4 crowSurfaceBiasedClipPosition(float4 clipPosition,uint featherClass){
+    if(featherClass==11u){clipPosition.z-=2.0e-5f*clipPosition.w;}
+    return clipPosition;
+}
+
 vertex CrowRasterVertex crowSurfaceAOVVertex(
     device const CrowSurfaceTemporalVertexGPU* vertices [[buffer(0)]],
     constant CrowTemporalCameraUniforms& camera [[buffer(1)]],
     uint vid [[vertex_id]]) {
     CrowSurfaceTemporalVertexGPU source=vertices[vid];
     CrowRasterVertex out;
-    out.position=camera.viewProjection*source.position;
-    out.previousClipPosition=camera.previousViewProjection*source.previousPosition;
+    uint featherClass=source.identity.w&255u;
+    out.position=crowSurfaceBiasedClipPosition(
+        camera.viewProjection*source.position,featherClass
+    );
+    out.previousClipPosition=crowSurfaceBiasedClipPosition(
+        camera.previousViewProjection*source.previousPosition,featherClass
+    );
     out.world=source.position.xyz;
     out.normal=normalize(source.normal.xyz);
     out.albedoAndMaterial=source.albedoAndMaterial;
@@ -1725,7 +1738,9 @@ inline float3 showcaseCrowLinearRadiance(
     float primaryVane=featherClass==1u?persistentVane:0.0f;
     float secondaryVane=featherClass==2u?persistentVane:0.0f;
     float rectrixVane=featherClass==3u?persistentVane:0.0f;
-    float greaterCovertVane=featherClass==4u?persistentVane:0.0f;
+    float underwingCovertVane=featherClass==11u?persistentVane:0.0f;
+    float greaterCovertVane=
+        (featherClass==4u||featherClass==11u)?persistentVane:0.0f;
     float dorsalBodyVane=featherClass==5u?persistentVane:0.0f;
     float flankBodyVane=featherClass==6u?persistentVane:0.0f;
     float ventralBodyVane=featherClass==7u?persistentVane:0.0f;
@@ -1745,6 +1760,7 @@ inline float3 showcaseCrowLinearRadiance(
     classSheenScale=mix(classSheenScale,0.72f,secondaryVane);
     classSheenScale=mix(classSheenScale,0.72f,rectrixVane);
     classSheenScale=mix(classSheenScale,0.72f,greaterCovertVane);
+    classSheenScale=mix(classSheenScale,0.66f,underwingCovertVane);
     classSheenScale=mix(classSheenScale,0.72f,dorsalBodyVane);
     classSheenScale=mix(classSheenScale,0.67f,flankBodyVane);
     classSheenScale=mix(classSheenScale,0.62f,ventralBodyVane);
@@ -1765,6 +1781,7 @@ inline float3 showcaseCrowLinearRadiance(
     vaneAnisotropy=mix(vaneAnisotropy,0.40f,headNeckVane);
     vaneAnisotropy=mix(vaneAnisotropy,0.32f,foreheadVane);
     vaneAnisotropy=mix(vaneAnisotropy,0.36f,gularVane);
+    vaneAnisotropy=mix(vaneAnisotropy,0.58f,underwingCovertVane);
     float longitudinalRoughness=mix(0.34f,0.25f,flightFeather);
     float transverseRoughness=mix(0.12f,0.075f,flightFeather);
     longitudinalRoughness=mix(longitudinalRoughness,0.215f,primaryVane);
@@ -1785,6 +1802,12 @@ inline float3 showcaseCrowLinearRadiance(
     transverseRoughness=mix(transverseRoughness,0.132f,headNeckVane);
     transverseRoughness=mix(transverseRoughness,0.145f,foreheadVane);
     transverseRoughness=mix(transverseRoughness,0.138f,gularVane);
+    longitudinalRoughness=mix(
+        longitudinalRoughness,0.325f,underwingCovertVane
+    );
+    transverseRoughness=mix(
+        transverseRoughness,0.105f,underwingCovertVane
+    );
     float anisotropicSpecular=featherMaterial*vaneAnisotropy
         *crowFeatherAnisotropicLobe(
         normal,featherAxis,halfVector,
@@ -1887,6 +1910,7 @@ inline float3 showcaseCrowLinearRadiance(
     classSharpScale=mix(classSharpScale,0.60f,secondaryVane);
     classSharpScale=mix(classSharpScale,0.72f,rectrixVane);
     classSharpScale=mix(classSharpScale,0.48f,greaterCovertVane);
+    classSharpScale=mix(classSharpScale,0.42f,underwingCovertVane);
     classSharpScale=mix(classSharpScale,0.98f,dorsalBodyVane);
     classSharpScale=mix(classSharpScale,0.94f,flankBodyVane);
     classSharpScale=mix(classSharpScale,0.88f,ventralBodyVane);

@@ -499,6 +499,7 @@ struct CrowShowcaseFrame {
         // leg plumage, and wing coverts is anatomical negative space rather
         // than a missing body or feather surface.
         let retractedPedalBoundaryMask = lowerBodyBoundaryMask | (1 << 4)
+          | (1 << CrowFlightWingBodyIntegration.underwingCovertSurfaceFeatherClass)
         let boundedByRetractedPedalSurfaces =
           adjacentClassMask & pedalSurfaceMask != 0
           && legFeatherBounded

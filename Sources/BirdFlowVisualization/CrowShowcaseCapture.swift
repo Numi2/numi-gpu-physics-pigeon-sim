@@ -1539,6 +1539,22 @@ private struct CrowMeshBuilder {
         projectedPixelsPerMeter: projectedPixelsPerMeter,
         to: &vertices
       )
+      // Append new reverse-face courses after all established surface geometry
+      // so every pre-existing primitive retains its exact audit identity.
+      appendSurfaceBoundUnderwingCoverts(
+        states: states,
+        left: true,
+        phase: phase,
+        projectedPixelsPerMeter: projectedPixelsPerMeter,
+        to: &vertices
+      )
+      appendSurfaceBoundUnderwingCoverts(
+        states: states,
+        left: false,
+        phase: phase,
+        projectedPixelsPerMeter: projectedPixelsPerMeter,
+        to: &vertices
+      )
     }
     return vertices
   }
@@ -3661,6 +3677,127 @@ private struct CrowMeshBuilder {
           // A fixed LOD contract preserves identical temporal topology even
           // while the measured-derived wing changes chord length slightly.
           lodLengthMeters: 0.12,
+          projectedPixelsPerMeter: projectedPixelsPerMeter,
+          to: &vertices
+        )
+      }
+    }
+  }
+
+  /// Three interleaved courses of lower marginal, median, and greater coverts
+  /// articulate the reverse face of the live wing. Every root and target is
+  /// sampled from the immutable 9 x 33 scaffold, and the tract stays one
+  /// station inside its perimeter so it cannot replace the aerodynamic outline.
+  private func appendSurfaceBoundUnderwingCoverts(
+    states: [SIMD3<Float>],
+    left: Bool,
+    phase: Float,
+    projectedPixelsPerMeter: Float,
+    to vertices: inout [ColoredVertex]
+  ) {
+    let partIdentifier: UInt8 = left ? 2 : 3
+    guard
+      let wing = dataset.components.first(where: {
+        $0.partIdentifier == partIdentifier
+      }), wing.vertexCount
+        == CrowFlightWingBodyIntegration.chordCount
+          * CrowFlightWingBodyIntegration.spanCount
+    else { return }
+    let chordCount = CrowFlightWingBodyIntegration.chordCount
+    func point(span: Int, chord: Int) -> SIMD3<Float> {
+      states[wing.vertexOffset + span * chordCount + chord]
+    }
+    let deploymentWeight: Float =
+      presentation == .takeoff
+      ? CrowFlightWingBodyIntegration.underwingCovertDeploymentWeight(
+        transitionProgress: CrowTakeoffSequence.sample(phase: phase)
+          .transitionProgress
+      )
+      : 1
+    for chord in CrowFlightWingBodyIntegration.underwingCovertChordIndices {
+      let rowFraction = Float(chord) / Float(chordCount - 1)
+      for span in CrowFlightWingBodyIntegration.underwingCovertSpanIndices {
+        let root = point(span: span, chord: chord)
+        let chordTarget = point(span: span, chord: chord + 2)
+        let spanTarget = point(span: span + 2, chord: chord)
+        let chordVector = chordTarget - root
+        let spanVector = spanTarget - root
+        let chordDirection = safeNormalize(
+          chordVector,
+          fallback: SIMD3<Float>(-1, 0, 0)
+        )
+        let spanDirection = safeNormalize(
+          spanVector,
+          fallback: SIMD3<Float>(0, left ? 1 : -1, 0)
+        )
+        let ventralNormal =
+          CrowFlightWingBodyIntegration.underwingCovertSurfaceNormal(
+            chordDirection: chordDirection,
+            spanDirection: spanDirection,
+            left: left
+          )
+        let tipSpanFraction =
+          CrowFlightWingBodyIntegration.underwingCovertTipSpanFraction(
+            chordIndex: chord,
+            spanIndex: span
+          )
+        let surfaceTip = root
+          + CrowFlightWingBodyIntegration.underwingCovertChordTargetScale
+            * chordVector
+          + tipSpanFraction * spanVector
+        let spacing = max(0.5 * simd_length(spanVector), 0.006)
+        let widthScale =
+          CrowFlightWingBodyIntegration.underwingCovertWidthScale(
+            chordIndex: chord,
+            spanIndex: span
+          )
+        let camberScale =
+          CrowFlightWingBodyIntegration.underwingCovertCamberScale(
+            chordIndex: chord,
+            spanIndex: span
+          )
+        let materialVariation =
+          CrowFlightWingBodyIntegration.underwingCovertMaterialVariation(
+            chordIndex: chord,
+            spanIndex: span
+          )
+        let edgeVariation =
+          CrowFlightWingBodyIntegration.underwingCovertEdgeVariation(
+            chordIndex: chord,
+            spanIndex: span
+          )
+        appendFeatherBlade(
+          root: root
+            + ventralNormal
+              * CrowFlightWingBodyIntegration
+                .underwingCovertRootClearanceMeters * deploymentWeight,
+          tip: surfaceTip
+            + ventralNormal
+              * CrowFlightWingBodyIntegration
+                .underwingCovertTipClearanceMeters * deploymentWeight,
+          planeNormal: ventralNormal,
+          rootWidth: deploymentWeight * widthScale * 0.34 * spacing,
+          maximumWidth: deploymentWeight * widthScale * 0.58 * spacing,
+          color: SIMD4<Float>(
+            (0.0065 + 0.0015 * rowFraction)
+              * (1 + 0.07 * materialVariation),
+            (0.0095 + 0.0020 * rowFraction)
+              * (1 + 0.05 * materialVariation),
+            (0.0170 + 0.0030 * rowFraction)
+              * (1 + 0.04 * materialVariation),
+            0.17 + 0.007 * materialVariation
+          ),
+          sections: 7,
+          camber: deploymentWeight * camberScale * 0.004
+            * simd_length(chordVector),
+          transverseCamberRatio: 0.04,
+          edgeRippleAmplitude: 0.006
+            + 0.008 * (0.5 + 0.5 * edgeVariation),
+          edgeRipplePhase: Float.pi * (edgeVariation + 1),
+          edgeRippleCycles: 1.10 + 0.45 * (0.5 + 0.5 * edgeVariation),
+          surfaceFeatherClass:
+            CrowFlightWingBodyIntegration.underwingCovertSurfaceFeatherClass,
+          lodLengthMeters: 0.10,
           projectedPixelsPerMeter: projectedPixelsPerMeter,
           to: &vertices
         )

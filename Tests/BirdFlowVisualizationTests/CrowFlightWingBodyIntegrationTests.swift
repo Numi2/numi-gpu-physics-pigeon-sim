@@ -693,6 +693,96 @@ func flightCovertCoursesDenselyCoverEveryBodyToWingStation() {
   #expect(Set(courseMeans.map { Int(($0 * 100_000).rounded()) }).count == 5)
 }
 
+@Test("underwing covert courses stay inset, deterministic, and topology bound")
+func underwingCovertCoursesStayInsetAndTopologyBound() {
+  #expect(CrowFlightWingBodyIntegration.underwingCovertChordIndices == [1, 3, 5])
+  #expect(CrowFlightWingBodyIntegration.underwingCovertSurfaceFeatherClass == 11)
+  #expect(
+    CrowFlightWingBodyIntegration.underwingCovertChordIndices.allSatisfy {
+      $0 > 0 && $0 + 2 < CrowFlightWingBodyIntegration.chordCount
+    }
+  )
+  let spans = CrowFlightWingBodyIntegration.underwingCovertSpanIndices
+  #expect(spans.first == 2)
+  #expect(spans.last == CrowFlightWingBodyIntegration.spanCount - 5)
+  #expect(spans.count == CrowFlightWingBodyIntegration.spanCount - 6)
+  #expect(Set(spans).count == spans.count)
+  #expect(zip(spans, spans.dropFirst()).allSatisfy { $1 - $0 == 1 })
+  #expect(spans.allSatisfy { $0 > 1 && $0 + 3 < CrowFlightWingBodyIntegration.spanCount })
+
+  let identities = CrowFlightWingBodyIntegration.underwingCovertChordIndices
+    .flatMap { chord in
+      spans.map { span in
+        (
+          chord,
+          span,
+          CrowFlightWingBodyIntegration.underwingCovertTipSpanFraction(
+            chordIndex: chord,
+            spanIndex: span
+          ),
+          CrowFlightWingBodyIntegration.underwingCovertWidthScale(
+            chordIndex: chord,
+            spanIndex: span
+          ),
+          CrowFlightWingBodyIntegration.underwingCovertCamberScale(
+            chordIndex: chord,
+            spanIndex: span
+          ),
+          CrowFlightWingBodyIntegration.underwingCovertMaterialVariation(
+            chordIndex: chord,
+            spanIndex: span
+          )
+        )
+      }
+    }
+  #expect(identities.count == 81)
+  #expect(identities.map(\.2).min()! > 0.075)
+  #expect(identities.map(\.2).max()! < 0.125)
+  #expect(
+    identities.allSatisfy {
+      CrowFlightWingBodyIntegration.underwingCovertChordTargetScale + $0.2 < 1
+    }
+  )
+  #expect(identities.map(\.3).min()! > 0.88)
+  #expect(identities.map(\.3).max()! < 1.00)
+  #expect(identities.map(\.4).min()! > 0.82)
+  #expect(identities.map(\.4).max()! < 0.98)
+  #expect(identities.map(\.5).min()! < -0.90)
+  #expect(identities.map(\.5).max()! > 0.90)
+  #expect(CrowFlightWingBodyIntegration.underwingCovertRootClearanceMeters == 0.0001)
+  #expect(CrowFlightWingBodyIntegration.underwingCovertTipClearanceMeters == 0.00015)
+  #expect(CrowFlightWingBodyIntegration.underwingCovertDeploymentWeight(transitionProgress: 0) == 0)
+  #expect(CrowFlightWingBodyIntegration.underwingCovertDeploymentWeight(transitionProgress: 0.01) == 0)
+  #expect(CrowFlightWingBodyIntegration.underwingCovertDeploymentWeight(transitionProgress: 0.20) == 1)
+  #expect(CrowFlightWingBodyIntegration.underwingCovertDeploymentWeight(transitionProgress: 1) == 1)
+  let halfDeployment = CrowFlightWingBodyIntegration.underwingCovertDeploymentWeight(
+    transitionProgress: 0.105
+  )
+  #expect(abs(halfDeployment - 0.5) < 1e-6)
+}
+
+@Test("underwing covert normals remain the anatomical reverse face")
+func underwingCovertNormalsRemainTheReverseFace() {
+  let chord = SIMD3<Float>(-1, 0, 0)
+  for (left, span) in [
+    (true, SIMD3<Float>(0, 1, 0)),
+    (false, SIMD3<Float>(0, -1, 0)),
+  ] {
+    let dorsal = CrowFlightWingBodyIntegration.covertSurfaceNormal(
+      chordDirection: chord,
+      spanDirection: span,
+      left: left
+    )
+    let ventral = CrowFlightWingBodyIntegration.underwingCovertSurfaceNormal(
+      chordDirection: chord,
+      spanDirection: span,
+      left: left
+    )
+    #expect(abs(simd_length(ventral) - 1) < 1e-6)
+    #expect(simd_dot(dorsal, ventral) < -0.999)
+  }
+}
+
 @Test("rectrix wing handoff is compact and bilateral")
 func rectrixWingHandoffIsCompactAndBilateral() {
   let count = CrowClosedTailAnatomy.rectrixCount
