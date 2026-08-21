@@ -684,10 +684,25 @@ rear-starboard, and `25/11/9` to `20/10/9` at the steep underside. This
 qualifies deterministic simulated raster continuity and retained feather
 ownership, not perceptual realism.
 
+The body optical-bank pass addresses the manufactured diagonal highlight bands
+seen from a previously unused high-port grazing view at yaw/pitch
+`(-1.55,0.84)`. A temporary non-shipping class render localized the exposed
+dorsum and flank to classes `5` and `6`; hidden contour-detail and follicle
+stagger candidates were rejected after producing no perceptible improvement.
+The retained shader instead broadens identity-stable barb-bank orientation,
+normal, and roughness variation in feather-local coordinates. Across the fresh
+nine-frame audit, pixel-weighted same-class neighbour luminance difference
+changes from `0.00295060` to `0.00293924` for class `5` and from `0.00246946`
+to `0.00246504` for class `6`, reducing coherent bands without flattening mean
+class luminance. Geometry, depth, motion, normal, identity, support, and hole
+AOV fields remain exact on the fresh view and all five established 17-frame
+safety views. These are deterministic optical-coherence checks, not a claim of
+measured American-crow reflectance or perceptual realism.
+
 The canonical README sequence is fully simulated and contains the native hold,
-transition, and flight path: `800 x 450`, `72` frames at `24 fps`, `8,204,168`
+transition, and flight path: `800 x 450`, `72` frames at `24 fps`, `8,196,728`
 bytes, SHA-256
-`ef41208d6683f383e04bb725f8b0704d453a8567e5604e57be083382213e8275`.
+`e361a2165195da23e01a668bac4e96b07c78296ff92c9587d871dfccfb599025`.
 
 Run the presentation with:
 

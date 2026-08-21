@@ -2438,7 +2438,7 @@ inline float3 showcaseCrowLinearRadiance(
             +0.29f*float(featherClass)
     );
     float bodyOpticalTurn=bodyContourVane
-        *(0.055f*bodyOpticalIdentity+0.018f*bodyOpticalDrift);
+        *(0.105f*bodyOpticalIdentity+0.035f*bodyOpticalDrift);
     float3 featherBarbAxis=safeNormalizeCrow(
         cross(normal,featherAxis),float3(0.0f,1.0f,0.0f)
     );
@@ -2450,7 +2450,7 @@ inline float3 showcaseCrowLinearRadiance(
     float bankIdentity=0.5f+0.5f*crowBandLimitedSine(
         2.39f*featherCoordinates.z+0.67f*float(featherClass)
     );
-    float bodyBankSpread=bodyContourVane*(0.105f+0.030f*bankIdentity);
+    float bodyBankSpread=bodyContourVane*(0.075f+0.095f*bankIdentity);
     float3 opticalBarbAxis=safeNormalizeCrow(
         cross(normal,bodyOpticalAxis),featherBarbAxis
     );
@@ -2502,6 +2502,12 @@ inline float3 showcaseCrowLinearRadiance(
     transverseRoughness=mix(
         transverseRoughness,0.105f,underwingCovertVane
     );
+    // Stable per-feather barb-bank orientation also carries a bounded
+    // microfacet-width variation. This prevents thousands of short body vanes
+    // from sharing one manufactured highlight band while remaining attached
+    // to the retained local feather coordinates through motion and takeoff.
+    longitudinalRoughness*=1.0f+0.10f*bodyContourVane*bodyOpticalIdentity;
+    transverseRoughness*=1.0f+0.12f*bodyContourVane*bodyOpticalDrift;
     float genericAnisotropicSpecular=crowFeatherAnisotropicLobe(
         normal,featherAxis,halfVector,
         longitudinalRoughness,transverseRoughness
@@ -2587,11 +2593,14 @@ inline float3 showcaseCrowLinearRadiance(
     );
     float bodyBarbTilt=0.024f*bodyContourVane*localBarbWave
         *(1.0f-smoothstep(0.72f,0.96f,abs(signedWidth)));
+    float bodyIdentityTilt=bodyContourVane
+        *(0.045f*bodyOpticalIdentity+0.015f*bodyOpticalDrift);
+    float bodyAxialTilt=0.022f*bodyContourVane*bodyOpticalDrift;
     float barbuleTilt=mix(0.006f,0.014f,flightFeather)
         *interlockingBarbules.x;
     float3 specularNormal=safeNormalizeCrow(
-        normal+(bodyBarbTilt+barbuleTilt)*bodyBarbAxis
-            +0.45f*barbuleTilt*featherAxis,
+        normal+(bodyBarbTilt+bodyIdentityTilt+barbuleTilt)*bodyBarbAxis
+            +(bodyAxialTilt+0.45f*barbuleTilt)*featherAxis,
         normal
     );
     // Overlapping body contours form a broader collective cortex response at

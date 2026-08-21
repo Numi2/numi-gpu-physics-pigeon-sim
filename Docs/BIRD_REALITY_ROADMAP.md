@@ -139,6 +139,16 @@ inventory or view-dependent patch geometry.
    characteristic feather appearance. Crow parameters remain estimated until
    matched measurements exist.
 
+   **Implemented optical baseline:** body classes resolve two feather-local
+   barb banks with identity-stable orientation, normal, and bounded roughness
+   variation. The field follows retained vane coordinates through standing and
+   takeoff, so it cannot swim in world or screen space, and it leaves geometry,
+   depth, motion, and identity AOVs exact. This moves the deterministic fallback
+   toward spatially and directionally varying feather reflectance; it is not a
+   measured crow BSDF. The next material milestone is calibrated black-plumage
+   acquisition and a wavelength-aware cortex/medulla/transmission model rather
+   than further hand-tuning of RGB lobes.
+
 4. **Physical light transport.** Add image-based lighting, multiple scattering,
    soft self-shadowing, and curve/triangle ray geometry. Metal supports curve
    primitives and motion triangle/curve acceleration structures, which map to
@@ -189,4 +199,5 @@ and the separation between solver boundary and beauty geometry. Promotion needs:
   and [Metal feature-set tables](https://developer.apple.com/metal/capabilities/).
 - Apple, [Metal Performance Primitives programming guide](https://developer.apple.com/download/files/Metal-Performance-Primitives-Programming-Guide.pdf).
 - Huang et al., [Rendering Iridescent Rock Dove Neck Feathers](https://light.informatik.uni-bonn.de/rendering-iridescent-rock-dove-neck-feathers/), SIGGRAPH 2022.
+- Harvey et al., [Measuring Spatially- and Directionally-varying Light Scattering from Biological Material](https://doi.org/10.3791/50254), *Journal of Visualized Experiments* 75 (2013).
 - Zeltner et al., [Real-Time Neural Appearance Models](https://research.nvidia.com/labs/rtr/neural_appearance_models/), SIGGRAPH 2024.

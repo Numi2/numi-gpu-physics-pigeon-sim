@@ -268,9 +268,15 @@ rendering model, not evidence of measured American-crow rachis depth.
 At showcase material quality, body-feather anisotropy now resolves two bounded
 optical barb banks around a stable feather-local axis. The lobe pair follows
 the same identity and axial phase as its vane while body-class transverse
-roughness remains broader than the flight-feather response. This is a
-future-compute optical approximation: it adds no geometry, does not alter the
-AOV topology owner, and is not measured barbule microstructure.
+roughness remains broader than the flight-feather response. Feather-local bank
+turn now spans at most `0.14 rad`, bank separation varies from `0.075` to
+`0.170 rad`, and longitudinal/transverse microfacet widths vary by at most
+`10%` and `12%`. A bounded identity-normal tilt below `0.06 rad` prevents
+adjacent body vanes from sharing one manufactured specular band. All phases
+remain attached to the local vane coordinates rather than world or screen
+space. This is a future-compute optical approximation: it adds no geometry,
+does not alter the AOV topology owner, and is not measured American-crow
+barbule microstructure.
 
 The estimated femoral field keeps its `15 x 18` body-surface-rooted inventory
 (`270` vanes per side) and all root and joint coordinates. A temporal-identity
