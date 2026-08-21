@@ -42,6 +42,7 @@ struct CrowShowcaseFrame {
     var aboveOneHDRPixelCount = 0
     var activeIdentityPixelCount = 0
     var fullyCoveredAOVPixelCount = 0
+    var fullyCoveredActiveIdentityPixelCount = 0
     var movingActivePixelCount = 0
     var maximumHDRComponent: Float = 0
     var maximumMotionPixels: Float = 0
@@ -55,6 +56,8 @@ struct CrowShowcaseFrame {
     var supportYTotal: Float = 0
     var supportPixelCount = 0
     var featherHashes: Set<UInt32> = []
+    var visibleFeatherClassPixelCounts = [Int](repeating: 0, count: 32)
+    var fullyCoveredFeatherClassPixelCounts = [Int](repeating: 0, count: 32)
     var birdMask = [Bool](repeating: false, count: pixelCount)
     var featherClassCodes = [UInt8](repeating: 0, count: pixelCount)
     var surfacePrimitiveIdentifiers = [UInt32](repeating: 0, count: pixelCount)
@@ -91,6 +94,8 @@ struct CrowShowcaseFrame {
       surfacePrimitiveIdentifiers[pixel] = id0 == UInt32.max ? id1 : 0
       if active {
         activeIdentityPixelCount += 1
+        let featherClass = Int(min(id3 & 255, 31))
+        visibleFeatherClassPixelCounts[featherClass] += 1
         if id0 != UInt32.max { featherHashes.insert(id1) }
         if id0 == UInt32.max && id2 == 6 {
           supportYTotal += Float(pixel / width)
@@ -107,6 +112,11 @@ struct CrowShowcaseFrame {
         continue
       }
       fullyCoveredAOVPixelCount += 1
+      if active {
+        fullyCoveredActiveIdentityPixelCount += 1
+        let featherClass = Int(min(id3 & 255, 31))
+        fullyCoveredFeatherClassPixelCounts[featherClass] += 1
+      }
       let speed = hypot(motionX, motionY)
       maximumMotionPixels = max(maximumMotionPixels, speed)
       if speed > 0.01 { movingActivePixelCount += 1 }
@@ -167,7 +177,10 @@ struct CrowShowcaseFrame {
       aboveOneHDRPixelCount: aboveOneHDRPixelCount,
       activeIdentityPixelCount: activeIdentityPixelCount,
       fullyCoveredAOVPixelCount: fullyCoveredAOVPixelCount,
+      fullyCoveredActiveIdentityPixelCount: fullyCoveredActiveIdentityPixelCount,
       visibleFeatherIdentityCount: featherHashes.count,
+      visibleFeatherClassPixelCounts: visibleFeatherClassPixelCounts,
+      fullyCoveredFeatherClassPixelCounts: fullyCoveredFeatherClassPixelCounts,
       enclosedBirdSilhouetteHolePixelCount: silhouetteHoles.pixelCount,
       enclosedBirdSilhouetteHoleComponentCount: silhouetteHoles.componentCount,
       largestEnclosedBirdSilhouetteHolePixelCount:
@@ -500,6 +513,9 @@ struct CrowShowcaseFrame {
         // than a missing body or feather surface.
         let retractedPedalBoundaryMask = lowerBodyBoundaryMask | (1 << 4)
           | (1 << CrowFlightWingBodyIntegration.underwingCovertSurfaceFeatherClass)
+          | (1
+            << CrowFlightWingBodyIntegration
+              .underwingPrimaryCovertSurfaceFeatherClass)
         let boundedByRetractedPedalSurfaces =
           adjacentClassMask & pedalSurfaceMask != 0
           && legFeatherBounded
@@ -683,7 +699,12 @@ struct CrowShowcaseAOVFrameAudit: Codable, Equatable {
   let aboveOneHDRPixelCount: Int
   let activeIdentityPixelCount: Int
   let fullyCoveredAOVPixelCount: Int
+  let fullyCoveredActiveIdentityPixelCount: Int
   let visibleFeatherIdentityCount: Int
+  /// Exact visible identity-AOV pixels binned by the low five class bits.
+  let visibleFeatherClassPixelCounts: [Int]
+  /// The same 32-bin census restricted to full geometric sample coverage.
+  let fullyCoveredFeatherClassPixelCounts: [Int]
   let enclosedBirdSilhouetteHolePixelCount: Int
   let enclosedBirdSilhouetteHoleComponentCount: Int
   let largestEnclosedBirdSilhouetteHolePixelCount: Int
@@ -725,7 +746,7 @@ struct CrowShowcaseAOVAuditReport: Codable, Equatable {
   let frames: [CrowShowcaseAOVFrameAudit]
 
   init(frames: [CrowShowcaseAOVFrameAudit]) {
-    schemaVersion = 6
+    schemaVersion = 7
     colorSpace = "scene-linear extended range; display output is tone mapped separately"
     motionConvention =
       "current pixel to previous pixel in upper-left-origin pixel units; MetalFX scale 1"

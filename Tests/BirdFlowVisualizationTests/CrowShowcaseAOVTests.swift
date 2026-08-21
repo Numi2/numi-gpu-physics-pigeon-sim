@@ -220,4 +220,18 @@ func silhouetteAuditPreservesRetractedPedalSpaceAcrossWingCoverts() {
   )
   #expect(underwingClassified.pixelCount == 0)
   #expect(underwingClassified.expectedLowerBodyAperturePixelCount == 6)
+
+  for x in 5...6 {
+    classes[6 * width + x] = UInt8(
+      CrowFlightWingBodyIntegration.underwingPrimaryCovertSurfaceFeatherClass
+    )
+  }
+  let primaryCovertClassified = CrowShowcaseFrame.silhouetteHoles(
+    birdMask: bird,
+    featherClassCodes: classes,
+    width: width,
+    height: height
+  )
+  #expect(primaryCovertClassified.pixelCount == 0)
+  #expect(primaryCovertClassified.expectedLowerBodyAperturePixelCount == 6)
 }

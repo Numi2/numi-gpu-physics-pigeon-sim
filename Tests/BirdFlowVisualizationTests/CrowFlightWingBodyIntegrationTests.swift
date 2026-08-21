@@ -695,8 +695,11 @@ func flightCovertCoursesDenselyCoverEveryBodyToWingStation() {
 
 @Test("underwing covert courses stay inset, deterministic, and topology bound")
 func underwingCovertCoursesStayInsetAndTopologyBound() {
-  #expect(CrowFlightWingBodyIntegration.underwingCovertChordIndices == [1, 3, 5])
-  #expect(CrowFlightWingBodyIntegration.underwingCovertSurfaceFeatherClass == 11)
+  #expect(CrowFlightWingBodyIntegration.underwingCovertChordIndices == [1, 3, 5, 6])
+  #expect(CrowFlightWingBodyIntegration.underwingCovertSurfaceFeatherClass == 12)
+  #expect(
+    CrowFlightWingBodyIntegration.underwingPrimaryCovertSurfaceFeatherClass == 13
+  )
   #expect(
     CrowFlightWingBodyIntegration.underwingCovertChordIndices.allSatisfy {
       $0 > 0 && $0 + 2 < CrowFlightWingBodyIntegration.chordCount
@@ -735,12 +738,14 @@ func underwingCovertCoursesStayInsetAndTopologyBound() {
         )
       }
     }
-  #expect(identities.count == 81)
+  #expect(identities.count == 108)
   #expect(identities.map(\.2).min()! > 0.075)
   #expect(identities.map(\.2).max()! < 0.125)
   #expect(
     identities.allSatisfy {
-      CrowFlightWingBodyIntegration.underwingCovertChordTargetScale + $0.2 < 1
+      CrowFlightWingBodyIntegration.underwingCovertChordTargetScale(
+        chordIndex: $0.0
+      ) + $0.2 < 1
     }
   )
   #expect(identities.map(\.3).min()! > 0.88)
@@ -749,6 +754,20 @@ func underwingCovertCoursesStayInsetAndTopologyBound() {
   #expect(identities.map(\.4).max()! < 0.98)
   #expect(identities.map(\.5).min()! < -0.90)
   #expect(identities.map(\.5).max()! > 0.90)
+  #expect(CrowFlightWingBodyIntegration.underwingCovertChordTargetScale(chordIndex: 5) == 0.86)
+  #expect(CrowFlightWingBodyIntegration.underwingCovertChordTargetScale(chordIndex: 6) == 0.64)
+  #expect(CrowFlightWingBodyIntegration.underwingCovertCourseWidthScale(chordIndex: 5) == 1)
+  #expect(CrowFlightWingBodyIntegration.underwingCovertCourseWidthScale(chordIndex: 6) == 0.82)
+  #expect(CrowFlightWingBodyIntegration.underwingCovertClassCode(chordIndex: 5) == 12)
+  #expect(CrowFlightWingBodyIntegration.underwingCovertClassCode(chordIndex: 6) == 13)
+  #expect(
+    CrowFlightWingBodyIntegration.underwingCovertSurfaceFeatherClass
+      != CrowFootAnatomy.surfaceIdentityClassCode
+  )
+  #expect(
+    CrowFlightWingBodyIntegration.underwingPrimaryCovertSurfaceFeatherClass
+      != CrowFootAnatomy.surfaceIdentityClassCode
+  )
   #expect(CrowFlightWingBodyIntegration.underwingCovertRootClearanceMeters == 0.0001)
   #expect(CrowFlightWingBodyIntegration.underwingCovertTipClearanceMeters == 0.00015)
   #expect(CrowFlightWingBodyIntegration.underwingCovertDeploymentWeight(transitionProgress: 0) == 0)

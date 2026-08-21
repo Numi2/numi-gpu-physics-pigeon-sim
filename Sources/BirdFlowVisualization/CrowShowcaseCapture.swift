@@ -3742,14 +3742,21 @@ private struct CrowMeshBuilder {
             spanIndex: span
           )
         let surfaceTip = root
-          + CrowFlightWingBodyIntegration.underwingCovertChordTargetScale
+          + CrowFlightWingBodyIntegration.underwingCovertChordTargetScale(
+            chordIndex: chord
+          )
             * chordVector
           + tipSpanFraction * spanVector
+        let deployedSurfaceTip = root
+          + deploymentWeight * (surfaceTip - root)
         let spacing = max(0.5 * simd_length(spanVector), 0.006)
         let widthScale =
           CrowFlightWingBodyIntegration.underwingCovertWidthScale(
             chordIndex: chord,
             spanIndex: span
+          )
+          * CrowFlightWingBodyIntegration.underwingCovertCourseWidthScale(
+            chordIndex: chord
           )
         let camberScale =
           CrowFlightWingBodyIntegration.underwingCovertCamberScale(
@@ -3771,7 +3778,7 @@ private struct CrowMeshBuilder {
             + ventralNormal
               * CrowFlightWingBodyIntegration
                 .underwingCovertRootClearanceMeters * deploymentWeight,
-          tip: surfaceTip
+          tip: deployedSurfaceTip
             + ventralNormal
               * CrowFlightWingBodyIntegration
                 .underwingCovertTipClearanceMeters * deploymentWeight,
@@ -3796,7 +3803,9 @@ private struct CrowMeshBuilder {
           edgeRipplePhase: Float.pi * (edgeVariation + 1),
           edgeRippleCycles: 1.10 + 0.45 * (0.5 + 0.5 * edgeVariation),
           surfaceFeatherClass:
-            CrowFlightWingBodyIntegration.underwingCovertSurfaceFeatherClass,
+            CrowFlightWingBodyIntegration.underwingCovertClassCode(
+              chordIndex: chord
+            ),
           lodLengthMeters: 0.10,
           projectedPixelsPerMeter: projectedPixelsPerMeter,
           to: &vertices

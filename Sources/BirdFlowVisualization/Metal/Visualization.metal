@@ -1495,7 +1495,9 @@ vertex RasterVertex crowFeatherVertex(
 // scaffold. Bias depth only, never clip X/Y, so they remain visible without
 // creating a second projected silhouette at grazing camera angles.
 inline float4 crowSurfaceBiasedClipPosition(float4 clipPosition,uint featherClass){
-    if(featherClass==11u){clipPosition.z-=2.0e-5f*clipPosition.w;}
+    if(featherClass==12u||featherClass==13u){
+        clipPosition.z-=2.0e-5f*clipPosition.w;
+    }
     return clipPosition;
 }
 
@@ -1738,9 +1740,11 @@ inline float3 showcaseCrowLinearRadiance(
     float primaryVane=featherClass==1u?persistentVane:0.0f;
     float secondaryVane=featherClass==2u?persistentVane:0.0f;
     float rectrixVane=featherClass==3u?persistentVane:0.0f;
-    float underwingCovertVane=featherClass==11u?persistentVane:0.0f;
+    float underwingCovertVane=
+        (featherClass==12u||featherClass==13u)?persistentVane:0.0f;
     float greaterCovertVane=
-        (featherClass==4u||featherClass==11u)?persistentVane:0.0f;
+        (featherClass==4u||featherClass==12u||featherClass==13u)
+            ?persistentVane:0.0f;
     float dorsalBodyVane=featherClass==5u?persistentVane:0.0f;
     float flankBodyVane=featherClass==6u?persistentVane:0.0f;
     float ventralBodyVane=featherClass==7u?persistentVane:0.0f;

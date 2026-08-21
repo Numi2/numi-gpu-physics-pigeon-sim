@@ -38,9 +38,9 @@ enum CrowFlightWingBodyIntegration {
   static let rectrixWingHandoffMaximumWidthScale: Float = 1.40
   static let covertAbdominalHandoffMaximumNormalLiftMeters: Float = 0.001
   static let covertChordIndices = [0, 3, 4, 5, 6]
-  static let underwingCovertChordIndices = [1, 3, 5]
-  static let underwingCovertSurfaceFeatherClass: UInt32 = 11
-  static let underwingCovertChordTargetScale: Float = 0.86
+  static let underwingCovertChordIndices = [1, 3, 5, 6]
+  static let underwingCovertSurfaceFeatherClass: UInt32 = 12
+  static let underwingPrimaryCovertSurfaceFeatherClass: UInt32 = 13
   static let underwingCovertRootClearanceMeters: Float = 0.0001
   static let underwingCovertTipClearanceMeters: Float = 0.00015
   static let underwingCovertDeploymentStartProgress: Float = 0.01
@@ -88,6 +88,22 @@ enum CrowFlightWingBodyIntegration {
           - underwingCovertDeploymentStartProgress)
     )
     return smootherstep(progress)
+  }
+
+  /// Passerine primary coverts are relatively short; the caudal course seals
+  /// remex bases without extending to the established trailing-wing outline.
+  static func underwingCovertChordTargetScale(chordIndex: Int) -> Float {
+    chordIndex == 6 ? 0.64 : 0.86
+  }
+
+  static func underwingCovertCourseWidthScale(chordIndex: Int) -> Float {
+    chordIndex == 6 ? 0.82 : 1
+  }
+
+  static func underwingCovertClassCode(chordIndex: Int) -> UInt32 {
+    chordIndex == 6
+      ? underwingPrimaryCovertSurfaceFeatherClass
+      : underwingCovertSurfaceFeatherClass
   }
 
   static func dorsalFoldedWingHandoffBodyRadialIndex(left: Bool) -> Int {
@@ -284,6 +300,7 @@ enum CrowFlightWingBodyIntegration {
     case 1: coursePhase = -0.012
     case 3: coursePhase = 0.010
     case 5: coursePhase = -0.002
+    case 6: coursePhase = 0.016
     default: coursePhase = 0
     }
     return 0.10 + coursePhase
