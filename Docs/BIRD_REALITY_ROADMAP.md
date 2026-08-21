@@ -93,6 +93,13 @@ ankles move by millimetres.
    interior barb pairs without changing identity or detail-record count. A
    future curve/meshlet implementation should emit those same records directly
    and replace the bounded crown blend with coupled feather contact and airflow.
+   Outer class-`6` scapular vanes now seat their visible crown beneath the live
+   wing and carry parent-class rachis/barb identity through the triangle oracle.
+   Interior barbs remain vane-bounded while terminal bundles preserve tip
+   coverage. Future hardware should consume these same compact records in a
+   GPU-resident curve or meshlet expansion, visibility-cull emitted detail, and
+   replace the prescribed transverse blend with per-feather contact, bending,
+   and airflow without reducing identity density or changing the AOV oracle.
 
 3. **Measured appearance, bounded claims.** Implement an energy-bounded,
    anisotropic feather BSDF with separate eumelanin absorption, longitudinal

@@ -49,6 +49,11 @@ enum CrowBodyFeatherTracts {
   static let humeralColumnCount = 30
   static let scapularRowCount = 22
   static let scapularColumnCount = 24
+  static let cervicalTransverseCamberRatio: Float = 0.24
+  static let bodyTractTransverseCamberRatio: Float = 0.28
+  static let scapularFlightTransverseCamberStartCourseFraction: Float = 0.40
+  static let scapularFlightOuterTransverseCamberRatio: Float = 0.16
+  static let retainedDetailCrownInsetScale: Float = 0.96
 
   static func visibleSamples(
     neckPose: CrowStandingNeckPose? = nil,
@@ -694,6 +699,58 @@ enum CrowBodyFeatherTracts {
     return 1
       + (mantleFlightPosteriorCamberScale - 1)
         * axialWeight * transitionWeight
+  }
+
+  /// Resolves the visible vane's transverse crown. Only the outer scapular
+  /// field settles during deployment; cervical, mantle, and humeral profiles
+  /// remain unchanged.
+  static func transverseCamberRatio(
+    region: CrowBodyFeatherTractRegion,
+    row: Int,
+    transitionProgress: Float
+  ) -> Float {
+    if region == .cervical { return cervicalTransverseCamberRatio }
+    guard region == .scapular else { return bodyTractTransverseCamberRatio }
+    let course = Float(min(max(row, 0), scapularRowCount - 1))
+      / Float(scapularRowCount - 1)
+    let courseProgress = min(
+      max(
+        (course - scapularFlightTransverseCamberStartCourseFraction)
+          / (1 - scapularFlightTransverseCamberStartCourseFraction),
+        0
+      ),
+      1
+    )
+    let courseWeight = courseProgress * courseProgress * (3 - 2 * courseProgress)
+    let boundedTransition = min(max(transitionProgress, 0), 1)
+    let transitionWeight =
+      boundedTransition * boundedTransition * (3 - 2 * boundedTransition)
+    return bodyTractTransverseCamberRatio
+      + (scapularFlightOuterTransverseCamberRatio
+        - bodyTractTransverseCamberRatio)
+        * courseWeight * transitionWeight
+  }
+
+  /// Only the exposed outer scapular field promotes retained detail against
+  /// the transverse vane crown. A small inset plus the mesostructure's raster
+  /// separation avoids coplanar flicker. Buried inner scapular and humeral
+  /// detail remains on its established centerline until it becomes visible.
+  static func retainedDetailTransverseCamberRatio(
+    region: CrowBodyFeatherTractRegion,
+    row: Int,
+    transitionProgress: Float
+  ) -> Float {
+    guard region == .scapular else { return 0 }
+    let course = Float(min(max(row, 0), scapularRowCount - 1))
+      / Float(scapularRowCount - 1)
+    guard course >= scapularFlightTransverseCamberStartCourseFraction else {
+      return 0
+    }
+    return retainedDetailCrownInsetScale * transverseCamberRatio(
+      region: region,
+      row: row,
+      transitionProgress: transitionProgress
+    )
   }
 
   /// Additional caudal shingling over the narrowing rump. The bounded

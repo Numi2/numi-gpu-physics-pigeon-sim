@@ -351,6 +351,19 @@ components, `10` expected-aperture pixels in `4` components, and the `44`-pixel
 worst hole also stayed exact. These are deterministic raster gates, not proof
 of measured feather behavior or perceptual realism.
 
+The exposed class-`6` scapular layer now shares its deployed transverse crown
+with retained rachis and barb geometry while preserving stable parent-class AOV
+ownership. Interior barbs remain inside `97%` of the local vane width and only
+five terminal bundles complete the feather tip. Across six 17-frame takeoff
+audits at yaw/pitch `(-0.62,-0.22)`, `(-1.25,0.38)`, `(-2.42,0.28)`,
+`(-1.82,0.62)`, `(2.65,-0.88)`, and `(0.85,0.18)`, aggregate enclosed holes
+fell from `791` to `786` pixels and components from `408` to `405`. Expected
+lower-body apertures remained exactly `10` pixels in `4` components and the
+worst hole remained `44` pixels. The new first view, high-side, low-rear,
+dorsal-rear, and front-starboard gap counts stayed exact; under-rear improved
+from `92` to `87` pixels and `50` to `47` components. These are deterministic
+raster-coverage checks for simulated geometry, not measured feather anatomy.
+
 Run the presentation with:
 
 ```bash

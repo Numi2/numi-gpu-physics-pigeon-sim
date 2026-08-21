@@ -99,6 +99,13 @@ stations; vane width, chord, identity, and the caudal handoff remain unchanged.
 Posterior class-`5` body plumage now follows the same deployment state: dorsal
 contour and mantle crown settle into the closed torso while showcase-scale
 dorsal vanes replace coarse edge aggregates with contained interior barb pairs.
+The exposed outer class-`6` scapular field now seats beneath the live wing root
+as deployment advances: its transverse crown settles from `0.28` to `0.16`,
+and retained rachis/barb geometry follows the same vane envelope instead of
+remaining on a buried centerline. Interior barbs stop at `97%` of the owning
+vane width, five bounded terminal bundles complete each tip, and all emitted
+detail keeps the parent class-`6` AOV identity. Follicles, centerline tips,
+widths, inventory, and standing anatomy remain unchanged.
 A locked
 `2,157`-vertex, `3,968`-triangle estimated-hybrid surface now also passes the
 live Apple-Metal geometry and production TRT moving-boundary coupling gates.

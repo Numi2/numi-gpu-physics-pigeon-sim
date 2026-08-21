@@ -102,6 +102,86 @@ func crowBodyFeatherTractsOverlapNeckAndCoverWingRoots() {
       ) == 1
     )
   }
+
+  let deployedScapularTransverseRatios =
+    (0..<CrowBodyFeatherTracts.scapularRowCount).map {
+      CrowBodyFeatherTracts.transverseCamberRatio(
+        region: .scapular,
+        row: $0,
+        transitionProgress: 1
+      )
+    }
+  #expect(
+    deployedScapularTransverseRatios.first
+      == CrowBodyFeatherTracts.bodyTractTransverseCamberRatio
+  )
+  #expect(
+    abs(
+      deployedScapularTransverseRatios.last!
+        - CrowBodyFeatherTracts.scapularFlightOuterTransverseCamberRatio
+    ) < 1e-7
+  )
+  #expect(
+    zip(
+      deployedScapularTransverseRatios,
+      deployedScapularTransverseRatios.dropFirst()
+    ).allSatisfy { $1 <= $0 }
+  )
+  for row in 0..<CrowBodyFeatherTracts.scapularRowCount {
+    #expect(
+      CrowBodyFeatherTracts.transverseCamberRatio(
+        region: .scapular,
+        row: row,
+        transitionProgress: 0
+      ) == CrowBodyFeatherTracts.bodyTractTransverseCamberRatio
+    )
+  }
+  #expect(
+    CrowBodyFeatherTracts.transverseCamberRatio(
+      region: .cervical,
+      row: 0,
+      transitionProgress: 1
+    ) == CrowBodyFeatherTracts.cervicalTransverseCamberRatio
+  )
+  for region in [CrowBodyFeatherTractRegion.mantle, .humeral] {
+    #expect(
+      CrowBodyFeatherTracts.transverseCamberRatio(
+        region: region,
+        row: 0,
+        transitionProgress: 1
+      ) == CrowBodyFeatherTracts.bodyTractTransverseCamberRatio
+    )
+  }
+  #expect(
+    CrowBodyFeatherTracts.retainedDetailTransverseCamberRatio(
+      region: .humeral,
+      row: CrowBodyFeatherTracts.humeralRowCount - 1,
+      transitionProgress: 1
+    ) == 0
+  )
+  #expect(
+    CrowBodyFeatherTracts.retainedDetailTransverseCamberRatio(
+      region: .scapular,
+      row: 0,
+      transitionProgress: 1
+    ) == 0
+  )
+  #expect(
+    CrowBodyFeatherTracts.retainedDetailTransverseCamberRatio(
+      region: .scapular,
+      row: CrowBodyFeatherTracts.scapularRowCount - 1,
+      transitionProgress: 0
+    ) == CrowBodyFeatherTracts.retainedDetailCrownInsetScale
+      * CrowBodyFeatherTracts.bodyTractTransverseCamberRatio
+  )
+  #expect(
+    CrowBodyFeatherTracts.retainedDetailTransverseCamberRatio(
+      region: .scapular,
+      row: CrowBodyFeatherTracts.scapularRowCount - 1,
+      transitionProgress: 1
+    ) == CrowBodyFeatherTracts.retainedDetailCrownInsetScale
+      * CrowBodyFeatherTracts.scapularFlightOuterTransverseCamberRatio
+  )
   #expect(
     CrowBodyFeatherTracts.surfaceFeatherClass(
       for: .cervical,

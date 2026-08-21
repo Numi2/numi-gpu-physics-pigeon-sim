@@ -160,6 +160,19 @@ bundles and the same detail-record count. Derived rachis and barb geometry uses
 the same scaled camber as its vane. These are presentation estimates, not
 measured crow feather compression or aerodynamic response.
 
+The outer class-`6` scapular course now receives a separate transverse
+deployment relief. Beyond `40%` of the seven-row course, the visible vane crown
+settles smoothly from the standing `0.28` width ratio to `0.16` at the outer
+row. Retained detail uses `96%` of that transverse ratio plus the existing
+`0.12 mm` raster separation, keeping its tubes on the visible crown without
+coplanar flicker. Promoted interior barbs terminate at `97%` of their local
+owning-vane half-width; the five terminal aggregates alone retain a bounded
+tip extension below `1.2 mm`. The generated tubes and ribbons now propagate
+their parent class-`6` surface code rather than reporting class `0`. Standing
+vane geometry, follicle and centerline-tip positions, widths, stable identities,
+inventory, and mesostructure record counts remain exact. This relief is an
+estimated presentation constraint, not measured scapular contact mechanics.
+
 ## Native Metal capture
 
 The native renderer consumes both locked inputs. Its encoding, input hashes,

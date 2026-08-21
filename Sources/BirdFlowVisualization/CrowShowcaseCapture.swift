@@ -2074,6 +2074,7 @@ private struct CrowMeshBuilder {
     _ feather: CrowBodyFeatherTractSample,
     bodyCenter: SIMD3<Float>,
     camberScale: Float,
+    transverseCamberRatio: Float,
     projectedPixelsPerMeter: Float,
     to vertices: inout [ColoredVertex]
   ) {
@@ -2081,11 +2082,13 @@ private struct CrowMeshBuilder {
       CrowFeatherMesostructure.segments(
         for: feather,
         projectedPixelsPerMeter: projectedPixelsPerMeter,
-        camberScale: camberScale
+        camberScale: camberScale,
+        transverseCamberRatio: transverseCamberRatio
       ),
       bodyCenter: bodyCenter,
       planeNormal: feather.planeNormal,
       material: feather.materialVariation,
+      surfaceFeatherClass: feather.surfaceFeatherClass,
       to: &vertices
     )
   }
@@ -2104,6 +2107,7 @@ private struct CrowMeshBuilder {
       bodyCenter: bodyCenter,
       planeNormal: feather.planeNormal,
       material: feather.materialVariation,
+      surfaceFeatherClass: feather.surfaceFeatherClass,
       to: &vertices
     )
   }
@@ -2113,6 +2117,7 @@ private struct CrowMeshBuilder {
     bodyCenter: SIMD3<Float>,
     planeNormal: SIMD3<Float>,
     material: Float,
+    surfaceFeatherClass: UInt32 = 0,
     to vertices: inout [ColoredVertex]
   ) {
     for segment in segments {
@@ -2145,6 +2150,7 @@ private struct CrowMeshBuilder {
           endHalfWidth: segment.endRadiusMeters,
           surfaceNormal: planeNormal,
           color: color,
+          surfaceFeatherClass: surfaceFeatherClass,
           to: &vertices
         )
       } else {
@@ -2155,6 +2161,7 @@ private struct CrowMeshBuilder {
           endRadius: segment.endRadiusMeters,
           color: color,
           radialSegments: segment.kind == .rachis ? 4 : 3,
+          surfaceFeatherClass: surfaceFeatherClass,
           to: &vertices
         )
       }
@@ -2348,6 +2355,11 @@ private struct CrowMeshBuilder {
         column: sample.column,
         transitionProgress: deploymentProgress
       )
+      let transverseCamberRatio = CrowBodyFeatherTracts.transverseCamberRatio(
+        region: sample.region,
+        row: sample.row,
+        transitionProgress: deploymentProgress
+      )
       let color: SIMD4<Float>
       switch sample.region {
       case .cervical:
@@ -2388,7 +2400,7 @@ private struct CrowMeshBuilder {
         color: color,
         sections: sample.region == .cervical ? 6 : 8,
         camber: sample.camberMeters * deploymentCamberScale,
-        transverseCamberRatio: sample.region == .cervical ? 0.24 : 0.28,
+        transverseCamberRatio: transverseCamberRatio,
         vaneAsymmetry: sample.vaneAsymmetry,
         edgeRippleAmplitude: sample.edgeRippleAmplitude,
         edgeRipplePhase: sample.edgeRipplePhase,
@@ -2404,6 +2416,12 @@ private struct CrowMeshBuilder {
         sample,
         bodyCenter: bodyCenter,
         camberScale: deploymentCamberScale,
+        transverseCamberRatio:
+          CrowBodyFeatherTracts.retainedDetailTransverseCamberRatio(
+            region: sample.region,
+            row: sample.row,
+            transitionProgress: deploymentProgress
+          ),
         projectedPixelsPerMeter: projectedPixelsPerMeter,
         to: &vertices
       )
@@ -3305,6 +3323,7 @@ private struct CrowMeshBuilder {
     endRadius: Float,
     color: SIMD4<Float>,
     radialSegments: Int,
+    surfaceFeatherClass: UInt32 = 0,
     to vertices: inout [ColoredVertex]
   ) {
     let axis = safeNormalize(end - start, fallback: SIMD3<Float>(0, 0, 1))
@@ -3326,6 +3345,7 @@ private struct CrowMeshBuilder {
         end + endRadius * radial1,
         end + endRadius * radial0,
         color: color,
+        surfaceFeatherClass: surfaceFeatherClass,
         to: &vertices
       )
     }
@@ -4537,12 +4557,17 @@ private struct CrowMeshBuilder {
     _ b: SIMD3<Float>,
     _ c: SIMD3<Float>,
     color: SIMD4<Float>,
+    surfaceFeatherClass: UInt32 = 0,
     to vertices: inout [ColoredVertex]
   ) {
     let normal = faceNormal(a, b, c)
-    vertices.append(vertex(a, normal: normal, color: color))
-    vertices.append(vertex(b, normal: normal, color: color))
-    vertices.append(vertex(c, normal: normal, color: color))
+    let parameters: SIMD4<Float> =
+      surfaceFeatherClass == 0
+      ? .zero
+      : SIMD4<Float>(0.5, 0, 0, Float(surfaceFeatherClass))
+    vertices.append(vertex(a, normal: normal, color: color, parameters: parameters))
+    vertices.append(vertex(b, normal: normal, color: color, parameters: parameters))
+    vertices.append(vertex(c, normal: normal, color: color, parameters: parameters))
   }
 
   private func appendQuad(
@@ -4551,10 +4576,25 @@ private struct CrowMeshBuilder {
     _ c: SIMD3<Float>,
     _ d: SIMD3<Float>,
     color: SIMD4<Float>,
+    surfaceFeatherClass: UInt32 = 0,
     to vertices: inout [ColoredVertex]
   ) {
-    appendTriangle(a, b, c, color: color, to: &vertices)
-    appendTriangle(a, c, d, color: color, to: &vertices)
+    appendTriangle(
+      a,
+      b,
+      c,
+      color: color,
+      surfaceFeatherClass: surfaceFeatherClass,
+      to: &vertices
+    )
+    appendTriangle(
+      a,
+      c,
+      d,
+      color: color,
+      surfaceFeatherClass: surfaceFeatherClass,
+      to: &vertices
+    )
   }
 
   private func componentIndices(partIdentifier: UInt8) -> Range<Int> {

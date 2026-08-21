@@ -216,6 +216,92 @@ func bodyTractDetailFollowsDeploymentCamber() throws {
   )
 }
 
+@Test("body tract detail follows the rendered transverse vane crown")
+func bodyTractDetailFollowsRenderedTransverseVaneCrown() throws {
+  let feather = try #require(
+    CrowBodyFeatherTracts.samples().first {
+      $0.region == .scapular
+        && $0.row == CrowBodyFeatherTracts.scapularRowCount - 1
+    }
+  )
+  let length = simd_distance(feather.rootOffset, feather.tipOffset)
+  let flat = CrowFeatherMesostructure.segments(
+    for: feather,
+    projectedPixelsPerMeter: 48 / length,
+    transverseCamberRatio: 0
+  )
+  let crowned = CrowFeatherMesostructure.segments(
+    for: feather,
+    projectedPixelsPerMeter: 48 / length,
+    transverseCamberRatio: CrowBodyFeatherTracts.bodyTractTransverseCamberRatio
+  )
+  #expect(crowned.count == flat.count)
+  #expect(zip(crowned, flat).allSatisfy { $0.kind == $1.kind })
+  let direction = simd_normalize(feather.tipOffset - feather.rootOffset)
+  let normal = simd_normalize(
+    feather.planeNormal - direction * simd_dot(feather.planeNormal, direction)
+  )
+  let normalLifts = zip(crowned, flat).map {
+    simd_dot($0.start - $1.start, normal)
+  }
+  #expect(normalLifts.max()! > 0.00045)
+  #expect(normalLifts.min()! >= -1e-7)
+}
+
+@Test("promoted shoulder barbs stay inside the vane before terminal tip bundles")
+func promotedShoulderBarbsStayInsideVaneBeforeTerminalTipBundles() throws {
+  let feather = try #require(
+    CrowBodyFeatherTracts.samples().first { $0.region == .scapular }
+  )
+  let direction = simd_normalize(feather.tipOffset - feather.rootOffset)
+  let normal = simd_normalize(
+    feather.planeNormal - direction * simd_dot(feather.planeNormal, direction)
+  )
+  let widthAxis = simd_normalize(simd_cross(normal, direction))
+  let length = simd_distance(feather.rootOffset, feather.tipOffset)
+  let barbs = CrowFeatherMesostructure.segments(
+    for: feather,
+    projectedPixelsPerMeter: 48 / length,
+    transverseCamberRatio: CrowBodyFeatherTracts.bodyTractTransverseCamberRatio
+  )
+  let interiorBarbs = barbs.filter { $0.kind == .barb }
+  #expect(!interiorBarbs.isEmpty)
+  for barb in interiorBarbs {
+    let axial = simd_dot(barb.end - feather.rootOffset, direction) / length
+    let bodyEnvelope =
+      feather.rootEnvelopeRatio
+      + (1 - feather.rootEnvelopeRatio)
+      * pow(max(sin(Float.pi * axial), 0), 0.58)
+    let tipTaper = 1 - 0.985 * pow(axial, 3.2)
+    let rippleEnvelope = pow(max(sin(Float.pi * axial), 0), 2)
+    let edgeRipple =
+      1
+      + feather.edgeRippleAmplitude
+      * sin(
+        2 * Float.pi * feather.edgeRippleCycles * axial
+          + feather.edgeRipplePhase
+      ) * rippleEnvelope
+    let signedSide: Float =
+      simd_dot(barb.end - feather.rootOffset, widthAxis) < 0 ? -1 : 1
+    let vaneHalfWidth =
+      (feather.rootWidthMeters * (1 - axial)
+        + feather.maximumWidthMeters * axial)
+      * bodyEnvelope * tipTaper * edgeRipple
+      * (1 + feather.vaneAsymmetry * signedSide)
+    let lateral = abs(simd_dot(barb.end - feather.rootOffset, widthAxis))
+    #expect(lateral <= 0.971 * vaneHalfWidth + 1e-7)
+  }
+  let terminalBundles = barbs.filter { $0.kind == .edgeBarbGroup }
+  #expect(terminalBundles.count == 5)
+  for bundle in terminalBundles {
+    let axial = simd_dot(bundle.end - feather.rootOffset, direction) / length
+    let lateral = abs(simd_dot(bundle.end - feather.rootOffset, widthAxis))
+    #expect(axial > 1)
+    #expect(axial < 1 + 0.0013 / length)
+    #expect(lateral <= 0.181 * feather.maximumWidthMeters + 1e-7)
+  }
+}
+
 @Test("ventral tract feathers resolve rachis and barb detail from their vane envelope")
 func ventralTractFeathersResolveMesostructure() {
   for feather in CrowVentralFeatherTracts.samples() {
