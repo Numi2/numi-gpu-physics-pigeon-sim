@@ -3987,6 +3987,9 @@ private struct CrowMeshBuilder {
         let resolvedWidthScale =
           widthScale * foldedSecondaryHandoffWidthScale
           * foldedShellHandoffWidthScale
+          * CrowFlightWingBodyIntegration.covertProximalWidthScale(
+            spanIndex: span
+          )
         let camberScale = CrowFlightWingBodyIntegration.covertCamberScale(
           chordIndex: chord,
           spanIndex: span
@@ -4022,6 +4025,10 @@ private struct CrowMeshBuilder {
           + CrowFlightWingBodyIntegration.covertDistalTrailingChordScale(
             chordIndex: chord,
             spanIndex: span
+          )
+          * CrowFlightWingBodyIntegration.covertProximalLeadingChordScale(
+            chordIndex: chord,
+            spanIndex: span
           ) * (isTrailingCourse
             ? 1.92 + proximalChordExtension + distalChordExtension
             : 1.16 + anteriorChordExtension)
@@ -4055,6 +4062,9 @@ private struct CrowMeshBuilder {
           )
         let featherCamber =
           proximalReliefScale * camberScale * 0.035
+          * CrowFlightWingBodyIntegration.covertProximalCamberScale(
+            spanIndex: span
+          )
           * simd_length(chordVector)
         let rootWidthMeters =
           resolvedWidthScale * covertOverlap * (isTrailingCourse ? 0.44 : 0.38)

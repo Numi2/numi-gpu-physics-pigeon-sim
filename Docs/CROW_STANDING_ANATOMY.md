@@ -526,6 +526,28 @@ visible rectrix pixels change from `1,289`, `2,333`, and `1,740` to `1,296`,
 `379`, `788`, and `325`. This qualifies the simulated fan orientation and
 raster continuity, not measured rectrix kinematics or perceptual realism.
 
+The apparent shoulder cavity in oblique transition views was then traced with
+the packed identity AOV rather than filled from the silhouette. The fixed
+class-`11` wing surface was already closed; the dominant plate was the live
+class-`4`, chord-`0`, span-`5` covert (`82436`), which covered `425` pixels in
+the canonical midpoint. Its first `12` span stations now recover smoothly from
+`62%` root width, `58%` root camber, and `72%` leading-course chord to the
+unchanged free-wing course. Roots, fixed surface, record count, identities,
+trailing courses, and axillary coverage remain exact. At the same midpoint the
+dominant plate falls to `288` pixels. High-front, rear-starboard, and
+under-quarter probes reduce their largest targeted covert by `32.25%`,
+`53.39%`, and `32.87%`, while active identity pixels change by less than
+`0.62%` and the largest enclosed hole stays exactly `4`, `5`, and `3` pixels.
+Across matched 72-frame, `2x` reconstruction audits, enclosed hole
+pixels/components change from `130/106` to `131/107`, `177/156` to `188/162`,
+and `43/35` to `41/37`; expected lower-body apertures stay exactly
+`15/4`, `9/1`, and `19,760/25`, and every worst component remains unchanged.
+This establishes topology ownership and bounded simulated raster continuity;
+it does not establish measured covert dimensions or perceptual realism.
+The regenerated README sequence is the native simulated hold, transition, and
+flight path: `800 x 450`, `72` frames at `24 fps`, `8,384,712` bytes, SHA-256
+`630ac185e82ff62b7768fc1cf9b11c3f691ce810820aa592a2e234d00faae5eb`.
+
 Run the presentation with:
 
 ```bash

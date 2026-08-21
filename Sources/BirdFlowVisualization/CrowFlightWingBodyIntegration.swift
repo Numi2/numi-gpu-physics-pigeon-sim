@@ -17,6 +17,9 @@ enum CrowFlightWingBodyIntegration {
   static let covertAttachmentMaximumOverlapScale: Float = 1.68
   static let covertProximalSeatingSpanCount = 12
   static let covertProximalRootReliefScale: Float = 0.48
+  static let covertProximalRootWidthScale: Float = 0.62
+  static let covertProximalRootCamberScale: Float = 0.58
+  static let covertProximalLeadingRootChordScale: Float = 0.72
   static let covertDistalMaximumChordExtension: Float = 0.70
   static let covertDistalAnteriorMaximumChordExtension: Float = 0.50
   static let covertProximalMaximumChordExtension: Float = 1.60
@@ -163,6 +166,32 @@ enum CrowFlightWingBodyIntegration {
     smootherstep(
       clamp(Float(spanIndex) / Float(covertProximalSeatingSpanCount))
     )
+  }
+
+  /// Recovers a feather-scale root course from the deliberately broad
+  /// coverage envelope. The fixed wing surface remains the closure owner;
+  /// only the decorative vane width and crown taper smoothly from the body
+  /// attachment into the established free-wing morphology.
+  static func covertProximalWidthScale(spanIndex: Int) -> Float {
+    let weight = covertProximalSeatingWeight(spanIndex: spanIndex)
+    return covertProximalRootWidthScale
+      + (1 - covertProximalRootWidthScale) * weight
+  }
+
+  static func covertProximalCamberScale(spanIndex: Int) -> Float {
+    let weight = covertProximalSeatingWeight(spanIndex: spanIndex)
+    return covertProximalRootCamberScale
+      + (1 - covertProximalRootCamberScale) * weight
+  }
+
+  static func covertProximalLeadingChordScale(
+    chordIndex: Int,
+    spanIndex: Int
+  ) -> Float {
+    guard chordIndex == 0 else { return 1 }
+    let weight = covertProximalSeatingWeight(spanIndex: spanIndex)
+    return covertProximalLeadingRootChordScale
+      + (1 - covertProximalLeadingRootChordScale) * weight
   }
 
   static func covertProximalReliefScale(

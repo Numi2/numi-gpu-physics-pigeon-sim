@@ -199,6 +199,64 @@ func flightCovertCoursesDenselyCoverEveryBodyToWingStation() {
     )
   }
 
+  let proximalWidthScales = (0..<CrowFlightWingBodyIntegration.spanCount).map {
+    CrowFlightWingBodyIntegration.covertProximalWidthScale(spanIndex: $0)
+  }
+  let proximalCamberScales = (0..<CrowFlightWingBodyIntegration.spanCount).map {
+    CrowFlightWingBodyIntegration.covertProximalCamberScale(spanIndex: $0)
+  }
+  #expect(proximalWidthScales.first == 0.62)
+  #expect(proximalCamberScales.first == 0.58)
+  #expect(
+    zip(proximalWidthScales, proximalWidthScales.dropFirst()).allSatisfy {
+      $1 >= $0
+    }
+  )
+  #expect(
+    zip(proximalCamberScales, proximalCamberScales.dropFirst()).allSatisfy {
+      $1 >= $0
+    }
+  )
+  #expect(
+    proximalWidthScales[CrowFlightWingBodyIntegration.covertProximalSeatingSpanCount]
+      == 1
+  )
+  #expect(
+    proximalCamberScales[
+      CrowFlightWingBodyIntegration.covertProximalSeatingSpanCount
+    ] == 1
+  )
+  #expect(proximalWidthScales.last == 1)
+  #expect(proximalCamberScales.last == 1)
+  let proximalLeadingChordScales =
+    (0..<CrowFlightWingBodyIntegration.spanCount).map {
+      CrowFlightWingBodyIntegration.covertProximalLeadingChordScale(
+        chordIndex: 0,
+        spanIndex: $0
+      )
+    }
+  #expect(proximalLeadingChordScales.first == 0.72)
+  #expect(
+    zip(proximalLeadingChordScales, proximalLeadingChordScales.dropFirst())
+      .allSatisfy { $1 >= $0 }
+  )
+  #expect(
+    proximalLeadingChordScales[
+      CrowFlightWingBodyIntegration.covertProximalSeatingSpanCount
+    ] == 1
+  )
+  #expect(proximalLeadingChordScales.last == 1)
+  for chordIndex in [3, 4, 5, 6] {
+    #expect(
+      (0..<CrowFlightWingBodyIntegration.spanCount).allSatisfy {
+        CrowFlightWingBodyIntegration.covertProximalLeadingChordScale(
+          chordIndex: chordIndex,
+          spanIndex: $0
+        ) == 1
+      }
+    )
+  }
+
   let distalExtensions = (0..<CrowFlightWingBodyIntegration.spanCount).map {
     CrowFlightWingBodyIntegration.covertDistalChordExtension(spanIndex: $0)
   }
