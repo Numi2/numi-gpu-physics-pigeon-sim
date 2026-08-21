@@ -469,7 +469,7 @@ raster-coverage checks for simulated geometry, not measured feather anatomy.
 Interior class-`7` pectoral and abdominal records now keep their established
 subvane continuity shaft and add a crown-following four-segment rachis, while
 boundary rows, terminal axial courses, and edge-barb aggregates remain exact.
-The `776` crown shafts are retained as `96`-byte analytic records and expanded
+The `776` crown shafts are retained as `112`-byte analytic records and expanded
 by Metal from a compact output-LOD interval list. At the current capture tier
 this replaces `74,496` per-frame CPU-authored vertices with `3,104` curve
 intervals while preserving the previous shaft oracle to sub-micrometre position
@@ -544,9 +544,29 @@ and `43/35` to `41/37`; expected lower-body apertures stay exactly
 `15/4`, `9/1`, and `19,760/25`, and every worst component remains unchanged.
 This establishes topology ownership and bounded simulated raster continuity;
 it does not establish measured covert dimensions or perceptual realism.
-The regenerated README sequence is the native simulated hold, transition, and
-flight path: `800 x 450`, `72` frames at `24 fps`, `8,384,712` bytes, SHA-256
-`630ac185e82ff62b7768fc1cf9b11c3f691ce810820aa592a2e234d00faae5eb`.
+The body-contour flow pass then traced the visible standing "corduroy" pattern
+to straight, uniformly crowned cervical, mantle, scapular, and ventral tracts.
+Every root, tip, identity, inventory, and LOD threshold stays fixed, but each
+vane now receives an identity-stable lateral sweep that returns to zero at both
+ends. Lower contour shingles stay below `1.06 mm` sweep; body transverse crown
+is `0.18`, deployed outer scapular crown is `0.12`, and ventral crown is `0.07`.
+Rachises and barb groups follow the same curved centerline, including the
+retained Metal-expanded ventral records.
+
+Across fresh 17-frame low-port-forward and dorsal-rear-starboard audits at
+yaw/pitch `(-0.92,-0.48)` and `(2.08,0.46)`, expected apertures remain exactly
+`6,189/6` and `751/6` pixels/components, and the worst enclosed components stay
+exactly `8` and `4` pixels. Low-port enclosed holes improve from `53/16` to
+`50/15`; dorsal-rear changes from `59/42` to `62/44`. Mean same-class neighbour
+luminance variation changes by class `5/6/7` by `-2.34%/+5.71%/-14.16%` in the
+low view and `-8.66%/-12.87%/-4.81%` in the dorsal view. This is deterministic
+simulated-raster evidence for reduced row coherence and continuity, not a
+measurement of feather anatomy or proof of perceptual realism.
+
+The canonical README sequence is fully simulated and contains the native hold,
+transition, and flight path: `800 x 450`, `72` frames at `24 fps`, `8,169,877`
+bytes, SHA-256
+`801f8e43f1cb310f14992d1bd8ca1e91cf9e596dc9b852938c83f4be13b6a738`.
 
 Run the presentation with:
 

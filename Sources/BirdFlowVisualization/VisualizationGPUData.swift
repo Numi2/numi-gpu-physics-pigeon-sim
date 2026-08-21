@@ -232,7 +232,7 @@ struct CrowFeatherGeometryUniforms {
 }
 
 /// One retained analytic crown-rachis curve for an interior class-7 body
-/// feather. Metal expands this 96-byte record into the selected radial tube
+/// feather. Metal expands this 112-byte record into the selected radial tube
 /// tessellation; no per-triangle body-detail stream is authored on the CPU.
 struct CrowVentralRachisCurveRecordGPU: Equatable {
   /// Local root position and pennaceous start fraction.
@@ -245,6 +245,8 @@ struct CrowVentralRachisCurveRecordGPU: Equatable {
   var widthsEnvelopeAndAsymmetry: SIMD4<Float>
   /// Edge-ripple amplitude, phase, cycles, and material variation.
   var edgeRippleAndMaterial: SIMD4<Float>
+  /// Lateral centerline sweep in metres followed by reserved future fields.
+  var lateralSweepAndReserved: SIMD4<Float>
   /// Stable region, side, row, and column identity.
   var identity: SIMD4<UInt32>
 }

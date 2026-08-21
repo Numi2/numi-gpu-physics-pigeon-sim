@@ -185,6 +185,7 @@ enum CrowFeatherMesostructure {
     let rootWidthMeters: Float
     let maximumWidthMeters: Float
     let camberMeters: Float
+    let lateralSweepMeters: Float
     let transverseCamberRatio: Float
     let barbTransverseCamberRatio: Float
     let rootEnvelopeRatio: Float
@@ -216,6 +217,7 @@ enum CrowFeatherMesostructure {
       rootWidthMeters = feather.rootWidthMeters
       maximumWidthMeters = feather.maximumWidthMeters
       camberMeters = feather.camberMeters
+      lateralSweepMeters = feather.lateralSweepMeters
       transverseCamberRatio = 0
       barbTransverseCamberRatio = 0
       rootEnvelopeRatio = 0.32
@@ -252,6 +254,7 @@ enum CrowFeatherMesostructure {
       rootWidthMeters = feather.rootWidthMeters
       maximumWidthMeters = feather.maximumWidthMeters
       camberMeters = feather.camberMeters * camberScale
+      lateralSweepMeters = feather.lateralSweepMeters
       self.transverseCamberRatio = transverseCamberRatio
       barbTransverseCamberRatio = transverseCamberRatio
       rootEnvelopeRatio = feather.rootEnvelopeRatio
@@ -287,6 +290,7 @@ enum CrowFeatherMesostructure {
       rootWidthMeters = feather.rootWidthMeters
       maximumWidthMeters = feather.maximumWidthMeters
       camberMeters = feather.camberMeters
+      lateralSweepMeters = feather.lateralSweepMeters
       self.transverseCamberRatio = transverseCamberRatio
       barbTransverseCamberRatio = 0
       rootEnvelopeRatio = feather.rootEnvelopeRatio
@@ -319,6 +323,7 @@ enum CrowFeatherMesostructure {
       rootWidthMeters = feather.rootWidthMeters
       maximumWidthMeters = feather.maximumWidthMeters
       camberMeters = feather.camberMeters
+      lateralSweepMeters = 0
       transverseCamberRatio = 0
       barbTransverseCamberRatio = 0
       rootEnvelopeRatio = feather.rootEnvelopeRatio
@@ -351,6 +356,7 @@ enum CrowFeatherMesostructure {
       rootWidthMeters = feather.rootWidthMeters
       maximumWidthMeters = feather.maximumWidthMeters
       camberMeters = feather.camberMeters
+      lateralSweepMeters = 0
       transverseCamberRatio = 0
       barbTransverseCamberRatio = 0
       rootEnvelopeRatio = feather.rootEnvelopeRatio
@@ -383,6 +389,7 @@ enum CrowFeatherMesostructure {
       rootWidthMeters = feather.rootWidthMeters
       maximumWidthMeters = feather.maximumWidthMeters
       camberMeters = feather.camberMeters
+      lateralSweepMeters = 0
       transverseCamberRatio = 0
       barbTransverseCamberRatio = 0
       rootEnvelopeRatio = feather.rootEnvelopeRatio
@@ -410,6 +417,7 @@ enum CrowFeatherMesostructure {
       let t = clamp(axial)
       return root
         + (tip - root) * t
+        + widthAxis * (lateralSweepMeters * sin(Float.pi * t))
         + normal
         * (camberMeters * sin(Float.pi * t)
           + transverseCamberRatio * halfWidth(at: t)

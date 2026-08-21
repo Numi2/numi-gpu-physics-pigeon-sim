@@ -23,6 +23,7 @@ struct CrowBodyContourShingle: Equatable {
   let rootWidthMeters: Float
   let maximumWidthMeters: Float
   let camberMeters: Float
+  let lateralSweepMeters: Float
   let transverseCamberRatio: Float
   let pennaceousStartFraction: Float
   let vaneAsymmetry: Float
@@ -163,6 +164,11 @@ enum CrowBodyContourShingles {
           axialIndex: axialIndex,
           salt: 0x27D4_EB2F
         )
+        let sweepIdentity = identityVariation(
+          radialIndex: radialIndex,
+          axialIndex: axialIndex,
+          salt: 0x4CF5_AD43
+        )
         let tipTheta = rootTheta + tipAngularFlowRadians(
           region: region,
           rootTheta: rootTheta,
@@ -224,6 +230,10 @@ enum CrowBodyContourShingles {
                 region: region,
                 morphologyPhase: morphologyPhase
               ) * maximumWidth,
+            lateralSweepMeters:
+              regionLateralSweepScale(region)
+              * (0.00030 * sin(0.73 * morphologyPhase + 1.91 * rootTheta)
+                + 0.00075 * sweepIdentity),
             transverseCamberRatio: regionTransverseCamberRatio(region)
               + transverseCamberVariation(region) * crownIdentity,
             pennaceousStartFraction: clamp(
@@ -443,6 +453,20 @@ enum CrowBodyContourShingles {
     }
   }
 
+  /// Individual contour rachises follow a shallow surface-tangent bow rather
+  /// than resolving as one set of ruler-straight longitudinal lanes. The
+  /// midpoint displacement stays well inside the vane half-width; roots and
+  /// tips remain on the established anatomical loft.
+  private static func regionLateralSweepScale(
+    _ region: CrowBodyContourRegion
+  ) -> Float {
+    switch region {
+    case .dorsal: 0.86
+    case .flank: 1.00
+    case .ventral: 0.92
+    }
+  }
+
   private static func transverseCamberVariation(
     _ region: CrowBodyContourRegion
   ) -> Float {
@@ -471,9 +495,23 @@ enum CrowBodyContourShingles {
     at fraction: Float
   ) -> SIMD3<Float> {
     let t = clamp(fraction, lower: 0, upper: 1)
+    let direction = normalized(
+      feather.tipOffset - feather.rootOffset,
+      fallback: SIMD3<Float>(-1, 0, 0)
+    )
+    let normal = normalized(
+      feather.planeNormal
+        - direction * simd_dot(feather.planeNormal, direction),
+      fallback: feather.planeNormal
+    )
+    let widthAxis = normalized(
+      simd_cross(normal, direction),
+      fallback: SIMD3<Float>(0, 1, 0)
+    )
     return feather.rootOffset
       + (feather.tipOffset - feather.rootOffset) * t
-      + feather.planeNormal * (feather.camberMeters * sin(Float.pi * t))
+      + normal * (feather.camberMeters * sin(Float.pi * t))
+      + widthAxis * (feather.lateralSweepMeters * sin(Float.pi * t))
   }
 
   static func vaneHalfWidth(

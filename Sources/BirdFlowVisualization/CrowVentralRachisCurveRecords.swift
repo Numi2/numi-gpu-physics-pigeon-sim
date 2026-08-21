@@ -48,6 +48,12 @@ enum CrowVentralRachisCurveRecords {
           feather.edgeRippleCycles,
           feather.materialVariation
         ),
+        lateralSweepAndReserved: SIMD4<Float>(
+          feather.lateralSweepMeters,
+          0,
+          0,
+          0
+        ),
         identity: SIMD4<UInt32>(
           UInt32(feather.region.rawValue),
           feather.side < 0 ? 0 : 1,
@@ -141,10 +147,17 @@ enum CrowVentralRachisCurveRecords {
     let root = xyz(record.rootAndPennaceousStart)
     let tip = xyz(record.tipAndCamber)
     let normal = xyz(record.normalAndTransverseCamber)
+    let direction = normalized(tip - root, fallback: SIMD3<Float>(-1, 0, 0))
+    let widthAxis = normalized(
+      simd_cross(normal, direction),
+      fallback: SIMD3<Float>(0, 1, 0)
+    )
     let centerline = root + (tip - root) * t
     let lift = record.tipAndCamber.w * sin(Float.pi * t)
       + record.normalAndTransverseCamber.w * width + 0.00012
-    return centerline + normal * lift
+    return centerline
+      + widthAxis * (record.lateralSweepAndReserved.x * sin(Float.pi * t))
+      + normal * lift
   }
 
   private static func halfWidth(

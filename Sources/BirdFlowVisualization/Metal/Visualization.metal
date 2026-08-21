@@ -76,6 +76,7 @@ struct CrowVentralRachisCurveRecordGPU {
     float4 normalAndTransverseCamber;
     float4 widthsEnvelopeAndAsymmetry;
     float4 edgeRippleAndMaterial;
+    float4 lateralSweepAndReserved;
     uint4 identity;
 };
 
@@ -1502,7 +1503,14 @@ inline float3 crowVentralRachisCenter(
     float axial) {
     float t=clamp(axial,0.0f,1.0f);
     float halfWidth=crowVentralRachisHalfWidth(record,t);
+    float3 direction=safeNormalizeCrow(
+        record.tipAndCamber.xyz-record.rootAndPennaceousStart.xyz,
+        float3(-1,0,0));
+    float3 widthAxis=safeNormalizeCrow(
+        cross(record.normalAndTransverseCamber.xyz,direction),
+        float3(0,1,0));
     return mix(record.rootAndPennaceousStart.xyz,record.tipAndCamber.xyz,t)
+        +widthAxis*(record.lateralSweepAndReserved.x*sin(M_PI_F*t))
         +record.normalAndTransverseCamber.xyz
         *(record.tipAndCamber.w*sin(M_PI_F*t)
             +record.normalAndTransverseCamber.w*halfWidth+0.00012f);
@@ -2453,9 +2461,17 @@ inline float3 showcaseCrowLinearRadiance(
         normal,featherAxis,halfVector,
         longitudinalRoughness,transverseRoughness
     );
+    float genericRachisAxial=smoothstep(0.035f,0.16f,axial)
+        *(1.0f-smoothstep(0.80f,0.985f,axial));
+    float bodyRachisAxial=smoothstep(0.48f,0.60f,axial)
+        *(1.0f-smoothstep(0.82f,0.94f,axial));
+    float bodyRachisIdentity=0.5f+0.5f*crowBandLimitedSine(
+        1.73f*featherCoordinates.z+0.31f*float(featherClass)
+    );
+    float bodyRachisScale=0.16f+0.18f*bodyRachisIdentity;
     float rachis=persistentVane*(1.0f-greaterCovertVane)
-        *smoothstep(0.035f,0.16f,axial)
-        *(1.0f-smoothstep(0.80f,0.985f,axial))
+        *mix(genericRachisAxial,bodyRachisAxial,bodyContourVane)
+        *mix(1.0f,bodyRachisScale,bodyContourVane)
         *exp2(-42.0f*abs(signedWidth));
     // Greater coverts are long enough to expose a seated shaft but too short
     // for a bright remex-style rachis. Resolve a narrow central core, broader

@@ -59,6 +59,18 @@ func crowBodyFeatherTractsOverlapNeckAndCoverWingRoots() {
   #expect(humeral.allSatisfy { $0.surfaceFeatherClass == 6 })
   #expect(scapular.allSatisfy { $0.surfaceFeatherClass == 6 })
   #expect(samples.allSatisfy { $0.surfaceFeatherClass == 5 || $0.surfaceFeatherClass == 6 })
+  let lateralSweeps = samples.map(\.lateralSweepMeters)
+  #expect(lateralSweeps.min()! < -0.00160)
+  #expect(lateralSweeps.max()! > 0.00160)
+  #expect(lateralSweeps.allSatisfy { abs($0) < 0.00173 })
+  #expect(
+    Set(lateralSweeps.map { Int(($0 * 1_000_000).rounded()) }).count > 1_000
+  )
+  #expect(
+    samples.allSatisfy {
+      abs($0.lateralSweepMeters) < 0.45 * $0.maximumWidthMeters
+    }
+  )
 
   let deployedMantleCamberScales = (0..<CrowBodyFeatherTracts.mantleColumnCount).map {
     CrowBodyFeatherTracts.deploymentCamberScale(

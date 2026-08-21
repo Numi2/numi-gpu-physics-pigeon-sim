@@ -2120,6 +2120,7 @@ private struct CrowMeshBuilder {
         color: color,
         sections: 7,
         camber: shingle.camberMeters,
+        lateralSweep: shingle.lateralSweepMeters,
         transverseCamberRatio: shingle.transverseCamberRatio,
         vaneAsymmetry: shingle.vaneAsymmetry,
         edgeRippleAmplitude: shingle.edgeRippleAmplitude,
@@ -2480,6 +2481,7 @@ private struct CrowMeshBuilder {
         color: color,
         sections: sample.region == .cervical ? 6 : 8,
         camber: sample.camberMeters * deploymentCamberScale,
+        lateralSweep: sample.lateralSweepMeters,
         transverseCamberRatio: transverseCamberRatio,
         vaneAsymmetry: sample.vaneAsymmetry,
         edgeRippleAmplitude: sample.edgeRippleAmplitude,
@@ -2532,6 +2534,7 @@ private struct CrowMeshBuilder {
         color: color,
         sections: 7,
         camber: sample.camberMeters,
+        lateralSweep: sample.lateralSweepMeters,
         transverseCamberRatio: CrowVentralFeatherTracts.transverseCamberRatio,
         vaneAsymmetry: sample.vaneAsymmetry,
         edgeRippleAmplitude: sample.edgeRippleAmplitude,
@@ -4533,6 +4536,7 @@ private struct CrowMeshBuilder {
     color: SIMD4<Float>,
     sections: Int,
     camber: Float = 0,
+    lateralSweep: Float = 0,
     transverseCamberRatio: Float = 0.18,
     vaneAsymmetry: Float = 0,
     edgeRippleAmplitude: Float = 0,
@@ -4576,7 +4580,10 @@ private struct CrowMeshBuilder {
         * sin(2 * Float.pi * edgeRippleCycles * t + edgeRipplePhase)
         * rippleEnvelope
       let width = (rootWidth * (1 - t) + maximumWidth * t) * envelope * edgeRipple
-      let center = root + (tip - root) * t + normal * (camber * sin(Float.pi * t))
+      let center =
+        root + (tip - root) * t
+        + normal * (camber * sin(Float.pi * t))
+        + widthAxis * (lateralSweep * sin(Float.pi * t))
       var result: [BladePoint] = []
       result.reserveCapacity(tessellation.widthSections + 1)
       for widthIndex in 0...tessellation.widthSections {

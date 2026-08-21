@@ -106,7 +106,11 @@ func bodyFeatherEdgeGroupsCrossClosedVaneOutline() {
     for segment in segments {
       let rootAxial = simd_dot(segment.start - feather.rootOffset, direction) / length
       let endAxial = simd_dot(segment.end - feather.rootOffset, direction) / length
-      let rootLateral = abs(simd_dot(segment.start - feather.rootOffset, widthAxis))
+      let rootCenter = CrowBodyContourShingles.centerlinePoint(
+        for: feather,
+        at: rootAxial
+      )
+      let rootLateral = abs(simd_dot(segment.start - rootCenter, widthAxis))
       let rootWidth = CrowBodyContourShingles.vaneHalfWidth(
         for: feather,
         at: rootAxial
@@ -117,10 +121,13 @@ func bodyFeatherEdgeGroupsCrossClosedVaneOutline() {
       #expect(simd_distance(segment.start, segment.end) < 0.012)
 
       if endAxial < 0.99 {
+        let endCenter = CrowBodyContourShingles.centerlinePoint(
+          for: feather,
+          at: endAxial
+        )
         let signedSide: Float =
-          simd_dot(segment.end - feather.rootOffset, widthAxis) < 0
-          ? -1 : 1
-        let endLateral = abs(simd_dot(segment.end - feather.rootOffset, widthAxis))
+          simd_dot(segment.end - endCenter, widthAxis) < 0 ? -1 : 1
+        let endLateral = abs(simd_dot(segment.end - endCenter, widthAxis))
         let vaneEdge = CrowBodyContourShingles.vaneHalfWidth(
           for: feather,
           at: endAxial,
@@ -281,14 +288,24 @@ func promotedShoulderBarbsStayInsideVaneBeforeTerminalTipBundles() throws {
         2 * Float.pi * feather.edgeRippleCycles * axial
           + feather.edgeRipplePhase
       ) * rippleEnvelope
+    let interpolatedWidth =
+      feather.rootWidthMeters * (1 - axial)
+      + feather.maximumWidthMeters * axial
+    let center = feather.rootOffset
+      + (feather.tipOffset - feather.rootOffset) * axial
+      + widthAxis * (feather.lateralSweepMeters * sin(Float.pi * axial))
+      + normal
+      * (feather.camberMeters * sin(Float.pi * axial)
+        + CrowBodyFeatherTracts.bodyTractTransverseCamberRatio
+        * interpolatedWidth * bodyEnvelope * tipTaper * edgeRipple
+        + 0.00012)
     let signedSide: Float =
-      simd_dot(barb.end - feather.rootOffset, widthAxis) < 0 ? -1 : 1
+      simd_dot(barb.end - center, widthAxis) < 0 ? -1 : 1
     let vaneHalfWidth =
-      (feather.rootWidthMeters * (1 - axial)
-        + feather.maximumWidthMeters * axial)
+      interpolatedWidth
       * bodyEnvelope * tipTaper * edgeRipple
       * (1 + feather.vaneAsymmetry * signedSide)
-    let lateral = abs(simd_dot(barb.end - feather.rootOffset, widthAxis))
+    let lateral = abs(simd_dot(barb.end - center, widthAxis))
     #expect(lateral <= 0.971 * vaneHalfWidth + 1e-7)
   }
   let terminalBundles = barbs.filter { $0.kind == .edgeBarbGroup }

@@ -16,8 +16,8 @@ func crowVentralTractsCoverBreastAndAbdomenAtFullResolution() {
         * CrowVentralFeatherTracts.abdominalColumnCount)
   )
   #expect(samples.count == 1_304)
-  #expect(CrowVentralFeatherTracts.transverseCamberRatio == 0.10)
-  #expect(CrowVentralFeatherTracts.retainedRachisTransverseCamberRatio == 0.10)
+  #expect(CrowVentralFeatherTracts.transverseCamberRatio == 0.07)
+  #expect(CrowVentralFeatherTracts.retainedRachisTransverseCamberRatio == 0.07)
   #expect(samples.filter(CrowVentralFeatherTracts.retainsCrownRachis).count == 776)
   #expect(
     CrowVentralFeatherTracts.visibleSamples(projectedPixelsPerMeter: 1_000).isEmpty
@@ -43,6 +43,18 @@ func crowVentralTractsCoverBreastAndAbdomenAtFullResolution() {
   #expect(samples.map(\.edgeRippleAmplitude).max()! > 0.0275)
   #expect(samples.map(\.edgeRippleCycles).min()! > 1.34)
   #expect(samples.map(\.edgeRippleCycles).max()! < 2.01)
+  let lateralSweeps = samples.map(\.lateralSweepMeters)
+  #expect(lateralSweeps.min()! < -0.00145)
+  #expect(lateralSweeps.max()! > 0.00145)
+  #expect(lateralSweeps.allSatisfy { abs($0) < 0.00153 })
+  #expect(
+    Set(lateralSweeps.map { Int(($0 * 1_000_000).rounded()) }).count > 550
+  )
+  #expect(
+    samples.allSatisfy {
+      abs($0.lateralSweepMeters) < 0.38 * $0.maximumWidthMeters
+    }
+  )
   #expect(
     Set(samples.map { Int(($0.edgeRipplePhase * 100_000).rounded()) }).count
       > 510

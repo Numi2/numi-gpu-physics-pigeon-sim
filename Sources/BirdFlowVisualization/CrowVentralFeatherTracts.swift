@@ -18,6 +18,7 @@ struct CrowVentralFeatherTractSample: Equatable {
   let rootWidthMeters: Float
   let maximumWidthMeters: Float
   let camberMeters: Float
+  let lateralSweepMeters: Float
   let rootEnvelopeRatio: Float
   let pennaceousStartFraction: Float
   let vaneAsymmetry: Float
@@ -39,8 +40,8 @@ enum CrowVentralFeatherTracts {
   static let abdominalRowCount = 10
   static let abdominalColumnCount = 22
   static let shellClearanceMeters: Float = 0.0008
-  static let transverseCamberRatio: Float = 0.10
-  static let retainedRachisTransverseCamberRatio: Float = 0.10
+  static let transverseCamberRatio: Float = 0.07
+  static let retainedRachisTransverseCamberRatio: Float = 0.07
 
   /// Only interior body-surface records receive a second crown rachis. Boundary
   /// rows and terminal axial courses retain the continuity shaft alone so a
@@ -249,6 +250,12 @@ enum CrowVentralFeatherTracts {
               maximumWidthMeters: maximumWidth,
               camberMeters: (0.00095 + 0.00035 * axial)
                 * (1 + 0.08 * rootIdentity),
+              lateralSweepMeters:
+                0.00036 * sin(
+                  Float(row) * 0.93 + Float(column) * 1.33
+                    + (region == .pectoral ? 0.27 : 1.11)
+                )
+                + 0.00116 * vaneIdentity,
               rootEnvelopeRatio:
                 region == .pectoral
                 ? 0.60 - 0.07 * axial

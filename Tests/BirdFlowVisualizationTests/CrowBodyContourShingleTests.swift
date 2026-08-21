@@ -232,12 +232,50 @@ func bodyContourTractsBreakTransverseRows() {
   let lengths = first.map { simd_distance($0.rootOffset, $0.tipOffset) }
   let widths = first.map(\.maximumWidthMeters)
   let edgeCycles = first.map(\.edgeRippleCycles)
+  let lateralSweeps = first.map(\.lateralSweepMeters)
   #expect(lengths.max()! - lengths.min()! > 0.006)
   #expect(widths.max()! - widths.min()! > 0.002)
   #expect(edgeCycles.min()! > 1.19)
   #expect(edgeCycles.max()! < 2.01)
   #expect(edgeCycles.max()! - edgeCycles.min()! > 0.78)
   #expect(Set(edgeCycles.map { Int(($0 * 100_000).rounded()) }).count > 2_500)
+  #expect(lateralSweeps.min()! < -0.00095)
+  #expect(lateralSweeps.max()! > 0.00095)
+  #expect(lateralSweeps.allSatisfy { abs($0) < 0.00106 })
+  #expect(
+    Set(lateralSweeps.map { Int(($0 * 1_000_000).rounded()) }).count > 1_700
+  )
+
+  for feather in first.enumerated().filter({ $0.offset.isMultiple(of: 97) })
+    .map(\.element)
+  {
+    let direction = simd_normalize(feather.tipOffset - feather.rootOffset)
+    let normal = simd_normalize(
+      feather.planeNormal
+        - direction * simd_dot(feather.planeNormal, direction)
+    )
+    let widthAxis = simd_normalize(simd_cross(normal, direction))
+    let midpoint = CrowBodyContourShingles.centerlinePoint(
+      for: feather,
+      at: 0.5
+    )
+    let expectedMidpoint =
+      0.5 * (feather.rootOffset + feather.tipOffset)
+      + normal * feather.camberMeters
+      + widthAxis * feather.lateralSweepMeters
+    #expect(simd_distance(midpoint, expectedMidpoint) < 1e-7)
+    #expect(
+      CrowBodyContourShingles.centerlinePoint(for: feather, at: 0)
+        == feather.rootOffset
+    )
+    #expect(
+      simd_distance(
+        CrowBodyContourShingles.centerlinePoint(for: feather, at: 1),
+        feather.tipOffset
+      ) < 1e-7
+    )
+    #expect(abs(feather.lateralSweepMeters) < 0.26 * feather.maximumWidthMeters)
+  }
 
   for radialIndex in 0..<CrowBodyContourShingles.radialCount {
     let tract =

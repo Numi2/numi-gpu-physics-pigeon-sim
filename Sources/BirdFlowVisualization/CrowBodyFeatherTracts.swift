@@ -25,6 +25,7 @@ struct CrowBodyFeatherTractSample: Equatable {
   let rootWidthMeters: Float
   let maximumWidthMeters: Float
   let camberMeters: Float
+  let lateralSweepMeters: Float
   let vaneAsymmetry: Float
   let edgeRippleAmplitude: Float
   let edgeRipplePhase: Float
@@ -49,10 +50,10 @@ enum CrowBodyFeatherTracts {
   static let humeralColumnCount = 30
   static let scapularRowCount = 22
   static let scapularColumnCount = 24
-  static let cervicalTransverseCamberRatio: Float = 0.24
-  static let bodyTractTransverseCamberRatio: Float = 0.28
+  static let cervicalTransverseCamberRatio: Float = 0.18
+  static let bodyTractTransverseCamberRatio: Float = 0.18
   static let scapularFlightTransverseCamberStartCourseFraction: Float = 0.40
-  static let scapularFlightOuterTransverseCamberRatio: Float = 0.16
+  static let scapularFlightOuterTransverseCamberRatio: Float = 0.12
   static let retainedDetailCrownInsetScale: Float = 0.96
 
   static func visibleSamples(
@@ -205,6 +206,9 @@ enum CrowBodyFeatherTracts {
               camberMeters:
                 0.0010
                 * (1 + 0.06 * sin(Float(row) * 1.49 - Float(column) * 2.11)),
+              lateralSweepMeters:
+                0.00024 * sin(Float(row) * 0.79 + Float(column) * 1.37)
+                + 0.00082 * vaneIdentity,
               vaneAsymmetry: 0.040 * vaneIdentity,
               edgeRippleAmplitude: 0.010 + 0.016 * (0.5 + 0.5 * edgeIdentity),
               edgeRipplePhase: Float.pi * (edgeIdentity + 1),
@@ -404,6 +408,9 @@ enum CrowBodyFeatherTracts {
                 * (1 + 0.055 * shapeIdentity),
               camberMeters: (0.00110 + 0.00025 * course)
                 * (1 + 0.09 * rootIdentity),
+              lateralSweepMeters:
+                0.00034 * sin(Float(row) * 0.91 + Float(column) * 1.29)
+                + 0.00112 * courseIdentity,
               vaneAsymmetry: 0.052 * shapeIdentity,
               edgeRippleAmplitude: 0.012 + 0.018 * (0.5 + 0.5 * edgeIdentity),
               edgeRipplePhase: Float.pi * (edgeIdentity + 1),
@@ -519,6 +526,9 @@ enum CrowBodyFeatherTracts {
                 * (1 + 0.050 * shapeIdentity),
               camberMeters: (0.00115 + 0.00020 * course)
                 * (1 + 0.08 * rootIdentity),
+              lateralSweepMeters:
+                0.00036 * sin(Float(row) * 1.07 + Float(column) * 1.19)
+                + 0.00118 * vaneIdentity,
               vaneAsymmetry: 0.055 * vaneIdentity,
               edgeRippleAmplitude:
                 0.013 + 0.018 * (0.5 + 0.5 * edgeIdentity),
@@ -643,6 +653,9 @@ enum CrowBodyFeatherTracts {
                 * (1 + 0.05 * shapeIdentity),
               camberMeters: (0.00120 + 0.00030 * course)
                 * (1 + 0.10 * rootIdentity),
+              lateralSweepMeters:
+                0.00040 * sin(Float(row) * 0.87 + Float(column) * 1.41)
+                + 0.00132 * courseIdentity,
               vaneAsymmetry: 0.060 * shapeIdentity,
               edgeRippleAmplitude: 0.014 + 0.020 * (0.5 + 0.5 * edgeIdentity),
               edgeRipplePhase: Float.pi * (edgeIdentity + 1),

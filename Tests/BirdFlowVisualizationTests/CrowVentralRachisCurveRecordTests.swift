@@ -9,7 +9,7 @@ func ventralCrownRachisesRetainCompactStableRecords() {
   let records = CrowVentralRachisCurveRecords.records()
   #expect(records == CrowVentralRachisCurveRecords.records())
   #expect(records.count == 776)
-  #expect(MemoryLayout<CrowVentralRachisCurveRecordGPU>.stride == 96)
+  #expect(MemoryLayout<CrowVentralRachisCurveRecordGPU>.stride == 112)
   #expect(CrowVentralRachisCurveRecords.verticesPerCurveInterval == 24)
   #expect(CrowVentralRachisCurveRecords.maximumRachisSectionCount == 12)
   #expect(Set(records.map(\.identity)).count == records.count)

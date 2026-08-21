@@ -228,7 +228,7 @@ measured crow feather compression or aerodynamic response.
 
 The outer class-`6` scapular course now receives a separate transverse
 deployment relief. Beyond `40%` of the seven-row course, the visible vane crown
-settles smoothly from the standing `0.28` width ratio to `0.16` at the outer
+settles smoothly from the standing `0.18` width ratio to `0.12` at the outer
 row. Retained detail uses `96%` of that transverse ratio plus the existing
 `0.12 mm` raster separation, keeping its tubes on the visible crown without
 coplanar flicker. Promoted interior barbs terminate at `97%` of their local
@@ -242,10 +242,11 @@ estimated presentation constraint, not measured scapular contact mechanics.
 The class-`7` pectoral and abdominal tracts now resolve shaft depth explicitly.
 All `1,304` ventral vanes preserve their established subvane continuity rachis;
 the `776` interior records, excluding two boundary rows and two terminal axial
-courses on every side, add a second four-segment rachis at the visible `0.10`
+courses on every side, add a second four-segment rachis at the visible `0.07`
 transverse crown. Edge-barb aggregates, vane geometry, roots, tips, identities,
 LOD thresholds, and boundary silhouettes remain unchanged. Each visible crown
-shaft is retained as a `96`-byte analytic record; a `16`-byte-per-interval LOD
+shaft is retained as a `112`-byte analytic record carrying its lateral
+centerline sweep; a `16`-byte-per-interval LOD
 list selects four, eight, or twelve shaft intervals, and Metal expands their
 four-sided tubes directly into temporal/AOV vertices. The current showcase tier
 therefore emits `3,104` intervals and `74,496` vertices without CPU triangle
