@@ -203,6 +203,29 @@ ownership. The ribbons are aggregate optical bundles, not a claim that
 individual American-crow barbs have been measured. Shaft radii, bundle radii,
 and color contrast remain presentation estimates.
 
+The broad trailing course is no longer rendered as one exposed root-to-tip
+plank. Every identity now contains a proximal rank over `0...72%` of the former
+axis and a distal rank over `34...100%`; one rank retains full analytic coverage
+at every station, while the accepted original envelope remains a darker hidden
+covert bed. The exposed ranks retain a `2%` vane margin, sit `20` micrometres
+above the bed, and separate by at most another `160` micrometres only inside
+their shared roof-tile interval. Their deployment follows wing opening from
+transition progress `0.25...0.85`, so the folded hold remains seated instead of
+prematurely layering the free-wing course. Each shorter rank retains the full
+coverage-tier axial density and carries its own LOD-selected shaft and paired
+aggregate-barb groups.
+
+The final 253-frame, 13-view comparison against the published single-rank bed
+adds only `188` active and `168` fully covered pixels across `24,950,723`
+baseline active pixels. Expected lower-body aperture pixels and components are
+exact, enclosed-hole component counts are exact, the maximum hole remains `36`
+pixels, and total enclosed-hole pixels improve from `1,922` to `1,921`; one
+front-starboard hole contracts from `13` to `12` pixels. A new high
+starboard-dorsal inspection at yaw `1.10`, pitch `0.88` found no second outline,
+floating shaft, or exposed bed gap. Rank intervals, separations, margins, and
+material contrast remain presentation estimates rather than measured
+American-crow covert dimensions.
+
 The cranial surface is not transported as a detached rigid shell during quiet
 standing. Points buried in the trunk-facing nape remain body-anchored, a cubic
 coupling field deforms the visible neck, and the field reaches rigid-head motion

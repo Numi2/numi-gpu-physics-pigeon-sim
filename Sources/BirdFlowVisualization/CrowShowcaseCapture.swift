@@ -3767,32 +3767,88 @@ private struct CrowMeshBuilder {
           + dorsalNormal * (0.0015 + abdominalHandoffNormalLift)
         let vaneTip = surfaceTip
           + dorsalNormal * (0.0025 + abdominalHandoffNormalLift)
-        appendFeatherBlade(
-          root: vaneRoot,
-          tip: vaneTip,
-          planeNormal: dorsalNormal,
-          rootWidth: rootWidthMeters,
-          maximumWidth: maximumWidthMeters,
-          color: SIMD4<Float>(
-            (0.008 + 0.002 * rowFraction) * (1 + 0.08 * materialVariation),
-            (0.012 + 0.003 * rowFraction) * (1 + 0.06 * materialVariation),
-            (0.021 + 0.004 * rowFraction) * (1 + 0.04 * materialVariation),
-            0.18 + 0.008 * materialVariation
-          ),
-          sections: 7,
-          camber: featherCamber,
-          transverseCamberRatio: 0.16,
-          vaneAsymmetry: caudalSecondaryHandoffVaneAsymmetry,
-          edgeRippleAmplitude: edgeRippleAmplitude,
-          edgeRipplePhase: edgeRipplePhase,
-          edgeRippleCycles: edgeRippleCycles,
-          surfaceFeatherClass: 4,
-          // A fixed LOD contract preserves identical temporal topology even
-          // while the measured-derived wing changes chord length slightly.
-          lodLengthMeters: 0.12,
-          projectedPixelsPerMeter: projectedPixelsPerMeter,
-          to: &vertices
+        let vaneColor = SIMD4<Float>(
+          (0.008 + 0.002 * rowFraction) * (1 + 0.08 * materialVariation),
+          (0.012 + 0.003 * rowFraction) * (1 + 0.06 * materialVariation),
+          (0.021 + 0.004 * rowFraction) * (1 + 0.04 * materialVariation),
+          0.18 + 0.008 * materialVariation
         )
+        let trailingRankDeployment = isTrailingCourse
+          ? (presentation == .takeoff
+            ? CrowTrailingCovertRanks.deploymentWeight(
+              transitionProgress: CrowTakeoffSequence.sample(phase: phase)
+                .transitionProgress
+            )
+            : 1)
+          : 0
+        if isTrailingCourse {
+          let underlayerColor = SIMD4<Float>(
+            vaneColor.x * 0.82,
+            vaneColor.y * 0.84,
+            vaneColor.z * 0.88,
+            vaneColor.w
+          )
+          appendFeatherBlade(
+            root: vaneRoot,
+            tip: vaneTip,
+            planeNormal: dorsalNormal,
+            rootWidth: rootWidthMeters,
+            maximumWidth: maximumWidthMeters,
+            color: underlayerColor,
+            sections: 7,
+            camber: featherCamber,
+            transverseCamberRatio: 0.16,
+            vaneAsymmetry: caudalSecondaryHandoffVaneAsymmetry,
+            edgeRippleAmplitude: edgeRippleAmplitude,
+            edgeRipplePhase: edgeRipplePhase,
+            edgeRippleCycles: edgeRippleCycles,
+            surfaceFeatherClass: 4,
+            lodLengthMeters: 0.12,
+            projectedPixelsPerMeter: projectedPixelsPerMeter,
+            to: &vertices
+          )
+          appendTrailingCovertRanks(
+            root: vaneRoot,
+            tip: vaneTip,
+            planeNormal: dorsalNormal,
+            rootWidth: rootWidthMeters,
+            maximumWidth: maximumWidthMeters,
+            color: vaneColor,
+            camber: featherCamber,
+            transverseCamberRatio: 0.16,
+            vaneAsymmetry: caudalSecondaryHandoffVaneAsymmetry,
+            edgeRippleAmplitude: edgeRippleAmplitude,
+            edgeRipplePhase: edgeRipplePhase,
+            edgeRippleCycles: edgeRippleCycles,
+            surfaceFeatherClass: 4,
+            deployment: trailingRankDeployment,
+            lodLengthMeters: 0.12,
+            projectedPixelsPerMeter: projectedPixelsPerMeter,
+            to: &vertices
+          )
+        } else {
+          appendFeatherBlade(
+            root: vaneRoot,
+            tip: vaneTip,
+            planeNormal: dorsalNormal,
+            rootWidth: rootWidthMeters,
+            maximumWidth: maximumWidthMeters,
+            color: vaneColor,
+            sections: 7,
+            camber: featherCamber,
+            transverseCamberRatio: 0.16,
+            vaneAsymmetry: caudalSecondaryHandoffVaneAsymmetry,
+            edgeRippleAmplitude: edgeRippleAmplitude,
+            edgeRipplePhase: edgeRipplePhase,
+            edgeRippleCycles: edgeRippleCycles,
+            surfaceFeatherClass: 4,
+            // A fixed LOD contract preserves identical temporal topology even
+            // while the measured-derived wing changes chord length slightly.
+            lodLengthMeters: 0.12,
+            projectedPixelsPerMeter: projectedPixelsPerMeter,
+            to: &vertices
+          )
+        }
         let rachisColor = SIMD4<Float>(
           (0.0095 + 0.002 * rowFraction) * (1 + 0.08 * materialVariation),
           (0.0140 + 0.003 * rowFraction) * (1 + 0.06 * materialVariation),
@@ -3850,6 +3906,37 @@ private struct CrowMeshBuilder {
             surfaceFeatherClass: 4,
             to: &vertices
           )
+        }
+        if isTrailingCourse {
+          let rankBaseRadius = min(0.00022, max(0.00009, 0.016 * spacing))
+          for segment in CrowTrailingCovertDetail.segments(
+            root: vaneRoot,
+            tip: vaneTip,
+            planeNormal: dorsalNormal,
+            rootWidthMeters: rootWidthMeters,
+            maximumWidthMeters: maximumWidthMeters,
+            camberMeters: featherCamber,
+            transverseCamberRatio: 0.16,
+            vaneAsymmetry: caudalSecondaryHandoffVaneAsymmetry,
+            edgeRippleAmplitude: edgeRippleAmplitude,
+            edgeRipplePhase: edgeRipplePhase,
+            edgeRippleCycles: edgeRippleCycles,
+            baseRadiusMeters: rankBaseRadius,
+            deployment: trailingRankDeployment,
+            lodLengthMeters: 0.12,
+            projectedPixelsPerMeter: projectedPixelsPerMeter
+          ) {
+            appendTaperedRibbon(
+              from: segment.start,
+              to: segment.end,
+              startHalfWidth: segment.startRadiusMeters,
+              endHalfWidth: segment.endRadiusMeters,
+              surfaceNormal: dorsalNormal,
+              color: segment.kind == .rachis ? rachisColor : barbColor,
+              surfaceFeatherClass: 4,
+              to: &vertices
+            )
+          }
         }
       }
     }
@@ -3962,6 +4049,135 @@ private struct CrowMeshBuilder {
         radialSegments: 5,
         to: &vertices
       )
+    }
+  }
+
+  /// Tessellates two overlapping trailing-covert ranks through the exact
+  /// centerline and width field of the accepted single-vane envelope. One rank
+  /// has full width at every axial station, while a sub-millimetric separation
+  /// inside the shared interval makes their roof-tile ordering readable.
+  private func appendTrailingCovertRanks(
+    root: SIMD3<Float>,
+    tip: SIMD3<Float>,
+    planeNormal: SIMD3<Float>,
+    rootWidth: Float,
+    maximumWidth: Float,
+    color: SIMD4<Float>,
+    camber: Float,
+    transverseCamberRatio: Float,
+    vaneAsymmetry: Float,
+    edgeRippleAmplitude: Float,
+    edgeRipplePhase: Float,
+    edgeRippleCycles: Float,
+    surfaceFeatherClass: UInt32,
+    deployment: Float,
+    lodLengthMeters: Float,
+    projectedPixelsPerMeter: Float,
+    to vertices: inout [ColoredVertex]
+  ) {
+    let direction = safeNormalize(tip - root, fallback: SIMD3<Float>(1, 0, 0))
+    let normal = safeNormalize(planeNormal, fallback: SIMD3<Float>(0, 0, 1))
+    let widthAxis = safeNormalize(
+      simd_cross(normal, direction),
+      fallback: SIMD3<Float>(0, 1, 0)
+    )
+    let tessellation = CrowFeatherCoverageLOD.tessellation(
+      lengthMeters: lodLengthMeters,
+      projectedPixelsPerMeter: projectedPixelsPerMeter,
+      baseAxialSections: 7
+    )
+    typealias BladePoint = (position: SIMD3<Float>, parameters: SIMD4<Float>)
+    for rank in CrowTrailingCovertRanks.Rank.allCases {
+      let range = CrowTrailingCovertRanks.range(for: rank)
+      // Each physical rank retains the full coverage-tier sampling density.
+      // Scaling section count by its shorter length under-sampled the inherited
+      // ripple field and produced view-dependent one-pixel raster slots.
+      let axialSections = tessellation.axialSections
+      func crossSection(at index: Int) -> [BladePoint] {
+        let localFraction = Float(index) / Float(axialSections)
+        let t = range.start + (range.end - range.start) * localFraction
+        let rootEnvelope: Float = 0.32
+        let bodyEnvelope = rootEnvelope
+          + (1 - rootEnvelope) * pow(max(sin(Float.pi * t), 0), 0.58)
+        let tipTaper = 1 - 0.985 * pow(t, 3.2)
+        let rippleEnvelope = pow(max(sin(Float.pi * t), 0), 2)
+        let edgeRipple = 1
+          + edgeRippleAmplitude
+            * sin(2 * Float.pi * edgeRippleCycles * t + edgeRipplePhase)
+            * rippleEnvelope
+        let rankWeight = deployment * CrowTrailingCovertRanks.coverageWeight(
+          rank: rank,
+          axialFraction: t
+        )
+        let width = (rootWidth * (1 - t) + maximumWidth * t)
+          * bodyEnvelope * tipTaper * edgeRipple * rankWeight
+          * CrowTrailingCovertRanks.visibleRankWidthScale
+        let center = root + (tip - root) * t
+          + normal
+            * (camber * sin(Float.pi * t)
+              + deployment * CrowTrailingCovertRanks.normalOffsetMeters(
+                rank: rank,
+                axialFraction: t
+              ))
+        var result: [BladePoint] = []
+        result.reserveCapacity(tessellation.widthSections + 1)
+        for widthIndex in 0...tessellation.widthSections {
+          let fraction = Float(widthIndex) / Float(tessellation.widthSections)
+          let signedWidth = 2 * fraction - 1
+          let transverseEnvelope = max(0, 1 - signedWidth * signedWidth)
+          let localWidth = width * (1 + vaneAsymmetry * signedWidth)
+          result.append(
+            (
+              center + widthAxis * (signedWidth * localWidth)
+                + normal
+                  * (localWidth * transverseCamberRatio * transverseEnvelope),
+              SIMD4<Float>(t, signedWidth, edgeRipplePhase, Float(surfaceFeatherClass))
+            )
+          )
+        }
+        return result
+      }
+
+      let grid = (0...axialSections).map(crossSection)
+      let rankColor = rank == .distal
+        ? SIMD4<Float>(color.x * 1.035, color.y * 1.03, color.z * 1.02, color.w)
+        : color
+      func smoothNormal(axialIndex: Int, widthIndex: Int) -> SIMD3<Float> {
+        let axialFirst = grid[max(0, axialIndex - 1)][widthIndex].position
+        let axialSecond = grid[min(axialSections, axialIndex + 1)][widthIndex]
+          .position
+        let widthFirst = grid[axialIndex][max(0, widthIndex - 1)].position
+        let widthSecond = grid[axialIndex][
+          min(tessellation.widthSections, widthIndex + 1)
+        ].position
+        var resolved = safeNormalize(
+          simd_cross(axialSecond - axialFirst, widthSecond - widthFirst),
+          fallback: normal
+        )
+        if simd_dot(resolved, normal) < 0 { resolved = -resolved }
+        return resolved
+      }
+      func appendPoint(axialIndex: Int, widthIndex: Int) {
+        let point = grid[axialIndex][widthIndex]
+        vertices.append(
+          vertex(
+            point.position,
+            normal: smoothNormal(axialIndex: axialIndex, widthIndex: widthIndex),
+            color: rankColor,
+            parameters: point.parameters
+          )
+        )
+      }
+      for index in 0..<axialSections {
+        for widthIndex in 0..<tessellation.widthSections {
+          appendPoint(axialIndex: index, widthIndex: widthIndex)
+          appendPoint(axialIndex: index, widthIndex: widthIndex + 1)
+          appendPoint(axialIndex: index + 1, widthIndex: widthIndex + 1)
+          appendPoint(axialIndex: index, widthIndex: widthIndex)
+          appendPoint(axialIndex: index + 1, widthIndex: widthIndex + 1)
+          appendPoint(axialIndex: index + 1, widthIndex: widthIndex)
+        }
+      }
     }
   }
 
