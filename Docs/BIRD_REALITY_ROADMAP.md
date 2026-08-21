@@ -143,11 +143,15 @@ inventory or view-dependent patch geometry.
    barb banks with identity-stable orientation, normal, and bounded roughness
    variation. The field follows retained vane coordinates through standing and
    takeoff, so it cannot swim in world or screen space, and it leaves geometry,
-   depth, motion, and identity AOVs exact. This moves the deterministic fallback
-   toward spatially and directionally varying feather reflectance; it is not a
-   measured crow BSDF. The next material milestone is calibrated black-plumage
-   acquisition and a wavelength-aware cortex/medulla/transmission model rather
-   than further hand-tuning of RGB lobes.
+   depth, motion, and identity AOVs exact. The former blue/violet endpoint blend
+   is now an eight-band `400...680 nm` visible-spectrum quadrature with an
+   estimated dispersive keratin interface, broadband eumelanin absorption, and
+   a final normalized CIE 1931/linear-sRGB projection. Its bounded loop and
+   tables are deliberately replaceable by denser samples on future GPUs. This
+   is a wavelength-domain deterministic fallback, not a measured crow BSDF.
+   The next material milestone is calibrated black-plumage acquisition,
+   measured illumination spectra, and a fitted cortex/medulla/transmission
+   model rather than further tuning of estimated absorption or index values.
 
 4. **Physical light transport.** Add image-based lighting, multiple scattering,
    soft self-shadowing, and curve/triangle ray geometry. Metal supports curve

@@ -215,6 +215,37 @@ angular masking between barbs and barbules
 The exact lobe bounds remain simulated presentation estimates, not measured
 American-crow optical parameters.
 
+The cortex return now stays in an eight-sample wavelength domain until display
+conversion. Equal-energy samples span `400...680 nm` in `40 nm` steps and use
+normalized CIE 1931/linear-sRGB quadrature weights, so a flat spectrum remains
+neutral. An estimated keratin index slopes from `1.57` to `1.535`; estimated
+eumelanin extinction slopes from `1.32` to `0.88`, feather-local density spans
+`1.62...1.84`, and feather-local cortex scale spans `0.92...1.04`. The smooth
+interface uses dielectric Fresnel while the existing barb-bank lobes determine
+its direction. This removes the former view-phase interpolation between chosen
+blue and violet RGB endpoints. Maia et al. measured low diffuse reflectance and
+a much stronger specular response across comparative glossy black feathers,
+including common raven and fish crow
+([Maia et al. 2011](https://pmc.ncbi.nlm.nih.gov/articles/PMC3107640/)); those
+data support neutral glossy-black structure, but do not calibrate the numerical
+American-crow parameters above.
+
+On the Mac mini, four alternating nine-frame `1280 x 720` takeoff captures at
+yaw `1.05` and pitch `0.25` measured a pooled post-warm-up GPU median of
+`13.711 ms` for the previous RGB blend and `13.823 ms` for the eight-band path
+(`+0.81%`). All non-appearance AOV fields remained exact. Across inspected
+standing, transition, and flight frames, changed-pixel display-RGB chroma fell
+by `5.52%`, `6.00%`, and `6.06%`; this is a renderer comparison, not a match to
+real-crow imagery.
+
+Five established 17-frame safety views were also rerendered at `1280 x 720`:
+elevated-port `(-2.92,0.52)`, low-starboard `(2.94,-0.18)`, rear-port
+`(-2.28,0.16)`, rear-starboard `(2.36,-0.24)`, and steep underside
+`(2.65,-0.88)`. Baseline and candidate reports are identical after removing
+only GPU duration, HDR extrema, and per-class luminance statistics; geometry,
+depth, normal, motion, coverage, identity, support, and aperture fields remain
+exact.
+
 At frozen frame `1` in the new rear-low, front-low, and dorsal-rear captures,
 all body-class pixel counts remain exact. The first two low-light views retain
 their scene-linear distributions within `0.49%`. In the revealing dorsal-rear
@@ -700,9 +731,9 @@ safety views. These are deterministic optical-coherence checks, not a claim of
 measured American-crow reflectance or perceptual realism.
 
 The canonical README sequence is fully simulated and contains the native hold,
-transition, and flight path: `800 x 450`, `72` frames at `24 fps`, `8,196,728`
+transition, and flight path: `800 x 450`, `72` frames at `24 fps`, `8,002,802`
 bytes, SHA-256
-`e361a2165195da23e01a668bac4e96b07c78296ff92c9587d871dfccfb599025`.
+`1ec7cc16596f81b56edeb56bac6d2c9c451ab625c6f115b2a2d165e1a030107c`.
 
 Run the presentation with:
 

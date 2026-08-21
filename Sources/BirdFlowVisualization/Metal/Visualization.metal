@@ -2286,6 +2286,74 @@ inline float crowBandLimitedSine(float phase) {
     return sin(phase)*max(boxAmplitude,0.0f)*nyquistFade;
 }
 
+// Eight equal-energy visible samples keep the black-plumage response in a
+// wavelength domain until the final display conversion. The signed weights
+// are a normalized CIE 1931 2-degree / linear-sRGB quadrature: an equal value
+// in every band reconstructs neutral white. Increasing the sample count later
+// changes only this table and the bounded loop below, rather than another set
+// of hand-authored RGB feather tints.
+constant float crowPlumageWavelengthNanometers[8]={
+    400.0f,440.0f,480.0f,520.0f,560.0f,600.0f,640.0f,680.0f
+};
+constant float3 crowPlumageLinearSRGBWeights[8]={
+    float3(0.00171033f,-0.00251128f,0.02640591f),
+    float3(0.08257090f,-0.09425744f,0.75526272f),
+    float3(-0.08956674f,0.07761361f,0.34014497f),
+    float3(-0.27795049f,0.49625930f,-0.02063986f),
+    float3(0.13188385f,0.50129871f,-0.06735511f),
+    float3(0.75319232f,0.06543094f,-0.02880139f),
+    float3(0.37033621f,-0.04372594f,-0.00428158f),
+    float3(0.02782362f,-0.00010791f,-0.00073564f)
+};
+
+inline float crowGlossyBlackReflectanceAtWavelength(
+    float wavelengthNanometers,
+    float interfaceCosine,
+    float melaninDensity,
+    float cortexScale) {
+    float visiblePosition=saturate(
+        (wavelengthNanometers-400.0f)*(1.0f/280.0f)
+    );
+
+    // A weak Cauchy-like dispersion keeps the smooth keratin interface close
+    // to neutral. Its directional term is the dielectric Fresnel response;
+    // the anisotropic barb and barbule distributions remain responsible for
+    // where that response is visible.
+    float keratinIndex=1.57f-0.035f*visiblePosition;
+    float indexRatio=(keratinIndex-1.0f)/(keratinIndex+1.0f);
+    float interfaceF0=indexRatio*indexRatio;
+    float oneMinusCosine=1.0f-saturate(interfaceCosine);
+    float interfaceReflectance=interfaceF0
+        +(1.0f-interfaceF0)*pow(oneMinusCosine,5.0f);
+
+    // Eumelanin is represented as broadband absorption rather than a painted
+    // blue channel. The estimated extinction slope suppresses short-wave
+    // volume return slightly more strongly; the exposed cortex remains the
+    // dominant glossy-black signal.
+    float melaninExtinction=mix(1.32f,0.88f,visiblePosition);
+    float volumeReturn=0.016f*exp(-melaninDensity*melaninExtinction);
+    float incoherentKeratinScatter=0.006f*mix(0.82f,1.0f,visiblePosition);
+    return cortexScale*interfaceReflectance
+        +volumeReturn+incoherentKeratinScatter;
+}
+
+inline float3 crowGlossyBlackSpectrum(
+    float interfaceCosine,
+    float melaninDensity,
+    float cortexScale) {
+    float3 linearRGB=float3(0.0f);
+    for(uint sampleIndex=0u;sampleIndex<8u;++sampleIndex){
+        float reflectance=crowGlossyBlackReflectanceAtWavelength(
+            crowPlumageWavelengthNanometers[sampleIndex],
+            interfaceCosine,
+            melaninDensity,
+            cortexScale
+        );
+        linearRGB+=reflectance*crowPlumageLinearSRGBWeights[sampleIndex];
+    }
+    return max(linearRGB,float3(0.0f));
+}
+
 /// Resolve the crossed hook-and-bow directions of interlocking barbules only
 /// while their projected phase remains sampleable. Both waves converge to
 /// zero at distance, so the unresolved vane retains its mean radiance rather
@@ -2362,10 +2430,10 @@ inline float3 showcaseCrowLinearRadiance(
         return 1.12f*keratin;
     }
 
-    // Eumelanin makes the body nearly black while a weak, view-dependent
-    // cortex response adds the restrained blue/violet sheen of adult crow
-    // feather regions. Keep the phase in the local vane frame: a world-space
-    // wave would visibly slide over feathers as the standing body moves.
+    // Eumelanin makes the body nearly black while the smooth cortex provides
+    // a weak, view-dependent glossy return. Evaluate that return in eight
+    // visible wavelength bands instead of choosing blue/violet RGB endpoints.
+    // The feather-local density and cortex variation move with the vane.
     float grazing=pow(1.0f-ndv,1.55f);
     float flightFeather=smoothstep(0.19f,0.25f,material);
     float featherMaterial=1.0f-smoothstep(0.46f,0.50f,material);
@@ -2374,16 +2442,18 @@ inline float3 showcaseCrowLinearRadiance(
     float persistentVane=featherMaterial*vaneCoordinates;
     float axial=saturate(featherCoordinates.x);
     float signedWidth=clamp(featherCoordinates.y,-1.0f,1.0f);
-    float cortexPhase=
-        29.0f*ndv
-        +2.10f*featherCoordinates.z
-        +3.25f*axial
-        +0.85f*abs(signedWidth);
-    float localCortexResponse=0.5f+0.5f*crowBandLimitedSine(cortexPhase);
-    float interference=mix(0.5f,localCortexResponse,persistentVane);
-    float3 blue=float3(0.025f,0.055f,0.090f);
-    float3 violet=float3(0.065f,0.035f,0.075f);
-    float3 sheen=mix(blue,violet,interference);
+    float melaninIdentity=0.5f+0.5f*crowBandLimitedSine(
+        1.91f*featherCoordinates.z+1.17f*axial+0.43f*abs(signedWidth)
+    );
+    float cortexIdentity=0.5f+0.5f*crowBandLimitedSine(
+        2.47f*featherCoordinates.z+0.73f*axial-0.31f*signedWidth
+    );
+    float melaninDensity=mix(1.62f,1.84f,melaninIdentity);
+    float cortexScale=mix(0.92f,1.04f,cortexIdentity);
+    float interfaceCosine=saturate(abs(dot(view,halfVector)));
+    float3 sheen=crowGlossyBlackSpectrum(
+        interfaceCosine,melaninDensity,cortexScale
+    );
     uint featherClass=packedIdentity&255u;
     float primaryVane=featherClass==1u?persistentVane:0.0f;
     float secondaryVane=featherClass==2u?persistentVane:0.0f;

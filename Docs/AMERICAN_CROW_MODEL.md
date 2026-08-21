@@ -324,12 +324,15 @@ including the two exposed dorsal trailing ranks; the remaining coherent
 topology-bound wing courses and asset-length procedural wingbeat rectrices
 remain presentation geometry. The fixed-topology
 wing surface supplies a dark gap-closing layer, while the smooth body/head,
-coverts, and contour feathers
-remain procedural estimates. Four-sample Metal rasterization and a dedicated
-eumelanin shader provide view-dependent cool sheen while keeping the bird
-neutral-black instead of allowing the warm key light to dominate its very low
-albedo. The native result is an executable motion and material estimate, not a
-photograph.
+coverts, and contour feathers remain procedural estimates. Four-sample Metal
+rasterization and a dedicated black-plumage shader keep the bird neutral-black
+instead of allowing the warm key light to dominate its very low albedo. The
+shader samples `400`, `440`, `480`, `520`, `560`, `600`, `640`, and `680 nm`,
+then projects the estimated keratin-interface and eumelanin-volume response to
+linear sRGB with equal-energy-normalized CIE 1931 weights. This replaces a
+direct blue/violet RGB blend, but it is not a calibrated American-crow spectrum
+or a full spectral lighting path. The native result is an executable motion
+and material estimate, not a photograph.
 Before display tone mapping, the same pass emits a scene-linear HDR image and
 typed albedo/material, normal/coverage, metric-depth, and deformation-motion
 AOVs. A separate single-sample integer pass preserves exact surface and feather
