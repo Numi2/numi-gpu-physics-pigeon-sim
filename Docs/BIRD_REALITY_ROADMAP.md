@@ -150,9 +150,16 @@ inventory or view-dependent patch geometry.
    glossy-corvid constraints from renderer-only estimates, and the live shader
    evaluates complex Snell refraction, polarized Fresnel amplitudes, and an Airy
    internal-reflection sum using the published complex refractive indices and
-   `110...180 nm` cortex interval. The key-light path is now angular rather than
-   reusing a normal-incidence upper bound; an on-GPU probe matches independent
-   FP64 normal-through-grazing reference cases.
+   `110...180 nm` cortex interval. Key, fill, and sun now evaluate separate
+   angular half-vector paths rather than sharing a normal-incidence or
+   key-light result; an on-GPU probe matches independent FP64
+   normal-through-grazing reference cases.
+   A second versioned profile block drives a constant-cost projected-area
+   approximation for barb, proximal barbule, distal barbule, and transmission
+   visibility. Its Metal probe enforces normalized weights, bilateral mirror
+   exchange, and monotonic gap transmission. This is a far-field regular
+   cross-section estimate derived from the Padrón-Griffe et al. construction,
+   not their exact analytic self-occlusion solver and not measured crow anatomy.
    Its bounded loop and tables are deliberately replaceable by denser samples
    on future GPUs. The local thickness variation, coherence blend, volume
    return, and target-species mapping remain estimates: this is a
@@ -160,9 +167,11 @@ inventory or view-dependent patch geometry.
    BSDF. The next material milestone is same-specimen American-crow
    gonioreflectance and cortex microscopy under measured illumination, followed
    by a fitted angular cortex/medulla/transmission model. Before that data
-   exists, extend the same spectral evaluation to every explicit light path and
-   add barb/barbule projected-area masking; do not substitute further hand
-   tuning for either measurement or geometry-aware visibility.
+   exists, the next renderer milestone is an exact constant-time analytic mask
+   with barb/barbule discontinuity rays, followed by a hybrid handoff to
+   explicit curve geometry when individual barbs exceed a projected-size
+   threshold. Do not substitute further hand tuning for either measurement or
+   geometry-aware visibility.
 
 4. **Physical light transport.** Add image-based lighting, multiple scattering,
    soft self-shadowing, and curve/triangle ray geometry. Metal supports curve
