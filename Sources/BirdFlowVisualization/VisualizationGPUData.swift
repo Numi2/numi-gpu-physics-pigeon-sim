@@ -231,6 +231,37 @@ struct CrowFeatherGeometryUniforms {
   var renderOffsetAndDetailScale: SIMD4<Float>
 }
 
+/// One retained analytic crown-rachis curve for an interior class-7 body
+/// feather. Metal expands this 96-byte record into the selected radial tube
+/// tessellation; no per-triangle body-detail stream is authored on the CPU.
+struct CrowVentralRachisCurveRecordGPU: Equatable {
+  /// Local root position and pennaceous start fraction.
+  var rootAndPennaceousStart: SIMD4<Float>
+  /// Local tip position and longitudinal camber in metres.
+  var tipAndCamber: SIMD4<Float>
+  /// Orthogonal vane normal and transverse crown-camber ratio.
+  var normalAndTransverseCamber: SIMD4<Float>
+  /// Root half-width, maximum half-width, root envelope ratio, and asymmetry.
+  var widthsEnvelopeAndAsymmetry: SIMD4<Float>
+  /// Edge-ripple amplitude, phase, cycles, and material variation.
+  var edgeRippleAndMaterial: SIMD4<Float>
+  /// Stable region, side, row, and column identity.
+  var identity: SIMD4<UInt32>
+}
+
+/// One active analytic curve interval selected for the current output LOD.
+struct CrowVentralRachisSegmentWorkGPU: Equatable {
+  /// Curve-record index, interval index, interval count, reserved.
+  var indices: SIMD4<UInt32>
+}
+
+struct CrowVentralRachisGeometryUniforms {
+  /// Curve count, active interval count, vertices per interval, class code.
+  var counts: SIMD4<UInt32>
+  var currentBodyCenter: SIMD4<Float>
+  var previousBodyCenter: SIMD4<Float>
+}
+
 /// Procedural crow geometry paired across two frames for true deformation
 /// motion rather than camera-only reprojection.
 struct CrowSurfaceTemporalVertexGPU {

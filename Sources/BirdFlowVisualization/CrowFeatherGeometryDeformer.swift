@@ -3,11 +3,25 @@ import Metal
 import simd
 
 struct CrowFeatherGeometryFrame {
-  fileprivate let slot: Int
-  fileprivate let readbackReady: Bool
+  let slot: Int
+  let readbackReady: Bool
   let outputBuffer: MTLBuffer
   let indirectDrawBuffer: MTLBuffer
   let vertexCount: Int
+
+  init(
+    slot: Int,
+    readbackReady: Bool,
+    outputBuffer: MTLBuffer,
+    indirectDrawBuffer: MTLBuffer,
+    vertexCount: Int
+  ) {
+    self.slot = slot
+    self.readbackReady = readbackReady
+    self.outputBuffer = outputBuffer
+    self.indirectDrawBuffer = indirectDrawBuffer
+    self.vertexCount = vertexCount
+  }
 }
 
 /// Expands one retained canonical vane template for every persistent feather.

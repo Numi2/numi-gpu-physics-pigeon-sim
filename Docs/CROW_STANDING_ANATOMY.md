@@ -367,6 +367,11 @@ raster-coverage checks for simulated geometry, not measured feather anatomy.
 Interior class-`7` pectoral and abdominal records now keep their established
 subvane continuity shaft and add a crown-following four-segment rachis, while
 boundary rows, terminal axial courses, and edge-barb aggregates remain exact.
+The `776` crown shafts are retained as `96`-byte analytic records and expanded
+by Metal from a compact output-LOD interval list. At the current capture tier
+this replaces `74,496` per-frame CPU-authored vertices with `3,104` curve
+intervals while preserving the previous shaft oracle to sub-micrometre position
+and `5e-6` normal error in the executable GPU parity test.
 In a new 17-frame underbody view at yaw `0.20`, pitch `-0.65`, holes remained
 `117` pixels in `70` components. Across that view plus the established
 high-side, low-rear, dorsal-rear, under-rear, and front-starboard probes,
@@ -375,6 +380,16 @@ to `429`; expected apertures stayed `10` pixels in `4` components and the
 worst hole stayed `44` pixels. Front-starboard supplied the one-pixel and
 one-component improvement; the other five views were exact. This qualifies
 simulated raster coverage, not anatomical rachis measurements.
+
+Migrating the visible class-`7` shafts to Metal retained that accepted result.
+Across complete 17-frame underbody, dorsal-rear, and front-starboard replays,
+all active/fully-covered identity totals, `334` enclosed-hole pixels in `235`
+components, and `6` expected-aperture pixels in `2` components stayed exact.
+At underbody phase `0.5`, one covered pixel changed ownership from adjacent
+class `6` to class `7`; no silhouette pixel changed. The nine visually inspected
+hold/mid-transition/flight frames had SSIM `>= 0.999997` against the prior CPU
+expansion. This is executable raster and parity evidence, not a performance
+claim or an anatomical measurement.
 
 Run the presentation with:
 

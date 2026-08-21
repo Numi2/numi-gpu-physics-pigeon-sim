@@ -734,6 +734,7 @@ private final class CrowShowcaseRenderer {
   private let featherGeometryDeformer: CrowFeatherGeometryDeformer?
   private let liveCovertRootBuffer: CrowLiveWingCovertRootBuffer?
   private let liveCovertGeometryDeformer: CrowFeatherGeometryDeformer?
+  private let ventralRachisGeometryDeformer: CrowVentralRachisGeometryDeformer
   private let featherRenderOffset: SIMD3<Float>
   private var previousPhase: Float?
   private var previousCamera: CameraState?
@@ -811,6 +812,9 @@ private final class CrowShowcaseRenderer {
       liveCovertRootBuffer = nil
       liveCovertGeometryDeformer = nil
     }
+    ventralRachisGeometryDeformer = try CrowVentralRachisGeometryDeformer(
+      backend: createdBackend
+    )
     featherRenderOffset = createdMeshBuilder.featherRenderOffset
     let createdSampleCount = device.supportsTextureSampleCount(4) ? 4 : 1
     sampleCount = createdSampleCount
@@ -827,15 +831,12 @@ private final class CrowShowcaseRenderer {
       colorFormats: aovFormats,
       sampleCount: createdSampleCount
     )
-    featherAOVPipeline =
-      try realityAsset != nil || liveCovertGeometryDeformer != nil
-      ? createdBackend.render(
-        vertex: "crowFeatherAOVVertex",
-        fragment: "showcaseCrowAOVFragment",
-        colorFormats: aovFormats,
-        sampleCount: createdSampleCount
-      )
-      : nil
+    featherAOVPipeline = try createdBackend.render(
+      vertex: "crowFeatherAOVVertex",
+      fragment: "showcaseCrowAOVFragment",
+      colorFormats: aovFormats,
+      sampleCount: createdSampleCount
+    )
     backgroundAOVPipeline = try backend.render(
       vertex: "showcaseBackgroundVertex",
       fragment: "showcaseCrowBackgroundAOVFragment",
@@ -847,14 +848,11 @@ private final class CrowShowcaseRenderer {
       fragment: "showcaseCrowIdentityFragment",
       colorFormat: .rgba32Uint
     )
-    featherIdentityPipeline =
-      try realityAsset != nil || liveCovertGeometryDeformer != nil
-      ? createdBackend.render(
-        vertex: "crowFeatherAOVVertex",
-        fragment: "showcaseCrowIdentityFragment",
-        colorFormat: .rgba32Uint
-      )
-      : nil
+    featherIdentityPipeline = try createdBackend.render(
+      vertex: "crowFeatherAOVVertex",
+      fragment: "showcaseCrowIdentityFragment",
+      colorFormat: .rgba32Uint
+    )
     normalResolvePipeline = try backend.render(
       vertex: "showcasePostVertex",
       fragment: "showcaseCrowNormalResolveFragment",
@@ -933,6 +931,14 @@ private final class CrowShowcaseRenderer {
     )
     let surfaceStates = meshBuilder.surfaceStates(phase: phase)
     let previousSurfaceStates = meshBuilder.surfaceStates(phase: priorPhase)
+    let currentAnatomyBodyCenter = meshBuilder.anatomyBodyCenter(
+      states: surfaceStates,
+      phase: phase
+    )
+    let previousAnatomyBodyCenter = meshBuilder.anatomyBodyCenter(
+      states: previousSurfaceStates,
+      phase: priorPhase
+    )
     let vertices = meshBuilder.vertices(
       states: surfaceStates,
       phase: phase,
@@ -1167,6 +1173,14 @@ private final class CrowShowcaseRenderer {
         )
       )
     }
+    featherFrames.append(
+      try ventralRachisGeometryDeformer.encode(
+        currentBodyCenter: currentAnatomyBodyCenter,
+        previousBodyCenter: previousAnatomyBodyCenter,
+        projectedPixelsPerMeter: projectedPixelsPerMeter,
+        commandBuffer: commandBuffer
+      )
+    )
 
     let pass = MTLRenderPassDescriptor()
     for index in formats.indices {
@@ -1573,6 +1587,35 @@ private struct CrowMeshBuilder {
   func surfaceStates(phase: Float) -> [SIMD3<Float>] {
     (0..<dataset.vertexCount).map {
       transformedPoint(phase: phase, vertexIndex: $0)
+    }
+  }
+
+  /// Body-space origin used by the retained ventral feather curves after the
+  /// standing/takeoff pose has been applied. This exactly matches the center
+  /// passed to the CPU-authored vane and continuity layers.
+  func anatomyBodyCenter(
+    states: [SIMD3<Float>],
+    phase: Float
+  ) -> SIMD3<Float> {
+    let base: SIMD3<Float>
+    switch presentation {
+    case .standing:
+      base = .zero
+    case .takeoff:
+      base = CrowTakeoffSequence.sample(phase: phase).bodyTranslation
+    case .wingbeat:
+      base = average(componentIndices(partIdentifier: 1).map { states[$0] })
+    }
+    switch presentation {
+    case .standing:
+      return CrowStandingPose.sample(
+        phase: phase,
+        referenceBodyCenter: base
+      ).bodyCenter
+    case .takeoff:
+      return CrowTakeoffSequence.standingPose(phase: phase).bodyCenter
+    case .wingbeat:
+      return base
     }
   }
 
@@ -2102,7 +2145,11 @@ private struct CrowMeshBuilder {
     appendTractFeatherMesostructure(
       CrowFeatherMesostructure.segments(
         for: feather,
-        projectedPixelsPerMeter: projectedPixelsPerMeter
+        projectedPixelsPerMeter: projectedPixelsPerMeter,
+        // Visible crown rachises are retained analytic records expanded by
+        // Metal. Preserve only the established subvane continuity and barb
+        // aggregates in this CPU surface stream.
+        transverseCamberRatio: 0
       ),
       bodyCenter: bodyCenter,
       planeNormal: feather.planeNormal,

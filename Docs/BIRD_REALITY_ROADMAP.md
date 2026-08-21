@@ -102,9 +102,12 @@ ankles move by millimetres.
    and airflow without reducing identity density or changing the AOV oracle.
    Class-`7` ventral body feathers now expose separate stable subvane-continuity
    and visible-crown rachis records for `776` interior feathers, while boundary
-   records preserve the accepted silhouette. A future indirect curve pass can
-   emit the visible layer, retain the continuity layer as an occlusion oracle,
-   and visibility-cull both from the same `1,304`-feather tract inventory.
+   records preserve the accepted silhouette. The visible layer now uses
+   `96`-byte retained analytic curves plus compact LOD interval records and a
+   Metal temporal/AOV expansion pass; the continuity layer remains an occlusion
+   oracle in the accepted surface stream. The next future-compute step is GPU
+   visibility selection and indirect meshlet or hardware-curve emission from
+   the same `1,304`-feather tract inventory.
 
 3. **Measured appearance, bounded claims.** Implement an energy-bounded,
    anisotropic feather BSDF with separate eumelanin absorption, longitudinal

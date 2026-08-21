@@ -178,9 +178,13 @@ All `1,304` ventral vanes preserve their established subvane continuity rachis;
 the `776` interior records, excluding two boundary rows and two terminal axial
 courses on every side, add a second four-segment rachis at the visible `0.10`
 transverse crown. Edge-barb aggregates, vane geometry, roots, tips, identities,
-LOD thresholds, and boundary silhouettes remain unchanged. The paired compact
-curve records are an estimated rendering hierarchy for future GPU curve or
-meshlet expansion, not evidence of measured American-crow rachis depth.
+LOD thresholds, and boundary silhouettes remain unchanged. Each visible crown
+shaft is retained as a `96`-byte analytic record; a `16`-byte-per-interval LOD
+list selects four, eight, or twelve shaft intervals, and Metal expands their
+four-sided tubes directly into temporal/AOV vertices. The current showcase tier
+therefore emits `3,104` intervals and `74,496` vertices without CPU triangle
+construction. The paired continuity/crown hierarchy remains an estimated
+rendering model, not evidence of measured American-crow rachis depth.
 
 ## Native Metal capture
 

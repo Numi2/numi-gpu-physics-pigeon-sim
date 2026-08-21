@@ -110,8 +110,12 @@ Interior class-`7` pectoral and abdominal feathers now retain a subvane
 continuity shaft and add a second four-segment rachis on the visible `0.10`
 transverse crown. Boundary rows, terminal courses, and all edge-barb aggregates
 remain unchanged, so higher-quality breast detail cannot become a new body
-silhouette. The two stable curve layers are ready for later GPU curve or
-meshlet emission without reducing the `1,304`-feather ventral inventory.
+silhouette. The `776` visible crown shafts are now retained as `96`-byte
+analytic records. At showcase LOD a compact `3,104`-interval work list drives
+Metal expansion into `74,496` temporal/AOV vertices instead of authoring those
+tubes on the CPU. The continuity and barb oracle remains in the accepted body
+surface stream; future meshlet or hardware-curve emission can consume the same
+records without reducing the `1,304`-feather ventral inventory.
 A locked
 `2,157`-vertex, `3,968`-triangle estimated-hybrid surface now also passes the
 live Apple-Metal geometry and production TRT moving-boundary coupling gates.
