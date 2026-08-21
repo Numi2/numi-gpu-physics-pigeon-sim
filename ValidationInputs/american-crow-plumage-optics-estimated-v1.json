@@ -1,0 +1,55 @@
+{
+  "schemaVersion": 1,
+  "profileIdentifier": "american-crow-plumage-optics-estimated-v1",
+  "targetTaxon": "Corvus brachyrhynchos",
+  "evidenceClass": "comparative-corvid-constrained-render-estimate",
+  "source": {
+    "title": "What makes a feather shine? A nanostructural basis for glossy black colours in feathers",
+    "doi": "10.1098/rspb.2010.1637",
+    "pmcid": "PMC3107640",
+    "sourceTaxa": [
+      "Corvus corax",
+      "Corvus ossifragus"
+    ],
+    "rawSpectraAvailable": false
+  },
+  "publishedConstraints": {
+    "wavelengthRangeNanometers": [300.0, 700.0],
+    "interpolatedBinWidthNanometers": 1.0,
+    "specularProbeAngleFromPlaneNormalDegrees": 75.0,
+    "diffuseMeanReflectanceUpperBound": 0.05,
+    "glossySpecularMeanReflectanceLowerBound": 0.20,
+    "glossyCortexThicknessRangeNanometers": [110.0, 180.0],
+    "glossyCortexGroupMeanNanometers": 160.0,
+    "keratinComplexRefractiveIndex": [1.56, 0.03],
+    "melaninComplexRefractiveIndex": [2.00, 0.60]
+  },
+  "renderParameters": {
+    "wavelengthSamplesNanometers": [
+      400.0,
+      440.0,
+      480.0,
+      520.0,
+      560.0,
+      600.0,
+      640.0,
+      680.0
+    ],
+    "cortexThicknessMeanNanometers": 160.0,
+    "cortexThicknessVariationNanometers": 18.0,
+    "thinFilmCoherence": 0.08,
+    "volumeReturnScale": 0.016,
+    "melaninExtinctionRange": [1.32, 0.88],
+    "melaninDensityRange": [1.62, 1.84],
+    "incoherentKeratinScatterRange": [0.00492, 0.006],
+    "cortexScaleRange": [0.92, 1.04]
+  },
+  "calibrationStatus": "not calibrated to an American-crow specimen",
+  "excludedClaims": [
+    "measured American-crow reflectance spectrum",
+    "same-specimen nanostructure",
+    "measured angular BRDF",
+    "calibrated illumination spectrum",
+    "species-specific ultraviolet response"
+  ]
+}

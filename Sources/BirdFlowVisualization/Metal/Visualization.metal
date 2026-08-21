@@ -102,6 +102,10 @@ struct CrowTemporalCameraUniforms {
     float4x4 previousViewProjection;
     float4 eyeAndWidth;
     float4 viewportAndInverse;
+    float4 plumageFilm;
+    float4 plumageComplexIndices;
+    float4 plumageMelanin;
+    float4 plumageCortex;
 };
 
 struct VisualizationUniforms {
@@ -2306,33 +2310,101 @@ constant float3 crowPlumageLinearSRGBWeights[8]={
     float3(0.02782362f,-0.00010791f,-0.00073564f)
 };
 
+inline float2 crowComplexMultiply(float2 first,float2 second) {
+    return float2(
+        first.x*second.x-first.y*second.y,
+        first.x*second.y+first.y*second.x
+    );
+}
+
+inline float2 crowComplexDivide(float2 numerator,float2 denominator) {
+    float inverseMagnitude=1.0f/max(dot(denominator,denominator),1.0e-8f);
+    return inverseMagnitude*float2(
+        numerator.x*denominator.x+numerator.y*denominator.y,
+        numerator.y*denominator.x-numerator.x*denominator.y
+    );
+}
+
+/// Normal-incidence air/keratin/melanin transfer-matrix upper bound used by
+/// the source paper. Positive imaginary components are extinction magnitudes;
+/// the round trip therefore decays rather than amplifies inside the cortex.
+inline float crowThinFilmReflectanceAtWavelength(
+    float wavelengthNanometers,
+    float cortexThicknessNanometers,
+    float4 complexIndices) {
+    float2 airIndex=float2(1.0f,0.0f);
+    float2 keratinIndex=complexIndices.xy;
+    float2 melaninIndex=complexIndices.zw;
+    float2 airKeratin=crowComplexDivide(
+        airIndex-keratinIndex,airIndex+keratinIndex
+    );
+    float2 keratinMelanin=crowComplexDivide(
+        keratinIndex-melaninIndex,keratinIndex+melaninIndex
+    );
+    float roundTripReal=4.0f*M_PI_F*keratinIndex.x
+        *cortexThicknessNanometers/wavelengthNanometers;
+    float roundTripAttenuation=exp(
+        -4.0f*M_PI_F*keratinIndex.y
+            *cortexThicknessNanometers/wavelengthNanometers
+    );
+    float2 roundTrip=roundTripAttenuation
+        *float2(cos(roundTripReal),sin(roundTripReal));
+    float2 reflectedSubstrate=crowComplexMultiply(
+        keratinMelanin,roundTrip
+    );
+    float2 numerator=airKeratin+reflectedSubstrate;
+    float2 denominator=float2(1.0f,0.0f)
+        +crowComplexMultiply(airKeratin,reflectedSubstrate);
+    float2 amplitude=crowComplexDivide(numerator,denominator);
+    return saturate(dot(amplitude,amplitude));
+}
+
 inline float crowGlossyBlackReflectanceAtWavelength(
     float wavelengthNanometers,
     float interfaceCosine,
     float melaninDensity,
-    float cortexScale) {
+    float cortexScale,
+    float cortexThicknessNanometers,
+    float4 plumageFilm,
+    float4 plumageComplexIndices,
+    float4 plumageMelanin,
+    float4 plumageCortex) {
     float visiblePosition=saturate(
         (wavelengthNanometers-400.0f)*(1.0f/280.0f)
     );
 
-    // A weak Cauchy-like dispersion keeps the smooth keratin interface close
-    // to neutral. Its directional term is the dielectric Fresnel response;
-    // the anisotropic barb and barbule distributions remain responsible for
-    // where that response is visible.
-    float keratinIndex=1.57f-0.035f*visiblePosition;
+    // The profile-owned keratin interface remains close to neutral before the
+    // bounded thin-film term. Its directional term is dielectric Fresnel; the
+    // anisotropic barb and barbule distributions remain responsible for where
+    // that response is visible.
+    float keratinIndex=plumageComplexIndices.x;
     float indexRatio=(keratinIndex-1.0f)/(keratinIndex+1.0f);
     float interfaceF0=indexRatio*indexRatio;
     float oneMinusCosine=1.0f-saturate(interfaceCosine);
-    float interfaceReflectance=interfaceF0
+    float dielectricInterfaceReflectance=interfaceF0
         +(1.0f-interfaceF0)*pow(oneMinusCosine,5.0f);
+    float idealThinFilmReflectance=crowThinFilmReflectanceAtWavelength(
+        wavelengthNanometers,cortexThicknessNanometers,
+        plumageComplexIndices
+    );
+    float interfaceReflectance=mix(
+        dielectricInterfaceReflectance,
+        idealThinFilmReflectance,
+        saturate(plumageFilm.z)
+    );
 
     // Eumelanin is represented as broadband absorption rather than a painted
     // blue channel. The estimated extinction slope suppresses short-wave
     // volume return slightly more strongly; the exposed cortex remains the
     // dominant glossy-black signal.
-    float melaninExtinction=mix(1.32f,0.88f,visiblePosition);
-    float volumeReturn=0.016f*exp(-melaninDensity*melaninExtinction);
-    float incoherentKeratinScatter=0.006f*mix(0.82f,1.0f,visiblePosition);
+    float melaninExtinction=mix(
+        plumageMelanin.x,plumageMelanin.y,visiblePosition
+    );
+    float volumeReturn=plumageFilm.w
+        *exp(-melaninDensity*melaninExtinction);
+    float incoherentKeratinScatter=mix(
+        plumageCortex.x,plumageCortex.y,visiblePosition
+    );
     return cortexScale*interfaceReflectance
         +volumeReturn+incoherentKeratinScatter;
 }
@@ -2340,14 +2412,24 @@ inline float crowGlossyBlackReflectanceAtWavelength(
 inline float3 crowGlossyBlackSpectrum(
     float interfaceCosine,
     float melaninDensity,
-    float cortexScale) {
+    float cortexScale,
+    float cortexThicknessNanometers,
+    float4 plumageFilm,
+    float4 plumageComplexIndices,
+    float4 plumageMelanin,
+    float4 plumageCortex) {
     float3 linearRGB=float3(0.0f);
     for(uint sampleIndex=0u;sampleIndex<8u;++sampleIndex){
         float reflectance=crowGlossyBlackReflectanceAtWavelength(
             crowPlumageWavelengthNanometers[sampleIndex],
             interfaceCosine,
             melaninDensity,
-            cortexScale
+            cortexScale,
+            cortexThicknessNanometers,
+            plumageFilm,
+            plumageComplexIndices,
+            plumageMelanin,
+            plumageCortex
         );
         linearRGB+=reflectance*crowPlumageLinearSRGBWeights[sampleIndex];
     }
@@ -2385,7 +2467,11 @@ inline float3 showcaseCrowLinearRadiance(
     float4 albedoAndMaterial,
     float3 eyePosition,
     float3 featherCoordinates,
-    uint packedIdentity) {
+    uint packedIdentity,
+    float4 plumageFilm,
+    float4 plumageComplexIndices,
+    float4 plumageMelanin,
+    float4 plumageCortex) {
     float3 normal=normalize(normalInput);
     float3 view=normalize(eyePosition-world);
     float material=albedoAndMaterial.a;
@@ -2448,11 +2534,22 @@ inline float3 showcaseCrowLinearRadiance(
     float cortexIdentity=0.5f+0.5f*crowBandLimitedSine(
         2.47f*featherCoordinates.z+0.73f*axial-0.31f*signedWidth
     );
-    float melaninDensity=mix(1.62f,1.84f,melaninIdentity);
-    float cortexScale=mix(0.92f,1.04f,cortexIdentity);
+    float melaninDensity=mix(
+        plumageMelanin.z,plumageMelanin.w,melaninIdentity
+    );
+    float cortexScale=mix(
+        plumageCortex.z,plumageCortex.w,cortexIdentity
+    );
+    float thicknessIdentity=crowBandLimitedSine(
+        1.37f*featherCoordinates.z+0.91f*axial+0.37f*signedWidth
+    );
+    float cortexThicknessNanometers=plumageFilm.x
+        +plumageFilm.y*thicknessIdentity;
     float interfaceCosine=saturate(abs(dot(view,halfVector)));
     float3 sheen=crowGlossyBlackSpectrum(
-        interfaceCosine,melaninDensity,cortexScale
+        interfaceCosine,melaninDensity,cortexScale,
+        cortexThicknessNanometers,plumageFilm,plumageComplexIndices,
+        plumageMelanin,plumageCortex
     );
     uint featherClass=packedIdentity&255u;
     float primaryVane=featherClass==1u?persistentVane:0.0f;
@@ -2739,7 +2836,7 @@ inline float3 showcaseCrowLinearRadiance(
     // Adult crow plumage should remain neutral-black under the warm key. A
     // direct copper lobe overwhelms the very low eumelanin albedo and makes
     // broad body regions read brown, so only a restrained cool sky return is
-    // added here; blue/violet structure stays view-dependent in `sheen`.
+    // added here; weak film structure stays view-dependent in `sheen`.
     color+=nds*float3(0.004f,0.006f,0.010f);
     color+=rim*mix(1.0f,classSheenScale,persistentVane)
         *float3(0.022f,0.040f,0.065f);
@@ -2754,7 +2851,11 @@ fragment float4 showcaseCrowFragment(
     RasterVertex in [[stage_in]],
     constant CameraUniforms& camera [[buffer(0)]]) {
     float3 radiance=showcaseCrowLinearRadiance(
-        in.world,in.normal,in.color,camera.eyeAndWidth.xyz,float3(in.uv,0),0u
+        in.world,in.normal,in.color,camera.eyeAndWidth.xyz,float3(in.uv,0),0u,
+        float4(160.0f,18.0f,0.08f,0.016f),
+        float4(1.56f,0.03f,2.00f,0.60f),
+        float4(1.32f,0.88f,1.62f,1.84f),
+        float4(0.00492f,0.006f,0.92f,1.04f)
     );
     return float4(1.0f-exp(-radiance),1.0f);
 }
@@ -2765,7 +2866,9 @@ fragment CrowAOVOutput showcaseCrowAOVFragment(
     float3 normal=in.normal;
     float3 radiance=showcaseCrowLinearRadiance(
         in.world,normal,in.albedoAndMaterial,camera.eyeAndWidth.xyz,
-        in.featherCoordinates,in.identity.w
+        in.featherCoordinates,in.identity.w,
+        camera.plumageFilm,camera.plumageComplexIndices,
+        camera.plumageMelanin,camera.plumageCortex
     );
     float inversePreviousW=1.0f/in.previousClipPosition.w;
     float2 previousNDC=in.previousClipPosition.xy*inversePreviousW;

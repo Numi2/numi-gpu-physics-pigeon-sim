@@ -11,6 +11,7 @@ CAMERA_YAW="${6:-}"
 MANIFEST="$ROOT/ValidationInputs/american-crow-hybrid-surface-v1/manifest.json"
 GENERATION_AUDIT="$ROOT/ValidationArtifacts/american-crow-hybrid-surface-generation-v1.json"
 PROFILE="$ROOT/ValidationInputs/american-crow-hybrid-visual-v1.json"
+PLUMAGE_OPTICS="$ROOT/ValidationInputs/american-crow-plumage-optics-estimated-v1.json"
 STANDING_REFERENCE="$ROOT/ValidationInputs/american-crow-standing-reference-v1.json"
 
 if [[ "$PRESENTATION" != "wingbeat" && "$PRESENTATION" != "standing" \
@@ -57,6 +58,7 @@ fi
   --capture-crow-surface-manifest "$MANIFEST" \
   --capture-crow-surface-generation-audit "$GENERATION_AUDIT" \
   --capture-crow-profile "$PROFILE" \
+  --capture-crow-plumage-optics "$PLUMAGE_OPTICS" \
   --capture-crow-standing-reference "$STANDING_REFERENCE" \
   --capture-crow-presentation "$PRESENTATION" \
   "${AOV_ARGUMENTS[@]}" \

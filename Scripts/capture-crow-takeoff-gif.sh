@@ -6,6 +6,7 @@ OUTPUT="${1:-$ROOT/Docs/Media/american-crow-standing-to-flight-v1.gif}"
 MANIFEST="$ROOT/ValidationInputs/american-crow-hybrid-surface-v1/manifest.json"
 GENERATION_AUDIT="$ROOT/ValidationArtifacts/american-crow-hybrid-surface-generation-v1.json"
 PROFILE="$ROOT/ValidationInputs/american-crow-hybrid-visual-v1.json"
+PLUMAGE_OPTICS="$ROOT/ValidationInputs/american-crow-plumage-optics-estimated-v1.json"
 STANDING_REFERENCE="$ROOT/ValidationInputs/american-crow-standing-reference-v1.json"
 
 for tool in ffmpeg ffprobe; do
@@ -30,6 +31,7 @@ swift build -c release --product birdflow-viewer
   --capture-crow-surface-manifest "$MANIFEST" \
   --capture-crow-surface-generation-audit "$GENERATION_AUDIT" \
   --capture-crow-profile "$PROFILE" \
+  --capture-crow-plumage-optics "$PLUMAGE_OPTICS" \
   --capture-crow-standing-reference "$STANDING_REFERENCE" \
   --capture-crow-presentation takeoff \
   --capture-width 1280 \

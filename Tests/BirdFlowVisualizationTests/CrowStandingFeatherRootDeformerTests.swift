@@ -40,7 +40,7 @@ func standingCrowFeatherRootsMatchMetalReference() throws {
   #expect(MemoryLayout<ColoredVertex>.stride == 64)
   #expect(MemoryLayout<CrowStandingFeatherUniforms>.stride == 32)
   #expect(MemoryLayout<CrowSurfaceTemporalVertexGPU>.stride == 96)
-  #expect(MemoryLayout<CrowTemporalCameraUniforms>.stride == 160)
+  #expect(MemoryLayout<CrowTemporalCameraUniforms>.stride == 224)
   #expect(deformer.featherCount == 54)
 
   for phases: (Float, Float) in [(0, 0), (0.22, 0.19), (0.61, 0.58), (1, 0.97)] {

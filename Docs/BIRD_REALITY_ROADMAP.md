@@ -144,14 +144,20 @@ inventory or view-dependent patch geometry.
    variation. The field follows retained vane coordinates through standing and
    takeoff, so it cannot swim in world or screen space, and it leaves geometry,
    depth, motion, and identity AOVs exact. The former blue/violet endpoint blend
-   is now an eight-band `400...680 nm` visible-spectrum quadrature with an
-   estimated dispersive keratin interface, broadband eumelanin absorption, and
-   a final normalized CIE 1931/linear-sRGB projection. Its bounded loop and
-   tables are deliberately replaceable by denser samples on future GPUs. This
-   is a wavelength-domain deterministic fallback, not a measured crow BSDF.
-   The next material milestone is calibrated black-plumage acquisition,
-   measured illumination spectra, and a fitted cortex/medulla/transmission
-   model rather than further tuning of estimated absorption or index values.
+   is now an eight-band `400...680 nm` visible-spectrum quadrature with
+   broadband eumelanin absorption and a final normalized CIE 1931/linear-sRGB
+   projection. A versioned profile separates Maia et al.'s comparative
+   glossy-corvid constraints from renderer-only estimates, and the live shader
+   evaluates an air/keratin/melanin transfer-matrix upper bound using the
+   published complex refractive indices and `110...180 nm` cortex interval.
+   Its bounded loop and tables are deliberately replaceable by denser samples
+   on future GPUs. The local thickness variation, coherence blend, volume
+   return, and target-species mapping remain estimates: this is a
+   wavelength-domain deterministic fallback, not a measured American-crow
+   BSDF. The next material milestone is same-specimen American-crow
+   gonioreflectance and cortex microscopy under measured illumination, followed
+   by a fitted angular cortex/medulla/transmission model rather than further
+   hand-tuning.
 
 4. **Physical light transport.** Add image-based lighting, multiple scattering,
    soft self-shadowing, and curve/triangle ray geometry. Metal supports curve

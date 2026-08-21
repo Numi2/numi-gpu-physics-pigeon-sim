@@ -166,6 +166,11 @@ Metal expansion into `74,496` temporal/AOV vertices instead of authoring those
 tubes on the CPU. The continuity and barb oracle remains in the accepted body
 surface stream; future meshlet or hardware-curve emission can consume the same
 records without reducing the `1,304`-feather ventral inventory.
+A separate versioned optics profile now drives the live eight-wavelength
+air/keratin/melanin film response. It records comparative glossy-corvid
+constraints independently from the renderer's American-crow estimates, so the
+subtler sheen is reproducible without presenting a figure trace, photograph,
+or related species as measured target data.
 The shared trunk loft now preserves a broader ventrolateral pectoral envelope
 through the sternum and fades that relief before the caudal pelvis. It moves
 the body surface and its already-attached contour follicles together while

@@ -218,25 +218,29 @@ American-crow optical parameters.
 The cortex return now stays in an eight-sample wavelength domain until display
 conversion. Equal-energy samples span `400...680 nm` in `40 nm` steps and use
 normalized CIE 1931/linear-sRGB quadrature weights, so a flat spectrum remains
-neutral. An estimated keratin index slopes from `1.57` to `1.535`; estimated
-eumelanin extinction slopes from `1.32` to `0.88`, feather-local density spans
-`1.62...1.84`, and feather-local cortex scale spans `0.92...1.04`. The smooth
-interface uses dielectric Fresnel while the existing barb-bank lobes determine
-its direction. This removes the former view-phase interpolation between chosen
-blue and violet RGB endpoints. Maia et al. measured low diffuse reflectance and
-a much stronger specular response across comparative glossy black feathers,
-including common raven and fish crow
+neutral. The versioned optics profile keeps two evidence classes explicit.
+Published comparative constraints supply complex keratin `1.56 - 0.03i` and
+melanin `2.00 - 0.60i` indices plus a glossy-cortex `110...180 nm` interval;
+the live shader uses them in a normal-incidence air/keratin/melanin transfer
+matrix. Renderer estimates separately set a `160 +/- 18 nm` feather-local
+thickness field, `0.08` coherent-film blend, eumelanin extinction
+`1.32...0.88`, density `1.62...1.84`, and cortex scale `0.92...1.04`. Existing
+barb-bank lobes still determine direction. This removes the former view-phase
+interpolation between chosen blue and violet RGB endpoints. Maia et al.
+measured low diffuse reflectance and a much stronger specular response across
+comparative glossy black feathers, including common raven and fish crow
 ([Maia et al. 2011](https://pmc.ncbi.nlm.nih.gov/articles/PMC3107640/)); those
-data support neutral glossy-black structure, but do not calibrate the numerical
-American-crow parameters above.
+data constrain neutral glossy-black structure, but the paper exposes no raw
+spectral table and does not calibrate the numerical American-crow parameters
+above. No figure trace is relabelled as target-species measurement.
 
 On the Mac mini, four alternating nine-frame `1280 x 720` takeoff captures at
-yaw `1.05` and pitch `0.25` measured a pooled post-warm-up GPU median of
-`13.711 ms` for the previous RGB blend and `13.823 ms` for the eight-band path
-(`+0.81%`). All non-appearance AOV fields remained exact. Across inspected
-standing, transition, and flight frames, changed-pixel display-RGB chroma fell
-by `5.52%`, `6.00%`, and `6.06%`; this is a renderer comparison, not a match to
-real-crow imagery.
+yaw `0.46` and pitch `1.08` measured a pooled post-warm-up GPU median of
+`13.971 ms` for the previous eight-band interface and `14.110 ms` for the
+profile-driven transfer-matrix path (`+0.99%`). All non-appearance AOV fields
+remained exact. Across inspected still, transition, and flight frames,
+changed-pixel display-RGB chroma fell by `2.76%`, `2.82%`, and `2.86%`; this is
+a renderer comparison, not a match to real-crow imagery.
 
 Five established 17-frame safety views were also rerendered at `1280 x 720`:
 elevated-port `(-2.92,0.52)`, low-starboard `(2.94,-0.18)`, rear-port
@@ -731,9 +735,9 @@ safety views. These are deterministic optical-coherence checks, not a claim of
 measured American-crow reflectance or perceptual realism.
 
 The canonical README sequence is fully simulated and contains the native hold,
-transition, and flight path: `800 x 450`, `72` frames at `24 fps`, `8,002,802`
+transition, and flight path: `800 x 450`, `72` frames at `24 fps`, `7,926,879`
 bytes, SHA-256
-`1ec7cc16596f81b56edeb56bac6d2c9c451ab625c6f115b2a2d165e1a030107c`.
+`1bc0355d6cc4d978452be5c929a1c68f78eeff956d265c43aea1b04a10983b09`.
 
 Run the presentation with:
 

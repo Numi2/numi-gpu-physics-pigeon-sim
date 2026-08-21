@@ -27,6 +27,7 @@ public enum CrowShowcaseCapture {
     let surfaceManifestURL: URL
     let surfaceGenerationAuditURL: URL
     let crowProfileURL: URL
+    let plumageOpticsURL: URL
     let realityAssetURL: URL
     let standingReferenceURL: URL
     let aovAuditURL: URL?
@@ -108,6 +109,10 @@ public enum CrowShowcaseCapture {
         fileURLWithPath: try value(after: "--capture-crow-profile")
           ?? "ValidationInputs/american-crow-hybrid-visual-v1.json"
       )
+      plumageOpticsURL = URL(
+        fileURLWithPath: try value(after: "--capture-crow-plumage-optics")
+          ?? "ValidationInputs/american-crow-plumage-optics-estimated-v1.json"
+      )
       realityAssetURL = URL(
         fileURLWithPath: try value(after: "--capture-crow-reality-asset")
           ?? "ValidationInputs/american-crow-hybrid-reality-v1.json"
@@ -154,6 +159,9 @@ public enum CrowShowcaseCapture {
     let profileData = try Data(contentsOf: arguments.crowProfileURL)
     let profile = try JSONDecoder().decode(CrowVisualProfile.self, from: profileData)
     try profile.validate()
+    let plumageOptics = try CrowPlumageOpticsProfile.load(
+      url: arguments.plumageOpticsURL
+    )
     if arguments.presentation == .standing || arguments.presentation == .takeoff {
       let standingData = try Data(contentsOf: arguments.standingReferenceURL)
       let standingReference = try JSONDecoder().decode(
@@ -243,6 +251,7 @@ public enum CrowShowcaseCapture {
       device: device,
       dataset: dataset,
       profile: profile,
+      plumageOptics: plumageOptics,
       motion: motion,
       realityAsset: realityAsset,
       presentation: arguments.presentation
@@ -254,6 +263,7 @@ public enum CrowShowcaseCapture {
         device: device,
         dataset: dataset,
         profile: profile,
+        plumageOptics: plumageOptics,
         motion: motion,
         realityAsset: realityAsset,
         presentation: arguments.presentation
@@ -730,6 +740,7 @@ private final class CrowShowcaseRenderer {
   private let depthState: MTLDepthStencilState
   private let sampleCount: Int
   private let presentation: CrowShowcasePresentation
+  private let plumageOptics: CrowPlumageOpticsGPUParameters
   private let featherRootDeformer: (any CrowFeatherRootDeforming)?
   private let featherGeometryDeformer: CrowFeatherGeometryDeformer?
   private let liveCovertRootBuffer: CrowLiveWingCovertRootBuffer?
@@ -745,11 +756,13 @@ private final class CrowShowcaseRenderer {
     device: MTLDevice,
     dataset: MeasuredBirdSurfaceSequence,
     profile: CrowVisualProfile,
+    plumageOptics: CrowPlumageOpticsProfile,
     motion: any CrowShowcaseMotion,
     realityAsset: BirdRealityAsset?,
     presentation: CrowShowcasePresentation
   ) throws {
     self.presentation = presentation
+    self.plumageOptics = plumageOptics.gpuParameters
     let createdBackend = try VisualizationBackend(device: device)
     backend = createdBackend
     let createdMeshBuilder = CrowMeshBuilder(
@@ -1234,7 +1247,11 @@ private final class CrowShowcaseRenderer {
         Float(renderHeight),
         historyReset ? 1 : 0,
         0
-      )
+      ),
+      plumageFilm: plumageOptics.film,
+      plumageComplexIndices: plumageOptics.complexIndices,
+      plumageMelanin: plumageOptics.melanin,
+      plumageCortex: plumageOptics.cortex
     )
     var backgroundOptions = SIMD4<Float>(
       phase,

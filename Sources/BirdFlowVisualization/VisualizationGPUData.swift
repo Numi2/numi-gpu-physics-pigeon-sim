@@ -282,4 +282,8 @@ struct CrowTemporalCameraUniforms {
   var previousViewProjection: simd_float4x4
   var eyeAndWidth: SIMD4<Float>
   var viewportAndInverse: SIMD4<Float>
+  var plumageFilm: SIMD4<Float>
+  var plumageComplexIndices: SIMD4<Float>
+  var plumageMelanin: SIMD4<Float>
+  var plumageCortex: SIMD4<Float>
 }

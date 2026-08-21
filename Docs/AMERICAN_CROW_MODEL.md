@@ -305,6 +305,8 @@ swift build -c release --product birdflow-viewer
     ValidationArtifacts/american-crow-hybrid-surface-generation-v1.json \
   --capture-crow-profile \
     ValidationInputs/american-crow-hybrid-visual-v1.json \
+  --capture-crow-plumage-optics \
+    ValidationInputs/american-crow-plumage-optics-estimated-v1.json \
   --capture-crow-reality-asset \
     ValidationInputs/american-crow-hybrid-reality-v1.json \
   --capture-width 1600 \
@@ -328,11 +330,17 @@ coverts, and contour feathers remain procedural estimates. Four-sample Metal
 rasterization and a dedicated black-plumage shader keep the bird neutral-black
 instead of allowing the warm key light to dominate its very low albedo. The
 shader samples `400`, `440`, `480`, `520`, `560`, `600`, `640`, and `680 nm`,
-then projects the estimated keratin-interface and eumelanin-volume response to
-linear sRGB with equal-energy-normalized CIE 1931 weights. This replaces a
-direct blue/violet RGB blend, but it is not a calibrated American-crow spectrum
-or a full spectral lighting path. The native result is an executable motion
-and material estimate, not a photograph.
+then projects a keratin-film/eumelanin-volume response to linear sRGB with
+equal-energy-normalized CIE 1931 weights. The versioned
+`american-crow-plumage-optics-estimated-v1.json` profile keeps published
+comparative-corvid constraints separate from renderer estimates. Its live
+normal-incidence air/keratin/melanin transfer matrix uses the published complex
+indices and `110...180 nm` glossy-cortex interval; the `160 +/- 18 nm` local
+thickness field, `0.08` coherence blend, and volume parameters remain bounded
+simulation choices. This replaces a direct blue/violet RGB blend, but it is
+not a measured American-crow spectrum, measured angular BSDF, calibrated
+illumination path, or ultraviolet model. The native result is an executable
+motion and material estimate, not a photograph.
 Before display tone mapping, the same pass emits a scene-linear HDR image and
 typed albedo/material, normal/coverage, metric-depth, and deformation-motion
 AOVs. A separate single-sample integer pass preserves exact surface and feather
