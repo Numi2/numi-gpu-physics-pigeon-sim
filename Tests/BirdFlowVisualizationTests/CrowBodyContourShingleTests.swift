@@ -131,6 +131,54 @@ func standingBodyContourComplianceIsRootLockedAndLoopClosed() {
   }
 }
 
+@Test("deployed dorsal contour crown settles without changing feather topology")
+func deployedDorsalContourCrownSettlesWithoutChangingFeatherTopology() {
+  let folded = CrowBodyContourShingles.samples(deploymentProgress: 0)
+  let deployed = CrowBodyContourShingles.samples(deploymentProgress: 1)
+  #expect(deployed.count == folded.count)
+
+  for (base, feather) in zip(folded, deployed) {
+    #expect(feather.rootOffset == base.rootOffset)
+    #expect(feather.tipOffset == base.tipOffset)
+    #expect(feather.rootWidthMeters == base.rootWidthMeters)
+    #expect(feather.maximumWidthMeters == base.maximumWidthMeters)
+    #expect(feather.surfaceFeatherClass == base.surfaceFeatherClass)
+    if feather.region != .dorsal {
+      #expect(feather.camberMeters == base.camberMeters)
+    }
+  }
+
+  let posteriorDorsal = zip(folded, deployed).filter {
+    $0.0.region == .dorsal
+      && $0.0.axialIndex == CrowBodyContourShingles.axialCount - 1
+  }
+  #expect(!posteriorDorsal.isEmpty)
+  #expect(
+    posteriorDorsal.allSatisfy {
+      abs(
+        $0.1.camberMeters / $0.0.camberMeters
+          - CrowBodyContourShingles.dorsalFlightPosteriorCamberScale
+      ) < 1e-6
+    }
+  )
+  let scales = (0..<CrowBodyContourShingles.axialCount).map {
+    CrowBodyContourShingles.deploymentCamberScale(
+      region: .dorsal,
+      axialIndex: $0,
+      transitionProgress: 1
+    )
+  }
+  #expect(scales.first == 1)
+  #expect(zip(scales, scales.dropFirst()).allSatisfy { $1 <= $0 })
+  #expect(
+    CrowBodyContourShingles.deploymentCamberScale(
+      region: .dorsal,
+      axialIndex: CrowBodyContourShingles.axialCount - 1,
+      transitionProgress: 0
+    ) == 1
+  )
+}
+
 @Test("standing body contour compliance preserves resolution topology")
 func standingBodyContourCompliancePreservesResolutionTopology() {
   let reference = CrowBodyContourShingles.samples(standingPhase: 0)

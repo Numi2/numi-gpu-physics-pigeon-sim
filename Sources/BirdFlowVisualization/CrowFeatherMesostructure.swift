@@ -22,6 +22,7 @@ struct CrowFeatherMesostructureSegment: Equatable {
 enum CrowFeatherMesostructure {
   static let bodyContourEdgeDetailThresholdPixels: Float = 96
   static let dorsalBodyContourDetailThresholdPixels: Float = 48
+  static let dorsalBodyContourInteriorBarbStartAxialFraction: Float = 0.45
   static let shoulderInteriorBarbThresholdPixels: Float = 40
 
   static func segments(
@@ -36,18 +37,27 @@ enum CrowFeatherMesostructure {
       feather.referenceLengthMeters * projectedPixelsPerMeter
         >= threshold
     else { return [] }
+    let axial = Float(feather.axialIndex)
+      / Float(CrowBodyContourShingles.axialCount - 1)
+    let promoteInteriorBarbs =
+      feather.region == .dorsal
+      && axial >= dorsalBodyContourInteriorBarbStartAxialFraction
+      && feather.referenceLengthMeters * projectedPixelsPerMeter
+        >= dorsalBodyContourDetailThresholdPixels
     return segments(
       frame: Frame(feather: feather),
-      projectedPixelsPerMeter: projectedPixelsPerMeter
+      projectedPixelsPerMeter: projectedPixelsPerMeter,
+      promoteInteriorBarbs: promoteInteriorBarbs
     )
   }
 
   static func segments(
     for feather: CrowBodyFeatherTractSample,
-    projectedPixelsPerMeter: Float
+    projectedPixelsPerMeter: Float,
+    camberScale: Float = 1
   ) -> [CrowFeatherMesostructureSegment] {
     segments(
-      frame: Frame(feather: feather),
+      frame: Frame(feather: feather, camberScale: camberScale),
       projectedPixelsPerMeter: projectedPixelsPerMeter,
       promoteInteriorBarbs: (feather.region == .humeral || feather.region == .scapular)
         && simd_distance(feather.rootOffset, feather.tipOffset)
@@ -181,7 +191,7 @@ enum CrowFeatherMesostructure {
       identitySecond = feather.axialIndex
     }
 
-    init(feather: CrowBodyFeatherTractSample) {
+    init(feather: CrowBodyFeatherTractSample, camberScale: Float = 1) {
       root = feather.rootOffset
       tip = feather.tipOffset
       referenceLengthMeters = simd_distance(feather.rootOffset, feather.tipOffset)
@@ -200,7 +210,7 @@ enum CrowFeatherMesostructure {
       )
       rootWidthMeters = feather.rootWidthMeters
       maximumWidthMeters = feather.maximumWidthMeters
-      camberMeters = feather.camberMeters
+      camberMeters = feather.camberMeters * camberScale
       rootEnvelopeRatio = feather.rootEnvelopeRatio
       pennaceousStartFraction = feather.pennaceousStartFraction
       vaneAsymmetry = feather.vaneAsymmetry

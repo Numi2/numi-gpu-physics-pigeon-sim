@@ -96,6 +96,9 @@ measured American-crow feather linkages.
 The middle live covert course also retains its full folded relief, then seats
 its deployed root camber and clearance to `48%` across the first `12` span
 stations; vane width, chord, identity, and the caudal handoff remain unchanged.
+Posterior class-`5` body plumage now follows the same deployment state: dorsal
+contour and mantle crown settle into the closed torso while showcase-scale
+dorsal vanes replace coarse edge aggregates with contained interior barb pairs.
 A locked
 `2,157`-vertex, `3,968`-triangle estimated-hybrid surface now also passes the
 live Apple-Metal geometry and production TRT moving-boundary coupling gates.

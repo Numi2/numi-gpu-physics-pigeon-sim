@@ -1778,6 +1778,14 @@ private struct CrowMeshBuilder {
       standingPose = nil
     }
     let posedBodyCenter = standingPose?.bodyCenter ?? bodyCenter
+    let bodyPlumageDeploymentProgress: Float = {
+      switch presentation {
+      case .standing: 0
+      case .takeoff:
+        CrowTakeoffSequence.sample(phase: phase).transitionProgress
+      case .wingbeat: 1
+      }
+    }()
     appendCrowBodyLoft(
       center: posedBodyCenter,
       neckPose: standingPose?.neckPose,
@@ -1834,12 +1842,14 @@ private struct CrowMeshBuilder {
     appendBodyContourFeathers(
       bodyCenter: posedBodyCenter,
       standingPhase: standingPose == nil ? nil : phase,
+      deploymentProgress: bodyPlumageDeploymentProgress,
       projectedPixelsPerMeter: projectedPixelsPerMeter,
       to: &vertices
     )
     appendBodyFeatherTracts(
       bodyCenter: posedBodyCenter,
       neckPose: standingPose?.neckPose,
+      deploymentProgress: bodyPlumageDeploymentProgress,
       projectedPixelsPerMeter: projectedPixelsPerMeter,
       to: &vertices
     )
@@ -1877,14 +1887,7 @@ private struct CrowMeshBuilder {
     appendAxillaryFeatherTracts(
       states: states,
       bodyCenter: posedBodyCenter,
-      transitionProgress: {
-        switch presentation {
-        case .standing: 0
-        case .takeoff:
-          CrowTakeoffSequence.sample(phase: phase).transitionProgress
-        case .wingbeat: 1
-        }
-      }(),
+      transitionProgress: bodyPlumageDeploymentProgress,
       projectedPixelsPerMeter: projectedPixelsPerMeter,
       to: &vertices
     )
@@ -1892,8 +1895,7 @@ private struct CrowMeshBuilder {
       let foldedShellScale: Float = {
         guard presentation == .takeoff else { return 1 }
         return CrowTakeoffSequence.foldedShellScale(
-          transitionProgress:
-            CrowTakeoffSequence.sample(phase: phase).transitionProgress
+          transitionProgress: bodyPlumageDeploymentProgress
         )
       }()
       appendFoldedWingCoverts(
@@ -2018,10 +2020,14 @@ private struct CrowMeshBuilder {
   private func appendBodyContourFeathers(
     bodyCenter: SIMD3<Float>,
     standingPhase: Float?,
+    deploymentProgress: Float,
     projectedPixelsPerMeter: Float,
     to vertices: inout [ColoredVertex]
   ) {
-    for shingle in CrowBodyContourShingles.samples(standingPhase: standingPhase) {
+    for shingle in CrowBodyContourShingles.samples(
+      standingPhase: standingPhase,
+      deploymentProgress: deploymentProgress
+    ) {
       let materialScale = 1 + 0.10 * shingle.materialVariation
       let color = SIMD4<Float>(
         0.006 * materialScale,
@@ -2067,13 +2073,15 @@ private struct CrowMeshBuilder {
   private func appendBodyTractFeatherMesostructure(
     _ feather: CrowBodyFeatherTractSample,
     bodyCenter: SIMD3<Float>,
+    camberScale: Float,
     projectedPixelsPerMeter: Float,
     to vertices: inout [ColoredVertex]
   ) {
     appendTractFeatherMesostructure(
       CrowFeatherMesostructure.segments(
         for: feather,
-        projectedPixelsPerMeter: projectedPixelsPerMeter
+        projectedPixelsPerMeter: projectedPixelsPerMeter,
+        camberScale: camberScale
       ),
       bodyCenter: bodyCenter,
       planeNormal: feather.planeNormal,
@@ -2326,6 +2334,7 @@ private struct CrowMeshBuilder {
   private func appendBodyFeatherTracts(
     bodyCenter: SIMD3<Float>,
     neckPose: CrowStandingNeckPose?,
+    deploymentProgress: Float,
     projectedPixelsPerMeter: Float,
     to vertices: inout [ColoredVertex]
   ) {
@@ -2334,6 +2343,11 @@ private struct CrowMeshBuilder {
       projectedPixelsPerMeter: projectedPixelsPerMeter
     ) {
       let material = sample.materialVariation
+      let deploymentCamberScale = CrowBodyFeatherTracts.deploymentCamberScale(
+        region: sample.region,
+        column: sample.column,
+        transitionProgress: deploymentProgress
+      )
       let color: SIMD4<Float>
       switch sample.region {
       case .cervical:
@@ -2373,7 +2387,7 @@ private struct CrowMeshBuilder {
         maximumWidth: sample.maximumWidthMeters,
         color: color,
         sections: sample.region == .cervical ? 6 : 8,
-        camber: sample.camberMeters,
+        camber: sample.camberMeters * deploymentCamberScale,
         transverseCamberRatio: sample.region == .cervical ? 0.24 : 0.28,
         vaneAsymmetry: sample.vaneAsymmetry,
         edgeRippleAmplitude: sample.edgeRippleAmplitude,
@@ -2389,6 +2403,7 @@ private struct CrowMeshBuilder {
       appendBodyTractFeatherMesostructure(
         sample,
         bodyCenter: bodyCenter,
+        camberScale: deploymentCamberScale,
         projectedPixelsPerMeter: projectedPixelsPerMeter,
         to: &vertices
       )

@@ -56,6 +56,32 @@ func bodyFeatherMesostructureResolvesHierarchy() {
   #expect(barbs.count < barbules.count)
 }
 
+@Test("posterior dorsal contour feathers promote contained interior barbs")
+func posteriorDorsalContourFeathersPromoteInteriorBarbs() throws {
+  let dorsal = CrowBodyContourShingles.samples().filter { $0.region == .dorsal }
+  let anterior = try #require(dorsal.first { $0.axialIndex == 0 })
+  let posterior = try #require(
+    dorsal.first { $0.axialIndex == CrowBodyContourShingles.axialCount - 1 }
+  )
+  let anteriorDetail = CrowFeatherMesostructure.segments(
+    for: anterior,
+    projectedPixelsPerMeter:
+      CrowFeatherMesostructure.dorsalBodyContourDetailThresholdPixels
+      / anterior.referenceLengthMeters
+  )
+  let posteriorDetail = CrowFeatherMesostructure.segments(
+    for: posterior,
+    projectedPixelsPerMeter:
+      CrowFeatherMesostructure.dorsalBodyContourDetailThresholdPixels
+      / posterior.referenceLengthMeters
+  )
+  #expect(anteriorDetail.filter { $0.kind == .edgeBarbGroup }.count == 25)
+  #expect(anteriorDetail.allSatisfy { $0.kind != .barb })
+  #expect(posteriorDetail.filter { $0.kind == .edgeBarbGroup }.count == 5)
+  #expect(posteriorDetail.filter { $0.kind == .barb }.count == 20)
+  #expect(posteriorDetail.count == anteriorDetail.count)
+}
+
 @Test("body feather edge groups attach inside the vane and cross its hard outline")
 func bodyFeatherEdgeGroupsCrossClosedVaneOutline() {
   for feather in CrowBodyContourShingles.samples() {
@@ -65,7 +91,12 @@ func bodyFeatherEdgeGroupsCrossClosedVaneOutline() {
       projectedPixelsPerMeter: (CrowFeatherMesostructure.bodyContourEdgeDetailThresholdPixels + 1)
         / feather.referenceLengthMeters
     ).filter { $0.kind == .edgeBarbGroup }
-    #expect(segments.count == 25)
+    let axial = Float(feather.axialIndex)
+      / Float(CrowBodyContourShingles.axialCount - 1)
+    let promoted = feather.region == .dorsal
+      && axial
+        >= CrowFeatherMesostructure.dorsalBodyContourInteriorBarbStartAxialFraction
+    #expect(segments.count == (promoted ? 5 : 25))
 
     let direction = simd_normalize(feather.tipOffset - feather.rootOffset)
     let normal = simd_normalize(
@@ -155,6 +186,34 @@ func bodyTractFeathersResolveMesostructure() {
       }
     )
   }
+}
+
+@Test("body tract detail follows deployment camber without changing inventory")
+func bodyTractDetailFollowsDeploymentCamber() throws {
+  let feather = try #require(
+    CrowBodyFeatherTracts.samples().first {
+      $0.region == .mantle
+        && $0.column == CrowBodyFeatherTracts.mantleColumnCount - 1
+    }
+  )
+  let length = simd_distance(feather.rootOffset, feather.tipOffset)
+  let full = CrowFeatherMesostructure.segments(
+    for: feather,
+    projectedPixelsPerMeter: 48 / length
+  )
+  let settled = CrowFeatherMesostructure.segments(
+    for: feather,
+    projectedPixelsPerMeter: 48 / length,
+    camberScale: CrowBodyFeatherTracts.mantleFlightPosteriorCamberScale
+  )
+  #expect(settled.count == full.count)
+  #expect(zip(settled, full).allSatisfy { $0.kind == $1.kind })
+  #expect(
+    zip(settled, full).contains {
+      simd_distance($0.start, $1.start) > 1e-6
+        || simd_distance($0.end, $1.end) > 1e-6
+    }
+  )
 }
 
 @Test("ventral tract feathers resolve rachis and barb detail from their vane envelope")

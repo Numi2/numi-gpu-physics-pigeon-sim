@@ -43,6 +43,8 @@ enum CrowBodyFeatherTracts {
   static let cervicalMaximumAngleRadians: Float = 1.54
   static let mantleRowCount = 20
   static let mantleColumnCount = 24
+  static let mantleFlightCamberStartAxialFraction: Float = 0.25
+  static let mantleFlightPosteriorCamberScale: Float = 0.62
   static let humeralRowCount = 5
   static let humeralColumnCount = 30
   static let scapularRowCount = 22
@@ -663,6 +665,35 @@ enum CrowBodyFeatherTracts {
     case .humeral, .scapular:
       return 6
     }
+  }
+
+  /// Settles the posterior mantle into the body volume as the wing deploys.
+  /// The anterior shoulder, every root and tip, vane width, and identity stay
+  /// unchanged; only the presentation camber and its owned detail follow this
+  /// bounded relief scale.
+  static func deploymentCamberScale(
+    region: CrowBodyFeatherTractRegion,
+    column: Int,
+    transitionProgress: Float
+  ) -> Float {
+    guard region == .mantle else { return 1 }
+    let axial = Float(min(max(column, 0), mantleColumnCount - 1))
+      / Float(mantleColumnCount - 1)
+    let axialProgress = min(
+      max(
+        (axial - mantleFlightCamberStartAxialFraction)
+          / (1 - mantleFlightCamberStartAxialFraction),
+        0
+      ),
+      1
+    )
+    let axialWeight = axialProgress * axialProgress * (3 - 2 * axialProgress)
+    let boundedTransition = min(max(transitionProgress, 0), 1)
+    let transitionWeight =
+      boundedTransition * boundedTransition * (3 - 2 * boundedTransition)
+    return 1
+      + (mantleFlightPosteriorCamberScale - 1)
+        * axialWeight * transitionWeight
   }
 
   /// Additional caudal shingling over the narrowing rump. The bounded

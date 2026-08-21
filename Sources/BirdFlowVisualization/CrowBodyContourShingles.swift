@@ -45,12 +45,15 @@ enum CrowBodyContourShingles {
   static let radialCount = 96
   static let axialCount = 72
   static let shellClearanceMeters: Float = 0.0012
+  static let dorsalFlightCamberStartAxialFraction: Float = 0.30
+  static let dorsalFlightPosteriorCamberScale: Float = 0.58
 
   private static let frontX: Float = 0.110
   private static let backX: Float = -0.160
 
   static func samples(
-    standingPhase: Float? = nil
+    standingPhase: Float? = nil,
+    deploymentProgress: Float = 0
   ) -> [CrowBodyContourShingle] {
     var result: [CrowBodyContourShingle] = []
     result.reserveCapacity(radialCount * axialCount)
@@ -190,6 +193,11 @@ enum CrowBodyContourShingles {
             phase: $0
           )
         } ?? 0
+        let deploymentCamberScale = deploymentCamberScale(
+          region: region,
+          axialIndex: axialIndex,
+          transitionProgress: deploymentProgress
+        )
         result.append(
           CrowBodyContourShingle(
             region: region,
@@ -210,10 +218,12 @@ enum CrowBodyContourShingles {
             ),
             rootWidthMeters: (0.57 + 0.035 * cos(morphologyPhase)) * maximumWidth,
             maximumWidthMeters: maximumWidth,
-            camberMeters: longitudinalCamberScale(
-              region: region,
-              morphologyPhase: morphologyPhase
-            ) * maximumWidth,
+            camberMeters:
+              deploymentCamberScale
+              * longitudinalCamberScale(
+                region: region,
+                morphologyPhase: morphologyPhase
+              ) * maximumWidth,
             transverseCamberRatio: regionTransverseCamberRatio(region)
               + transverseCamberVariation(region) * crownIdentity,
             pennaceousStartFraction: clamp(
@@ -367,6 +377,36 @@ enum CrowBodyContourShingles {
     case .ventral:
       return 7
     }
+  }
+
+  /// Settles only the posterior dorsal crown into the closed loft during
+  /// deployment. The visible vane and every derived rachis/barb share the
+  /// scaled sample, so detail cannot detach from its owning feather.
+  static func deploymentCamberScale(
+    region: CrowBodyContourRegion,
+    axialIndex: Int,
+    transitionProgress: Float
+  ) -> Float {
+    guard region == .dorsal else { return 1 }
+    let axial = Float(min(max(axialIndex, 0), axialCount - 1))
+      / Float(axialCount - 1)
+    let axialProgress = clamp(
+      (axial - dorsalFlightCamberStartAxialFraction)
+        / (1 - dorsalFlightCamberStartAxialFraction),
+      lower: 0,
+      upper: 1
+    )
+    let axialWeight = axialProgress * axialProgress * (3 - 2 * axialProgress)
+    let boundedTransition = clamp(
+      transitionProgress,
+      lower: 0,
+      upper: 1
+    )
+    let transitionWeight =
+      boundedTransition * boundedTransition * (3 - 2 * boundedTransition)
+    return 1
+      + (dorsalFlightPosteriorCamberScale - 1)
+        * axialWeight * transitionWeight
   }
 
   private static func regionLength(_ region: CrowBodyContourRegion) -> Float {

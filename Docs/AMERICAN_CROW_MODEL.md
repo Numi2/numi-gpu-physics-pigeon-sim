@@ -149,6 +149,17 @@ stable motion vectors. The crow material derives a local feather axis from
 live vane coordinates where present and uses a surface-projected fallback on
 the body for a restrained anisotropic black-feather highlight.
 
+Posterior class-`5` plumage now carries a topology-stable deployment relief.
+Beyond `30%` of the dorsal contour tract, crown settles smoothly to `58%` at
+the posterior course; beyond `25%` of the mantle tract, camber settles to
+`62%`. Standing remains exact, and roots, tips, widths, identities, vane count,
+and the closed loft do not change. At `48 px` projected length, posterior
+dorsal contour vanes beyond `45%` axial extent promote `20` coarse edge
+segments into contained interior barb pairs while retaining five terminal
+bundles and the same detail-record count. Derived rachis and barb geometry uses
+the same scaled camber as its vane. These are presentation estimates, not
+measured crow feather compression or aerodynamic response.
+
 ## Native Metal capture
 
 The native renderer consumes both locked inputs. Its encoding, input hashes,

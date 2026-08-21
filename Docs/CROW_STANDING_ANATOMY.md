@@ -338,6 +338,19 @@ components, `6` expected-aperture pixels, and the `33`-pixel worst hole while
 increasing fully covered active pixels by `13`. These are deterministic raster
 coverage gates, not anatomical measurements.
 
+The visible posterior class-`5` body owner now refines in two coupled layers.
+Dorsal contour crown settles to `58%` and mantle camber to `62%` at their
+posterior courses during deployment, with smooth anterior falloff and exact
+standing roots, tips, widths, identities, and inventory. Posterior dorsal
+contours resolving at least `48 px` replace `20` coarse edge aggregates with
+contained interior barb pairs while retaining five terminal bundles and the
+same record count. In a new 17-frame high-side view, `145` hole pixels, `75`
+components, zero expected-aperture pixels, and the `33`-pixel worst hole stayed
+exact. Across the four established stress views, `574` hole pixels, `288`
+components, `10` expected-aperture pixels in `4` components, and the `44`-pixel
+worst hole also stayed exact. These are deterministic raster gates, not proof
+of measured feather behavior or perceptual realism.
+
 Run the presentation with:
 
 ```bash

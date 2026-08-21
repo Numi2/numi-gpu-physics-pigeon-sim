@@ -59,6 +59,49 @@ func crowBodyFeatherTractsOverlapNeckAndCoverWingRoots() {
   #expect(humeral.allSatisfy { $0.surfaceFeatherClass == 6 })
   #expect(scapular.allSatisfy { $0.surfaceFeatherClass == 6 })
   #expect(samples.allSatisfy { $0.surfaceFeatherClass == 5 || $0.surfaceFeatherClass == 6 })
+
+  let deployedMantleCamberScales = (0..<CrowBodyFeatherTracts.mantleColumnCount).map {
+    CrowBodyFeatherTracts.deploymentCamberScale(
+      region: .mantle,
+      column: $0,
+      transitionProgress: 1
+    )
+  }
+  #expect(deployedMantleCamberScales.first == 1)
+  #expect(
+    abs(
+      deployedMantleCamberScales.last!
+        - CrowBodyFeatherTracts.mantleFlightPosteriorCamberScale
+    ) < 1e-7
+  )
+  #expect(
+    zip(
+      deployedMantleCamberScales,
+      deployedMantleCamberScales.dropFirst()
+    ).allSatisfy { $1 <= $0 }
+  )
+  for column in 0..<CrowBodyFeatherTracts.mantleColumnCount {
+    #expect(
+      CrowBodyFeatherTracts.deploymentCamberScale(
+        region: .mantle,
+        column: column,
+        transitionProgress: 0
+      ) == 1
+    )
+  }
+  for region in [
+    CrowBodyFeatherTractRegion.cervical,
+    .humeral,
+    .scapular,
+  ] {
+    #expect(
+      CrowBodyFeatherTracts.deploymentCamberScale(
+        region: region,
+        column: CrowBodyFeatherTracts.mantleColumnCount - 1,
+        transitionProgress: 1
+      ) == 1
+    )
+  }
   #expect(
     CrowBodyFeatherTracts.surfaceFeatherClass(
       for: .cervical,

@@ -88,6 +88,11 @@ ankles move by millimetres.
    deployment without changing width, chord, or identity. Future per-feather
    rachis/contact dynamics should replace this bounded presentation blend while
    preserving the same deterministic geometry and coverage oracle.
+   Posterior class-`5` dorsal and mantle crown now shares that deployment state;
+   projected dorsal vanes promote coarse edge aggregates into contained
+   interior barb pairs without changing identity or detail-record count. A
+   future curve/meshlet implementation should emit those same records directly
+   and replace the bounded crown blend with coupled feather contact and airflow.
 
 3. **Measured appearance, bounded claims.** Implement an energy-bounded,
    anisotropic feather BSDF with separate eumelanin absorption, longitudinal
