@@ -84,6 +84,17 @@ CPU tessellation, preserves geometric standstill-to-flight deployment, and
 keeps the density contract ready for indirect draws, mesh shaders, or
 ray-tracing geometry without changing feather identity.
 
+Those `216` root identities now also select a bounded vane profile in the
+shared Swift/Metal geometry path. The three secondary-covert courses and one
+primary-covert course vary inner/outer width asymmetry, longitudinal camber,
+crown, root width, and two-frequency distal edge structure while bilateral
+counterparts mirror the exposed edge. Analytic axial and transverse derivatives
+carry that edge structure into the generated normals. The amplitudes are
+estimated presentation morphology: [Ng et al. (2014)](https://pmc.ncbi.nlm.nih.gov/articles/PMC4202321/)
+and [Eliason et al. (2025)](https://pmc.ncbi.nlm.nih.gov/articles/PMC12285719/)
+support a layered feather with a structured exposed pennaceous region, but do
+not supply these exact American-crow covert measurements.
+
 Persistent flight-feather roots remain attached to their exact fixed-topology
 solver vertices and continue to evaluate current and previous phases on Metal.
 Their long vane shells are retained for standing and diagnostic deformation,

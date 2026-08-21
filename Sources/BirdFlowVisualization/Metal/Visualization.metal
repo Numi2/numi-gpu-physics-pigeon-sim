@@ -540,6 +540,80 @@ inline float4 crowRemexVaneProfile(uint packedIdentity) {
     );
 }
 
+inline bool crowIsLiveCovert(uint featherClass) {
+    return featherClass==12u||featherClass==13u;
+}
+
+// span fraction, course fraction, mirrored exposed edge, vane asymmetry
+inline float4 crowCovertVaneProfile0(uint packedIdentity) {
+    uint featherClass=packedIdentity&255u;
+    if(!crowIsLiveCovert(featherClass)){return float4(0);}
+    uint sideCode=(packedIdentity>>8u)&255u;
+    uint order=(packedIdentity>>16u)&255u;
+    uint count=max((packedIdentity>>24u)&255u,1u);
+    uint courseCount=featherClass==12u?3u:1u;
+    uint spanCount=max(count/courseCount,1u);
+    uint safeOrder=min(order,count-1u);
+    uint courseIndex=featherClass==12u
+        ?min(safeOrder/spanCount,courseCount-1u):0u;
+    uint spanOrder=safeOrder%spanCount;
+    float spanFraction=float(spanOrder)/float(max(spanCount-1u,1u));
+    float courseFraction=featherClass==12u
+        ?float(courseIndex)/float(courseCount):1.0f;
+    float distalFraction=abs(2.0f*spanFraction-1.0f);
+    float exposedSignedWidth=sideCode==2u?-1.0f:1.0f;
+    float vaneAsymmetry=0.012f+0.010f*courseFraction
+        +0.006f*distalFraction;
+    return float4(
+        spanFraction,courseFraction,exposedSignedWidth,vaneAsymmetry
+    );
+}
+
+// camber skew, crown ratio, root-width ratio, edge amplitude
+inline float4 crowCovertVaneProfile1(float4 covert) {
+    float distalFraction=abs(2.0f*covert.x-1.0f);
+    return float4(
+        -0.035f+0.050f*covert.y+0.020f*(covert.x-0.5f),
+        0.052f-0.015f*covert.y+0.004f*(1.0f-distalFraction),
+        0.585f+0.030f*(1.0f-covert.y)+0.005f*(1.0f-distalFraction),
+        0.007f+0.004f*covert.y+0.002f*distalFraction
+    );
+}
+
+inline float3 crowCovertEdgeMicrostructure(
+    float axial,
+    float signedWidth,
+    float4 covert,
+    float4 covertMorphology) {
+    axial=clamp(axial,0.0f,1.0f);
+    float sine=max(sin(M_PI_F*axial),0.0f);
+    float cosine=cos(M_PI_F*axial);
+    float sinePower=pow(sine,0.9f);
+    float distalBias=0.42f+0.58f*axial;
+    float envelope=sinePower*distalBias;
+    float envelopeDerivative=0.9f*pow(max(sine,1.0e-6f),-0.1f)
+        *M_PI_F*cosine*distalBias+0.58f*sinePower;
+    float phase=0.45f+2.15f*covert.x+0.85f*covert.y
+        +0.42f*signedWidth*covert.z;
+    float firstFrequency=2.0f*M_PI_F*(3.75f+1.25f*covert.y);
+    float secondFrequency=2.0f*M_PI_F*(8.25f+1.75f*covert.y);
+    float firstAngle=firstFrequency*axial+phase;
+    float secondAngle=secondFrequency*axial-0.68f*phase;
+    float wave=0.70f*sin(firstAngle)+0.30f*sin(secondAngle);
+    float waveAxialDerivative=0.70f*firstFrequency*cos(firstAngle)
+        +0.30f*secondFrequency*cos(secondAngle);
+    float phaseSignedWidthDerivative=0.42f*covert.z;
+    float waveSignedWidthDerivative=0.70f*cos(firstAngle)
+        *phaseSignedWidthDerivative
+        -0.30f*0.68f*cos(secondAngle)*phaseSignedWidthDerivative;
+    float amplitude=covertMorphology.w;
+    return float3(
+        1.0f+amplitude*envelope*wave,
+        amplitude*(envelopeDerivative*wave+envelope*waveAxialDerivative),
+        amplitude*envelope*waveSignedWidthDerivative
+    );
+}
+
 inline float3 crowRemexEdgeMicrostructure(
     float axial,
     float signedWidth,
@@ -688,13 +762,19 @@ inline float crowFeatherCrownRatio(uint packedIdentity) {
             ?0.122f-0.018f*fraction
             :0.158f-0.012f*fraction;
     }
-    if(featherClass==12u||featherClass==13u){return 0.04f;}
+    if(crowIsLiveCovert(featherClass)){
+        return crowCovertVaneProfile1(
+            crowCovertVaneProfile0(packedIdentity)
+        ).y;
+    }
     return featherClass==1u?0.13f:(featherClass==2u?0.16f:0.14f);
 }
 
 inline float crowFeatherRootWidthRatio(uint packedIdentity) {
     uint featherClass=packedIdentity&255u;
-    return featherClass==12u||featherClass==13u?0.60f:0.55f;
+    return crowIsLiveCovert(featherClass)
+        ?crowCovertVaneProfile1(crowCovertVaneProfile0(packedIdentity)).z
+        :0.55f;
 }
 
 inline float3 crowFeatherPosition(
@@ -722,15 +802,24 @@ inline float3 crowFeatherPosition(
     uint featherClass=packedIdentity&255u;
     float4 rectrix=crowRectrixVaneProfile(packedIdentity);
     float4 remex=crowRemexVaneProfile(packedIdentity);
-    float vaneAsymmetry=featherClass==3u?rectrix.z:remex.z;
-    float narrowSignedWidth=featherClass==3u?rectrix.y:remex.y;
+    float4 covert=crowCovertVaneProfile0(packedIdentity);
+    float4 covertMorphology=crowCovertVaneProfile1(covert);
+    float vaneAsymmetry=featherClass==3u?rectrix.z:
+        ((featherClass==1u||featherClass==2u)?remex.z:
+            (crowIsLiveCovert(featherClass)?covert.w:0.0f));
+    float narrowSignedWidth=featherClass==3u?rectrix.y:
+        ((featherClass==1u||featherClass==2u)?remex.y:
+            (crowIsLiveCovert(featherClass)?covert.z:0.0f));
     float sideScale=1.0f-vaneAsymmetry*signedWidth*narrowSignedWidth;
     float edgeModulation=featherClass==3u
         ?crowRectrixEdgeMicrostructure(axial,signedWidth,rectrix).x
         :((featherClass==1u||featherClass==2u)
             ?crowRemexEdgeMicrostructure(
                 axial,signedWidth,packedIdentity,remex
-            ).x:1.0f);
+            ).x:(crowIsLiveCovert(featherClass)
+                ?crowCovertEdgeMicrostructure(
+                    axial,signedWidth,covert,covertMorphology
+                ).x:1.0f));
     float broadEdgeScale=crowTerminalPrimaryBroadEdgeTerms(
         axial,signedWidth,packedIdentity,remex
     ).x;
@@ -739,7 +828,10 @@ inline float3 crowFeatherPosition(
     ).x;
     float width=symmetricWidth*sideScale*edgeModulation*broadEdgeScale
         *foldedJunctionScale;
-    float camberSkew=featherClass==3u?rectrix.w:remex.w;
+    float camberSkew=featherClass==3u?rectrix.w:
+        ((featherClass==1u||featherClass==2u)
+            ?remex.w:(crowIsLiveCovert(featherClass)
+                ?covertMorphology.x:0.0f));
     float camberEnvelope=sin(M_PI_F*axial)
         *(1.0f+camberSkew*(2.0f*axial-1.0f));
     float3 center=root+tangent*(lengthMeters*axial)
@@ -786,15 +878,24 @@ inline float3 crowFeatherNormal(
     uint featherClass=packedIdentity&255u;
     float4 rectrix=crowRectrixVaneProfile(packedIdentity);
     float4 remex=crowRemexVaneProfile(packedIdentity);
-    float vaneAsymmetry=featherClass==3u?rectrix.z:remex.z;
-    float narrowSignedWidth=featherClass==3u?rectrix.y:remex.y;
+    float4 covert=crowCovertVaneProfile0(packedIdentity);
+    float4 covertMorphology=crowCovertVaneProfile1(covert);
+    float vaneAsymmetry=featherClass==3u?rectrix.z:
+        ((featherClass==1u||featherClass==2u)?remex.z:
+            (crowIsLiveCovert(featherClass)?covert.w:0.0f));
+    float narrowSignedWidth=featherClass==3u?rectrix.y:
+        ((featherClass==1u||featherClass==2u)?remex.y:
+            (crowIsLiveCovert(featherClass)?covert.z:0.0f));
     float sideScale=1.0f-vaneAsymmetry*signedWidth*narrowSignedWidth;
     float3 edgeMicrostructure=featherClass==3u
         ?crowRectrixEdgeMicrostructure(sampledAxial,signedWidth,rectrix)
         :((featherClass==1u||featherClass==2u)
             ?crowRemexEdgeMicrostructure(
                 sampledAxial,signedWidth,packedIdentity,remex
-            ):float3(1.0f,0.0f,0.0f));
+            ):(crowIsLiveCovert(featherClass)
+                ?crowCovertEdgeMicrostructure(
+                    sampledAxial,signedWidth,covert,covertMorphology
+                ):float3(1.0f,0.0f,0.0f)));
     float3 broadEdge=crowTerminalPrimaryBroadEdgeTerms(
         sampledAxial,signedWidth,packedIdentity,remex
     );
@@ -824,7 +925,10 @@ inline float3 crowFeatherNormal(
     float crownDerivative=0.65f*pow(sine,-0.35f)*sineDerivative;
     float transverseEnvelope=max(0.0f,1.0f-signedWidth*signedWidth);
     float crownRatio=crowFeatherCrownRatio(packedIdentity);
-    float camberSkew=featherClass==3u?rectrix.w:remex.w;
+    float camberSkew=featherClass==3u?rectrix.w:
+        ((featherClass==1u||featherClass==2u)
+            ?remex.w:(crowIsLiveCovert(featherClass)
+                ?covertMorphology.x:0.0f));
     float camberDerivative=sineDerivative
         *(1.0f+camberSkew*(2.0f*sampledAxial-1.0f))
         +sine*2.0f*camberSkew;
