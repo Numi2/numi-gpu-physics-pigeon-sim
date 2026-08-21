@@ -5,7 +5,10 @@ import Testing
 @Test("live covert profiles cover every bilateral root with bounded identity variation")
 func liveCovertProfilesCoverEveryBilateralRootWithBoundedIdentityVariation() {
   var profiles: [CrowCovertVaneProfile] = []
-  for (featherClass, count) in [(UInt32(12), 81), (UInt32(13), 27)] {
+  for (featherClass, count) in [
+    (UInt32(12), 81), (UInt32(13), 27),
+    (UInt32(14), 31), (UInt32(15), 31),
+  ] {
     for order in 0..<count {
       let left = CrowCovertVaneAnatomy.profile(
         featherClass: featherClass,
@@ -36,16 +39,20 @@ func liveCovertProfilesCoverEveryBilateralRootWithBoundedIdentityVariation() {
     }
   }
 
-  #expect(profiles.count == 216)
+  #expect(profiles.count == 340)
   #expect(profiles.filter { $0.featherClass == 12 }.count == 162)
   #expect(profiles.filter { $0.featherClass == 13 }.count == 54)
+  #expect(profiles.filter { $0.featherClass == 14 }.count == 62)
+  #expect(profiles.filter { $0.featherClass == 15 }.count == 62)
   #expect(Set(profiles.filter { $0.featherClass == 12 }.map(\.courseFraction)).count == 3)
   #expect(Set(profiles.filter { $0.featherClass == 13 }.map(\.courseFraction)) == [1])
+  #expect(Set(profiles.filter { $0.featherClass == 14 }.map(\.courseFraction)) == [0.42])
+  #expect(Set(profiles.filter { $0.featherClass == 15 }.map(\.courseFraction)) == [1])
   #expect(profiles.allSatisfy { (0...1).contains($0.spanFraction) })
   #expect(profiles.allSatisfy { (0.012...0.028).contains($0.vaneAsymmetry) })
   #expect(profiles.allSatisfy { (-0.045...0.025).contains($0.camberSkew) })
   #expect(profiles.allSatisfy { (0.037...0.056).contains($0.crownRatio) })
-  #expect(profiles.allSatisfy { (0.585...0.620).contains($0.rootWidthRatio) })
+  #expect(profiles.allSatisfy { (0.564...0.620).contains($0.rootWidthRatio) })
   #expect(profiles.allSatisfy { (0.007...0.013).contains($0.edgeAmplitude) })
   #expect(CrowCovertVaneAnatomy.profile(featherClass: 1, sideCode: 1, order: 0, count: 10) == nil)
 }
@@ -54,7 +61,10 @@ func liveCovertProfilesCoverEveryBilateralRootWithBoundedIdentityVariation() {
 func covertEdgeStructureIsBoundedMirroredAndAnalyticallyDifferentiable() {
   var minimumModulation: Float = 1
   var maximumModulation: Float = 1
-  for (featherClass, count) in [(UInt32(12), 81), (UInt32(13), 27)] {
+  for (featherClass, count) in [
+    (UInt32(12), 81), (UInt32(13), 27),
+    (UInt32(14), 31), (UInt32(15), 31),
+  ] {
     for order in 0..<count {
       let left = CrowCovertVaneAnatomy.profile(
         featherClass: featherClass,
@@ -70,18 +80,20 @@ func covertEdgeStructureIsBoundedMirroredAndAnalyticallyDifferentiable() {
       )!
       for signedWidth: Float in [-1, -0.5, 0.5, 1] {
         #expect(
-          abs(CrowCovertVaneAnatomy.edgeModulation(
-            axial: 0,
-            signedWidth: signedWidth,
-            profile: left
-          ) - 1) < 1e-7
+          abs(
+            CrowCovertVaneAnatomy.edgeModulation(
+              axial: 0,
+              signedWidth: signedWidth,
+              profile: left
+            ) - 1) < 1e-7
         )
         #expect(
-          abs(CrowCovertVaneAnatomy.edgeModulation(
-            axial: 1,
-            signedWidth: signedWidth,
-            profile: left
-          ) - 1) < 1e-6
+          abs(
+            CrowCovertVaneAnatomy.edgeModulation(
+              axial: 1,
+              signedWidth: signedWidth,
+              profile: left
+            ) - 1) < 1e-6
         )
 
         for axial: Float in stride(from: 0.04, through: 0.96, by: 0.04) {
@@ -106,11 +118,12 @@ func covertEdgeStructureIsBoundedMirroredAndAnalyticallyDifferentiable() {
               axial: axial + epsilon,
               signedWidth: signedWidth,
               profile: left
-            ) - CrowCovertVaneAnatomy.edgeModulation(
-              axial: axial - epsilon,
-              signedWidth: signedWidth,
-              profile: left
-            )) / (2 * epsilon)
+            )
+              - CrowCovertVaneAnatomy.edgeModulation(
+                axial: axial - epsilon,
+                signedWidth: signedWidth,
+                profile: left
+              )) / (2 * epsilon)
           let axialAnalytic = CrowCovertVaneAnatomy.edgeModulationAxialDerivative(
             axial: axial,
             signedWidth: signedWidth,
@@ -123,11 +136,12 @@ func covertEdgeStructureIsBoundedMirroredAndAnalyticallyDifferentiable() {
               axial: axial,
               signedWidth: signedWidth + epsilon,
               profile: left
-            ) - CrowCovertVaneAnatomy.edgeModulation(
-              axial: axial,
-              signedWidth: signedWidth - epsilon,
-              profile: left
-            )) / (2 * epsilon)
+            )
+              - CrowCovertVaneAnatomy.edgeModulation(
+                axial: axial,
+                signedWidth: signedWidth - epsilon,
+                profile: left
+              )) / (2 * epsilon)
           let widthAnalytic = CrowCovertVaneAnatomy.edgeModulationSignedWidthDerivative(
             axial: axial,
             signedWidth: signedWidth,

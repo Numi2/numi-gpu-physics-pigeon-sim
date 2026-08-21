@@ -226,6 +226,29 @@ floating shaft, or exposed bed gap. Rank intervals, separations, margins, and
 material contrast remain presentation estimates rather than measured
 American-crow covert dimensions.
 
+Flight and takeoff now promote those two exposed ranks into the retained Metal
+geometry stream. Each side contributes `31` proximal and `31` distal roots, so
+`124` new class-`14`/class-`15` temporal records join the `216` reverse-wing
+coverts. The shared template maps rank-local coordinates back to the accepted
+global vane intervals and evaluates current/previous morphology before one
+indirect compute and draw submission. The CPU path keeps only the continuous
+class-`4` bed for flight; standing retains its existing visible CPU ranks until
+the grounded persistent-feather stream owns that tract.
+
+Against the immediately preceding 253-frame, 13-view orbit, the retained-rank
+pass increases active identity pixels from `24,950,911` to `24,956,584` and
+fully covered identity pixels from `24,714,523` to `24,720,501`. The maximum
+enclosed hole remains `36` pixels. One `31`-pixel planted lower-body aperture
+at the short high-angle sequence changes audit category from expected aperture
+to enclosed hole without changing its pixel area; therefore raw enclosed-hole
+pixels move `1,921...1,949` while expected-aperture pixels move
+`4,324...4,293`. The category-invariant combined pixels improve from `6,245`
+to `6,242`, and combined components improve from `1,056` to `1,052`. A new
+opposite-dorsal inspection at yaw `-1.82`, pitch `0.62` found no detached rank,
+second outline, or exposed continuity-bed gap. These are raster qualification
+results, not evidence that the estimated covert dimensions are measured crow
+anatomy.
+
 The cranial surface is not transported as a detached rigid shell during quiet
 standing. Points buried in the trunk-facing nape remain body-anchored, a cubic
 coupling field deforms the visible neck, and the field reaches rigid-head motion

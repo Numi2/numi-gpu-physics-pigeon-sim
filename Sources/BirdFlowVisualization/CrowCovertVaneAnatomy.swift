@@ -1,6 +1,6 @@
 import Foundation
 
-/// Identity-derived presentation morphology for live underwing coverts.
+/// Identity-derived presentation morphology for retained wing coverts.
 ///
 /// The packed order traverses three secondary-covert courses of 27 stations;
 /// primary coverts use one 27-station course. Bilateral counterparts share all
@@ -20,7 +20,8 @@ struct CrowCovertVaneProfile: Equatable {
   let secondEdgeCycles: Float
 }
 
-/// Bounded non-cloned vane shape for classes 12 and 13.
+/// Bounded non-cloned vane shape for reverse-wing classes 12/13 and dorsal
+/// trailing-rank classes 14/15.
 ///
 /// The values are estimated render morphology. They encode only general
 /// feather principles—layered overlap, bilateral mirroring, and a structured
@@ -28,6 +29,10 @@ struct CrowCovertVaneProfile: Equatable {
 enum CrowCovertVaneAnatomy {
   static let secondaryClass: UInt32 = 12
   static let primaryClass: UInt32 = 13
+  static let trailingProximalClass =
+    CrowTrailingCovertRanks.proximalSurfaceFeatherClass
+  static let trailingDistalClass =
+    CrowTrailingCovertRanks.distalSurfaceFeatherClass
   static let spanStationCount = 27
 
   static func profile(packedIdentity: UInt32) -> CrowCovertVaneProfile? {
@@ -45,21 +50,28 @@ enum CrowCovertVaneAnatomy {
     order: Int,
     count: Int
   ) -> CrowCovertVaneProfile? {
-    guard featherClass == secondaryClass || featherClass == primaryClass else {
+    guard isLiveCovertClass(featherClass) else {
       return nil
     }
     let courseCount = featherClass == secondaryClass ? 3 : 1
     let safeCount = max(count, 1)
     let resolvedSpanCount = max(safeCount / courseCount, 1)
     let safeOrder = min(max(order, 0), safeCount - 1)
-    let courseIndex = featherClass == secondaryClass
+    let courseIndex =
+      featherClass == secondaryClass
       ? min(safeOrder / resolvedSpanCount, courseCount - 1)
       : 0
     let spanOrder = safeOrder % resolvedSpanCount
     let spanFraction = Float(spanOrder) / Float(max(resolvedSpanCount - 1, 1))
-    let courseFraction = featherClass == secondaryClass
-      ? Float(courseIndex) / Float(courseCount)
-      : 1
+    let courseFraction: Float
+    switch featherClass {
+    case secondaryClass:
+      courseFraction = Float(courseIndex) / Float(courseCount)
+    case trailingProximalClass:
+      courseFraction = 0.42
+    default:
+      courseFraction = 1
+    }
     let distalFraction = abs(2 * spanFraction - 1)
     let exposedSignedWidth: Float = sideCode == 2 ? -1 : 1
     return CrowCovertVaneProfile(
@@ -73,13 +85,75 @@ enum CrowCovertVaneAnatomy {
         + 0.020 * (spanFraction - 0.5),
       crownRatio: 0.052 - 0.015 * courseFraction
         + 0.004 * (1 - distalFraction),
-      rootWidthRatio: 0.585 + 0.030 * (1 - courseFraction)
-        + 0.005 * (1 - distalFraction),
+      rootWidthRatio: isTrailingRankClass(featherClass)
+        ? 0.44 / 0.78
+        : 0.585 + 0.030 * (1 - courseFraction)
+          + 0.005 * (1 - distalFraction),
       edgeAmplitude: 0.007 + 0.004 * courseFraction
         + 0.002 * distalFraction,
       edgePhase: 0.45 + 2.15 * spanFraction + 0.85 * courseFraction,
       firstEdgeCycles: 3.75 + 1.25 * courseFraction,
       secondEdgeCycles: 8.25 + 1.75 * courseFraction
+    )
+  }
+
+  static func isLiveCovertClass(_ featherClass: UInt32) -> Bool {
+    featherClass == secondaryClass || featherClass == primaryClass
+      || isTrailingRankClass(featherClass)
+  }
+
+  static func isTrailingRankClass(_ featherClass: UInt32) -> Bool {
+    featherClass == trailingProximalClass || featherClass == trailingDistalClass
+  }
+
+  static func geometryAxialFraction(
+    localAxialFraction: Float,
+    featherClass: UInt32
+  ) -> Float {
+    guard
+      let rank = CrowTrailingCovertRanks.rank(
+        forSurfaceFeatherClass: featherClass
+      )
+    else { return min(max(localAxialFraction, 0), 1) }
+    return CrowTrailingCovertRanks.globalAxialFraction(
+      rank: rank,
+      localAxialFraction: localAxialFraction
+    )
+  }
+
+  static func rankCoverageScale(
+    localAxialFraction: Float,
+    featherClass: UInt32
+  ) -> Float {
+    guard
+      let rank = CrowTrailingCovertRanks.rank(
+        forSurfaceFeatherClass: featherClass
+      )
+    else { return 1 }
+    return CrowTrailingCovertRanks.coverageWeight(
+      rank: rank,
+      axialFraction: CrowTrailingCovertRanks.globalAxialFraction(
+        rank: rank,
+        localAxialFraction: localAxialFraction
+      )
+    )
+  }
+
+  static func rankNormalOffsetMeters(
+    localAxialFraction: Float,
+    featherClass: UInt32
+  ) -> Float {
+    guard
+      let rank = CrowTrailingCovertRanks.rank(
+        forSurfaceFeatherClass: featherClass
+      )
+    else { return 0 }
+    return CrowTrailingCovertRanks.normalOffsetMeters(
+      rank: rank,
+      axialFraction: CrowTrailingCovertRanks.globalAxialFraction(
+        rank: rank,
+        localAxialFraction: localAxialFraction
+      )
     )
   }
 
@@ -152,7 +226,8 @@ enum CrowCovertVaneAnatomy {
     let envelopeDerivative =
       0.9 * pow(max(sine, 1e-6), -0.1) * Float.pi * cosine * distalBias
       + 0.58 * sinePower
-    let phase = profile.edgePhase
+    let phase =
+      profile.edgePhase
       + 0.42 * signedWidth * profile.exposedSignedWidth
     let firstFrequency = 2 * Float.pi * profile.firstEdgeCycles
     let secondFrequency = 2 * Float.pi * profile.secondEdgeCycles

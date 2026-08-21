@@ -20,6 +20,10 @@ enum CrowTrailingCovertRanks {
 
   static let proximalRange = Range(start: 0, end: 0.72)
   static let distalRange = Range(start: 0.34, end: 1)
+  /// Stable retained-geometry identities. These are separate from the hidden
+  /// class-4 continuity bed and the class-12/13 reverse-wing coverts.
+  static let proximalSurfaceFeatherClass: UInt32 = 14
+  static let distalSurfaceFeatherClass: UInt32 = 15
   static let distalFullCoverageFraction: Float = 0.44
   static let proximalTaperStartFraction: Float = 0.62
   static let rankSurfaceClearanceMeters: Float = 0.00002
@@ -33,6 +37,23 @@ enum CrowTrailingCovertRanks {
     case .proximal: proximalRange
     case .distal: distalRange
     }
+  }
+
+  static func rank(forSurfaceFeatherClass featherClass: UInt32) -> Rank? {
+    switch featherClass {
+    case proximalSurfaceFeatherClass: .proximal
+    case distalSurfaceFeatherClass: .distal
+    default: nil
+    }
+  }
+
+  static func globalAxialFraction(
+    rank: Rank,
+    localAxialFraction: Float
+  ) -> Float {
+    let range = range(for: rank)
+    let local = min(max(localAxialFraction, 0), 1)
+    return range.start + (range.end - range.start) * local
   }
 
   static func coverageWeight(rank: Rank, axialFraction: Float) -> Float {

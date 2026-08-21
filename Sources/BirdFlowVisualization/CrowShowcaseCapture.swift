@@ -288,7 +288,8 @@ public enum CrowShowcaseCapture {
       } else if arguments.presentation == .takeoff {
         let takeoff = CrowTakeoffSequence.sample(phase: phase)
         let framing = takeoff.transitionProgress
-        camera.target = SIMD3<Float>(0.010, 0, -0.050)
+        camera.target =
+          SIMD3<Float>(0.010, 0, -0.050)
           + SIMD3<Float>(takeoff.bodyTranslation.x, 0, takeoff.bodyTranslation.z)
         camera.distance = 0.56 + 0.54 * framing + 0.08 * takeoff.flightProgress
         camera.yaw = 0.92 - 1.30 * framing
@@ -826,8 +827,8 @@ private final class CrowShowcaseRenderer {
       colorFormats: aovFormats,
       sampleCount: createdSampleCount
     )
-    featherAOVPipeline = try
-      realityAsset != nil || liveCovertGeometryDeformer != nil
+    featherAOVPipeline =
+      try realityAsset != nil || liveCovertGeometryDeformer != nil
       ? createdBackend.render(
         vertex: "crowFeatherAOVVertex",
         fragment: "showcaseCrowAOVFragment",
@@ -846,8 +847,8 @@ private final class CrowShowcaseRenderer {
       fragment: "showcaseCrowIdentityFragment",
       colorFormat: .rgba32Uint
     )
-    featherIdentityPipeline = try
-      realityAsset != nil || liveCovertGeometryDeformer != nil
+    featherIdentityPipeline =
+      try realityAsset != nil || liveCovertGeometryDeformer != nil
       ? createdBackend.render(
         vertex: "crowFeatherAOVVertex",
         fragment: "showcaseCrowIdentityFragment",
@@ -1121,26 +1122,41 @@ private final class CrowShowcaseRenderer {
       )
     }
     if let liveCovertRootBuffer, let liveCovertGeometryDeformer {
-      let deployment: (Float, Float)
+      let underwingDeployment: (Float, Float)
+      let trailingDeployment: (Float, Float)
       if presentation == .takeoff {
-        deployment = (
+        let currentTakeoff = CrowTakeoffSequence.sample(phase: phase)
+        let previousTakeoff = CrowTakeoffSequence.sample(phase: priorPhase)
+        underwingDeployment = (
           CrowFlightWingBodyIntegration.underwingCovertDeploymentWeight(
-            transitionProgress: CrowTakeoffSequence.sample(phase: phase)
-              .transitionProgress
+            transitionProgress: currentTakeoff.transitionProgress
           ),
           CrowFlightWingBodyIntegration.underwingCovertDeploymentWeight(
-            transitionProgress: CrowTakeoffSequence.sample(phase: priorPhase)
-              .transitionProgress
+            transitionProgress: previousTakeoff.transitionProgress
+          )
+        )
+        trailingDeployment = (
+          CrowTrailingCovertRanks.deploymentWeight(
+            transitionProgress: currentTakeoff.transitionProgress
+          ),
+          CrowTrailingCovertRanks.deploymentWeight(
+            transitionProgress: previousTakeoff.transitionProgress
           )
         )
       } else {
-        deployment = (1, 1)
+        underwingDeployment = (1, 1)
+        trailingDeployment = (1, 1)
       }
       let liveRootFrame = try liveCovertRootBuffer.upload(
         currentStates: surfaceStates,
         previousStates: previousSurfaceStates,
-        currentDeployment: deployment.0,
-        previousDeployment: deployment.1
+        currentDeployment: underwingDeployment.0,
+        previousDeployment: underwingDeployment.1,
+        currentTrailingDeployment: trailingDeployment.0,
+        previousTrailingDeployment: trailingDeployment.1,
+        currentPresentationPhase: phase,
+        previousPresentationPhase: priorPhase,
+        useTakeoffBodyHandoff: presentation == .takeoff
       )
       featherFrames.append(
         try liveCovertGeometryDeformer.encode(
@@ -1672,11 +1688,12 @@ private struct CrowMeshBuilder {
             chordIndex: chordIndex,
             left: partIdentifier == 2
           )
-          point = CrowTakeoffSequence.mix(
-            folded,
-            point,
-            takeoff.transitionProgress
-          ) + takeoff.bodyTranslation
+          point =
+            CrowTakeoffSequence.mix(
+              folded,
+              point,
+              takeoff.transitionProgress
+            ) + takeoff.bodyTranslation
         }
       } else if let takeoff {
         point += takeoff.bodyTranslation
@@ -3370,9 +3387,10 @@ private struct CrowMeshBuilder {
     guard
       let wing = dataset.components.first(where: {
         $0.partIdentifier == partIdentifier
-      }), wing.vertexCount
+      }),
+      wing.vertexCount
         == CrowFlightWingBodyIntegration.chordCount
-          * CrowFlightWingBodyIntegration.spanCount
+        * CrowFlightWingBodyIntegration.spanCount
     else { return }
     let folded = CrowFoldedWingCoverts.terminalAxillaryHandoffSample(left: left)
     let chordCount = CrowFlightWingBodyIntegration.chordCount
@@ -3398,7 +3416,8 @@ private struct CrowMeshBuilder {
       spanDirection: spanDirection,
       left: left
     )
-    let wingTip = wingRoot
+    let wingTip =
+      wingRoot
       + (1.92
         + CrowFlightWingBodyIntegration.covertProximalChordExtension(
           spanIndex: span
@@ -3449,13 +3468,16 @@ private struct CrowMeshBuilder {
     guard
       let wing = dataset.components.first(where: {
         $0.partIdentifier == partIdentifier
-      }), wing.vertexCount
+      }),
+      wing.vertexCount
         == CrowFlightWingBodyIntegration.chordCount
-          * CrowFlightWingBodyIntegration.spanCount
+        * CrowFlightWingBodyIntegration.spanCount
     else { return }
-    let radialIndex = CrowFlightWingBodyIntegration
+    let radialIndex =
+      CrowFlightWingBodyIntegration
       .dorsalFoldedWingHandoffBodyRadialIndex(left: left)
-    let shingleIndex = radialIndex * CrowBodyContourShingles.axialCount
+    let shingleIndex =
+      radialIndex * CrowBodyContourShingles.axialCount
       + CrowFlightWingBodyIntegration.dorsalFoldedWingHandoffBodyAxialIndex
     let shingles = CrowBodyContourShingles.samples(standingPhase: phase)
     guard shingles.indices.contains(shingleIndex) else { return }
@@ -3472,9 +3494,11 @@ private struct CrowMeshBuilder {
       wing.vertexOffset
         + spans[1] * CrowFlightWingBodyIntegration.chordCount + chord
     ]
-    let foldedWeight = CrowFlightWingBodyIntegration
+    let foldedWeight =
+      CrowFlightWingBodyIntegration
       .dorsalFoldedWingHandoffWeight(presentationPhase: phase)
-    let bodyFirstTarget = bodyCenter
+    let bodyFirstTarget =
+      bodyCenter
       + CrowBodyContourShingles.centerlinePoint(
         for: shingle,
         at: shingle.pennaceousStartFraction
@@ -3532,7 +3556,8 @@ private struct CrowMeshBuilder {
       let trailingStation = point(span: span, chord: tipChord)
       let nextSpan = min(span + 1, CrowFlightWingBodyIntegration.spanCount - 1)
       let previousSpan = max(span - 1, 0)
-      let spanVector = point(span: nextSpan, chord: rootChord)
+      let spanVector =
+        point(span: nextSpan, chord: rootChord)
         - point(span: previousSpan, chord: rootChord)
       let chordVector = trailingStation - root
       let chordDirection = safeNormalize(
@@ -3552,7 +3577,8 @@ private struct CrowMeshBuilder {
         CrowFlightWingBodyIntegration.axillaryUnderlayerTipSpanFraction(
           spanIndex: span
         )
-      let chordScale = 1.92
+      let chordScale =
+        1.92
         + CrowFlightWingBodyIntegration.covertProximalChordExtension(
           spanIndex: span
         )
@@ -3661,20 +3687,23 @@ private struct CrowMeshBuilder {
               presentationPhase: phase
             )
           : 1
-        let widthScale = CrowFlightWingBodyIntegration.covertWidthScale(
-          chordIndex: chord,
-          spanIndex: span
-        ) * CrowFlightWingBodyIntegration.covertAbdominalHandoffWidthScale(
-          chordIndex: chord,
-          spanIndex: span
-        ) * CrowFlightWingBodyIntegration.covertDistalTrailingWidthScale(
-          chordIndex: chord,
-          spanIndex: span
-        ) * distalTrailingBodyHandoffWidthScale
+        let widthScale =
+          CrowFlightWingBodyIntegration.covertWidthScale(
+            chordIndex: chord,
+            spanIndex: span
+          )
+          * CrowFlightWingBodyIntegration.covertAbdominalHandoffWidthScale(
+            chordIndex: chord,
+            spanIndex: span
+          )
+          * CrowFlightWingBodyIntegration.covertDistalTrailingWidthScale(
+            chordIndex: chord,
+            spanIndex: span
+          ) * distalTrailingBodyHandoffWidthScale
           * CrowFlightWingBodyIntegration.covertProximalTailHandoffWidthScale(
-          chordIndex: chord,
-          spanIndex: span
-        ) * caudalSecondaryHandoffWidthScale
+            chordIndex: chord,
+            spanIndex: span
+          ) * caudalSecondaryHandoffWidthScale
           * CrowFlightWingBodyIntegration.covertVentralBodyHandoffWidthScale(
             chordIndex: chord,
             spanIndex: span
@@ -3729,7 +3758,7 @@ private struct CrowMeshBuilder {
           + (isTrailingCourse
             ? 1.92 + proximalChordExtension + distalChordExtension
             : 1.16 + anteriorChordExtension)
-            * chordVector
+          * chordVector
           + tipSpanFraction * spanVector
         let spacing = max(simd_length(spanVector), 0.012)
         let abdominalHandoffNormalLift =
@@ -3758,14 +3787,18 @@ private struct CrowMeshBuilder {
         let maximumWidthMeters =
           resolvedWidthScale * covertOverlap * (isTrailingCourse ? 0.78 : 0.66)
           * spacing
-        let edgeRippleAmplitude = 0.008
+        let edgeRippleAmplitude =
+          0.008
           + 0.010 * (0.5 + 0.5 * edgeVariation)
         let edgeRipplePhase = Float.pi * (edgeVariation + 1)
-        let edgeRippleCycles = 1.25
+        let edgeRippleCycles =
+          1.25
           + 0.55 * (0.5 + 0.5 * edgeVariation)
-        let vaneRoot = root
+        let vaneRoot =
+          root
           + dorsalNormal * (0.0015 + abdominalHandoffNormalLift)
-        let vaneTip = surfaceTip
+        let vaneTip =
+          surfaceTip
           + dorsalNormal * (0.0025 + abdominalHandoffNormalLift)
         let vaneColor = SIMD4<Float>(
           (0.008 + 0.002 * rowFraction) * (1 + 0.08 * materialVariation),
@@ -3773,7 +3806,8 @@ private struct CrowMeshBuilder {
           (0.021 + 0.004 * rowFraction) * (1 + 0.04 * materialVariation),
           0.18 + 0.008 * materialVariation
         )
-        let trailingRankDeployment = isTrailingCourse
+        let trailingRankDeployment =
+          isTrailingCourse
           ? (presentation == .takeoff
             ? CrowTrailingCovertRanks.deploymentWeight(
               transitionProgress: CrowTakeoffSequence.sample(phase: phase)
@@ -3807,25 +3841,27 @@ private struct CrowMeshBuilder {
             projectedPixelsPerMeter: projectedPixelsPerMeter,
             to: &vertices
           )
-          appendTrailingCovertRanks(
-            root: vaneRoot,
-            tip: vaneTip,
-            planeNormal: dorsalNormal,
-            rootWidth: rootWidthMeters,
-            maximumWidth: maximumWidthMeters,
-            color: vaneColor,
-            camber: featherCamber,
-            transverseCamberRatio: 0.16,
-            vaneAsymmetry: caudalSecondaryHandoffVaneAsymmetry,
-            edgeRippleAmplitude: edgeRippleAmplitude,
-            edgeRipplePhase: edgeRipplePhase,
-            edgeRippleCycles: edgeRippleCycles,
-            surfaceFeatherClass: 4,
-            deployment: trailingRankDeployment,
-            lodLengthMeters: 0.12,
-            projectedPixelsPerMeter: projectedPixelsPerMeter,
-            to: &vertices
-          )
+          if presentation == .standing {
+            appendTrailingCovertRanks(
+              root: vaneRoot,
+              tip: vaneTip,
+              planeNormal: dorsalNormal,
+              rootWidth: rootWidthMeters,
+              maximumWidth: maximumWidthMeters,
+              color: vaneColor,
+              camber: featherCamber,
+              transverseCamberRatio: 0.16,
+              vaneAsymmetry: caudalSecondaryHandoffVaneAsymmetry,
+              edgeRippleAmplitude: edgeRippleAmplitude,
+              edgeRipplePhase: edgeRipplePhase,
+              edgeRippleCycles: edgeRippleCycles,
+              surfaceFeatherClass: 4,
+              deployment: trailingRankDeployment,
+              lodLengthMeters: 0.12,
+              projectedPixelsPerMeter: projectedPixelsPerMeter,
+              to: &vertices
+            )
+          }
         } else {
           appendFeatherBlade(
             root: vaneRoot,
@@ -3907,7 +3943,7 @@ private struct CrowMeshBuilder {
             to: &vertices
           )
         }
-        if isTrailingCourse {
+        if isTrailingCourse && presentation == .standing {
           let rankBaseRadius = min(0.00022, max(0.00009, 0.016 * spacing))
           for segment in CrowTrailingCovertDetail.segments(
             root: vaneRoot,
@@ -4097,28 +4133,35 @@ private struct CrowMeshBuilder {
         let localFraction = Float(index) / Float(axialSections)
         let t = range.start + (range.end - range.start) * localFraction
         let rootEnvelope: Float = 0.32
-        let bodyEnvelope = rootEnvelope
+        let bodyEnvelope =
+          rootEnvelope
           + (1 - rootEnvelope) * pow(max(sin(Float.pi * t), 0), 0.58)
         let tipTaper = 1 - 0.985 * pow(t, 3.2)
         let rippleEnvelope = pow(max(sin(Float.pi * t), 0), 2)
-        let edgeRipple = 1
+        let edgeRipple =
+          1
           + edgeRippleAmplitude
-            * sin(2 * Float.pi * edgeRippleCycles * t + edgeRipplePhase)
-            * rippleEnvelope
-        let rankWeight = deployment * CrowTrailingCovertRanks.coverageWeight(
-          rank: rank,
-          axialFraction: t
-        )
-        let width = (rootWidth * (1 - t) + maximumWidth * t)
+          * sin(2 * Float.pi * edgeRippleCycles * t + edgeRipplePhase)
+          * rippleEnvelope
+        let rankWeight =
+          deployment
+          * CrowTrailingCovertRanks.coverageWeight(
+            rank: rank,
+            axialFraction: t
+          )
+        let width =
+          (rootWidth * (1 - t) + maximumWidth * t)
           * bodyEnvelope * tipTaper * edgeRipple * rankWeight
           * CrowTrailingCovertRanks.visibleRankWidthScale
-        let center = root + (tip - root) * t
+        let center =
+          root + (tip - root) * t
           + normal
-            * (camber * sin(Float.pi * t)
-              + deployment * CrowTrailingCovertRanks.normalOffsetMeters(
-                rank: rank,
-                axialFraction: t
-              ))
+          * (camber * sin(Float.pi * t)
+            + deployment
+            * CrowTrailingCovertRanks.normalOffsetMeters(
+              rank: rank,
+              axialFraction: t
+            ))
         var result: [BladePoint] = []
         result.reserveCapacity(tessellation.widthSections + 1)
         for widthIndex in 0...tessellation.widthSections {
@@ -4130,7 +4173,7 @@ private struct CrowMeshBuilder {
             (
               center + widthAxis * (signedWidth * localWidth)
                 + normal
-                  * (localWidth * transverseCamberRatio * transverseEnvelope),
+                * (localWidth * transverseCamberRatio * transverseEnvelope),
               SIMD4<Float>(t, signedWidth, edgeRipplePhase, Float(surfaceFeatherClass))
             )
           )
@@ -4139,7 +4182,8 @@ private struct CrowMeshBuilder {
       }
 
       let grid = (0...axialSections).map(crossSection)
-      let rankColor = rank == .distal
+      let rankColor =
+        rank == .distal
         ? SIMD4<Float>(color.x * 1.035, color.y * 1.03, color.z * 1.02, color.w)
         : color
       func smoothNormal(axialIndex: Int, widthIndex: Int) -> SIMD3<Float> {
@@ -4219,7 +4263,8 @@ private struct CrowMeshBuilder {
       let startFraction = min(max(axialStartFraction, 0), 0.95)
       let t = startFraction + (1 - startFraction) * localFraction
       let rootEnvelope = min(max(rootEnvelopeRatio, 0.05), 1)
-      let bodyEnvelope = rootEnvelope
+      let bodyEnvelope =
+        rootEnvelope
         + (1 - rootEnvelope) * pow(max(sin(Float.pi * t), 0), 0.58)
       let tipTaper = 1 - 0.985 * pow(t, 3.2)
       let envelope = bodyEnvelope * tipTaper

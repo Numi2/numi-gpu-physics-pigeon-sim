@@ -81,7 +81,10 @@ reference footage. The live dorsal covert courses now add LOD-selected,
 vane-contained rachis and paired aggregate-barb ribbons without opening a new
 simulated wing gap. The formerly single trailing-covert sheet now deploys as
 two overlapping physical ranks over a continuous hidden feather bed; each rank
-owns its own contained shafts and barb bundles.
+owns its own contained shafts and barb bundles. In takeoff and flight, those
+two exposed ranks are now generated from `124` stable current/previous root
+records by the retained Metal template path instead of being rebuilt as CPU
+triangles; the darker continuity bed remains underneath them.
 A locked
 `2,157`-vertex, `3,968`-triangle estimated-hybrid surface now also passes the
 live Apple-Metal geometry and production TRT moving-boundary coupling gates.

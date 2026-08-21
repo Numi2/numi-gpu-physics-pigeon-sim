@@ -76,26 +76,33 @@ visible at the steep stroke reversal. The coverts remain estimated presentation
 geometry and do not enter the moving-boundary, force, or power calculation.
 
 The reverse face adds four inset marginal/median/greater/primary-covert courses
-per wing: `216` stable bilateral roots in total. The CPU uploads one `128`-byte
-record per root with current and previous position, direction, normal, and
-morphology. Metal then expands the shared `48 x 8` vane template plus rachis
-and paired-barb ribbons into `580,608` vertices. This replaces twice-per-frame
-CPU tessellation and preserves geometric standstill-to-flight deployment. A
-Metal prepass now quantizes final-output coverage into triangle-major prefixes:
-vane only (`497,664` live-covert vertices), vane plus rachis (`528,768`), or
-the full paired-barb stream (`580,608`). It writes both indirect compute and
-draw arguments, so unresolved detail is neither deformed nor rasterized while
-all `216` stable roots remain present. The same compact contract remains ready
-for mesh shaders or ray-tracing geometry without changing feather identity.
+per wing (`216` stable bilateral roots). The two exposed dorsal trailing ranks
+add another `124` stable roots over the continuous class-`4` bed, for `340`
+live covert roots in flight and takeoff. The CPU uploads one `128`-byte record
+per root with current and previous position, direction, normal, and morphology.
+Metal then expands the shared `48 x 8` vane template plus rachis and paired-barb
+ribbons into `913,920` vertices at full density. The dorsal identities map the
+local template axis back onto the accepted `0...72%` and `34...100%` intervals,
+including overlap taper and sub-millimetre rank separation. This replaces the
+visible dorsal ranks' twice-per-frame CPU tessellation while retaining the
+hidden continuity bed. A Metal prepass now quantizes final-output coverage into
+triangle-major prefixes: vane only (`783,360` live-covert vertices), vane plus
+rachis (`832,320`), or the full paired-barb stream (`913,920`). It writes both
+indirect compute and draw arguments, so unresolved detail is neither deformed
+nor rasterized while all `340` stable roots remain present. The same compact
+contract remains ready for mesh shaders or ray-tracing geometry without
+changing feather identity.
 The full tier preserves the established root-major submission order exactly;
 only reduced tiers switch to the triangle-major density prefixes.
 
-Those `216` root identities now also select a bounded vane profile in the
-shared Swift/Metal geometry path. The three secondary-covert courses and one
-primary-covert course vary inner/outer width asymmetry, longitudinal camber,
-crown, root width, and two-frequency distal edge structure while bilateral
-counterparts mirror the exposed edge. Analytic axial and transverse derivatives
-carry that edge structure into the generated normals. The amplitudes are
+Those `340` root identities select bounded vane profiles in the shared
+Swift/Metal geometry path. The three reverse secondary-covert courses, one
+reverse primary-covert course, and two dorsal rank classes vary inner/outer
+width asymmetry, longitudinal camber, crown, root width, and two-frequency
+distal edge structure while bilateral counterparts mirror the exposed edge.
+The reverse courses retain analytic derivatives; the interval-mapped dorsal
+ranks use the same bounded finite-difference tangent construction on Swift and
+Metal, with measured CPU/GPU position parity below `3e-6 m`. The amplitudes are
 estimated presentation morphology: [Ng et al. (2014)](https://pmc.ncbi.nlm.nih.gov/articles/PMC4202321/)
 and [Eliason et al. (2025)](https://pmc.ncbi.nlm.nih.gov/articles/PMC12285719/)
 support a layered feather with a structured exposed pennaceous region, but do
@@ -152,8 +159,9 @@ and previous part frames for all `54` persistent flight/tail feather roots.
 Standing expands those roots through the shared `48 x 8` vane template, rachis,
 and barb ribbons into `145,152` renderable vertices. Wingbeat keeps the retained
 asset root-state path diagnostic-only while Metal expands the separate live
-underwing root inventory; the coherent dorsal topology-bound wing courses and
-asset-length tail rectrices remain presentation geometry. The fixed-topology
+wing-covert inventory, including the two exposed dorsal trailing ranks; the
+remaining coherent topology-bound wing courses and asset-length tail rectrices
+remain presentation geometry. The fixed-topology
 wing surface supplies a dark gap-closing layer, while the smooth body/head,
 coverts, and contour feathers
 remain procedural estimates. Four-sample Metal rasterization and a dedicated

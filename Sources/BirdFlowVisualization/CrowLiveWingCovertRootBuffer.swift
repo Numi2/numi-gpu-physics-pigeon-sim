@@ -3,7 +3,8 @@ import Foundation
 import Metal
 import simd
 
-/// Compact, stable root records for the topology-bound reverse-wing tract.
+/// Compact, stable root records for topology-bound reverse-wing coverts and
+/// the two exposed dorsal trailing-covert ranks.
 ///
 /// The live scaffold is still authored on the CPU today, but it uploads only
 /// one 128-byte temporal record per feather. `CrowFeatherGeometryDeformer`
@@ -23,6 +24,8 @@ final class CrowLiveWingCovertRootBuffer {
   private let requiredStateCount: Int
   private var nextSlot = 0
 
+  let underwingFeatherCount: Int
+  let trailingRankFeatherCount: Int
   let featherCount: Int
 
   init(backend: VisualizationBackend, dataset: MeasuredBirdSurfaceSequence) throws {
@@ -31,11 +34,11 @@ final class CrowLiveWingCovertRootBuffer {
       let right = dataset.components.first(where: { $0.partIdentifier == 3 }),
       left.vertexCount
         == CrowFlightWingBodyIntegration.chordCount
-          * CrowFlightWingBodyIntegration.spanCount,
+        * CrowFlightWingBodyIntegration.spanCount,
       right.vertexCount == left.vertexCount
     else {
       throw VisualizationError.pipeline(
-        "live underwing covert roots require bilateral 9 x 33 wing topology"
+        "live wing covert roots require bilateral 9 x 33 wing topology"
       )
     }
     leftWingOffset = left.vertexOffset
@@ -44,9 +47,14 @@ final class CrowLiveWingCovertRootBuffer {
       left.vertexOffset + left.vertexCount,
       right.vertexOffset + right.vertexCount
     )
-    featherCount = 2
+    underwingFeatherCount =
+      2
       * CrowFlightWingBodyIntegration.underwingCovertChordIndices.count
       * CrowFlightWingBodyIntegration.underwingCovertSpanIndices.count
+    trailingRankFeatherCount =
+      2 * CrowTrailingCovertRanks.Rank.allCases.count
+      * CrowFlightWingBodyIntegration.covertSpanIndices.count
+    featherCount = underwingFeatherCount + trailingRankFeatherCount
     let byteCount = MemoryLayout<CrowFeatherRootStateGPU>.stride * featherCount
     buffers = try (0..<Self.bufferedFrameCount).map { _ in
       try backend.buffer(length: byteCount, shared: true)
@@ -57,21 +65,31 @@ final class CrowLiveWingCovertRootBuffer {
     currentStates: [SIMD3<Float>],
     previousStates: [SIMD3<Float>],
     currentDeployment: Float,
-    previousDeployment: Float
+    previousDeployment: Float,
+    currentTrailingDeployment: Float? = nil,
+    previousTrailingDeployment: Float? = nil,
+    currentPresentationPhase: Float = 0,
+    previousPresentationPhase: Float = 0,
+    useTakeoffBodyHandoff: Bool = false
   ) throws -> CrowFeatherRootFrame {
     guard
       currentStates.count >= requiredStateCount,
       previousStates.count >= requiredStateCount
     else {
       throw VisualizationError.pipeline(
-        "live underwing covert root upload received incomplete surface state"
+        "live wing covert root upload received incomplete surface state"
       )
     }
     let states = referenceStates(
       currentStates: currentStates,
       previousStates: previousStates,
       currentDeployment: currentDeployment,
-      previousDeployment: previousDeployment
+      previousDeployment: previousDeployment,
+      currentTrailingDeployment: currentTrailingDeployment,
+      previousTrailingDeployment: previousTrailingDeployment,
+      currentPresentationPhase: currentPresentationPhase,
+      previousPresentationPhase: previousPresentationPhase,
+      useTakeoffBodyHandoff: useTakeoffBodyHandoff
     )
     let slot = nextSlot
     nextSlot = (nextSlot + 1) % Self.bufferedFrameCount
@@ -101,8 +119,17 @@ final class CrowLiveWingCovertRootBuffer {
     currentStates: [SIMD3<Float>],
     previousStates: [SIMD3<Float>],
     currentDeployment: Float,
-    previousDeployment: Float
+    previousDeployment: Float,
+    currentTrailingDeployment: Float? = nil,
+    previousTrailingDeployment: Float? = nil,
+    currentPresentationPhase: Float = 0,
+    previousPresentationPhase: Float = 0,
+    useTakeoffBodyHandoff: Bool = false
   ) -> [CrowFeatherRootStateGPU] {
+    let resolvedCurrentTrailingDeployment =
+      currentTrailingDeployment ?? currentDeployment
+    let resolvedPreviousTrailingDeployment =
+      previousTrailingDeployment ?? previousDeployment
     var result: [CrowFeatherRootStateGPU] = []
     result.reserveCapacity(featherCount)
     for (left, offset, partIdentifier): (Bool, Int, UInt32) in [
@@ -115,15 +142,18 @@ final class CrowLiveWingCovertRootBuffer {
             chordIndex: chord
           )
         let classCourse = chord == 1 ? 0 : (chord == 3 ? 1 : (chord == 5 ? 2 : 0))
-        let classCount = featherClass
-          == CrowFlightWingBodyIntegration.underwingCovertSurfaceFeatherClass
+        let classCount =
+          featherClass
+            == CrowFlightWingBodyIntegration.underwingCovertSurfaceFeatherClass
           ? 3 * CrowFlightWingBodyIntegration.underwingCovertSpanIndices.count
           : CrowFlightWingBodyIntegration.underwingCovertSpanIndices.count
         for span in CrowFlightWingBodyIntegration.underwingCovertSpanIndices {
-          let spanOrder = span
+          let spanOrder =
+            span
             - (CrowFlightWingBodyIntegration.underwingCovertSpanIndices.first ?? 0)
-          let classOrder = featherClass
-            == CrowFlightWingBodyIntegration.underwingCovertSurfaceFeatherClass
+          let classOrder =
+            featherClass
+              == CrowFlightWingBodyIntegration.underwingCovertSurfaceFeatherClass
             ? classCourse
               * CrowFlightWingBodyIntegration.underwingCovertSpanIndices.count
               + spanOrder
@@ -144,46 +174,77 @@ final class CrowLiveWingCovertRootBuffer {
             span: span,
             deployment: previousDeployment
           )
-          let packedIdentity = featherClass
+          let packedIdentity =
+            featherClass
             | ((left ? UInt32(1) : UInt32(2)) << 8)
             | (UInt32(classOrder) << 16)
             | (UInt32(classCount) << 24)
-          let stableIdentifier = UInt32(0xC000_0000)
+          let stableIdentifier =
+            UInt32(0xC000_0000)
             | (partIdentifier << 20)
             | (UInt32(chord) << 12)
             | UInt32(span)
           result.append(
-            CrowFeatherRootStateGPU(
-              currentPositionAndLength: SIMD4<Float>(
-                current.root,
-                current.length
-              ),
-              previousPositionAndWidth: SIMD4<Float>(
-                previous.root,
-                current.maximumWidth
-              ),
-              currentDirectionAndRachis: SIMD4<Float>(
-                current.direction,
-                current.rachisRadius
-              ),
-              previousDirectionAndCamber: SIMD4<Float>(
-                previous.direction,
-                current.camber
-              ),
-              currentNormalAndPadding: SIMD4<Float>(current.normal, 0),
-              previousNormalAndPadding: SIMD4<Float>(previous.normal, 0),
-              previousMorphology: SIMD4<Float>(
-                previous.length,
-                previous.maximumWidth,
-                previous.rachisRadius,
-                previous.camber
-              ),
-              identity: SIMD4<UInt32>(
-                UInt32(result.count),
-                stableIdentifier,
-                partIdentifier,
-                packedIdentity
-              )
+            Self.rootState(
+              current: current,
+              previous: previous,
+              streamIndex: result.count,
+              stableIdentifier: stableIdentifier,
+              partIdentifier: partIdentifier,
+              packedIdentity: packedIdentity
+            )
+          )
+        }
+      }
+      let trailingChord = 6
+      for rank in CrowTrailingCovertRanks.Rank.allCases {
+        let featherClass: UInt32 =
+          rank == .proximal
+          ? CrowTrailingCovertRanks.proximalSurfaceFeatherClass
+          : CrowTrailingCovertRanks.distalSurfaceFeatherClass
+        let classCount = CrowFlightWingBodyIntegration.covertSpanIndices.count
+        for span in CrowFlightWingBodyIntegration.covertSpanIndices {
+          let classOrder =
+            span
+            - (CrowFlightWingBodyIntegration.covertSpanIndices.first ?? 0)
+          let current = Self.trailingPose(
+            states: currentStates,
+            wingOffset: offset,
+            left: left,
+            span: span,
+            deployment: resolvedCurrentTrailingDeployment,
+            presentationPhase: currentPresentationPhase,
+            useTakeoffBodyHandoff: useTakeoffBodyHandoff
+          )
+          let previous = Self.trailingPose(
+            states: previousStates,
+            wingOffset: offset,
+            left: left,
+            span: span,
+            deployment: resolvedPreviousTrailingDeployment,
+            presentationPhase: previousPresentationPhase,
+            useTakeoffBodyHandoff: useTakeoffBodyHandoff
+          )
+          let packedIdentity =
+            featherClass
+            | ((left ? UInt32(1) : UInt32(2)) << 8)
+            | (UInt32(classOrder) << 16)
+            | (UInt32(classCount) << 24)
+          let rankCode: UInt32 = rank == .proximal ? 1 : 2
+          let stableIdentifier =
+            UInt32(0xD000_0000)
+            | (partIdentifier << 20)
+            | (rankCode << 16)
+            | (UInt32(trailingChord) << 12)
+            | UInt32(span)
+          result.append(
+            Self.rootState(
+              current: current,
+              previous: previous,
+              streamIndex: result.count,
+              stableIdentifier: stableIdentifier,
+              partIdentifier: partIdentifier,
+              packedIdentity: packedIdentity
             )
           )
         }
@@ -200,6 +261,45 @@ final class CrowLiveWingCovertRootBuffer {
     let maximumWidth: Float
     let rachisRadius: Float
     let camber: Float
+  }
+
+  private static func rootState(
+    current: Pose,
+    previous: Pose,
+    streamIndex: Int,
+    stableIdentifier: UInt32,
+    partIdentifier: UInt32,
+    packedIdentity: UInt32
+  ) -> CrowFeatherRootStateGPU {
+    CrowFeatherRootStateGPU(
+      currentPositionAndLength: SIMD4<Float>(current.root, current.length),
+      previousPositionAndWidth: SIMD4<Float>(
+        previous.root,
+        current.maximumWidth
+      ),
+      currentDirectionAndRachis: SIMD4<Float>(
+        current.direction,
+        current.rachisRadius
+      ),
+      previousDirectionAndCamber: SIMD4<Float>(
+        previous.direction,
+        current.camber
+      ),
+      currentNormalAndPadding: SIMD4<Float>(current.normal, 0),
+      previousNormalAndPadding: SIMD4<Float>(previous.normal, 0),
+      previousMorphology: SIMD4<Float>(
+        previous.length,
+        previous.maximumWidth,
+        previous.rachisRadius,
+        previous.camber
+      ),
+      identity: SIMD4<UInt32>(
+        UInt32(streamIndex),
+        stableIdentifier,
+        partIdentifier,
+        packedIdentity
+      )
+    )
   }
 
   private static func pose(
@@ -231,7 +331,8 @@ final class CrowLiveWingCovertRootBuffer {
       spanDirection: spanDirection,
       left: left
     )
-    let surfaceTip = surfaceRoot
+    let surfaceTip =
+      surfaceRoot
       + CrowFlightWingBodyIntegration.underwingCovertChordTargetScale(
         chordIndex: chord
       ) * chordVector
@@ -239,22 +340,26 @@ final class CrowLiveWingCovertRootBuffer {
         chordIndex: chord,
         spanIndex: span
       ) * spanVector
-    let root = surfaceRoot
+    let root =
+      surfaceRoot
       + normal
-        * CrowFlightWingBodyIntegration.underwingCovertRootClearanceMeters
-        * weight
-    let tip = surfaceRoot + weight * (surfaceTip - surfaceRoot)
+      * CrowFlightWingBodyIntegration.underwingCovertRootClearanceMeters
+      * weight
+    let tip =
+      surfaceRoot + weight * (surfaceTip - surfaceRoot)
       + normal
-        * CrowFlightWingBodyIntegration.underwingCovertTipClearanceMeters
-        * weight
+      * CrowFlightWingBodyIntegration.underwingCovertTipClearanceMeters
+      * weight
     let vector = tip - root
     let spacing = max(0.5 * simd_length(spanVector), 0.006)
-    let widthScale = CrowFlightWingBodyIntegration.underwingCovertWidthScale(
-      chordIndex: chord,
-      spanIndex: span
-    ) * CrowFlightWingBodyIntegration.underwingCovertCourseWidthScale(
-      chordIndex: chord
-    )
+    let widthScale =
+      CrowFlightWingBodyIntegration.underwingCovertWidthScale(
+        chordIndex: chord,
+        spanIndex: span
+      )
+      * CrowFlightWingBodyIntegration.underwingCovertCourseWidthScale(
+        chordIndex: chord
+      )
     return Pose(
       root: root,
       direction: safeNormalize(vector, fallback: chordDirection),
@@ -268,6 +373,134 @@ final class CrowLiveWingCovertRootBuffer {
           chordIndex: chord,
           spanIndex: span
         ) * 0.004 * simd_length(chordVector)
+    )
+  }
+
+  private static func trailingPose(
+    states: [SIMD3<Float>],
+    wingOffset: Int,
+    left: Bool,
+    span: Int,
+    deployment: Float,
+    presentationPhase: Float,
+    useTakeoffBodyHandoff: Bool
+  ) -> Pose {
+    let chord = 6
+    let chordCount = CrowFlightWingBodyIntegration.chordCount
+    func point(span: Int, chord: Int) -> SIMD3<Float> {
+      states[wingOffset + span * chordCount + chord]
+    }
+    let weight = min(max(deployment, 0), 1)
+    let surfaceRoot = point(span: span, chord: chord)
+    let sampledChordVector = point(span: span, chord: 8) - surfaceRoot
+    let chordVector =
+      simd_length(sampledChordVector) >= 0.018
+      ? sampledChordVector
+      : safeNormalize(
+        sampledChordVector,
+        fallback: SIMD3<Float>(-1, 0, 0)
+      ) * 0.018
+    let spanVector = point(span: span + 2, chord: chord) - surfaceRoot
+    let chordDirection = safeNormalize(
+      chordVector,
+      fallback: SIMD3<Float>(-1, 0, 0)
+    )
+    let spanDirection = safeNormalize(
+      spanVector,
+      fallback: SIMD3<Float>(0, left ? 1 : -1, 0)
+    )
+    let normal = CrowFlightWingBodyIntegration.covertSurfaceNormal(
+      chordDirection: chordDirection,
+      spanDirection: spanDirection,
+      left: left
+    )
+    let tipSpanFraction = CrowFlightWingBodyIntegration.covertTipSpanFraction(
+      chordIndex: chord,
+      spanIndex: span
+    )
+    let surfaceTip =
+      surfaceRoot
+      + (1.92
+        + CrowFlightWingBodyIntegration.covertProximalChordExtension(
+          spanIndex: span
+        )
+        + CrowFlightWingBodyIntegration.covertDistalChordExtension(
+          spanIndex: span
+        )) * chordVector
+      + tipSpanFraction * spanVector
+    let abdominalLift =
+      CrowFlightWingBodyIntegration.covertAbdominalHandoffNormalLift(
+        chordIndex: chord,
+        spanIndex: span
+      )
+    let vaneRoot = surfaceRoot + normal * (0.0015 + abdominalLift)
+    let vaneTip = surfaceTip + normal * (0.0025 + abdominalLift)
+    let vector = vaneTip - vaneRoot
+    let spacing = max(simd_length(spanVector), 0.012)
+    let takeoffHandoffScale =
+      useTakeoffBodyHandoff
+      ? CrowFlightWingBodyIntegration.covertDistalTrailingBodyHandoffWidthScale(
+        chordIndex: chord,
+        spanIndex: span,
+        presentationPhase: presentationPhase
+      )
+      : 1
+    let widthScale =
+      CrowFlightWingBodyIntegration.covertWidthScale(
+        chordIndex: chord,
+        spanIndex: span
+      )
+      * CrowFlightWingBodyIntegration.covertAbdominalHandoffWidthScale(
+        chordIndex: chord,
+        spanIndex: span
+      )
+      * CrowFlightWingBodyIntegration.covertDistalTrailingWidthScale(
+        chordIndex: chord,
+        spanIndex: span
+      ) * takeoffHandoffScale
+      * CrowFlightWingBodyIntegration.covertProximalTailHandoffWidthScale(
+        chordIndex: chord,
+        spanIndex: span
+      )
+      * CrowFlightWingBodyIntegration.covertCaudalSecondaryHandoffWidthScale(
+        chordIndex: chord,
+        spanIndex: span
+      )
+      * CrowFlightWingBodyIntegration.covertVentralBodyHandoffWidthScale(
+        chordIndex: chord,
+        spanIndex: span
+      )
+      * CrowFlightWingBodyIntegration.covertFoldedSecondaryHandoffWidthScale(
+        chordIndex: chord,
+        spanIndex: span,
+        presentationPhase: presentationPhase
+      )
+      * CrowFlightWingBodyIntegration.covertFoldedShellHandoffWidthScale(
+        chordIndex: chord,
+        spanIndex: span,
+        presentationPhase: presentationPhase
+      )
+    let overlap =
+      CrowFlightWingBodyIntegration.covertCourseOverlapScale
+      * CrowFlightWingBodyIntegration.covertAttachmentOverlapScale(
+        spanIndex: span
+      )
+    let maximumWidth =
+      widthScale * overlap * 0.78 * spacing
+      * CrowTrailingCovertRanks.visibleRankWidthScale
+    let camber =
+      CrowFlightWingBodyIntegration.covertCamberScale(
+        chordIndex: chord,
+        spanIndex: span
+      ) * 0.035 * simd_length(chordVector)
+    return Pose(
+      root: vaneRoot,
+      direction: safeNormalize(vector, fallback: chordDirection),
+      normal: normal,
+      length: weight * simd_length(vector),
+      maximumWidth: weight * maximumWidth,
+      rachisRadius: weight * min(0.00022, max(0.00009, 0.016 * spacing)),
+      camber: weight * camber
     )
   }
 
