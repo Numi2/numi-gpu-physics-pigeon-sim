@@ -223,9 +223,15 @@ and a separate throat-only gular list. Whole-bird framing keeps all `711`
 cranial candidates, but the fixed gular draw now submits exactly `225` records
 instead of invoking `711` and collapsing `486` non-gular records to zero area:
 `28,350` rather than `89,586` detail vertices. The three-slot compactor retains
-`43,392` bytes for flags, offsets, counts, stable work, and `12` indirect draws;
-it adds no temporal segment buffer. Schema-`28` AOV reports candidates, visible
-records, and raster invocations for both owners. The
+`43,464` bytes for flags, offsets, counters, stable work, and `12` indirect
+draws; it adds no temporal segment buffer. The same classifier now reprojects
+previous-pose bounds into the prior max-device-depth hierarchy and fails open
+for reset history, camera drift, viewport edges, invalid clip/depth, clear
+background, and oversized mip coverage. In a fixed-camera three-frame
+`1280 x 720` probe, schema `29` tests all `711` cranial / `225` gular records on
+the middle frame and conservatively culls zero; constant-depth GPU tests prove
+both actual rejection and clear-background retention. This is an execution
+boundary, not a normal-view speedup claim. The
 `--capture-crow-cpu-cranial-vanes` baseline restores both the former
 full-density vane and gular-detail owners. Independent Swift/Metal
 checks cover breathing, two neck poses, current/previous positions, transformed

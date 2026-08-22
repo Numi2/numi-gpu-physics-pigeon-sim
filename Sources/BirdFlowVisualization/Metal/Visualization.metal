@@ -131,6 +131,8 @@ struct CrowCranialVisibilityUniforms {
     float4 farPlane;
     float4 selection;
     uint4 counts;
+    float4x4 previousViewProjection;
+    float4 occlusionViewportBiasAndEnabled;
 };
 
 struct CrowBodyDetailSegmentGPU {
@@ -3734,12 +3736,82 @@ inline bool crowCranialBoundIntersectsFrustum(
         &&dot(visibility.farPlane,point)>=-radius;
 }
 
+inline bool crowCranialBoundOccluded(
+    CrowBodyVaneMorphologyGPU record,
+    device const CrowBodyVanePoseUniforms& pose,
+    device const CrowBodyVaneNeckTransformGPU* neckTransforms,
+    constant CrowCranialVisibilityUniforms& visibility,
+    texture2d<float,access::read> previousDepth) {
+    if(visibility.occlusionViewportBiasAndEnabled.w<0.5f){return false;}
+    float2 viewport=visibility.occlusionViewportBiasAndEnabled.xy;
+    if(any(viewport<1.0f)){return false;}
+    CrowBodyVaneDynamicState state=crowBodyVaneDynamicState(
+        record,pose,neckTransforms,false
+    );
+    float3 root=crowCranialNeckPosition(state.root,pose,false);
+    float3 tip=crowCranialNeckPosition(state.tip,pose,false);
+    float3 center=0.5f*(root+tip);
+    float radius=0.5f*distance(root,tip)+state.maximumWidth
+        +abs(state.camber)+visibility.selection.y;
+    float2 minimumPixel=viewport;
+    float2 maximumPixel=float2(0.0f);
+    float nearestDepth=1.0f;
+    for(uint corner=0u;corner<8u;++corner){
+        float3 sign=float3(
+            (corner&1u)==0u?-1.0f:1.0f,
+            (corner&2u)==0u?-1.0f:1.0f,
+            (corner&4u)==0u?-1.0f:1.0f
+        );
+        float4 clip=visibility.previousViewProjection
+            *float4(center+sign*radius,1.0f);
+        if(clip.w<=1.0e-6f){return false;}
+        float3 ndc=clip.xyz/clip.w;
+        if(ndc.z<=0.0f||ndc.z>=1.0f){return false;}
+        float2 pixel=(ndc.xy*0.5f+0.5f)*viewport;
+        minimumPixel=min(minimumPixel,pixel);
+        maximumPixel=max(maximumPixel,pixel);
+        nearestDepth=min(nearestDepth,ndc.z);
+    }
+    minimumPixel-=2.0f;
+    maximumPixel+=2.0f;
+    if(any(minimumPixel<0.0f)||any(maximumPixel>=viewport)){return false;}
+    float maximumExtent=max(
+        maximumPixel.x-minimumPixel.x,
+        maximumPixel.y-minimumPixel.y
+    );
+    uint level=uint(floor(log2(max(maximumExtent,1.0f))));
+    level=min(level,previousDepth.get_num_mip_levels()-1u);
+    float scale=exp2(float(level));
+    uint2 first=uint2(floor(minimumPixel/scale));
+    uint2 last=uint2(floor(maximumPixel/scale));
+    uint2 levelSize=uint2(
+        previousDepth.get_width(level),previousDepth.get_height(level)
+    );
+    first=min(first,levelSize-1u);
+    last=min(last,levelSize-1u);
+    if(any(last-first>2u)){return false;}
+    float maximumDepth=0.0f;
+    for(uint y=0u;y<3u;++y){
+        for(uint x=0u;x<3u;++x){
+            uint2 coordinate=first+uint2(x,y);
+            if(any(coordinate>last)){continue;}
+            maximumDepth=max(
+                maximumDepth,previousDepth.read(coordinate,level).x
+            );
+        }
+    }
+    if(maximumDepth>=0.999999f){return false;}
+    return maximumDepth+visibility.occlusionViewportBiasAndEnabled.z
+        <nearestDepth;
+}
+
 kernel void classifyCrowCranialVisibility(
     device const CrowBodyVaneMorphologyGPU* records [[buffer(0)]],
     device const CrowBodyVanePoseUniforms& pose [[buffer(1)]],
     device const CrowBodyVaneNeckTransformGPU* neckTransforms [[buffer(2)]],
     device uint* topologyIndices [[buffer(3)]],
     constant CrowCranialVisibilityUniforms& visibility [[buffer(4)]],
+    texture2d<float,access::read> previousDepth [[texture(0)]],
     uint localIndex [[thread_position_in_grid]]) {
     if(localIndex>=visibility.counts.y){return;}
     uint recordIndex=visibility.counts.x+localIndex;
@@ -3753,10 +3825,17 @@ kernel void classifyCrowCranialVisibility(
     if((visibility.counts.w&8u)==0u||visibility.selection.x<1400.0f){
         topologyIndex=0xffffffffu;
     }
-    topologyIndices[localIndex]=topologyIndex<visibility.counts.z
-        &&crowCranialBoundIntersectsFrustum(
+    if(topologyIndex>=visibility.counts.z
+        ||!crowCranialBoundIntersectsFrustum(
             record,pose,neckTransforms,visibility
-        )?topologyIndex:0xffffffffu;
+        )){
+        topologyIndices[localIndex]=0xffffffffu;
+        return;
+    }
+    bool occluded=crowCranialBoundOccluded(
+        record,pose,neckTransforms,visibility,previousDepth
+    );
+    topologyIndices[localIndex]=topologyIndex|(occluded?0x80000000u:0u);
 }
 
 kernel void scanCrowCranialVisibility(
@@ -3770,12 +3849,29 @@ kernel void scanCrowCranialVisibility(
     if(index>0u){return;}
     uint localCounts[11]={0u,0u,0u,0u,0u,0u,0u,0u,0u,0u,0u};
     uint gularCount=0u;
+    uint frustumCount=0u;
+    uint frustumGularCount=0u;
+    uint occlusionCulled=0u;
+    uint occlusionGularCulled=0u;
+    bool occlusionEnabled=visibility.occlusionViewportBiasAndEnabled.w>=0.5f;
     for(uint localIndex=0u;localIndex<visibility.counts.y;++localIndex){
-        uint topologyIndex=topologyIndices[localIndex];
-        if(topologyIndex<11u){
-            topologyOffsets[localIndex]=localCounts[topologyIndex]++;
+        uint classification=topologyIndices[localIndex];
+        if(classification!=0xffffffffu){
+            bool occluded=(classification&0x80000000u)!=0u;
+            uint topologyIndex=classification&0x7fffffffu;
             uint recordIndex=visibility.counts.x+localIndex;
-            if(records[recordIndex].identity.w==10u){
+            bool gular=records[recordIndex].identity.w==10u;
+            ++frustumCount;
+            frustumGularCount+=gular?1u:0u;
+            occlusionCulled+=occluded?1u:0u;
+            occlusionGularCulled+=(occluded&&gular)?1u:0u;
+            if(occluded){
+                topologyOffsets[localIndex]=0xffffffffu;
+                gularOffsets[localIndex]=0xffffffffu;
+                continue;
+            }
+            topologyOffsets[localIndex]=localCounts[topologyIndex]++;
+            if(gular){
                 gularOffsets[localIndex]=gularCount++;
             }else{
                 gularOffsets[localIndex]=0xffffffffu;
@@ -3792,6 +3888,12 @@ kernel void scanCrowCranialVisibility(
     }
     counts[11]=total;
     counts[12]=gularCount;
+    counts[13]=frustumCount;
+    counts[14]=frustumGularCount;
+    counts[15]=occlusionCulled;
+    counts[16]=occlusionEnabled?frustumCount:0u;
+    counts[17]=occlusionGularCulled;
+    counts[18]=occlusionEnabled?frustumGularCount:0u;
 }
 
 kernel void emitCrowCranialVisibilityWork(

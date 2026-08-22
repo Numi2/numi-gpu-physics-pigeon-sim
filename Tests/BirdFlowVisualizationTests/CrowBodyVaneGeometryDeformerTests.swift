@@ -12,7 +12,7 @@ func bodyVanesRetainCompactIdentityStableTemporalRecords() {
   #expect(MemoryLayout<CrowBodyVaneNeckTransformGPU>.stride == 48)
   #expect(MemoryLayout<CrowBodyVaneGeometryUniforms>.stride == 32)
   #expect(MemoryLayout<CrowBodyVaneSelectionUniforms>.stride == 32)
-  #expect(MemoryLayout<CrowCranialVisibilityUniforms>.stride == 128)
+  #expect(MemoryLayout<CrowCranialVisibilityUniforms>.stride == 208)
   #expect(MemoryLayout<CrowBodyDetailSegmentGPU>.stride == 96)
   let first = CrowBodyVaneRecords.groupedRecords(
     currentBodyCenter: SIMD3<Float>(0.01, -0.02, 0.03),
@@ -881,7 +881,10 @@ func metalFamilySevenVisibilityCompactsStableCranialAndGularWork() throws {
   let deformer = try CrowBodyVaneGeometryDeformer(backend: backend)
   let morphology = CrowBodyVaneRecords.retainedMorphologyRecords()
 
-  func visibility(target: SIMD3<Float>) throws -> CrowCranialVisibilityFrame {
+  func visibility(
+    target: SIMD3<Float>,
+    previousDepthPyramid: MTLTexture? = nil
+  ) throws -> CrowCranialVisibilityFrame {
     let commandBuffer = try #require(backend.queue.makeCommandBuffer())
     let bodyFrame = try deformer.encode(
       currentBodyCenter: .zero,
@@ -902,10 +905,16 @@ func metalFamilySevenVisibilityCompactsStableCranialAndGularWork() throws {
     camera.distance = 0.50
     camera.yaw = 1.18
     camera.pitch = 0.075
+    let viewProjection = camera.uniforms(
+      aspect: 16.0 / 9.0,
+      ribbonWidth: 0.001
+    ).viewProjection
     let compact = try deformer.encodeCranialVisibility(
       for: bodyFrame,
-      viewProjection: camera.uniforms(aspect: 16.0 / 9.0, ribbonWidth: 0.001)
-        .viewProjection,
+      viewProjection: viewProjection,
+      previousViewProjection: viewProjection,
+      previousDepthPyramid: previousDepthPyramid,
+      occlusionViewport: SIMD2<Int>(128, 72),
       commandBuffer: commandBuffer
     )
     commandBuffer.commit()
@@ -944,6 +953,18 @@ func metalFamilySevenVisibilityCompactsStableCranialAndGularWork() throws {
   }
   #expect(deformer.cranialExpandedVertexCount(for: visible) > 0)
   #expect(
+    deformer.cranialFrustumVisibleRecordCount(for: visible)
+      == deformer.cranialVisibleRecordCount(for: visible)
+  )
+  #expect(deformer.cranialOcclusionTestedRecordCount(for: visible) == 0)
+  #expect(deformer.cranialOcclusionCulledRecordCount(for: visible) == 0)
+  #expect(
+    deformer.gularFrustumVisibleRecordCount(for: visible)
+      == deformer.gularVisibleRecordCount(for: visible)
+  )
+  #expect(deformer.gularOcclusionTestedRecordCount(for: visible) == 0)
+  #expect(deformer.gularOcclusionCulledRecordCount(for: visible) == 0)
+  #expect(
     deformer.gularExpandedVertexCount(for: visible)
       == gularIndices.count * (1 + 2 * CrowGularFeatherDetail.barbPairCount) * 18
   )
@@ -953,6 +974,132 @@ func metalFamilySevenVisibilityCompactsStableCranialAndGularWork() throws {
   #expect(deformer.gularVisibleRecordCount(for: outside) == 0)
   #expect(deformer.cranialExpandedVertexCount(for: outside) == 0)
   #expect(deformer.gularExpandedVertexCount(for: outside) == 0)
+}
+
+@Test("previous max depth conservatively culls retained family-7 work")
+func previousMaxDepthCullsRetainedFamilySevenWork() throws {
+  guard let device = MTLCreateSystemDefaultDevice() else { return }
+  let backend = try VisualizationBackend(device: device)
+  let deformer = try CrowBodyVaneGeometryDeformer(backend: backend)
+  let target = SIMD3<Float>(0.158, 0, 0.052)
+  let viewport = SIMD2<Int>(128, 72)
+  var camera = CameraState()
+  camera.target = target
+  camera.distance = 0.50
+  camera.yaw = 1.18
+  camera.pitch = 0.075
+  let viewProjection = camera.uniforms(
+    aspect: Float(viewport.x) / Float(viewport.y),
+    ribbonWidth: 0.001
+  ).viewProjection
+
+  func classify(depth: Float?) throws -> CrowCranialVisibilityFrame {
+    let commandBuffer = try #require(backend.queue.makeCommandBuffer())
+    let bodyFrame = try deformer.encode(
+      currentBodyCenter: .zero,
+      previousBodyCenter: .zero,
+      currentNeckPose: nil,
+      previousNeckPose: nil,
+      cranialRadii: SIMD3<Float>(0.0447, 0.0328, 0.0387),
+      currentCranialBreathingScale: 1.006,
+      previousCranialBreathingScale: 0.997,
+      retainedFamilyMask: 0x8,
+      currentDeployment: 0,
+      previousDeployment: 0,
+      projectedPixelsPerMeter: 1_600,
+      commandBuffer: commandBuffer
+    )
+    let depthTexture = try depth.map {
+      try constantR32Texture(
+        device: device,
+        width: viewport.x,
+        height: viewport.y,
+        value: $0
+      )
+    }
+    let compact = try deformer.encodeCranialVisibility(
+      for: bodyFrame,
+      viewProjection: viewProjection,
+      previousViewProjection: viewProjection,
+      previousDepthPyramid: depthTexture,
+      occlusionViewport: viewport,
+      commandBuffer: commandBuffer
+    )
+    commandBuffer.commit()
+    commandBuffer.waitUntilCompleted()
+    #expect(commandBuffer.status == .completed)
+    return compact
+  }
+
+  let historyReset = try classify(depth: nil)
+  let background = try classify(depth: 1)
+  #expect(
+    deformer.cranialFrustumVisibleRecordCount(for: background)
+      == deformer.cranialFrustumVisibleRecordCount(for: historyReset)
+  )
+  #expect(
+    deformer.cranialVisibleRecordCount(for: background)
+      == deformer.cranialVisibleRecordCount(for: historyReset)
+  )
+  #expect(
+    deformer.cranialOcclusionTestedRecordCount(for: background)
+      == deformer.cranialFrustumVisibleRecordCount(for: background)
+  )
+  #expect(deformer.cranialOcclusionCulledRecordCount(for: background) == 0)
+  #expect(
+    deformer.cranialVisibleRecordCount(for: background)
+      + deformer.cranialOcclusionCulledRecordCount(for: background)
+      == deformer.cranialFrustumVisibleRecordCount(for: background)
+  )
+  #expect(
+    deformer.gularOcclusionTestedRecordCount(for: background)
+      == deformer.gularFrustumVisibleRecordCount(for: background)
+  )
+  #expect(deformer.gularOcclusionCulledRecordCount(for: background) == 0)
+  #expect(
+    deformer.gularVisibleRecordCount(for: background)
+      + deformer.gularOcclusionCulledRecordCount(for: background)
+      == deformer.gularFrustumVisibleRecordCount(for: background)
+  )
+  #expect(
+    deformer.cranialVisibleRecordIndices(for: background)
+      == deformer.cranialVisibleRecordIndices(for: historyReset)
+  )
+
+  let occluded = try classify(depth: 0)
+  #expect(
+    deformer.cranialOcclusionTestedRecordCount(for: occluded)
+      == deformer.cranialFrustumVisibleRecordCount(for: occluded)
+  )
+  #expect(deformer.cranialOcclusionCulledRecordCount(for: occluded) > 0)
+  #expect(
+    deformer.cranialVisibleRecordCount(for: occluded)
+      < deformer.cranialFrustumVisibleRecordCount(for: occluded)
+  )
+  #expect(
+    deformer.cranialVisibleRecordCount(for: occluded)
+      + deformer.cranialOcclusionCulledRecordCount(for: occluded)
+      == deformer.cranialFrustumVisibleRecordCount(for: occluded)
+  )
+  #expect(
+    deformer.gularOcclusionTestedRecordCount(for: occluded)
+      == deformer.gularFrustumVisibleRecordCount(for: occluded)
+  )
+  #expect(
+    deformer.gularOcclusionCulledRecordCount(for: occluded)
+      <= deformer.gularFrustumVisibleRecordCount(for: occluded)
+  )
+  let survivors = deformer.cranialVisibleRecordIndices(for: occluded)
+  let gularSurvivors = deformer.gularVisibleRecordIndices(for: occluded)
+  #expect(Set(survivors).count == survivors.count)
+  #expect(Set(gularSurvivors).count == gularSurvivors.count)
+  #expect(gularSurvivors.count == deformer.gularVisibleRecordCount(for: occluded))
+  #expect(gularSurvivors.allSatisfy { survivors.contains($0) })
+  #expect(
+    survivors.allSatisfy {
+      deformer.cranialVisibleRecordIndices(for: historyReset).contains($0)
+    }
+  )
 }
 
 @Test("Metal body vane LOD selection matches the deterministic CPU oracle")
@@ -1051,6 +1198,40 @@ func metalBodyVaneLODSelectionMatchesCPUOracle() throws {
       )
     }
   }
+}
+
+private func constantR32Texture(
+  device: MTLDevice,
+  width: Int,
+  height: Int,
+  value: Float
+) throws -> MTLTexture {
+  let descriptor = MTLTextureDescriptor.texture2DDescriptor(
+    pixelFormat: .r32Float,
+    width: width,
+    height: height,
+    mipmapped: true
+  )
+  descriptor.storageMode = .shared
+  descriptor.usage = .shaderRead
+  let texture = try #require(device.makeTexture(descriptor: descriptor))
+  for level in 0..<texture.mipmapLevelCount {
+    let levelWidth = max(1, width >> level)
+    let levelHeight = max(1, height >> level)
+    let values = [Float](
+      repeating: value,
+      count: levelWidth * levelHeight
+    )
+    values.withUnsafeBytes { bytes in
+      texture.replace(
+        region: MTLRegionMake2D(0, 0, levelWidth, levelHeight),
+        mipmapLevel: level,
+        withBytes: bytes.baseAddress!,
+        bytesPerRow: levelWidth * MemoryLayout<Float>.stride
+      )
+    }
+  }
+  return texture
 }
 
 private func cranialBladePoint(

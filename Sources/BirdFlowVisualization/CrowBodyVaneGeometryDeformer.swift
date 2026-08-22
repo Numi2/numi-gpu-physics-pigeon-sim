@@ -2,6 +2,8 @@ import Foundation
 import Metal
 import simd
 
+private let crowCranialVisibilityCounterCount = 19
+
 struct CrowBodyVaneTopology: Hashable, Comparable {
   let axialSections: Int
   let widthSections: Int
@@ -181,6 +183,7 @@ final class CrowCranialVisibilityResources {
   let cranialVisibilityScanPipeline: MTLComputePipelineState
   let cranialVisibilityEmitPipeline: MTLComputePipelineState
   let cranialVisibilityIndirectPipeline: MTLComputePipelineState
+  let fallbackDepthTexture: MTLTexture
   let cranialVisibilityTopologyBuffers: [MTLBuffer]
   let cranialVisibilityOffsetBuffers: [MTLBuffer]
   let cranialGularOffsetBuffers: [MTLBuffer]
@@ -207,6 +210,29 @@ final class CrowCranialVisibilityResources {
     cranialVisibilityIndirectPipeline = try backend.compute(
       "prepareCrowCranialVisibilityIndirectWork"
     )
+    let fallbackDescriptor = MTLTextureDescriptor.texture2DDescriptor(
+      pixelFormat: .r32Float,
+      width: 1,
+      height: 1,
+      mipmapped: false
+    )
+    fallbackDescriptor.storageMode = .shared
+    fallbackDescriptor.usage = .shaderRead
+    guard
+      let fallbackDepthTexture = backend.device.makeTexture(
+        descriptor: fallbackDescriptor
+      )
+    else {
+      throw VisualizationError.allocation(MemoryLayout<Float>.stride)
+    }
+    var clearDepth: Float = 1
+    fallbackDepthTexture.replace(
+      region: MTLRegionMake2D(0, 0, 1, 1),
+      mipmapLevel: 0,
+      withBytes: &clearDepth,
+      bytesPerRow: MemoryLayout<Float>.stride
+    )
+    self.fallbackDepthTexture = fallbackDepthTexture
     cranialVisibilityTopologyBuffers = try (0..<bufferedFrameCount).map { _ in
       try backend.buffer(length: cranialRecordCount * MemoryLayout<UInt32>.stride)
     }
@@ -217,7 +243,10 @@ final class CrowCranialVisibilityResources {
       try backend.buffer(length: cranialRecordCount * MemoryLayout<UInt32>.stride)
     }
     cranialVisibilityCountBuffers = try (0..<bufferedFrameCount).map { _ in
-      try backend.buffer(length: 13 * MemoryLayout<UInt32>.stride, shared: true)
+      try backend.buffer(
+        length: crowCranialVisibilityCounterCount * MemoryLayout<UInt32>.stride,
+        shared: true
+      )
     }
     cranialVisibilityWorkBuffers = try (0..<bufferedFrameCount).map { _ in
       try backend.buffer(length: cranialRecordCount * MemoryLayout<UInt32>.stride)
@@ -819,6 +848,9 @@ final class CrowBodyVaneGeometryDeformer {
   func encodeCranialVisibility(
     for frame: CrowBodyVaneGeometryFrame,
     viewProjection: simd_float4x4,
+    previousViewProjection: simd_float4x4 = matrix_identity_float4x4,
+    previousDepthPyramid: MTLTexture? = nil,
+    occlusionViewport: SIMD2<Int> = .zero,
     commandBuffer: MTLCommandBuffer
   ) throws -> CrowCranialVisibilityFrame {
     let slot = frame.slot
@@ -827,7 +859,7 @@ final class CrowBodyVaneGeometryDeformer {
     memset(
       retainedResources.cranialVisibilityCountBuffers[slot].contents(),
       0,
-      13 * MemoryLayout<UInt32>.stride
+      crowCranialVisibilityCounterCount * MemoryLayout<UInt32>.stride
     )
     memset(
       retainedResources.cranialVisibilityIndirectBuffers[slot].contents(),
@@ -836,7 +868,10 @@ final class CrowBodyVaneGeometryDeformer {
     )
     var uniforms = Self.cranialVisibilityUniforms(
       viewProjection: viewProjection,
-      projectedPixelsPerMeter: frame.batches.first?.projectedPixelsPerMeter ?? 0
+      projectedPixelsPerMeter: frame.batches.first?.projectedPixelsPerMeter ?? 0,
+      previousViewProjection: previousViewProjection,
+      occlusionViewport: occlusionViewport,
+      occlusionEnabled: previousDepthPyramid != nil
     )
     guard let classify = commandBuffer.makeComputeCommandEncoder() else {
       throw VisualizationError.pipeline("crow cranial visibility encoder")
@@ -849,6 +884,10 @@ final class CrowBodyVaneGeometryDeformer {
       retainedResources.cranialVisibilityTopologyBuffers[slot],
       offset: 0,
       index: 3
+    )
+    classify.setTexture(
+      previousDepthPyramid ?? retainedResources.fallbackDepthTexture,
+      index: 0
     )
     classify.setBytes(
       &uniforms,
@@ -989,11 +1028,57 @@ final class CrowBodyVaneGeometryDeformer {
   }
 
   func cranialVisibleRecordCount(for frame: CrowCranialVisibilityFrame) -> Int {
-    Int(frame.countBuffer.contents().bindMemory(to: UInt32.self, capacity: 13)[11])
+    Int(
+      frame.countBuffer.contents().bindMemory(
+        to: UInt32.self,
+        capacity: crowCranialVisibilityCounterCount
+      )[11]
+    )
   }
 
   func gularVisibleRecordCount(for frame: CrowCranialVisibilityFrame) -> Int {
-    Int(frame.countBuffer.contents().bindMemory(to: UInt32.self, capacity: 13)[12])
+    Int(
+      frame.countBuffer.contents().bindMemory(
+        to: UInt32.self,
+        capacity: crowCranialVisibilityCounterCount
+      )[12]
+    )
+  }
+
+  func cranialFrustumVisibleRecordCount(
+    for frame: CrowCranialVisibilityFrame
+  ) -> Int {
+    cranialVisibilityCounter(frame, index: 13)
+  }
+
+  func gularFrustumVisibleRecordCount(
+    for frame: CrowCranialVisibilityFrame
+  ) -> Int {
+    cranialVisibilityCounter(frame, index: 14)
+  }
+
+  func cranialOcclusionCulledRecordCount(
+    for frame: CrowCranialVisibilityFrame
+  ) -> Int {
+    cranialVisibilityCounter(frame, index: 15)
+  }
+
+  func cranialOcclusionTestedRecordCount(
+    for frame: CrowCranialVisibilityFrame
+  ) -> Int {
+    cranialVisibilityCounter(frame, index: 16)
+  }
+
+  func gularOcclusionCulledRecordCount(
+    for frame: CrowCranialVisibilityFrame
+  ) -> Int {
+    cranialVisibilityCounter(frame, index: 17)
+  }
+
+  func gularOcclusionTestedRecordCount(
+    for frame: CrowCranialVisibilityFrame
+  ) -> Int {
+    cranialVisibilityCounter(frame, index: 18)
   }
 
   func cranialVisibleRecordIndices(
@@ -1035,9 +1120,25 @@ final class CrowBodyVaneGeometryDeformer {
     return Int(argument.vertexCount) * Int(argument.instanceCount)
   }
 
+  private func cranialVisibilityCounter(
+    _ frame: CrowCranialVisibilityFrame,
+    index: Int
+  ) -> Int {
+    precondition(index >= 0 && index < crowCranialVisibilityCounterCount)
+    return Int(
+      frame.countBuffer.contents().bindMemory(
+        to: UInt32.self,
+        capacity: crowCranialVisibilityCounterCount
+      )[index]
+    )
+  }
+
   private static func cranialVisibilityUniforms(
     viewProjection: simd_float4x4,
-    projectedPixelsPerMeter: Float
+    projectedPixelsPerMeter: Float,
+    previousViewProjection: simd_float4x4,
+    occlusionViewport: SIMD2<Int>,
+    occlusionEnabled: Bool
   ) -> CrowCranialVisibilityUniforms {
     let row0 = SIMD4<Float>(
       viewProjection.columns.0.x, viewProjection.columns.1.x,
@@ -1072,6 +1173,13 @@ final class CrowBodyVaneGeometryDeformer {
         UInt32(CrowBodyVaneRecords.cranialMorphologyRecordCount),
         UInt32(CrowBodyVaneRecords.productionTopologies.count),
         0x8
+      ),
+      previousViewProjection: previousViewProjection,
+      occlusionViewportBiasAndEnabled: SIMD4<Float>(
+        Float(occlusionViewport.x),
+        Float(occlusionViewport.y),
+        CrowVentralBarbCurveRecords.previousDepthBias,
+        occlusionEnabled ? 1 : 0
       )
     )
   }

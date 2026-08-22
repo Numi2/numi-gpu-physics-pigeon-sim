@@ -775,7 +775,7 @@ func estimatedStandingCrowCaptureProducesLoopClosedFrames() throws {
     try VisualizationBackend(device: device).supportsMeshShaders
     ? "gpu-mesh-threadgroup-8-vertex-indexed"
     : "gpu-procedural-vertex-pulling"
-  #expect(audit.schemaVersion == 28)
+  #expect(audit.schemaVersion == 29)
   #expect(
     audit.frames.allSatisfy {
       $0.bodyVaneMorphologyRecordCount == 6_179
@@ -799,11 +799,19 @@ func estimatedStandingCrowCaptureProducesLoopClosedFrames() throws {
         && $0.bodyVaneVertexGenerationMode
           == "gpu-resident-morphology-pose-instanced-indirect"
         && $0.cranialVisibilityRetainedCapacityBytes == 0
+        && $0.cranialVisibilityOcclusionDepthBytes == 0
+        && $0.cranialVisibilityOcclusionMode == "inactive"
         && $0.cranialVaneCandidateRecordCount == 0
+        && $0.cranialVaneFrustumVisibleRecordCount == 0
         && $0.cranialVaneVisibleRecordCount == 0
+        && $0.cranialVaneOcclusionTestedRecordCount == 0
+        && $0.cranialVaneOcclusionCulledRecordCount == 0
         && $0.cranialVaneRasterVertexInvocationCount == 0
         && $0.gularDetailCandidateRecordCount == 0
+        && $0.gularDetailFrustumVisibleRecordCount == 0
         && $0.gularDetailVisibleRecordCount == 0
+        && $0.gularDetailOcclusionTestedRecordCount == 0
+        && $0.gularDetailOcclusionCulledRecordCount == 0
         && $0.gularDetailRasterVertexInvocationCount == 0
     })
   #expect(

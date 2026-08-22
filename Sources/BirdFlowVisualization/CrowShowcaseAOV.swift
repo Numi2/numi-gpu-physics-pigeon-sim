@@ -1,6 +1,24 @@
 import Foundation
 import Metal
 
+struct CrowCranialVisibilityMetrics {
+  var retainedCapacityBytes = 0
+  var occlusionDepthBytes = 0
+  var occlusionMode = "inactive"
+  var candidateRecordCount = 0
+  var frustumVisibleRecordCount = 0
+  var visibleRecordCount = 0
+  var occlusionTestedRecordCount = 0
+  var occlusionCulledRecordCount = 0
+  var rasterVertexInvocationCount = 0
+  var gularCandidateRecordCount = 0
+  var gularFrustumVisibleRecordCount = 0
+  var gularVisibleRecordCount = 0
+  var gularOcclusionTestedRecordCount = 0
+  var gularOcclusionCulledRecordCount = 0
+  var gularRasterVertexInvocationCount = 0
+}
+
 struct CrowShowcaseFrame {
   let displayTexture: MTLTexture
   let hdrColorTexture: MTLTexture
@@ -28,13 +46,7 @@ struct CrowShowcaseFrame {
   let bodyVaneMorphologyBufferAllocationCount: Int
   let bodyVaneRasterVertexInvocationCount: Int
   let bodyVaneVertexGenerationMode: String
-  let cranialVisibilityRetainedCapacityBytes: Int
-  let cranialVaneCandidateRecordCount: Int
-  let cranialVaneVisibleRecordCount: Int
-  let cranialVaneRasterVertexInvocationCount: Int
-  let gularDetailCandidateRecordCount: Int
-  let gularDetailVisibleRecordCount: Int
-  let gularDetailRasterVertexInvocationCount: Int
+  let cranialVisibilityMetrics: CrowCranialVisibilityMetrics
   let ventralVaneMorphologyRecordCount: Int
   let ventralVaneMorphologyRecordBytes: Int
   let ventralVaneSelectedMorphologyRecordCount: Int
@@ -576,15 +588,34 @@ struct CrowShowcaseFrame {
       bodyVaneRasterVertexInvocationCount: bodyVaneRasterVertexInvocationCount,
       bodyVaneVertexGenerationMode: bodyVaneVertexGenerationMode,
       cranialVisibilityRetainedCapacityBytes:
-        cranialVisibilityRetainedCapacityBytes,
-      cranialVaneCandidateRecordCount: cranialVaneCandidateRecordCount,
-      cranialVaneVisibleRecordCount: cranialVaneVisibleRecordCount,
+        cranialVisibilityMetrics.retainedCapacityBytes,
+      cranialVisibilityOcclusionDepthBytes:
+        cranialVisibilityMetrics.occlusionDepthBytes,
+      cranialVisibilityOcclusionMode: cranialVisibilityMetrics.occlusionMode,
+      cranialVaneCandidateRecordCount:
+        cranialVisibilityMetrics.candidateRecordCount,
+      cranialVaneFrustumVisibleRecordCount:
+        cranialVisibilityMetrics.frustumVisibleRecordCount,
+      cranialVaneVisibleRecordCount:
+        cranialVisibilityMetrics.visibleRecordCount,
+      cranialVaneOcclusionTestedRecordCount:
+        cranialVisibilityMetrics.occlusionTestedRecordCount,
+      cranialVaneOcclusionCulledRecordCount:
+        cranialVisibilityMetrics.occlusionCulledRecordCount,
       cranialVaneRasterVertexInvocationCount:
-        cranialVaneRasterVertexInvocationCount,
-      gularDetailCandidateRecordCount: gularDetailCandidateRecordCount,
-      gularDetailVisibleRecordCount: gularDetailVisibleRecordCount,
+        cranialVisibilityMetrics.rasterVertexInvocationCount,
+      gularDetailCandidateRecordCount:
+        cranialVisibilityMetrics.gularCandidateRecordCount,
+      gularDetailFrustumVisibleRecordCount:
+        cranialVisibilityMetrics.gularFrustumVisibleRecordCount,
+      gularDetailVisibleRecordCount:
+        cranialVisibilityMetrics.gularVisibleRecordCount,
+      gularDetailOcclusionTestedRecordCount:
+        cranialVisibilityMetrics.gularOcclusionTestedRecordCount,
+      gularDetailOcclusionCulledRecordCount:
+        cranialVisibilityMetrics.gularOcclusionCulledRecordCount,
       gularDetailRasterVertexInvocationCount:
-        gularDetailRasterVertexInvocationCount,
+        cranialVisibilityMetrics.gularRasterVertexInvocationCount,
       ventralVaneMorphologyRecordCount: ventralVaneMorphologyRecordCount,
       ventralVaneMorphologyRecordBytes: ventralVaneMorphologyRecordBytes,
       ventralVaneSelectedMorphologyRecordCount:
@@ -1556,11 +1587,19 @@ struct CrowShowcaseAOVFrameAudit: Codable, Equatable {
   let bodyVaneRasterVertexInvocationCount: Int
   let bodyVaneVertexGenerationMode: String
   let cranialVisibilityRetainedCapacityBytes: Int
+  let cranialVisibilityOcclusionDepthBytes: Int
+  let cranialVisibilityOcclusionMode: String
   let cranialVaneCandidateRecordCount: Int
+  let cranialVaneFrustumVisibleRecordCount: Int
   let cranialVaneVisibleRecordCount: Int
+  let cranialVaneOcclusionTestedRecordCount: Int
+  let cranialVaneOcclusionCulledRecordCount: Int
   let cranialVaneRasterVertexInvocationCount: Int
   let gularDetailCandidateRecordCount: Int
+  let gularDetailFrustumVisibleRecordCount: Int
   let gularDetailVisibleRecordCount: Int
+  let gularDetailOcclusionTestedRecordCount: Int
+  let gularDetailOcclusionCulledRecordCount: Int
   let gularDetailRasterVertexInvocationCount: Int
   let ventralVaneMorphologyRecordCount: Int
   let ventralVaneMorphologyRecordBytes: Int
@@ -1811,7 +1850,7 @@ struct CrowShowcaseAOVAuditReport: Codable, Equatable {
   let frames: [CrowShowcaseAOVFrameAudit]
 
   init(frames: [CrowShowcaseAOVFrameAudit]) {
-    schemaVersion = 28
+    schemaVersion = 29
     colorSpace = "scene-linear extended range; display output is tone mapped separately"
     motionConvention =
       "current pixel to previous pixel in upper-left-origin pixel units; MetalFX scale 1"

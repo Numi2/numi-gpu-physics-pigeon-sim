@@ -312,6 +312,10 @@ struct CrowCranialVisibilityUniforms {
   var selection: SIMD4<Float>
   /// Inventory base, inventory count, topology count, retained-family mask.
   var counts: SIMD4<UInt32>
+  /// Previous jittered camera transform used only when history is valid.
+  var previousViewProjection: simd_float4x4
+  /// Width, height, device-depth bias, history-valid flag.
+  var occlusionViewportBiasAndEnabled: SIMD4<Float>
 }
 
 /// Compact current/previous body-detail segment emitted by Metal before

@@ -28,16 +28,6 @@ private final class CrowDepthReadbackBox {
   }
 }
 
-private struct CrowCranialVisibilityMetrics {
-  var retainedCapacityBytes = 0
-  var candidateRecordCount = 0
-  var visibleRecordCount = 0
-  var rasterVertexInvocationCount = 0
-  var gularCandidateRecordCount = 0
-  var gularVisibleRecordCount = 0
-  var gularRasterVertexInvocationCount = 0
-}
-
 /// Native Metal presentation of an explicitly estimated American-crow model.
 ///
 /// The measured Deetjen dove contributes only a deformation scaffold. Crow
@@ -1221,11 +1211,17 @@ private final class CrowShowcaseRenderer {
       (ventralBarbGeometryDeformer?.candidateRecordCount(
         projectedPixelsPerMeter: projectedPixelsPerMeter
       ) ?? 0) > 0
+    let hasCranialVisibilityCandidates =
+      cranialVanesOwnedByMetal
+      && projectedPixelsPerMeter
+        >= CrowCranialFeatherTracts.fullDensityPixelsPerMeter
+    let hasOcclusionCandidates =
+      hasVentralBarbCandidates || hasCranialVisibilityCandidates
     let depthPyramid =
-      try hasVentralBarbCandidates
+      try hasOcclusionCandidates
       ? ensureOcclusionDepthPyramid(width: renderWidth, height: renderHeight)
       : nil
-    if !hasVentralBarbCandidates {
+    if !hasOcclusionCandidates {
       occlusionDepthValid = false
       occlusionDepthPyramid = nil
     }
@@ -1449,6 +1445,9 @@ private final class CrowShowcaseRenderer {
       bodyVaneFrame: bodyVaneFrame,
       projectedPixelsPerMeter: projectedPixelsPerMeter,
       viewProjection: currentViewProjection,
+      previousViewProjection: previousViewProjection,
+      previousDepthPyramid: canTestPreviousDepth ? depthPyramid?.texture : nil,
+      occlusionViewport: SIMD2<Int>(renderWidth, renderHeight),
       commandBuffer: commandBuffer
     )
     let rootFrame = try featherRootDeformer?.encode(
@@ -2011,7 +2010,11 @@ private final class CrowShowcaseRenderer {
       bodyVaneFrame.map {
         bodyVaneGeometryDeformer?.expandedVertexCount(for: $0) ?? 0
       } ?? 0
-    let cranialMetrics = cranialVisibilityMetrics(for: bodyVaneFrame)
+    let cranialMetrics = cranialVisibilityMetrics(
+      for: bodyVaneFrame,
+      depthPyramid: depthPyramid,
+      hasCandidates: hasCranialVisibilityCandidates
+    )
     let bodyVaneExpandedVertexCount =
       mainBodyVaneExpandedVertexCount
       + cranialMetrics.rasterVertexInvocationCount
@@ -2109,17 +2112,7 @@ private final class CrowShowcaseRenderer {
       bodyVaneVertexGenerationMode: bodyVaneFrame == nil
         ? "cpu-surface-fallback"
         : "gpu-resident-morphology-pose-instanced-indirect",
-      cranialVisibilityRetainedCapacityBytes:
-        cranialMetrics.retainedCapacityBytes,
-      cranialVaneCandidateRecordCount: cranialMetrics.candidateRecordCount,
-      cranialVaneVisibleRecordCount: cranialMetrics.visibleRecordCount,
-      cranialVaneRasterVertexInvocationCount:
-        cranialMetrics.rasterVertexInvocationCount,
-      gularDetailCandidateRecordCount:
-        cranialMetrics.gularCandidateRecordCount,
-      gularDetailVisibleRecordCount: cranialMetrics.gularVisibleRecordCount,
-      gularDetailRasterVertexInvocationCount:
-        cranialMetrics.gularRasterVertexInvocationCount,
+      cranialVisibilityMetrics: cranialMetrics,
       ventralVaneMorphologyRecordCount: bodyVaneFrame == nil
         ? 0 : CrowBodyVaneRecords.ventralMorphologyRecordCount,
       ventralVaneMorphologyRecordBytes: bodyVaneFrame == nil
@@ -2155,7 +2148,8 @@ private final class CrowShowcaseRenderer {
       ventralBarbOcclusionCulledRecordCount: Int(
         ventralBarbVisibilityCounts.occlusionCulled
       ),
-      ventralBarbOcclusionDepthBytes: depthPyramid?.allocatedBytes ?? 0,
+      ventralBarbOcclusionDepthBytes: hasVentralBarbCandidates
+        ? depthPyramid?.allocatedBytes ?? 0 : 0,
       ventralBarbOcclusionMode: hasVentralBarbCandidates
         ? "previous-max-device-depth-fail-open" : "inactive",
       ventralBarbExpandedVertexCount: ventralBarbExpandedVertexCount,
@@ -2176,6 +2170,9 @@ private final class CrowShowcaseRenderer {
     bodyVaneFrame: CrowBodyVaneGeometryFrame?,
     projectedPixelsPerMeter: Float,
     viewProjection: simd_float4x4,
+    previousViewProjection: simd_float4x4,
+    previousDepthPyramid: MTLTexture?,
+    occlusionViewport: SIMD2<Int>,
     commandBuffer: MTLCommandBuffer
   ) throws {
     guard cranialVanesOwnedByMetal,
@@ -2186,6 +2183,9 @@ private final class CrowShowcaseRenderer {
     _ = try bodyVaneGeometryDeformer.encodeCranialVisibility(
       for: bodyVaneFrame,
       viewProjection: viewProjection,
+      previousViewProjection: previousViewProjection,
+      previousDepthPyramid: previousDepthPyramid,
+      occlusionViewport: occlusionViewport,
       commandBuffer: commandBuffer
     )
   }
@@ -2308,7 +2308,9 @@ private final class CrowShowcaseRenderer {
 
   @inline(never)
   private func cranialVisibilityMetrics(
-    for bodyVaneFrame: CrowBodyVaneGeometryFrame?
+    for bodyVaneFrame: CrowBodyVaneGeometryFrame?,
+    depthPyramid: CrowOcclusionDepthPyramid?,
+    hasCandidates: Bool
   ) -> CrowCranialVisibilityMetrics {
     guard let bodyVaneFrame, let bodyVaneGeometryDeformer,
       let visibility = bodyVaneGeometryDeformer.cranialVisibilityFrame(
@@ -2318,15 +2320,43 @@ private final class CrowShowcaseRenderer {
     return CrowCranialVisibilityMetrics(
       retainedCapacityBytes:
         bodyVaneGeometryDeformer.retainedCranialVisibilityCapacityBytes,
+      occlusionDepthBytes: hasCandidates
+        ? depthPyramid?.allocatedBytes ?? 0 : 0,
+      occlusionMode: hasCandidates
+        ? "previous-max-device-depth-fail-open" : "inactive",
       candidateRecordCount: CrowBodyVaneRecords.cranialMorphologyRecordCount,
+      frustumVisibleRecordCount:
+        bodyVaneGeometryDeformer.cranialFrustumVisibleRecordCount(
+          for: visibility
+        ),
       visibleRecordCount:
         bodyVaneGeometryDeformer.cranialVisibleRecordCount(for: visibility),
+      occlusionTestedRecordCount:
+        bodyVaneGeometryDeformer.cranialOcclusionTestedRecordCount(
+          for: visibility
+        ),
+      occlusionCulledRecordCount:
+        bodyVaneGeometryDeformer.cranialOcclusionCulledRecordCount(
+          for: visibility
+        ),
       rasterVertexInvocationCount:
         bodyVaneGeometryDeformer.cranialExpandedVertexCount(for: visibility),
       gularCandidateRecordCount:
         CrowBodyVaneRecords.gularMorphologyRecordCount,
+      gularFrustumVisibleRecordCount:
+        bodyVaneGeometryDeformer.gularFrustumVisibleRecordCount(
+          for: visibility
+        ),
       gularVisibleRecordCount:
         bodyVaneGeometryDeformer.gularVisibleRecordCount(for: visibility),
+      gularOcclusionTestedRecordCount:
+        bodyVaneGeometryDeformer.gularOcclusionTestedRecordCount(
+          for: visibility
+        ),
+      gularOcclusionCulledRecordCount:
+        bodyVaneGeometryDeformer.gularOcclusionCulledRecordCount(
+          for: visibility
+        ),
       gularRasterVertexInvocationCount:
         bodyVaneGeometryDeformer.gularExpandedVertexCount(for: visibility)
     )

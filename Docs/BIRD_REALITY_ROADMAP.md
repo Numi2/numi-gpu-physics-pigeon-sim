@@ -164,9 +164,12 @@ inventory or view-dependent patch geometry.
    topology bins and a throat-only gular list, with `12` indirect draws shared
    by beauty and identity rasterization. Normal whole-bird framing retains all
    `711` cranial candidates, while gular submission falls from `711` to its
-   exact `225` owners. Coarse head tiers remain CPU owners. The next compute
-   pass should add fail-open previous-depth occlusion to the same stable work
-   owner before per-feather bending or contact.
+   exact `225` owners. The same stable work owner now tests previous-pose
+   conservative bounds against the prior max-device-depth hierarchy and fails
+   open across reset history, camera drift, invalid projection, viewport edges,
+   clear background, and uncertain mip coverage. Coarse head tiers remain CPU
+   owners. The next compute pass should retain current/previous per-feather bend
+   state for visible family-`7` work without readback or identity churn.
 
 3. **Measured appearance, bounded claims.** Implement an energy-bounded,
    anisotropic feather BSDF with separate eumelanin absorption, longitudinal

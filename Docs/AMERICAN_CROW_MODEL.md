@@ -607,14 +607,18 @@ input to `1,984` bytes and the three-slot capacity to `5,952` bytes. The
 gular records procedurally add `1,575` rachis/barb tubes and `28,350` live
 vertices, eliminating `2,721,600` bytes of CPU-expanded geometry per frame.
 One conservative family-`7` compute pass now emits stable topology-grouped
-cranial work and a throat-only gular list. It retains `43,392` bytes over three
+cranial work and a throat-only gular list. It retains `43,464` bytes over three
 slots for classification, offsets, counts, compact indices, and `12` indirect
 arguments, but no temporal segment buffer. Normal whole-bird framing keeps all
 `711` cranial candidates; the gular list nevertheless removes `486` inactive
 instances and submits the exact `225` owners / `28,350` vertices instead of
-`89,586`. Direct Swift/Metal parity qualifies two distinct temporal poses, and
-schema-`28` records candidate, visible, and invocation counts. No image is
-admitted as anatomy or perceptual-realism evidence in this pass.
+`89,586`. The classifier now uses the previous max-device-depth hierarchy with
+previous-pose bounds and fails open when history, camera, clip, viewport,
+background, or mip coverage is uncertain. Schema `29` separates candidate,
+frustum-visible, post-occlusion, tested, culled, and invocation counts. A fixed
+camera tests all `711` / `225` records and culls zero in an ordinary view;
+synthetic depth proves the rejection path. No image is admitted as anatomy or
+perceptual-realism evidence in this pass.
 
 At the five-by-seven distance LOD, a rear-right temporal-identity trace at
 yaw/pitch `(2.28, 0.38)` resolves the residual pelvic insertion owners to

@@ -90,7 +90,7 @@ audit path and temporal scale:
   /tmp/crow.mp4 /tmp/crow.png standing /tmp/crow-aov-audit.json 2
 ```
 
-The schema-28 JSON report records format and coordinate conventions plus per-frame
+The schema-29 JSON report records format and coordinate conventions plus per-frame
 finite-pixel count, HDR values above one, exact active IDs, visible feather IDs,
 fully covered samples, unit-normal error, depth range, moving-pixel count,
 maximum motion, and bird/support vertical centroids. It also records exact
@@ -167,16 +167,21 @@ frame. Crural family `5` adds `46,656` raster vertices and eliminates another
 and eliminates another `1,064,448` bytes per frame. Exact retained-family
 selected counts are recoverable from the family census and aggregate selected
 count without widening the already large frame-audit ABI.
-Schema `28` adds explicit family-`7` execution evidence: cranial-vane and
-gular-detail candidate counts, frustum-visible counts, and raster vertex
-invocations. The shared compactor preserves ascending inventory order inside
-each topology bin and feeds beauty and exact-identity passes from the same
-work. A separate gular list contains only class-`10` throat records, reducing
-the full-density detail submission from `711` instances / `89,586` vertices to
-the exact `225` owners / `28,350` vertices. Normal whole-bird framing keeps all
-`711` cranial candidates; frustum compaction is therefore an ownership and
-off-screen-work boundary, not a claimed normal-view speedup. Coarse tiers
-report zero for these fields because CPU remains their declared owner.
+Schema `29` carries explicit family-`7` execution evidence: cranial-vane and
+gular-detail candidate, frustum-visible, post-occlusion, tested, culled, and
+raster-invocation counts plus retained-work and depth-hierarchy bytes. The
+shared compactor preserves ascending inventory order inside each topology bin
+and feeds beauty and exact-identity passes from the same work. A separate gular
+list contains only class-`10` throat records, reducing the full-density detail
+submission from `711` instances / `89,586` vertices to the exact `225` owners /
+`28,350` vertices. Previous-pose bounds test the prior max-device-depth pyramid
+only under stable camera history and fail open at viewport edges, invalid clip
+or depth, clear background, and uncertain mip coverage. A fixed-camera
+`1280 x 720` probe tests all `711` cranial and `225` gular records but culls zero
+in the ordinary view; synthetic constant-depth GPU tests prove rejection and
+background retention. This is an ownership/off-screen-work boundary, not a
+claimed normal-view speedup. Coarse tiers report zero because CPU remains their
+declared owner.
 This is a data-flow and residency audit, not a GPU-time or throughput result.
 Schema `24` deliberately keeps the existing body-vane counters: rachis and
 detail inherit their parent vane's stable identity, and the integer pass
