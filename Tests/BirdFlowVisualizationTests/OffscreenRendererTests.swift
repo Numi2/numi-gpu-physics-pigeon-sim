@@ -556,11 +556,13 @@ func crowAOVAuditLocalizesCrossClassLuminanceBoundaries() {
   #expect(gular.minimumX == 0 && gular.maximumX == 0)
   #expect(gular.minimumY == 0 && gular.maximumY == 1)
   #expect(gular.meanAbsoluteLinearLuminanceDifference == 3)
+  #expect(gular.meanLowerMinusUpperLinearLuminanceDifference == -3)
   #expect(gular.maximumAbsoluteLinearLuminanceDifference == 4)
   #expect(gular.maximumDifferenceX == 0 && gular.maximumDifferenceY == 1)
   let cheek = audits[1]
   #expect(cheek.edgeCount == 1)
   #expect(cheek.meanAbsoluteLinearLuminanceDifference == 4)
+  #expect(cheek.meanLowerMinusUpperLinearLuminanceDifference == 4)
 }
 
 @Test("estimated crow body loft preserves asymmetric anatomical regions")
@@ -770,7 +772,7 @@ func estimatedStandingCrowCaptureProducesLoopClosedFrames() throws {
     try VisualizationBackend(device: device).supportsMeshShaders
     ? "gpu-mesh-threadgroup-8-vertex-indexed"
     : "gpu-procedural-vertex-pulling"
-  #expect(audit.schemaVersion == 22)
+  #expect(audit.schemaVersion == 23)
   #expect(
     audit.frames.allSatisfy {
       $0.bodyVaneMorphologyRecordCount == 3_212
@@ -881,6 +883,7 @@ func estimatedStandingCrowCaptureProducesLoopClosedFrames() throws {
         $0.firstFeatherClassCode < $0.secondFeatherClassCode
           && $0.edgeCount > 0
           && $0.meanAbsoluteLinearLuminanceDifference.isFinite
+          && $0.meanLowerMinusUpperLinearLuminanceDifference.isFinite
           && $0.maximumAbsoluteLinearLuminanceDifference.isFinite
           && $0.maximumAbsoluteLinearLuminanceDifference
             >= $0.meanAbsoluteLinearLuminanceDifference

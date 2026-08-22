@@ -569,6 +569,7 @@ struct CrowShowcaseFrame {
     struct Accumulator {
       var edgeCount = 0
       var luminanceDifferenceSum: Double = 0
+      var signedLuminanceDifferenceSum: Double = 0
       var maximumLuminanceDifference: Float = 0
       var maximumX = 0
       var maximumY = 0
@@ -589,9 +590,14 @@ struct CrowShowcaseFrame {
       let difference = abs(
         linearLuminances[firstPixel] - linearLuminances[secondPixel]
       )
+      let signedDifference =
+        firstClass == lower
+        ? linearLuminances[firstPixel] - linearLuminances[secondPixel]
+        : linearLuminances[secondPixel] - linearLuminances[firstPixel]
       var accumulator = accumulators[key] ?? Accumulator()
       accumulator.edgeCount += 1
       accumulator.luminanceDifferenceSum += Double(difference)
+      accumulator.signedLuminanceDifferenceSum += Double(signedDifference)
       accumulator.minimumX = min(accumulator.minimumX, x)
       accumulator.maximumBoundaryX = max(accumulator.maximumBoundaryX, x)
       accumulator.minimumY = min(accumulator.minimumY, y)
@@ -626,6 +632,9 @@ struct CrowShowcaseFrame {
         maximumY: accumulator.maximumBoundaryY,
         meanAbsoluteLinearLuminanceDifference: Float(
           accumulator.luminanceDifferenceSum / Double(accumulator.edgeCount)
+        ),
+        meanLowerMinusUpperLinearLuminanceDifference: Float(
+          accumulator.signedLuminanceDifferenceSum / Double(accumulator.edgeCount)
         ),
         maximumAbsoluteLinearLuminanceDifference:
           accumulator.maximumLuminanceDifference,
@@ -1310,6 +1319,9 @@ struct CrowFeatherClassBoundaryAudit: Codable, Equatable {
   let minimumY: Int
   let maximumY: Int
   let meanAbsoluteLinearLuminanceDifference: Float
+  /// Signed mean with the lower class code first, independent of image-edge
+  /// direction. Negative means the lower class is darker along this boundary.
+  let meanLowerMinusUpperLinearLuminanceDifference: Float
   let maximumAbsoluteLinearLuminanceDifference: Float
   let maximumDifferenceX: Int
   let maximumDifferenceY: Int
@@ -1540,7 +1552,7 @@ struct CrowShowcaseAOVAuditReport: Codable, Equatable {
   let frames: [CrowShowcaseAOVFrameAudit]
 
   init(frames: [CrowShowcaseAOVFrameAudit]) {
-    schemaVersion = 22
+    schemaVersion = 23
     colorSpace = "scene-linear extended range; display output is tone mapped separately"
     motionConvention =
       "current pixel to previous pixel in upper-left-origin pixel units; MetalFX scale 1"
