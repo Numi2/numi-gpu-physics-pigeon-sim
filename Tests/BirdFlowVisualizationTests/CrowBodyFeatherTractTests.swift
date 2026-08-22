@@ -59,7 +59,7 @@ func crowBodyFeatherTractsOverlapNeckAndCoverWingRoots() {
   #expect(humeral.allSatisfy { $0.surfaceFeatherClass == 6 })
   #expect(scapular.allSatisfy { $0.surfaceFeatherClass == 6 })
   #expect(samples.allSatisfy { $0.surfaceFeatherClass == 5 || $0.surfaceFeatherClass == 6 })
-  let cervicalLengths = cervical.map { simd_distance($0.rootOffset, $0.tipOffset) }
+  let cervicalLengths = cervical.map(\.lodReferenceLengthMeters)
   #expect(cervicalLengths.min()! > 0.014)
   #expect(cervicalLengths.max()! < 0.020)
   #expect(cervical.map(\.maximumWidthMeters).max()! < 0.0035)
@@ -560,6 +560,62 @@ func crowBodyFeatherTractsOverlapNeckAndCoverWingRoots() {
   #expect(low.count == 1_042)
   #expect(medium.count == 1_606)
   #expect(full.count == 3_212)
+}
+
+@Test("cervical terminals dephase without moving roots or changing LOD length")
+func cervicalTerminalsDephaseWithoutMovingRootsOrLODLength() {
+  let flowed = CrowBodyFeatherTracts.samples()
+  let reference = CrowBodyFeatherTracts.samples(
+    appliesCervicalTerminalFlow: false
+  )
+  #expect(flowed.count == reference.count)
+
+  var offsets: [SIMD3<Float>] = []
+  for (candidate, baseline) in zip(flowed, reference) {
+    #expect(candidate.rootOffset == baseline.rootOffset)
+    #expect(candidate.lodReferenceLengthMeters == baseline.lodReferenceLengthMeters)
+    if candidate.region == .cervical {
+      let expected = CrowBodyFeatherTracts.cervicalTerminalFlowOffset(
+        side: candidate.side,
+        row: candidate.row,
+        column: candidate.column,
+        planeNormal: candidate.planeNormal
+      )
+      let actual = candidate.tipOffset - baseline.tipOffset
+      #expect(simd_distance(actual, expected) < 2e-8)
+      offsets.append(actual)
+    } else {
+      #expect(candidate.tipOffset == baseline.tipOffset)
+    }
+  }
+
+  let magnitudes = offsets.map(simd_length)
+  #expect(magnitudes.max()! > 0.0020)
+  #expect(magnitudes.max()! < 0.0023)
+  #expect(
+    Set(offsets.map {
+      SIMD3<Int>(
+        Int(($0.x * 1_000_000).rounded()),
+        Int(($0.y * 1_000_000).rounded()),
+        Int(($0.z * 1_000_000).rounded())
+      )
+    }).count > 800
+  )
+  let boundaryMagnitudes: [Float] = zip(flowed, reference).compactMap { pair in
+    let (candidate, baseline) = pair
+    guard candidate.region == .cervical,
+      candidate.column == 0
+        || candidate.column == CrowBodyFeatherTracts.cervicalColumnCount - 1
+    else { return nil }
+    return simd_distance(candidate.tipOffset, baseline.tipOffset)
+  }
+  #expect(boundaryMagnitudes.max()! > 0.00085)
+  #expect(
+    zip(flowed, reference).allSatisfy { candidate, baseline in
+      candidate.region != .cervical || candidate.column != 0
+        || candidate.tipOffset.x < baseline.tipOffset.x - 0.00025
+    }
+  )
 }
 
 @Test("quiet head motion bends the cervical tract without moving the mantle")

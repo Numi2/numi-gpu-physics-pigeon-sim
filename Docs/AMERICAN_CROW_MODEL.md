@@ -339,6 +339,26 @@ coverage; the upper cervical collar remains a separate unresolved body target.
 These offsets are renderer estimates, not measured American-crow pteryla
 coordinates or perceptual-realism evidence.
 
+The following cervical-terminal pass keeps the same `896` follicles and the
+compact `128`-byte immutable body-vane morphology. The uploaded tip remains the
+reference chord consumed by CPU and Metal projected-length classification;
+only the dynamic state applies a deterministic row/column/side displacement.
+Offsets remain below `2.3 mm`, and a `1.2 mm` tapered extension over shoulder
+columns `0...2` overlaps the mantle root field without moving either root
+field. The full owner count (`3,212`) and per-frame vane work (`685,530` raster
+vertex invocations at this gate) remain exact.
+
+At a fresh lateral-front standing view `(0.38, -0.05)`, `0.50 m`, and
+`1200 x 675`, baseline and candidate five-frame enclosed-hole pixels,
+components, largest components, and expected apertures are exact at
+`4,5,4,3,4`, `3,5,4,3,3`, `2,1,1,1,2`, and all zero. Fully covered AOV pixels
+move by `+7,+1,-2,-3,+7`; minimum full-frame SSIM is `0.999853` with no more
+than `1,960 / 810,000` changed pixels. The inspected frame shows de-locked
+cervical terminals and no new shoulder aperture, but the collar remains
+readable. This rejects additional terminal amplitude as a complete solution;
+the next pass must localize the material or neighboring-tract handoff instead.
+This is executable simulated morphology, not an anatomical measurement.
+
 At showcase material quality, body-feather anisotropy now resolves two bounded
 optical barb banks around a stable feather-local axis. The lobe pair follows
 the same identity and axial phase as its vane while body-class transverse

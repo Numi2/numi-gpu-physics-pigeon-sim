@@ -333,6 +333,21 @@ largest components `14, 11, 13, 16, 14`, and expected apertures `0, 0, 2, 0,
 pixels change. Inspection shows no new breast seam or serrated contour. The
 terminal phases are estimated rendering morphology, not measured crow feather
 attachments or proof that the remaining cervical collar is solved.
+The cervical tract now applies the same topology-neutral principle to all
+`896` neck vanes. Its immutable `128`-byte Metal morphology retains the former
+tip for projected-length classification; Swift and Metal add an identity-stable
+low-discrepancy terminal displacement only after selection, with a shallow
+`1.2 mm` overlap bias over the first three shoulder columns. Every root,
+reference chord, identity, selected owner, and raster invocation remains fixed.
+At a new lateral-front standing gate, yaw/pitch `(0.38, -0.05)`, distance
+`0.50 m`, and `1200 x 675`, five-frame holes/components/largest holes remain
+exactly `4,5,4,3,4` / `3,5,4,3,3` / `2,1,1,1,2`; expected apertures stay zero.
+Fully covered pixels change by `+7,+1,-2,-3,+7`, minimum beauty SSIM is
+`0.999853`, and at most `1,960 / 810,000` pixels change. Inspection confirms no
+new neck or shoulder gap and less phase-locked terminal rake, but a readable
+collar remains; its next owner is not qualified by adding more terminal
+amplitude. These are simulated contour-feather offsets, not measured follicle
+or feather dimensions.
 The first projected-size handoff now consumes those same records when an
 individual feather reaches `480` final-output pixels. Each eligible feather
 then resolves `72` identity-varied barb pairs per side as four connected,

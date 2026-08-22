@@ -832,7 +832,9 @@ enum CrowBodyVaneRecords {
   }
 
   static func morphologyRecords() -> [CrowBodyVaneMorphologyGPU] {
-    CrowBodyFeatherTracts.samples().enumerated().map { index, sample in
+    CrowBodyFeatherTracts.samples(
+      appliesCervicalTerminalFlow: false
+    ).enumerated().map { index, sample in
       let identityHash = stableHash(identity(of: sample))
       return CrowBodyVaneMorphologyGPU(
         rootAndRootWidth: SIMD4<Float>(
@@ -1016,7 +1018,7 @@ enum CrowBodyVaneRecords {
     for sample: CrowBodyFeatherTractSample,
     projectedPixelsPerMeter: Float
   ) -> CrowBodyVaneTopology {
-    let length = simd_distance(sample.rootOffset, sample.tipOffset)
+    let length = sample.lodReferenceLengthMeters
     let tessellation = CrowFeatherCoverageLOD.tessellation(
       lengthMeters: length,
       projectedPixelsPerMeter: projectedPixelsPerMeter,

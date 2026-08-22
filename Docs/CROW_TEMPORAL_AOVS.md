@@ -160,6 +160,17 @@ distance for older or synthetic zero-reserved records. This keeps projected
 dephased; actual endpoint distance still owns conservative frustum and depth
 bounds. Record stride, identities, curve counts, and indirect layout are
 unchanged.
+Body-vane cervical flow follows the same classification boundary without
+adding a packed field. The immutable morphology's reference tip still owns
+projected-length topology; the dynamic CPU oracle and Metal state reconstruct
+the same row/column/side terminal displacement after selection and before the
+existing cervical affine transform. At the `1200 x 675`, five-frame
+lateral-front standing audit `(0.38, -0.05)` from `0.50 m`, selected body-vane
+owners remain `3,212`, raster invocations remain `685,530`, maximum normal-unit
+error is exact, and the complete hole/component/largest-hole/aperture series is
+unchanged. Fully covered AOV deltas are `+7,+1,-2,-3,+7`; the localized beauty
+change has minimum SSIM `0.999853`. This is a topology and temporal-parity gate,
+not a claim that the remaining visible collar has been eliminated.
 Schema `17` separately records projected-size barbule candidates,
 frustum-visible and retained detailed owners, procedural barbule vertex count,
 and the exact number of identity pixels won by geometry kind `4`. This

@@ -3226,6 +3226,33 @@ inline float3 crowBodyVaneAffineDirection(
     );
 }
 
+inline float3 crowCervicalTerminalFlowOffset(
+    CrowBodyVaneMorphologyGPU record) {
+    if(uint(record.morphology.y)!=0u){return float3(0.0f);}
+    uint row=uint(record.morphology.z);
+    uint column=uint(record.morphology.w);
+    uint inventoryIndex=record.identity.x&0x00ffffffu;
+    uint sideIndex=inventoryIndex<448u?0u:1u;
+    float side=sideIndex==0u?-1.0f:1.0f;
+    float axialPhase=(float((row*17u+column*23u+sideIndex*11u)%37u)+0.5f)
+        /37.0f-0.5f;
+    float circumferentialPhase=
+        (float((row*29u+column*13u+sideIndex*19u)%41u)+0.5f)
+        /41.0f-0.5f;
+    float axial=float(column)/13.0f;
+    float boundaryEnvelope=0.55f+0.45f*sin(M_PI_F*axial);
+    float shoulderOverlap=max(0.0f,1.0f-float(column)/3.0f);
+    float3 tangent=safeNormalizeCrow(
+        cross(float3(1.0f,0.0f,0.0f),record.normalAndCamber.xyz),
+        float3(0.0f,side,0.0f)
+    );
+    return float3(
+        0.0034f*axialPhase*boundaryEnvelope-0.0012f*shoulderOverlap,
+        0.0f,0.0f
+    )
+        +tangent*(0.0019f*circumferentialPhase*boundaryEnvelope);
+}
+
 inline CrowBodyVaneDynamicState crowBodyVaneDynamicState(
     CrowBodyVaneMorphologyGPU record,
     device const CrowBodyVanePoseUniforms& pose,
@@ -3233,7 +3260,8 @@ inline CrowBodyVaneDynamicState crowBodyVaneDynamicState(
     bool current) {
     CrowBodyVaneDynamicState state;
     state.root=record.rootAndRootWidth.xyz;
-    state.tip=record.tipAndMaximumWidth.xyz;
+    state.tip=record.tipAndMaximumWidth.xyz
+        +crowCervicalTerminalFlowOffset(record);
     state.normal=record.normalAndCamber.xyz;
     uint region=uint(record.morphology.y);
     if(region==0u){

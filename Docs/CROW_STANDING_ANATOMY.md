@@ -719,6 +719,23 @@ serrated silhouette. The remaining upper collar is owned outside this ventral
 field and remains the next body target. This is simulated terminal morphology,
 not an anatomical measurement or all-angle realism proof.
 
+The cervical follow-up retains every one of its `896` roots while moving only
+dynamic terminals after CPU/Metal LOD selection. Coprime row/column phases
+produce independent bilateral axial and circumferential flow below `2.3 mm`;
+the first three shoulder columns add a tapered `1.2 mm` overlap into the mantle
+root field. The immutable Metal record continues to carry the reference tip,
+so all `3,212` selected body vanes and `685,530` raster vertex invocations stay
+exact at the diagnostic scale.
+
+At a previously unused lateral-front standing angle, yaw/pitch
+`(0.38, -0.05)` from `0.50 m` at `1200 x 675`, five-frame enclosed-hole pixels
+(`4, 5, 4, 3, 4`), components (`3, 5, 4, 3, 3`), largest holes
+(`2, 1, 1, 1, 2`), and zero expected apertures are exact. Fully covered pixels
+change by only `+7, +1, -2, -3, +7`; minimum SSIM is `0.999853`. Inspection
+shows a less uniform cervical rake with no opened neck seam, but the collar is
+still visible. The pass is therefore retained as terminal-morphology progress,
+not evidence that the neck handoff is solved or that the offsets are measured.
+
 The next body-gap trace separated an actual femoral insertion seam from the
 larger intentional spaces bounded by class-`11` retracting toes. At high-side
 phase `0.3125`, the temporal identity AOV mapped the nine-pixel class-`0`/

@@ -21,6 +21,10 @@ struct CrowBodyFeatherTractSample: Equatable {
   let column: Int
   let rootOffset: SIMD3<Float>
   let tipOffset: SIMD3<Float>
+  /// Pre-terminal-flow shaft length used by CPU LOD selection. The immutable
+  /// Metal morphology stores the matching reference tip, so terminal breakup
+  /// cannot churn topology near a projected-length threshold.
+  let lodReferenceLengthMeters: Float
   let planeNormal: SIMD3<Float>
   let rootWidthMeters: Float
   let maximumWidthMeters: Float
@@ -123,7 +127,8 @@ enum CrowBodyFeatherTracts {
   }
 
   static func samples(
-    neckPose: CrowStandingNeckPose? = nil
+    neckPose: CrowStandingNeckPose? = nil,
+    appliesCervicalTerminalFlow: Bool = true
   ) -> [CrowBodyFeatherTractSample] {
     var result: [CrowBodyFeatherTractSample] = []
     result.reserveCapacity(
@@ -133,7 +138,11 @@ enum CrowBodyFeatherTracts {
           + humeralRowCount * humeralColumnCount
           + scapularRowCount * scapularColumnCount)
     )
-    appendCervical(neckPose: neckPose, to: &result)
+    appendCervical(
+      neckPose: neckPose,
+      appliesTerminalFlow: appliesCervicalTerminalFlow,
+      to: &result
+    )
     appendMantle(to: &result)
     appendHumeral(to: &result)
     appendScapular(to: &result)
@@ -142,6 +151,7 @@ enum CrowBodyFeatherTracts {
 
   private static func appendCervical(
     neckPose: CrowStandingNeckPose?,
+    appliesTerminalFlow: Bool,
     to result: inout [CrowBodyFeatherTractSample]
   ) {
     for side: Float in [-1, 1] {
@@ -220,7 +230,7 @@ enum CrowBodyFeatherTracts {
           let length =
             (0.0183 - 0.0032 * axial)
             * (1 + 0.060 * shapeIdentity + 0.025 * lengthIdentity)
-          let unposedTip =
+          let unposedReferenceTip =
             unposedRoot
             + SIMD3<Float>(
               -length,
@@ -230,6 +240,15 @@ enum CrowBodyFeatherTracts {
               -0.001 - 0.0025 * max(0, -sin(angle))
                 + 0.00055 * shapeIdentity * sin(Float.pi * axial)
             )
+          let terminalFlow = appliesTerminalFlow
+            ? cervicalTerminalFlowOffset(
+              side: side,
+              row: row,
+              column: column,
+              planeNormal: unposedNormal
+            )
+            : .zero
+          let unposedTip = unposedReferenceTip + terminalFlow
           let root =
             neckPose?.transform(
               offset: unposedRoot,
@@ -257,6 +276,10 @@ enum CrowBodyFeatherTracts {
               column: column,
               rootOffset: root,
               tipOffset: tip,
+              lodReferenceLengthMeters: simd_distance(
+                unposedRoot,
+                unposedReferenceTip
+              ),
               planeNormal: planeNormal,
               rootWidthMeters: 0.00185 * (1 + 0.080 * rootIdentity),
               maximumWidthMeters: 1.03 * (0.00318 - 0.00034 * axial)
@@ -294,6 +317,40 @@ enum CrowBodyFeatherTracts {
         }
       }
     }
+  }
+
+  /// Identity-stable low-discrepancy terminal flow for the cervical tract.
+  /// Roots remain exact; the full displacement is transported by the same
+  /// column neck transform as the reference shaft.
+  static func cervicalTerminalFlowOffset(
+    side: Float,
+    row: Int,
+    column: Int,
+    planeNormal: SIMD3<Float>
+  ) -> SIMD3<Float> {
+    let sideIndex = side < 0 ? 0 : 1
+    let axialPhase =
+      (Float((row * 17 + column * 23 + sideIndex * 11) % 37) + 0.5) / 37
+      - 0.5
+    let circumferentialPhase =
+      (Float((row * 29 + column * 13 + sideIndex * 19) % 41) + 0.5) / 41
+      - 0.5
+    let axial = Float(column) / Float(cervicalColumnCount - 1)
+    let boundaryEnvelope = 0.55 + 0.45 * sin(.pi * axial)
+    // The first three columns interleave with the mantle. A shallow extension
+    // bias makes their terminals overlap that root field instead of exposing a
+    // phase-broken but still readable circular handoff.
+    let shoulderOverlap = max(0, 1 - Float(column) / 3)
+    let tangent = normalized(
+      simd_cross(SIMD3<Float>(1, 0, 0), planeNormal),
+      fallback: SIMD3<Float>(0, side, 0)
+    )
+    return SIMD3<Float>(
+      0.0034 * axialPhase * boundaryEnvelope - 0.0012 * shoulderOverlap,
+      0,
+      0
+    )
+      + tangent * (0.0019 * circumferentialPhase * boundaryEnvelope)
   }
 
   static func cervicalRootSurface(
@@ -474,6 +531,7 @@ enum CrowBodyFeatherTracts {
               column: column,
               rootOffset: root,
               tipOffset: tip,
+              lodReferenceLengthMeters: simd_distance(root, tip),
               planeNormal: normalized(
                 SIMD3<Float>(
                   0.08 + 0.025 * shapeIdentity,
@@ -612,6 +670,7 @@ enum CrowBodyFeatherTracts {
               column: column,
               rootOffset: root,
               tipOffset: tip,
+              lodReferenceLengthMeters: simd_distance(root, tip),
               planeNormal: normalized(
                 SIMD3<Float>(
                   0.09,
@@ -759,6 +818,7 @@ enum CrowBodyFeatherTracts {
               column: column,
               rootOffset: root,
               tipOffset: tip,
+              lodReferenceLengthMeters: simd_distance(root, tip),
               planeNormal: normalized(
                 SIMD3<Float>(
                   0.10,
