@@ -191,6 +191,19 @@ remaining on a buried centerline. Interior barbs stop at `97%` of the owning
 vane width, five bounded terminal bundles complete each tip, and all emitted
 detail keeps the parent class-`6` AOV identity. Follicles, centerline tips,
 widths, inventory, and standing anatomy remain unchanged.
+Resolved cervical, mantle, humeral, and scapular vanes now use a five-strip
+transverse crown once an individual feather reaches `24` final-output pixels.
+The prior three-strip tier exposed a broad planar center facet and repeated it
+as coherent shoulder ribs. Sub-`24 px` silhouettes remain one strip, while the
+existing close/offline tiers remain five and seven strips. A first proximal-
+underlayer candidate was rejected for opening a sawtooth neck seam; suppressing
+explicit body raches was also rejected because it did not remove the ribs. At a
+new `1200 x 675` rear-port yaw/pitch `(-1.74,0.38)` A/B, active coverage stays
+exactly `164,876` pixels, enclosed holes stay `8/8/1`, and the expected lower-
+body aperture stays zero. Fully covered pixels change by only `+3`; class-`5`
+and class-`6` peak luminance remain exact while local neighbour variation rises
+by `4.28%` and `5.29%`, respectively. This is simulated screen-space feather
+refinement, not measured crow morphology or proof of perceptual equivalence.
 At the opposite standing diagnostic view, the humeral/scapular base spectrum
 and broader optical lobe reduce class-`6` mean scene-linear luminance by
 `8.31%`, standard deviation by `10.57%`, and same-class neighbour contrast by

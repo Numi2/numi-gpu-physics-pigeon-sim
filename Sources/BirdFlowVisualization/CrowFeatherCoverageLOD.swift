@@ -19,6 +19,18 @@ struct CrowFeatherTessellation: Equatable {
 enum CrowFeatherCoverageLOD {
   static let verticalFieldOfViewRadians: Float = 48 * .pi / 180
 
+  /// A resolved body contour uses a five-strip crown even when its length is
+  /// still in the aggregate-mesostructure tier. Three strips leave a broad
+  /// planar center facet whose repeated highlight reads as a parallel rib.
+  /// Far silhouettes retain the one-strip tier; close and offline tiers are
+  /// already at least this dense.
+  static func bodyTractMinimumWidthSections(
+    lengthMeters: Float,
+    projectedPixelsPerMeter: Float
+  ) -> Int {
+    lengthMeters * projectedPixelsPerMeter >= 24 ? 5 : 1
+  }
+
   static func projectedPixelsPerMeter(
     viewportHeight: Int,
     cameraDistanceMeters: Float

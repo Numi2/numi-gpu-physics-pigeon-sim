@@ -3,6 +3,29 @@ import simd
 
 @testable import BirdFlowVisualization
 
+@Test("resolved body tracts use a smooth five-strip crown")
+func resolvedBodyTractsUseSmoothCrown() {
+  func widthSections(projectedLength: Float) -> Int {
+    let tessellation = CrowFeatherCoverageLOD.tessellation(
+      lengthMeters: 1,
+      projectedPixelsPerMeter: projectedLength,
+      baseAxialSections: 8
+    )
+    return max(
+      tessellation.widthSections,
+      CrowFeatherCoverageLOD.bodyTractMinimumWidthSections(
+        lengthMeters: 1,
+        projectedPixelsPerMeter: projectedLength
+      )
+    )
+  }
+
+  #expect(widthSections(projectedLength: 12) == 1)
+  #expect(widthSections(projectedLength: 24) == 5)
+  #expect(widthSections(projectedLength: 120) == 5)
+  #expect(widthSections(projectedLength: 480) == 7)
+}
+
 @Test("body feather mesostructure resolves a nested anatomical hierarchy")
 func bodyFeatherMesostructureResolvesHierarchy() {
   let feather = CrowBodyContourShingles.samples().first { $0.region == .dorsal }!

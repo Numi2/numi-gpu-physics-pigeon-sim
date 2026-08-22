@@ -574,6 +574,21 @@ components, `10` expected-aperture pixels in `4` components, and the `44`-pixel
 worst hole also stayed exact. These are deterministic raster gates, not proof
 of measured feather behavior or perceptual realism.
 
+The ordinary body-tract tier now samples each resolved transverse crown with
+five strips instead of three once the individual vane reaches `24` output
+pixels. This removes the broad center plane that repeated as longitudinal ribs
+without moving roots, tips, vane edges, identities, or retained rachis/barb
+geometry. Far silhouettes remain one strip, and the established close/offline
+tiers remain five/seven strips. A proximal plumulaceous split was visually
+rejected because it opened a sawtooth neck seam, and an explicit-rachis LOD
+experiment was rejected because the rib pattern remained. At a previously
+unused rear-port yaw/pitch `(-1.74,0.38)`, distance `0.52 m`, and `1200 x 675`,
+the accepted A/B keeps `164,876` active pixels, `8/8/1` enclosed
+pixels/components/largest component, and zero expected aperture. Fully covered
+pixels increase by `3`; class-`5`/`6` maxima remain exact while same-class
+neighbour variation rises `4.28%`/`5.29%`. This qualifies one simulated raster
+view and the deterministic LOD contract, not all-angle or perceptual realism.
+
 The exposed class-`6` scapular layer now shares its deployed transverse crown
 with retained rachis and barb geometry while preserving stable parent-class AOV
 ownership. Interior barbs remain inside `97%` of the local vane width and only
@@ -968,9 +983,9 @@ simulated terminal ownership and raster continuity, not measured rectrix
 morphology or perceptual realism.
 
 The canonical README sequence is fully simulated and contains the native hold,
-transition, and flight path: `800 x 450`, `72` frames at `24 fps`, `7,855,116`
+transition, and flight path: `800 x 450`, `72` frames at `24 fps`, `7,917,054`
 bytes, SHA-256
-`20f931d68a7fcfd6c79bc7a1995b9dee1d4081df7633433ae74a37eb3d22c9a0`.
+`f0fdc5a0c83e85b14a28ab75b870a8b7b8900272b9308192a4ea85ce47c37c28`.
 The audited stage PNGs at frames `0`, `35`, and `71` are distinct and retain
 the simulated hold, geometric deployment, and sustained-flight states.
 

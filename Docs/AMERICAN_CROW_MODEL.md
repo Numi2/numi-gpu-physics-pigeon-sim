@@ -332,6 +332,23 @@ space. This is a future-compute optical approximation: it adds no geometry,
 does not alter the AOV topology owner, and is not measured American-crow
 barbule microstructure.
 
+Body-tract vane crowns now retain at least five transverse strips when a
+feather spans `24` final-output pixels. The former three-strip tier represented
+the parabolic crown with one broad central plane; repeated cervical and mantle
+planes formed coherent ribs at an oblique view. Far silhouettes remain one
+strip, the `120 px` close tier remains five, and the `480 px` offline tier
+remains seven. Roots, tips, widths, feather identities, LOD thresholds, and
+mesostructure are unchanged. At yaw/pitch `(-1.74,0.38)`, distance `0.52 m`,
+and `1200 x 675`, active coverage remains `164,876` pixels, all `8` enclosed
+components remain single pixels, and the expected lower-body aperture remains
+zero; fully covered pixels change `163,811 -> 163,814`. Class-`5` and class-`6`
+peak luminance are exact, while their local same-class neighbour variation
+changes `0.002910 -> 0.003034` and `0.001899 -> 0.001999`. The implementation
+is an estimated rendering discretization. General pennaceous feather hierarchy
+is supported by [Ng et al. (2014)](https://pmc.ncbi.nlm.nih.gov/articles/PMC4202321/)
+and [Widelitz et al. (2019)](https://pmc.ncbi.nlm.nih.gov/articles/PMC6953487/),
+but neither source supplies these American-crow crown sections or thresholds.
+
 The estimated femoral field keeps its `15 x 18` body-surface-rooted inventory
 (`270` vanes per side) and all root and joint coordinates. A temporal-identity
 trace of the high-side transition opening localized the owning geometry to

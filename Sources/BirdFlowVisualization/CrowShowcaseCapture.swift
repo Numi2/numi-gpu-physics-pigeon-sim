@@ -2879,6 +2879,11 @@ private struct CrowMeshBuilder {
         axialStartFraction: sample.pennaceousStartFraction,
         surfaceFeatherClass: sample.surfaceFeatherClass,
         lodLengthMeters: simd_distance(sample.rootOffset, sample.tipOffset),
+        minimumWidthSections:
+          CrowFeatherCoverageLOD.bodyTractMinimumWidthSections(
+            lengthMeters: simd_distance(sample.rootOffset, sample.tipOffset),
+            projectedPixelsPerMeter: projectedPixelsPerMeter
+          ),
         projectedPixelsPerMeter: projectedPixelsPerMeter,
         to: &vertices
       )
@@ -4940,6 +4945,7 @@ private struct CrowMeshBuilder {
     axialStartFraction: Float = 0,
     surfaceFeatherClass: UInt32 = 0,
     lodLengthMeters: Float? = nil,
+    minimumWidthSections: Int = 0,
     projectedPixelsPerMeter: Float,
     to vertices: inout [ColoredVertex]
   ) {
@@ -4954,6 +4960,7 @@ private struct CrowMeshBuilder {
       projectedPixelsPerMeter: projectedPixelsPerMeter,
       baseAxialSections: sections
     )
+    let widthSections = max(tessellation.widthSections, minimumWidthSections)
     typealias BladePoint = (position: SIMD3<Float>, parameters: SIMD4<Float>)
     func crossSection(at index: Int) -> [BladePoint] {
       let localFraction = Float(index) / Float(tessellation.axialSections)
@@ -4978,9 +4985,9 @@ private struct CrowMeshBuilder {
         + normal * (camber * sin(Float.pi * t))
         + widthAxis * (lateralSweep * sin(Float.pi * t))
       var result: [BladePoint] = []
-      result.reserveCapacity(tessellation.widthSections + 1)
-      for widthIndex in 0...tessellation.widthSections {
-        let fraction = Float(widthIndex) / Float(tessellation.widthSections)
+      result.reserveCapacity(widthSections + 1)
+      for widthIndex in 0...widthSections {
+        let fraction = Float(widthIndex) / Float(widthSections)
         let signedWidth = 2 * fraction - 1
         let transverseEnvelope = max(0, 1 - signedWidth * signedWidth)
         let localWidth = width * (1 + vaneAsymmetry * signedWidth)
@@ -5001,7 +5008,7 @@ private struct CrowMeshBuilder {
       let axialSecond = grid[min(tessellation.axialSections, axialIndex + 1)][widthIndex]
         .position
       let widthFirst = grid[axialIndex][max(0, widthIndex - 1)].position
-      let widthSecond = grid[axialIndex][min(tessellation.widthSections, widthIndex + 1)]
+      let widthSecond = grid[axialIndex][min(widthSections, widthIndex + 1)]
         .position
       var resolved = safeNormalize(
         simd_cross(axialSecond - axialFirst, widthSecond - widthFirst),
@@ -5022,7 +5029,7 @@ private struct CrowMeshBuilder {
       )
     }
     for index in 0..<tessellation.axialSections {
-      for widthIndex in 0..<tessellation.widthSections {
+      for widthIndex in 0..<widthSections {
         appendPoint(axialIndex: index, widthIndex: widthIndex)
         appendPoint(axialIndex: index, widthIndex: widthIndex + 1)
         appendPoint(axialIndex: index + 1, widthIndex: widthIndex + 1)
