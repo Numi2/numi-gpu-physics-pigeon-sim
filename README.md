@@ -320,6 +320,19 @@ Metal expansion into `74,496` temporal/AOV vertices instead of authoring those
 tubes on the CPU. The continuity and barb oracle remains in the accepted body
 surface stream; future meshlet or hardware-curve emission can consume the same
 records without reducing the `1,304`-feather ventral inventory.
+The subsequent ventral-terminal pass keeps every follicle fixed but dephases
+the body-surface tip attachment independently on the two sides. Irrational
+row/column phases bound axial motion to `+/-1.9 mm` and circumferential motion
+to `+/-0.014 rad`, below half one pectoral row interval. A pre-flow reference
+length is retained in the existing curve-record payload, so the `480/800 px`
+barb/barbule handoffs remain exact while vane geometry changes. At a new
+oblique-underside yaw/pitch `(-0.52, -0.24)`, `0.46 m`, `1200 x 675` gate,
+five-frame hole pixels `20, 18, 24, 29, 20`, components `4, 6, 10, 10, 4`,
+largest components `14, 11, 13, 16, 14`, and expected apertures `0, 0, 2, 0,
+0` remain exact. Minimum beauty SSIM is `0.996480`; at most `20,548 / 810,000`
+pixels change. Inspection shows no new breast seam or serrated contour. The
+terminal phases are estimated rendering morphology, not measured crow feather
+attachments or proof that the remaining cervical collar is solved.
 The first projected-size handoff now consumes those same records when an
 individual feather reaches `480` final-output pixels. Each eligible feather
 then resolves `72` identity-varied barb pairs per side as four connected,

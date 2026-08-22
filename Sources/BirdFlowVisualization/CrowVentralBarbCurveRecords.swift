@@ -96,10 +96,8 @@ enum CrowVentralBarbCurveRecords {
     _ record: CrowVentralRachisCurveRecordGPU,
     projectedPixelsPerMeter: Float
   ) -> Bool {
-    simd_distance(
-      xyz(record.rootAndPennaceousStart),
-      xyz(record.tipAndCamber)
-    ) * projectedPixelsPerMeter >= projectedBarbuleThresholdPixels
+    lodReferenceLength(record) * projectedPixelsPerMeter
+      >= projectedBarbuleThresholdPixels
   }
 
   static func activeRecordIndices(
@@ -108,13 +106,22 @@ enum CrowVentralBarbCurveRecords {
   ) -> [UInt32] {
     records.indices.compactMap { index in
       let record = records[index]
-      let length = simd_distance(
-        xyz(record.rootAndPennaceousStart),
-        xyz(record.tipAndCamber)
-      )
+      let length = lodReferenceLength(record)
       return length * projectedPixelsPerMeter
         >= projectedFeatherThresholdPixels ? UInt32(index) : nil
     }
+  }
+
+  private static func lodReferenceLength(
+    _ record: CrowVentralRachisCurveRecordGPU
+  ) -> Float {
+    let retained = record.lateralSweepAndReserved.y
+    return retained > 0
+      ? retained
+      : simd_distance(
+        xyz(record.rootAndPennaceousStart),
+        xyz(record.tipAndCamber)
+      )
   }
 
   static func visibilityUniforms(
@@ -261,7 +268,7 @@ enum CrowVentralBarbCurveRecords {
     let explicitCurvesActive =
       explicitCurvesEnabled
       && CrowVentralFeatherTracts.retainsCrownRachis(feather)
-      && simd_distance(feather.rootOffset, feather.tipOffset)
+      && feather.lodReferenceLengthMeters
         * projectedPixelsPerMeter >= projectedFeatherThresholdPixels
     let segments = CrowFeatherMesostructure.segments(
       for: feather,

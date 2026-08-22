@@ -14,6 +14,7 @@ struct CrowVentralFeatherTractSample: Equatable {
   let rootSurfaceOffset: SIMD3<Float>
   let rootOffset: SIMD3<Float>
   let tipOffset: SIMD3<Float>
+  let lodReferenceLengthMeters: Float
   let planeNormal: SIMD3<Float>
   let rootWidthMeters: Float
   let maximumWidthMeters: Float
@@ -204,11 +205,44 @@ enum CrowVentralFeatherTracts {
           let length =
             (baseLengthMeters + 0.010 * axial + 0.003 * rowFraction)
             * (1 + 0.070 * shapeIdentity + 0.035 * lengthIdentity)
-          let tipX = max(
+          let referenceTipX = max(
             rootX - length,
             CrowBodyAnatomy.loftRings.first!.x
           )
-          let tipTheta = theta - 0.030 - 0.015 * axial + 0.009 * rootIdentity
+          let referenceTipTheta = theta - 0.030 - 0.015 * axial
+            + 0.009 * rootIdentity
+          let referenceTipSurface = mirroredSurfacePoint(
+            x: referenceTipX,
+            theta: referenceTipTheta,
+            side: side
+          )
+          let referenceTipNormal = mirroredSurfaceNormal(
+            x: referenceTipX,
+            theta: referenceTipTheta,
+            side: side
+          )
+          let referenceTip = referenceTipSurface
+            + shellClearanceMeters * referenceTipNormal
+          let terminalAxialOffset = terminalAxialOffsetMeters(
+            region: region,
+            side: side,
+            row: row,
+            column: column,
+            columnCount: columnCount
+          )
+          let tipX = max(
+            rootX - length + terminalAxialOffset,
+            CrowBodyAnatomy.loftRings.first!.x
+          )
+          let terminalThetaOffset = terminalThetaOffsetRadians(
+            region: region,
+            side: side,
+            row: row,
+            column: column,
+            columnCount: columnCount
+          )
+          let tipTheta = theta - 0.030 - 0.015 * axial
+            + 0.009 * rootIdentity + terminalThetaOffset
           let tipSurface = mirroredSurfacePoint(x: tipX, theta: tipTheta, side: side)
           let tipNormal = mirroredSurfaceNormal(x: tipX, theta: tipTheta, side: side)
           let tip = tipSurface + shellClearanceMeters * tipNormal
@@ -261,6 +295,7 @@ enum CrowVentralFeatherTracts {
               rootSurfaceOffset: rootSurface,
               rootOffset: root,
               tipOffset: tip,
+              lodReferenceLengthMeters: simd_distance(root, referenceTip),
               planeNormal: planeNormal,
               rootWidthMeters:
                 region == .pectoral && column == 0
@@ -366,6 +401,75 @@ enum CrowVentralFeatherTracts {
     let unwrapped =
       Float(row) * 0.618_033_988_75 + regionOffset + 0.018 * identity
     return unwrapped - unwrapped.rounded(.down)
+  }
+
+  /// Dephases the surface-bound tips that remain coherent after follicle-flow,
+  /// crown, and optical variation. Two irrational row/column increments and a
+  /// side-specific offset prevent a frontal course from closing into a
+  /// bilateral ring; the resulting axial and angular offsets remain below
+  /// half one pectoral row interval and do not move any follicle.
+  static func terminalFlowPhase(
+    region: CrowVentralFeatherTractRegion,
+    side: Float,
+    row: Int,
+    column: Int
+  ) -> Float {
+    let regionOffset: Float = region == .pectoral ? 0.07 : 0.41
+    let sideOffset: Float = side < 0 ? 0.173 : 0.619
+    let identity = identityVariation(
+      region: region,
+      row: row,
+      column: column,
+      salt: side < 0 ? 0xA24B_AED4 : 0x9FB2_1C65
+    )
+    let unwrapped = Float(row) * 0.381_966_011_25
+      + Float(column) * 0.236_067_977_50
+      + regionOffset + sideOffset + 0.018 * identity
+    return unwrapped - unwrapped.rounded(.down)
+  }
+
+  static func terminalAxialOffsetMeters(
+    region: CrowVentralFeatherTractRegion,
+    side: Float,
+    row: Int,
+    column: Int,
+    columnCount: Int
+  ) -> Float {
+    0.0038
+      * terminalFlowEnvelope(column: column, columnCount: columnCount)
+      * (terminalFlowPhase(
+        region: region,
+        side: side,
+        row: row,
+        column: column
+      ) - 0.5)
+  }
+
+  static func terminalThetaOffsetRadians(
+    region: CrowVentralFeatherTractRegion,
+    side: Float,
+    row: Int,
+    column: Int,
+    columnCount: Int
+  ) -> Float {
+    0.028
+      * terminalFlowEnvelope(column: column, columnCount: columnCount)
+      * (terminalFlowPhase(
+        region: region,
+        side: side,
+        row: row,
+        column: column
+      ) - 0.5)
+  }
+
+  private static func terminalFlowEnvelope(
+    column: Int,
+    columnCount: Int
+  ) -> Float {
+    let boundedCount = max(columnCount, 2)
+    let boundedColumn = min(max(column, 0), boundedCount - 1)
+    let axial = Float(boundedColumn) / Float(boundedCount - 1)
+    return 0.55 + 0.45 * sin(Float.pi * axial)
   }
 
   private static func mirroredSurfacePoint(

@@ -152,6 +152,14 @@ audit-readback geometry oracle. Prior-depth classification reports
 hierarchy; ordinary coverage reports `inactive` and zero bytes. These are
 executable work/residency counters, not a GPU speed claim; duration still
 requires a controlled repeated benchmark.
+Ventral curve records now use the previously reserved second lateral-sweep
+component for a pre-terminal-flow reference length. CPU LOD work generation and
+Metal barb/barbule classification consume that value, falling back to endpoint
+distance for older or synthetic zero-reserved records. This keeps projected
+`480/800 px` topology stable while the beauty vane's class-`7` surface tip is
+dephased; actual endpoint distance still owns conservative frustum and depth
+bounds. Record stride, identities, curve counts, and indirect layout are
+unchanged.
 Schema `17` separately records projected-size barbule candidates,
 frustum-visible and retained detailed owners, procedural barbule vertex count,
 and the exact number of identity pixels won by geometry kind `4`. This

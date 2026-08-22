@@ -51,7 +51,7 @@ enum CrowVentralRachisCurveRecords {
         ),
         lateralSweepAndReserved: SIMD4<Float>(
           feather.lateralSweepMeters,
-          0,
+          feather.lodReferenceLengthMeters,
           0,
           0
         ),
@@ -76,10 +76,7 @@ enum CrowVentralRachisCurveRecords {
     work.reserveCapacity(records.count * 4)
     for (recordIndex, record) in records.enumerated() {
       let sections = CrowFeatherCoverageLOD.tessellation(
-        lengthMeters: simd_distance(
-          xyz(record.rootAndPennaceousStart),
-          xyz(record.tipAndCamber)
-        ),
+        lengthMeters: lodReferenceLength(record),
         projectedPixelsPerMeter: projectedPixelsPerMeter,
         baseAxialSections: 7
       ).rachisSections
@@ -97,6 +94,18 @@ enum CrowVentralRachisCurveRecords {
       }
     }
     return work
+  }
+
+  private static func lodReferenceLength(
+    _ record: CrowVentralRachisCurveRecordGPU
+  ) -> Float {
+    let retained = record.lateralSweepAndReserved.y
+    return retained > 0
+      ? retained
+      : simd_distance(
+        xyz(record.rootAndPennaceousStart),
+        xyz(record.tipAndCamber)
+      )
   }
 
   static func crownSegments(

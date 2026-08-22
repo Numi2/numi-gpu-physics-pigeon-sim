@@ -319,6 +319,26 @@ therefore emits `3,104` intervals and `74,496` vertices without CPU triangle
 construction. The paired continuity/crown hierarchy remains an estimated
 rendering model, not evidence of measured American-crow rachis depth.
 
+The ventral tips now leave their formerly bilateral terminal stations while
+all `1,304` follicle roots remain exact. A deterministic low-discrepancy phase
+combines row, column, region, side, and stable identity; the resulting surface
+attachment offsets stay within `+/-1.9 mm` axially and `+/-0.014 rad`
+circumferentially, below half a pectoral row interval. The pre-offset tip length
+is retained in `lateralSweepAndReserved.y`, preserving the established
+projected-size topology owner without growing the `112`-byte curve record.
+CPU and Metal therefore keep the exact `746` future-close barb owners and
+`429,696` interval work items at the established diagnostic while endpoint
+parity stays below `5e-7 m` and sampled normal-vector distance below `1e-4`.
+At the new oblique-underside standing gate `(-0.52, -0.24)`, `0.46 m`, and
+`1200 x 675`, five-frame enclosed-hole pixels/components/largest components
+remain exactly `20,18,24,29,20` / `4,6,10,10,4` / `14,11,13,16,14`; expected
+apertures remain `0,0,2,0,0`. Fully covered AOV pixels change by `+1,0,+2,+8,+1`.
+Minimum beauty SSIM is `0.996480`, with no more than `20,548 / 810,000` changed
+pixels. The inspected frame has continuous lower-breast and leg insertion
+coverage; the upper cervical collar remains a separate unresolved body target.
+These offsets are renderer estimates, not measured American-crow pteryla
+coordinates or perceptual-realism evidence.
+
 At showcase material quality, body-feather anisotropy now resolves two bounded
 optical barb banks around a stable feather-local axis. The lobe pair follows
 the same identity and axial phase as its vane while body-class transverse

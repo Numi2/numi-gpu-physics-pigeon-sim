@@ -29,6 +29,7 @@ func crowVentralTractsCoverBreastAndAbdomenAtFullResolution() {
   #expect(samples.filter { $0.region == .pectoral }.count == 864)
   #expect(samples.filter { $0.region == .abdominal }.count == 440)
   #expect(samples.allSatisfy { $0.surfaceFeatherClass == 7 })
+  #expect(samples.allSatisfy { $0.lodReferenceLengthMeters > 0 })
   #expect(
     CrowVentralFeatherTractRegion.allCases.allSatisfy {
       CrowVentralFeatherTracts.surfaceFeatherClass(for: $0) == 7
@@ -119,6 +120,65 @@ func crowVentralTractsCoverBreastAndAbdomenAtFullResolution() {
       let linearDistance = abs(pair.0 - pair.1)
       #expect(min(linearDistance, 1 - linearDistance) > 0.30)
     }
+    let columnCount = region == .pectoral
+      ? CrowVentralFeatherTracts.pectoralColumnCount
+      : CrowVentralFeatherTracts.abdominalColumnCount
+    for side: Float in [-1, 1] {
+      let terminalPhases = (0..<rowCount).flatMap { row in
+        (0..<columnCount).map { column in
+          CrowVentralFeatherTracts.terminalFlowPhase(
+            region: region,
+            side: side,
+            row: row,
+            column: column
+          )
+        }
+      }
+      #expect(terminalPhases.allSatisfy { $0 >= 0 && $0 < 1 })
+      #expect(
+        Set(terminalPhases.map { Int(($0 * 100_000).rounded()) }).count
+          > 9 * terminalPhases.count / 10
+      )
+      for column in 0..<columnCount {
+        let coursePhases = (0..<rowCount).map {
+          CrowVentralFeatherTracts.terminalFlowPhase(
+            region: region,
+            side: side,
+            row: $0,
+            column: column
+          )
+        }
+        #expect(coursePhases.max()! - coursePhases.min()! > 0.80)
+      }
+      let axialOffsets = (0..<rowCount).flatMap { row in
+        (0..<columnCount).map { column in
+          CrowVentralFeatherTracts.terminalAxialOffsetMeters(
+            region: region,
+            side: side,
+            row: row,
+            column: column,
+            columnCount: columnCount
+          )
+        }
+      }
+      let thetaOffsets = (0..<rowCount).flatMap { row in
+        (0..<columnCount).map { column in
+          CrowVentralFeatherTracts.terminalThetaOffsetRadians(
+            region: region,
+            side: side,
+            row: row,
+            column: column,
+            columnCount: columnCount
+          )
+        }
+      }
+      #expect(axialOffsets.allSatisfy { abs($0) <= 0.0019 })
+      #expect(axialOffsets.min()! < -0.00175)
+      #expect(axialOffsets.max()! > 0.00175)
+      #expect(thetaOffsets.allSatisfy { abs($0) <= 0.014 })
+      #expect(thetaOffsets.min()! < -0.0125)
+      #expect(thetaOffsets.max()! > 0.0125)
+    }
   }
   #expect(samples.map(\.rootEnvelopeRatio).min()! >= 0.53)
   #expect(samples.map(\.rootEnvelopeRatio).max()! <= 0.621)
@@ -176,17 +236,25 @@ func crowVentralTractsCoverBreastAndAbdomenAtFullResolution() {
   let negative = samples.filter { $0.side == -1 }
   let positive = samples.filter { $0.side == 1 }
   #expect(negative.count == positive.count)
+  var independentlyTerminatedPairs = 0
   for pair in zip(negative, positive) {
     #expect(pair.0.region == pair.1.region)
     #expect(pair.0.row == pair.1.row && pair.0.column == pair.1.column)
     #expect(abs(pair.0.rootOffset.x - pair.1.rootOffset.x) < 1e-7)
     #expect(abs(pair.0.rootOffset.y + pair.1.rootOffset.y) < 1e-7)
     #expect(abs(pair.0.rootOffset.z - pair.1.rootOffset.z) < 1e-7)
-    #expect(abs(pair.0.tipOffset.y + pair.1.tipOffset.y) < 1e-7)
-    #expect(abs(pair.0.planeNormal.x - pair.1.planeNormal.x) < 1e-7)
-    #expect(abs(pair.0.planeNormal.y + pair.1.planeNormal.y) < 1e-7)
-    #expect(abs(pair.0.planeNormal.z - pair.1.planeNormal.z) < 1e-7)
+    if simd_distance(
+      pair.0.tipOffset,
+      SIMD3<Float>(pair.1.tipOffset.x, -pair.1.tipOffset.y, pair.1.tipOffset.z)
+    ) > 0.00025 {
+      independentlyTerminatedPairs += 1
+    }
+    #expect(pair.0.tipOffset.x < pair.0.rootOffset.x)
+    #expect(pair.1.tipOffset.x < pair.1.rootOffset.x)
+    #expect(abs(simd_length(pair.0.planeNormal) - 1) < 1e-5)
+    #expect(abs(simd_length(pair.1.planeNormal) - 1) < 1e-5)
   }
+  #expect(independentlyTerminatedPairs > 9 * negative.count / 10)
 
   for region in CrowVentralFeatherTractRegion.allCases {
     let regionSamples = samples.filter { $0.region == region }

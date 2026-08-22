@@ -704,6 +704,21 @@ hold/mid-transition/flight frames had SSIM `>= 0.999997` against the prior CPU
 expansion. This is executable raster and parity evidence, not a performance
 claim or an anatomical measurement.
 
+The next class-`7` geometry pass dephases terminal attachments rather than
+moving follicles or adding feathers. Each side receives an independent stable
+phase over row and axial course; offsets remain within `+/-1.9 mm` along the
+body and `+/-0.014 rad` around it. A retained pre-flow reference length keeps
+the established future-close curve thresholds and counts unchanged. At a fresh
+oblique-underside yaw/pitch `(-0.52, -0.24)`, distance `0.46 m`, and
+`1200 x 675`, five-frame hole pixels (`20, 18, 24, 29, 20`), components
+(`4, 6, 10, 10, 4`), largest components (`14, 11, 13, 16, 14`), and expected
+apertures (`0, 0, 2, 0, 0`) are exact against the mirrored-tip predecessor.
+Fully covered AOV pixels improve or stay exact by `+1, 0, +2, +8, +1`; minimum
+beauty SSIM is `0.996480`. Inspection exposes no new lower-breast seam or
+serrated silhouette. The remaining upper collar is owned outside this ventral
+field and remains the next body target. This is simulated terminal morphology,
+not an anatomical measurement or all-angle realism proof.
+
 The next body-gap trace separated an actual femoral insertion seam from the
 larger intentional spaces bounded by class-`11` retracting toes. At high-side
 phase `0.3125`, the temporal identity AOV mapped the nine-pixel class-`0`/

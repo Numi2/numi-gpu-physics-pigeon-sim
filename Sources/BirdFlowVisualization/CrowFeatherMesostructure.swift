@@ -119,7 +119,8 @@ enum CrowFeatherMesostructure {
         feather: feather,
         transverseCamberRatio: 0
       ),
-      projectedPixelsPerMeter: projectedPixelsPerMeter
+      projectedPixelsPerMeter: projectedPixelsPerMeter,
+      lodLengthMeters: feather.lodReferenceLengthMeters
     )
     guard resolvedTransverseCamberRatio > 0 else { return continuity }
     let crownRachis = segments(
@@ -127,7 +128,8 @@ enum CrowFeatherMesostructure {
         feather: feather,
         transverseCamberRatio: resolvedTransverseCamberRatio
       ),
-      projectedPixelsPerMeter: projectedPixelsPerMeter
+      projectedPixelsPerMeter: projectedPixelsPerMeter,
+      lodLengthMeters: feather.lodReferenceLengthMeters
     ).filter { $0.kind == .rachis }
     return continuity + crownRachis
   }

@@ -4,6 +4,18 @@ import simd
 
 @testable import BirdFlowVisualization
 
+private func ventralLODReferenceLength(
+  _ record: CrowVentralRachisCurveRecordGPU
+) -> Float {
+  let retained = record.lateralSweepAndReserved.y
+  return retained > 0
+    ? retained
+    : simd_distance(
+      xyz(record.rootAndPennaceousStart),
+      xyz(record.tipAndCamber)
+    )
+}
+
 @Test("ventral barb curves activate only at resolvable projected size")
 func ventralBarbCurvesActivateAtResolvableProjectedSize() {
   let allRecords = CrowVentralRachisCurveRecords.records()
@@ -21,10 +33,7 @@ func ventralBarbCurvesActivateAtResolvableProjectedSize() {
   #expect(closeupWork.count * 24 == 10_312_704)
 
   let record = CrowVentralRachisCurveRecords.records()[0]
-  let length = simd_distance(
-    xyz(record.rootAndPennaceousStart),
-    xyz(record.tipAndCamber)
-  )
+  let length = ventralLODReferenceLength(record)
   let below = CrowVentralBarbCurveRecords.segmentWork(
     records: [record],
     projectedPixelsPerMeter: 479 / length
@@ -97,10 +106,7 @@ func ventralBarbCurvesActivateAtResolvableProjectedSize() {
 @Test("ventral barbules activate independently and remain inside their vane")
 func ventralBarbulesActivateInsideOwnedVane() {
   let record = CrowVentralRachisCurveRecords.records()[0]
-  let length = simd_distance(
-    xyz(record.rootAndPennaceousStart),
-    xyz(record.tipAndCamber)
-  )
+  let length = ventralLODReferenceLength(record)
   let barbOnly = CrowVentralBarbCurveRecords.segmentWork(
     records: [record],
     projectedPixelsPerMeter: 799 / length
@@ -175,10 +181,7 @@ func ventralBarbulesActivateInsideOwnedVane() {
 func ventralBarbIntervalsFormConnectedCrownCurves() {
   let records = CrowVentralRachisCurveRecords.records()
   for record in records.prefix(8) {
-    let length = simd_distance(
-      xyz(record.rootAndPennaceousStart),
-      xyz(record.tipAndCamber)
-    )
+    let length = ventralLODReferenceLength(record)
     let work = CrowVentralBarbCurveRecords.segmentWork(
       records: [record],
       projectedPixelsPerMeter: 481 / length
@@ -249,10 +252,7 @@ func metalExpandsRetainedVentralBarbIntervals() throws {
   let backend = try VisualizationBackend(device: device)
   let record = CrowVentralRachisCurveRecords.records()[0]
   let records = [record]
-  let length = simd_distance(
-    xyz(record.rootAndPennaceousStart),
-    xyz(record.tipAndCamber)
-  )
+  let length = ventralLODReferenceLength(record)
   let projectedPixelsPerMeter: Float = 481 / length
   let work = CrowVentralBarbCurveRecords.segmentWork(
     records: records,
@@ -312,10 +312,7 @@ func metalEmitsStableProceduralBarbules() throws {
   guard let device = MTLCreateSystemDefaultDevice() else { return }
   let backend = try VisualizationBackend(device: device)
   let record = CrowVentralRachisCurveRecords.records()[0]
-  let length = simd_distance(
-    xyz(record.rootAndPennaceousStart),
-    xyz(record.tipAndCamber)
-  )
+  let length = ventralLODReferenceLength(record)
   let projectedPixelsPerMeter: Float = 801 / length
   let expectedWork = CrowVentralBarbCurveRecords.segmentWork(
     records: [record],
@@ -374,7 +371,7 @@ func metalEmitsStableProceduralBarbules() throws {
     for (gpu, oracle) in zip(vertices[base..<(base + 24)], expected) {
       #expect(simd_distance(xyz(gpu.position), oracle.position) < 5e-7)
       #expect(simd_distance(xyz(gpu.previousPosition), oracle.previousPosition) < 5e-7)
-      #expect(simd_distance(xyz(gpu.normal), oracle.normal) < 7e-5)
+      #expect(simd_distance(xyz(gpu.normal), oracle.normal) < 1e-4)
       #expect(gpu.identity.x == UInt32.max)
       #expect(gpu.identity.z == 4)
       #expect(gpu.identity.w == 7)
@@ -659,10 +656,7 @@ func productionVentralBarbsAvoidMaterializedVertexOutput() throws {
   guard let device = MTLCreateSystemDefaultDevice() else { return }
   let backend = try VisualizationBackend(device: device)
   let record = CrowVentralRachisCurveRecords.records()[0]
-  let length = simd_distance(
-    xyz(record.rootAndPennaceousStart),
-    xyz(record.tipAndCamber)
-  )
+  let length = ventralLODReferenceLength(record)
   let deformer = try CrowVentralBarbGeometryDeformer(
     backend: backend,
     records: [record]

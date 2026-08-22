@@ -1915,13 +1915,22 @@ inline bool crowVentralBarbInsidePlane(
     return dot(plane.xyz,center)+plane.w>=-radius;
 }
 
+inline float crowVentralLODReferenceLength(
+    thread const CrowVentralRachisCurveRecordGPU& record) {
+    float retained=record.lateralSweepAndReserved.y;
+    return retained>0.0f?retained:distance(
+        record.rootAndPennaceousStart.xyz,record.tipAndCamber.xyz
+    );
+}
+
 inline bool crowVentralBarbRecordVisible(
     thread const CrowVentralRachisCurveRecordGPU& record,
     constant CrowVentralBarbVisibilityUniforms& uniforms) {
     float3 root=record.rootAndPennaceousStart.xyz;
     float3 tip=record.tipAndCamber.xyz;
     float featherLength=distance(root,tip);
-    if(featherLength*uniforms.selection.x<uniforms.selection.y){return false;}
+    if(crowVentralLODReferenceLength(record)*uniforms.selection.x
+        <uniforms.selection.y){return false;}
     float maximumWidth=record.widthsEnvelopeAndAsymmetry.y
         *(1.0f+abs(record.widthsEnvelopeAndAsymmetry.w));
     float radius=0.5f*featherLength+maximumWidth
@@ -2026,9 +2035,8 @@ kernel void classifyCrowVentralBarbRecords(
         selected[recordIndex]=0u;
         return;
     }
-    bool barbules=distance(
-        record.rootAndPennaceousStart.xyz,record.tipAndCamber.xyz
-    )*uniforms.selection.x>=uniforms.barbuleSelection.x;
+    bool barbules=crowVentralLODReferenceLength(record)*uniforms.selection.x
+        >=uniforms.barbuleSelection.x;
     bool occluded=crowVentralBarbRecordOccluded(
         record,uniforms,previousDepth
     );
