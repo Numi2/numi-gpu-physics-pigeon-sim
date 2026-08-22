@@ -214,11 +214,16 @@ a frozen cap. At `1,600 px/m`, stable conservative `3 x 1` / `6 x 3` tiers
 emit `35,568` vertices and remove `3,414,528` bytes of expanded CPU vane
 geometry per frame. Retained morphology now totals `6,179` records / `790,912`
 bytes; the cranial pose fields bring per-frame input to `1,984` bytes and its
-three-slot store to `5,952` bytes. Coarse `152`/`291`-vane tiers and the
-full-density gular rachis/barb layer remain CPU-owned and unchanged. The
-`--capture-crow-cpu-cranial-vanes` baseline restores the former full-density
-vane owner. Independent Swift/Metal checks cover breathing, two neck poses,
-current/previous positions, warped normals, topology, identity, and material;
+three-slot store to `5,952` bytes. Coarse `152`/`291`-vane tiers remain on the
+CPU. The `225` gular owners now expand one rachis and three bilateral barb pairs
+directly from the same family-`7` morphology: `1,575` analytic tubes / `28,350`
+live vertices replace `2,721,600` bytes of expanded CPU geometry per frame.
+The fixed seven-segment topology draws the `711`-record cranial suffix directly,
+so it adds no segment buffer or indirect arguments; non-gular records collapse
+to zero area. The `--capture-crow-cpu-cranial-vanes` baseline restores both the
+former full-density vane and gular-detail owners. Independent Swift/Metal
+checks cover breathing, two neck poses, current/previous positions, transformed
+gular endpoints and radii, warped normals, topology, identity, and material;
 this is simulated geometry parity, not measured head plumage or a realism
 claim. The reserved visual gate remains the new underside throat-to-bill view.
 The body-detail prepass retains one `96`-byte current/previous analytic segment

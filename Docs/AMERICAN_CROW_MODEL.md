@@ -603,9 +603,13 @@ vertices and removes `3,414,528` bytes of CPU-expanded vane geometry per frame.
 The retained inventory is now `6,179` records / `790,912` bytes; current and
 previous cranial radii, breathing, translation, yaw, pitch, and roll bring pose
 input to `1,984` bytes and the three-slot capacity to `5,952` bytes. The
-`152`/`291` coarse tiers and explicit gular rachis/barb detail remain unchanged
-on the CPU. Direct Swift/Metal parity qualifies two distinct temporal poses;
-no image is admitted as anatomy or perceptual-realism evidence in this pass.
+`152`/`291` coarse tiers remain unchanged on the CPU. At full density the `225`
+gular records procedurally add `1,575` rachis/barb tubes and `28,350` live
+vertices, eliminating `2,721,600` bytes of CPU-expanded geometry per frame.
+The fixed direct draw reuses family-`7` morphology and pose inputs without a new
+segment buffer or indirect store. Direct Swift/Metal parity qualifies two
+distinct temporal poses; no image is admitted as anatomy or perceptual-realism
+evidence in this pass.
 
 At the five-by-seven distance LOD, a rear-right temporal-identity trace at
 yaw/pitch `(2.28, 0.38)` resolves the residual pelvic insertion owners to

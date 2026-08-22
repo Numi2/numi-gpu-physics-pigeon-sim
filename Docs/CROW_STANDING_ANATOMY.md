@@ -924,9 +924,11 @@ neighbour-derived tangents, then the established graded head transform is
 applied per generated point and normal rather than as one rigid shell. Orbit
 holes, the bill-base aperture, regional classes `8...10`, and axial/angular
 identity remain exact. At `1,600 px/m`, `35,568` procedural vertices avoid
-`3,414,528` bytes of expanded CPU vane data per frame. The coarse tiers and
-gular detail tubes stay CPU-owned. Swift/Metal temporal parity is the evidence
-for this pass; the reserved underside visual gate is not spent here.
+`3,414,528` bytes of expanded CPU vane data per frame. The `225` gular owners
+now derive one rachis and three bilateral barb pairs each from the same retained
+record, replacing `28,350` CPU-expanded tube vertices without adding a segment
+buffer. The coarse tiers stay CPU-owned. Swift/Metal temporal parity is the
+evidence for this pass; the reserved underside visual gate is not spent here.
 
 Across fresh 17-frame front-starboard and ventral-port audits at yaw/pitch
 `(-0.32,0.06)` and `(0.66,-0.34)`, enclosed-hole pixels stay `6 -> 6` and

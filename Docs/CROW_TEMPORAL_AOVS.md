@@ -153,7 +153,9 @@ records mapping bilateral side, interdigitated row, and one of four graded
 neck-coupling columns. Family `7` adds `711` cranial records mapping region,
 axial loft station, angular tract, and derived side. Aggregate
 retained-morphology counters now report `6,179` records and `790,912` bytes,
-while dedicated ventral fields
+and the `225` gular records reuse those family-`7` identities for `1,575`
+procedural rachis/barb tubes without a new identity namespace or retained
+segment buffer. Dedicated ventral fields
 continue to report
 `1,304` records, selected work, procedural raster invocations, eliminated CPU
 surface bytes, and `gpu-retained-identity-stable-procedural-vane` generation.

@@ -314,6 +314,172 @@ func metalFutureCloseBodyBarbulesMatchRetainedSwiftOracle() throws {
   }
 }
 
+@Test("Metal gular shafts and barb groups match the transformed Swift oracle")
+func metalGularDetailMatchesTransformedSwiftOracle() throws {
+  guard let device = MTLCreateSystemDefaultDevice() else { return }
+  let backend = try VisualizationBackend(device: device)
+  let morphologies = CrowCranialFeatherTracts.morphologySamples()
+  let morphologyIndex = try #require(
+    morphologies.firstIndex { $0.region == .throat }
+  )
+  let morphology = morphologies[morphologyIndex]
+  let gpuMorphology = CrowBodyVaneRecords.cranialMorphologyRecords()[
+    morphologyIndex
+  ]
+  let currentBodyCenter = SIMD3<Float>(0.008, -0.004, 0.015)
+  let previousBodyCenter = SIMD3<Float>(-0.005, 0.003, -0.009)
+  let radii = SIMD3<Float>(0.0447, 0.0328, 0.0387)
+  let currentBreathing: Float = 1.009
+  let previousBreathing: Float = 0.993
+  let currentNeckPose = CrowStandingNeckPose(
+    translation: SIMD3<Float>(0.0012, -0.0008, 0.0006),
+    yawRadians: 0.017,
+    pitchRadians: -0.012,
+    rollRadians: 0.005
+  )
+  let previousNeckPose = CrowStandingNeckPose(
+    translation: SIMD3<Float>(-0.0007, 0.0005, -0.0004),
+    yawRadians: -0.010,
+    pitchRadians: 0.008,
+    rollRadians: -0.003
+  )
+
+  func sharedBuffer<T>(_ values: [T]) throws -> MTLBuffer {
+    let buffer = try backend.buffer(
+      length: values.count * MemoryLayout<T>.stride,
+      shared: true
+    )
+    values.withUnsafeBytes { bytes in
+      if let baseAddress = bytes.baseAddress {
+        buffer.contents().copyMemory(from: baseAddress, byteCount: bytes.count)
+      }
+    }
+    return buffer
+  }
+
+  let morphologyBuffer = try sharedBuffer([gpuMorphology])
+  let poseBuffer = try sharedBuffer([
+    CrowBodyVanePoseUniforms(
+      currentBodyCenterAndDeployment: SIMD4<Float>(currentBodyCenter, 1),
+      previousBodyCenterAndDeployment: SIMD4<Float>(previousBodyCenter, 1),
+      currentCranialRadiiAndBreathing: SIMD4<Float>(radii, currentBreathing),
+      previousCranialRadiiAndBreathing: SIMD4<Float>(radii, previousBreathing),
+      currentNeckTranslationAndYaw: SIMD4<Float>(
+        currentNeckPose.translation,
+        currentNeckPose.yawRadians
+      ),
+      currentNeckPitchRollAndActive: SIMD4<Float>(
+        currentNeckPose.pitchRadians,
+        currentNeckPose.rollRadians,
+        1,
+        0
+      ),
+      previousNeckTranslationAndYaw: SIMD4<Float>(
+        previousNeckPose.translation,
+        previousNeckPose.yawRadians
+      ),
+      previousNeckPitchRollAndActive: SIMD4<Float>(
+        previousNeckPose.pitchRadians,
+        previousNeckPose.rollRadians,
+        1,
+        0
+      )
+    )
+  ])
+  let neckBuffer = try sharedBuffer(
+    CrowBodyVaneRecords.neckTransforms(current: nil, previous: nil)
+  )
+  let segmentCount = 1 + 2 * CrowGularFeatherDetail.barbPairCount
+  let output = try backend.buffer(
+    length: segmentCount * MemoryLayout<CrowBodyDetailSegmentGPU>.stride,
+    shared: true
+  )
+  let pipeline = try backend.compute("probeCrowGularDetailSegments")
+  let commandBuffer = try #require(backend.queue.makeCommandBuffer())
+  let encoder = try #require(commandBuffer.makeComputeCommandEncoder())
+  encoder.setBuffer(morphologyBuffer, offset: 0, index: 0)
+  encoder.setBuffer(output, offset: 0, index: 1)
+  encoder.setBuffer(poseBuffer, offset: 0, index: 2)
+  encoder.setBuffer(neckBuffer, offset: 0, index: 3)
+  backend.dispatch1D(encoder, pipeline: pipeline, count: segmentCount)
+  encoder.endEncoding()
+  commandBuffer.commit()
+  commandBuffer.waitUntilCompleted()
+  #expect(commandBuffer.status == .completed)
+
+  let currentFeather = CrowCranialFeatherTracts.feather(
+    morphology: morphology,
+    center: currentBodyCenter + CrowCranialAnatomy.showcaseCenterOffsetMeters,
+    radii: radii,
+    breathingScale: currentBreathing
+  )
+  let previousFeather = CrowCranialFeatherTracts.feather(
+    morphology: morphology,
+    center: previousBodyCenter + CrowCranialAnatomy.showcaseCenterOffsetMeters,
+    radii: radii,
+    breathingScale: previousBreathing
+  )
+  let currentSegments = CrowGularFeatherDetail.segments(
+    for: currentFeather,
+    projectedPixelsPerMeter: 1_600
+  )
+  let previousSegments = CrowGularFeatherDetail.segments(
+    for: previousFeather,
+    projectedPixelsPerMeter: 1_600
+  )
+  #expect(currentSegments.count == segmentCount)
+  #expect(previousSegments.count == segmentCount)
+  let pointer = output.contents().bindMemory(
+    to: CrowBodyDetailSegmentGPU.self,
+    capacity: segmentCount
+  )
+  for index in 0..<segmentCount {
+    let gpu = pointer[index]
+    let current = currentSegments[index]
+    let previous = previousSegments[index]
+    let expectedCurrentStart = CrowHeadNeckBlend.position(
+      current.start,
+      bodyCenter: currentBodyCenter,
+      neckPose: currentNeckPose
+    )
+    let expectedCurrentEnd = CrowHeadNeckBlend.position(
+      current.end,
+      bodyCenter: currentBodyCenter,
+      neckPose: currentNeckPose
+    )
+    let expectedPreviousStart = CrowHeadNeckBlend.position(
+      previous.start,
+      bodyCenter: previousBodyCenter,
+      neckPose: previousNeckPose
+    )
+    let expectedPreviousEnd = CrowHeadNeckBlend.position(
+      previous.end,
+      bodyCenter: previousBodyCenter,
+      neckPose: previousNeckPose
+    )
+    #expect(
+      simd_distance(gpu.currentStartAndRadius.xyz, expectedCurrentStart) < 2e-6
+    )
+    #expect(
+      simd_distance(gpu.currentEndAndRadius.xyz, expectedCurrentEnd) < 2e-6
+    )
+    #expect(
+      simd_distance(gpu.previousStartAndRadius.xyz, expectedPreviousStart)
+        < 2e-6
+    )
+    #expect(
+      simd_distance(gpu.previousEndAndRadius.xyz, expectedPreviousEnd) < 2e-6
+    )
+    #expect(
+      abs(gpu.currentStartAndRadius.w - current.startRadiusMeters) < 2e-7
+    )
+    #expect(
+      abs(gpu.currentEndAndRadius.w - current.endRadiusMeters) < 2e-7
+    )
+    #expect(gpu.currentNormalAndKind.w == Float(current.kind.rawValue))
+  }
+}
+
 @Test("Metal procedural body vanes match the Swift geometry oracle")
 func metalProceduralBodyVanesMatchSwiftGeometryOracle() throws {
   guard let device = MTLCreateSystemDefaultDevice() else { return }

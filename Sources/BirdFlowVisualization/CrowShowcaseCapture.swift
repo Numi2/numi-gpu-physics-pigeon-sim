@@ -1656,6 +1656,36 @@ private final class CrowShowcaseRenderer {
         )
       }
     }
+    if cranialVanesOwnedByMetal,
+      let bodyVaneFrame, let bodyVaneGeometryDeformer,
+      let batch = bodyVaneFrame.batches.first,
+      projectedPixelsPerMeter >= CrowCranialFeatherTracts.fullDensityPixelsPerMeter
+    {
+      let gularPipeline = try backend.render(
+        vertex: "crowGularDetailAOVVertex",
+        fragment: "showcaseCrowAOVFragment",
+        colorFormats: [.rgba16Float, .rgba16Float, .rgba16Float, .rg16Float, .r32Float],
+        sampleCount: sampleCount
+      )
+      encoder.setRenderPipelineState(gularPipeline)
+      encoder.setVertexBytes(
+        &cameraUniforms,
+        length: MemoryLayout<CrowTemporalCameraUniforms>.stride,
+        index: 3
+      )
+      encoder.setFragmentBytes(
+        &cameraUniforms,
+        length: MemoryLayout<CrowTemporalCameraUniforms>.stride,
+        index: 0
+      )
+      bodyVaneGeometryDeformer.bindRenderResources(for: batch, encoder: encoder)
+      encoder.drawPrimitives(
+        type: .triangle,
+        vertexStart: 0,
+        vertexCount: (1 + 2 * CrowGularFeatherDetail.barbPairCount) * 18,
+        instanceCount: 711
+      )
+    }
     if let featherAOVPipeline {
       encoder.setRenderPipelineState(featherAOVPipeline)
       encoder.setVertexBytes(
@@ -3135,23 +3165,28 @@ private struct CrowMeshBuilder {
           to: &vertices
         )
       }
-      for segment in CrowGularFeatherDetail.segments(
-        for: sample,
-        projectedPixelsPerMeter: projectedPixelsPerMeter
-      ) {
-        let detailColor: SIMD4<Float> =
-          segment.kind == .rachis
-          ? SIMD4<Float>(0.0048, 0.0072, 0.0125, 0.13)
-          : SIMD4<Float>(0.0055, 0.0084, 0.0145, 0.12)
-        appendTaperedTube(
-          from: segment.start,
-          to: segment.end,
-          startRadius: segment.startRadiusMeters,
-          endRadius: segment.endRadiusMeters,
-          color: detailColor,
-          radialSegments: 3,
-          to: &vertices
-        )
+      if !cranialVanesOwnedByMetal
+        || projectedPixelsPerMeter
+          < CrowCranialFeatherTracts.fullDensityPixelsPerMeter
+      {
+        for segment in CrowGularFeatherDetail.segments(
+          for: sample,
+          projectedPixelsPerMeter: projectedPixelsPerMeter
+        ) {
+          let detailColor: SIMD4<Float> =
+            segment.kind == .rachis
+            ? SIMD4<Float>(0.0048, 0.0072, 0.0125, 0.13)
+            : SIMD4<Float>(0.0055, 0.0084, 0.0145, 0.12)
+          appendTaperedTube(
+            from: segment.start,
+            to: segment.end,
+            startRadius: segment.startRadiusMeters,
+            endRadius: segment.endRadiusMeters,
+            color: detailColor,
+            radialSegments: 3,
+            to: &vertices
+          )
+        }
       }
     }
   }

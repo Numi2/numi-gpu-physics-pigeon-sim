@@ -3257,7 +3257,8 @@ kernel void prepareCrowBodyVaneIndirectWork(
     uint bodyInstanceCount=0u;
     for(uint local=0u;local<topologyCounts[topologyIndex];++local){
         uint recordIndex=recordWork[base+local];
-        if((records[recordIndex].identity.x&0xff000000u)==0x02000000u){
+        uint family=records[recordIndex].identity.x&0xff000000u;
+        if(family==0x02000000u){
             ++bodyInstanceCount;
         }
     }
@@ -4666,6 +4667,185 @@ vertex CrowRasterVertex crowBodyDetailAOVVertex(
     );
     out.world=source.position.xyz;
     out.normal=normalize(source.normal.xyz);
+    out.albedoAndMaterial=source.color;
+    out.featherCoordinates=source.parameters.xyz;
+    out.resolvedCurveTangent=float3(0.0f);
+    out.identity=source.identity;
+    return out;
+}
+
+inline float3 crowGularDetailCenter(
+    CrowBodyVaneDynamicState state,float fraction) {
+    return state.root+fraction*(state.tip-state.root)
+        +state.normal*(state.camber*sin(M_PI_F*fraction)+0.00010f);
+}
+
+inline float crowGularDetailHalfWidth(
+    CrowBodyVaneDynamicState state,float fraction) {
+    float envelope=0.32f+0.68f
+        *pow(max(sin(M_PI_F*fraction),0.0f),0.58f);
+    float tipTaper=1.0f-0.985f*pow(fraction,3.2f);
+    return mix(state.rootWidth,state.maximumWidth,fraction)
+        *envelope*tipTaper;
+}
+
+inline CrowBodyDetailSegment crowGularDetailSegment(
+    CrowBodyVaneMorphologyGPU record,
+    device const CrowBodyVanePoseUniforms& pose,
+    device const CrowBodyVaneNeckTransformGPU* neckTransforms,
+    bool current,uint segmentIndex) {
+    CrowBodyVaneDynamicState state=crowBodyVaneDynamicState(
+        record,pose,neckTransforms,current
+    );
+    float3 direction=safeNormalizeCrow(
+        state.tip-state.root,float3(-1.0f,0.0f,0.0f)
+    );
+    float3 normal=safeNormalizeCrow(
+        state.normal-direction*dot(state.normal,direction),state.normal
+    );
+    state.normal=normal;
+    float3 widthAxis=safeNormalizeCrow(
+        cross(normal,direction),float3(0.0f,1.0f,0.0f)
+    );
+    CrowBodyDetailSegment segment;
+    if(segmentIndex==0u){
+        segment.kind=0u;
+        segment.start=crowGularDetailCenter(state,0.16f);
+        segment.end=crowGularDetailCenter(state,0.94f);
+        segment.startRadius=0.00017f;
+        segment.endRadius=0.000045f;
+    }else{
+        uint local=segmentIndex-1u;
+        uint pair=local/2u;
+        float side=(local&1u)==0u?-1.0f:1.0f;
+        float axial=0.32f+0.18f*float(pair);
+        float reach=axial+0.075f;
+        segment.kind=1u;
+        segment.start=crowGularDetailCenter(state,axial)+normal*0.00006f;
+        segment.end=crowGularDetailCenter(state,reach)
+            +side*widthAxis*(crowGularDetailHalfWidth(state,reach)+0.00045f)
+            +normal*0.00012f;
+        segment.startRadius=0.000075f;
+        segment.endRadius=0.000025f;
+    }
+    segment.start=crowCranialNeckPosition(segment.start,pose,current);
+    segment.end=crowCranialNeckPosition(segment.end,pose,current);
+    return segment;
+}
+
+inline CrowFeatherVertexGPU crowGularDetailProceduralVertex(
+    CrowBodyVaneMorphologyGPU record,
+    device const CrowBodyVanePoseUniforms& pose,
+    device const CrowBodyVaneNeckTransformGPU* neckTransforms,
+    uint vertexIndex) {
+    bool active=(record.identity.x&0xff000000u)==0x07000000u
+        &&record.identity.w==10u;
+    uint segmentIndex=vertexIndex/18u;
+    uint localVertex=vertexIndex-segmentIndex*18u;
+    CrowBodyDetailSegment current=crowGularDetailSegment(
+        record,pose,neckTransforms,true,segmentIndex
+    );
+    CrowBodyDetailSegment previous=crowGularDetailSegment(
+        record,pose,neckTransforms,false,segmentIndex
+    );
+    if(!active){
+        current.end=current.start;
+        previous.end=previous.start;
+        current.startRadius=0.0f;
+        current.endRadius=0.0f;
+        previous.startRadius=0.0f;
+        previous.endRadius=0.0f;
+    }
+    uint corners[6]={0u,1u,2u,0u,2u,3u};
+    uint corner=corners[localVertex%6u];
+    CrowBodyRachisQuad currentQuad=crowBodyDetailTubeQuad(
+        current,localVertex/6u
+    );
+    CrowBodyRachisQuad previousQuad=crowBodyDetailTubeQuad(
+        previous,localVertex/6u
+    );
+    float3 currentPoints[4]={
+        currentQuad.a,currentQuad.b,currentQuad.c,currentQuad.d
+    };
+    float3 previousPoints[4]={
+        previousQuad.a,previousQuad.b,previousQuad.c,previousQuad.d
+    };
+    CrowFeatherVertexGPU out;
+    out.position=float4(currentPoints[corner],1.0f);
+    out.previousPosition=float4(previousPoints[corner],1.0f);
+    out.normal=float4(currentQuad.normal,0.0f);
+    out.color=segmentIndex==0u
+        ?float4(0.0048f,0.0072f,0.0125f,0.13f)
+        :float4(0.0055f,0.0084f,0.0145f,0.12f);
+    if(!active){out.color=float4(0.0f);}
+    out.identity=record.identity;
+    out.parameters=float4(0.5f,0.0f,0.0f,0.0f);
+    return out;
+}
+
+kernel void probeCrowGularDetailVertices(
+    device const CrowBodyVaneMorphologyGPU* records [[buffer(0)]],
+    constant CrowBodyVaneGeometryUniforms& geometry [[buffer(1)]],
+    device CrowFeatherVertexGPU* output [[buffer(2)]],
+    device const CrowBodyVanePoseUniforms& pose [[buffer(3)]],
+    device const CrowBodyVaneNeckTransformGPU* neckTransforms [[buffer(4)]],
+    uint index [[thread_position_in_grid]]) {
+    uint instanceIndex=index/geometry.counts.w;
+    uint vertexIndex=index-instanceIndex*geometry.counts.w;
+    if(instanceIndex>=geometry.counts.z){return;}
+    output[index]=crowGularDetailProceduralVertex(
+        records[instanceIndex],pose,neckTransforms,vertexIndex
+    );
+}
+
+kernel void probeCrowGularDetailSegments(
+    device const CrowBodyVaneMorphologyGPU* records [[buffer(0)]],
+    device CrowBodyDetailSegmentGPU* output [[buffer(1)]],
+    device const CrowBodyVanePoseUniforms& pose [[buffer(2)]],
+    device const CrowBodyVaneNeckTransformGPU* neckTransforms [[buffer(3)]],
+    uint index [[thread_position_in_grid]]) {
+    if(index>=7u){return;}
+    CrowBodyDetailSegment current=crowGularDetailSegment(
+        records[0],pose,neckTransforms,true,index
+    );
+    CrowBodyDetailSegment previous=crowGularDetailSegment(
+        records[0],pose,neckTransforms,false,index
+    );
+    CrowBodyDetailSegmentGPU emitted;
+    emitted.currentStartAndRadius=float4(current.start,current.startRadius);
+    emitted.currentEndAndRadius=float4(current.end,current.endRadius);
+    emitted.previousStartAndRadius=float4(previous.start,previous.startRadius);
+    emitted.previousEndAndRadius=float4(previous.end,previous.endRadius);
+    emitted.currentNormalAndKind=float4(0.0f,0.0f,1.0f,float(current.kind));
+    emitted.previousNormalAndReserved=float4(0.0f,0.0f,1.0f,0.0f);
+    output[index]=emitted;
+}
+
+vertex CrowRasterVertex crowGularDetailAOVVertex(
+    device const CrowBodyVaneMorphologyGPU* records [[buffer(0)]],
+    constant CrowBodyVaneGeometryUniforms& geometry [[buffer(2)]],
+    constant CrowTemporalCameraUniforms& camera [[buffer(3)]],
+    device const CrowBodyVanePoseUniforms& pose [[buffer(4)]],
+    device const CrowBodyVaneNeckTransformGPU* neckTransforms [[buffer(5)]],
+    uint vertexIndex [[vertex_id]],
+    uint instanceIndex [[instance_id]]) {
+    // Family 7 is the immutable suffix after body, ventral, femoral, crural,
+    // and throat-bridge morphology. Direct indexing avoids another compaction
+    // or indirect-argument owner for a fixed seven-segment detail topology.
+    uint recordIndex=5468u+instanceIndex;
+    CrowFeatherVertexGPU source=crowGularDetailProceduralVertex(
+        records[recordIndex],pose,neckTransforms,vertexIndex
+    );
+    CrowRasterVertex out;
+    uint featherClass=source.identity.w&255u;
+    out.position=crowSurfaceBiasedClipPosition(
+        camera.viewProjection*source.position,featherClass
+    );
+    out.previousClipPosition=crowSurfaceBiasedClipPosition(
+        camera.previousViewProjection*source.previousPosition,featherClass
+    );
+    out.world=source.position.xyz;
+    out.normal=source.normal.xyz;
     out.albedoAndMaterial=source.color;
     out.featherCoordinates=source.parameters.xyz;
     out.resolvedCurveTangent=float3(0.0f);
