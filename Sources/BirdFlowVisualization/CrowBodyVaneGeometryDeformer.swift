@@ -16,17 +16,23 @@ struct CrowBodyVaneTopology: Hashable, Comparable {
 struct CrowBodyVaneGeometryBatchFrame {
   let topologyIndex: Int
   let topology: CrowBodyVaneTopology
+  let projectedPixelsPerMeter: Float
   let morphologyBuffer: MTLBuffer
   let poseBuffer: MTLBuffer
   let neckTransformBuffer: MTLBuffer
   let workBuffer: MTLBuffer
   let indirectDrawBuffer: MTLBuffer
   let indirectDrawBufferOffset: Int
+  let rachisIndirectDrawBufferOffset: Int
   let auditRecords: [CrowBodyVaneRecordGPU]
   let auditRecordCount: Int
   let auditOutputBuffer: MTLBuffer?
+  let auditRachisOutputBuffer: MTLBuffer?
 
   var vertexCount: Int { topology.verticesPerInstance }
+  var rachisVertexCount: Int {
+    CrowBodyVaneRecords.rachisVerticesPerInstance(for: topology)
+  }
 }
 
 struct CrowBodyVaneGeometryFrame {
@@ -39,6 +45,7 @@ struct CrowBodyVaneGeometryFrame {
   let retainedPoseCapacityBytes: Int
   let morphologyBufferAllocationCount: Int
   let auditReadbackReady: Bool
+
 }
 
 /// Live procedural expansion of body contour vanes.
@@ -54,6 +61,7 @@ final class CrowBodyVaneGeometryDeformer {
   private let emitPipeline: MTLComputePipelineState
   private let indirectPipeline: MTLComputePipelineState
   private let auditPipeline: MTLComputePipelineState
+  private let auditRachisPipeline: MTLComputePipelineState
   private let morphologyRecords: [CrowBodyVaneMorphologyGPU]
   private let morphologyBuffer: MTLBuffer
   private let poseBuffers: [MTLBuffer]
@@ -86,6 +94,7 @@ final class CrowBodyVaneGeometryDeformer {
     emitPipeline = try backend.compute("emitCrowBodyVaneWork")
     indirectPipeline = try backend.compute("prepareCrowBodyVaneIndirectWork")
     auditPipeline = try backend.compute("probeCrowBodyVaneVertices")
+    auditRachisPipeline = try backend.compute("probeCrowBodyRachisVertices")
     morphologyRecords = CrowBodyVaneRecords.morphologyRecords()
     let maximumRecordCount = morphologyRecords.count
     morphologyBuffer = try Self.sharedBuffer(
@@ -133,7 +142,7 @@ final class CrowBodyVaneGeometryDeformer {
     }
     indirectDrawBuffers = try (0..<Self.bufferedFrameCount).map { _ in
       try backend.buffer(
-        length: CrowBodyVaneRecords.productionTopologies.count
+        length: 2 * CrowBodyVaneRecords.productionTopologies.count
           * MemoryLayout<DrawPrimitivesIndirectArguments>.stride,
         shared: true
       )
@@ -203,7 +212,7 @@ final class CrowBodyVaneGeometryDeformer {
     memset(
       indirectDrawBuffers[slot].contents(),
       0,
-      CrowBodyVaneRecords.productionTopologies.count
+      2 * CrowBodyVaneRecords.productionTopologies.count
         * MemoryLayout<DrawPrimitivesIndirectArguments>.stride
     )
     var selection = CrowBodyVaneSelectionUniforms(
@@ -301,7 +310,8 @@ final class CrowBodyVaneGeometryDeformer {
             UInt32(topology.widthSections),
             UInt32(auditRecords.count),
             UInt32(topology.verticesPerInstance)
-          )
+          ),
+          selection: SIMD4<Float>(projectedPixelsPerMeter, 0, 0, 0)
         )
         guard let audit = commandBuffer.makeComputeCommandEncoder() else {
           throw VisualizationError.pipeline("crow body vane audit encoder")
@@ -326,10 +336,60 @@ final class CrowBodyVaneGeometryDeformer {
       } else {
         auditOutputBuffer = nil
       }
+      let auditRachisOutputBuffer: MTLBuffer?
+      let auditRachisVertexCount =
+        CrowBodyVaneRecords.rachisVerticesPerInstance(for: topology)
+        * auditRecords.count
+      if auditReadback && auditRachisVertexCount > 0 {
+        let auditMorphologies = auditIndices.map { morphologyRecords[$0] }
+        let auditInput = try Self.sharedBuffer(
+          values: auditMorphologies,
+          backend: backend
+        )
+        let auditOutput = try backend.buffer(
+          length: auditRachisVertexCount
+            * MemoryLayout<CrowFeatherVertexGPU>.stride,
+          shared: true
+        )
+        var uniforms = CrowBodyVaneGeometryUniforms(
+          counts: SIMD4<UInt32>(
+            UInt32(topology.axialSections),
+            UInt32(topology.widthSections),
+            UInt32(auditRecords.count),
+            UInt32(
+              CrowBodyVaneRecords.rachisVerticesPerInstance(for: topology)
+            )
+          ),
+          selection: SIMD4<Float>(projectedPixelsPerMeter, 0, 0, 0)
+        )
+        guard let audit = commandBuffer.makeComputeCommandEncoder() else {
+          throw VisualizationError.pipeline("crow body rachis audit encoder")
+        }
+        audit.label = "Audit procedural body rachis geometry"
+        audit.setBuffer(auditInput, offset: 0, index: 0)
+        audit.setBytes(
+          &uniforms,
+          length: MemoryLayout<CrowBodyVaneGeometryUniforms>.stride,
+          index: 1
+        )
+        audit.setBuffer(auditOutput, offset: 0, index: 2)
+        audit.setBuffer(poseBuffers[slot], offset: 0, index: 3)
+        audit.setBuffer(neckTransformBuffers[slot], offset: 0, index: 4)
+        backend.dispatch1D(
+          audit,
+          pipeline: auditRachisPipeline,
+          count: auditRachisVertexCount
+        )
+        audit.endEncoding()
+        auditRachisOutputBuffer = auditOutput
+      } else {
+        auditRachisOutputBuffer = nil
+      }
       batches.append(
         CrowBodyVaneGeometryBatchFrame(
           topologyIndex: topologyIndex,
           topology: topology,
+          projectedPixelsPerMeter: projectedPixelsPerMeter,
           morphologyBuffer: morphologyBuffer,
           poseBuffer: poseBuffers[slot],
           neckTransformBuffer: neckTransformBuffers[slot],
@@ -337,9 +397,13 @@ final class CrowBodyVaneGeometryDeformer {
           indirectDrawBuffer: indirectDrawBuffers[slot],
           indirectDrawBufferOffset: topologyIndex
             * MemoryLayout<DrawPrimitivesIndirectArguments>.stride,
+          rachisIndirectDrawBufferOffset:
+            (CrowBodyVaneRecords.productionTopologies.count + topologyIndex)
+            * MemoryLayout<DrawPrimitivesIndirectArguments>.stride,
           auditRecords: auditRecords,
           auditRecordCount: auditRecords.count,
-          auditOutputBuffer: auditOutputBuffer
+          auditOutputBuffer: auditOutputBuffer,
+          auditRachisOutputBuffer: auditRachisOutputBuffer
         )
       )
     }
@@ -366,7 +430,8 @@ final class CrowBodyVaneGeometryDeformer {
         UInt32(batch.topology.widthSections),
         0,
         UInt32(batch.vertexCount)
-      )
+      ),
+      selection: SIMD4<Float>(batch.projectedPixelsPerMeter, 0, 0, 0)
     )
     encoder.setVertexBuffer(batch.morphologyBuffer, offset: 0, index: 0)
     encoder.setVertexBuffer(batch.workBuffer, offset: 0, index: 1)
@@ -390,6 +455,17 @@ final class CrowBodyVaneGeometryDeformer {
     ).pointee
   }
 
+  func drawRachisArguments(
+    for batch: CrowBodyVaneGeometryBatchFrame
+  ) -> DrawPrimitivesIndirectArguments {
+    batch.indirectDrawBuffer.contents().advanced(
+      by: batch.rachisIndirectDrawBufferOffset
+    ).bindMemory(
+      to: DrawPrimitivesIndirectArguments.self,
+      capacity: 1
+    ).pointee
+  }
+
   func activeRecordCount(for frame: CrowBodyVaneGeometryFrame) -> Int {
     Int(topologyCounts(for: frame)[7])
   }
@@ -398,6 +474,13 @@ final class CrowBodyVaneGeometryDeformer {
     frame.batches.reduce(0) {
       $0 + Int(drawArguments(for: $1).vertexCount)
         * Int(drawArguments(for: $1).instanceCount)
+    }
+  }
+
+  func expandedRachisVertexCount(for frame: CrowBodyVaneGeometryFrame) -> Int {
+    frame.batches.reduce(0) {
+      $0 + Int(drawRachisArguments(for: $1).vertexCount)
+        * Int(drawRachisArguments(for: $1).instanceCount)
     }
   }
 
@@ -442,6 +525,21 @@ final class CrowBodyVaneGeometryDeformer {
     return Array(UnsafeBufferPointer(start: pointer, count: count))
   }
 
+  func rachisVertices(
+    for batch: CrowBodyVaneGeometryBatchFrame
+  ) -> [CrowFeatherVertexGPU] {
+    let count = batch.rachisVertexCount * batch.auditRecordCount
+    guard count > 0 else { return [] }
+    guard let buffer = batch.auditRachisOutputBuffer else {
+      preconditionFailure("body rachis frame lacks audit readback")
+    }
+    let pointer = buffer.contents().bindMemory(
+      to: CrowFeatherVertexGPU.self,
+      capacity: count
+    )
+    return Array(UnsafeBufferPointer(start: pointer, count: count))
+  }
+
   func auditRecords(
     for batch: CrowBodyVaneGeometryBatchFrame
   ) -> [CrowBodyVaneRecordGPU] {
@@ -475,6 +573,21 @@ enum CrowBodyVaneRecords {
     CrowBodyVaneTopology(axialSections: 12, widthSections: 5),
     CrowBodyVaneTopology(axialSections: 16, widthSections: 7),
   ]
+
+  static func rachisSections(for topology: CrowBodyVaneTopology) -> Int {
+    switch topology.axialSections {
+    case ...4: 0
+    case 6, 8: 4
+    case 10, 12: 8
+    default: 12
+    }
+  }
+
+  static func rachisVerticesPerInstance(
+    for topology: CrowBodyVaneTopology
+  ) -> Int {
+    rachisSections(for: topology) * 24
+  }
 
   static func morphologyRecords() -> [CrowBodyVaneMorphologyGPU] {
     CrowBodyFeatherTracts.samples().enumerated().map { index, sample in
@@ -777,6 +890,197 @@ enum CrowBodyVaneRecords {
     )
     if simd_dot(resolved, supplied) < 0 { resolved = -resolved }
     return resolved
+  }
+
+  static func rachisIsResolved(
+    record: CrowBodyVaneRecordGPU,
+    projectedPixelsPerMeter: Float
+  ) -> Bool {
+    2 * record.currentTipAndMaximumWidth.w * projectedPixelsPerMeter
+      < CrowFeatherMesostructure.bodyTractResolvedRachisWidthThresholdPixels
+  }
+
+  static func rachisVertex(
+    record: CrowBodyVaneRecordGPU,
+    topology: CrowBodyVaneTopology,
+    projectedPixelsPerMeter: Float,
+    vertexIndex: Int
+  ) -> CrowFeatherVertexGPU {
+    let verticesPerInstance = rachisVerticesPerInstance(for: topology)
+    precondition(vertexIndex >= 0 && vertexIndex < verticesPerInstance)
+    guard
+      rachisIsResolved(
+        record: record,
+        projectedPixelsPerMeter: projectedPixelsPerMeter
+      )
+    else {
+      return CrowFeatherVertexGPU(
+        position: SIMD4<Float>(record.currentRootAndRootWidth.xyz, 1),
+        normal: SIMD4<Float>(0, 0, 1, 0),
+        color: .zero,
+        previousPosition: SIMD4<Float>(record.previousRootAndCurrentCamber.xyz, 1),
+        identity: record.identity,
+        parameters: .zero
+      )
+    }
+    let sections = rachisSections(for: topology)
+    let section = vertexIndex / 24
+    let localVertex = vertexIndex % 24
+    let radialSegment = localVertex / 6
+    let corner = [0, 1, 2, 0, 2, 3][localVertex % 6]
+    let start = min(max(record.morphology.x, 0), 0.95)
+    let firstAxial = start
+      + (1 - start) * Float(section) / Float(sections)
+    let secondAxial = start
+      + (1 - start) * Float(section + 1) / Float(sections)
+    let current = rachisTubeQuad(
+      record: record,
+      current: true,
+      firstAxial: firstAxial,
+      secondAxial: secondAxial,
+      radialSegment: radialSegment
+    )
+    let previous = rachisTubeQuad(
+      record: record,
+      current: false,
+      firstAxial: firstAxial,
+      secondAxial: secondAxial,
+      radialSegment: radialSegment
+    )
+    return CrowFeatherVertexGPU(
+      position: SIMD4<Float>(current.points[corner], 1),
+      normal: SIMD4<Float>(current.normal, 0),
+      color: rachisColor(record: record),
+      previousPosition: SIMD4<Float>(previous.points[corner], 1),
+      identity: record.identity,
+      parameters: SIMD4<Float>(0.5, 0, 0, 0)
+    )
+  }
+
+  private static func rachisTubeQuad(
+    record: CrowBodyVaneRecordGPU,
+    current: Bool,
+    firstAxial: Float,
+    secondAxial: Float,
+    radialSegment: Int
+  ) -> (points: [SIMD3<Float>], normal: SIMD3<Float>) {
+    let start = rachisCenter(record: record, current: current, axial: firstAxial)
+    let end = rachisCenter(record: record, current: current, axial: secondAxial)
+    let axis = normalized(end - start, fallback: SIMD3<Float>(0, 0, 1))
+    let helper: SIMD3<Float> = abs(axis.z) < 0.82
+      ? SIMD3<Float>(0, 0, 1)
+      : SIMD3<Float>(0, 1, 0)
+    let first = normalized(simd_cross(axis, helper), fallback: SIMD3<Float>(1, 0, 0))
+    let second = normalized(simd_cross(axis, first), fallback: SIMD3<Float>(0, 1, 0))
+    let next = (radialSegment + 1) % 4
+    let angle0 = 2 * Float.pi * Float(radialSegment) / 4
+    let angle1 = 2 * Float.pi * Float(next) / 4
+    let radial0 = cos(angle0) * first + sin(angle0) * second
+    let radial1 = cos(angle1) * first + sin(angle1) * second
+    let startRadius = 0.00022 + (0.000055 - 0.00022) * firstAxial
+    let endRadius = 0.00022 + (0.000055 - 0.00022) * secondAxial
+    let points = [
+      start + startRadius * radial0,
+      start + startRadius * radial1,
+      end + endRadius * radial1,
+      end + endRadius * radial0,
+    ]
+    let normal = normalized(
+      simd_cross(points[1] - points[0], points[2] - points[0]),
+      fallback: SIMD3<Float>(0, 0, 1)
+    )
+    return (points, normal)
+  }
+
+  private static func rachisCenter(
+    record: CrowBodyVaneRecordGPU,
+    current: Bool,
+    axial: Float
+  ) -> SIMD3<Float> {
+    let root = current
+      ? record.currentRootAndRootWidth.xyz
+      : record.previousRootAndCurrentCamber.xyz
+    let tip = current
+      ? record.currentTipAndMaximumWidth.xyz
+      : record.previousTipAndPreviousCamber.xyz
+    let suppliedNormal = current
+      ? record.currentNormalAndTransverseCamber.xyz
+      : record.previousNormalAndTransverseCamber.xyz
+    let direction = normalized(tip - root, fallback: SIMD3<Float>(-1, 0, 0))
+    let normal = normalized(
+      suppliedNormal - direction * simd_dot(suppliedNormal, direction),
+      fallback: suppliedNormal
+    )
+    let widthAxis = normalized(
+      simd_cross(normal, direction),
+      fallback: SIMD3<Float>(0, 1, 0)
+    )
+    let camber = current
+      ? record.previousRootAndCurrentCamber.w
+      : record.previousTipAndPreviousCamber.w
+    let vaneTransverse = current
+      ? record.currentNormalAndTransverseCamber.w
+      : record.previousNormalAndTransverseCamber.w
+    let region = Int(record.morphology.y)
+    let row = min(max(record.morphology.z, 0), 21)
+    let course = row / 21
+    let retainedTransverse: Float =
+      region == Int(CrowBodyFeatherTractRegion.scapular.rawValue)
+        && course >= CrowBodyFeatherTracts
+          .scapularFlightTransverseCamberStartCourseFraction
+      ? CrowBodyFeatherTracts.retainedDetailCrownInsetScale * vaneTransverse
+      : 0
+    let halfWidth = bodyVaneHalfWidth(record: record, axial: axial)
+    return root + (tip - root) * axial
+      + widthAxis * (record.sweepAsymmetryAndRipple.x * sin(.pi * axial))
+      + normal
+        * (camber * sin(.pi * axial) + retainedTransverse * halfWidth + 0.00012)
+  }
+
+  private static func bodyVaneHalfWidth(
+    record: CrowBodyVaneRecordGPU,
+    axial: Float
+  ) -> Float {
+    let rootEnvelope = min(max(record.envelopeAndTaper.y, 0.05), 1)
+    let bodyEnvelope = rootEnvelope
+      + (1 - rootEnvelope) * pow(max(sin(.pi * axial), 0), 0.58)
+    let terminal = min(max(record.envelopeAndTaper.z, 0), 1)
+    let exponent = min(max(record.envelopeAndTaper.w, 2), 5)
+    let tipTaper = 1 - (1 - terminal) * pow(axial, exponent)
+    let rippleEnvelope = pow(max(sin(.pi * axial), 0), 2)
+    let ripple = 1 + record.sweepAsymmetryAndRipple.z
+      * sin(
+        2 * .pi * record.envelopeAndTaper.x * axial
+          + record.sweepAsymmetryAndRipple.w
+      ) * rippleEnvelope
+    return (
+      record.currentRootAndRootWidth.w * (1 - axial)
+        + record.currentTipAndMaximumWidth.w * axial
+    ) * bodyEnvelope * tipTaper * ripple
+  }
+
+  private static func rachisColor(
+    record: CrowBodyVaneRecordGPU
+  ) -> SIMD4<Float> {
+    let region = Int(record.morphology.y)
+    let baseAndScale: (Float, Float)
+    switch region {
+    case Int(CrowBodyFeatherTractRegion.cervical.rawValue):
+      baseAndScale = (0.006, 0.07)
+    case Int(CrowBodyFeatherTractRegion.mantle.rawValue):
+      baseAndScale = (0.0065, 0.09)
+    case Int(CrowBodyFeatherTractRegion.humeral.rawValue):
+      baseAndScale = (0.0058, 0.080)
+    default:
+      baseAndScale = (0.0060, 0.085)
+    }
+    let material = (record.color.x / baseAndScale.0 - 1) / baseAndScale.1
+    return SIMD4<Float>(
+      0.010 * (1 + 0.06 * material),
+      0.014 * (1 + 0.04 * material),
+      0.022 * (1 + 0.03 * material),
+      0.14
+    )
   }
 
   static func decodedVertex(

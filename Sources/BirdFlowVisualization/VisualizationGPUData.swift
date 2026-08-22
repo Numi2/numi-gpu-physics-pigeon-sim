@@ -282,6 +282,8 @@ struct CrowBodyVaneNeckTransformGPU: Equatable {
 struct CrowBodyVaneGeometryUniforms {
   /// Axial sections, width sections, record count, vertices per instance.
   var counts: SIMD4<UInt32>
+  /// Projected pixels/metre followed by reserved detail controls.
+  var selection: SIMD4<Float>
 }
 
 struct CrowBodyVaneSelectionUniforms {

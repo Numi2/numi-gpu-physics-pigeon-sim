@@ -516,9 +516,10 @@ asymmetric width, ripple, terminal taper, color, and stable identity. A compact
 pose stream reconstructs current and previous body translation, neck transport,
 deployment camber, and transverse settling. Projected-size topology remains
 quantized exactly as before, but the CPU no longer appends those vane triangles
-to `CrowSurfaceTemporalVertexGPU` or authors production temporal records. The
-separate tract rachis/barb mesostructure is still CPU-authored, and failure to
-create the required Metal pipelines restores the former CPU vane path. A
+or their vane-contained tubular rachis to `CrowSurfaceTemporalVertexGPU` or
+authors production temporal records. Paired aggregate-barb and terminal
+microstructure remain CPU-authored, and failure to create the required Metal
+pipelines restores the former CPU vane-and-rachis path. A
 compute-only audit invokes the same Metal pose/point/normal helpers used by
 raster; sampled positions including nonzero neck pose agree with the
 independent Swift temporal oracle within `2 um`, and terminal normals agree
@@ -539,14 +540,14 @@ pose slots retain `4,128` bytes total and each receives only `1,376` bytes of
 current/previous body, deployment, and cervical affine transforms. Metal
 reproduces the established whole/half/quarter density predicate, classifies
 each active morphology into one of seven topology bins, scans stable offsets,
-emits compact inventory indices, and prepares beauty and identity
-`DrawPrimitivesIndirectArguments`. CPU temporal-record construction and
+emits compact inventory indices, and prepares one set of vane plus one set of
+rachis `DrawPrimitivesIndirectArguments`. CPU temporal-record construction and
 grouping run only for explicit audit readback. Schema `21` reports morphology,
 pose, selected work, retained capacity, indirect bytes, allocations, raster
 invocations, and generation mode separately. At the left-flank yaw/pitch
 `(-1.12, 0.26)`, `0.50 m` diagnostic, Metal selects the CPU-oracle-exact
-`1,606` records in two active bins and requests `285,984` raster vertices; the
-retained indirect arguments occupy `336` bytes. GPU identities and indirect
+`1,606` records in two active bins and requests `285,984` vane raster vertices;
+the retained indirect arguments occupy `672` bytes. GPU identities and indirect
 counts are exact against the CPU oracle at `800`, `1,000`, `1,600`, and
 `20,000 px/m`. A nonzero-neck/deployment compute audit agrees with CPU temporal
 geometry within `2 um`. A new five-frame release diagnostic at rear-right
@@ -558,6 +559,19 @@ component is bounded by wing class `4` and pedal class `11`, not body-vane
 ownership. Visual inspection shows continuous neck, shoulder, flank, and tail
 coverage. Audit-expanded buffers are excluded, and no timing improvement is
 claimed.
+
+The rachis tier uses `0`, `4`, `8`, or `12` axial tube sections according to
+the selected vane topology. Current and previous positions, flat tube normals,
+material, parameters, and stable identity match the independent Swift oracle;
+sampled Metal positions agree within `2 um`. A five-frame low-side release gate
+at yaw/pitch `(1.55, -0.30)` and `0.60 m` preserves the predecessor's exact
+enclosed-hole counts (`9, 2, 0, 4, 1`), largest components (`3, 1, 0, 1, 1`),
+active identities, and fully covered AOV pixels. Minimum beauty SSIM is
+`0.999853`, with no more than `394 / 360,000` changed pixels in a frame. The
+tube carries its parent vane identity and stays on the vane centerline, so the
+integer pass retains the underlying vane identity instead of issuing a second
+indirect tube draw. This is ownership and parity evidence, not a speed or
+measured-anatomy claim.
 
 The same executable renderer also has a distinct `standing` presentation. It
 does not freeze or slow the flight surface. A dedicated Metal kernel folds the

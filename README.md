@@ -106,8 +106,10 @@ input; production no longer builds or uploads `176`-byte temporal records.
 The live raster vertex stage evaluates each crown, asymmetric width, ripple,
 distal taper, smooth normal, motion, and stable identity directly; those vane
 triangles are no longer expanded into the CPU surface stream. The CPU temporal
-path remains only as an explicit audit oracle, and body mesostructure remains a
-separate CPU-authored layer. A shared compute audit including nonzero neck pose
+path remains only as an explicit audit oracle. The vane-contained tubular
+rachis now expands from the same retained morphology and pose records in Metal;
+paired aggregate-barb and terminal microstructure remain CPU-authored. A shared
+compute audit including nonzero neck pose
 and takeoff deployment agrees with that Swift oracle within `2 um`; the most
 cancellation-sensitive terminal normal remains within `0.06 degrees`. The
 earlier temporal-record renderer's front-dorsal yaw/pitch
@@ -119,17 +121,24 @@ below. Neither is measured anatomy or a speedup.
 The immutable inventory occupies `411,136` bytes once. Three pose slots retain
 `4,128` bytes total, while Metal applies the established density predicate,
 classifies seven possible tessellation topologies, scans stable offsets, emits
-compact morphology indices, and prepares indirect beauty/identity draws. At
+compact morphology indices, and prepares indirect vane draws plus a second set
+of rachis beauty draws. At
 yaw/pitch `(-1.12, 0.26)` and `0.50 m`, Metal selects the same `1,606` records
 in two active topology bins and requests `285,984` raster vertex invocations;
-the shared indirect arguments occupy `336` bytes. CPU grouping and temporal
+the shared indirect arguments occupy `672` bytes. CPU grouping and temporal
 record construction now run only for explicit audit readback. A new five-frame
 release gate at rear-right yaw/pitch `(2.28, 0.38)` and `0.62 m` spans standing,
 deployment, and flight. Minimum beauty SSIM against the former temporal-record
 renderer is `0.999997`, with the middle frame byte-exact. Largest enclosed
 components are `5, 3, 1, 1, 10` pixels; the final component is bounded by wing
 and pedal owners rather than a body vane. Inspection exposes no new neck,
-shoulder, flank, or tail discontinuity.
+shoulder, flank, or tail discontinuity. An additional low-side takeoff gate at
+yaw/pitch `(1.55, -0.30)` and `0.60 m` keeps the exact five-frame enclosed-hole,
+largest-component, active-identity, and full-coverage counts of the CPU-rachis
+predecessor. Beauty SSIM is at least `0.999853`; at most `394 / 360,000` pixels
+change in any frame. The rachis uses its parent vane identity, so the redundant
+integer-identity tube draw is intentionally omitted while beauty remains
+GPU-generated.
 These counters exclude audit-only expanded output and do not constitute a
 performance claim.
 The same retained path now owns all `12` rectrices throughout takeoff. Their

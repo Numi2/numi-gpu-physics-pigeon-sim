@@ -118,6 +118,13 @@ morphology inventory is retained once; only pose input uses three in-flight
 slots. CPU temporal records and expanded geometry exist only during explicit
 audit readback. This makes pose ownership, selection, allocation stability, and
 residency executable without treating them as a speed result.
+The retained body path now also allocates a second indirect-argument set for
+the vane-contained rachis, increasing the three-slot indirect capacity from
+`336` to `672` bytes. Dedicated Metal/Swift parity and indirect-storage tests
+qualify its `0/4/8/12`-section tube expansion. Schema `21` deliberately keeps
+the existing body-vane counters: the rachis inherits its parent vane's stable
+identity and the integer pass retains that underlying vane identity rather than
+issuing a redundant tube draw. Beauty ownership is nevertheless Metal-native.
 Schema `21` also records projected-size ventral-barb candidate,
 frustum-visible, prior-depth-tested, occlusion-culled, and retained record
 counts; logical triangle-stream vertex count; actual raster vertex invocations;

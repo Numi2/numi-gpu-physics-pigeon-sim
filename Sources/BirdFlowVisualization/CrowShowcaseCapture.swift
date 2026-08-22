@@ -800,6 +800,7 @@ private final class CrowShowcaseRenderer {
   private let backgroundAOVPipeline: MTLRenderPipelineState
   private let featherAOVPipeline: MTLRenderPipelineState?
   private let bodyVaneAOVPipeline: MTLRenderPipelineState?
+  private let bodyRachisAOVPipeline: MTLRenderPipelineState?
   private let ventralBarbAOVPipeline: MTLRenderPipelineState
   private let ventralBarbMeshAOVPipeline: MTLRenderPipelineState?
   private let surfaceIdentityPipeline: MTLRenderPipelineState
@@ -870,17 +871,26 @@ private final class CrowShowcaseRenderer {
       fragment: "showcaseCrowIdentityFragment",
       colorFormat: .rgba32Uint
     )
+    let candidateBodyRachisAOVPipeline = try? createdBackend.render(
+      vertex: "crowBodyRachisAOVVertex",
+      fragment: "showcaseCrowAOVFragment",
+      colorFormats: [.rgba16Float, .rgba16Float, .rgba16Float, .rg16Float, .r32Float],
+      sampleCount: device.supportsTextureSampleCount(4) ? 4 : 1
+    )
     if let candidateBodyVaneDeformer,
       let candidateBodyVaneAOVPipeline,
-      let candidateBodyVaneIdentityPipeline
+      let candidateBodyVaneIdentityPipeline,
+      let candidateBodyRachisAOVPipeline
     {
       bodyVaneGeometryDeformer = candidateBodyVaneDeformer
       bodyVaneAOVPipeline = candidateBodyVaneAOVPipeline
       bodyVaneIdentityPipeline = candidateBodyVaneIdentityPipeline
+      bodyRachisAOVPipeline = candidateBodyRachisAOVPipeline
     } else {
       bodyVaneGeometryDeformer = nil
       bodyVaneAOVPipeline = nil
       bodyVaneIdentityPipeline = nil
+      bodyRachisAOVPipeline = nil
     }
     let createdMeshBuilder = CrowMeshBuilder(
       dataset: dataset,
@@ -1510,6 +1520,29 @@ private final class CrowShowcaseRenderer {
           type: .triangle,
           indirectBuffer: batch.indirectDrawBuffer,
           indirectBufferOffset: batch.indirectDrawBufferOffset
+        )
+      }
+    }
+    if let bodyVaneFrame, let bodyVaneGeometryDeformer,
+      let bodyRachisAOVPipeline
+    {
+      encoder.setRenderPipelineState(bodyRachisAOVPipeline)
+      encoder.setVertexBytes(
+        &cameraUniforms,
+        length: MemoryLayout<CrowTemporalCameraUniforms>.stride,
+        index: 3
+      )
+      encoder.setFragmentBytes(
+        &cameraUniforms,
+        length: MemoryLayout<CrowTemporalCameraUniforms>.stride,
+        index: 0
+      )
+      for batch in bodyVaneFrame.batches where batch.rachisVertexCount > 0 {
+        bodyVaneGeometryDeformer.bindRenderResources(for: batch, encoder: encoder)
+        encoder.drawPrimitives(
+          type: .triangle,
+          indirectBuffer: batch.indirectDrawBuffer,
+          indirectBufferOffset: batch.rachisIndirectDrawBufferOffset
         )
       }
     }
@@ -2689,13 +2722,16 @@ private struct CrowMeshBuilder {
     projectedPixelsPerMeter: Float,
     to vertices: inout [ColoredVertex]
   ) {
-    appendTractFeatherMesostructure(
-      CrowFeatherMesostructure.segments(
+    let segments = CrowFeatherMesostructure.segments(
         for: feather,
         projectedPixelsPerMeter: projectedPixelsPerMeter,
         camberScale: camberScale,
         transverseCamberRatio: transverseCamberRatio
-      ),
+      )
+    appendTractFeatherMesostructure(
+      bodyVanesOwnedByMetal
+        ? segments.filter { $0.kind != .rachis }
+        : segments,
       bodyCenter: bodyCenter,
       planeNormal: feather.planeNormal,
       material: feather.materialVariation,
