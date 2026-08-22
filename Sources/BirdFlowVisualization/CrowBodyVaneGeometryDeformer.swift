@@ -167,7 +167,7 @@ final class CrowBodyVaneGeometryDeformer {
     auditPipeline = try backend.compute("probeCrowBodyVaneVertices")
     auditRachisPipeline = try backend.compute("probeCrowBodyRachisVertices")
     auditDetailPipeline = try backend.compute("probeCrowBodyDetailVertices")
-    let createdMorphologyRecords = CrowBodyVaneRecords.morphologyRecords()
+    let createdMorphologyRecords = CrowBodyVaneRecords.retainedMorphologyRecords()
     morphologyRecords = createdMorphologyRecords
     maximumMorphologyLength = createdMorphologyRecords.reduce(.zero) {
       partial, record in
@@ -212,7 +212,11 @@ final class CrowBodyVaneGeometryDeformer {
       )
     }
     topologyCountBuffers = try (0..<Self.bufferedFrameCount).map { _ in
-      try backend.buffer(length: 8 * MemoryLayout<UInt32>.stride, shared: true)
+      try backend.buffer(
+        length: (CrowBodyVaneRecords.productionTopologies.count + 1)
+          * MemoryLayout<UInt32>.stride,
+        shared: true
+      )
     }
     workBuffers = try (0..<Self.bufferedFrameCount).map { _ in
       try backend.buffer(
@@ -229,7 +233,7 @@ final class CrowBodyVaneGeometryDeformer {
     }
     detailSegmentBuffers = try (0..<Self.bufferedFrameCount).map { _ in
       try backend.buffer(
-        length: maximumRecordCount * 43
+        length: CrowBodyVaneRecords.bodyMorphologyRecordCount * 43
           * MemoryLayout<CrowBodyDetailSegmentGPU>.stride
       )
     }
@@ -285,7 +289,7 @@ final class CrowBodyVaneGeometryDeformer {
         * MemoryLayout<CrowBodyVaneNeckTransformGPU>.stride
     let auditTemporalRecords =
       auditReadback
-      ? CrowBodyVaneRecords.temporalRecords(
+      ? CrowBodyVaneRecords.retainedTemporalRecords(
         currentBodyCenter: currentBodyCenter,
         previousBodyCenter: previousBodyCenter,
         currentNeckPose: currentNeckPose,
@@ -297,7 +301,8 @@ final class CrowBodyVaneGeometryDeformer {
     memset(
       topologyCountBuffers[slot].contents(),
       0,
-      8 * MemoryLayout<UInt32>.stride
+      (CrowBodyVaneRecords.productionTopologies.count + 1)
+        * MemoryLayout<UInt32>.stride
     )
     memset(
       indirectDrawBuffers[slot].contents(),
@@ -365,6 +370,8 @@ final class CrowBodyVaneGeometryDeformer {
     prepare.label = "Prepare body vane indirect draws"
     prepare.setBuffer(topologyCountBuffers[slot], offset: 0, index: 0)
     prepare.setBuffer(indirectDrawBuffers[slot], offset: 0, index: 1)
+    prepare.setBuffer(morphologyBuffer, offset: 0, index: 2)
+    prepare.setBuffer(workBuffers[slot], offset: 0, index: 3)
     backend.dispatch1D(
       prepare,
       pipeline: indirectPipeline,
@@ -391,13 +398,14 @@ final class CrowBodyVaneGeometryDeformer {
     backend.dispatch1D(
       detailSegments,
       pipeline: detailSegmentPipeline,
-      count: recordCount * retainedDetailSegmentCapacity
+      count: CrowBodyVaneRecords.bodyMorphologyRecordCount
+        * retainedDetailSegmentCapacity
     )
     detailSegments.endEncoding()
 
     let auditGroups =
       auditReadback
-      ? CrowBodyVaneRecords.groupedMorphologyIndices(
+      ? CrowBodyVaneRecords.retainedGroupedMorphologyIndices(
         projectedPixelsPerMeter: projectedPixelsPerMeter
       )
       : [:]
@@ -656,13 +664,34 @@ final class CrowBodyVaneGeometryDeformer {
   }
 
   func activeRecordCount(for frame: CrowBodyVaneGeometryFrame) -> Int {
-    Int(topologyCounts(for: frame)[7])
+    Int(
+      topologyCounts(for: frame)[
+        CrowBodyVaneRecords.productionTopologies.count
+      ]
+    )
   }
 
   func expandedVertexCount(for frame: CrowBodyVaneGeometryFrame) -> Int {
     frame.batches.reduce(0) {
       $0 + Int(drawArguments(for: $1).vertexCount)
         * Int(drawArguments(for: $1).instanceCount)
+    }
+  }
+
+  func activeVentralRecordCount(for frame: CrowBodyVaneGeometryFrame) -> Int {
+    frame.batches.indices.reduce(0) { partial, topologyIndex in
+      partial + selectedRecordIndices(for: frame, topologyIndex: topologyIndex)
+        .count { Int($0) >= CrowBodyVaneRecords.bodyMorphologyRecordCount }
+    }
+  }
+
+  func expandedVentralVertexCount(for frame: CrowBodyVaneGeometryFrame) -> Int {
+    frame.batches.enumerated().reduce(0) { partial, pair in
+      let selected = selectedRecordIndices(
+        for: frame,
+        topologyIndex: pair.offset
+      ).count { Int($0) >= CrowBodyVaneRecords.bodyMorphologyRecordCount }
+      return partial + selected * pair.element.vertexCount
     }
   }
 
@@ -681,11 +710,12 @@ final class CrowBodyVaneGeometryDeformer {
   }
 
   func topologyCounts(for frame: CrowBodyVaneGeometryFrame) -> [UInt32] {
+    let count = CrowBodyVaneRecords.productionTopologies.count + 1
     let pointer = topologyCountBuffers[frame.slot].contents().bindMemory(
       to: UInt32.self,
-      capacity: 8
+      capacity: count
     )
-    return Array(UnsafeBufferPointer(start: pointer, count: 8))
+    return Array(UnsafeBufferPointer(start: pointer, count: count))
   }
 
   func selectedRecordIndices(
@@ -765,7 +795,7 @@ final class CrowBodyVaneGeometryDeformer {
     guard requiredCapacity > detailSegmentCapacityPerRecord else { return }
     detailSegmentBuffers = try (0..<Self.bufferedFrameCount).map { _ in
       try backend.buffer(
-        length: morphologyRecords.count * requiredCapacity
+        length: CrowBodyVaneRecords.bodyMorphologyRecordCount * requiredCapacity
           * MemoryLayout<CrowBodyDetailSegmentGPU>.stride
       )
     }
@@ -791,6 +821,12 @@ final class CrowBodyVaneGeometryDeformer {
 }
 
 enum CrowBodyVaneRecords {
+  static let bodyMorphologyRecordCount = 3_212
+  static let ventralMorphologyRecordCount = 1_304
+  /// Body topologies stay first. Because body morphology precedes ventral
+  /// morphology, compact body work remains a prefix of the shared work list;
+  /// body-only rachis/detail buffers can therefore retain their original
+  /// capacity while the final two bins remain vane-only ventral tiers.
   static let productionTopologies: [CrowBodyVaneTopology] = [
     CrowBodyVaneTopology(axialSections: 3, widthSections: 1),
     CrowBodyVaneTopology(axialSections: 4, widthSections: 1),
@@ -799,13 +835,15 @@ enum CrowBodyVaneRecords {
     CrowBodyVaneTopology(axialSections: 10, widthSections: 5),
     CrowBodyVaneTopology(axialSections: 12, widthSections: 5),
     CrowBodyVaneTopology(axialSections: 16, widthSections: 7),
+    CrowBodyVaneTopology(axialSections: 7, widthSections: 3),
+    CrowBodyVaneTopology(axialSections: 11, widthSections: 5),
   ]
 
   static func rachisSections(for topology: CrowBodyVaneTopology) -> Int {
     switch topology.axialSections {
     case ...4: 0
-    case 6, 8: 4
-    case 10, 12: 8
+    case 5...8: 4
+    case 9...12: 8
     default: 12
     }
   }
@@ -819,8 +857,8 @@ enum CrowBodyVaneRecords {
   static func detailSegmentCount(for topology: CrowBodyVaneTopology) -> Int {
     switch topology.axialSections {
     case ...4: 0
-    case 6, 8: 43
-    case 10, 12: 41
+    case 5...8: 43
+    case 9...12: 41
     default: 167
     }
   }
@@ -878,6 +916,61 @@ enum CrowBodyVaneRecords {
     }
   }
 
+  /// The production inventory retains both dorsal/body contour vanes and the
+  /// complete bilateral pectoral/abdominal vane owner. Ventral records use a
+  /// separate identity namespace and share only the procedural vane raster;
+  /// their rachis and barb hierarchy remain owned by the dedicated retained
+  /// ventral curve systems.
+  static func retainedMorphologyRecords() -> [CrowBodyVaneMorphologyGPU] {
+    morphologyRecords() + ventralMorphologyRecords()
+  }
+
+  static func ventralMorphologyRecords() -> [CrowBodyVaneMorphologyGPU] {
+    CrowVentralFeatherTracts.samples().enumerated().map { index, sample in
+      CrowBodyVaneMorphologyGPU(
+        rootAndRootWidth: SIMD4<Float>(
+          sample.rootOffset,
+          sample.rootWidthMeters
+        ),
+        tipAndMaximumWidth: SIMD4<Float>(
+          sample.tipOffset,
+          sample.maximumWidthMeters
+        ),
+        normalAndCamber: SIMD4<Float>(
+          sample.planeNormal,
+          sample.camberMeters
+        ),
+        sweepAsymmetryAndRipple: SIMD4<Float>(
+          sample.lateralSweepMeters,
+          sample.vaneAsymmetry,
+          sample.edgeRippleAmplitude,
+          sample.edgeRipplePhase
+        ),
+        envelopeAndTaper: SIMD4<Float>(
+          sample.edgeRippleCycles,
+          sample.rootEnvelopeRatio,
+          0.015,
+          3.2
+        ),
+        color: ventralColor(for: sample),
+        morphology: SIMD4<Float>(
+          sample.pennaceousStartFraction,
+          sample.lodReferenceLengthMeters,
+          Float(sample.row),
+          Float(sample.column)
+        ),
+        identity: SIMD4<UInt32>(
+          0x0300_0000 | UInt32(index),
+          stableHash(ventralIdentity(of: sample)),
+          (CrowVentralFeatherTracts.transverseCamberRatio
+            * CrowVentralFeatherTracts.transverseCamberScale(for: sample))
+            .bitPattern,
+          sample.surfaceFeatherClass
+        )
+      )
+    }
+  }
+
   static func groupedMorphologyIndices(
     projectedPixelsPerMeter: Float
   ) -> [CrowBodyVaneTopology: [Int]] {
@@ -894,6 +987,23 @@ enum CrowBodyVaneRecords {
         ),
         default: []
       ].append(index)
+    }
+    return grouped
+  }
+
+  static func retainedGroupedMorphologyIndices(
+    projectedPixelsPerMeter: Float
+  ) -> [CrowBodyVaneTopology: [Int]] {
+    var grouped = groupedMorphologyIndices(
+      projectedPixelsPerMeter: projectedPixelsPerMeter
+    )
+    let bodyCount = morphologyRecords().count
+    for (index, sample) in CrowVentralFeatherTracts.samples().enumerated()
+    where isVisible(sample, projectedPixelsPerMeter: projectedPixelsPerMeter) {
+      grouped[
+        topology(for: sample, projectedPixelsPerMeter: projectedPixelsPerMeter),
+        default: []
+      ].append(bodyCount + index)
     }
     return grouped
   }
@@ -960,6 +1070,41 @@ enum CrowBodyVaneRecords {
     }
   }
 
+  static func retainedTemporalRecords(
+    currentBodyCenter: SIMD3<Float>,
+    previousBodyCenter: SIMD3<Float>,
+    currentNeckPose: CrowStandingNeckPose?,
+    previousNeckPose: CrowStandingNeckPose?,
+    currentDeployment: Float,
+    previousDeployment: Float
+  ) -> [CrowBodyVaneRecordGPU] {
+    temporalRecords(
+      currentBodyCenter: currentBodyCenter,
+      previousBodyCenter: previousBodyCenter,
+      currentNeckPose: currentNeckPose,
+      previousNeckPose: previousNeckPose,
+      currentDeployment: currentDeployment,
+      previousDeployment: previousDeployment
+    ) + ventralTemporalRecords(
+      currentBodyCenter: currentBodyCenter,
+      previousBodyCenter: previousBodyCenter
+    )
+  }
+
+  static func ventralTemporalRecords(
+    currentBodyCenter: SIMD3<Float>,
+    previousBodyCenter: SIMD3<Float>
+  ) -> [CrowBodyVaneRecordGPU] {
+    CrowVentralFeatherTracts.samples().enumerated().map { index, sample in
+      ventralRecord(
+        sample: sample,
+        currentBodyCenter: currentBodyCenter,
+        previousBodyCenter: previousBodyCenter,
+        inventoryIndex: index
+      )
+    }
+  }
+
   static func groupedRecords(
     currentBodyCenter: SIMD3<Float>,
     previousBodyCenter: SIMD3<Float>,
@@ -1000,6 +1145,28 @@ enum CrowBodyVaneRecords {
     return grouped
   }
 
+  static func retainedGroupedRecords(
+    currentBodyCenter: SIMD3<Float>,
+    previousBodyCenter: SIMD3<Float>,
+    currentNeckPose: CrowStandingNeckPose?,
+    previousNeckPose: CrowStandingNeckPose?,
+    currentDeployment: Float,
+    previousDeployment: Float,
+    projectedPixelsPerMeter: Float
+  ) -> [CrowBodyVaneTopology: [CrowBodyVaneRecordGPU]] {
+    let records = retainedTemporalRecords(
+      currentBodyCenter: currentBodyCenter,
+      previousBodyCenter: previousBodyCenter,
+      currentNeckPose: currentNeckPose,
+      previousNeckPose: previousNeckPose,
+      currentDeployment: currentDeployment,
+      previousDeployment: previousDeployment
+    )
+    return retainedGroupedMorphologyIndices(
+      projectedPixelsPerMeter: projectedPixelsPerMeter
+    ).mapValues { indices in indices.map { records[$0] } }
+  }
+
   static func isVisible(
     _ sample: CrowBodyFeatherTractSample,
     projectedPixelsPerMeter: Float
@@ -1033,6 +1200,28 @@ enum CrowBodyVaneRecords {
           projectedPixelsPerMeter: projectedPixelsPerMeter
         )
       )
+    )
+  }
+
+  static func isVisible(
+    _ sample: CrowVentralFeatherTractSample,
+    projectedPixelsPerMeter: Float
+  ) -> Bool {
+    projectedPixelsPerMeter >= 1_400
+  }
+
+  static func topology(
+    for sample: CrowVentralFeatherTractSample,
+    projectedPixelsPerMeter: Float
+  ) -> CrowBodyVaneTopology {
+    let tessellation = CrowFeatherCoverageLOD.tessellation(
+      lengthMeters: sample.lodReferenceLengthMeters,
+      projectedPixelsPerMeter: projectedPixelsPerMeter,
+      baseAxialSections: 7
+    )
+    return CrowBodyVaneTopology(
+      axialSections: tessellation.axialSections,
+      widthSections: tessellation.widthSections
     )
   }
 
@@ -1961,6 +2150,61 @@ enum CrowBodyVaneRecords {
     )
   }
 
+  private static func ventralRecord(
+    sample: CrowVentralFeatherTractSample,
+    currentBodyCenter: SIMD3<Float>,
+    previousBodyCenter: SIMD3<Float>,
+    inventoryIndex: Int
+  ) -> CrowBodyVaneRecordGPU {
+    let transverseCamber = CrowVentralFeatherTracts.transverseCamberRatio
+      * CrowVentralFeatherTracts.transverseCamberScale(for: sample)
+    return CrowBodyVaneRecordGPU(
+      currentRootAndRootWidth: SIMD4<Float>(
+        currentBodyCenter + sample.rootOffset, sample.rootWidthMeters
+      ),
+      currentTipAndMaximumWidth: SIMD4<Float>(
+        currentBodyCenter + sample.tipOffset, sample.maximumWidthMeters
+      ),
+      previousRootAndCurrentCamber: SIMD4<Float>(
+        previousBodyCenter + sample.rootOffset, sample.camberMeters
+      ),
+      previousTipAndPreviousCamber: SIMD4<Float>(
+        previousBodyCenter + sample.tipOffset, sample.camberMeters
+      ),
+      currentNormalAndTransverseCamber: SIMD4<Float>(
+        sample.planeNormal, transverseCamber
+      ),
+      previousNormalAndTransverseCamber: SIMD4<Float>(
+        sample.planeNormal, transverseCamber
+      ),
+      sweepAsymmetryAndRipple: SIMD4<Float>(
+        sample.lateralSweepMeters,
+        sample.vaneAsymmetry,
+        sample.edgeRippleAmplitude,
+        sample.edgeRipplePhase
+      ),
+      envelopeAndTaper: SIMD4<Float>(
+        sample.edgeRippleCycles,
+        sample.rootEnvelopeRatio,
+        0.015,
+        3.2
+      ),
+      color: ventralColor(for: sample),
+      morphology: SIMD4<Float>(
+        sample.pennaceousStartFraction,
+        sample.lodReferenceLengthMeters,
+        Float(sample.row),
+        Float(sample.column)
+      ),
+      identity: SIMD4<UInt32>(
+        0x0300_0000 | UInt32(inventoryIndex),
+        stableHash(ventralIdentity(of: sample)),
+        1,
+        sample.surfaceFeatherClass
+      )
+    )
+  }
+
   private static func color(
     for sample: CrowBodyFeatherTractSample
   ) -> SIMD4<Float> {
@@ -1989,11 +2233,34 @@ enum CrowBodyVaneRecords {
     }
   }
 
+  private static func ventralColor(
+    for sample: CrowVentralFeatherTractSample
+  ) -> SIMD4<Float> {
+    let material = sample.materialVariation
+    return SIMD4<Float>(
+      0.006 * (1 + 0.08 * material),
+      0.009 * (1 + 0.06 * material),
+      0.016 * (1 + 0.04 * material),
+      0.15 + 0.008 * material
+    )
+  }
+
   private static func identity(
     of sample: CrowBodyFeatherTractSample
   ) -> SIMD4<UInt32> {
     SIMD4<UInt32>(
       UInt32(sample.region.rawValue),
+      sample.side < 0 ? 0 : 1,
+      UInt32(sample.row),
+      UInt32(sample.column)
+    )
+  }
+
+  private static func ventralIdentity(
+    of sample: CrowVentralFeatherTractSample
+  ) -> SIMD4<UInt32> {
+    SIMD4<UInt32>(
+      0x0300 | UInt32(sample.region.rawValue),
       sample.side < 0 ? 0 : 1,
       UInt32(sample.row),
       UInt32(sample.column)

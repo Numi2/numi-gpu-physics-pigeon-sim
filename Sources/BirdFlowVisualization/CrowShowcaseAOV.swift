@@ -28,6 +28,12 @@ struct CrowShowcaseFrame {
   let bodyVaneMorphologyBufferAllocationCount: Int
   let bodyVaneRasterVertexInvocationCount: Int
   let bodyVaneVertexGenerationMode: String
+  let ventralVaneMorphologyRecordCount: Int
+  let ventralVaneMorphologyRecordBytes: Int
+  let ventralVaneSelectedMorphologyRecordCount: Int
+  let ventralVaneRasterVertexInvocationCount: Int
+  let ventralVaneEliminatedCPUSurfaceVertexBytes: Int
+  let ventralVaneVertexGenerationMode: String
   let ventralBarbCandidateRecordCount: Int
   let ventralBarbCloseCandidateRecordCount: Int
   let ventralBarbuleCandidateRecordCount: Int
@@ -198,7 +204,9 @@ struct CrowShowcaseFrame {
           persistentFeatherXTotal[featherIdentity, default: 0] += x
           persistentFeatherYTotal[featherIdentity, default: 0] += y
         }
-        if id0 & 0xff00_0000 == 0x0200_0000 {
+        if id0 & 0xff00_0000 == 0x0200_0000
+          || id0 & 0xff00_0000 == 0x0300_0000
+        {
           let bodyVaneIdentity = SIMD4(id0, id1, id2, id3)
           bodyVaneVisiblePixels[bodyVaneIdentity, default: 0] += 1
           let x = pixel % width
@@ -274,7 +282,9 @@ struct CrowShowcaseFrame {
           persistentFeatherFullyCoveredPixels[featherIdentity, default: 0] += 1
           persistentFeatherPrimitiveFullyCoveredPixels[primitiveIdentity, default: 0] += 1
         }
-        if id0 & 0xff00_0000 == 0x0200_0000 {
+        if id0 & 0xff00_0000 == 0x0200_0000
+          || id0 & 0xff00_0000 == 0x0300_0000
+        {
           bodyVaneFullyCoveredPixels[SIMD4(id0, id1, id2, id3), default: 0] += 1
         }
         if id0 == UInt32.max
@@ -390,20 +400,42 @@ struct CrowShowcaseFrame {
     let bodyVaneSamples = CrowBodyFeatherTracts.samples(
       appliesCervicalTerminalFlow: false
     )
+    let ventralVaneSamples = CrowVentralFeatherTracts.samples()
     let bodyVaneIdentities = bodyVaneVisiblePixels.compactMap {
       identity, visiblePixelCount -> CrowBodyVaneIdentityAudit? in
       let inventoryIndex = Int(identity.x & 0x00ff_ffff)
-      guard bodyVaneSamples.indices.contains(inventoryIndex) else { return nil }
-      let sample = bodyVaneSamples[inventoryIndex]
+      let familyCode = UInt8((identity.x >> 24) & 0xff)
+      let regionCode: UInt8
+      let sideCode: UInt8
+      let row: Int
+      let column: Int
+      if familyCode == 2 && bodyVaneSamples.indices.contains(inventoryIndex) {
+        let sample = bodyVaneSamples[inventoryIndex]
+        regionCode = sample.region.rawValue
+        sideCode = sample.side < 0 ? 0 : 1
+        row = sample.row
+        column = sample.column
+      } else if familyCode == 3
+        && ventralVaneSamples.indices.contains(inventoryIndex)
+      {
+        let sample = ventralVaneSamples[inventoryIndex]
+        regionCode = sample.region.rawValue
+        sideCode = sample.side < 0 ? 0 : 1
+        row = sample.row
+        column = sample.column
+      } else {
+        return nil
+      }
       return CrowBodyVaneIdentityAudit(
+        familyCode: familyCode,
         inventoryIndex: inventoryIndex,
         stableIdentifierHash: identity.y,
         physicsSurfacePartIdentifier: identity.z,
         featherClassCode: identity.w & 255,
-        regionCode: sample.region.rawValue,
-        sideCode: sample.side < 0 ? 0 : 1,
-        row: sample.row,
-        column: sample.column,
+        regionCode: regionCode,
+        sideCode: sideCode,
+        row: row,
+        column: column,
         visiblePixelCount: visiblePixelCount,
         fullyCoveredPixelCount: bodyVaneFullyCoveredPixels[identity, default: 0],
         minimumX: bodyVaneMinimumX[identity, default: 0],
@@ -415,7 +447,7 @@ struct CrowShowcaseFrame {
         centroidY: Float(bodyVaneYTotal[identity, default: 0])
           / Float(visiblePixelCount)
       )
-    }.sorted { $0.inventoryIndex < $1.inventoryIndex }
+    }.sorted { ($0.familyCode, $0.inventoryIndex) < ($1.familyCode, $1.inventoryIndex) }
     let wingSurfaceCellIdentities = wingSurfaceCellVisiblePixels.map {
       identity, visiblePixelCount in
       CrowWingSurfaceCellIdentityAudit(
@@ -488,6 +520,15 @@ struct CrowShowcaseFrame {
         bodyVaneMorphologyBufferAllocationCount,
       bodyVaneRasterVertexInvocationCount: bodyVaneRasterVertexInvocationCount,
       bodyVaneVertexGenerationMode: bodyVaneVertexGenerationMode,
+      ventralVaneMorphologyRecordCount: ventralVaneMorphologyRecordCount,
+      ventralVaneMorphologyRecordBytes: ventralVaneMorphologyRecordBytes,
+      ventralVaneSelectedMorphologyRecordCount:
+        ventralVaneSelectedMorphologyRecordCount,
+      ventralVaneRasterVertexInvocationCount:
+        ventralVaneRasterVertexInvocationCount,
+      ventralVaneEliminatedCPUSurfaceVertexBytes:
+        ventralVaneEliminatedCPUSurfaceVertexBytes,
+      ventralVaneVertexGenerationMode: ventralVaneVertexGenerationMode,
       ventralBarbCandidateRecordCount: ventralBarbCandidateRecordCount,
       ventralBarbCloseCandidateRecordCount:
         ventralBarbCloseCandidateRecordCount,
@@ -1449,6 +1490,12 @@ struct CrowShowcaseAOVFrameAudit: Codable, Equatable {
   let bodyVaneMorphologyBufferAllocationCount: Int
   let bodyVaneRasterVertexInvocationCount: Int
   let bodyVaneVertexGenerationMode: String
+  let ventralVaneMorphologyRecordCount: Int
+  let ventralVaneMorphologyRecordBytes: Int
+  let ventralVaneSelectedMorphologyRecordCount: Int
+  let ventralVaneRasterVertexInvocationCount: Int
+  let ventralVaneEliminatedCPUSurfaceVertexBytes: Int
+  let ventralVaneVertexGenerationMode: String
   let ventralBarbCandidateRecordCount: Int
   /// Candidate records promoted from the 40-pixel aggregate tier to the
   /// independently gated 480-pixel close tier.
@@ -1578,6 +1625,8 @@ struct CrowPersistentFeatherPrimitiveAudit: Codable, Equatable {
 }
 
 struct CrowBodyVaneIdentityAudit: Codable, Equatable {
+  /// Two identifies dorsal/body contour vanes; three identifies ventral vanes.
+  let familyCode: UInt8
   let inventoryIndex: Int
   let stableIdentifierHash: UInt32
   let physicsSurfacePartIdentifier: UInt32
@@ -1690,7 +1739,7 @@ struct CrowShowcaseAOVAuditReport: Codable, Equatable {
   let frames: [CrowShowcaseAOVFrameAudit]
 
   init(frames: [CrowShowcaseAOVFrameAudit]) {
-    schemaVersion = 26
+    schemaVersion = 27
     colorSpace = "scene-linear extended range; display output is tone mapped separately"
     motionConvention =
       "current pixel to previous pixel in upper-left-origin pixel units; MetalFX scale 1"

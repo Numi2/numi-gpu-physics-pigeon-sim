@@ -119,14 +119,17 @@ metrics, the expected lower-body apertures, and normal-unit error are exact
 against its CPU-expanded predecessor; beauty SSIM is `0.999997`. This remains
 the procedural-raster ownership gate; the retained-morphology gate follows
 below. Neither is measured anatomy or a speedup.
-The immutable inventory occupies `411,136` bytes once. Three pose slots retain
-`4,128` bytes total, while Metal applies the established density predicate,
-classifies seven possible tessellation topologies, scans stable offsets, emits
+The `3,212`-record dorsal/body subset occupies `411,136` bytes inside one
+`578,048`-byte retained inventory. The additional `1,304` pectoral and
+abdominal vanes use the same immutable owner with a distinct `0x03` identity
+namespace; their dedicated retained rachis and barb systems remain separate.
+Three pose slots retain `4,128` bytes total, while Metal applies the established
+density predicates, classifies nine possible tessellation topologies, scans stable offsets, emits
 compact morphology indices, and prepares indirect vane, rachis, and body-detail
 beauty draws. At
-yaw/pitch `(-1.12, 0.26)` and `0.50 m`, Metal selects the same `1,606` records
+yaw/pitch `(-1.12, 0.26)` and `0.50 m`, Metal selects the same `1,606` body records
 in two active topology bins and requests `285,984` raster vertex invocations;
-the three-slot indirect arguments occupy `1,008` bytes. CPU grouping and temporal
+the current three-slot indirect arguments occupy `1,296` bytes. CPU grouping and temporal
 record construction now run only for explicit audit readback. A new five-frame
 release gate at rear-right yaw/pitch `(2.28, 0.38)` and `0.62 m` spans standing,
 deployment, and flight. Minimum beauty SSIM against the former temporal-record
@@ -140,6 +143,22 @@ predecessor. Beauty SSIM is at least `0.999853`; at most `394 / 360,000` pixels
 change in any frame. The rachis uses its parent vane identity, so the redundant
 integer-identity tube draw is intentionally omitted while beauty remains
 GPU-generated.
+At the live `1,400+ px/m` ventral tier, all `1,304` pectoral/abdominal vanes
+select the exact former `7 x 3` grid and emit `164,304` procedural raster
+vertices. This removes `15,773,184` bytes of current/previous expanded
+`CrowSurfaceTemporalVertexGPU` data from the per-frame CPU stream while adding
+only `166,912` bytes to the lifetime morphology store. A fresh low front-port
+standing gate at yaw/pitch `(-0.46, -0.40)`, `0.46 m`, and `1280 x 720` retains
+exact enclosed-hole pixels/components/largest components of `1,4,1` /
+`1,4,1` / `1,1,1`, exact active/full-coverage AOV pixels, and zero expected
+lower-body aperture in all three frames. Minimum beauty SSIM against the
+CPU-vane predecessor is
+`0.999976`; the loop endpoint PNG is byte-exact. The inspected simulated frame
+shows continuous pectoral, abdominal, femoral, and folded-wing overlap without
+a new macro gap. Schema `27` exposes the ventral record, selected-work, raster,
+eliminated-CPU-byte, generation-mode, and visible identity-family census. This
+is an executable ownership/parity result, not a speed measurement or measured
+American-crow anatomy.
 The body-detail prepass retains one `96`-byte current/previous analytic segment
 instead of a fixed `18`-vertex triangle stream. Each resolved feather adds six
 three-segment curved basal barb chains beneath the unchanged continuous shell.

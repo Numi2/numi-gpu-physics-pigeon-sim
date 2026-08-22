@@ -140,9 +140,18 @@ of the `3,212` retained body-vane identities. Inventory index and stable hash
 remain coupled to tract region, bilateral side, row, and column, so a dorsal or
 flank patch can be traced to its owning simulated feather without a target
 image or color inference. Vane-contained rachis and detail primitives retain
-their parent identity. CPU-authored class-`7` ventral and throat blades remain
-separate surface primitives; the census does not mislabel those as retained
-body morphologies.
+their parent identity.
+Schema `27` extends that census and the retained inventory to the `1,304`
+class-`7` pectoral/abdominal vane owners. Identity family `2` remains the
+`3,212` dorsal/body records; family `3` maps its own inventory index back to
+ventral region, side, row, and column. Throat blades remain separate surface
+primitives. The aggregate retained-morphology counters therefore report
+`4,516` records and `578,048` bytes, while dedicated ventral fields report
+`1,304` records, selected work, procedural raster invocations, eliminated CPU
+surface bytes, and `gpu-retained-identity-stable-procedural-vane` generation.
+At the current `7 x 3` tier this is `164,304` raster vertices and `15,773,184`
+eliminated `CrowSurfaceTemporalVertexGPU` bytes per frame. This is a data-flow
+and residency audit, not a GPU-time or throughput result.
 Schema `24` deliberately keeps the existing body-vane counters: rachis and
 detail inherit their parent vane's stable identity, and the integer pass
 retains that underlying vane identity rather than issuing redundant subpixel

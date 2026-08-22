@@ -1271,9 +1271,9 @@ simulated projected-detail handoff, not a measured feather-density or
 performance result.
 
 The canonical README sequence is fully simulated and contains the native hold,
-transition, and flight path: `800 x 450`, `72` frames at `24 fps`, `7,984,745`
+transition, and flight path: `800 x 450`, `72` frames at `24 fps`, `8,012,472`
 bytes, SHA-256
-`6ce221f52eac460a5409e5c0e9660ae3532e63b11032ba9403655045780880ca`.
+`fef6ec24bb9aeae9de92ff5922e401b665fba7b7c5096e4e65cc9eae55e0a84c`.
 The audited stage PNGs at frames `0`, `35`, and `71` are distinct and retain
 the simulated hold, geometric deployment, and sustained-flight states.
 

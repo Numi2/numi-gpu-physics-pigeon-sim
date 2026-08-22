@@ -319,6 +319,30 @@ therefore emits `3,104` intervals and `74,496` vertices without CPU triangle
 construction. The paired continuity/crown hierarchy remains an estimated
 rendering model, not evidence of measured American-crow rachis depth.
 
+The owning pectoral/abdominal vane surfaces are now retained alongside the
+dorsal/body inventory instead of being rebuilt into the generic CPU surface
+stream. All `1,304` records preserve region, bilateral side, row, column,
+projected-length reference, crown multiplier, widths, camber, sweep, ripple,
+material, and stable identity. Their production identity namespace begins at
+`0x03000000`; the raster AOV restores physics part `1` while the immutable
+record's otherwise redundant identity word transports the exact transverse
+camber ratio without widening the `128`-byte ABI. GPU selection reproduces the
+former visibility gate and the exact `7 x 3`, `11 x 5`, and `16 x 7` future
+tessellation tiers. The current tier emits `164,304` vane vertices and removes
+`15,773,184` bytes of expanded temporal surface vertices from CPU construction
+and upload per frame. Body-only rachis/detail indirect counts exclude this
+family, so the existing three-slot body-detail segment capacity does not grow.
+
+At the fresh low front-port standing gate `(-0.46, -0.40)`, `0.46 m`, and
+`1280 x 720`, the CPU predecessor and retained candidate have minimum beauty
+SSIM `0.999976`. Enclosed-hole pixels/components/largest components are
+`1,4,1` / `1,4,1` / `1,1,1` for both predecessor and candidate; expected
+lower-body aperture remains zero. The
+candidate loop endpoint PNG is byte-exact. The inspected middle frame retains
+continuous breast, abdomen, femoral insertion, and folded-wing overlap. These
+are executable simulated-geometry and raster-parity observations, not measured
+crow pterylosis or performance evidence.
+
 The ventral tips now leave their formerly bilateral terminal stations while
 all `1,304` follicle roots remain exact. A deterministic low-discrepancy phase
 combines row, column, region, side, and stable identity; the resulting surface

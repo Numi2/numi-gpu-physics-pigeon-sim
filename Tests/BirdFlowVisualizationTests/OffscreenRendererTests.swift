@@ -772,10 +772,10 @@ func estimatedStandingCrowCaptureProducesLoopClosedFrames() throws {
     try VisualizationBackend(device: device).supportsMeshShaders
     ? "gpu-mesh-threadgroup-8-vertex-indexed"
     : "gpu-procedural-vertex-pulling"
-  #expect(audit.schemaVersion == 26)
+  #expect(audit.schemaVersion == 27)
   #expect(
     audit.frames.allSatisfy {
-      $0.bodyVaneMorphologyRecordCount == 3_212
+      $0.bodyVaneMorphologyRecordCount == 4_516
         && $0.bodyVaneMorphologyRecordBytes
           == $0.bodyVaneMorphologyRecordCount
           * MemoryLayout<CrowBodyVaneMorphologyGPU>.stride
@@ -795,6 +795,17 @@ func estimatedStandingCrowCaptureProducesLoopClosedFrames() throws {
         && $0.bodyVaneRasterVertexInvocationCount > 0
         && $0.bodyVaneVertexGenerationMode
           == "gpu-resident-morphology-pose-instanced-indirect"
+    })
+  #expect(
+    audit.frames.allSatisfy {
+      $0.ventralVaneMorphologyRecordCount == 1_304
+        && $0.ventralVaneMorphologyRecordBytes
+          == 1_304 * MemoryLayout<CrowBodyVaneMorphologyGPU>.stride
+        && $0.ventralVaneSelectedMorphologyRecordCount == 0
+        && $0.ventralVaneRasterVertexInvocationCount == 0
+        && $0.ventralVaneEliminatedCPUSurfaceVertexBytes == 0
+        && $0.ventralVaneVertexGenerationMode
+          == "gpu-retained-identity-stable-procedural-vane"
     })
   #expect(
     audit.frames.allSatisfy {
@@ -885,11 +896,15 @@ func estimatedStandingCrowCaptureProducesLoopClosedFrames() throws {
   #expect(audit.frames.allSatisfy { !$0.bodyVaneIdentities.isEmpty })
   #expect(
     audit.frames.allSatisfy { frame in
-      Set(frame.bodyVaneIdentities.map(\.inventoryIndex)).count
+      Set(frame.bodyVaneIdentities.map {
+        UInt32($0.familyCode) << 24 | UInt32($0.inventoryIndex)
+      }).count
         == frame.bodyVaneIdentities.count
         && frame.bodyVaneIdentities.allSatisfy {
-          $0.inventoryIndex >= 0
-            && $0.inventoryIndex < frame.bodyVaneMorphologyRecordCount
+          ($0.familyCode == 2 || $0.familyCode == 3)
+            && $0.inventoryIndex >= 0
+            && ($0.familyCode == 2
+              ? $0.inventoryIndex < 3_212 : $0.inventoryIndex < 1_304)
             && (4...7).contains($0.featherClassCode)
             && $0.regionCode <= CrowBodyFeatherTractRegion.scapular.rawValue
             && $0.sideCode <= 1

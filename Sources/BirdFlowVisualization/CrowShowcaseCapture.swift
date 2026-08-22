@@ -909,7 +909,8 @@ private final class CrowShowcaseRenderer {
       realityAsset: realityAsset,
       presentation: presentation,
       explicitVentralBarbCurvesEnabled: explicitVentralBarbCurvesEnabled,
-      bodyVanesOwnedByMetal: bodyVaneGeometryDeformer != nil
+      bodyVanesOwnedByMetal: bodyVaneGeometryDeformer != nil,
+      ventralVanesOwnedByMetal: bodyVaneGeometryDeformer != nil
     )
     meshBuilder = createdMeshBuilder
     if let realityAsset {
@@ -1895,6 +1896,14 @@ private final class CrowShowcaseRenderer {
       bodyVaneFrame.map {
         bodyVaneGeometryDeformer?.expandedVertexCount(for: $0) ?? 0
       } ?? 0
+    let ventralVaneSelectedMorphologyRecordCount =
+      bodyVaneFrame.map {
+        bodyVaneGeometryDeformer?.activeVentralRecordCount(for: $0) ?? 0
+      } ?? 0
+    let ventralVaneExpandedVertexCount =
+      bodyVaneFrame.map {
+        bodyVaneGeometryDeformer?.expandedVentralVertexCount(for: $0) ?? 0
+      } ?? 0
     let ventralBarbCandidateRecordCount =
       ventralBarbGeometryDeformer?
       .candidateRecordCount(projectedPixelsPerMeter: projectedPixelsPerMeter) ?? 0
@@ -1960,7 +1969,8 @@ private final class CrowShowcaseRenderer {
       bodyVaneSelectedMorphologyRecordCount:
         bodyVaneSelectedMorphologyRecordCount,
       bodyVaneBatchCount: bodyVaneFrame.map {
-        bodyVaneGeometryDeformer?.topologyCounts(for: $0).prefix(7)
+        bodyVaneGeometryDeformer?.topologyCounts(for: $0)
+          .prefix(CrowBodyVaneRecords.productionTopologies.count)
           .filter { $0 > 0 }.count ?? 0
       } ?? 0,
       bodyVaneSelectedMorphologyRecordBytes:
@@ -1980,6 +1990,21 @@ private final class CrowShowcaseRenderer {
       bodyVaneVertexGenerationMode: bodyVaneFrame == nil
         ? "cpu-surface-fallback"
         : "gpu-resident-morphology-pose-instanced-indirect",
+      ventralVaneMorphologyRecordCount: bodyVaneFrame == nil
+        ? 0 : CrowBodyVaneRecords.ventralMorphologyRecordCount,
+      ventralVaneMorphologyRecordBytes: bodyVaneFrame == nil
+        ? 0
+        : CrowBodyVaneRecords.ventralMorphologyRecordCount
+          * MemoryLayout<CrowBodyVaneMorphologyGPU>.stride,
+      ventralVaneSelectedMorphologyRecordCount:
+        ventralVaneSelectedMorphologyRecordCount,
+      ventralVaneRasterVertexInvocationCount: ventralVaneExpandedVertexCount,
+      ventralVaneEliminatedCPUSurfaceVertexBytes:
+        ventralVaneExpandedVertexCount
+        * MemoryLayout<CrowSurfaceTemporalVertexGPU>.stride,
+      ventralVaneVertexGenerationMode: bodyVaneFrame == nil
+        ? "cpu-surface-fallback"
+        : "gpu-retained-identity-stable-procedural-vane",
       ventralBarbCandidateRecordCount: ventralBarbCandidateRecordCount,
       ventralBarbCloseCandidateRecordCount:
         ventralBarbCloseCandidateRecordCount,
@@ -2107,6 +2132,7 @@ private struct CrowMeshBuilder {
   private let presentation: CrowShowcasePresentation
   private let explicitVentralBarbCurvesEnabled: Bool
   private let bodyVanesOwnedByMetal: Bool
+  private let ventralVanesOwnedByMetal: Bool
   private let leftWingAnchor: CrowWingAttachmentAnchor?
   private let rightWingAnchor: CrowWingAttachmentAnchor?
 
@@ -2123,7 +2149,8 @@ private struct CrowMeshBuilder {
     realityAsset: BirdRealityAsset?,
     presentation: CrowShowcasePresentation,
     explicitVentralBarbCurvesEnabled: Bool,
-    bodyVanesOwnedByMetal: Bool
+    bodyVanesOwnedByMetal: Bool,
+    ventralVanesOwnedByMetal: Bool
   ) {
     self.dataset = dataset
     self.profile = profile
@@ -2131,6 +2158,7 @@ private struct CrowMeshBuilder {
     self.presentation = presentation
     self.explicitVentralBarbCurvesEnabled = explicitVentralBarbCurvesEnabled
     self.bodyVanesOwnedByMetal = bodyVanesOwnedByMetal
+    self.ventralVanesOwnedByMetal = ventralVanesOwnedByMetal
     persistentFeathers = realityAsset?.feathers ?? []
     surfaceIsEstimatedCrow =
       dataset.scientificTier == "estimated-hybrid-complete-surface"
@@ -3152,28 +3180,30 @@ private struct CrowMeshBuilder {
       let transverseCamberRatio =
         CrowVentralFeatherTracts.transverseCamberRatio
         * CrowVentralFeatherTracts.transverseCamberScale(for: sample)
-      appendFeatherBlade(
-        root: bodyCenter + sample.rootOffset,
-        tip: bodyCenter + sample.tipOffset,
-        planeNormal: sample.planeNormal,
-        rootWidth: sample.rootWidthMeters,
-        maximumWidth: sample.maximumWidthMeters,
-        color: color,
-        sections: 7,
-        camber: sample.camberMeters,
-        lateralSweep: sample.lateralSweepMeters,
-        transverseCamberRatio: transverseCamberRatio,
-        vaneAsymmetry: sample.vaneAsymmetry,
-        edgeRippleAmplitude: sample.edgeRippleAmplitude,
-        edgeRipplePhase: sample.edgeRipplePhase,
-        edgeRippleCycles: sample.edgeRippleCycles,
-        rootEnvelopeRatio: sample.rootEnvelopeRatio,
-        axialStartFraction: sample.pennaceousStartFraction,
-        surfaceFeatherClass: sample.surfaceFeatherClass,
-        lodLengthMeters: sample.lodReferenceLengthMeters,
-        projectedPixelsPerMeter: projectedPixelsPerMeter,
-        to: &vertices
-      )
+      if !ventralVanesOwnedByMetal {
+        appendFeatherBlade(
+          root: bodyCenter + sample.rootOffset,
+          tip: bodyCenter + sample.tipOffset,
+          planeNormal: sample.planeNormal,
+          rootWidth: sample.rootWidthMeters,
+          maximumWidth: sample.maximumWidthMeters,
+          color: color,
+          sections: 7,
+          camber: sample.camberMeters,
+          lateralSweep: sample.lateralSweepMeters,
+          transverseCamberRatio: transverseCamberRatio,
+          vaneAsymmetry: sample.vaneAsymmetry,
+          edgeRippleAmplitude: sample.edgeRippleAmplitude,
+          edgeRipplePhase: sample.edgeRipplePhase,
+          edgeRippleCycles: sample.edgeRippleCycles,
+          rootEnvelopeRatio: sample.rootEnvelopeRatio,
+          axialStartFraction: sample.pennaceousStartFraction,
+          surfaceFeatherClass: sample.surfaceFeatherClass,
+          lodLengthMeters: sample.lodReferenceLengthMeters,
+          projectedPixelsPerMeter: projectedPixelsPerMeter,
+          to: &vertices
+        )
+      }
       appendVentralTractFeatherMesostructure(
         sample,
         bodyCenter: bodyCenter,
