@@ -92,6 +92,8 @@ struct CrowShowcaseFrame {
     var persistentFeatherMaximumY: [SIMD4<UInt32>: Int] = [:]
     var persistentFeatherXTotal: [SIMD4<UInt32>: Int] = [:]
     var persistentFeatherYTotal: [SIMD4<UInt32>: Int] = [:]
+    var persistentFeatherPrimitiveVisiblePixels: [SIMD4<UInt32>: Int] = [:]
+    var persistentFeatherPrimitiveFullyCoveredPixels: [SIMD4<UInt32>: Int] = [:]
     var wingSurfaceCellVisiblePixels: [UInt32: Int] = [:]
     var wingSurfaceCellFullyCoveredPixels: [UInt32: Int] = [:]
     var wingSurfaceCellMinimumX: [UInt32: Int] = [:]
@@ -160,8 +162,12 @@ struct CrowShowcaseFrame {
         visibleFeatherClassPixelCounts[featherClass] += 1
         if id0 != UInt32.max { featherHashes.insert(id1) }
         if id0 != UInt32.max && (1...3).contains(id3 & 255) {
-          let featherIdentity = SIMD4(id0, id1, id2, id3)
+          let physicsSurfacePartIdentifier = id2 & 0x00ff_ffff
+          let detailKind = id2 >> 24
+          let featherIdentity = SIMD4(id0, id1, physicsSurfacePartIdentifier, id3)
+          let primitiveIdentity = SIMD4(id0, id1, detailKind, id3)
           persistentFeatherVisiblePixels[featherIdentity, default: 0] += 1
+          persistentFeatherPrimitiveVisiblePixels[primitiveIdentity, default: 0] += 1
           let x = pixel % width
           let y = pixel / width
           persistentFeatherMinimumX[featherIdentity] = min(
@@ -230,7 +236,10 @@ struct CrowShowcaseFrame {
         let featherClass = Int(min(id3 & 255, 31))
         fullyCoveredFeatherClassPixelCounts[featherClass] += 1
         if id0 != UInt32.max && (1...3).contains(id3 & 255) {
-          persistentFeatherFullyCoveredPixels[SIMD4(id0, id1, id2, id3), default: 0] += 1
+          let featherIdentity = SIMD4(id0, id1, id2 & 0x00ff_ffff, id3)
+          let primitiveIdentity = SIMD4(id0, id1, id2 >> 24, id3)
+          persistentFeatherFullyCoveredPixels[featherIdentity, default: 0] += 1
+          persistentFeatherPrimitiveFullyCoveredPixels[primitiveIdentity, default: 0] += 1
         }
         if id0 == UInt32.max
           && CrowWingSurfaceCellIdentity.isPacked(
@@ -326,6 +335,21 @@ struct CrowShowcaseFrame {
     }.sorted {
       ($0.featherClass, $0.sideCode, $0.order, $0.stableIdentifierHash)
         < ($1.featherClass, $1.sideCode, $1.order, $1.stableIdentifierHash)
+    }
+    let persistentFeatherPrimitives = persistentFeatherPrimitiveVisiblePixels.map {
+      identity, visiblePixelCount in
+      CrowPersistentFeatherPrimitiveAudit(
+        featherIndex: identity.x,
+        stableIdentifierHash: identity.y,
+        packedIdentity: identity.w,
+        detailKind: identity.z,
+        visiblePixelCount: visiblePixelCount,
+        fullyCoveredPixelCount:
+          persistentFeatherPrimitiveFullyCoveredPixels[identity, default: 0]
+      )
+    }.sorted {
+      ($0.featherClass, $0.sideCode, $0.order, $0.detailKind, $0.stableIdentifierHash)
+        < ($1.featherClass, $1.sideCode, $1.order, $1.detailKind, $1.stableIdentifierHash)
     }
     let wingSurfaceCellIdentities = wingSurfaceCellVisiblePixels.map {
       identity, visiblePixelCount in
@@ -424,6 +448,7 @@ struct CrowShowcaseFrame {
       fullyCoveredActiveIdentityPixelCount: fullyCoveredActiveIdentityPixelCount,
       visibleFeatherIdentityCount: featherHashes.count,
       persistentFeatherIdentities: persistentFeatherIdentities,
+      persistentFeatherPrimitives: persistentFeatherPrimitives,
       wingSurfaceCellIdentities: wingSurfaceCellIdentities,
       wingCovertIdentities: wingCovertIdentities,
       visibleFeatherClassPixelCounts: visibleFeatherClassPixelCounts,
@@ -1382,6 +1407,10 @@ struct CrowShowcaseAOVFrameAudit: Codable, Equatable {
   /// rectrix identities. Procedural surface primitives retain separate AOV
   /// ownership and are intentionally excluded.
   let persistentFeatherIdentities: [CrowPersistentFeatherIdentityAudit]
+  /// Visible-pixel survival for each persistent feather's simulated vane,
+  /// rachis, and barb geometry. This is decoded from the diagnostic high byte
+  /// without changing the stable anatomical identity above.
+  let persistentFeatherPrimitives: [CrowPersistentFeatherPrimitiveAudit]
   /// Exact visible-pixel census for the fixed 32 by 8 cells of each retained
   /// wing surface. This maps coarse silhouette evidence back to owning
   /// topology without storing an image-space target.
@@ -1452,6 +1481,21 @@ struct CrowPersistentFeatherIdentityAudit: Codable, Equatable {
   let maximumY: Int
   let centroidX: Float
   let centroidY: Float
+
+  var featherClass: UInt32 { packedIdentity & 255 }
+  var sideCode: UInt32 { (packedIdentity >> 8) & 255 }
+  var order: UInt32 { (packedIdentity >> 16) & 255 }
+  var count: UInt32 { (packedIdentity >> 24) & 255 }
+}
+
+struct CrowPersistentFeatherPrimitiveAudit: Codable, Equatable {
+  let featherIndex: UInt32
+  let stableIdentifierHash: UInt32
+  let packedIdentity: UInt32
+  /// CrowFeatherVertexGPU.parameters.w: 0 vane, 1 rachis, 2 barb.
+  let detailKind: UInt32
+  let visiblePixelCount: Int
+  let fullyCoveredPixelCount: Int
 
   var featherClass: UInt32 { packedIdentity & 255 }
   var sideCode: UInt32 { (packedIdentity >> 8) & 255 }
@@ -1552,7 +1596,7 @@ struct CrowShowcaseAOVAuditReport: Codable, Equatable {
   let frames: [CrowShowcaseAOVFrameAudit]
 
   init(frames: [CrowShowcaseAOVFrameAudit]) {
-    schemaVersion = 23
+    schemaVersion = 24
     colorSpace = "scene-linear extended range; display output is tone mapped separately"
     motionConvention =
       "current pixel to previous pixel in upper-left-origin pixel units; MetalFX scale 1"

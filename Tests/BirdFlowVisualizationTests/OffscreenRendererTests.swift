@@ -772,7 +772,7 @@ func estimatedStandingCrowCaptureProducesLoopClosedFrames() throws {
     try VisualizationBackend(device: device).supportsMeshShaders
     ? "gpu-mesh-threadgroup-8-vertex-indexed"
     : "gpu-procedural-vertex-pulling"
-  #expect(audit.schemaVersion == 23)
+  #expect(audit.schemaVersion == 24)
   #expect(
     audit.frames.allSatisfy {
       $0.bodyVaneMorphologyRecordCount == 3_212
@@ -861,6 +861,19 @@ func estimatedStandingCrowCaptureProducesLoopClosedFrames() throws {
             && $0.visiblePixelCount > 0
             && $0.fullyCoveredPixelCount <= $0.visiblePixelCount
         }
+    }
+  )
+  #expect(audit.frames.allSatisfy { !$0.persistentFeatherPrimitives.isEmpty })
+  #expect(
+    audit.frames.allSatisfy { frame in
+      frame.persistentFeatherPrimitives.allSatisfy {
+        (1...3).contains($0.featherClass)
+          && (0...2).contains($0.detailKind)
+          && $0.order < $0.count
+          && $0.visiblePixelCount > 0
+          && $0.fullyCoveredPixelCount <= $0.visiblePixelCount
+      }
+        && Set(frame.persistentFeatherPrimitives.map(\.detailKind)).contains(0)
     }
   )
   #expect(audit.frames.allSatisfy { $0.visibleFeatherClassPixelCounts.count == 32 })

@@ -4248,6 +4248,11 @@ vertex CrowRasterVertex crowFeatherAOVVertex(
     out.featherCoordinates=source.parameters.xyz;
     out.resolvedCurveTangent=float3(0.0f);
     out.identity=source.identity;
+    // Preserve the anatomical feather owner while making vane, rachis, and
+    // barb survival measurable after projection. Persistent physics surface
+    // identifiers occupy the low 24 bits; the detail kind is diagnostic-only.
+    uint detailKind=uint(clamp(source.parameters.w,0.0f,255.0f)+0.5f);
+    out.identity.z=(source.identity.z&0x00ffffffu)|(detailKind<<24u);
     return out;
 }
 
