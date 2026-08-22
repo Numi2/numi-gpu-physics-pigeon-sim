@@ -18,6 +18,10 @@ let package = Package(
             name: "birdflow-formation-geometry",
             targets: ["FormationGeometryBridgeCLI"]
         ),
+        .executable(
+            name: "birdflow-capture",
+            targets: ["BirdFlowCaptureCLI"]
+        ),
         .executable(name: "birdflow-viewer", targets: ["BirdFlowViewerApp"])
     ],
     targets: [
@@ -36,6 +40,10 @@ let package = Package(
         .executableTarget(
             name: "FormationGeometryBridgeCLI",
             dependencies: ["BirdFlowMetal"]
+        ),
+        .executableTarget(
+            name: "BirdFlowCaptureCLI",
+            dependencies: ["BirdFlowVisualization"]
         ),
         .target(
             name: "BirdFlowVisualization",

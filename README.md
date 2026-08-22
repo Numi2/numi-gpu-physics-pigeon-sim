@@ -159,6 +159,23 @@ a new macro gap. Schema `27` exposes the ventral record, selected-work, raster,
 eliminated-CPU-byte, generation-mode, and visible identity-family census. This
 is an executable ownership/parity result, not a speed measurement or measured
 American-crow anatomy.
+The bilateral femoral field now extends that retained inventory with `540`
+identity-stable family-`4` vanes. At the same live `7 x 3` tier they issue
+`68,040` procedural vertices and remove `6,531,840` bytes of expanded temporal
+surface vertices per frame; lifetime morphology grows by `69,120` bytes to
+`5,056` records / `647,168` bytes. Eight limb vectors add only `128` bytes to
+the pose input and reconstruct both hips, hocks, roots, tips, normals, widths,
+and temporal positions on Metal. A new low rear-port release A/B at yaw/pitch
+`(-2.05, -0.34)`, `0.44 m`, and `1280 x 720` preserves exact three-frame
+enclosed-hole pixels (`11,13,11`), components (`6,7,6`), largest components
+(`5,4,5`), active/full-coverage pixels, and zero expected lower-body aperture.
+Minimum beauty SSIM is `0.999975`; family `4` resolves `221,227,221` visible
+femoral owners instead of generic CPU-triangle identities. The inspected
+simulated frame retains a closed pelvic-to-crural overlap from this new angle.
+`birdflow-capture` provides the same release renderer without a SwiftUI/window
+server dependency for deterministic heavy captures over SSH. These are
+residency, ownership, and parity results—not a GPU-time result or measured
+American-crow anatomy.
 The body-detail prepass retains one `96`-byte current/previous analytic segment
 instead of a fixed `18`-vertex triangle stream. Each resolved feather adds six
 three-segment curved basal barb chains beneath the unchanged continuous shell.

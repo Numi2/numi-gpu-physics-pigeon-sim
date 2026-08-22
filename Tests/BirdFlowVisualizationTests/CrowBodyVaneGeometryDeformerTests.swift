@@ -80,8 +80,16 @@ func bodyVanesRetainCompactIdentityStableTemporalRecords() {
     }
   )
   let retainedMorphology = CrowBodyVaneRecords.retainedMorphologyRecords()
-  #expect(retainedMorphology.count == 4_516)
-  #expect(Set(retainedMorphology.map(\.identity)).count == 4_516)
+  #expect(retainedMorphology.count == 5_056)
+  #expect(Set(retainedMorphology.map(\.identity)).count == 5_056)
+  let femoralMorphology = CrowBodyVaneRecords.femoralMorphologyRecords()
+  #expect(femoralMorphology.count == 540)
+  #expect(Set(femoralMorphology.map(\.identity)).count == 540)
+  #expect(
+    femoralMorphology.allSatisfy {
+      ($0.identity.x & 0xFF00_0000) == 0x0400_0000
+    }
+  )
 }
 
 @Test("retained body detail reproduces the CPU mesostructure hierarchy")
@@ -278,9 +286,15 @@ func metalProceduralBodyVanesMatchSwiftGeometryOracle() throws {
   let backend = try VisualizationBackend(device: device)
   let deformer = try CrowBodyVaneGeometryDeformer(backend: backend)
   let commandBuffer = try #require(backend.queue.makeCommandBuffer())
+  let currentFemoralPose = CrowFemoralVanePoseSample(
+    CrowStandingPose.sample(phase: 0.37)
+  )
+  let previousFemoralPose = CrowFemoralVanePoseSample(
+    CrowStandingPose.sample(phase: 0.31)
+  )
   let frame = try deformer.encode(
-    currentBodyCenter: SIMD3<Float>(0.013, -0.021, 0.034),
-    previousBodyCenter: SIMD3<Float>(-0.008, 0.017, -0.025),
+    currentBodyCenter: currentFemoralPose.bodyCenter,
+    previousBodyCenter: previousFemoralPose.bodyCenter,
     currentNeckPose: CrowStandingNeckPose(
       translation: SIMD3<Float>(0.001, -0.002, 0.0015),
       yawRadians: 0.018,
@@ -293,6 +307,8 @@ func metalProceduralBodyVanesMatchSwiftGeometryOracle() throws {
       pitchRadians: 0.009,
       rollRadians: -0.004
     ),
+    currentFemoralPose: currentFemoralPose,
+    previousFemoralPose: previousFemoralPose,
     currentDeployment: 1,
     previousDeployment: 0.35,
     projectedPixelsPerMeter: 1_600,
@@ -303,8 +319,10 @@ func metalProceduralBodyVanesMatchSwiftGeometryOracle() throws {
   commandBuffer.waitUntilCompleted()
   #expect(commandBuffer.status == .completed)
   #expect(frame.auditReadbackReady)
-  #expect(frame.morphologyRecordCount == 4_516)
-  #expect(deformer.activeRecordCount(for: frame) == 4_516)
+  #expect(frame.morphologyRecordCount == 5_056)
+  #expect(deformer.activeRecordCount(for: frame) == 5_056)
+  #expect(deformer.activeFemoralRecordCount(for: frame) == 540)
+  #expect(deformer.expandedFemoralVertexCount(for: frame) == 68_040)
   #expect(deformer.expandedVertexCount(for: frame) > 0)
 
   for batch in frame.batches where batch.auditRecordCount > 0 {
@@ -449,7 +467,7 @@ func bodyVaneProductionStorageIsTripleBufferedAndIndirect() throws {
   #expect(batchCount == CrowBodyVaneRecords.productionTopologies.count)
   #expect(frames.map(\.slot) == [0, 1, 2, 0])
   #expect(frames.map(\.morphologyBufferAllocationCount) == [1, 1, 1, 1])
-  #expect(frames.allSatisfy { $0.morphologyRecordCount == 4_516 })
+  #expect(frames.allSatisfy { $0.morphologyRecordCount == 5_056 })
   #expect(
     frames.allSatisfy {
       $0.morphologyRecordBytes == $0.morphologyRecordCount
@@ -461,8 +479,8 @@ func bodyVaneProductionStorageIsTripleBufferedAndIndirect() throws {
       $0.morphologyCapacityBytes == $0.morphologyRecordBytes
     }
   )
-  #expect(frames.allSatisfy { $0.poseInputBytes == 1_376 })
-  #expect(frames.allSatisfy { $0.retainedPoseCapacityBytes == 4_128 })
+  #expect(frames.allSatisfy { $0.poseInputBytes == 1_504 })
+  #expect(frames.allSatisfy { $0.retainedPoseCapacityBytes == 4_512 })
   #expect(deformer.retainedIndirectDrawBytes == 1_296)
   #expect(
     frames.allSatisfy {

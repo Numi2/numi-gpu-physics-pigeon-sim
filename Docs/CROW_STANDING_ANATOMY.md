@@ -882,6 +882,19 @@ quiet pose motion at the small topology test resolution; standing and takeoff
 now use the same `0.035 m` representative femoral LOD length, restoring exact
 current/previous vertex counts while retaining the higher detail tier.
 
+The full-density femoral vane shell is now retained as `540` family-`4` Metal
+records. Only five current and five previous body/limb points cross the
+optimized render boundary; digit arrays and contact mechanics remain outside
+the feather path. The current `7 x 3` tier emits `68,040` vertices and avoids
+`6,531,840` bytes of expanded CPU temporal surface data per frame without
+removing the standing-only rachis/barb detail. A fresh low rear-port A/B at
+yaw/pitch `(-2.05,-0.34)`, distance `0.44 m`, and `1280 x 720` preserves exact
+enclosed-hole pixels `11,13,11`, components `6,7,6`, largest components
+`5,4,5`, active/full-coverage pixels, and zero expected lower-body aperture.
+Minimum beauty SSIM is `0.999975`; inspection retains continuous simulated
+pelvic, femoral, and crural overlap. This is renderer parity, not a biological
+measurement.
+
 Across fresh 17-frame front-starboard and ventral-port audits at yaw/pitch
 `(-0.32,0.06)` and `(0.66,-0.34)`, enclosed-hole pixels stay `6 -> 6` and
 improve `36 -> 35`; components improve `5 -> 4` and `17 -> 16`; and the worst

@@ -206,6 +206,7 @@ struct CrowShowcaseFrame {
         }
         if id0 & 0xff00_0000 == 0x0200_0000
           || id0 & 0xff00_0000 == 0x0300_0000
+          || id0 & 0xff00_0000 == 0x0400_0000
         {
           let bodyVaneIdentity = SIMD4(id0, id1, id2, id3)
           bodyVaneVisiblePixels[bodyVaneIdentity, default: 0] += 1
@@ -284,6 +285,7 @@ struct CrowShowcaseFrame {
         }
         if id0 & 0xff00_0000 == 0x0200_0000
           || id0 & 0xff00_0000 == 0x0300_0000
+          || id0 & 0xff00_0000 == 0x0400_0000
         {
           bodyVaneFullyCoveredPixels[SIMD4(id0, id1, id2, id3), default: 0] += 1
         }
@@ -401,6 +403,9 @@ struct CrowShowcaseFrame {
       appliesCervicalTerminalFlow: false
     )
     let ventralVaneSamples = CrowVentralFeatherTracts.samples()
+    let femoralVaneSamples = [-Float(1), Float(1)].flatMap {
+      CrowFemoralPlumage.morphologySamples(side: $0)
+    }
     let bodyVaneIdentities = bodyVaneVisiblePixels.compactMap {
       identity, visiblePixelCount -> CrowBodyVaneIdentityAudit? in
       let inventoryIndex = Int(identity.x & 0x00ff_ffff)
@@ -423,6 +428,14 @@ struct CrowShowcaseFrame {
         sideCode = sample.side < 0 ? 0 : 1
         row = sample.row
         column = sample.column
+      } else if familyCode == 4
+        && femoralVaneSamples.indices.contains(inventoryIndex)
+      {
+        let sample = femoralVaneSamples[inventoryIndex]
+        regionCode = 4
+        sideCode = sample.side < 0 ? 0 : 1
+        row = sample.row
+        column = sample.course
       } else {
         return nil
       }

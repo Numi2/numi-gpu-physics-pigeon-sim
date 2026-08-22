@@ -40,7 +40,7 @@ if [[ -n "$AOV_AUDIT" ]]; then
   mkdir -p "$(dirname "$AOV_AUDIT")"
 fi
 cd "$ROOT"
-swift build -c release --product birdflow-viewer
+swift build -c release --product birdflow-capture
 
 AOV_ARGUMENTS=()
 if [[ -n "$AOV_AUDIT" ]]; then
@@ -53,7 +53,7 @@ fi
 
 # The 49th frame is a seam probe equal to frame zero. The encoded movie uses
 # the first 48 frames, avoiding a duplicated endpoint pause at the loop wrap.
-.build/release/birdflow-viewer \
+.build/release/birdflow-capture \
   --capture-crow-frames "$FRAMES" \
   --capture-crow-surface-manifest "$MANIFEST" \
   --capture-crow-surface-generation-audit "$GENERATION_AUDIT" \

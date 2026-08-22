@@ -3112,6 +3112,18 @@ inline uint crowBodyVaneTopologyIndex(
     constant CrowBodyVaneSelectionUniforms& selection) {
     float projectedPixelsPerMeter=selection.selection.x;
     bool ventral=(record.identity.x&0xff000000u)==0x03000000u;
+    bool femoral=(record.identity.x&0xff000000u)==0x04000000u;
+    if(femoral){
+        if(selection.counts.w==0u||projectedPixelsPerMeter<1400.0f){
+            return 0xffffffffu;
+        }
+        float projectedLength=max(0.0f,record.morphology.y
+            *projectedPixelsPerMeter);
+        if(projectedLength>=480.0f){return 6u;}
+        if(projectedLength>=120.0f){return 8u;}
+        if(projectedLength>=24.0f){return 7u;}
+        return 1u;
+    }
     if(ventral){
         if(projectedPixelsPerMeter<1400.0f){return 0xffffffffu;}
         float projectedLength=max(0.0f,record.morphology.y
@@ -3234,6 +3246,9 @@ struct CrowBodyVaneDynamicState {
     float3 root;
     float3 tip;
     float3 normal;
+    float rootWidth;
+    float maximumWidth;
+    float lateralSweep;
     float camber;
     float transverseCamber;
 };
@@ -3320,6 +3335,61 @@ inline CrowBodyVaneDynamicState crowBodyVaneDynamicState(
     bool current) {
     CrowBodyVaneDynamicState state;
     bool ventral=(record.identity.x&0xff000000u)==0x03000000u;
+    bool femoral=(record.identity.x&0xff000000u)==0x04000000u;
+    if(femoral){
+        uint inventoryIndex=record.identity.x&0x00ffffffu;
+        bool negativeSide=inventoryIndex<270u;
+        float4 centerAndDeployment=current
+            ?pose.currentBodyCenterAndDeployment
+            :pose.previousBodyCenterAndDeployment;
+        device const float4* femoralPose=(device const float4*)(
+            neckTransforms+28u
+        );
+        float3 hip;
+        float3 hock;
+        if(current){
+            hip=negativeSide?femoralPose[2].xyz:femoralPose[0].xyz;
+            hock=negativeSide?femoralPose[3].xyz:femoralPose[1].xyz;
+        }else{
+            hip=negativeSide?femoralPose[6].xyz:femoralPose[4].xyz;
+            hock=negativeSide?femoralPose[7].xyz:femoralPose[5].xyz;
+        }
+        float side=negativeSide?-1.0f:1.0f;
+        float3 legAxis=safeNormalizeCrow(hock-hip,float3(0.0f,0.0f,-1.0f));
+        float3 rootSurface=centerAndDeployment.xyz+record.rootAndRootWidth.xyz;
+        float3 localNormal=record.tipAndMaximumWidth.xyz;
+        state.root=rootSurface+0.0009f*localNormal;
+        float3 rootRelativeToHip=rootSurface-hip;
+        float3 radial=safeNormalizeCrow(
+            rootRelativeToHip-legAxis*dot(rootRelativeToHip,legAxis),
+            float3(0.0f,side,0.0f)
+        );
+        float3 tangential=safeNormalizeCrow(
+            cross(legAxis,radial),float3(1.0f,0.0f,0.0f)
+        );
+        float3 bridgeTarget=mix(hip,hock,record.normalAndCamber.x)
+            +(record.normalAndCamber.y+record.normalAndCamber.z)*radial
+            +record.normalAndCamber.w*tangential;
+        float3 bridgeVector=bridgeTarget-state.root;
+        float bridgeDistance=length(bridgeVector);
+        float vaneLength=min(0.034f,max(0.018f,0.68f*bridgeDistance))
+            *record.morphology.z;
+        float3 direction=safeNormalizeCrow(
+            bridgeVector+0.20f*bridgeDistance*legAxis,legAxis
+        );
+        state.tip=state.root+vaneLength*direction;
+        state.normal=safeNormalizeCrow(
+            0.85f*localNormal+0.15f*radial,localNormal
+        );
+        state.maximumWidth=min(0.0076f,max(0.0041f,0.235f*vaneLength))
+            *record.tipAndMaximumWidth.w;
+        state.rootWidth=record.rootAndRootWidth.w*state.maximumWidth;
+        state.lateralSweep=record.sweepAsymmetryAndRipple.x
+            *state.maximumWidth;
+        state.camber=record.morphology.w;
+        state.transverseCamber=0.12f;
+        return state;
+    }
     state.root=record.rootAndRootWidth.xyz;
     state.tip=record.tipAndMaximumWidth.xyz
         +(ventral?float3(0.0f):crowCervicalTerminalFlowOffset(record));
@@ -3338,6 +3408,9 @@ inline CrowBodyVaneDynamicState crowBodyVaneDynamicState(
         :pose.previousBodyCenterAndDeployment;
     state.root+=centerAndDeployment.xyz;
     state.tip+=centerAndDeployment.xyz;
+    state.rootWidth=record.rootAndRootWidth.w;
+    state.maximumWidth=record.tipAndMaximumWidth.w;
+    state.lateralSweep=record.sweepAsymmetryAndRipple.x;
     state.camber=record.normalAndCamber.w*(ventral?1.0f:
         crowBodyVaneDeploymentCamberScale(record,centerAndDeployment.w));
     state.transverseCamber=ventral?as_type<float>(record.identity.z):
@@ -3373,12 +3446,12 @@ inline float3 crowBodyVanePoint(
         *sin(2.0f*M_PI_F*record.envelopeAndTaper.x*t
             +record.sweepAsymmetryAndRipple.w)*rippleEnvelope;
     float width=mix(
-        record.rootAndRootWidth.w,
-        record.tipAndMaximumWidth.w,t
+        state.rootWidth,
+        state.maximumWidth,t
     )*bodyEnvelope*tipTaper*ripple;
     float sine=sin(M_PI_F*t);
     float3 center=mix(state.root,state.tip,t)+normal*(state.camber*sine)
-        +widthAxis*(record.sweepAsymmetryAndRipple.x*sine);
+        +widthAxis*(state.lateralSweep*sine);
     float signedWidth=2.0f*float(widthIndex)/float(geometry.counts.y)-1.0f;
     float localWidth=width
         *(1.0f+record.sweepAsymmetryAndRipple.y*signedWidth);

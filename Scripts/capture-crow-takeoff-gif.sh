@@ -24,9 +24,9 @@ trap cleanup EXIT
 
 mkdir -p "$(dirname "$OUTPUT")"
 cd "$ROOT"
-swift build -c release --product birdflow-viewer
+swift build -c release --product birdflow-capture
 
-.build/release/birdflow-viewer \
+.build/release/birdflow-capture \
   --capture-crow-frames "$FRAMES" \
   --capture-crow-surface-manifest "$MANIFEST" \
   --capture-crow-surface-generation-audit "$GENERATION_AUDIT" \

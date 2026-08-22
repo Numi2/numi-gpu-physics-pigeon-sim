@@ -22,6 +22,33 @@ struct CrowFemoralPlumageFeather: Equatable {
   let bodyMaterialBlend: Float
 }
 
+/// Immutable bilateral seed for one femoral contour vane.  The live limb
+/// frame is intentionally absent: Metal reconstructs that compact pose every
+/// frame while this morphology remains resident for the lifetime of the
+/// renderer.
+struct CrowFemoralPlumageMorphology: Equatable {
+  let side: Float
+  let row: Int
+  let course: Int
+  let rootSurfaceOffset: SIMD3<Float>
+  let localNormal: SIMD3<Float>
+  let targetFraction: Float
+  let targetRadiusMeters: Float
+  let tipRadialLiftMeters: Float
+  let tipTangentialSweepMeters: Float
+  let lengthScale: Float
+  let maximumWidthScale: Float
+  let lateralSweepRatio: Float
+  let vaneAsymmetry: Float
+  let edgeRippleAmplitude: Float
+  let edgeRipplePhase: Float
+  let edgeRippleCycles: Float
+  let rootWidthRatio: Float
+  let camberMeters: Float
+  let materialVariation: Float
+  let bodyMaterialBlend: Float
+}
+
 /// Estimated femoral tract joining pelvic contour plumage to the crural tract.
 ///
 /// Roots follow the same asymmetric loft as the visible trunk, then overlap
@@ -69,8 +96,21 @@ enum CrowFemoralPlumage {
     hock: SIMD3<Float>
   ) -> [CrowFemoralPlumageFeather] {
     let side: Float = hip.y >= bodyCenter.y ? 1 : -1
-    let legAxis = normalized(hock - hip, fallback: SIMD3<Float>(0, 0, -1))
-    var result: [CrowFemoralPlumageFeather] = []
+    return morphologySamples(side: side).map {
+      feather(
+        morphology: $0,
+        bodyCenter: bodyCenter,
+        hip: hip,
+        hock: hock
+      )
+    }
+  }
+
+  static func morphologySamples(
+    side: Float
+  ) -> [CrowFemoralPlumageMorphology] {
+    let boundedSide: Float = side < 0 ? -1 : 1
+    var result: [CrowFemoralPlumageMorphology] = []
     result.reserveCapacity(rowCount * courseCount)
     for row in 0..<rowCount {
       let baseRowFraction = Float(row) / Float(rowCount - 1)
@@ -142,24 +182,12 @@ enum CrowFemoralPlumage {
         let localSurface = mirroredSurfacePoint(
           x: rootX,
           theta: theta,
-          side: side
+          side: boundedSide
         )
         let localNormal = mirroredSurfaceNormal(
           x: rootX,
           theta: theta,
-          side: side
-        )
-        let rootSurface = bodyCenter + localSurface
-        let root = rootSurface + shellClearanceMeters * localNormal
-        let rootRelativeToHip = rootSurface - hip
-        let radial = normalized(
-          rootRelativeToHip
-            - legAxis * simd_dot(rootRelativeToHip, legAxis),
-          fallback: SIMD3<Float>(0, side, 0)
-        )
-        let tangential = normalized(
-          simd_cross(legAxis, radial),
-          fallback: SIMD3<Float>(1, 0, 0)
+          side: boundedSide
         )
         let targetFraction =
           0.035 + 0.195 * courseFraction
@@ -178,59 +206,41 @@ enum CrowFemoralPlumage {
           (0.00025 + 0.00065 * (0.5 + 0.5 * liftIdentity))
           * (0.35 + 0.65 * courseFraction)
           * breakupScale
-        let tipTangentialSweep = side * (
+        let tipTangentialSweep = boundedSide * (
           0.00075 * sweepIdentity
             + 0.00035 * sin(1.71 * Float(row) + 0.83 * Float(course))
         ) * breakupScale
-        let bridgeTarget =
-          mix(hip, hock, targetFraction)
-          + (targetRadius + tipRadialLift) * radial
-          + tipTangentialSweep * tangential
-        let bridgeVector = bridgeTarget - root
-        let bridgeDistance = simd_length(bridgeVector)
-        let length = min(
-          nominalMaximumLengthMeters,
-          max(0.018, bridgeLengthScale * bridgeDistance)
-        )
-          * (1 + 0.10 * shapeIdentity)
-          * insertionSeamLengthScale(row: row, course: course)
-        let direction = normalized(
-          bridgeVector + 0.20 * bridgeDistance * legAxis,
-          fallback: legAxis
-        )
-        let tip = root + length * direction
-        let maximumWidth = min(0.0076, max(0.0041, 0.235 * length))
-          * pelvicAxillaryHandoffWidthScale(row: row, course: course)
-          * insertionSeamWidthScale(row: row, course: course)
-        let lateralSweep = maximumWidth * (
+        let lateralSweepRatio = (
           0.10 * sweepIdentity
             + 0.035 * sin(2.17 * Float(row) + 0.59 * Float(course))
         ) * breakupScale
         result.append(
-          CrowFemoralPlumageFeather(
-            side: side,
+          CrowFemoralPlumageMorphology(
+            side: boundedSide,
             row: row,
             course: course,
-            rootSurface: rootSurface,
-            root: root,
-            tip: tip,
-            planeNormal: normalized(
-              0.85 * localNormal + 0.15 * radial,
-              fallback: localNormal
-            ),
-            rootWidthMeters: rootWidthRatio(courseFraction: courseFraction)
-              * maximumWidth,
-            maximumWidthMeters: maximumWidth * (1 + 0.04 * shapeIdentity),
-            camberMeters: (0.00085 + 0.00030 * courseFraction)
-              * (1 + 0.08 * rootIdentity),
-            lateralSweepMeters: lateralSweep,
+            rootSurfaceOffset: localSurface,
+            localNormal: localNormal,
+            targetFraction: targetFraction,
+            targetRadiusMeters: targetRadius,
+            tipRadialLiftMeters: tipRadialLift,
+            tipTangentialSweepMeters: tipTangentialSweep,
+            lengthScale: (1 + 0.10 * shapeIdentity)
+              * insertionSeamLengthScale(row: row, course: course),
+            maximumWidthScale:
+              pelvicAxillaryHandoffWidthScale(row: row, course: course)
+              * insertionSeamWidthScale(row: row, course: course)
+              * (1 + 0.04 * shapeIdentity),
+            lateralSweepRatio: lateralSweepRatio / (1 + 0.04 * shapeIdentity),
             vaneAsymmetry: 0.040 * vaneIdentity,
             edgeRippleAmplitude:
               0.010 + 0.014 * (0.5 + 0.5 * edgeIdentity),
             edgeRipplePhase: Float.pi * (edgeIdentity + 1),
             edgeRippleCycles: 1.20 + 0.70 * (0.5 + 0.5 * cycleIdentity),
-            rootEnvelopeRatio: visibleRootEnvelopeRatio,
-            pennaceousStartFraction: 0,
+            rootWidthRatio: rootWidthRatio(courseFraction: courseFraction)
+              / (1 + 0.04 * shapeIdentity),
+            camberMeters: (0.00085 + 0.00030 * courseFraction)
+              * (1 + 0.08 * rootIdentity),
             materialVariation: materialIdentity,
             bodyMaterialBlend: 0.88 - 0.28 * courseFraction
           )
@@ -238,6 +248,68 @@ enum CrowFemoralPlumage {
       }
     }
     return result
+  }
+
+  static func feather(
+    morphology: CrowFemoralPlumageMorphology,
+    bodyCenter: SIMD3<Float>,
+    hip: SIMD3<Float>,
+    hock: SIMD3<Float>
+  ) -> CrowFemoralPlumageFeather {
+    let legAxis = normalized(hock - hip, fallback: SIMD3<Float>(0, 0, -1))
+    let rootSurface = bodyCenter + morphology.rootSurfaceOffset
+    let root = rootSurface + shellClearanceMeters * morphology.localNormal
+    let rootRelativeToHip = rootSurface - hip
+    let radial = normalized(
+      rootRelativeToHip
+        - legAxis * simd_dot(rootRelativeToHip, legAxis),
+      fallback: SIMD3<Float>(0, morphology.side, 0)
+    )
+    let tangential = normalized(
+      simd_cross(legAxis, radial),
+      fallback: SIMD3<Float>(1, 0, 0)
+    )
+    let bridgeTarget =
+      mix(hip, hock, morphology.targetFraction)
+      + (morphology.targetRadiusMeters + morphology.tipRadialLiftMeters) * radial
+      + morphology.tipTangentialSweepMeters * tangential
+    let bridgeVector = bridgeTarget - root
+    let bridgeDistance = simd_length(bridgeVector)
+    let length = min(
+      nominalMaximumLengthMeters,
+      max(0.018, bridgeLengthScale * bridgeDistance)
+    ) * morphology.lengthScale
+    let direction = normalized(
+      bridgeVector + 0.20 * bridgeDistance * legAxis,
+      fallback: legAxis
+    )
+    let tip = root + length * direction
+    let maximumWidth = min(0.0076, max(0.0041, 0.235 * length))
+      * morphology.maximumWidthScale
+    return CrowFemoralPlumageFeather(
+      side: morphology.side,
+      row: morphology.row,
+      course: morphology.course,
+      rootSurface: rootSurface,
+      root: root,
+      tip: tip,
+      planeNormal: normalized(
+        0.85 * morphology.localNormal + 0.15 * radial,
+        fallback: morphology.localNormal
+      ),
+      rootWidthMeters: morphology.rootWidthRatio * maximumWidth,
+      maximumWidthMeters: maximumWidth,
+      camberMeters: morphology.camberMeters,
+      lateralSweepMeters: maximumWidth * morphology.lateralSweepRatio,
+      vaneAsymmetry: morphology.vaneAsymmetry,
+      edgeRippleAmplitude: morphology.edgeRippleAmplitude,
+      edgeRipplePhase: morphology.edgeRipplePhase,
+      edgeRippleCycles: morphology.edgeRippleCycles,
+      rootEnvelopeRatio: visibleRootEnvelopeRatio,
+      pennaceousStartFraction: 0,
+      materialVariation: morphology.materialVariation,
+      bodyMaterialBlend: morphology.bodyMaterialBlend
+    )
   }
 
   /// Broadens the compact posterior femoral field that roofs the pelvic side

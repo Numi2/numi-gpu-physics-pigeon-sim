@@ -555,6 +555,19 @@ intentional negative space between articulated digits. It is a presentation
 continuity estimate, not measured American-crow femoral dimensions or contact
 mechanics.
 
+Those same `540` close-view femoral vanes are now immutable family-`4` Metal
+morphology rather than per-frame CPU triangles. The retained records store the
+body-surface root, local normal, target fraction/radius, bounded lift and sweep,
+width/length scales, material, and stable row/course identity. A compact limb
+pose reconstructs both hips and hocks for current and previous positions; the
+former `7 x 3` topology, `15 x 18` density per side, and CPU mesostructure are
+unchanged. At `1,400+ px/m`, `68,040` procedural vertices replace `6,531,840`
+bytes of expanded temporal surface data per frame. The low rear-port
+`1280 x 720` A/B at yaw/pitch `(-2.05,-0.34)` preserves exact hole, expected
+aperture, and active/full-coverage counts with minimum SSIM `0.999975`. Family
+`4` exposes `221,227,221` visible owners across the three frames. This
+qualifies simulated ownership and parity, not measured anatomy or speed.
+
 At the five-by-seven distance LOD, a rear-right temporal-identity trace at
 yaw/pitch `(2.28, 0.38)` resolves the residual pelvic insertion owners to
 anterior course `6`: rows `1...2` receive a `1.52x` width and `1.06x` length
