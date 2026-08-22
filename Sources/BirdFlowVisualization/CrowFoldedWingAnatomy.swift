@@ -115,6 +115,18 @@ enum CrowFoldedWingAnatomy {
   ) -> Float {
     let fraction = min(max(rawFraction, 0), 1)
     return 0.027 + 0.002 * fraction
+      - 0.018 * pow(fraction, 6)
+  }
+
+  /// Only the posterior folded secondaries narrow toward the rectrix stack.
+  /// The sixth-power envelope leaves the anterior course effectively exact
+  /// while preventing one terminal vane from reading as a broad tail lobe in
+  /// the reverse quarter. Flight morphology remains owned by the live wing.
+  static func secondaryStandingWidthScale(
+    fraction rawFraction: Float
+  ) -> Float {
+    let fraction = min(max(rawFraction, 0), 1)
+    return 1 - 0.18 * pow(fraction, 6)
   }
 
   private static func safeNormalize(

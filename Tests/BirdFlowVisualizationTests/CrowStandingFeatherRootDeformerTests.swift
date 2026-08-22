@@ -145,7 +145,13 @@ func standingCrowFeatherRootsMatchMetalReference() throws {
         return root + direction * state.currentPositionAndLength.w
       }
       #expect(tips.count >= 10)
-      #expect(tips.map(\.y).max()! - tips.map(\.y).min()! < 0.004)
+      let lateralTipSpan = tips.map(\.y).max()! - tips.map(\.y).min()!
+      if featherClass == 2 {
+        #expect(lateralTipSpan > 0.015)
+        #expect(lateralTipSpan < 0.018)
+      } else {
+        #expect(lateralTipSpan < 0.004)
+      }
       #expect(tips.map(\.z).max()! - tips.map(\.z).min()! < 0.046)
     }
   }
@@ -265,7 +271,12 @@ func standingCrowFeatherRootsMatchMetalReference() throws {
     let rearLength: Float = featherClass == 1 ? 0.205 : 0.142
     let frontTip = leftFront.rootOffset + frontLength * leftFront.direction
     let rearTip = leftRear.rootOffset + rearLength * leftRear.direction
-    #expect(abs(frontTip.y - rearTip.y) < 0.004)
+    if featherClass == 2 {
+      #expect(abs(frontTip.y - rearTip.y) > 0.015)
+      #expect(abs(frontTip.y - rearTip.y) < 0.017)
+    } else {
+      #expect(abs(frontTip.y - rearTip.y) < 0.004)
+    }
     #expect(abs(frontTip.z - rearTip.z) < 0.046)
   }
 
@@ -281,8 +292,22 @@ func standingCrowFeatherRootsMatchMetalReference() throws {
   #expect(abs(anteriorPrimaryTipOffset - 0.003) < 1e-7)
   #expect(abs(posteriorPrimaryTipOffset - 0.001) < 1e-7)
   #expect(abs(anteriorSecondaryTipOffset - 0.027) < 1e-7)
-  #expect(abs(posteriorSecondaryTipOffset - 0.029) < 1e-7)
-  #expect(posteriorSecondaryTipOffset - posteriorPrimaryTipOffset <= 0.0281)
+  #expect(abs(posteriorSecondaryTipOffset - 0.011) < 1e-7)
+  #expect(posteriorSecondaryTipOffset - posteriorPrimaryTipOffset <= 0.0101)
+  #expect(
+    CrowFoldedWingAnatomy.secondaryTipLateralOffsetMeters(fraction: 0.5)
+      > 0.0275
+  )
+  #expect(
+    CrowFoldedWingAnatomy.secondaryTipLateralOffsetMeters(fraction: 0.9)
+      < 0.020
+  )
+  #expect(
+    CrowFoldedWingAnatomy.secondaryStandingWidthScale(fraction: 0) == 1
+  )
+  #expect(abs(
+    CrowFoldedWingAnatomy.secondaryStandingWidthScale(fraction: 1) - 0.82
+  ) < 1e-7)
   #expect(
     CrowFoldedWingAnatomy.primaryTipLateralOffsetMeters(fraction: 7.0 / 9.0)
       < 0.0024

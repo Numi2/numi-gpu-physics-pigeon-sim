@@ -63,6 +63,22 @@ shoulder-to-pelvis series, but lateral fanning is reduced so the folded tips do
 not split into separated decks when viewed from behind. This is estimated
 presentation anatomy and does not enter the solver.
 
+The posterior secondary course now uses a sixth-power tuck into the rectrix
+stack instead of continuing the anterior lateral trend through its terminal
+vane. The anterior centerline tip remains `27 mm` from the sagittal plane; the
+terminal estimate changes from `29 mm` to `11 mm`, and only its standing width
+narrows to `82%`. This leaves the anterior and middle course effectively
+unchanged and does not alter the live-wing flight owner. A reverse-quarter
+identity-AOV diagnosis assigned the former smooth lower-tail lobe to terminal
+secondary `0x0b0a0102`, which covered `3,217` pixels in the original `1200 x
+675` trace. In the accepted `800 x 450` rerun that identity is fully occluded;
+the complete silhouette contains `14` enclosed pixels in `10` components with
+a `5`-pixel maximum. A fresh opposite rear-quarter gate contains `18` enclosed
+pixels in `15` components with a `3`-pixel maximum and no detected lower-body
+aperture. These different-resolution diagnostics establish ownership and
+all-angle closure separately; they are not a pixel-count A/B benchmark or a
+measurement of crow folded-secondary anatomy.
+
 The longest primary centerlines now converge to `9-10 mm` from the sagittal
 plane where their tapered tips enter the lateral rectrix envelope. A retained
 geometry gate evaluates the primary tip against the live lateral-tail vane
@@ -917,9 +933,9 @@ simulated terminal ownership and raster continuity, not measured rectrix
 morphology or perceptual realism.
 
 The canonical README sequence is fully simulated and contains the native hold,
-transition, and flight path: `800 x 450`, `72` frames at `24 fps`, `7,999,691`
+transition, and flight path: `800 x 450`, `72` frames at `24 fps`, `8,120,057`
 bytes, SHA-256
-`8e7cad46fa9e5e28df39f7d6b3e7e8b9208c7e65689f60ec66e38a4d56938ca3`.
+`2d8a212c9bc15b1e32f6ca563dfea3f301e8e6d9f40de1cfdc2770442cceb266`.
 The audited stage PNGs at frames `0`, `35`, and `71` are distinct and retain
 the simulated hold, geometric deployment, and sustained-flight states.
 

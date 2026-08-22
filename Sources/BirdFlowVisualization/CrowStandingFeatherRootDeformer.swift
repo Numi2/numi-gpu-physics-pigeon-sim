@@ -175,14 +175,24 @@ final class CrowStandingFeatherRootDeformer: CrowFeatherRootDeforming {
           radialFraction: abs(2 * fraction - 1)
         ) / CrowClosedTailAnatomy.rectrixLengthMeters
         : 1
+      let widthScale =
+        featherClass == 2
+        ? CrowFoldedWingAnatomy.secondaryStandingWidthScale(
+          fraction: fraction
+        )
+        : 1
       var previousMorphology = binding.morphology
       previousMorphology.x *= lengthScale
+      previousMorphology.y *= widthScale
       return CrowFeatherRootStateGPU(
         currentPositionAndLength: SIMD4<Float>(
           current.root,
           binding.morphology.x * lengthScale
         ),
-        previousPositionAndWidth: SIMD4<Float>(previous.root, binding.morphology.y),
+        previousPositionAndWidth: SIMD4<Float>(
+          previous.root,
+          binding.morphology.y * widthScale
+        ),
         currentDirectionAndRachis: SIMD4<Float>(current.direction, binding.morphology.z),
         previousDirectionAndCamber: SIMD4<Float>(previous.direction, binding.morphology.w),
         currentNormalAndPadding: SIMD4<Float>(current.normal, 0),

@@ -115,6 +115,18 @@ throat, body-feather, and foot classes but no femoral/crural class, and it
 disappears under small yaw/pitch changes. Filling it with torso geometry would
 therefore be anatomically incorrect. This is estimated presentation geometry,
 not a measured folded-wing width.
+The folded secondary stack now also tucks only its posterior end into the
+rectrix handoff. An identity-AOV trace at the reverse quarter found that the
+apparent lower-tail plate was one terminal class-`2` vane (`0x0b0a0102`), not
+a torso opening. Its centerline lateral offset now eases from the unchanged
+`27 mm` anterior value to `11 mm` at the terminal feather, while a sixth-power
+envelope narrows only that terminal width to `82%`; live-flight geometry is
+unchanged. In the accepted `800 x 450` reverse-quarter gate that owner is fully
+occluded, with `14` enclosed pixels in `10` components and a `5`-pixel worst
+component. The opposite rear quarter retains a closed body/wing-root silhouette
+with `18` enclosed pixels in `15` components and a `3`-pixel worst component.
+These are simulated standing-morphology and raster checks, not measured crow
+folded-secondary dimensions.
 The retained rectrices keep nonzero terminal vanes instead of collapsing to
 generic needle points. Medial and outermost pairs retain the original
 `13-16%` envelope, while only the three sublateral bilateral pairs broaden to

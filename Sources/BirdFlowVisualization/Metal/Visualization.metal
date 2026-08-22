@@ -426,7 +426,9 @@ inline CrowStandingRootPose crowStandingRootPose(
             side*0.047f,
             0.044f-0.024f*fraction
         );
-        float secondaryTipLateralOffset=0.027f+0.002f*fraction;
+        float posteriorTuck=pow(fraction,6.0f);
+        float secondaryTipLateralOffset=0.027f+0.002f*fraction
+            -0.018f*posteriorTuck;
         float lateralDirection=side*(secondaryTipLateralOffset-0.047f)/featherLength;
         float verticalDirection=(-0.012f*fraction-(result.root.z-center.z))/featherLength;
         result.direction=safeNormalizeCrow(
@@ -500,16 +502,21 @@ kernel void poseStandingCrowFeatherRoots(
     float fraction=float(binding.orderCountClassSide.x)/float(max(count-1u,1u));
     float lengthScale=featherClass==3u
         ?crowClosedRectrixLengthScale(abs(2.0f*fraction-1.0f)):1.0f;
+    float widthScale=featherClass==2u
+        ?1.0f-0.18f*pow(fraction,6.0f):1.0f;
     state.currentPositionAndLength=float4(
         current.root,binding.morphology.x*lengthScale
     );
-    state.previousPositionAndWidth=float4(previous.root,binding.morphology.y);
+    state.previousPositionAndWidth=float4(
+        previous.root,binding.morphology.y*widthScale
+    );
     state.currentDirectionAndRachis=float4(current.direction,binding.morphology.z);
     state.previousDirectionAndCamber=float4(previous.direction,binding.morphology.w);
     state.currentNormalAndPadding=float4(current.normal,0);
     state.previousNormalAndPadding=float4(previous.normal,0);
     state.previousMorphology=binding.morphology;
     state.previousMorphology.x*=lengthScale;
+    state.previousMorphology.y*=widthScale;
     state.identity=binding.identity;
     output[featherIndex]=state;
 }

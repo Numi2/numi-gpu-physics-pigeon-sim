@@ -59,6 +59,18 @@ The retained feather lengths and stable identities do not change; only the
 estimated grounded rest pose prevents all vanes from collapsing into one
 planar flank slab.
 
+That grounded secondary course now ends in a posterior-only sixth-power tuck.
+Its anterior tip offset remains `27 mm`, while the terminal tip converges to
+`11 mm` and its standing width to `82%` before meeting the rectrix stack. An
+exact identity-AOV trace showed that one terminal class-`2` vane, rather than a
+body-surface gap, owned the broad lower-tail lobe visible from the reverse
+quarter. Accepted `800 x 450` reverse-quarter and opposite-rear gates retain
+closed body/wing-root silhouettes with worst enclosed components of `5` and
+`3` pixels respectively. The live flight wing, retained feather lengths,
+follicles, and stable identities remain unchanged. These values are bounded
+simulated presentation morphology, not measured American-crow folded-secondary
+dimensions.
+
 Grounded coverts are seated directly on the asymmetric trunk loft in five
 overlapping courses per side. Rectrix bases remain inside the rump coverage and
 the standing tail closes to a narrow caudal stack. These all-angle attachment
