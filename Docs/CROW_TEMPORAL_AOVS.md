@@ -245,6 +245,20 @@ thresholded patch from `1,933` to `1,823` pixels. Standing minimum SSIM is
 aperture fields remain exact in both A/Bs. These are semantic ownership and
 bounded optical-continuity results, not a measured plumage reflectance fit.
 
+The same persistent-identity ledger now separates the broad folded-primary
+handoff into stable layers without shrinking its accepted raster envelope. At
+the low starboard-quarter mid-phase, near-side primary order `8` rises from
+`25` to `383` visible pixels while terminal order `9` changes from `11,456` to
+`11,164`; total active identity coverage remains exactly `157,562`. Widening
+only the terminal primary's already-contained aggregate barb ribbons raises
+their primitive-kind-`2` census from `230` to `424` pixels. All standing and
+takeoff hole, component, largest-hole, expected-aperture, and active-coverage
+fields remain exact; later takeoff frames are pixel-exact. The fresh low
+rear-port audit exposes three primary orders on the far wing and keeps its
+largest enclosed component at `2,3,2` pixels. This establishes retained
+geometry ownership and containment, not measured feather-layer spacing or
+perceptual equivalence.
+
 Schema `24` separately records projected-size barbule candidates,
 frustum-visible and retained detailed owners, procedural barbule vertex count,
 and the exact number of identity pixels won by geometry kind `4`. This

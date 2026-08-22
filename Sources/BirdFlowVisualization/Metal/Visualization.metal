@@ -451,15 +451,19 @@ inline CrowStandingRootPose crowStandingRootPose(
     CrowStandingRootPose result;
     if(featherClass==1u){
         float featherLength=0.155f+0.050f*fraction;
+        float stackSurfaceCoordinate=clamp((fraction-0.55f)/0.45f,0.0f,1.0f);
+        float stackSurfaceEnvelope=sin(M_PI_F*stackSurfaceCoordinate);
+        float stackSurfaceLift=0.0022f
+            *stackSurfaceEnvelope*stackSurfaceEnvelope;
         float primaryRootLateralOffset=0.042f-0.0024f
-            *fraction*fraction*fraction;
+            *fraction*fraction*fraction+stackSurfaceLift;
         result.root=center+float3(
             0.040f-0.132f*fraction,
             side*primaryRootLateralOffset,
             0.032f-0.024f*fraction
         );
         float primaryTipLateralOffset=0.003f+0.001f*fraction
-            -0.003f*fraction*fraction*fraction;
+            -0.003f*fraction*fraction*fraction+stackSurfaceLift;
         float lateralDirection=side
             *(primaryTipLateralOffset-primaryRootLateralOffset)/featherLength;
         float tipHeight=-0.068f*fraction*fraction+0.062f*fraction-0.018f;
@@ -1452,7 +1456,13 @@ inline float3 crowFeatherDetailPosition(
     float3 ribbonAxis=safeNormalizeCrow(
         cross(baseNormal,barbDirection),tangent
     );
-    float halfWidth=0.00010f*(1.0f-0.28f*axial);
+    uint featherClass=packedIdentity&255u;
+    uint featherOrder=(packedIdentity>>16u)&255u;
+    uint featherCount=max((packedIdentity>>24u)&255u,1u);
+    float terminalPrimaryBarbScale=
+        featherClass==1u&&featherOrder+1u==featherCount?1.80f:1.0f;
+    float halfWidth=0.00010f*(1.0f-0.28f*axial)
+        *terminalPrimaryBarbScale;
     return base+baseNormal*0.00010f
         +ribbonAxis*(ribbonSide*halfWidth);
 }

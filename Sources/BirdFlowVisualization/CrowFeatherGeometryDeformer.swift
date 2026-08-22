@@ -547,6 +547,9 @@ final class CrowFeatherGeometryDeformer {
       fallback: tangent
     )
     let halfWidth = 0.00010 * (1 - 0.28 * axial)
+      * CrowRemexVaneAnatomy.retainedBarbRibbonHalfWidthScale(
+        packedIdentity: packedIdentity
+      )
     return base + baseNormal * 0.00010
       + ribbonAxis * (ribbonSide * halfWidth)
   }

@@ -86,6 +86,28 @@ func primaryAndSecondaryVaneProfilesAreClassSpecificBilateralMirrors() {
       count: 11
     ) == 1
   )
+  let terminalPrimaryIdentity = UInt32(1) | (UInt32(1) << 8)
+    | (UInt32(9) << 16) | (UInt32(10) << 24)
+  let penultimatePrimaryIdentity = UInt32(1) | (UInt32(1) << 8)
+    | (UInt32(8) << 16) | (UInt32(10) << 24)
+  let terminalSecondaryIdentity = UInt32(2) | (UInt32(1) << 8)
+    | (UInt32(10) << 16) | (UInt32(11) << 24)
+  #expect(CrowRemexVaneAnatomy.terminalPrimaryBarbRibbonHalfWidthScale == 1.80)
+  #expect(
+    CrowRemexVaneAnatomy.retainedBarbRibbonHalfWidthScale(
+      packedIdentity: terminalPrimaryIdentity
+    ) == 1.80
+  )
+  #expect(
+    CrowRemexVaneAnatomy.retainedBarbRibbonHalfWidthScale(
+      packedIdentity: penultimatePrimaryIdentity
+    ) == 1
+  )
+  #expect(
+    CrowRemexVaneAnatomy.retainedBarbRibbonHalfWidthScale(
+      packedIdentity: terminalSecondaryIdentity
+    ) == 1
+  )
   #expect(
     CrowRemexVaneAnatomy.posteriorSecondaryOverlapMaximumWidthScale == 1.35
   )

@@ -28,6 +28,19 @@ enum CrowRemexVaneAnatomy {
   static let terminalPrimaryBroadEdgeMaximumScale: Float = 1.40
   static let terminalPrimaryFoldedJunctionMaximumScale: Float = 1.35
   static let terminalSecondaryFoldedJunctionMaximumScale: Float = 1.28
+  static let terminalPrimaryBarbRibbonHalfWidthScale: Float = 1.80
+
+  /// The terminal standing primary occupies many more final-output pixels than
+  /// its neighbours. Widen only its already-contained aggregate barb ribbons
+  /// so the future-density geometry can win stable samples inside the vane
+  /// without changing the feather edge or adding a second surface envelope.
+  static func retainedBarbRibbonHalfWidthScale(packedIdentity: UInt32) -> Float {
+    let featherClass = packedIdentity & 255
+    let order = (packedIdentity >> 16) & 255
+    let count = max((packedIdentity >> 24) & 255, 1)
+    return featherClass == 1 && order + 1 == count
+      ? terminalPrimaryBarbRibbonHalfWidthScale : 1
+  }
 
   /// Broadens only the two caudal-most primary vanes where their folded
   /// envelope meets the posterior secondary and live covert shell. Rachis

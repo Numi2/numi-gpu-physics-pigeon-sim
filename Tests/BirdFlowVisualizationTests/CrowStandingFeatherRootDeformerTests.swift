@@ -350,6 +350,18 @@ func standingCrowFeatherRootsMatchMetalReference() throws {
   #expect(abs(
     CrowFoldedWingAnatomy.primaryStackNormalLift(fraction: 1)
   ) < 1e-7)
+  #expect(CrowFoldedWingAnatomy.primaryStackSurfaceLiftMeters(fraction: 0) == 0)
+  #expect(abs(
+    CrowFoldedWingAnatomy.primaryStackSurfaceLiftMeters(fraction: 1)
+  ) < 1e-7)
+  #expect(
+    CrowFoldedWingAnatomy.primaryStackSurfaceLiftMeters(fraction: 7.0 / 9.0)
+      > 0.0021
+  )
+  #expect(
+    CrowFoldedWingAnatomy.primaryStackSurfaceLiftMeters(fraction: 8.0 / 9.0)
+      > 0.0010
+  )
   #expect(
     CrowFoldedWingAnatomy.primaryTipLateralOffsetMeters(fraction: 7.0 / 9.0)
       < 0.0024

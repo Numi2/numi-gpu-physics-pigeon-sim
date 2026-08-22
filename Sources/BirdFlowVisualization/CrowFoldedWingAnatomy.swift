@@ -14,6 +14,7 @@ struct CrowFoldedFeatherPose: Equatable {
 enum CrowFoldedWingAnatomy {
   static let anteriorPrimaryRootLateralOffsetMeters: Float = 0.042
   static let posteriorPrimaryRootInsetMeters: Float = 0.0024
+  static let primaryStackSurfaceLiftMaximumMeters: Float = 0.0022
 
   static func pose(
     featherClass: UInt32,
@@ -27,9 +28,9 @@ enum CrowFoldedWingAnatomy {
     switch featherClass {
     case 1:
       let length = 0.155 + 0.050 * fraction
-      let rootLateralOffset = primaryRootLateralOffsetMeters(
-        fraction: fraction
-      )
+      let stackSurfaceLift = primaryStackSurfaceLiftMeters(fraction: fraction)
+      let rootLateralOffset = primaryRootLateralOffsetMeters(fraction: fraction)
+        + stackSurfaceLift
       rootOffset = SIMD3<Float>(
         0.040 - 0.132 * fraction,
         side * rootLateralOffset,
@@ -37,7 +38,7 @@ enum CrowFoldedWingAnatomy {
       )
       let lateralDirection =
         side
-        * (primaryTipLateralOffsetMeters(fraction: fraction)
+        * (primaryTipLateralOffsetMeters(fraction: fraction) + stackSurfaceLift
           - rootLateralOffset)
         / length
       let tipHeight = -0.068 * fraction * fraction + 0.062 * fraction - 0.018
@@ -137,6 +138,16 @@ enum CrowFoldedWingAnatomy {
     let terminalWeight = terminalCoordinate * terminalCoordinate
       * (3 - 2 * terminalCoordinate)
     return intermediateScale * (1 - 0.12 * terminalWeight)
+  }
+
+  /// Seats intermediate primaries just above their wider terminal neighbour.
+  /// Both root and tip receive the same bilateral translation, preserving each
+  /// feather's direction while leaving terminal handoff endpoints fixed.
+  static func primaryStackSurfaceLiftMeters(fraction rawFraction: Float) -> Float {
+    let fraction = min(max(rawFraction, 0), 1)
+    let posterior = min(max((fraction - 0.55) / 0.45, 0), 1)
+    let envelope = sin(Float.pi * posterior)
+    return primaryStackSurfaceLiftMaximumMeters * envelope * envelope
   }
 
   /// Raises the intermediate primary crowns between fixed roots and tips so

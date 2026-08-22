@@ -1201,6 +1201,33 @@ hole pixels `10,4,10`, components `4,4,4`, and largest components `7,1,7`;
 inspection shows no bright collar or new throat/wing opening. The still-smooth
 folded wing/tail handoff remains a separate realism target.
 
+The next retained-primary audit resolves that smooth handoff to one stable
+owner rather than treating it as a generic wing sheet. At the low
+starboard-quarter gate `(1.84,-0.18)` from `0.50 m`, terminal primary
+`0x0a090101` owns `11,456` pixels while penultimate `0x0a080101` survives for
+only `25`. A terminal-width experiment exposed `441` penultimate pixels but
+removed `1,241` active bird pixels at matched mid-phase and was rejected. The
+retained geometry instead translates both root and tip of intermediate
+primaries by the same smooth bilateral surface lift, peaking at `2.2 mm` and
+returning to zero at the anterior and terminal identities. Feather direction,
+terminal width, primary-to-rectrix endpoints, and flight targets therefore stay
+fixed. The penultimate owner rises `25 -> 383` pixels while the terminal owner
+yields only already-covered samples (`11,456 -> 11,164`); active coverage and
+every hole/component/largest-hole/aperture field are exact. The large terminal
+vane's existing `48` aggregate barb pairs also receive an identity-local
+`1.8x` ribbon half-width, increasing terminal-barb ownership `230 -> 424`
+pixels without changing the vane edge. Minimum standing SSIM is `0.999874`.
+At takeoff, active coverage and the complete topology series remain exact;
+minimum early-frame SSIM is `0.999667`, and frames `2...4` are pixel-exact.
+A fresh low rear-port gate `(-1.88,-0.28)` from `0.49 m` records holes
+`4,5,4`, components `3,3,3`, largest components `2,3,2`, and zero unexpected
+lower-body aperture. At mid-phase, the far wing exposes primary orders `7`,
+`8`, and `9` for `184`, `1,713`, and `4,274` pixels, with `427` terminal-barb
+pixels. Inspection confirms distinct retained layers and contained barb
+structure without a new seam. The still-broad lower caudal lobe remains the
+next ownership target. These lift and ribbon dimensions are simulated
+presentation estimates, not measured American-crow separations or barb widths.
+
 The canonical README sequence is fully simulated and contains the native hold,
 transition, and flight path: `800 x 450`, `72` frames at `24 fps`, `8,015,883`
 bytes, SHA-256
