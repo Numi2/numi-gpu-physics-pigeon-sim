@@ -7,6 +7,7 @@ struct CrowFeatherGeometryFrame {
   let readbackReady: Bool
   let outputBuffer: MTLBuffer
   let indirectDrawBuffer: MTLBuffer
+  let indirectMeshDispatchBuffer: MTLBuffer?
   let vertexCount: Int
 
   init(
@@ -14,12 +15,14 @@ struct CrowFeatherGeometryFrame {
     readbackReady: Bool,
     outputBuffer: MTLBuffer,
     indirectDrawBuffer: MTLBuffer,
+    indirectMeshDispatchBuffer: MTLBuffer? = nil,
     vertexCount: Int
   ) {
     self.slot = slot
     self.readbackReady = readbackReady
     self.outputBuffer = outputBuffer
     self.indirectDrawBuffer = indirectDrawBuffer
+    self.indirectMeshDispatchBuffer = indirectMeshDispatchBuffer
     self.vertexCount = vertexCount
   }
 }
@@ -609,12 +612,13 @@ final class CrowFeatherGeometryDeformer {
       0.32
       + 0.68 * pow(max(sin(Float.pi * shapedAxial), 0), 0.58)
     let tipTaper = 1 - 0.985 * pow(shapedAxial, 3.2)
-    let widthEnvelope = rectrix.map {
-      CrowRectrixVaneAnatomy.terminalWidthEnvelope(
-        axial: shapedAxial,
-        profile: $0
-      )
-    } ?? (bodyEnvelope * tipTaper)
+    let widthEnvelope =
+      rectrix.map {
+        CrowRectrixVaneAnatomy.terminalWidthEnvelope(
+          axial: shapedAxial,
+          profile: $0
+        )
+      } ?? (bodyEnvelope * tipTaper)
     let rootWidthRatio = rootWidthRatio(packedIdentity: packedIdentity)
     let baseWidth =
       (rootWidthRatio * maximumWidthMeters * (1 - shapedAxial)

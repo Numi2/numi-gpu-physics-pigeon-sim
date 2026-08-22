@@ -28,6 +28,7 @@ final class CrowVentralBarbGeometryDeformer {
   private var outputBuffers: [MTLBuffer]
   private let indirectDrawBuffers: [MTLBuffer]
   private let indirectDispatchBuffers: [MTLBuffer]
+  private let indirectMeshDispatchBuffers: [MTLBuffer]
   private var readbackBuffers: [MTLBuffer?]
   private var nextSlot = 0
 
@@ -68,9 +69,11 @@ final class CrowVentralBarbGeometryDeformer {
     )
     fallbackDescriptor.storageMode = .shared
     fallbackDescriptor.usage = .shaderRead
-    guard let fallbackDepthTexture = backend.device.makeTexture(
-      descriptor: fallbackDescriptor
-    ) else {
+    guard
+      let fallbackDepthTexture = backend.device.makeTexture(
+        descriptor: fallbackDescriptor
+      )
+    else {
       throw VisualizationError.allocation(MemoryLayout<Float>.stride)
     }
     var clearDepth: Float = 1
@@ -120,6 +123,9 @@ final class CrowVentralBarbGeometryDeformer {
     indirectDispatchBuffers = try (0..<Self.bufferedFrameCount).map { _ in
       try backend.buffer(length: 3 * MemoryLayout<UInt32>.stride, shared: true)
     }
+    indirectMeshDispatchBuffers = try (0..<Self.bufferedFrameCount).map { _ in
+      try backend.buffer(length: 3 * MemoryLayout<UInt32>.stride, shared: true)
+    }
     readbackBuffers = Array(repeating: nil, count: Self.bufferedFrameCount)
   }
 
@@ -142,10 +148,12 @@ final class CrowVentralBarbGeometryDeformer {
     let candidateBarbuleRecordCount = candidateBarbuleRecordCount(
       projectedPixelsPerMeter: projectedPixelsPerMeter
     )
-    let barbWorkCount = candidateRecordCount
+    let barbWorkCount =
+      candidateRecordCount
       * CrowVentralBarbCurveRecords.maximumBarbPairCount * 2
       * CrowVentralBarbCurveRecords.intervalCount
-    let barbuleWorkCount = candidateBarbuleRecordCount
+    let barbuleWorkCount =
+      candidateBarbuleRecordCount
       * CrowVentralBarbCurveRecords.maximumBarbPairCount * 2
       * CrowVentralBarbCurveRecords.barbuleBranchCount
       * CrowVentralBarbCurveRecords.explicitBarbulesPerBranch
@@ -183,6 +191,11 @@ final class CrowVentralBarbGeometryDeformer {
         bytes.count
       )
     }
+    memset(
+      indirectMeshDispatchBuffers[slot].contents(),
+      0,
+      3 * MemoryLayout<UInt32>.stride
+    )
     memset(
       compactedCountBuffers[slot].contents(),
       0,
@@ -280,6 +293,7 @@ final class CrowVentralBarbGeometryDeformer {
         length: MemoryLayout<UInt32>.stride,
         index: 4
       )
+      prepare.setBuffer(indirectMeshDispatchBuffers[slot], offset: 0, index: 5)
       backend.dispatch1D(prepare, pipeline: indirectPipeline, count: 1)
       prepare.endEncoding()
 
@@ -340,6 +354,7 @@ final class CrowVentralBarbGeometryDeformer {
       readbackReady: auditReadback,
       outputBuffer: outputBuffers[slot],
       indirectDrawBuffer: indirectDrawBuffers[slot],
+      indirectMeshDispatchBuffer: indirectMeshDispatchBuffers[slot],
       vertexCount: maximumVertexCount
     )
   }
@@ -353,6 +368,11 @@ final class CrowVentralBarbGeometryDeformer {
     ).pointee
   }
 
+  func meshThreadgroupCount(for frame: CrowFeatherGeometryFrame) -> UInt32 {
+    guard let buffer = frame.indirectMeshDispatchBuffer else { return 0 }
+    return buffer.contents().bindMemory(to: UInt32.self, capacity: 3).pointee
+  }
+
   /// Binds the GPU-resident compact work and stable procedural inputs. Camera
   /// uniforms intentionally occupy index 3 in the specialized vertex stage.
   func bindRenderResources(
@@ -362,6 +382,20 @@ final class CrowVentralBarbGeometryDeformer {
     encoder.setVertexBuffer(recordBuffer, offset: 0, index: 0)
     encoder.setVertexBuffer(workBuffers[frame.slot], offset: 0, index: 1)
     encoder.setVertexBuffer(
+      geometryUniformBuffers[frame.slot],
+      offset: 0,
+      index: 2
+    )
+  }
+
+  /// Mesh stages have independent resource tables from vertex stages.
+  func bindMeshRenderResources(
+    for frame: CrowFeatherGeometryFrame,
+    encoder: MTLRenderCommandEncoder
+  ) {
+    encoder.setMeshBuffer(recordBuffer, offset: 0, index: 0)
+    encoder.setMeshBuffer(workBuffers[frame.slot], offset: 0, index: 1)
+    encoder.setMeshBuffer(
       geometryUniformBuffers[frame.slot],
       offset: 0,
       index: 2

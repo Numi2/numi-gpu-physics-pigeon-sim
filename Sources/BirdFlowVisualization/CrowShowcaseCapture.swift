@@ -12,6 +12,12 @@ enum CrowShowcasePresentation: String {
   case takeoff
 }
 
+enum CrowVentralCurveEmissionMode: String {
+  case vertex
+  case mesh
+  case auto
+}
+
 /// Native Metal presentation of an explicitly estimated American-crow model.
 ///
 /// The measured Deetjen dove contributes only a deformation scaffold. Crow
@@ -37,6 +43,7 @@ public enum CrowShowcaseCapture {
     let cameraDistanceMeters: Float?
     let cameraTarget: SIMD3<Float>?
     let explicitVentralBarbCurvesEnabled: Bool
+    let ventralCurveEmissionMode: CrowVentralCurveEmissionMode
     let presentation: CrowShowcasePresentation
 
     public init(commandLine: [String]) throws {
@@ -106,6 +113,19 @@ public enum CrowShowcaseCapture {
       explicitVentralBarbCurvesEnabled = !commandLine.contains(
         "--capture-crow-disable-ventral-barb-curves"
       )
+      let emissionValue =
+        try value(after: "--capture-crow-ventral-curve-emission")
+        ?? CrowVentralCurveEmissionMode.vertex.rawValue
+      guard
+        let parsedEmission = CrowVentralCurveEmissionMode(
+          rawValue: emissionValue
+        )
+      else {
+        throw CaptureError.invalidArguments(
+          "--capture-crow-ventral-curve-emission requires vertex, mesh, or auto"
+        )
+      }
+      ventralCurveEmissionMode = parsedEmission
       guard frameCount >= 2 else {
         throw CaptureError.invalidArguments("--capture-frames must be at least 2")
       }
@@ -288,7 +308,8 @@ public enum CrowShowcaseCapture {
       realityAsset: realityAsset,
       presentation: arguments.presentation,
       explicitVentralBarbCurvesEnabled:
-        arguments.explicitVentralBarbCurvesEnabled
+        arguments.explicitVentralBarbCurvesEnabled,
+      ventralCurveEmissionMode: arguments.ventralCurveEmissionMode
     )
     let nativeReferenceRenderer =
       try arguments.temporalScale > 1
@@ -302,7 +323,8 @@ public enum CrowShowcaseCapture {
         realityAsset: realityAsset,
         presentation: arguments.presentation,
         explicitVentralBarbCurvesEnabled:
-          arguments.explicitVentralBarbCurvesEnabled
+          arguments.explicitVentralBarbCurvesEnabled,
+        ventralCurveEmissionMode: arguments.ventralCurveEmissionMode
       )
       : nil
     try FileManager.default.createDirectory(
@@ -776,9 +798,11 @@ private final class CrowShowcaseRenderer {
   private let backgroundAOVPipeline: MTLRenderPipelineState
   private let featherAOVPipeline: MTLRenderPipelineState?
   private let ventralBarbAOVPipeline: MTLRenderPipelineState
+  private let ventralBarbMeshAOVPipeline: MTLRenderPipelineState?
   private let surfaceIdentityPipeline: MTLRenderPipelineState
   private let featherIdentityPipeline: MTLRenderPipelineState?
   private let ventralBarbIdentityPipeline: MTLRenderPipelineState
+  private let ventralBarbMeshIdentityPipeline: MTLRenderPipelineState?
   private let normalResolvePipeline: MTLRenderPipelineState
   private let reactiveMaskPipeline: MTLRenderPipelineState
   private let toneMapPipeline: MTLRenderPipelineState
@@ -792,6 +816,7 @@ private final class CrowShowcaseRenderer {
   private let liveCovertGeometryDeformer: CrowFeatherGeometryDeformer?
   private let ventralRachisGeometryDeformer: CrowVentralRachisGeometryDeformer
   private let ventralBarbGeometryDeformer: CrowVentralBarbGeometryDeformer?
+  private let ventralBarbUsesMeshStage: Bool
   private let featherRenderOffset: SIMD3<Float>
   private var previousPhase: Float?
   private var previousCamera: CameraState?
@@ -808,12 +833,24 @@ private final class CrowShowcaseRenderer {
     motion: any CrowShowcaseMotion,
     realityAsset: BirdRealityAsset?,
     presentation: CrowShowcasePresentation,
-    explicitVentralBarbCurvesEnabled: Bool = true
+    explicitVentralBarbCurvesEnabled: Bool = true,
+    ventralCurveEmissionMode: CrowVentralCurveEmissionMode = .vertex
   ) throws {
     self.presentation = presentation
     self.plumageOptics = plumageOptics.gpuParameters
     let createdBackend = try VisualizationBackend(device: device)
     backend = createdBackend
+    switch ventralCurveEmissionMode {
+    case .vertex:
+      ventralBarbUsesMeshStage = false
+    case .mesh:
+      guard createdBackend.supportsMeshShaders else {
+        throw VisualizationError.pipeline("ventral curve mesh shaders unsupported")
+      }
+      ventralBarbUsesMeshStage = true
+    case .auto:
+      ventralBarbUsesMeshStage = createdBackend.supportsMeshShaders
+    }
     let createdMeshBuilder = CrowMeshBuilder(
       dataset: dataset,
       profile: profile,
@@ -910,6 +947,16 @@ private final class CrowShowcaseRenderer {
       colorFormats: aovFormats,
       sampleCount: createdSampleCount
     )
+    if ventralBarbUsesMeshStage {
+      ventralBarbMeshAOVPipeline = try createdBackend.meshRender(
+        mesh: "crowVentralBarbAOVMesh",
+        fragment: "showcaseCrowAOVFragment",
+        colorFormats: aovFormats,
+        sampleCount: createdSampleCount
+      )
+    } else {
+      ventralBarbMeshAOVPipeline = nil
+    }
     backgroundAOVPipeline = try backend.render(
       vertex: "showcaseBackgroundVertex",
       fragment: "showcaseCrowBackgroundAOVFragment",
@@ -931,6 +978,15 @@ private final class CrowShowcaseRenderer {
       fragment: "showcaseCrowIdentityFragment",
       colorFormat: .rgba32Uint
     )
+    if ventralBarbUsesMeshStage {
+      ventralBarbMeshIdentityPipeline = try createdBackend.meshRender(
+        mesh: "crowVentralBarbAOVMesh",
+        fragment: "showcaseCrowIdentityFragment",
+        colorFormats: [.rgba32Uint]
+      )
+    } else {
+      ventralBarbMeshIdentityPipeline = nil
+    }
     normalResolvePipeline = try backend.render(
       vertex: "showcasePostVertex",
       fragment: "showcaseCrowNormalResolveFragment",
@@ -1032,7 +1088,8 @@ private final class CrowShowcaseRenderer {
       (ventralBarbGeometryDeformer?.candidateRecordCount(
         projectedPixelsPerMeter: projectedPixelsPerMeter
       ) ?? 0) > 0
-    let depthPyramid = try hasVentralBarbCandidates
+    let depthPyramid =
+      try hasVentralBarbCandidates
       ? ensureOcclusionDepthPyramid(width: renderWidth, height: renderHeight)
       : nil
     if !hasVentralBarbCandidates {
@@ -1409,26 +1466,51 @@ private final class CrowShowcaseRenderer {
       }
     }
     if let ventralBarbFrame, let ventralBarbGeometryDeformer {
-      encoder.setRenderPipelineState(ventralBarbAOVPipeline)
-      ventralBarbGeometryDeformer.bindRenderResources(
-        for: ventralBarbFrame,
-        encoder: encoder
-      )
-      encoder.setVertexBytes(
-        &cameraUniforms,
-        length: MemoryLayout<CrowTemporalCameraUniforms>.stride,
-        index: 3
-      )
       encoder.setFragmentBytes(
         &cameraUniforms,
         length: MemoryLayout<CrowTemporalCameraUniforms>.stride,
         index: 0
       )
-      encoder.drawPrimitives(
-        type: .triangle,
-        indirectBuffer: ventralBarbFrame.indirectDrawBuffer,
-        indirectBufferOffset: 0
-      )
+      if ventralBarbUsesMeshStage {
+        guard let ventralBarbMeshAOVPipeline,
+          let indirectMeshDispatchBuffer =
+            ventralBarbFrame.indirectMeshDispatchBuffer
+        else {
+          throw VisualizationError.pipeline("ventral curve mesh AOV resources")
+        }
+        encoder.setRenderPipelineState(ventralBarbMeshAOVPipeline)
+        ventralBarbGeometryDeformer.bindMeshRenderResources(
+          for: ventralBarbFrame,
+          encoder: encoder
+        )
+        encoder.setMeshBytes(
+          &cameraUniforms,
+          length: MemoryLayout<CrowTemporalCameraUniforms>.stride,
+          index: 3
+        )
+        encoder.drawMeshThreadgroups(
+          indirectBuffer: indirectMeshDispatchBuffer,
+          indirectBufferOffset: 0,
+          threadsPerObjectThreadgroup: MTLSize(width: 1, height: 1, depth: 1),
+          threadsPerMeshThreadgroup: MTLSize(width: 24, height: 1, depth: 1)
+        )
+      } else {
+        encoder.setRenderPipelineState(ventralBarbAOVPipeline)
+        ventralBarbGeometryDeformer.bindRenderResources(
+          for: ventralBarbFrame,
+          encoder: encoder
+        )
+        encoder.setVertexBytes(
+          &cameraUniforms,
+          length: MemoryLayout<CrowTemporalCameraUniforms>.stride,
+          index: 3
+        )
+        encoder.drawPrimitives(
+          type: .triangle,
+          indirectBuffer: ventralBarbFrame.indirectDrawBuffer,
+          indirectBufferOffset: 0
+        )
+      }
     }
     encoder.endEncoding()
 
@@ -1491,21 +1573,46 @@ private final class CrowShowcaseRenderer {
       }
     }
     if let ventralBarbFrame, let ventralBarbGeometryDeformer {
-      identityEncoder.setRenderPipelineState(ventralBarbIdentityPipeline)
-      ventralBarbGeometryDeformer.bindRenderResources(
-        for: ventralBarbFrame,
-        encoder: identityEncoder
-      )
-      identityEncoder.setVertexBytes(
-        &cameraUniforms,
-        length: MemoryLayout<CrowTemporalCameraUniforms>.stride,
-        index: 3
-      )
-      identityEncoder.drawPrimitives(
-        type: .triangle,
-        indirectBuffer: ventralBarbFrame.indirectDrawBuffer,
-        indirectBufferOffset: 0
-      )
+      if ventralBarbUsesMeshStage {
+        guard let ventralBarbMeshIdentityPipeline,
+          let indirectMeshDispatchBuffer =
+            ventralBarbFrame.indirectMeshDispatchBuffer
+        else {
+          throw VisualizationError.pipeline("ventral curve mesh identity resources")
+        }
+        identityEncoder.setRenderPipelineState(ventralBarbMeshIdentityPipeline)
+        ventralBarbGeometryDeformer.bindMeshRenderResources(
+          for: ventralBarbFrame,
+          encoder: identityEncoder
+        )
+        identityEncoder.setMeshBytes(
+          &cameraUniforms,
+          length: MemoryLayout<CrowTemporalCameraUniforms>.stride,
+          index: 3
+        )
+        identityEncoder.drawMeshThreadgroups(
+          indirectBuffer: indirectMeshDispatchBuffer,
+          indirectBufferOffset: 0,
+          threadsPerObjectThreadgroup: MTLSize(width: 1, height: 1, depth: 1),
+          threadsPerMeshThreadgroup: MTLSize(width: 24, height: 1, depth: 1)
+        )
+      } else {
+        identityEncoder.setRenderPipelineState(ventralBarbIdentityPipeline)
+        ventralBarbGeometryDeformer.bindRenderResources(
+          for: ventralBarbFrame,
+          encoder: identityEncoder
+        )
+        identityEncoder.setVertexBytes(
+          &cameraUniforms,
+          length: MemoryLayout<CrowTemporalCameraUniforms>.stride,
+          index: 3
+        )
+        identityEncoder.drawPrimitives(
+          type: .triangle,
+          indirectBuffer: ventralBarbFrame.indirectDrawBuffer,
+          indirectBufferOffset: 0
+        )
+      }
     }
     identityEncoder.endEncoding()
 
@@ -1614,33 +1721,40 @@ private final class CrowShowcaseRenderer {
       ? inputPixels * (32 + 4) * sampleCount
       : 0
     let outputBytes = outputPixels * (4 + (temporalEnabled ? 8 : 0))
-    let ventralBarbCandidateRecordCount = ventralBarbGeometryDeformer?
+    let ventralBarbCandidateRecordCount =
+      ventralBarbGeometryDeformer?
       .candidateRecordCount(projectedPixelsPerMeter: projectedPixelsPerMeter) ?? 0
-    let ventralBarbuleCandidateRecordCount = ventralBarbGeometryDeformer?
+    let ventralBarbuleCandidateRecordCount =
+      ventralBarbGeometryDeformer?
       .candidateBarbuleRecordCount(
         projectedPixelsPerMeter: projectedPixelsPerMeter
       ) ?? 0
-    let ventralBarbVisibleRecordCount = ventralBarbFrame.map {
-      ventralBarbGeometryDeformer?.compactedRecordCount(for: $0) ?? 0
-    } ?? 0
-    let ventralBarbVisibilityCounts = ventralBarbFrame.flatMap { frame in
-      ventralBarbGeometryDeformer.map { $0.visibilityCounts(for: frame) }
-    } ?? CrowVentralBarbVisibilityCounts(
-      postOcclusionVisible: 0,
-      frustumVisible: 0,
-      occlusionCulled: 0,
-      occlusionTested: 0,
-      postOcclusionBarbuleVisible: 0,
-      frustumBarbuleVisible: 0,
-      emittedWorkCount: 0,
-      reserved: 0
-    )
-    let ventralBarbExpandedVertexCount = ventralBarbFrame.map {
-      Int(ventralBarbGeometryDeformer?.drawArguments(for: $0).vertexCount ?? 0)
-    } ?? 0
-    let ventralBarbuleExpandedVertexCount = Int(
-      ventralBarbVisibilityCounts.postOcclusionBarbuleVisible
-    ) * CrowVentralBarbCurveRecords.explicitBarbPairCount * 2
+    let ventralBarbVisibleRecordCount =
+      ventralBarbFrame.map {
+        ventralBarbGeometryDeformer?.compactedRecordCount(for: $0) ?? 0
+      } ?? 0
+    let ventralBarbVisibilityCounts =
+      ventralBarbFrame.flatMap { frame in
+        ventralBarbGeometryDeformer.map { $0.visibilityCounts(for: frame) }
+      }
+      ?? CrowVentralBarbVisibilityCounts(
+        postOcclusionVisible: 0,
+        frustumVisible: 0,
+        occlusionCulled: 0,
+        occlusionTested: 0,
+        postOcclusionBarbuleVisible: 0,
+        frustumBarbuleVisible: 0,
+        emittedWorkCount: 0,
+        reserved: 0
+      )
+    let ventralBarbExpandedVertexCount =
+      ventralBarbFrame.map {
+        Int(ventralBarbGeometryDeformer?.drawArguments(for: $0).vertexCount ?? 0)
+      } ?? 0
+    let ventralBarbuleExpandedVertexCount =
+      Int(
+        ventralBarbVisibilityCounts.postOcclusionBarbuleVisible
+      ) * CrowVentralBarbCurveRecords.explicitBarbPairCount * 2
       * CrowVentralBarbCurveRecords.barbuleBranchCount
       * CrowVentralBarbCurveRecords.explicitBarbulesPerBranch
       * CrowVentralBarbCurveRecords.verticesPerCurveInterval
@@ -1686,7 +1800,9 @@ private final class CrowShowcaseRenderer {
       ventralBarbExpandedVertexCount: ventralBarbExpandedVertexCount,
       ventralBarbuleExpandedVertexCount: ventralBarbuleExpandedVertexCount,
       ventralBarbOutputCapacityBytes: 0,
-      ventralBarbVertexGenerationMode: "gpu-procedural-vertex-pulling"
+      ventralBarbVertexGenerationMode: ventralBarbUsesMeshStage
+        ? "gpu-mesh-threadgroup-24-vertex"
+        : "gpu-procedural-vertex-pulling"
     )
   }
 
@@ -2044,12 +2160,14 @@ private struct CrowMeshBuilder {
           })
         else { return 0 }
         let localIndices = indices.map { $0 - wing.vertexOffset }
-        let minimumSpan = localIndices.map {
-          $0 / CrowFlightWingBodyIntegration.chordCount
-        }.min() ?? 0
-        let minimumChord = localIndices.map {
-          $0 % CrowFlightWingBodyIntegration.chordCount
-        }.min() ?? 0
+        let minimumSpan =
+          localIndices.map {
+            $0 / CrowFlightWingBodyIntegration.chordCount
+          }.min() ?? 0
+        let minimumChord =
+          localIndices.map {
+            $0 % CrowFlightWingBodyIntegration.chordCount
+          }.min() ?? 0
         let upperTriangle = localIndices.contains {
           $0 / CrowFlightWingBodyIntegration.chordCount > minimumSpan
             && $0 % CrowFlightWingBodyIntegration.chordCount == minimumChord
@@ -3932,7 +4050,8 @@ private struct CrowMeshBuilder {
     let foldedTip = bodyCenter + folded.tipOffset - 0.0003 * folded.planeNormal
     let transitionProgress = CrowTakeoffSequence.sample(phase: phase)
       .transitionProgress
-    let handoffWeight = CrowFlightWingBodyIntegration
+    let handoffWeight =
+      CrowFlightWingBodyIntegration
       .terminalAxillaryHandoffWeight(
         transitionProgress: transitionProgress
       )
@@ -4289,7 +4408,8 @@ private struct CrowMeshBuilder {
           * CrowFlightWingBodyIntegration.covertProximalLeadingChordScale(
             chordIndex: chord,
             spanIndex: span
-          ) * (isTrailingCourse
+          )
+          * (isTrailingCourse
             ? 1.92 + proximalChordExtension + distalChordExtension
             : 1.16 + anteriorChordExtension)
           * chordVector
@@ -4409,7 +4529,7 @@ private struct CrowMeshBuilder {
               edgeRippleAmplitude: edgeRippleAmplitude,
               edgeRipplePhase: edgeRipplePhase,
               edgeRippleCycles: edgeRippleCycles,
-            surfaceFeatherClass: surfaceIdentity,
+              surfaceFeatherClass: surfaceIdentity,
               deployment: trailingRankDeployment,
               lodLengthMeters: 0.12,
               projectedPixelsPerMeter: projectedPixelsPerMeter,

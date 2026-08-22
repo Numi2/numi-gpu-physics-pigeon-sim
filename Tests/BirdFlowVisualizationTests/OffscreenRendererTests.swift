@@ -441,7 +441,7 @@ func estimatedCrowShowcaseCaptureProducesDistinctFrames() throws {
 }
 
 @Test("Crow capture accepts bounded simulated camera overrides")
-func CrowCaptureAcceptsBoundedCameraOverrides() throws {
+func crowCaptureAcceptsBoundedCameraOverrides() throws {
   let arguments = try CrowShowcaseCapture.Arguments(commandLine: [
     "birdflow-viewer",
     "--capture-crow-frames", "/tmp/crow-camera-override-test",
@@ -459,6 +459,22 @@ func CrowCaptureAcceptsBoundedCameraOverrides() throws {
   #expect(arguments.cameraDistanceMeters == 0.035)
   #expect(arguments.cameraTarget == SIMD3<Float>(0.02, 0.055, -0.04))
   #expect(!arguments.explicitVentralBarbCurvesEnabled)
+  #expect(arguments.ventralCurveEmissionMode == .vertex)
+
+  let meshArguments = try CrowShowcaseCapture.Arguments(commandLine: [
+    "birdflow-viewer",
+    "--capture-crow-frames", "/tmp/crow-mesh-emission-test",
+    "--capture-frames", "2",
+    "--capture-crow-ventral-curve-emission", "mesh",
+  ])
+  #expect(meshArguments.ventralCurveEmissionMode == .mesh)
+  let autoArguments = try CrowShowcaseCapture.Arguments(commandLine: [
+    "birdflow-viewer",
+    "--capture-crow-frames", "/tmp/crow-auto-emission-test",
+    "--capture-frames", "2",
+    "--capture-crow-ventral-curve-emission", "auto",
+  ])
+  #expect(autoArguments.ventralCurveEmissionMode == .auto)
 
   #expect(throws: CrowShowcaseCapture.CaptureError.self) {
     _ = try CrowShowcaseCapture.Arguments(commandLine: [
@@ -482,6 +498,14 @@ func CrowCaptureAcceptsBoundedCameraOverrides() throws {
       "--capture-crow-frames", "/tmp/crow-camera-override-test",
       "--capture-frames", "2",
       "--capture-crow-camera-target-x", "0.02",
+    ])
+  }
+  #expect(throws: CrowShowcaseCapture.CaptureError.self) {
+    _ = try CrowShowcaseCapture.Arguments(commandLine: [
+      "birdflow-viewer",
+      "--capture-crow-frames", "/tmp/crow-camera-override-test",
+      "--capture-frames", "2",
+      "--capture-crow-ventral-curve-emission", "automatic",
     ])
   }
 }
@@ -714,19 +738,20 @@ func estimatedStandingCrowCaptureProducesLoopClosedFrames() throws {
     from: Data(contentsOf: aovAuditURL)
   )
   #expect(audit.schemaVersion == 16)
-  #expect(audit.frames.allSatisfy {
-    $0.ventralBarbCandidateRecordCount == 0
-      && $0.ventralBarbFrustumVisibleRecordCount == 0
-      && $0.ventralBarbVisibleRecordCount == 0
-      && $0.ventralBarbOcclusionTestedRecordCount == 0
-      && $0.ventralBarbOcclusionCulledRecordCount == 0
-      && $0.ventralBarbOcclusionDepthBytes == 0
-      && $0.ventralBarbOcclusionMode == "inactive"
-      && $0.ventralBarbExpandedVertexCount == 0
-      && $0.ventralBarbOutputCapacityBytes == 0
-      && $0.ventralBarbVertexGenerationMode
-        == "gpu-procedural-vertex-pulling"
-  })
+  #expect(
+    audit.frames.allSatisfy {
+      $0.ventralBarbCandidateRecordCount == 0
+        && $0.ventralBarbFrustumVisibleRecordCount == 0
+        && $0.ventralBarbVisibleRecordCount == 0
+        && $0.ventralBarbOcclusionTestedRecordCount == 0
+        && $0.ventralBarbOcclusionCulledRecordCount == 0
+        && $0.ventralBarbOcclusionDepthBytes == 0
+        && $0.ventralBarbOcclusionMode == "inactive"
+        && $0.ventralBarbExpandedVertexCount == 0
+        && $0.ventralBarbOutputCapacityBytes == 0
+        && $0.ventralBarbVertexGenerationMode
+          == "gpu-procedural-vertex-pulling"
+    })
   #expect(audit.formats["hdrColor"] == "rgba16Float")
   #expect(audit.formats["normalCoverage"] == "rgba16Float")
   #expect(audit.formats["deviceDepth"] == "depth32Float")

@@ -2022,7 +2022,6 @@ kernel void emitCrowVentralBarbWork(
     if(classification!=1u&&classification!=3u){return;}
     uint pairCount=uint(uniforms.selection.z);
     uint intervalCount=uint(uniforms.selection.w);
-    uint workPerRecord=pairCount*2u*intervalCount;
     uint outputIndex=offsets[recordIndex];
     for(uint pairIndex=0u;pairIndex<pairCount;++pairIndex){
         for(uint sideIndex=0u;sideIndex<2u;++sideIndex){
@@ -2069,6 +2068,7 @@ kernel void prepareCrowVentralBarbIndirectWork(
     device CrowFeatherDispatchArguments* dispatchArguments [[buffer(2)]],
     constant CrowVentralBarbVisibilityUniforms& uniforms [[buffer(3)]],
     constant uint& threadsPerThreadgroup [[buffer(4)]],
+    device CrowFeatherDispatchArguments* meshDispatchArguments [[buffer(5)]],
     uint gid [[thread_position_in_grid]]) {
     if(gid!=0u){return;}
     uint vertexCount=compactedCount[6]*uniforms.counts.y;
@@ -2080,6 +2080,9 @@ kernel void prepareCrowVentralBarbIndirectWork(
         (vertexCount+threadsPerThreadgroup-1u)/threadsPerThreadgroup;
     dispatchArguments[0].threadgroupsPerGrid[1]=1u;
     dispatchArguments[0].threadgroupsPerGrid[2]=1u;
+    meshDispatchArguments[0].threadgroupsPerGrid[0]=compactedCount[6];
+    meshDispatchArguments[0].threadgroupsPerGrid[1]=1u;
+    meshDispatchArguments[0].threadgroupsPerGrid[2]=1u;
 }
 
 // One compiled helper is shared by compute audit expansion and production
@@ -2271,6 +2274,61 @@ inline CrowFeatherVertexGPU crowVentralBarbProceduralVertex(
     return (work[workIndex].indices.w&0x80000000u)!=0u
         ?crowVentralBarbuleVertex(records,work,uniforms,outputIndex)
         :crowVentralBarbVertex(records,work,uniforms,outputIndex);
+}
+
+struct CrowVentralCurvePrimitive {
+    uint reserved;
+};
+
+inline float4 crowSurfaceBiasedClipPosition(
+    float4 clipPosition,uint featherClass);
+
+using CrowVentralCurveMesh = metal::mesh<
+    CrowRasterVertex,
+    CrowVentralCurvePrimitive,
+    24,
+    8,
+    metal::topology::triangle
+>;
+
+/// Mesh-stage parity path: one compact interval work record owns one mesh
+/// threadgroup. Keep the duplicated flat-shaded vertices until a primitive-
+/// normal representation proves exact against this and the vertex oracle.
+[[mesh]] void crowVentralBarbAOVMesh(
+    device const CrowVentralRachisCurveRecordGPU* records [[buffer(0)]],
+    device const CrowVentralBarbSegmentWorkGPU* work [[buffer(1)]],
+    constant CrowVentralBarbGeometryUniforms& geometry [[buffer(2)]],
+    constant CrowTemporalCameraUniforms& camera [[buffer(3)]],
+    CrowVentralCurveMesh outputMesh,
+    uint tid [[thread_index_in_threadgroup]],
+    uint3 workPosition [[threadgroup_position_in_grid]]) {
+    if(tid<24u){
+        uint vertexIndex=workPosition.x*24u+tid;
+        CrowFeatherVertexGPU source=crowVentralBarbProceduralVertex(
+            records,work,geometry,vertexIndex
+        );
+        CrowRasterVertex out;
+        uint featherClass=source.identity.w&255u;
+        out.position=crowSurfaceBiasedClipPosition(
+            camera.viewProjection*source.position,featherClass
+        );
+        out.previousClipPosition=crowSurfaceBiasedClipPosition(
+            camera.previousViewProjection*source.previousPosition,featherClass
+        );
+        out.world=source.position.xyz;
+        out.normal=normalize(source.normal.xyz);
+        out.albedoAndMaterial=source.color;
+        out.featherCoordinates=source.parameters.xyz;
+        out.identity=source.identity;
+        outputMesh.set_vertex(tid,out);
+        outputMesh.set_index(tid,tid);
+    }
+    if(tid<8u){
+        CrowVentralCurvePrimitive primitive;
+        primitive.reserved=0u;
+        outputMesh.set_primitive(tid,primitive);
+    }
+    if(tid==0u){outputMesh.set_primitive_count(8u);}
 }
 
 kernel void expandCrowVentralBarbCurves(

@@ -211,8 +211,18 @@ identity pixels. The ordinary view and established `800 x 450`, `0.035 m`
 close tier remain byte-exact against `dcc638f`; that close tier retains `746`
 barb candidates and zero barbule candidates. These are renderer-estimated
 geometry and local occlusion, not measured crow barbule dimensions, physical
-self-shadowing, or a speed claim. Indexed/mesh-stage emission and curve-aware
-ray visibility remain open.
+self-shadowing, or a speed claim. A capability-gated Metal mesh-stage prototype
+now consumes the same compact GPU work directly: one threadgroup emits each
+24-vertex, eight-triangle interval, and the existing vertex-pulling path remains
+the canonical default and audit oracle. On the M4 Pro, both paths retain `746`
+candidates, `621` visible owners, `357,696` emitted intervals, and `8,584,704`
+procedural vertices in the established close diagnostic. Their silhouettes and
+active-pixel totals are exact, but `1,772 / 360,000` pixels (`0.492%`) change
+ownership only in a lower-left near-coincident feather overlap; normalized
+display RMSE is `0.00125` and the maximum channel difference is `25 / 255`.
+Mesh emission is therefore explicit/experimental rather than promoted, and no
+speed claim is made. Indexed vertex reuse, exact cross-stage raster ownership,
+and curve-aware ray visibility remain open.
 A separate versioned optics profile now drives the live eight-wavelength
 air/keratin/melanin film response. It records comparative glossy-corvid
 constraints independently from the renderer's American-crow estimates, so the

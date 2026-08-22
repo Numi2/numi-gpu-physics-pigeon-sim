@@ -280,6 +280,7 @@ func metalExpandsRetainedVentralBarbIntervals() throws {
   #expect(deformer.compactedRecordCount(for: frame) == 1)
   #expect(deformer.segmentWork(for: frame) == work)
   #expect(deformer.drawArguments(for: frame).vertexCount == UInt32(frame.vertexCount))
+  #expect(deformer.meshThreadgroupCount(for: frame) == UInt32(work.count))
   let vertices = deformer.vertices(for: frame)
   for workIndex in [0, work.count - 1] {
     let segment = CrowVentralBarbCurveRecords.segment(
@@ -344,6 +345,9 @@ func metalEmitsStableProceduralBarbules() throws {
   #expect(
     deformer.drawArguments(for: frame).vertexCount
       == UInt32(expectedWork.count * 24)
+  )
+  #expect(
+    deformer.meshThreadgroupCount(for: frame) == UInt32(expectedWork.count)
   )
 
   let vertices = deformer.vertices(for: frame)
@@ -476,6 +480,20 @@ func metalCompactsVisibleVentralBarbRecords() throws {
       )
   )
   #expect(deformer.drawArguments(for: dormantFrame).vertexCount == 0)
+  #expect(deformer.meshThreadgroupCount(for: dormantFrame) == 0)
+}
+
+@Test("capability-gated ventral mesh pipeline compiles on supported Metal GPUs")
+func capabilityGatedVentralMeshPipelineCompiles() throws {
+  guard let device = MTLCreateSystemDefaultDevice() else { return }
+  let backend = try VisualizationBackend(device: device)
+  guard backend.supportsMeshShaders else { return }
+  _ = try backend.meshRender(
+    mesh: "crowVentralBarbAOVMesh",
+    fragment: "showcaseCrowIdentityFragment",
+    colorFormats: [.rgba32Uint]
+  )
+  #expect(backend.supportsMeshShaders)
 }
 
 @Test("production ventral barbs pull vertices without materialized output")

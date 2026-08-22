@@ -1,6 +1,11 @@
 import Foundation
 import Metal
 
+private final class VisualizationMeshPipelineCompilation: @unchecked Sendable {
+  var pipeline: MTLRenderPipelineState?
+  var error: Error?
+}
+
 enum VisualizationError: Error, CustomStringConvertible {
   case resourceMissing
   case shader(String)
@@ -29,9 +34,15 @@ final class VisualizationBackend {
 
   private var computePipelines: [String: MTLComputePipelineState] = [:]
   private var renderPipelines: [String: MTLRenderPipelineState] = [:]
+  private var meshRenderPipelines: [String: MTLRenderPipelineState] = [:]
+
+  var supportsMeshShaders: Bool {
+    device.supportsFamily(.apple7) || device.supportsFamily(.mac2)
+  }
 
   init(device: MTLDevice) throws {
-    fastMathEnabled = ProcessInfo.processInfo.environment["BIRDFLOW_VIS_FAST_MATH"]
+    fastMathEnabled =
+      ProcessInfo.processInfo.environment["BIRDFLOW_VIS_FAST_MATH"]
       != "0"
     self.device = device
     guard let queue = device.makeCommandQueue() else {
@@ -121,6 +132,53 @@ final class VisualizationBackend {
     }
     let pipeline = try device.makeRenderPipelineState(descriptor: descriptor)
     renderPipelines[key] = pipeline
+    return pipeline
+  }
+
+  func meshRender(
+    mesh: String,
+    fragment: String,
+    colorFormats: [MTLPixelFormat],
+    depthFormat: MTLPixelFormat = .depth32Float,
+    sampleCount: Int = 1,
+    maximumThreadsPerMeshThreadgroup: Int = 24
+  ) throws -> MTLRenderPipelineState {
+    guard supportsMeshShaders else {
+      throw VisualizationError.pipeline("mesh shaders unsupported")
+    }
+    guard !colorFormats.isEmpty, colorFormats.count <= 8 else {
+      throw VisualizationError.pipeline("mesh render target count")
+    }
+    let formats = colorFormats.map { String($0.rawValue) }.joined(separator: ",")
+    let key =
+      "\(mesh)|\(fragment)|\(formats)|\(depthFormat.rawValue)|\(sampleCount)"
+      + "|\(maximumThreadsPerMeshThreadgroup)"
+    if let existing = meshRenderPipelines[key] { return existing }
+    let descriptor = MTLMeshRenderPipelineDescriptor()
+    descriptor.meshFunction = library.makeFunction(name: mesh)
+    descriptor.fragmentFunction = library.makeFunction(name: fragment)
+    descriptor.maxTotalThreadsPerMeshThreadgroup = maximumThreadsPerMeshThreadgroup
+    for (index, format) in colorFormats.enumerated() {
+      descriptor.colorAttachments[index].pixelFormat = format
+    }
+    descriptor.depthAttachmentPixelFormat = depthFormat
+    descriptor.rasterSampleCount = sampleCount
+    let completion = DispatchSemaphore(value: 0)
+    let result = VisualizationMeshPipelineCompilation()
+    device.makeRenderPipelineState(descriptor: descriptor, options: []) {
+      pipeline,
+      _,
+      error in
+      result.pipeline = pipeline
+      result.error = error
+      completion.signal()
+    }
+    completion.wait()
+    if let error = result.error { throw error }
+    guard let pipeline = result.pipeline else {
+      throw VisualizationError.pipeline(mesh)
+    }
+    meshRenderPipelines[key] = pipeline
     return pipeline
   }
 
