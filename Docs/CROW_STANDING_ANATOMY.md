@@ -602,6 +602,21 @@ same-class neighbour variation falls `8.2%`/`32.8%`. The retained vane edges
 remain visually distinct. This qualifies one simulated view and executable GPU
 threshold response, not all-angle closure or measured rachis visibility.
 
+The ten aggregate barb stations on every body-tract vane now receive a stable
+identity-derived axial offset bounded to `18%` of their base spacing. Both
+sides of a pair retain the same station, adjacent stations remain strictly
+ordered, and replay regenerates byte-equivalent segment arrays. Counts, roots,
+tips, extensions, radii, terminal bundles, vane geometry, and feather-class
+ownership are unchanged. At a previously unused close-oblique yaw/pitch
+`(-0.34,0.46)`, distance `0.36 m`, and `1200 x 675`, active coverage is exact
+at `307,367` pixels and fully covered coverage increases by one pixel. The
+largest hole remains `6` pixels and expected aperture remains `3`; small
+enclosed holes change `27/18 -> 29/19` pixels/components. Matched full-frame
+SSIM is `0.998958`, while the inspected neck/back crop shows that short edge
+strokes no longer terminate on one repeated ruler. This qualifies only the
+simulated station contract and one view, not measured barb spacing or all-angle
+realism.
+
 The exposed class-`6` scapular layer now shares its deployed transverse crown
 with retained rachis and barb geometry while preserving stable parent-class AOV
 ownership. Interior barbs remain inside `97%` of the local vane width and only
@@ -996,9 +1011,9 @@ simulated terminal ownership and raster continuity, not measured rectrix
 morphology or perceptual realism.
 
 The canonical README sequence is fully simulated and contains the native hold,
-transition, and flight path: `800 x 450`, `72` frames at `24 fps`, `8,015,902`
+transition, and flight path: `800 x 450`, `72` frames at `24 fps`, `8,111,434`
 bytes, SHA-256
-`bbc0eb1b0e260a027bfed0336e166a0161840af1ded7202a6ad0e5af0340b2cd`.
+`d17433353b39c31a438027989249cc3459c19bc939e8ec530e7850a91a7a119c`.
 The audited stage PNGs at frames `0`, `35`, and `71` are distinct and retain
 the simulated hold, geometric deployment, and sustained-flight states.
 

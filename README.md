@@ -215,6 +215,18 @@ one pixel, and the expected aperture stays zero. Class-`5` and class-`6` peak
 luminance remain exact while same-class neighbour contrast falls `8.2%` and
 `32.8%`, removing the engraved-groove read without smoothing away feather
 edges. These thresholds are simulated optical LOD, not measured visual acuity.
+Aggregate body-barb stations now retain their ten-pair budget but no longer
+repeat one exact axial ruler across every cervical, mantle, humeral, and
+scapular vane. Existing stable feather identity offsets each bilateral station
+by at most `18%` of one inter-station spacing; ordered stations cannot cross,
+and all terminal bundles, roots, tips, radii, and AOV classes remain unchanged.
+At a new close-oblique `1200 x 675` view `(-0.34,0.46)` from `0.36 m`, active
+coverage remains exactly `307,367` pixels, fully covered pixels change by `+1`,
+the worst hole stays `6` pixels, and the expected aperture stays `3` pixels.
+Tiny enclosed holes change `27/18 -> 29/19` pixels/components. The localized
+A/B is `0.998958` SSIM and the crop shows de-locked edge strokes rather than a
+broad material change. This spacing is simulated mesostructure, not a measured
+American-crow barb map.
 At the opposite standing diagnostic view, the humeral/scapular base spectrum
 and broader optical lobe reduce class-`6` mean scene-linear luminance by
 `8.31%`, standard deviation by `10.57%`, and same-class neighbour contrast by

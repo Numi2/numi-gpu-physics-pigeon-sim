@@ -234,6 +234,54 @@ func bodyTractFeathersResolveMesostructure() {
   }
 }
 
+@Test("body tract barb stations vary deterministically without crossing")
+func bodyTractBarbStationsVaryWithoutCrossing() {
+  let feathers = Array(CrowBodyFeatherTracts.samples().prefix(48))
+  var quantizedOffsets: Set<Int> = []
+  for feather in feathers {
+    let direction = simd_normalize(feather.tipOffset - feather.rootOffset)
+    let length = simd_distance(feather.rootOffset, feather.tipOffset)
+    let pixelsPerMeter = 48 / length
+    let first = CrowFeatherMesostructure.segments(
+      for: feather,
+      projectedPixelsPerMeter: pixelsPerMeter
+    )
+    let replay = CrowFeatherMesostructure.segments(
+      for: feather,
+      projectedPixelsPerMeter: pixelsPerMeter
+    )
+    #expect(first == replay)
+
+    let aggregates = first.filter { $0.kind == .edgeBarbGroup }
+    #expect(aggregates.count == 25)
+    let pairCount = 10
+    let stationSpacing = Float(0.77) / Float(pairCount + 1)
+    let maximumOffset =
+      CrowFeatherMesostructure.bodyTractBarbStationJitterFractionOfSpacing
+      * stationSpacing
+    var previousAxial: Float = 0
+    for pair in 0..<pairCount {
+      let firstSideAxial = simd_dot(
+        aggregates[2 * pair].start - feather.rootOffset,
+        direction
+      ) / length
+      let secondSideAxial = simd_dot(
+        aggregates[2 * pair + 1].start - feather.rootOffset,
+        direction
+      ) / length
+      let baseAxial = 0.10 + stationSpacing * Float(pair + 1)
+      #expect(abs(firstSideAxial - secondSideAxial) < 2e-6)
+      #expect(abs(firstSideAxial - baseAxial) <= maximumOffset + 2e-6)
+      #expect(firstSideAxial > previousAxial)
+      previousAxial = firstSideAxial
+      quantizedOffsets.insert(
+        Int(((firstSideAxial - baseAxial) * 10_000_000).rounded())
+      )
+    }
+  }
+  #expect(quantizedOffsets.count > 100)
+}
+
 @Test("body tract detail follows deployment camber without changing inventory")
 func bodyTractDetailFollowsDeploymentCamber() throws {
   let feather = try #require(

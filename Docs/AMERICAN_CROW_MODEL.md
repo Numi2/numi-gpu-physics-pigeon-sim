@@ -364,6 +364,23 @@ same-class neighbour variation changes `0.002467 -> 0.002264` and
 `12/18/24 px`. These thresholds and the perceptual interpretation remain
 estimated rendering choices, not measured American-crow acuity or rachis size.
 
+The aggregate body-barb tier now varies station placement per persistent
+feather instead of instancing the same ten axial fractions everywhere. A stable
+identity phase offsets each bilateral station by at most `0.18` of the base
+spacing; because adjacent stations can close by at most `0.36` spacing, their
+ordering cannot invert. Counts remain `20` bilateral edge segments plus five
+terminal bundles for coarse cervical/mantle vanes, or `20` contained barbs plus
+five terminal bundles for promoted humeral/scapular vanes. A 48-feather replay
+test proves deterministic equality, paired-side axial agreement, bounded
+offsets, strict ordering, and more than `100` distinct quantized offsets. At
+yaw/pitch `(-0.34,0.46)`, distance `0.36 m`, and `1200 x 675`, active pixels
+remain `307,367`, fully covered pixels change `305,712 -> 305,713`, the worst
+hole remains `6` pixels, and expected aperture remains `3` pixels. Enclosed
+holes change `27/18 -> 29/19` pixels/components; the matched image SSIM is
+`0.998958`, localizing the variation to feather-edge structure. The station
+phase and amplitude are estimated rendering morphology, not measured barb
+coordinates.
+
 The estimated femoral field keeps its `15 x 18` body-surface-rooted inventory
 (`270` vanes per side) and all root and joint coordinates. A temporal-identity
 trace of the high-side transition opening localized the owning geometry to

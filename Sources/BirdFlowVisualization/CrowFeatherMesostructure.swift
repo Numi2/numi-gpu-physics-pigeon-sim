@@ -25,6 +25,7 @@ enum CrowFeatherMesostructure {
   static let dorsalBodyContourInteriorBarbStartAxialFraction: Float = 0.45
   static let shoulderInteriorBarbThresholdPixels: Float = 40
   static let bodyTractResolvedRachisWidthThresholdPixels: Float = 24
+  static let bodyTractBarbStationJitterFractionOfSpacing: Float = 0.18
 
   static func segments(
     for feather: CrowBodyContourShingle,
@@ -73,6 +74,8 @@ enum CrowFeatherMesostructure {
       ),
       projectedPixelsPerMeter: projectedPixelsPerMeter,
       containPromotedInteriorBarbs: true,
+      barbStationJitterFractionOfSpacing:
+        bodyTractBarbStationJitterFractionOfSpacing,
       promoteInteriorBarbs: (feather.region == .humeral || feather.region == .scapular)
         && simd_distance(feather.rootOffset, feather.tipOffset)
           * projectedPixelsPerMeter >= shoulderInteriorBarbThresholdPixels
@@ -152,6 +155,7 @@ enum CrowFeatherMesostructure {
     projectedPixelsPerMeter: Float,
     lodLengthMeters: Float? = nil,
     containPromotedInteriorBarbs: Bool = false,
+    barbStationJitterFractionOfSpacing: Float = 0,
     promoteInteriorBarbs: Bool = false
   ) -> [CrowFeatherMesostructureSegment] {
     let tessellation = CrowFeatherCoverageLOD.tessellation(
@@ -181,6 +185,7 @@ enum CrowFeatherMesostructure {
       barbulesPerBarb: tessellation.barbulesPerBarb,
       projectedPixelsPerMeter: projectedPixelsPerMeter,
       containPromotedInteriorBarbs: containPromotedInteriorBarbs,
+      stationJitterFractionOfSpacing: barbStationJitterFractionOfSpacing,
       frame: frame,
       to: &result
     )
@@ -490,6 +495,7 @@ enum CrowFeatherMesostructure {
     barbulesPerBarb: Int,
     projectedPixelsPerMeter: Float,
     containPromotedInteriorBarbs: Bool,
+    stationJitterFractionOfSpacing: Float,
     frame: Frame,
     to result: inout [CrowFeatherMesostructureSegment]
   ) {
@@ -499,8 +505,20 @@ enum CrowFeatherMesostructure {
     let safePixelsPerMeter = max(projectedPixelsPerMeter, 1)
     let aggregateRadius = min(0.00020, max(0.000035, 0.30 / safePixelsPerMeter))
     let baseExtension = min(0.0012, max(0.00050, 1.10 / safePixelsPerMeter))
+    let stationSpacing = 0.77 / Float(edgePairCount + 1)
+    let boundedStationJitter = min(
+      max(stationJitterFractionOfSpacing, 0),
+      0.49
+    )
     for pair in 0..<edgePairCount {
-      let localAxial = 0.10 + 0.77 * Float(pair + 1) / Float(edgePairCount + 1)
+      let featherPhase =
+        Float(frame.identityFirst + 1) * Float(19.193)
+        + Float(frame.identitySecond + 1) * Float(47.117)
+      let stationPhase = Float(pair + 1) * Float(11.731)
+      let stationIdentity = sin(featherPhase + stationPhase)
+      let localAxial =
+        0.10 + stationSpacing * Float(pair + 1)
+        + boundedStationJitter * stationSpacing * stationIdentity
       let axial = frame.pennaceousAxial(at: localAxial)
       let reachAxial = frame.pennaceousAxial(
         at: min(0.94, localAxial + 0.035 + 0.020 * localAxial)
