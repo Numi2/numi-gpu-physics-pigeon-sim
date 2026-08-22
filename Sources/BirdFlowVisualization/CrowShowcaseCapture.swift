@@ -945,7 +945,8 @@ private final class CrowShowcaseRenderer {
       ? realityAsset.map {
         try CrowFeatherGeometryDeformer(
           backend: createdBackend,
-          featherCount: $0.feathers.count
+          featherCount: $0.feathers.count,
+          gpuSelectedDetailDensity: true
         )
       }
       : nil

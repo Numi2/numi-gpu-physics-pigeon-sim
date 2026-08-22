@@ -31,7 +31,8 @@ func crowFeatherTemplateGPUDeformationMatchesCPUReference() throws {
   )
   let geometryDeformer = try CrowFeatherGeometryDeformer(
     backend: backend,
-    featherCount: asset.feathers.count
+    featherCount: asset.feathers.count,
+    gpuSelectedDetailDensity: true
   )
 
   #expect(MemoryLayout<CrowFeatherTemplateVertexGPU>.stride == 16)
@@ -51,6 +52,7 @@ func crowFeatherTemplateGPUDeformationMatchesCPUReference() throws {
   let renderOffset = -referenceBodyCenter
   let phases: [(Float, Float, Float)] = [
     (0, 0, 0),
+    (0.139, 0.127, 1_200),
     (0.271, 0.249, 1_600),
     (0.503, 0.481, 0),
     (0.997, 0.975, 0),
@@ -78,6 +80,14 @@ func crowFeatherTemplateGPUDeformationMatchesCPUReference() throws {
     commandBuffer.commit()
     commandBuffer.waitUntilCompleted()
     #expect(commandBuffer.status == .completed)
+    let selectedTemplateVertexCount =
+      projectedPixelsPerMeter >= 1_400
+      ? (48 * 8 * 6 + 24 * 6 + 20 * 2 * 6)
+      : (projectedPixelsPerMeter >= 1_050 ? (48 * 8 * 6 + 24 * 6) : 48 * 8 * 6)
+    #expect(
+      geometryDeformer.drawArguments(for: geometryFrame).vertexCount
+        == UInt32(asset.feathers.count * selectedTemplateVertexCount)
+    )
 
     let actual = geometryDeformer.vertices(for: geometryFrame)
     let expected = geometryDeformer.referenceVertices(
@@ -150,6 +160,32 @@ func crowFeatherTemplateGPUDeformationMatchesCPUReference() throws {
     roots: movingRoots,
     renderOffset: renderOffset,
     projectedPixelsPerMeter: 1_600
+  )
+  let rachisTierVertices = geometryDeformer.referenceVertices(
+    roots: movingRoots,
+    renderOffset: renderOffset,
+    projectedPixelsPerMeter: 1_200
+  )
+  let resolvedRachisTierDetail = rachisTierVertices.filter { vertex in
+    let featherClass = vertex.identity.w & 255
+    guard (featherClass == 1 || featherClass == 2) && vertex.parameters.w > 0.5,
+      let root = movingRoots.first(where: { $0.identity == vertex.identity })
+    else { return false }
+    let rootPosition = SIMD3<Float>(
+      root.currentPositionAndLength.x + renderOffset.x,
+      root.currentPositionAndLength.y + renderOffset.y,
+      root.currentPositionAndLength.z + renderOffset.z
+    )
+    let vertexPosition = SIMD3<Float>(
+      vertex.position.x,
+      vertex.position.y,
+      vertex.position.z
+    )
+    return simd_distance(vertexPosition, rootPosition) > 1e-7
+  }
+  #expect(resolvedRachisTierDetail.count == 42 * 24 * 6)
+  #expect(
+    resolvedRachisTierDetail.allSatisfy { abs($0.parameters.w - 1) < 1e-7 }
   )
   let resolvedRemexDetail = resolvedVertices.filter {
     let featherClass = $0.identity.w & 255

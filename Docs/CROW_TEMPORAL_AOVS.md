@@ -90,7 +90,7 @@ audit path and temporal scale:
   /tmp/crow.mp4 /tmp/crow.png standing /tmp/crow-aov-audit.json 2
 ```
 
-The schema-23 JSON report records format and coordinate conventions plus per-frame
+The schema-24 JSON report records format and coordinate conventions plus per-frame
 finite-pixel count, HDR values above one, exact active IDs, visible feather IDs,
 fully covered samples, unit-normal error, depth range, moving-pixel count,
 maximum motion, and bird/support vertical centroids. It also records exact
@@ -112,11 +112,11 @@ ordered class pair are retained, so one large projection cannot erase other
 anatomical owners. Wing-cell ownership additionally requires the scaffold's
 low-alpha material code, preventing the bare class-`11` pedal identity from
 aliasing the first left-wing cell. For the largest enclosed component, schema
-`23` also
+`24` also
 retains the sorted packed identities adjacent to its boundary. This resolves a
 gap directly to persistent class/side/order/count or live covert ownership
 without inferring the owner from color or a temporary debug render.
-Schema `23` records the body-vane immutable morphology count and bytes,
+Schema `24` records the body-vane immutable morphology count and bytes,
 Metal-selected morphology count and bytes, per-frame pose bytes, retained
 morphology/pose/indirect capacity, active topology-bin count, morphology-buffer
 allocations, raster invocations, and the
@@ -135,7 +135,7 @@ plumulaceous chains, contained beneath each resolved feather's unchanged vane.
 The initial `96`-byte segment store retains `39,777,408` bytes over three
 in-flight slots and grows to `154,484,352` bytes only for the future `480 px`
 topology.
-Schema `23` deliberately keeps the existing body-vane counters: rachis and
+Schema `24` deliberately keeps the existing body-vane counters: rachis and
 detail inherit their parent vane's stable identity, and the integer pass
 retains that underlying vane identity rather than issuing redundant subpixel
 fiber draws. Beauty ownership is nevertheless Metal-native. These storage and
@@ -146,7 +146,7 @@ At near-front standing yaw/pitch `(0.12, 0.16)`, distance `0.55 m`, and
 aperture in every frame. Minimum beauty SSIM is `0.999999`, with at most `11`
 pixel values changed in a frame. The underlayer carries the parent vane
 identity, so these fibers do not add an integer-identity draw.
-Schema `23` also records projected-size ventral-barb candidate,
+Schema `24` also records projected-size ventral-barb candidate,
 frustum-visible, prior-depth-tested, occlusion-culled, and retained record
 counts; logical triangle-stream vertex count; actual raster vertex invocations;
 materialized output-capacity bytes; generation mode; and max-depth hierarchy
@@ -200,7 +200,21 @@ topology-exact, has minimum SSIM `0.999305`, and becomes pixel-exact in frames
 `3...4`, proving the standing morphology does not leak into sustained flight.
 These records diagnose raster ownership and temporal release; they do not
 measure biological primary overlap.
-Schema `23` separately records projected-size barbule candidates,
+Schema `24` reserves the high byte of the persistent feather physics-part AOV
+channel for detail kind `0/1/2` (vane/rachis/barb). The stable anatomical census
+normalizes that byte away, while `persistentFeatherPrimitives` reports exact
+visible and fully covered pixels per feather and detail kind. At the existing
+opposite rear-quarter `1200 x 675` view, the former persistent LOD path emitted
+only vane ownership even though its `1,378 px/m` coverage belonged to the
+rachis tier. Restoring the middle tier exposes `355,357,355` visible and fully
+covered primary-rachis pixels over the three-frame loop. Hole pixels,
+components, largest component, and expected lower-body aperture remain exact;
+minimum beauty SSIM is `0.999819`. The GPU-selected prefix now draws only vane
+plus rachis work at this density and retains full barb geometry above the
+existing `1,400 px/m` threshold. This is projected geometry evidence, not a
+claim that the estimated shafts match a measured specimen.
+
+Schema `24` separately records projected-size barbule candidates,
 frustum-visible and retained detailed owners, procedural barbule vertex count,
 and the exact number of identity pixels won by geometry kind `4`. This
 distinguishes allocated work from raster contribution. The `800 px` handoff is

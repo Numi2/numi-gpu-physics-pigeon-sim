@@ -1145,6 +1145,23 @@ without an inflated plate or membrane. These gates establish deterministic
 simulated terminal ownership and raster continuity, not measured rectrix
 morphology or perceptual realism.
 
+The retained primary hierarchy now uses all three projected-coverage tiers in
+quiet stance and takeoff. Previously, the persistent path jumped directly from
+vane-only to full vane/rachis/barb geometry, leaving the intended middle rachis
+tier empty. At the already-audited opposite rear-quarter `1200 x 675` view
+`(-2.18, 0.18)` from `0.55 m`, schema-`24` records one visible primary rachis
+owner with `355,357,355` fully covered pixels. The stable primary census changes
+by only `+6,+5,+6` pixels as the rachis wins samples from its own vane; enclosed
+holes, components, largest component, and expected lower-body aperture are
+exact, with minimum beauty SSIM `0.999819`. A fresh front-quarter view
+`(0.94,-0.08)` from `0.56 m` records `37,36,37` primary-rachis pixels and a
+largest enclosed component of at most `5` pixels. Inspection found the shaft
+contained by folded vanes with no new tip, plate, or body-gap silhouette. The
+Metal indirect prefix selects vane plus rachis at this tier and retains full
+barbs for closer or higher-resolution coverage; the CPU/Metal parity gate locks
+all three counts. This qualifies simulated hierarchy and LOD ownership, not
+biological shaft dimensions or photorealism.
+
 The canonical README sequence is fully simulated and contains the native hold,
 transition, and flight path: `800 x 450`, `72` frames at `24 fps`, `8,015,883`
 bytes, SHA-256

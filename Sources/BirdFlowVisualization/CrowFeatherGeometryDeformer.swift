@@ -113,11 +113,9 @@ final class CrowFeatherGeometryDeformer {
     let indirectDraw = indirectDrawBuffers[slot]
     let indirectDispatch = indirectDispatchBuffers[slot]
     let detailTier: Float =
-      gpuSelectedDetailDensity
-      ? (projectedPixelsPerMeter >= Self.fullDetailPixelsPerMeter
-        ? 2
-        : (projectedPixelsPerMeter >= Self.rachisDetailPixelsPerMeter ? 1 : 0))
-      : (projectedPixelsPerMeter >= Self.fullDetailPixelsPerMeter ? 2 : 0)
+      projectedPixelsPerMeter >= Self.fullDetailPixelsPerMeter
+      ? 2
+      : (projectedPixelsPerMeter >= Self.rachisDetailPixelsPerMeter ? 1 : 0)
     var uniforms = CrowFeatherGeometryUniforms(
       counts: SIMD4<UInt32>(
         UInt32(featherCount),
