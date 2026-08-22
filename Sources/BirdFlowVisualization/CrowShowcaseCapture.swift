@@ -946,7 +946,8 @@ private final class CrowShowcaseRenderer {
         try CrowFeatherGeometryDeformer(
           backend: createdBackend,
           featherCount: $0.feathers.count,
-          gpuSelectedDetailDensity: true
+          gpuSelectedDetailDensity: true,
+          barbPairCount: CrowFeatherGeometryDeformer.retainedRemexBarbPairCount
         )
       }
       : nil

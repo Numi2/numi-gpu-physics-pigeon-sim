@@ -32,7 +32,8 @@ func crowFeatherTemplateGPUDeformationMatchesCPUReference() throws {
   let geometryDeformer = try CrowFeatherGeometryDeformer(
     backend: backend,
     featherCount: asset.feathers.count,
-    gpuSelectedDetailDensity: true
+    gpuSelectedDetailDensity: true,
+    barbPairCount: CrowFeatherGeometryDeformer.retainedRemexBarbPairCount
   )
 
   #expect(MemoryLayout<CrowFeatherTemplateVertexGPU>.stride == 16)
@@ -40,7 +41,9 @@ func crowFeatherTemplateGPUDeformationMatchesCPUReference() throws {
   #expect(MemoryLayout<CrowFeatherGeometryUniforms>.stride == 32)
   #expect(
     geometryDeformer.vertexCount
-      == 54 * (48 * 8 * 6 + 24 * 6 + 20 * 2 * 6)
+      == 54
+        * (48 * 8 * 6 + 24 * 6
+          + CrowFeatherGeometryDeformer.retainedRemexBarbPairCount * 2 * 6)
   )
 
   let body = surface.components.first { $0.partIdentifier == 1 }!
@@ -82,7 +85,8 @@ func crowFeatherTemplateGPUDeformationMatchesCPUReference() throws {
     #expect(commandBuffer.status == .completed)
     let selectedTemplateVertexCount =
       projectedPixelsPerMeter >= 1_400
-      ? (48 * 8 * 6 + 24 * 6 + 20 * 2 * 6)
+      ? (48 * 8 * 6 + 24 * 6
+        + CrowFeatherGeometryDeformer.retainedRemexBarbPairCount * 2 * 6)
       : (projectedPixelsPerMeter >= 1_050 ? (48 * 8 * 6 + 24 * 6) : 48 * 8 * 6)
     #expect(
       geometryDeformer.drawArguments(for: geometryFrame).vertexCount
@@ -191,7 +195,12 @@ func crowFeatherTemplateGPUDeformationMatchesCPUReference() throws {
     let featherClass = $0.identity.w & 255
     return (featherClass == 1 || featherClass == 2) && $0.parameters.w > 0.5
   }
-  #expect(resolvedRemexDetail.count == 42 * (24 * 6 + 20 * 2 * 6))
+  #expect(
+    resolvedRemexDetail.count
+      == 42
+        * (24 * 6
+          + CrowFeatherGeometryDeformer.retainedRemexBarbPairCount * 2 * 6)
+  )
   #expect(resolvedRemexDetail.contains { abs($0.parameters.w - 1) < 1e-7 })
   #expect(resolvedRemexDetail.contains { abs($0.parameters.w - 2) < 1e-7 })
   let firstResolvedRachis = resolvedRemexDetail.filter {
@@ -208,7 +217,10 @@ func crowFeatherTemplateGPUDeformationMatchesCPUReference() throws {
   let resolvedRectrixBarbs = resolvedVertices.filter {
     ($0.identity.w & 255) == 3 && abs($0.parameters.w - 2) < 1e-7
   }
-  #expect(resolvedRectrixBarbs.count == 12 * (20 * 2 * 6))
+  #expect(
+    resolvedRectrixBarbs.count
+      == 12 * (CrowFeatherGeometryDeformer.aggregateBarbPairCount * 2 * 6)
+  )
   #expect(
     resolvedRectrixBarbs.allSatisfy {
       $0.parameters.x >= 0.10 && $0.parameters.x <= 0.95 + 1e-6

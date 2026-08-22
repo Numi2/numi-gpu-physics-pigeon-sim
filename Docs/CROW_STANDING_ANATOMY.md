@@ -1162,6 +1162,25 @@ barbs for closer or higher-resolution coverage; the CPU/Metal parity gate locks
 all three counts. This qualifies simulated hierarchy and LOD ownership, not
 biological shaft dimensions or photorealism.
 
+The full projected-detail tier now interlaces `28` additional aggregate barb
+pairs into each retained primary and secondary, increasing those remiges from
+`20` to `48` pairs without changing the established `20`-pair rectrix or live
+covert contracts. Supplemental ribbons terminate by axial fraction `0.95` and
+normalized vane width `0.94`; rectrix supplements collapse at their root and
+retain exact class-`3` AOV ownership. At the existing rear-high `1280 x 720`
+gate `(2.45,0.30)` from `0.50 m`, visible remex-barb pixels rise from
+`115...160` to `291...339` over the five-frame standing loop and from
+`47,47,3` to `125,118,4` over the retained early-takeoff frames. Every
+hole/component/largest-hole/aperture field and every rectrix primitive census
+is exact. Standing minimum beauty SSIM is `0.999954`; early takeoff is
+`0.999978`, and takeoff frames `2...4` are pixel-exact. A fresh dorsal
+port-quarter view `(-1.36,0.24)` from `0.48 m` records `74,76,74` remex-barb
+pixels and a largest enclosed background component of at most `4` pixels.
+Inspection confirms subtle contained vane breakup, while also exposing a
+pre-existing bright wing-scaffold patch beneath the covert field; that surface
+handoff remains a separate body-gap target. The extra pairs are aggregate
+render proxies, not measured American-crow barb counts.
+
 The canonical README sequence is fully simulated and contains the native hold,
 transition, and flight path: `800 x 450`, `72` frames at `24 fps`, `8,015,883`
 bytes, SHA-256

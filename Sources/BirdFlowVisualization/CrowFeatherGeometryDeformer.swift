@@ -38,7 +38,10 @@ final class CrowFeatherGeometryDeformer {
   private static let sectionCount = 48
   private static let widthSectionCount = 8
   private static let rachisSectionCount = 24
-  private static let barbPairCount = 20
+  static let aggregateBarbPairCount = 20
+  /// Full-detail primaries and secondaries add a second interlaced aggregate
+  /// set. Rectrices and live coverts retain the established 20-pair contract.
+  static let retainedRemexBarbPairCount = 48
   private static let rachisDetailPixelsPerMeter: Float = 1_050
   private static let fullDetailPixelsPerMeter: Float = 1_400
 
@@ -46,6 +49,7 @@ final class CrowFeatherGeometryDeformer {
     case vane = 0
     case rachis = 1
     case barb = 2
+    case remexBarbSupplement = 3
   }
 
   private let backend: VisualizationBackend
@@ -70,14 +74,16 @@ final class CrowFeatherGeometryDeformer {
   init(
     backend: VisualizationBackend,
     featherCount: Int,
-    gpuSelectedDetailDensity: Bool = false
+    gpuSelectedDetailDensity: Bool = false,
+    barbPairCount: Int = CrowFeatherGeometryDeformer.aggregateBarbPairCount
   ) throws {
+    precondition(barbPairCount >= Self.aggregateBarbPairCount)
     self.backend = backend
     self.featherCount = featherCount
     self.gpuSelectedDetailDensity = gpuSelectedDetailDensity
     indirectPipeline = try backend.compute("prepareCrowFeatherIndirectWork")
     pipeline = try backend.compute("deformCrowFeatherTemplates")
-    templateVertices = Self.makeTemplateVertices()
+    templateVertices = Self.makeTemplateVertices(barbPairCount: barbPairCount)
     templateBuffer = try Self.sharedBuffer(
       values: templateVertices,
       backend: backend
@@ -246,6 +252,9 @@ final class CrowFeatherGeometryDeformer {
         let axial = template.parameters.x
         let signedWidth = template.parameters.y
         let detailKind = template.parameters.z
+        let geometryDetailKind =
+          detailKind == TemplateKind.remexBarbSupplement.rawValue
+          ? TemplateKind.barb.rawValue : detailKind
         let ribbonSide = template.parameters.w
         let currentDirection = Self.xyz(root.currentDirectionAndRachis)
         let previousDirection = Self.xyz(root.previousDirectionAndCamber)
@@ -263,7 +272,9 @@ final class CrowFeatherGeometryDeformer {
         let isUnderwingCovert = featherClass == 12 || featherClass == 13
         let isLiveCovert = CrowCovertVaneAnatomy.isLiveCovertClass(featherClass)
         let isRectrixBarb =
-          featherClass == 3 && detailKind == TemplateKind.barb.rawValue
+          featherClass == 3 && geometryDetailKind == TemplateKind.barb.rawValue
+        let isRemexBarbSupplement =
+          detailKind == TemplateKind.remexBarbSupplement.rawValue
         let temporallyVariableMorphology = isLiveCovert
         let material: Float =
           featherClass == 1
@@ -277,9 +288,11 @@ final class CrowFeatherGeometryDeformer {
         let previousRoot = Self.xyz(root.previousPositionAndWidth)
         let detailEnabled =
           detailKind == TemplateKind.vane.rawValue
-          || (detailScale >= detailKind
-            && (featherClass == 1 || featherClass == 2 || isLiveCovert
-              || isRectrixBarb))
+          || (detailScale >= geometryDetailKind
+            && (isRemexBarbSupplement
+              ? (featherClass == 1 || featherClass == 2)
+              : (featherClass == 1 || featherClass == 2 || isLiveCovert
+                || isRectrixBarb)))
         let currentPosition =
           detailEnabled
           ? Self.detailPosition(
@@ -292,7 +305,7 @@ final class CrowFeatherGeometryDeformer {
             rachisRadiusMeters: root.currentDirectionAndRachis.w,
             axial: axial,
             signedWidth: signedWidth,
-            detailKind: detailKind,
+            detailKind: geometryDetailKind,
             ribbonSide: ribbonSide,
             packedIdentity: packedIdentity
           )
@@ -313,7 +326,7 @@ final class CrowFeatherGeometryDeformer {
               ? previousRachisRadiusMeters : root.currentDirectionAndRachis.w,
             axial: axial,
             signedWidth: signedWidth,
-            detailKind: detailKind,
+            detailKind: geometryDetailKind,
             ribbonSide: ribbonSide,
             packedIdentity: packedIdentity
           )
@@ -328,15 +341,15 @@ final class CrowFeatherGeometryDeformer {
             camberMeters: camberMeters,
             axial: axial,
             signedWidth: signedWidth,
-            detailKind: detailKind,
+            detailKind: geometryDetailKind,
             ribbonSide: ribbonSide,
             packedIdentity: packedIdentity
           )
           : currentNormal
         let detailShadeScale: Float =
-          detailKind == TemplateKind.rachis.rawValue
+          geometryDetailKind == TemplateKind.rachis.rawValue
           ? 1.18
-          : (detailKind == TemplateKind.barb.rawValue ? 1.08 : 1)
+          : (geometryDetailKind == TemplateKind.barb.rawValue ? 1.08 : 1)
         let greenScale: Float = isUnderwingCovert ? 1.45 : 1.28
         let blueScale: Float = isUnderwingCovert ? 2.55 : 1.72
         return CrowFeatherVertexGPU(
@@ -363,7 +376,7 @@ final class CrowFeatherGeometryDeformer {
             ),
             signedWidth,
             Float(featherClass),
-            detailKind
+            detailEnabled ? geometryDetailKind : detailKind
           )
         )
       }
@@ -380,7 +393,9 @@ final class CrowFeatherGeometryDeformer {
     return triangleMajor
   }
 
-  private static func makeTemplateVertices() -> [CrowFeatherTemplateVertexGPU] {
+  private static func makeTemplateVertices(
+    barbPairCount: Int
+  ) -> [CrowFeatherTemplateVertexGPU] {
     var result: [CrowFeatherTemplateVertexGPU] = []
     result.reserveCapacity(
       sectionCount * widthSectionCount * 6
@@ -419,18 +434,30 @@ final class CrowFeatherGeometryDeformer {
         to: &result
       )
     }
-    for pair in 0..<barbPairCount {
-      let fraction = Float(pair + 1) / Float(barbPairCount + 1)
+    func appendBarbPair(fraction: Float, kind: TemplateKind) {
       let firstAxial = 0.10 + 0.76 * fraction
       let secondAxial = min(0.95, firstAxial + 0.045 + 0.020 * fraction)
       for side: Float in [-1, 1] {
         appendRibbon(
           first: SIMD2<Float>(firstAxial, side * 0.025),
           second: SIMD2<Float>(secondAxial, side * 0.94),
-          kind: .barb,
+          kind: kind,
           to: &result
         )
       }
+    }
+    for pair in 0..<aggregateBarbPairCount {
+      appendBarbPair(
+        fraction: Float(pair + 1) / Float(aggregateBarbPairCount + 1),
+        kind: .barb
+      )
+    }
+    let supplementCount = barbPairCount - aggregateBarbPairCount
+    for pair in 0..<supplementCount {
+      appendBarbPair(
+        fraction: Float(pair + 1) / Float(supplementCount + 1),
+        kind: .remexBarbSupplement
+      )
     }
     return result
   }

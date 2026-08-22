@@ -1547,6 +1547,8 @@ kernel void deformCrowFeatherTemplates(
         :outputIndex-featherIndex*templateVertexCount;
     CrowFeatherRootStateGPU root=roots[featherIndex];
     float4 parameter=templateVertices[templateIndex].parameters;
+    bool isRemexBarbSupplement=parameter.z>2.5f;
+    float geometryDetailKind=isRemexBarbSupplement?2.0f:parameter.z;
     float3 currentDirection=root.currentDirectionAndRachis.xyz;
     float3 previousDirection=root.previousDirectionAndCamber.xyz;
     float3 currentNormal=root.currentNormalAndPadding.xyz;
@@ -1562,18 +1564,20 @@ kernel void deformCrowFeatherTemplates(
     uint featherClass=packedIdentity&255u;
     bool isUnderwingCovert=featherClass==12u||featherClass==13u;
     bool isLiveCovert=crowIsLiveCovert(featherClass);
-    bool isRectrixBarb=featherClass==3u&&parameter.z>1.5f;
+    bool isRectrixBarb=featherClass==3u&&geometryDetailKind>1.5f;
     bool temporallyVariableMorphology=isLiveCovert;
     bool detailEnabled=parameter.z<0.5f
-        ||(uniforms.renderOffsetAndDetailScale.w>=parameter.z
-            &&(featherClass==1u||featherClass==2u||isLiveCovert
-                ||isRectrixBarb));
+        ||(uniforms.renderOffsetAndDetailScale.w>=geometryDetailKind
+            &&(isRemexBarbSupplement
+                ?(featherClass==1u||featherClass==2u)
+                :(featherClass==1u||featherClass==2u||isLiveCovert
+                    ||isRectrixBarb)));
     float3 current=detailEnabled
         ?crowFeatherDetailPosition(
             root.currentPositionAndLength.xyz,currentDirection,currentNormal,
             lengthMeters,maximumWidthMeters,camberMeters,
             root.currentDirectionAndRachis.w,parameter.x,parameter.y,
-            parameter.z,parameter.w,packedIdentity
+            geometryDetailKind,parameter.w,packedIdentity
         )
         :root.currentPositionAndLength.xyz;
     float3 previous=detailEnabled
@@ -1586,7 +1590,7 @@ kernel void deformCrowFeatherTemplates(
             temporallyVariableMorphology
                 ?previousRachisRadiusMeters:root.currentDirectionAndRachis.w,
             parameter.x,parameter.y,
-            parameter.z,parameter.w,packedIdentity
+            geometryDetailKind,parameter.w,packedIdentity
         )
         :root.previousPositionAndWidth.xyz;
     current+=uniforms.renderOffsetAndDetailScale.xyz;
@@ -1594,7 +1598,7 @@ kernel void deformCrowFeatherTemplates(
     float3 deformedNormal=detailEnabled
         ?crowFeatherDetailNormal(
             currentDirection,currentNormal,lengthMeters,maximumWidthMeters,
-            camberMeters,parameter.x,parameter.y,parameter.z,parameter.w,
+            camberMeters,parameter.x,parameter.y,geometryDetailKind,parameter.w,
             packedIdentity
         ):currentNormal;
     float material=featherClass==1u?0.25f:
@@ -1604,8 +1608,8 @@ kernel void deformCrowFeatherTemplates(
         :0.0075f+0.00045f*float(root.identity.x%11u);
     float greenScale=isUnderwingCovert?1.45f:1.28f;
     float blueScale=isUnderwingCovert?2.55f:1.72f;
-    float detailShadeScale=parameter.z>0.5f
-        ?(parameter.z<1.5f?1.18f:1.08f):1.0f;
+    float detailShadeScale=geometryDetailKind>0.5f
+        ?(geometryDetailKind<1.5f?1.18f:1.08f):1.0f;
     CrowFeatherVertexGPU result;
     result.position=float4(current,1);
     result.normal=float4(deformedNormal,0);
@@ -1617,7 +1621,7 @@ kernel void deformCrowFeatherTemplates(
     result.identity=root.identity;
     result.parameters=float4(
         crowTrailingCovertGlobalAxial(featherClass,parameter.x),
-        parameter.y,float(featherClass),parameter.z
+        parameter.y,float(featherClass),detailEnabled?geometryDetailKind:parameter.z
     );
     output[outputIndex]=result;
 }

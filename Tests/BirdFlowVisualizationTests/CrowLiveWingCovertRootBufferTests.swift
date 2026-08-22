@@ -130,7 +130,9 @@ func liveUnderwingCovertGeometryMatchesMetal() throws {
   )
   #expect(
     actual.count
-      == covertRoots.featherCount * (48 * 8 * 6 + 24 * 6 + 20 * 2 * 6)
+      == covertRoots.featherCount
+        * (48 * 8 * 6 + 24 * 6
+          + CrowFeatherGeometryDeformer.aggregateBarbPairCount * 2 * 6)
   )
   #expect(actual.count == expected.count)
   var maximumPositionDifference: Float = 0
@@ -193,7 +195,8 @@ func liveCovertGPUSelectsCompleteIndirectDetailPrefixes() throws {
     (
       pixelsPerMeter: Float(1_600),
       vertexCount: covertRoots.featherCount
-        * (48 * 8 * 6 + 24 * 6 + 20 * 2 * 6)
+        * (48 * 8 * 6 + 24 * 6
+          + CrowFeatherGeometryDeformer.aggregateBarbPairCount * 2 * 6)
     ),
   ]
 

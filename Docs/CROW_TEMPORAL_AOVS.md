@@ -214,6 +214,17 @@ plus rachis work at this density and retains full barb geometry above the
 existing `1,400 px/m` threshold. This is projected geometry evidence, not a
 claim that the estimated shafts match a measured specimen.
 
+The same primitive ledger qualifies the first denser-remex full tier without
+changing the rectrix or live-covert templates. Twenty established barb pairs
+remain shared; primaries and secondaries alone resolve `28` interlaced
+supplemental pairs as kind `2` ownership. At rear-high `1280 x 720`, standing
+remex-barb ownership rises from `115...160` to `291...339` pixels and early
+takeoff from `47,47,3` to `125,118,4`. The complete hole/aperture series and
+class-`3` primitive arrays remain exact. Beauty minimum SSIM is `0.999954` for
+standing and `0.999978` for the changed early-takeoff frames; frames `2...4`
+of takeoff are pixel-exact. This proves contained projected contribution and
+phase-bounded release, not biological barb density or a performance result.
+
 Schema `24` separately records projected-size barbule candidates,
 frustum-visible and retained detailed owners, procedural barbule vertex count,
 and the exact number of identity pixels won by geometry kind `4`. This
