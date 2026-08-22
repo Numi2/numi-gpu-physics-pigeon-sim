@@ -8,7 +8,7 @@ import simd
 func bodyVanesRetainCompactIdentityStableTemporalRecords() {
   #expect(MemoryLayout<CrowBodyVaneMorphologyGPU>.stride == 128)
   #expect(MemoryLayout<CrowBodyVaneRecordGPU>.stride == 176)
-  #expect(MemoryLayout<CrowBodyVanePoseUniforms>.stride == 32)
+  #expect(MemoryLayout<CrowBodyVanePoseUniforms>.stride == 128)
   #expect(MemoryLayout<CrowBodyVaneNeckTransformGPU>.stride == 48)
   #expect(MemoryLayout<CrowBodyVaneGeometryUniforms>.stride == 32)
   #expect(MemoryLayout<CrowBodyVaneSelectionUniforms>.stride == 32)
@@ -37,26 +37,26 @@ func bodyVanesRetainCompactIdentityStableTemporalRecords() {
   #expect(Set(records.map(\.identity)).count == records.count)
   #expect(first.keys.allSatisfy { $0.widthSections == 1 || $0.widthSections >= 5 })
   #expect(first.keys.allSatisfy { $0.verticesPerInstance > 0 })
-  #expect(CrowBodyVaneRecords.productionTopologies.count == 10)
+  #expect(CrowBodyVaneRecords.productionTopologies.count == 11)
   #expect(
     CrowBodyVaneRecords.productionTopologies.map {
       CrowBodyVaneRecords.rachisSections(for: $0)
-    } == [0, 0, 4, 4, 8, 8, 12, 4, 8, 4]
+    } == [0, 0, 4, 4, 8, 8, 12, 4, 8, 4, 4]
   )
   #expect(
     CrowBodyVaneRecords.productionTopologies.map {
       CrowBodyVaneRecords.rachisVerticesPerInstance(for: $0)
-    } == [0, 0, 96, 96, 192, 192, 288, 96, 192, 96]
+    } == [0, 0, 96, 96, 192, 192, 288, 96, 192, 96, 96]
   )
   #expect(
     CrowBodyVaneRecords.productionTopologies.map {
       CrowBodyVaneRecords.detailSegmentCount(for: $0)
-    } == [0, 0, 43, 43, 41, 41, 167, 43, 41, 43]
+    } == [0, 0, 43, 43, 41, 41, 167, 43, 41, 43, 43]
   )
   #expect(
     CrowBodyVaneRecords.productionTopologies.map {
       CrowBodyVaneRecords.detailVerticesPerInstance(for: $0)
-    } == [0, 0, 774, 774, 738, 738, 3_006, 774, 738, 774]
+    } == [0, 0, 774, 774, 738, 738, 3_006, 774, 738, 774, 774]
   )
   let morphology = CrowBodyVaneRecords.morphologyRecords()
   #expect(morphology.count == 3_212)
@@ -80,8 +80,8 @@ func bodyVanesRetainCompactIdentityStableTemporalRecords() {
     }
   )
   let retainedMorphology = CrowBodyVaneRecords.retainedMorphologyRecords()
-  #expect(retainedMorphology.count == 5_468)
-  #expect(Set(retainedMorphology.map(\.identity)).count == 5_468)
+  #expect(retainedMorphology.count == 6_179)
+  #expect(Set(retainedMorphology.map(\.identity)).count == 6_179)
   let inactiveLimbRecords = CrowBodyVaneRecords.retainedTemporalRecords(
     currentBodyCenter: .zero,
     previousBodyCenter: .zero,
@@ -114,6 +114,14 @@ func bodyVanesRetainCompactIdentityStableTemporalRecords() {
   #expect(
     throatMorphology.allSatisfy {
       ($0.identity.x & 0xFF00_0000) == 0x0600_0000
+    }
+  )
+  let cranialMorphology = CrowBodyVaneRecords.cranialMorphologyRecords()
+  #expect(cranialMorphology.count == 711)
+  #expect(Set(cranialMorphology.map(\.identity)).count == 711)
+  #expect(
+    cranialMorphology.allSatisfy {
+      ($0.identity.x & 0xFF00_0000) == 0x0700_0000
     }
   )
 }
@@ -318,21 +326,29 @@ func metalProceduralBodyVanesMatchSwiftGeometryOracle() throws {
   let previousFemoralPose = CrowFemoralVanePoseSample(
     CrowStandingPose.sample(phase: 0.31)
   )
+  let currentNeckPose = CrowStandingNeckPose(
+    translation: SIMD3<Float>(0.001, -0.002, 0.0015),
+    yawRadians: 0.018,
+    pitchRadians: -0.013,
+    rollRadians: 0.006
+  )
+  let previousNeckPose = CrowStandingNeckPose(
+    translation: SIMD3<Float>(-0.0005, 0.001, -0.0007),
+    yawRadians: -0.011,
+    pitchRadians: 0.009,
+    rollRadians: -0.004
+  )
+  let cranialRadii = SIMD3<Float>(0.0447, 0.0328, 0.0387)
+  let currentCranialBreathing: Float = 1.009
+  let previousCranialBreathing: Float = 0.994
   let frame = try deformer.encode(
     currentBodyCenter: currentFemoralPose.bodyCenter,
     previousBodyCenter: previousFemoralPose.bodyCenter,
-    currentNeckPose: CrowStandingNeckPose(
-      translation: SIMD3<Float>(0.001, -0.002, 0.0015),
-      yawRadians: 0.018,
-      pitchRadians: -0.013,
-      rollRadians: 0.006
-    ),
-    previousNeckPose: CrowStandingNeckPose(
-      translation: SIMD3<Float>(-0.0005, 0.001, -0.0007),
-      yawRadians: -0.011,
-      pitchRadians: 0.009,
-      rollRadians: -0.004
-    ),
+    currentNeckPose: currentNeckPose,
+    previousNeckPose: previousNeckPose,
+    cranialRadii: cranialRadii,
+    currentCranialBreathingScale: currentCranialBreathing,
+    previousCranialBreathingScale: previousCranialBreathing,
     currentFemoralPose: currentFemoralPose,
     previousFemoralPose: previousFemoralPose,
     currentDeployment: 1,
@@ -345,14 +361,27 @@ func metalProceduralBodyVanesMatchSwiftGeometryOracle() throws {
   commandBuffer.waitUntilCompleted()
   #expect(commandBuffer.status == .completed)
   #expect(frame.auditReadbackReady)
-  #expect(frame.morphologyRecordCount == 5_468)
-  #expect(deformer.activeRecordCount(for: frame) == 5_468)
+  #expect(frame.morphologyRecordCount == 6_179)
+  #expect(deformer.activeRecordCount(for: frame) == 6_179)
   #expect(deformer.activeFemoralRecordCount(for: frame) == 540)
   #expect(deformer.expandedFemoralVertexCount(for: frame) == 68_040)
   #expect(deformer.activeCruralRecordCount(for: frame) == 324)
   #expect(deformer.expandedCruralVertexCount(for: frame) == 46_656)
   #expect(deformer.activeThroatBridgeRecordCount(for: frame) == 88)
   #expect(deformer.expandedThroatBridgeVertexCount(for: frame) == 11_088)
+  #expect(deformer.activeCranialRecordCount(for: frame) == 711)
+  let expectedCranialVertexCount = CrowCranialFeatherTracts.morphologySamples()
+    .reduce(0) { partial, sample in
+      let tessellation = CrowFeatherCoverageLOD.tessellation(
+        lengthMeters: CrowCranialFeatherTracts.lodReferenceLengthMeters(for: sample),
+        projectedPixelsPerMeter: 1_600,
+        baseAxialSections: sample.region == .nape ? 6 : 5
+      )
+      return partial
+        + tessellation.axialSections * tessellation.widthSections * 6
+    }
+  #expect(expectedCranialVertexCount == 35_568)
+  #expect(deformer.expandedCranialVertexCount(for: frame) == expectedCranialVertexCount)
   #expect(deformer.expandedVertexCount(for: frame) > 0)
 
   for batch in frame.batches where batch.auditRecordCount > 0 {
@@ -364,6 +393,7 @@ func metalProceduralBodyVanesMatchSwiftGeometryOracle() throws {
       records.firstIndex { Int($0.morphology.y) == 0 } ?? 0,
     ]) {
       let record = records[recordIndex]
+      if (record.identity.x & 0xFF00_0000) == 0x0700_0000 { continue }
       let interestingVertices = Set([
         0,
         batch.vertexCount / 2,
@@ -400,6 +430,77 @@ func metalProceduralBodyVanesMatchSwiftGeometryOracle() throws {
         // The terminal chord is deliberately narrow; fast-math normalization
         // remains within 0.06 degrees of the FP32 Swift oracle there.
         #expect(simd_distance(gpu.normal.xyz, normal) < 1e-3)
+        #expect(gpu.identity == record.identity)
+        #expect(gpu.color == record.color)
+      }
+    }
+    if let cranialRecordIndex = records.firstIndex(where: {
+      ($0.identity.x & 0xFF00_0000) == 0x0700_0000
+    }) {
+      let record = records[cranialRecordIndex]
+      let inventoryIndex = Int(record.identity.x & 0x00FF_FFFF)
+      let morphology = CrowCranialFeatherTracts.morphologySamples()[inventoryIndex]
+      let currentSample = CrowCranialFeatherTracts.feather(
+        morphology: morphology,
+        center: currentFemoralPose.bodyCenter
+          + CrowCranialAnatomy.showcaseCenterOffsetMeters,
+        radii: cranialRadii,
+        breathingScale: currentCranialBreathing
+      )
+      let previousSample = CrowCranialFeatherTracts.feather(
+        morphology: morphology,
+        center: previousFemoralPose.bodyCenter
+          + CrowCranialAnatomy.showcaseCenterOffsetMeters,
+        radii: cranialRadii,
+        breathingScale: previousCranialBreathing
+      )
+      for localVertex in Set([
+        0,
+        batch.vertexCount / 2,
+        max(0, batch.vertexCount - 1),
+      ]) {
+        let grid = CrowBodyVaneRecords.decodedVertex(
+          localVertex,
+          topology: batch.topology
+        )
+        let sourceCurrent = cranialBladePoint(
+          sample: currentSample,
+          topology: batch.topology,
+          axialIndex: grid.axial,
+          widthIndex: grid.width
+        )
+        let sourcePrevious = cranialBladePoint(
+          sample: previousSample,
+          topology: batch.topology,
+          axialIndex: grid.axial,
+          widthIndex: grid.width
+        )
+        let expectedCurrent = CrowHeadNeckBlend.position(
+          sourceCurrent,
+          bodyCenter: currentFemoralPose.bodyCenter,
+          neckPose: currentNeckPose
+        )
+        let expectedPrevious = CrowHeadNeckBlend.position(
+          sourcePrevious,
+          bodyCenter: previousFemoralPose.bodyCenter,
+          neckPose: previousNeckPose
+        )
+        let sourceNormal = cranialBladeNormal(
+          sample: currentSample,
+          topology: batch.topology,
+          axialIndex: grid.axial,
+          widthIndex: grid.width
+        )
+        let expectedNormal = CrowHeadNeckBlend.normal(
+          sourceNormal,
+          position: sourceCurrent,
+          bodyCenter: currentFemoralPose.bodyCenter,
+          neckPose: currentNeckPose
+        )
+        let gpu = vertices[cranialRecordIndex * batch.vertexCount + localVertex]
+        #expect(simd_distance(gpu.position.xyz, expectedCurrent) < 2e-6)
+        #expect(simd_distance(gpu.previousPosition.xyz, expectedPrevious) < 2e-6)
+        #expect(simd_distance(gpu.normal.xyz, expectedNormal) < 1e-3)
         #expect(gpu.identity == record.identity)
         #expect(gpu.color == record.color)
       }
@@ -497,7 +598,7 @@ func bodyVaneProductionStorageIsTripleBufferedAndIndirect() throws {
   #expect(batchCount == CrowBodyVaneRecords.productionTopologies.count)
   #expect(frames.map(\.slot) == [0, 1, 2, 0])
   #expect(frames.map(\.morphologyBufferAllocationCount) == [1, 1, 1, 1])
-  #expect(frames.allSatisfy { $0.morphologyRecordCount == 5_468 })
+  #expect(frames.allSatisfy { $0.morphologyRecordCount == 6_179 })
   #expect(
     frames.allSatisfy {
       $0.morphologyRecordBytes == $0.morphologyRecordCount
@@ -509,9 +610,9 @@ func bodyVaneProductionStorageIsTripleBufferedAndIndirect() throws {
       $0.morphologyCapacityBytes == $0.morphologyRecordBytes
     }
   )
-  #expect(frames.allSatisfy { $0.poseInputBytes == 1_888 })
-  #expect(frames.allSatisfy { $0.retainedPoseCapacityBytes == 5_664 })
-  #expect(deformer.retainedIndirectDrawBytes == 1_440)
+  #expect(frames.allSatisfy { $0.poseInputBytes == 1_984 })
+  #expect(frames.allSatisfy { $0.retainedPoseCapacityBytes == 5_952 })
+  #expect(deformer.retainedIndirectDrawBytes == 1_584)
   #expect(
     frames.allSatisfy {
       $0.retainedDetailSegmentCapacityBytes
@@ -554,7 +655,7 @@ func bodyVaneProductionStorageIsTripleBufferedAndIndirect() throws {
   }
 }
 
-@Test("Metal retained-family mask separates femoral crural and throat ownership")
+@Test("Metal retained-family mask separates femoral crural throat and cranial ownership")
 func metalRetainedFamilyMaskSeparatesIndependentOwners() throws {
   guard let device = MTLCreateSystemDefaultDevice() else { return }
   let backend = try VisualizationBackend(device: device)
@@ -569,6 +670,9 @@ func metalRetainedFamilyMaskSeparatesIndependentOwners() throws {
       previousBodyCenter: pose.bodyCenter,
       currentNeckPose: standingPose.neckPose,
       previousNeckPose: standingPose.neckPose,
+      cranialRadii: SIMD3<Float>(0.0447, 0.0328, 0.0387),
+      currentCranialBreathingScale: 1.006,
+      previousCranialBreathingScale: 0.997,
       currentFemoralPose: pose,
       previousFemoralPose: pose,
       retainedFamilyMask: mask,
@@ -595,6 +699,12 @@ func metalRetainedFamilyMaskSeparatesIndependentOwners() throws {
   #expect(deformer.activeFemoralRecordCount(for: throatOnly) == 0)
   #expect(deformer.activeCruralRecordCount(for: throatOnly) == 0)
   #expect(deformer.activeThroatBridgeRecordCount(for: throatOnly) == 88)
+  #expect(deformer.activeCranialRecordCount(for: throatOnly) == 0)
+  let cranialOnly = try frame(mask: 0x8)
+  #expect(deformer.activeFemoralRecordCount(for: cranialOnly) == 0)
+  #expect(deformer.activeCruralRecordCount(for: cranialOnly) == 0)
+  #expect(deformer.activeThroatBridgeRecordCount(for: cranialOnly) == 0)
+  #expect(deformer.activeCranialRecordCount(for: cranialOnly) == 711)
 }
 
 @Test("Metal body vane LOD selection matches the deterministic CPU oracle")
@@ -608,12 +718,16 @@ func metalBodyVaneLODSelectionMatchesCPUOracle() throws {
   let previousLimbPose = CrowFemoralVanePoseSample(
     CrowStandingPose.sample(phase: 0.35)
   )
+  let cranialRadii = SIMD3<Float>(0.0447, 0.0328, 0.0387)
   for projectedPixelsPerMeter: Float in [800, 1_000, 1_600, 4_000, 20_000] {
     let allRecords = CrowBodyVaneRecords.retainedTemporalRecords(
       currentBodyCenter: .zero,
       previousBodyCenter: .zero,
       currentNeckPose: nil,
       previousNeckPose: nil,
+      cranialRadii: cranialRadii,
+      currentCranialBreathingScale: 1.01,
+      previousCranialBreathingScale: 0.99,
       currentFemoralPose: currentLimbPose,
       previousFemoralPose: previousLimbPose,
       currentDeployment: 1,
@@ -624,6 +738,9 @@ func metalBodyVaneLODSelectionMatchesCPUOracle() throws {
       previousBodyCenter: .zero,
       currentNeckPose: nil,
       previousNeckPose: nil,
+      cranialRadii: cranialRadii,
+      currentCranialBreathingScale: 1.01,
+      previousCranialBreathingScale: 0.99,
       currentFemoralPose: currentLimbPose,
       previousFemoralPose: previousLimbPose,
       currentDeployment: 1,
@@ -636,6 +753,9 @@ func metalBodyVaneLODSelectionMatchesCPUOracle() throws {
       previousBodyCenter: .zero,
       currentNeckPose: nil,
       previousNeckPose: nil,
+      cranialRadii: cranialRadii,
+      currentCranialBreathingScale: 1.01,
+      previousCranialBreathingScale: 0.99,
       currentFemoralPose: currentLimbPose,
       previousFemoralPose: previousLimbPose,
       currentDeployment: 1,
@@ -680,6 +800,87 @@ func metalBodyVaneLODSelectionMatchesCPUOracle() throws {
       )
     }
   }
+}
+
+private func cranialBladePoint(
+  sample: CrowCranialFeatherSample,
+  topology: CrowBodyVaneTopology,
+  axialIndex: Int,
+  widthIndex: Int
+) -> SIMD3<Float> {
+  let t = Float(axialIndex) / Float(topology.axialSections)
+  let direction = normalizedTest(
+    sample.tip - sample.root,
+    fallback: SIMD3<Float>(1, 0, 0)
+  )
+  let normal = normalizedTest(
+    sample.planeNormal,
+    fallback: SIMD3<Float>(0, 0, 1)
+  )
+  let widthAxis = normalizedTest(
+    simd_cross(normal, direction),
+    fallback: SIMD3<Float>(0, 1, 0)
+  )
+  let bodyEnvelope = 0.32 + 0.68 * pow(max(sin(.pi * t), 0), 0.58)
+  let tipTaper = 1 - 0.985 * pow(t, 3.2)
+  let width = (
+    sample.rootWidthMeters * (1 - t) + sample.maximumWidthMeters * t
+  ) * bodyEnvelope * tipTaper
+  let center = sample.root + (sample.tip - sample.root) * t
+    + normal * (sample.camberMeters * sin(.pi * t))
+  let signedWidth = 2 * Float(widthIndex) / Float(topology.widthSections) - 1
+  return center + widthAxis * (signedWidth * width)
+    + normal * (width * 0.18 * max(0, 1 - signedWidth * signedWidth))
+}
+
+private func cranialBladeNormal(
+  sample: CrowCranialFeatherSample,
+  topology: CrowBodyVaneTopology,
+  axialIndex: Int,
+  widthIndex: Int
+) -> SIMD3<Float> {
+  let axialFirst = cranialBladePoint(
+    sample: sample,
+    topology: topology,
+    axialIndex: max(0, axialIndex - 1),
+    widthIndex: widthIndex
+  )
+  let axialSecond = cranialBladePoint(
+    sample: sample,
+    topology: topology,
+    axialIndex: min(topology.axialSections, axialIndex + 1),
+    widthIndex: widthIndex
+  )
+  let widthFirst = cranialBladePoint(
+    sample: sample,
+    topology: topology,
+    axialIndex: axialIndex,
+    widthIndex: max(0, widthIndex - 1)
+  )
+  let widthSecond = cranialBladePoint(
+    sample: sample,
+    topology: topology,
+    axialIndex: axialIndex,
+    widthIndex: min(topology.widthSections, widthIndex + 1)
+  )
+  let supplied = normalizedTest(
+    sample.planeNormal,
+    fallback: SIMD3<Float>(0, 0, 1)
+  )
+  var resolved = normalizedTest(
+    simd_cross(axialSecond - axialFirst, widthSecond - widthFirst),
+    fallback: supplied
+  )
+  if simd_dot(resolved, supplied) < 0 { resolved = -resolved }
+  return resolved
+}
+
+private func normalizedTest(
+  _ value: SIMD3<Float>,
+  fallback: SIMD3<Float>
+) -> SIMD3<Float> {
+  let length = simd_length(value)
+  return length > 1e-12 ? value / length : fallback
 }
 
 extension SIMD4 where Scalar == Float {

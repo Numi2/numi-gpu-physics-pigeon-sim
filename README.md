@@ -120,18 +120,18 @@ against its CPU-expanded predecessor; beauty SSIM is `0.999997`. This remains
 the procedural-raster ownership gate; the retained-morphology gate follows
 below. Neither is measured anatomy or a speedup.
 The `3,212`-record dorsal/body subset occupies `411,136` bytes inside one
-`699,904`-byte retained inventory. The additional `1,304` pectoral and
+`790,912`-byte retained inventory. The additional `1,304` pectoral and
 abdominal vanes use the same immutable owner with a distinct `0x03` identity
 namespace, followed by the `540` femoral, `324` crural, and `88` throat-bridge
-vanes; dedicated rachis and barb systems remain separate. Three pose slots
-retain `5,664` bytes total, while Metal applies the established density
-predicates, classifies ten
+vanes and the `711`-vane cranial shell; dedicated rachis and barb systems remain
+separate. Three pose slots retain `5,952` bytes total, while Metal applies the
+established density predicates, classifies eleven
 possible tessellation topologies, scans stable offsets, emits
 compact morphology indices, and prepares indirect vane, rachis, and body-detail
 beauty draws. At
 yaw/pitch `(-1.12, 0.26)` and `0.50 m`, Metal selects the same `1,606` body records
 in two active topology bins and requests `285,984` raster vertex invocations;
-the current three-slot indirect arguments occupy `1,440` bytes. CPU grouping and temporal
+the current three-slot indirect arguments occupy `1,584` bytes. CPU grouping and temporal
 record construction now run only for explicit audit readback. A new five-frame
 release gate at rear-right yaw/pitch `(2.28, 0.38)` and `0.62 m` spans standing,
 deployment, and flight. Minimum beauty SSIM against the former temporal-record
@@ -197,14 +197,30 @@ records. Immutable unposed blades share four exact current/previous neck
 couplings, preserving the established graded quiet-motion handoff without
 uploading 88 temporal surfaces. The live `7 x 3` tier emits `11,088`
 procedural vertices and removes `1,064,448` bytes of expanded temporal CPU
-geometry per frame; retained morphology totals `5,468` records / `699,904`
-bytes. Exact neck transport increases per-frame pose input from `1,504` to
+geometry per frame; that milestone retained `5,468` records / `699,904`
+bytes. Exact neck transport increased per-frame pose input from `1,504` to
 `1,888` bytes and the three-slot store from `4,512` to `5,664` bytes. The
 `--capture-crow-cpu-throat-bridge-vanes` baseline independently restores CPU
 ownership, and family `6` maps visible identity to bilateral side, row, and
 neck-coupling column. This pass changes data ownership, not the estimated
 throat anatomy; visual inspection remains reserved for a later underside
 throat-to-bill boundary gate from a new angle.
+The full-density crown, nape, forehead, cheek, and gular shell now adds `711`
+identity-stable family-`7` records. Immutable ring-neighbour morphology lets
+Metal reconstruct the breathing cranial loft before applying the same graded
+head transform to every generated point and normal; both orbit reservations and
+the bill-base aperture therefore remain part of the owner rather than becoming
+a frozen cap. At `1,600 px/m`, stable conservative `3 x 1` / `6 x 3` tiers
+emit `35,568` vertices and remove `3,414,528` bytes of expanded CPU vane
+geometry per frame. Retained morphology now totals `6,179` records / `790,912`
+bytes; the cranial pose fields bring per-frame input to `1,984` bytes and its
+three-slot store to `5,952` bytes. Coarse `152`/`291`-vane tiers and the
+full-density gular rachis/barb layer remain CPU-owned and unchanged. The
+`--capture-crow-cpu-cranial-vanes` baseline restores the former full-density
+vane owner. Independent Swift/Metal checks cover breathing, two neck poses,
+current/previous positions, warped normals, topology, identity, and material;
+this is simulated geometry parity, not measured head plumage or a realism
+claim. The reserved visual gate remains the new underside throat-to-bill view.
 The body-detail prepass retains one `96`-byte current/previous analytic segment
 instead of a fixed `18`-vertex triangle stream. Each resolved feather adds six
 three-segment curved basal barb chains beneath the unchanged continuous shell.

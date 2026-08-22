@@ -451,9 +451,9 @@ only the tract relationship transfers here, not species dimensions. The layer
 does not modify hip, hock, ankle, or digital support coordinates.
 
 Standing crown, cheek, throat, and nape contour tracts are rooted directly on
-the breathing cranial loft. The standing path now uses one `306`-vane field
+the breathing cranial loft. The standing path now uses one `711`-vane field
 instead of stacking the former `40`-vane legacy overlay over a sparse second
-system. Eleven axial stations by thirty-two angular tracts are finite-difference
+system. Twenty-five axial stations by thirty-two angular tracts are finite-difference
 attached to the loft; explicit holes reserve both orbits, and the two anterior
 stations retain only crown and throat coverage so the bill base remains clear.
 Every non-reserved angular neighbour overlaps, every retained axial neighbour
@@ -461,7 +461,7 @@ is reached by the preceding vane, and the same graded head-neck transform
 transports roots, tips, and normals. Alternating half-tract angular phase plus
 bounded identity-stable length, camber, and eumelanin variation prevents the
 field from collapsing into aligned bead rows. Final-output coverage selects
-deterministic `82`, `152`, or `306`-tract tiers so subpixel vanes do not alias
+deterministic `152`, `291`, or `711`-tract tiers so subpixel vanes do not alias
 while a `1280 x 720` standing render retains the complete inventory.
 
 The cervical bridge likewise increases from `50` broad accents to `154`
@@ -917,6 +917,16 @@ the full-resolution-only `1,400 px/m` visibility threshold are unchanged. A
 dedicated CPU baseline switch and Metal/Swift vertex oracle qualify ownership;
 the next visual gate is intentionally deferred to a new underside
 throat-to-bill camera angle.
+
+That full `711`-vane cranial shell is now retained as family-`7` Metal
+morphology. Current and previous breathing reconstruct the ring surface and
+neighbour-derived tangents, then the established graded head transform is
+applied per generated point and normal rather than as one rigid shell. Orbit
+holes, the bill-base aperture, regional classes `8...10`, and axial/angular
+identity remain exact. At `1,600 px/m`, `35,568` procedural vertices avoid
+`3,414,528` bytes of expanded CPU vane data per frame. The coarse tiers and
+gular detail tubes stay CPU-owned. Swift/Metal temporal parity is the evidence
+for this pass; the reserved underside visual gate is not spent here.
 
 Across fresh 17-frame front-starboard and ventral-port audits at yaw/pitch
 `(-0.32,0.06)` and `(0.66,-0.34)`, enclosed-hole pixels stay `6 -> 6` and

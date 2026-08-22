@@ -290,9 +290,12 @@ final class CrowBodyVaneGeometryDeformer {
     previousBodyCenter: SIMD3<Float>,
     currentNeckPose: CrowStandingNeckPose?,
     previousNeckPose: CrowStandingNeckPose?,
+    cranialRadii: SIMD3<Float>? = nil,
+    currentCranialBreathingScale: Float? = nil,
+    previousCranialBreathingScale: Float? = nil,
     currentFemoralPose: CrowFemoralVanePoseSample? = nil,
     previousFemoralPose: CrowFemoralVanePoseSample? = nil,
-    retainedFamilyMask: UInt32 = 0x7,
+    retainedFamilyMask: UInt32 = 0xF,
     currentDeployment: Float,
     previousDeployment: Float,
     projectedPixelsPerMeter: Float,
@@ -307,6 +310,9 @@ final class CrowBodyVaneGeometryDeformer {
       previousBodyCenter: previousBodyCenter,
       currentNeckPose: currentNeckPose,
       previousNeckPose: previousNeckPose,
+      cranialRadii: cranialRadii,
+      currentCranialBreathingScale: currentCranialBreathingScale,
+      previousCranialBreathingScale: previousCranialBreathingScale,
       currentFemoralPose: currentFemoralPose,
       previousFemoralPose: previousFemoralPose,
       currentDeployment: currentDeployment,
@@ -327,6 +333,9 @@ final class CrowBodyVaneGeometryDeformer {
         previousBodyCenter: previousBodyCenter,
         currentNeckPose: currentNeckPose,
         previousNeckPose: previousNeckPose,
+        cranialRadii: cranialRadii,
+        currentCranialBreathingScale: currentCranialBreathingScale,
+        previousCranialBreathingScale: previousCranialBreathingScale,
         currentFemoralPose: currentFemoralPose,
         previousFemoralPose: previousFemoralPose,
         currentDeployment: currentDeployment,
@@ -348,6 +357,12 @@ final class CrowBodyVaneGeometryDeformer {
     var activeFamilyMask = retainedFamilyMask
     if currentFemoralPose == nil || previousFemoralPose == nil {
       activeFamilyMask &= ~UInt32(0x3)
+    }
+    if cranialRadii == nil
+      || currentCranialBreathingScale == nil
+      || previousCranialBreathingScale == nil
+    {
+      activeFamilyMask &= ~UInt32(0x8)
     }
     var selection = CrowBodyVaneSelectionUniforms(
       selection: SIMD4<Float>(projectedPixelsPerMeter, 0, 0, 0),
@@ -450,7 +465,11 @@ final class CrowBodyVaneGeometryDeformer {
           && retainedFamilyMask & 0x1 != 0,
         cruralActive: currentFemoralPose != nil && previousFemoralPose != nil
           && retainedFamilyMask & 0x2 != 0,
-        throatBridgeActive: retainedFamilyMask & 0x4 != 0
+        throatBridgeActive: retainedFamilyMask & 0x4 != 0,
+        cranialActive: cranialRadii != nil
+          && currentCranialBreathingScale != nil
+          && previousCranialBreathingScale != nil
+          && retainedFamilyMask & 0x8 != 0
       )
       : [:]
     var batches: [CrowBodyVaneGeometryBatchFrame] = []
@@ -800,9 +819,10 @@ final class CrowBodyVaneGeometryDeformer {
       + CrowBodyVaneRecords.ventralMorphologyRecordCount
       + CrowBodyVaneRecords.femoralMorphologyRecordCount
       + CrowBodyVaneRecords.cruralMorphologyRecordCount
+    let end = base + CrowBodyVaneRecords.throatBridgeMorphologyRecordCount
     return frame.batches.indices.reduce(0) { partial, topologyIndex in
       partial + selectedRecordIndices(for: frame, topologyIndex: topologyIndex)
-        .count { Int($0) >= base }
+        .count { Int($0) >= base && Int($0) < end }
     }
   }
 
@@ -811,6 +831,34 @@ final class CrowBodyVaneGeometryDeformer {
       + CrowBodyVaneRecords.ventralMorphologyRecordCount
       + CrowBodyVaneRecords.femoralMorphologyRecordCount
       + CrowBodyVaneRecords.cruralMorphologyRecordCount
+    let end = base + CrowBodyVaneRecords.throatBridgeMorphologyRecordCount
+    return frame.batches.enumerated().reduce(0) { partial, pair in
+      let selected = selectedRecordIndices(
+        for: frame,
+        topologyIndex: pair.offset
+      ).count { Int($0) >= base && Int($0) < end }
+      return partial + selected * pair.element.vertexCount
+    }
+  }
+
+  func activeCranialRecordCount(for frame: CrowBodyVaneGeometryFrame) -> Int {
+    let base = CrowBodyVaneRecords.bodyMorphologyRecordCount
+      + CrowBodyVaneRecords.ventralMorphologyRecordCount
+      + CrowBodyVaneRecords.femoralMorphologyRecordCount
+      + CrowBodyVaneRecords.cruralMorphologyRecordCount
+      + CrowBodyVaneRecords.throatBridgeMorphologyRecordCount
+    return frame.batches.indices.reduce(0) { partial, topologyIndex in
+      partial + selectedRecordIndices(for: frame, topologyIndex: topologyIndex)
+        .count { Int($0) >= base }
+    }
+  }
+
+  func expandedCranialVertexCount(for frame: CrowBodyVaneGeometryFrame) -> Int {
+    let base = CrowBodyVaneRecords.bodyMorphologyRecordCount
+      + CrowBodyVaneRecords.ventralMorphologyRecordCount
+      + CrowBodyVaneRecords.femoralMorphologyRecordCount
+      + CrowBodyVaneRecords.cruralMorphologyRecordCount
+      + CrowBodyVaneRecords.throatBridgeMorphologyRecordCount
     return frame.batches.enumerated().reduce(0) { partial, pair in
       let selected = selectedRecordIndices(
         for: frame,
@@ -922,6 +970,9 @@ final class CrowBodyVaneGeometryDeformer {
     previousBodyCenter: SIMD3<Float>,
     currentNeckPose: CrowStandingNeckPose?,
     previousNeckPose: CrowStandingNeckPose?,
+    cranialRadii: SIMD3<Float>?,
+    currentCranialBreathingScale: Float?,
+    previousCranialBreathingScale: Float?,
     currentFemoralPose: CrowFemoralVanePoseSample?,
     previousFemoralPose: CrowFemoralVanePoseSample?,
     currentDeployment: Float,
@@ -935,6 +986,34 @@ final class CrowBodyVaneGeometryDeformer {
       previousBodyCenterAndDeployment: SIMD4<Float>(
         previousBodyCenter,
         previousDeployment
+      ),
+      currentCranialRadiiAndBreathing: SIMD4<Float>(
+        cranialRadii ?? .zero,
+        currentCranialBreathingScale ?? 1
+      ),
+      previousCranialRadiiAndBreathing: SIMD4<Float>(
+        cranialRadii ?? .zero,
+        previousCranialBreathingScale ?? 1
+      ),
+      currentNeckTranslationAndYaw: SIMD4<Float>(
+        currentNeckPose?.translation ?? .zero,
+        currentNeckPose?.yawRadians ?? 0
+      ),
+      currentNeckPitchRollAndActive: SIMD4<Float>(
+        currentNeckPose?.pitchRadians ?? 0,
+        currentNeckPose?.rollRadians ?? 0,
+        currentNeckPose == nil ? 0 : 1,
+        0
+      ),
+      previousNeckTranslationAndYaw: SIMD4<Float>(
+        previousNeckPose?.translation ?? .zero,
+        previousNeckPose?.yawRadians ?? 0
+      ),
+      previousNeckPitchRollAndActive: SIMD4<Float>(
+        previousNeckPose?.pitchRadians ?? 0,
+        previousNeckPose?.rollRadians ?? 0,
+        previousNeckPose == nil ? 0 : 1,
+        0
       )
     )
     memcpy(
@@ -1050,6 +1129,8 @@ enum CrowBodyVaneRecords {
     * CrowLegPlumage.radialCount * CrowLegPlumage.stationCount
   static let throatBridgeMorphologyRecordCount = 2
     * CrowThroatBridgeFeathers.rowCount * CrowThroatBridgeFeathers.columnCount
+  static let cranialMorphologyRecordCount = CrowCranialFeatherTracts
+    .morphologySamples().count
   /// Body topologies stay first. Because body morphology precedes ventral
   /// morphology, compact body work remains a prefix of the shared work list;
   /// body-only rachis/detail buffers can therefore retain their original
@@ -1065,6 +1146,7 @@ enum CrowBodyVaneRecords {
     CrowBodyVaneTopology(axialSections: 7, widthSections: 3),
     CrowBodyVaneTopology(axialSections: 11, widthSections: 5),
     CrowBodyVaneTopology(axialSections: 8, widthSections: 3),
+    CrowBodyVaneTopology(axialSections: 6, widthSections: 3),
   ]
 
   static func rachisSections(for topology: CrowBodyVaneTopology) -> Int {
@@ -1154,6 +1236,7 @@ enum CrowBodyVaneRecords {
       + femoralMorphologyRecords()
       + cruralMorphologyRecords()
       + throatBridgeMorphologyRecords()
+      + cranialMorphologyRecords()
   }
 
   static func ventralMorphologyRecords() -> [CrowBodyVaneMorphologyGPU] {
@@ -1333,6 +1416,71 @@ enum CrowBodyVaneRecords {
     }
   }
 
+  static func cranialMorphologyRecords() -> [CrowBodyVaneMorphologyGPU] {
+    CrowCranialFeatherTracts.morphologySamples().enumerated().map { index, sample in
+      let ring = sample.ring
+      let previous = sample.previousRing
+      let next = sample.nextRing
+      let material = sample.materialIdentity
+      let gularBlend = CrowCranialFeatherTracts.gularBridgeMaterialBlend(
+        region: sample.region,
+        ring: ring
+      )
+      return CrowBodyVaneMorphologyGPU(
+        rootAndRootWidth: SIMD4<Float>(
+          ring.axialFraction,
+          ring.verticalFraction,
+          ring.halfWidthFraction,
+          ring.dorsalRadiusFraction
+        ),
+        tipAndMaximumWidth: SIMD4<Float>(
+          ring.ventralRadiusFraction,
+          previous.axialFraction,
+          previous.verticalFraction,
+          previous.halfWidthFraction
+        ),
+        normalAndCamber: SIMD4<Float>(
+          previous.dorsalRadiusFraction,
+          previous.ventralRadiusFraction,
+          next.axialFraction,
+          next.verticalFraction
+        ),
+        sweepAsymmetryAndRipple: SIMD4<Float>(
+          next.halfWidthFraction,
+          next.dorsalRadiusFraction,
+          next.ventralRadiusFraction,
+          sample.thetaRadians
+        ),
+        envelopeAndTaper: SIMD4<Float>(
+          CrowCranialFeatherTracts.axialLength(for: sample),
+          (0.00055 + (sample.region == .nape ? 0.00020 : 0))
+            * (1 + 0.08 * material),
+          sample.directionIdentity,
+          Float(sample.region.rawValue)
+        ),
+        color: SIMD4<Float>(
+          0.006 * (1 + 0.08 * material),
+          0.009 * (1 + 0.06 * material),
+          0.015 * (1 + 0.04 * material),
+          0.14 + CrowCranialFeatherTracts.gularBridgeMaterialTagScale
+            * gularBlend
+        ),
+        morphology: SIMD4<Float>(
+          0,
+          CrowCranialFeatherTracts.lodReferenceLengthMeters(for: sample),
+          Float(sample.axialIndex),
+          Float(sample.angularIndex)
+        ),
+        identity: SIMD4<UInt32>(
+          0x0700_0000 | UInt32(index),
+          stableHash(cranialIdentity(of: sample)),
+          Float(0.18).bitPattern,
+          CrowCranialFeatherTracts.surfaceFeatherClass(for: sample.region)
+        )
+      )
+    }
+  }
+
   static func groupedMorphologyIndices(
     projectedPixelsPerMeter: Float
   ) -> [CrowBodyVaneTopology: [Int]] {
@@ -1357,7 +1505,8 @@ enum CrowBodyVaneRecords {
     projectedPixelsPerMeter: Float,
     femoralActive: Bool = true,
     cruralActive: Bool = true,
-    throatBridgeActive: Bool = true
+    throatBridgeActive: Bool = true,
+    cranialActive: Bool = true
   ) -> [CrowBodyVaneTopology: [Int]] {
     var grouped = groupedMorphologyIndices(
       projectedPixelsPerMeter: projectedPixelsPerMeter
@@ -1409,7 +1558,36 @@ enum CrowBodyVaneRecords {
         grouped[throatTopology, default: []].append(throatBase + index)
       }
     }
+    if cranialActive && projectedPixelsPerMeter >= 1_400 {
+      let cranialBase = bodyCount + ventralMorphologyRecordCount
+        + femoralMorphologyRecordCount + cruralMorphologyRecordCount
+        + throatBridgeMorphologyRecordCount
+      for (index, sample) in CrowCranialFeatherTracts.morphologySamples().enumerated() {
+        grouped[
+          cranialTopology(
+            for: sample,
+            projectedPixelsPerMeter: projectedPixelsPerMeter
+          ),
+          default: []
+        ].append(cranialBase + index)
+      }
+    }
     return grouped
+  }
+
+  private static func cranialTopology(
+    for sample: CrowCranialFeatherMorphology,
+    projectedPixelsPerMeter: Float
+  ) -> CrowBodyVaneTopology {
+    let tessellation = CrowFeatherCoverageLOD.tessellation(
+      lengthMeters: CrowCranialFeatherTracts.lodReferenceLengthMeters(for: sample),
+      projectedPixelsPerMeter: projectedPixelsPerMeter,
+      baseAxialSections: sample.region == .nape ? 6 : 5
+    )
+    return CrowBodyVaneTopology(
+      axialSections: tessellation.axialSections,
+      widthSections: tessellation.widthSections
+    )
   }
 
   private static func limbTopology(
@@ -1527,6 +1705,9 @@ enum CrowBodyVaneRecords {
     previousBodyCenter: SIMD3<Float>,
     currentNeckPose: CrowStandingNeckPose?,
     previousNeckPose: CrowStandingNeckPose?,
+    cranialRadii: SIMD3<Float>? = nil,
+    currentCranialBreathingScale: Float? = nil,
+    previousCranialBreathingScale: Float? = nil,
     currentFemoralPose: CrowFemoralVanePoseSample? = nil,
     previousFemoralPose: CrowFemoralVanePoseSample? = nil,
     currentDeployment: Float,
@@ -1551,6 +1732,14 @@ enum CrowBodyVaneRecords {
     ) + throatBridgeTemporalRecords(
       currentBodyCenter: currentBodyCenter,
       previousBodyCenter: previousBodyCenter,
+      currentNeckPose: currentNeckPose,
+      previousNeckPose: previousNeckPose
+    ) + cranialTemporalRecords(
+      currentBodyCenter: currentBodyCenter,
+      previousBodyCenter: previousBodyCenter,
+      cranialRadii: cranialRadii,
+      currentBreathingScale: currentCranialBreathingScale,
+      previousBreathingScale: previousCranialBreathingScale,
       currentNeckPose: currentNeckPose,
       previousNeckPose: previousNeckPose
     )
@@ -1648,6 +1837,43 @@ enum CrowBodyVaneRecords {
     }
   }
 
+  static func cranialTemporalRecords(
+    currentBodyCenter: SIMD3<Float>,
+    previousBodyCenter: SIMD3<Float>,
+    cranialRadii: SIMD3<Float>?,
+    currentBreathingScale: Float?,
+    previousBreathingScale: Float?,
+    currentNeckPose: CrowStandingNeckPose?,
+    previousNeckPose: CrowStandingNeckPose?
+  ) -> [CrowBodyVaneRecordGPU] {
+    let radii = cranialRadii ?? .zero
+    let currentCenter = currentBodyCenter
+      + CrowCranialAnatomy.showcaseCenterOffsetMeters
+    let previousCenter = previousBodyCenter
+      + CrowCranialAnatomy.showcaseCenterOffsetMeters
+    let morphologyRecords = cranialMorphologyRecords()
+    return CrowCranialFeatherTracts.morphologySamples().enumerated().map {
+      index, morphology in
+      let current = CrowCranialFeatherTracts.feather(
+        morphology: morphology,
+        center: currentCenter,
+        radii: radii,
+        breathingScale: currentBreathingScale ?? 1
+      )
+      let previous = CrowCranialFeatherTracts.feather(
+        morphology: morphology,
+        center: previousCenter,
+        radii: radii,
+        breathingScale: previousBreathingScale ?? 1
+      )
+      return cranialRecord(
+        current: current,
+        previous: previous,
+        morphology: morphologyRecords[index]
+      )
+    }
+  }
+
   static func ventralTemporalRecords(
     currentBodyCenter: SIMD3<Float>,
     previousBodyCenter: SIMD3<Float>
@@ -1707,6 +1933,9 @@ enum CrowBodyVaneRecords {
     previousBodyCenter: SIMD3<Float>,
     currentNeckPose: CrowStandingNeckPose?,
     previousNeckPose: CrowStandingNeckPose?,
+    cranialRadii: SIMD3<Float>? = nil,
+    currentCranialBreathingScale: Float? = nil,
+    previousCranialBreathingScale: Float? = nil,
     currentFemoralPose: CrowFemoralVanePoseSample? = nil,
     previousFemoralPose: CrowFemoralVanePoseSample? = nil,
     currentDeployment: Float,
@@ -1718,6 +1947,9 @@ enum CrowBodyVaneRecords {
       previousBodyCenter: previousBodyCenter,
       currentNeckPose: currentNeckPose,
       previousNeckPose: previousNeckPose,
+      cranialRadii: cranialRadii,
+      currentCranialBreathingScale: currentCranialBreathingScale,
+      previousCranialBreathingScale: previousCranialBreathingScale,
       currentFemoralPose: currentFemoralPose,
       previousFemoralPose: previousFemoralPose,
       currentDeployment: currentDeployment,
@@ -1726,7 +1958,10 @@ enum CrowBodyVaneRecords {
     return retainedGroupedMorphologyIndices(
       projectedPixelsPerMeter: projectedPixelsPerMeter,
       femoralActive: currentFemoralPose != nil && previousFemoralPose != nil,
-      cruralActive: currentFemoralPose != nil && previousFemoralPose != nil
+      cruralActive: currentFemoralPose != nil && previousFemoralPose != nil,
+      cranialActive: cranialRadii != nil
+        && currentCranialBreathingScale != nil
+        && previousCranialBreathingScale != nil
     ).mapValues { indices in indices.map { records[$0] } }
   }
 
@@ -2902,6 +3137,44 @@ enum CrowBodyVaneRecords {
     )
   }
 
+  private static func cranialRecord(
+    current: CrowCranialFeatherSample,
+    previous: CrowCranialFeatherSample,
+    morphology: CrowBodyVaneMorphologyGPU
+  ) -> CrowBodyVaneRecordGPU {
+    CrowBodyVaneRecordGPU(
+      currentRootAndRootWidth: SIMD4<Float>(
+        current.root,
+        current.rootWidthMeters
+      ),
+      currentTipAndMaximumWidth: SIMD4<Float>(
+        current.tip,
+        current.maximumWidthMeters
+      ),
+      previousRootAndCurrentCamber: SIMD4<Float>(
+        previous.root,
+        current.camberMeters
+      ),
+      previousTipAndPreviousCamber: SIMD4<Float>(
+        previous.tip,
+        previous.camberMeters
+      ),
+      currentNormalAndTransverseCamber: SIMD4<Float>(
+        current.planeNormal,
+        0.18
+      ),
+      previousNormalAndTransverseCamber: SIMD4<Float>(
+        previous.planeNormal,
+        0.18
+      ),
+      sweepAsymmetryAndRipple: .zero,
+      envelopeAndTaper: SIMD4<Float>(1.5, 0.32, 0.015, 3.2),
+      color: morphology.color,
+      morphology: morphology.morphology,
+      identity: morphology.identity
+    )
+  }
+
   private static func throatBridgeRecord(
     morphology: CrowThroatBridgeMorphology,
     currentBodyCenter: SIMD3<Float>,
@@ -3100,6 +3373,17 @@ enum CrowBodyVaneRecords {
       sample.side < 0 ? 0 : 1,
       UInt32(sample.row),
       UInt32(sample.column)
+    )
+  }
+
+  private static func cranialIdentity(
+    of sample: CrowCranialFeatherMorphology
+  ) -> SIMD4<UInt32> {
+    SIMD4<UInt32>(
+      0x0700 | UInt32(sample.region.rawValue),
+      UInt32(sample.axialIndex),
+      UInt32(sample.angularIndex),
+      0
     )
   }
 

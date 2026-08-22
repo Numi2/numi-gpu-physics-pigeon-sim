@@ -12,6 +12,18 @@ func crowCranialContourTractsRemainAttachedAndRegionallyBounded() {
     radii: radii,
     breathingScale: 1.01
   )
+  let morphology = CrowCranialFeatherTracts.morphologySamples()
+  #expect(morphology.count == 711)
+  #expect(
+    morphology.map {
+      CrowCranialFeatherTracts.feather(
+        morphology: $0,
+        center: center,
+        radii: radii,
+        breathingScale: 1.01
+      )
+    } == samples
+  )
   #expect(samples.count == 711)
   #expect(samples.filter { $0.region == .nape }.count == 224)
   #expect(samples.filter { $0.region == .crown }.count == 89)
@@ -238,5 +250,42 @@ func crowCranialContourTractsRemainAttachedAndRegionallyBounded() {
   for region in CrowCranialFeatherRegion.allCases {
     #expect(low.contains { $0.region == region })
     #expect(medium.contains { $0.region == region })
+  }
+}
+
+@Test("retained cranial LOD matches the breathing CPU vane topology")
+func retainedCranialLODMatchesBreathingCPUVaneTopology() {
+  let center = SIMD3<Float>(0.164, 0, 0.052)
+  let radii = SIMD3<Float>(0.0447, 0.0328, 0.0387)
+  let morphology = CrowCranialFeatherTracts.morphologySamples()
+  for breathing: Float in [0.988, 1, 1.012] {
+    let samples = morphology.map {
+      CrowCranialFeatherTracts.feather(
+        morphology: $0,
+        center: center,
+        radii: radii,
+        breathingScale: breathing
+      )
+    }
+    for projectedPixelsPerMeter: Float in [1_400, 1_600, 4_000, 20_000] {
+      for (retained, live) in zip(morphology, samples) {
+        let base = retained.region == .nape ? 6 : 5
+        let retainedTopology = CrowFeatherCoverageLOD.tessellation(
+          lengthMeters: CrowCranialFeatherTracts.lodReferenceLengthMeters(
+            for: retained
+          ),
+          projectedPixelsPerMeter: projectedPixelsPerMeter,
+          baseAxialSections: base
+        )
+        let liveTopology = CrowFeatherCoverageLOD.tessellation(
+          lengthMeters: simd_distance(live.root, live.tip),
+          projectedPixelsPerMeter: projectedPixelsPerMeter,
+          baseAxialSections: base
+        )
+        #expect(retainedTopology.tier <= liveTopology.tier)
+        #expect(retainedTopology.axialSections >= liveTopology.axialSections)
+        #expect(retainedTopology.widthSections >= liveTopology.widthSections)
+      }
+    }
   }
 }

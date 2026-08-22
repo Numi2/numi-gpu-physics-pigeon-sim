@@ -150,8 +150,10 @@ row, and course. The
 crural-retention pass adds `324` family-`5` records mapping bilateral side,
 radial tract, and axial station. The throat-bridge pass adds `88` family-`6`
 records mapping bilateral side, interdigitated row, and one of four graded
-neck-coupling columns. Aggregate retained-morphology counters now report
-`5,468` records and `699,904` bytes, while dedicated ventral fields
+neck-coupling columns. Family `7` adds `711` cranial records mapping region,
+axial loft station, angular tract, and derived side. Aggregate
+retained-morphology counters now report `6,179` records and `790,912` bytes,
+while dedicated ventral fields
 continue to report
 `1,304` records, selected work, procedural raster invocations, eliminated CPU
 surface bytes, and `gpu-retained-identity-stable-procedural-vane` generation.

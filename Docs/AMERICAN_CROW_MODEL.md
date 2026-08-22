@@ -586,11 +586,26 @@ transforms per temporal endpoint reproduce the exact graded neck motion used
 by the CPU oracle while keeping roots, tips, widths, material variation, and
 row/column identity unchanged. At the live `7 x 3` tier, `11,088` procedural
 vertices replace `1,064,448` bytes of expanded temporal CPU surface data per
-frame. The exact transform upload adds `384` bytes per frame, bringing the
-complete pose input to `1,888` bytes and its three-slot capacity to `5,664`
+frame. The exact transform upload adds `384` bytes per frame, bringing that
+milestone's pose input to `1,888` bytes and its three-slot capacity to `5,664`
 bytes. Coarse output remains unchanged because this bridge is intentionally
 absent below `1,400 px/m`. This qualifies simulated ownership and temporal
 geometry parity, not measured gular anatomy or visual realism.
+
+The full-density cranial shell now retains all `711` crown, nape, forehead,
+cheek, and gular vanes as family-`7` morphology. Each record stores its owning
+loft ring and both axial neighbours, angular phase, deterministic length,
+camber and direction variation, optical class, and stable axial/angular
+identity. Metal reconstructs the current and previous breathing loft and then
+applies the same spatially varying head-neck warp to each generated point and
+normal. At `1,600 px/m`, its stable conservative topology emits `35,568`
+vertices and removes `3,414,528` bytes of CPU-expanded vane geometry per frame.
+The retained inventory is now `6,179` records / `790,912` bytes; current and
+previous cranial radii, breathing, translation, yaw, pitch, and roll bring pose
+input to `1,984` bytes and the three-slot capacity to `5,952` bytes. The
+`152`/`291` coarse tiers and explicit gular rachis/barb detail remain unchanged
+on the CPU. Direct Swift/Metal parity qualifies two distinct temporal poses;
+no image is admitted as anatomy or perceptual-realism evidence in this pass.
 
 At the five-by-seven distance LOD, a rear-right temporal-identity trace at
 yaw/pitch `(2.28, 0.38)` resolves the residual pelvic insertion owners to
@@ -698,12 +713,13 @@ executable ownership/parity result, not a performance measurement or an
 American-crow anatomical measurement.
 
 Body-vane morphology is retained once rather than triple-buffered per pose. The
-`3,212` immutable `128`-byte records occupy `411,136` bytes; three in-flight
-pose slots now retain `5,664` bytes total and each receives only `1,888` bytes
-of current/previous body, deployment, cervical affine transforms, compact limb
-vectors, and exact throat-bridge coupling transforms. Metal
+complete `6,179`-record inventory occupies `790,912` bytes; its `3,212`-record
+dorsal/body prefix remains `411,136` bytes. Three in-flight pose slots retain
+`5,952` bytes total and each receives only `1,984` bytes of current/previous
+body, deployment, cervical affine transforms, compact limb vectors, exact
+throat-bridge transforms, and cranial breathing/head-pose inputs. Metal
 reproduces the established whole/half/quarter density predicate, classifies
-each active morphology into one of ten retained topology bins, scans stable offsets,
+each active morphology into one of eleven retained topology bins, scans stable offsets,
 emits compact inventory indices, and prepares vane, rachis, and body-detail
 `DrawPrimitivesIndirectArguments`. CPU temporal-record construction and
 grouping run only for explicit audit readback. Schema `21` reports morphology,

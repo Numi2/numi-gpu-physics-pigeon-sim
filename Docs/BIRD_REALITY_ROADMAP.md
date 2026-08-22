@@ -156,6 +156,12 @@ inventory or view-dependent patch geometry.
    transforms per endpoint. Its next future-compute step is to merge those
    shared transforms and family work into the same visibility-compacted
    indexed/meshlet emission path before any anatomy-changing throat pass.
+   The `711` full-density cranial vanes now retain family-`7` loft-neighbour
+   morphology and reconstruct breathing plus the spatially graded head warp on
+   Metal. Coarse head tiers and explicit gular rachis/barb tubes remain CPU
+   owners. The next compute pass should retain that gular detail against the
+   same family identity, then compact cranial visibility before adding
+   per-feather bending or contact.
 
 3. **Measured appearance, bounded claims.** Implement an energy-bounded,
    anisotropic feather BSDF with separate eumelanin absorption, longitudinal

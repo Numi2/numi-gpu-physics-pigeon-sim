@@ -269,6 +269,12 @@ struct CrowBodyVaneRecordGPU: Equatable {
 struct CrowBodyVanePoseUniforms: Equatable {
   var currentBodyCenterAndDeployment: SIMD4<Float>
   var previousBodyCenterAndDeployment: SIMD4<Float>
+  var currentCranialRadiiAndBreathing: SIMD4<Float> = .zero
+  var previousCranialRadiiAndBreathing: SIMD4<Float> = .zero
+  var currentNeckTranslationAndYaw: SIMD4<Float> = .zero
+  var currentNeckPitchRollAndActive: SIMD4<Float> = .zero
+  var previousNeckTranslationAndYaw: SIMD4<Float> = .zero
+  var previousNeckPitchRollAndActive: SIMD4<Float> = .zero
 }
 
 /// Three affine rows transport one cervical column. The same upper 3x3 block

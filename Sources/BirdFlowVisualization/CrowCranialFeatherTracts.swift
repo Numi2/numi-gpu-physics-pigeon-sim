@@ -26,6 +26,22 @@ struct CrowCranialFeatherSample: Equatable {
   let surfaceFeatherClass: UInt32
 }
 
+/// Immutable identity and loft parameterization for one cranial contour vane.
+/// Live breathing and quiet head motion are reconstructed from these values;
+/// no expanded feather vertex belongs in the retained inventory.
+struct CrowCranialFeatherMorphology: Equatable {
+  let region: CrowCranialFeatherRegion
+  let axialIndex: Int
+  let angularIndex: Int
+  let thetaRadians: Float
+  let ring: CrowCranialLoftRing
+  let previousRing: CrowCranialLoftRing
+  let nextRing: CrowCranialLoftRing
+  let lengthIdentity: Float
+  let materialIdentity: Float
+  let directionIdentity: Float
+}
+
 /// Small overlapping contour tracts attached to the estimated cranial loft.
 ///
 /// The tracts break the analytic head silhouette without covering the orbit or
@@ -68,14 +84,19 @@ enum CrowCranialFeatherTracts {
         breathingScale: breathingScale
       )
     }
-    let coarse = samples(
-      center: center,
-      radii: radii,
-      breathingScale: breathingScale,
+    let coarse = morphologySamples(
       rings: coarseAxialRings,
       billBaseApertureSineThreshold: coarseBillBaseApertureSineThreshold
-    ).map {
-      sample($0, surfaceFeatherClass: coarseSurfaceFeatherClass(for: $0.region))
+    ).map { morphology in
+      sample(
+        feather(
+          morphology: morphology,
+          center: center,
+          radii: radii,
+          breathingScale: breathingScale
+        ),
+        surfaceFeatherClass: coarseSurfaceFeatherClass(for: morphology.region)
+      )
     }
     if projectedPixelsPerMeter >= mediumDensityPixelsPerMeter {
       return coarse.filter {
@@ -93,24 +114,28 @@ enum CrowCranialFeatherTracts {
     radii: SIMD3<Float>,
     breathingScale: Float
   ) -> [CrowCranialFeatherSample] {
-    samples(
-      center: center,
-      radii: radii,
-      breathingScale: breathingScale,
+    morphologySamples().map {
+      feather(
+        morphology: $0,
+        center: center,
+        radii: radii,
+        breathingScale: breathingScale
+      )
+    }
+  }
+
+  static func morphologySamples() -> [CrowCranialFeatherMorphology] {
+    morphologySamples(
       rings: axialRings,
       billBaseApertureSineThreshold: billBaseApertureSineThreshold
     )
   }
 
-  private static func samples(
-    center: SIMD3<Float>,
-    radii: SIMD3<Float>,
-    breathingScale: Float,
+  private static func morphologySamples(
     rings: [CrowCranialLoftRing],
     billBaseApertureSineThreshold: Float
-  ) -> [CrowCranialFeatherSample] {
-    let effectiveRadii = radii * SIMD3<Float>(breathingScale, 1, breathingScale)
-    var result: [CrowCranialFeatherSample] = []
+  ) -> [CrowCranialFeatherMorphology] {
+    var result: [CrowCranialFeatherMorphology] = []
     result.reserveCapacity(rings.count * angularCount)
 
     for axialIndex in rings.indices {
@@ -133,33 +158,49 @@ enum CrowCranialFeatherTracts {
         {
           continue
         }
-        append(
-          axialIndex: axialIndex,
-          angularIndex: angularIndex,
-          ring: ring,
-          previousRing: previousRing,
-          nextRing: nextRing,
-          theta: theta,
-          center: center,
-          effectiveRadii: effectiveRadii,
-          to: &result
+        let region = region(for: ring, theta: theta)
+        result.append(
+          CrowCranialFeatherMorphology(
+            region: region,
+            axialIndex: axialIndex,
+            angularIndex: angularIndex,
+            thetaRadians: theta,
+            ring: ring,
+            previousRing: previousRing,
+            nextRing: nextRing,
+            lengthIdentity: identityVariation(
+              axialIndex: axialIndex,
+              angularIndex: angularIndex,
+              salt: 0x85EB_CA6B
+            ),
+            materialIdentity: identityVariation(
+              axialIndex: axialIndex,
+              angularIndex: angularIndex,
+              salt: 0xC2B2_AE35
+            ),
+            directionIdentity: identityVariation(
+              axialIndex: axialIndex,
+              angularIndex: angularIndex,
+              salt: 0x27D4_EB2F
+            )
+          )
         )
       }
     }
     return result
   }
 
-  private static func append(
-    axialIndex: Int,
-    angularIndex: Int,
-    ring: CrowCranialLoftRing,
-    previousRing: CrowCranialLoftRing,
-    nextRing: CrowCranialLoftRing,
-    theta: Float,
+  static func feather(
+    morphology: CrowCranialFeatherMorphology,
     center: SIMD3<Float>,
-    effectiveRadii: SIMD3<Float>,
-    to result: inout [CrowCranialFeatherSample]
-  ) {
+    radii: SIMD3<Float>,
+    breathingScale: Float
+  ) -> CrowCranialFeatherSample {
+    let ring = morphology.ring
+    let previousRing = morphology.previousRing
+    let nextRing = morphology.nextRing
+    let theta = morphology.thetaRadians
+    let effectiveRadii = radii * SIMD3<Float>(breathingScale, 1, breathingScale)
     let surface = CrowCranialAnatomy.surfacePoint(
       center: center,
       effectiveRadii: effectiveRadii,
@@ -197,25 +238,10 @@ enum CrowCranialFeatherTracts {
       simd_cross(angularTangent, axialTangent),
       fallback: SIMD3<Float>(0, cos(theta), sin(theta))
     )
-    let region = region(for: ring, theta: theta)
-    let lengthIdentity = identityVariation(
-      axialIndex: axialIndex,
-      angularIndex: angularIndex,
-      salt: 0x85EB_CA6B
-    )
-    let materialIdentity = identityVariation(
-      axialIndex: axialIndex,
-      angularIndex: angularIndex,
-      salt: 0xC2B2_AE35
-    )
-    let directionIdentity = identityVariation(
-      axialIndex: axialIndex,
-      angularIndex: angularIndex,
-      salt: 0x27D4_EB2F
-    )
-    let lengthVariation: Float = region == .throat ? 0.16 : 0.04
-    let length = axialLength(region: region, ring: ring)
-      * (1 + lengthVariation * lengthIdentity)
+    let region = morphology.region
+    let materialIdentity = morphology.materialIdentity
+    let directionIdentity = morphology.directionIdentity
+    let length = axialLength(for: morphology)
     let direction = normalized(
       -axialTangent
         + (region == .throat ? 0.085 : 0.035) * directionIdentity * angularTangent
@@ -234,26 +260,24 @@ enum CrowCranialFeatherTracts {
     let circumferentialSpacing = simd_distance(surface, neighbour)
     let overlapScale = circumferentialOverlapScale(for: region)
     let width = min(0.0048, max(0.0024, overlapScale * circumferentialSpacing))
-    result.append(
-      CrowCranialFeatherSample(
+    return CrowCranialFeatherSample(
+      region: region,
+      axialIndex: morphology.axialIndex,
+      angularIndex: morphology.angularIndex,
+      thetaRadians: theta,
+      root: root,
+      tip: tip,
+      planeNormal: normal,
+      rootWidthMeters: 0.55 * width,
+      maximumWidthMeters: width,
+      camberMeters: (0.00055 + (region == .nape ? 0.00020 : 0))
+        * (1 + 0.08 * materialIdentity),
+      materialVariation: materialIdentity,
+      gularBridgeMaterialBlend: gularBridgeMaterialBlend(
         region: region,
-        axialIndex: axialIndex,
-        angularIndex: angularIndex,
-        thetaRadians: theta,
-        root: root,
-        tip: tip,
-        planeNormal: normal,
-        rootWidthMeters: 0.55 * width,
-        maximumWidthMeters: width,
-        camberMeters: (0.00055 + (region == .nape ? 0.00020 : 0))
-          * (1 + 0.08 * materialIdentity),
-        materialVariation: materialIdentity,
-        gularBridgeMaterialBlend: gularBridgeMaterialBlend(
-          region: region,
-          ring: ring
-        ),
-        surfaceFeatherClass: surfaceFeatherClass(for: region)
-      )
+        ring: ring
+      ),
+      surfaceFeatherClass: surfaceFeatherClass(for: region)
     )
   }
 
@@ -279,6 +303,24 @@ enum CrowCranialFeatherTracts {
     region == .throat
       ? throatCircumferentialOverlapScale
       : standardCircumferentialOverlapScale
+  }
+
+  static func axialLength(
+    for morphology: CrowCranialFeatherMorphology
+  ) -> Float {
+    axialLength(region: morphology.region, ring: morphology.ring)
+      * (1 + (morphology.region == .throat ? 0.16 : 0.04)
+        * morphology.lengthIdentity)
+  }
+
+  static func lodReferenceLengthMeters(
+    for morphology: CrowCranialFeatherMorphology
+  ) -> Float {
+    // The live root-tip vector adds a 0.2 mm normal lift to the prescribed
+    // shaft direction. Their angle changes slightly with breathing, so the
+    // triangle-inequality bound keeps retained topology stable and can never
+    // select a coarser tier than the former per-frame CPU distance.
+    axialLength(for: morphology) + 0.00020
   }
 
   /// Smoothly limits collar suppression to the posterior throat rings that

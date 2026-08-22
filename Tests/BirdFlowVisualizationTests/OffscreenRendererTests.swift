@@ -453,12 +453,14 @@ func crowCaptureAcceptsBoundedCameraOverrides() throws {
     "--capture-crow-camera-target-y", "0.055",
     "--capture-crow-camera-target-z", "-0.04",
     "--capture-crow-disable-ventral-barb-curves",
+    "--capture-crow-cpu-cranial-vanes",
   ])
   #expect(arguments.cameraYawRadians == -2.35)
   #expect(arguments.cameraPitchRadians == -0.31)
   #expect(arguments.cameraDistanceMeters == 0.035)
   #expect(arguments.cameraTarget == SIMD3<Float>(0.02, 0.055, -0.04))
   #expect(!arguments.explicitVentralBarbCurvesEnabled)
+  #expect(!arguments.retainedCranialVanesEnabled)
   #expect(arguments.ventralCurveEmissionMode == .auto)
 
   let meshArguments = try CrowShowcaseCapture.Arguments(commandLine: [
@@ -475,6 +477,7 @@ func crowCaptureAcceptsBoundedCameraOverrides() throws {
     "--capture-crow-ventral-curve-emission", "auto",
   ])
   #expect(autoArguments.ventralCurveEmissionMode == .auto)
+  #expect(autoArguments.retainedCranialVanesEnabled)
 
   #expect(throws: CrowShowcaseCapture.CaptureError.self) {
     _ = try CrowShowcaseCapture.Arguments(commandLine: [
@@ -775,7 +778,7 @@ func estimatedStandingCrowCaptureProducesLoopClosedFrames() throws {
   #expect(audit.schemaVersion == 27)
   #expect(
     audit.frames.allSatisfy {
-      $0.bodyVaneMorphologyRecordCount == 5_468
+      $0.bodyVaneMorphologyRecordCount == 6_179
         && $0.bodyVaneMorphologyRecordBytes
           == $0.bodyVaneMorphologyRecordCount
           * MemoryLayout<CrowBodyVaneMorphologyGPU>.stride
@@ -786,8 +789,8 @@ func estimatedStandingCrowCaptureProducesLoopClosedFrames() throws {
           * MemoryLayout<CrowBodyVaneMorphologyGPU>.stride
         && $0.bodyVaneRetainedMorphologyCapacityBytes
           >= $0.bodyVaneSelectedMorphologyRecordBytes
-        && $0.bodyVanePoseInputBytes == 1_888
-        && $0.bodyVaneRetainedPoseCapacityBytes == 5_664
+        && $0.bodyVanePoseInputBytes == 1_984
+        && $0.bodyVaneRetainedPoseCapacityBytes == 5_952
         && $0.bodyVaneRetainedIndirectDrawBytes
           >= 3 * $0.bodyVaneBatchCount
           * MemoryLayout<DrawPrimitivesIndirectArguments>.stride
@@ -901,17 +904,24 @@ func estimatedStandingCrowCaptureProducesLoopClosedFrames() throws {
       }).count
         == frame.bodyVaneIdentities.count
         && frame.bodyVaneIdentities.allSatisfy {
-          [2, 3, 6].contains($0.familyCode)
+          [2, 3, 6, 7].contains($0.familyCode)
             && $0.inventoryIndex >= 0
             && ($0.familyCode == 2
               ? $0.inventoryIndex < 3_212
               : ($0.familyCode == 3
-                ? $0.inventoryIndex < 1_304 : $0.inventoryIndex < 88))
+                ? $0.inventoryIndex < 1_304
+                : ($0.familyCode == 6
+                  ? $0.inventoryIndex < 88 : $0.inventoryIndex < 711)))
             && ($0.familyCode == 6
-              ? $0.featherClassCode == 17 : (4...7).contains($0.featherClassCode))
+              ? $0.featherClassCode == 17
+              : ($0.familyCode == 7
+                ? (8...10).contains($0.featherClassCode)
+                : (4...7).contains($0.featherClassCode)))
             && ($0.familyCode == 6
               ? $0.regionCode == 6
-              : $0.regionCode <= CrowBodyFeatherTractRegion.scapular.rawValue)
+              : ($0.familyCode == 7
+                ? (7...11).contains($0.regionCode)
+                : $0.regionCode <= CrowBodyFeatherTractRegion.scapular.rawValue))
             && $0.sideCode <= 1
             && $0.visiblePixelCount > 0
             && $0.fullyCoveredPixelCount <= $0.visiblePixelCount
