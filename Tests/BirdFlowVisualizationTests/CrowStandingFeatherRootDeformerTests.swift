@@ -338,7 +338,12 @@ func standingCrowFeatherRootsMatchMetalReference() throws {
   #expect(abs(centerTailTip.y) < 1e-6)
   #expect(abs(edgeTailTip.y) <= 0.0061)
   #expect(abs(centerTailTip.z + 0.025) < 1e-5)
-  #expect(abs(edgeTailTip.z + 0.031) < 1e-5)
+  #expect(
+    abs(
+      edgeTailTip.z
+        - (-0.025 - CrowClosedTailAnatomy.tipLayerDepthMeters)
+    ) < 1e-5
+  )
 }
 
 @Test("takeoff unfolds retained rectrices on Metal while remiges collapse")

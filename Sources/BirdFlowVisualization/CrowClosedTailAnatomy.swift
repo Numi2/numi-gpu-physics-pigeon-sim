@@ -20,7 +20,10 @@ enum CrowClosedTailAnatomy {
   static let lateralRectrixLengthReductionMeters: Float = 0.006
   static let lateralSpanMeters: Float = 0.012
   static let rootLayerDepthMeters: Float = 0.004
-  static let tipLayerDepthMeters: Float = 0.006
+  /// Adult rectrix tips converge toward a smooth truncated stack. Retain the
+  /// deeper root tent, but keep the terminal course close enough that a
+  /// grazing camera cannot see a ladder of background between adjacent vanes.
+  static let tipLayerDepthMeters: Float = 0.002
 
   static func pose(fraction rawFraction: Float) -> CrowClosedTailPose {
     let fraction = min(max(rawFraction, 0), 1)

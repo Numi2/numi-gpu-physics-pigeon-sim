@@ -213,6 +213,20 @@ discrete, rounded simulated rectrix ends without changing stable IDs, root
 poses, or storage topology. Full-chord finite-difference normals run in both
 Swift and Metal and retain the existing `< 1e-5` CPU/GPU normal-parity gate.
 
+The quiet stack preserves its `4 mm` root-layer depth while converging to a
+`2 mm` terminal depth instead of `6 mm`. Adult American-crow rectrices are
+reported as smooth and squared or truncated by
+[Ludwig et al. (2010)](https://doi.org/10.22621/cfn.v123i2.691); the
+[U.S. Fish and Wildlife Service Feather Atlas](https://www.fws.gov/lab/featheratlas/id-position.html)
+also distinguishes rectrices from finger-tipped primaries. The exact `2 mm`
+value is an estimated standing-presentation constraint, not a measurement.
+At the matched `1200 x 675` reverse-quarter gate it reduces enclosed
+pixels/components/worst component from `47/30/5` to `4/2/3` and exact
+rectrix-to-rectrix exterior slots from `7` runs totaling `10` pixels to one
+`1`-pixel run. A fresh elevated rear-starboard view retains separate vane
+layers with zero rectrix slots. Flight targets, widths, lengths, and identities
+are unchanged, and no reference pixels are stored or rendered.
+
 The closed rectrix stack now graduates from `0.166 m` medially to `0.160 m`
 laterally and returns continuously to the retained open-flight lengths during
 deployment. This replaces the camera-dependent straight terminal bar with a

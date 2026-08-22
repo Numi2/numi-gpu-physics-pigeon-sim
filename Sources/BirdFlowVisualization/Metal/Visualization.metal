@@ -454,7 +454,7 @@ inline CrowStandingRootPose crowStandingRootPose(
             0.0065f-0.004f*radialFraction
         );
         float featherLength=0.166f*crowClosedRectrixLengthScale(radialFraction);
-        float targetZ=-0.025f-0.006f*radialFraction;
+        float targetZ=-0.025f-0.002f*radialFraction;
         float verticalDirection=(targetZ-(result.root.z-center.z))/featherLength;
         result.direction=safeNormalizeCrow(
             float3(
@@ -634,7 +634,7 @@ inline CrowTakeoffRectrixPose crowTakeoffRectrixPose(
     );
     float closedLength=0.166f*crowClosedRectrixLengthScale(radialFraction);
     float verticalDirection=
-        (-0.025f-0.006f*radialFraction-closedRoot.z)/closedLength;
+        (-0.025f-0.002f*radialFraction-closedRoot.z)/closedLength;
     float3 closedDirection=safeNormalizeCrow(
         float3(
             -sqrt(max(0.0f,1.0f-verticalDirection*verticalDirection)),

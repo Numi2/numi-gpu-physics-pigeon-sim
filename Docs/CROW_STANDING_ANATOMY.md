@@ -146,7 +146,7 @@ not evidence that the presentation geometry is measured.
 
 The twelve retained rectrices form a closed standing stack: their bases remain
 buried beneath the rump shell, their root and distal lateral spans are each
-`12 mm`, and their distal envelope descends `25-31 mm` below the body center.
+`12 mm`, and their distal envelope descends `25-27 mm` below the body center.
 Within each side, every medial rectrix lies above its lateral neighbour and the
 two sides form a shallow tent, avoiding both a coplanar sheet and an open fan.
 The six mirrored pairs now retain explicit order/count metadata through the
@@ -165,6 +165,26 @@ and retains `13-16%` of maximum half-width at the tip. The centerline keeps the
 exact `166 mm` asset length while lateral edge vertices retreat quadratically
 by `1.7-2.3 mm`, yielding a rounded end without changing the closed-tail root or
 deployment schedule.
+The root tent retains its `4 mm` total depth, but the terminal stack now
+converges to `2 mm` rather than continuing to `6 mm`. This is consistent with
+the smooth squared or truncated outline reported for after-second-year
+American-crow rectrices by
+[Ludwig et al. (2010)](https://doi.org/10.22621/cfn.v123i2.691) and with the
+[U.S. Fish and Wildlife Service Feather Atlas](https://www.fws.gov/lab/featheratlas/id-position.html)
+distinction that ordinary rectrices lack finger-like tips. Neither source
+specifies the encoded depth, which remains a bounded presentation estimate.
+
+At yaw/pitch `(-2.32,0.08)` and `1200 x 675`, the prior `6 mm` depth exposed a
+ladder of background between terminal vane layers. Reducing analytic rachis
+energy was visually ineffective and was rejected. The retained geometric
+change reduces enclosed pixels/components/worst component from `47/30/5` to
+`4/2/3`; exact class-`3`-to-class-`3` exterior slots change from `7` runs,
+`10` pixels, and a `3`-pixel maximum to one `1`-pixel run. A previously unused
+elevated rear-starboard view at `(2.82,0.18)` records `2/1/2` enclosed metrics,
+zero expected lower-body aperture, and zero rectrix-to-rectrix slots without
+forming a broad tail plate. Stable identity, length graduation, vane width,
+root depth, and open-flight targets remain exact. No source image enters the
+renderer or repository.
 This ordering follows the general folded-tail overlap described by
 [Clark (2010)](https://academic.oup.com/auk/article/127/1/44/5148514); only the
 ordering transfers here. All vane asymmetry, width, crown, and camber values are
@@ -933,9 +953,9 @@ simulated terminal ownership and raster continuity, not measured rectrix
 morphology or perceptual realism.
 
 The canonical README sequence is fully simulated and contains the native hold,
-transition, and flight path: `800 x 450`, `72` frames at `24 fps`, `8,120,057`
+transition, and flight path: `800 x 450`, `72` frames at `24 fps`, `7,855,272`
 bytes, SHA-256
-`2d8a212c9bc15b1e32f6ca563dfea3f301e8e6d9f40de1cfdc2770442cceb266`.
+`4761bf6abe82df20ed96041c1c0c71c7f0047d503da2e0da84bcbc3083d025c1`.
 The audited stage PNGs at frames `0`, `35`, and `71` are distinct and retain
 the simulated hold, geometric deployment, and sustained-flight states.
 

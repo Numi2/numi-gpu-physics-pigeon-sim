@@ -137,6 +137,18 @@ rear-port 17-frame stress audit, enclosed-hole pixels/components/worst channel
 fall from `593/157/28` to `165/121/8`; a new rear-port grazing view remains
 discrete rather than forming a tail plate. These are bounded simulated
 morphology and raster checks, not measured American-crow tip dimensions.
+The quiet tail now keeps its `4 mm` root tent but converges to a `2 mm` total
+terminal depth instead of `6 mm`. Adult American-crow rectrices are described
+as [smooth and squared or truncated](https://doi.org/10.22621/cfn.v123i2.691),
+and the [U.S. Fish and Wildlife Service](https://www.fws.gov/lab/featheratlas/id-position.html)
+notes that ordinary tail feathers do not have finger-like tips. This
+standing-only convergence removes the background ladder between otherwise
+overlapping terminal vanes without widening them or changing flight. In the
+same `1200 x 675` reverse-quarter A/B, enclosed pixels/components/worst
+component fall `47/30/5 -> 4/2/3`; rectrix-to-rectrix exterior slots fall from
+`7` runs and `10` pixels to one `1`-pixel run. A fresh elevated rear-starboard
+view retains individual layers with `2/1/2` enclosed metrics and zero rectrix
+slots. No reference image is rendered or stored.
 The exact identity AOV now also reports visible and fully covered pixels for
 every persistent primary, secondary, and rectrix as schema `18`. The same
 report retains the longest exterior-connected row/column slots with exact

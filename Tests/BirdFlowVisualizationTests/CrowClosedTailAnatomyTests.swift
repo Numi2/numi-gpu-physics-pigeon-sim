@@ -58,8 +58,24 @@ func closedRectricesOverlapInMedialToLateralTent() {
   #expect(poses.map { abs($0.normal.y) }.max()! < 0.16)
 
   let tipDepths = poses.map(\.tipOffset.z)
-  #expect(tipDepths.max()! - tipDepths.min()! > 0.005)
-  #expect(tipDepths.max()! - tipDepths.min()! < 0.0061)
+  let rootDepths = poses.map(\.rootOffset.z)
+  let sampledRadialSpan = poses.map(\.radialFraction).max()!
+    - poses.map(\.radialFraction).min()!
+  let tipDepthSpan = tipDepths.max()! - tipDepths.min()!
+  let rootDepthSpan = rootDepths.max()! - rootDepths.min()!
+  #expect(
+    abs(
+      tipDepthSpan
+        - CrowClosedTailAnatomy.tipLayerDepthMeters * sampledRadialSpan
+    ) < 1e-7
+  )
+  #expect(
+    abs(
+      rootDepthSpan
+        - CrowClosedTailAnatomy.rootLayerDepthMeters * sampledRadialSpan
+    ) < 1e-7
+  )
+  #expect(rootDepthSpan > tipDepthSpan)
 }
 
 @Test("rectrix pairs retain identity-specific asymmetric vane profiles")
