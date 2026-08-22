@@ -453,8 +453,7 @@ inline CrowStandingRootPose crowStandingRootPose(
         float featherLength=0.155f+0.050f*fraction;
         float stackSurfaceCoordinate=clamp((fraction-0.55f)/0.45f,0.0f,1.0f);
         float stackSurfaceEnvelope=sin(M_PI_F*stackSurfaceCoordinate);
-        float stackSurfaceLift=0.0022f
-            *stackSurfaceEnvelope*stackSurfaceEnvelope;
+        float stackSurfaceLift=0.0022f*stackSurfaceEnvelope;
         float primaryRootLateralOffset=0.042f-0.0024f
             *fraction*fraction*fraction+stackSurfaceLift;
         result.root=center+float3(

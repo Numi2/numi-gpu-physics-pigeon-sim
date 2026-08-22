@@ -1228,6 +1228,28 @@ structure without a new seam. The still-broad lower caudal lobe remains the
 next ownership target. These lift and ribbon dimensions are simulated
 presentation estimates, not measured American-crow separations or barb widths.
 
+The lower-lobe follow-up identifies the visible mass itself as retained
+primary geometry, not an underlayer patch or body-shell gap. At the low
+rear-port gate, near-side terminal primary `0x0a090101` owns `4,274` pixels at
+mid-phase, with penultimate `0x0a080101` owning `1,713`; on the far side those
+owners contribute `11,040` and only `368`. The retained correction broadens
+the existing surface-lift envelope from squared sine to sine while preserving
+its `2.2 mm` maximum and zero-valued anterior and terminal endpoints. Far-side
+penultimate exposure rises `368 -> 1,313` pixels and near-side exposure rises
+`1,713 -> 1,759`; terminal ownership yields already-covered samples, active
+bird coverage changes by only `5...6` pixels, and every hole, component,
+largest-hole, and expected-aperture field is exact. At the low starboard gate,
+penultimate exposure rises `378...383 -> 1,330...1,338` pixels with only
+`2...3` additional active pixels and exact topology. Minimum standing SSIM is
+`0.999734`. Takeoff retains exact topology and active coverage, reaches a
+minimum SSIM of `0.999865` in the changed early frames, and is pixel-exact from
+frame `2` onward. A fresh near-level rear-port gate `(-2.12,0.06)` from
+`0.47 m` records `14,16,14` enclosed pixels in `7,11,7` components, with
+largest components `4,3,4`. Inspection shows a readable penultimate course
+inside the broad terminal outline without a macroscopic opening. This is
+simulated layer separation and projected identity evidence, not a measured
+primary-stack depth or proof of perceptual equivalence.
+
 The canonical README sequence is fully simulated and contains the native hold,
 transition, and flight path: `800 x 450`, `72` frames at `24 fps`, `8,015,883`
 bytes, SHA-256

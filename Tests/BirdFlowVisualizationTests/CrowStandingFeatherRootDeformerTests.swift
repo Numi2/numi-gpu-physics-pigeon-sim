@@ -360,7 +360,7 @@ func standingCrowFeatherRootsMatchMetalReference() throws {
   )
   #expect(
     CrowFoldedWingAnatomy.primaryStackSurfaceLiftMeters(fraction: 8.0 / 9.0)
-      > 0.0010
+      > 0.0015
   )
   #expect(
     CrowFoldedWingAnatomy.primaryTipLateralOffsetMeters(fraction: 7.0 / 9.0)

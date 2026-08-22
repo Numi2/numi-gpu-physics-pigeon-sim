@@ -259,6 +259,20 @@ largest enclosed component at `2,3,2` pixels. This establishes retained
 geometry ownership and containment, not measured feather-layer spacing or
 perceptual equivalence.
 
+The subsequent lower-lobe audit uses those same packed identities to reject an
+underlayer-gap diagnosis. Broadening only the intermediate-primary lift
+envelope at its unchanged `2.2 mm` maximum raises far-side penultimate order
+`8` from `368` to `1,313` visible pixels and near-side order `8` from `1,713`
+to `1,759` at the low rear-port mid-phase. Total active ownership changes by
+six pixels there; the complete topology ledger is exact. The independent low
+starboard gate raises penultimate ownership from `383` to `1,330` with three
+additional active pixels and exact topology. Takeoff active ownership and
+topology remain exact, with later frames pixel-identical. A new near-level
+rear-port audit bounds all enclosed components to at most four pixels while
+showing the penultimate course inside the terminal outline. These counters
+localize and bound the simulated overlap change; they do not validate a
+biological spacing measurement or whole-bird realism.
+
 Schema `24` separately records projected-size barbule candidates,
 frustum-visible and retained detailed owners, procedural barbule vertex count,
 and the exact number of identity pixels won by geometry kind `4`. This

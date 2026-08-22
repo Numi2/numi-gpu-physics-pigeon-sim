@@ -141,13 +141,14 @@ enum CrowFoldedWingAnatomy {
   }
 
   /// Seats intermediate primaries just above their wider terminal neighbour.
+  /// A broad sine envelope keeps the posterior penultimate course exposed.
   /// Both root and tip receive the same bilateral translation, preserving each
   /// feather's direction while leaving terminal handoff endpoints fixed.
   static func primaryStackSurfaceLiftMeters(fraction rawFraction: Float) -> Float {
     let fraction = min(max(rawFraction, 0), 1)
     let posterior = min(max((fraction - 0.55) / 0.45, 0), 1)
     let envelope = sin(Float.pi * posterior)
-    return primaryStackSurfaceLiftMaximumMeters * envelope * envelope
+    return primaryStackSurfaceLiftMaximumMeters * envelope
   }
 
   /// Raises the intermediate primary crowns between fixed roots and tips so
