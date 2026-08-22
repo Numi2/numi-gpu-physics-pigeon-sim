@@ -493,6 +493,27 @@ native-resolution renderer remains its executable parity oracle.
 The beauty mesh and fluid boundary mesh are intentionally distinct: the former
 adds feather detail, while the latter remains the fixed-topology coupling input.
 
+The body-tract vane surface is now evaluated directly from compact temporal
+records in the live Metal raster vertex stage. At full inventory, `3,212`
+cervical, mantle, humeral, and scapular vanes each contribute one `176`-byte
+record containing current/previous roots, tips, normals, deployment camber,
+transverse crown, asymmetric width, ripple, terminal taper, color, and stable
+identity. Projected-size topology remains quantized exactly as before, but the
+CPU no longer appends those vane triangles to `CrowSurfaceTemporalVertexGPU`.
+The separate tract rachis/barb mesostructure is still CPU-authored, and failure
+to create all three required Metal pipelines restores the former CPU vane path.
+A compute-only audit invokes the same Metal point/normal helper used by raster;
+sampled positions agree with the independent Swift oracle within `0.4 um`, and
+terminal normals agree within `0.06 degrees` with fast math enabled. In the new
+front-dorsal `800 x 450` gate at yaw/pitch `(0.52, 0.64)` and `0.44 m`, both
+paths retain `92,467` active pixels, `91,727` fully covered AOV pixels, `14`
+enclosed pixels in `7` components, an `8`-pixel largest component, and `17`
+expected lower-body aperture pixels in `3` components. Beauty SSIM is
+`0.999997`; exact per-feather body identity raises the visible-identity census
+from the legacy surface aggregate rather than changing coverage. This is an
+executable ownership/parity result, not a performance measurement or an
+American-crow anatomical measurement.
+
 The same executable renderer also has a distinct `standing` presentation. It
 does not freeze or slow the flight surface. A dedicated Metal kernel folds the
 same `54` persistent feathers against the body and retains current/previous

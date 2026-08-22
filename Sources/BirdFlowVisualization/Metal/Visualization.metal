@@ -70,6 +70,22 @@ struct CrowFeatherGeometryUniforms {
     float4 renderOffsetAndDetailScale;
 };
 
+struct CrowBodyVaneRecordGPU {
+    float4 currentRootAndRootWidth;
+    float4 currentTipAndMaximumWidth;
+    float4 previousRootAndCurrentCamber;
+    float4 previousTipAndPreviousCamber;
+    float4 currentNormalAndTransverseCamber;
+    float4 previousNormalAndTransverseCamber;
+    float4 sweepAsymmetryAndRipple;
+    float4 envelopeAndTaper;
+    float4 color;
+    float4 morphology;
+    uint4 identity;
+};
+
+struct CrowBodyVaneGeometryUniforms { uint4 counts; };
+
 struct CrowVentralRachisCurveRecordGPU {
     float4 rootAndPennaceousStart;
     float4 tipAndCamber;
@@ -2973,6 +2989,156 @@ inline float4 crowRectrixDetailBiasedClipPosition(
         clipPosition.z-=2.0e-5f*clipPosition.w;
     }
     return clipPosition;
+}
+
+inline uint2 crowBodyVaneGridIndex(
+    uint vertexIndex,
+    constant CrowBodyVaneGeometryUniforms& geometry) {
+    uint cell=vertexIndex/6u;
+    uint2 corner;
+    switch(vertexIndex%6u){
+        case 0u: corner=uint2(0u,0u); break;
+        case 1u: corner=uint2(0u,1u); break;
+        case 2u: corner=uint2(1u,1u); break;
+        case 3u: corner=uint2(0u,0u); break;
+        case 4u: corner=uint2(1u,1u); break;
+        default: corner=uint2(1u,0u); break;
+    }
+    return uint2(cell/geometry.counts.y,cell%geometry.counts.y)+corner;
+}
+
+inline float3 crowBodyVanePoint(
+    CrowBodyVaneRecordGPU record,
+    constant CrowBodyVaneGeometryUniforms& geometry,
+    bool current,
+    uint axialIndex,
+    uint widthIndex) {
+    float localFraction=float(axialIndex)/float(geometry.counts.x);
+    float start=clamp(record.morphology.x,0.0f,0.95f);
+    float t=start+(1.0f-start)*localFraction;
+    float3 root=current?record.currentRootAndRootWidth.xyz
+        :record.previousRootAndCurrentCamber.xyz;
+    float3 tip=current?record.currentTipAndMaximumWidth.xyz
+        :record.previousTipAndPreviousCamber.xyz;
+    float3 suppliedNormal=current?record.currentNormalAndTransverseCamber.xyz
+        :record.previousNormalAndTransverseCamber.xyz;
+    float3 normal=safeNormalizeCrow(suppliedNormal,float3(0,0,1));
+    float3 direction=safeNormalizeCrow(tip-root,float3(1,0,0));
+    float3 widthAxis=safeNormalizeCrow(cross(normal,direction),float3(0,1,0));
+    float rootEnvelope=clamp(record.envelopeAndTaper.y,0.05f,1.0f);
+    float bodyEnvelope=rootEnvelope+(1.0f-rootEnvelope)
+        *pow(max(sin(M_PI_F*t),0.0f),0.58f);
+    float terminal=clamp(record.envelopeAndTaper.z,0.0f,1.0f);
+    float exponent=clamp(record.envelopeAndTaper.w,2.0f,5.0f);
+    float tipTaper=1.0f-(1.0f-terminal)*pow(t,exponent);
+    float rippleEnvelope=pow(max(sin(M_PI_F*t),0.0f),2.0f);
+    float ripple=1.0f+record.sweepAsymmetryAndRipple.z
+        *sin(2.0f*M_PI_F*record.envelopeAndTaper.x*t
+            +record.sweepAsymmetryAndRipple.w)*rippleEnvelope;
+    float width=mix(
+        record.currentRootAndRootWidth.w,
+        record.currentTipAndMaximumWidth.w,t
+    )*bodyEnvelope*tipTaper*ripple;
+    float camber=current?record.previousRootAndCurrentCamber.w
+        :record.previousTipAndPreviousCamber.w;
+    float transverse=current?record.currentNormalAndTransverseCamber.w
+        :record.previousNormalAndTransverseCamber.w;
+    float sine=sin(M_PI_F*t);
+    float3 center=mix(root,tip,t)+normal*(camber*sine)
+        +widthAxis*(record.sweepAsymmetryAndRipple.x*sine);
+    float signedWidth=2.0f*float(widthIndex)/float(geometry.counts.y)-1.0f;
+    float localWidth=width
+        *(1.0f+record.sweepAsymmetryAndRipple.y*signedWidth);
+    return center+widthAxis*(signedWidth*localWidth)
+        +normal*(localWidth*transverse
+            *max(0.0f,1.0f-signedWidth*signedWidth));
+}
+
+inline float3 crowBodyVaneNormal(
+    CrowBodyVaneRecordGPU record,
+    constant CrowBodyVaneGeometryUniforms& geometry,
+    uint2 gridIndex) {
+    uint axialFirst=gridIndex.x>0u?gridIndex.x-1u:0u;
+    uint axialSecond=min(geometry.counts.x,gridIndex.x+1u);
+    uint widthFirst=gridIndex.y>0u?gridIndex.y-1u:0u;
+    uint widthSecond=min(geometry.counts.y,gridIndex.y+1u);
+    float3 supplied=safeNormalizeCrow(
+        record.currentNormalAndTransverseCamber.xyz,float3(0,0,1)
+    );
+    float3 axialDelta=crowBodyVanePoint(
+        record,geometry,true,axialSecond,gridIndex.y
+    )-crowBodyVanePoint(record,geometry,true,axialFirst,gridIndex.y);
+    float3 widthDelta=crowBodyVanePoint(
+        record,geometry,true,gridIndex.x,widthSecond
+    )-crowBodyVanePoint(record,geometry,true,gridIndex.x,widthFirst);
+    float3 resolved=safeNormalizeCrow(cross(axialDelta,widthDelta),supplied);
+    return dot(resolved,supplied)<0.0f?-resolved:resolved;
+}
+
+inline CrowFeatherVertexGPU crowBodyVaneProceduralVertex(
+    device const CrowBodyVaneRecordGPU* records,
+    constant CrowBodyVaneGeometryUniforms& geometry,
+    uint vertexIndex,
+    uint instanceIndex) {
+    CrowBodyVaneRecordGPU record=records[instanceIndex];
+    uint2 gridIndex=crowBodyVaneGridIndex(vertexIndex,geometry);
+    float localFraction=float(gridIndex.x)/float(geometry.counts.x);
+    float start=clamp(record.morphology.x,0.0f,0.95f);
+    float axial=start+(1.0f-start)*localFraction;
+    float signedWidth=2.0f*float(gridIndex.y)/float(geometry.counts.y)-1.0f;
+    CrowFeatherVertexGPU out;
+    out.position=float4(crowBodyVanePoint(
+        record,geometry,true,gridIndex.x,gridIndex.y
+    ),1.0f);
+    out.previousPosition=float4(crowBodyVanePoint(
+        record,geometry,false,gridIndex.x,gridIndex.y
+    ),1.0f);
+    out.normal=float4(crowBodyVaneNormal(record,geometry,gridIndex),0.0f);
+    out.color=record.color;
+    out.identity=record.identity;
+    out.parameters=float4(
+        axial,signedWidth,record.sweepAsymmetryAndRipple.w,0.0f
+    );
+    return out;
+}
+
+kernel void probeCrowBodyVaneVertices(
+    device const CrowBodyVaneRecordGPU* records [[buffer(0)]],
+    constant CrowBodyVaneGeometryUniforms& geometry [[buffer(1)]],
+    device CrowFeatherVertexGPU* output [[buffer(2)]],
+    uint index [[thread_position_in_grid]]) {
+    uint instanceIndex=index/geometry.counts.w;
+    uint vertexIndex=index-instanceIndex*geometry.counts.w;
+    if(instanceIndex>=geometry.counts.z){return;}
+    output[index]=crowBodyVaneProceduralVertex(
+        records,geometry,vertexIndex,instanceIndex
+    );
+}
+
+vertex CrowRasterVertex crowBodyVaneAOVVertex(
+    device const CrowBodyVaneRecordGPU* records [[buffer(0)]],
+    constant CrowBodyVaneGeometryUniforms& geometry [[buffer(1)]],
+    constant CrowTemporalCameraUniforms& camera [[buffer(2)]],
+    uint vertexIndex [[vertex_id]],
+    uint instanceIndex [[instance_id]]) {
+    CrowFeatherVertexGPU source=crowBodyVaneProceduralVertex(
+        records,geometry,vertexIndex,instanceIndex
+    );
+    CrowRasterVertex out;
+    uint featherClass=source.identity.w&255u;
+    out.position=crowSurfaceBiasedClipPosition(
+        camera.viewProjection*source.position,featherClass
+    );
+    out.previousClipPosition=crowSurfaceBiasedClipPosition(
+        camera.previousViewProjection*source.previousPosition,featherClass
+    );
+    out.world=source.position.xyz;
+    out.normal=normalize(source.normal.xyz);
+    out.albedoAndMaterial=source.color;
+    out.featherCoordinates=source.parameters.xyz;
+    out.resolvedCurveTangent=float3(0.0f);
+    out.identity=source.identity;
+    return out;
 }
 
 vertex CrowRasterVertex crowSurfaceAOVVertex(

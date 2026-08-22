@@ -98,6 +98,19 @@ and distal taper curvature, replacing one repeated cut-paper tip profile while
 the visible vane and retained detail continue to share one envelope. These are
 simulated presentation constraints, not measured American-crow feather
 linkages.
+The `3,212`-feather cervical, mantle, humeral, and scapular inventory now sends
+one `176`-byte current/previous analytic record per active vane to Metal. The
+live raster vertex stage evaluates its crown, asymmetric width, ripple, distal
+taper, smooth normal, motion, and stable identity directly; those vane
+triangles are no longer expanded into the CPU surface stream. The existing CPU
+path remains an initialization fallback, and body mesostructure remains a
+separate CPU-authored layer. A shared compute audit agrees with the Swift
+position oracle within `0.4 um`; the most cancellation-sensitive terminal
+normal remains within `0.06 degrees`. At a new front-dorsal yaw/pitch
+`(0.52, 0.64)`, `0.44 m` gate, coverage, finite pixels, all enclosed-hole
+metrics, the expected lower-body apertures, and normal-unit error are exact
+against the previous renderer; beauty SSIM is `0.999997`. This qualifies live
+Metal geometry ownership and visual parity, not measured anatomy or a speedup.
 The same retained path now owns all `12` rectrices throughout takeoff. Their
 stable roots unfold from the compact standing stack into the open-flight pose
 over transition progress `0.08...0.62`, while preserving full vane morphology

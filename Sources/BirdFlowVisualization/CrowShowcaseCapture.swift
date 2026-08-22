@@ -799,10 +799,12 @@ private final class CrowShowcaseRenderer {
   private let surfaceAOVPipeline: MTLRenderPipelineState
   private let backgroundAOVPipeline: MTLRenderPipelineState
   private let featherAOVPipeline: MTLRenderPipelineState?
+  private let bodyVaneAOVPipeline: MTLRenderPipelineState?
   private let ventralBarbAOVPipeline: MTLRenderPipelineState
   private let ventralBarbMeshAOVPipeline: MTLRenderPipelineState?
   private let surfaceIdentityPipeline: MTLRenderPipelineState
   private let featherIdentityPipeline: MTLRenderPipelineState?
+  private let bodyVaneIdentityPipeline: MTLRenderPipelineState?
   private let ventralBarbIdentityPipeline: MTLRenderPipelineState
   private let ventralBarbMeshIdentityPipeline: MTLRenderPipelineState?
   private let normalResolvePipeline: MTLRenderPipelineState
@@ -816,6 +818,7 @@ private final class CrowShowcaseRenderer {
   private let featherGeometryDeformer: CrowFeatherGeometryDeformer?
   private let liveCovertRootBuffer: CrowLiveWingCovertRootBuffer?
   private let liveCovertGeometryDeformer: CrowFeatherGeometryDeformer?
+  private let bodyVaneGeometryDeformer: CrowBodyVaneGeometryDeformer?
   private let ventralRachisGeometryDeformer: CrowVentralRachisGeometryDeformer
   private let ventralBarbGeometryDeformer: CrowVentralBarbGeometryDeformer?
   private let ventralBarbUsesMeshStage: Bool
@@ -853,13 +856,40 @@ private final class CrowShowcaseRenderer {
     case .auto:
       ventralBarbUsesMeshStage = createdBackend.supportsMeshShaders
     }
+    let candidateBodyVaneDeformer = try? CrowBodyVaneGeometryDeformer(
+      backend: createdBackend
+    )
+    let candidateBodyVaneAOVPipeline = try? createdBackend.render(
+      vertex: "crowBodyVaneAOVVertex",
+      fragment: "showcaseCrowAOVFragment",
+      colorFormats: [.rgba16Float, .rgba16Float, .rgba16Float, .rg16Float, .r32Float],
+      sampleCount: device.supportsTextureSampleCount(4) ? 4 : 1
+    )
+    let candidateBodyVaneIdentityPipeline = try? createdBackend.render(
+      vertex: "crowBodyVaneAOVVertex",
+      fragment: "showcaseCrowIdentityFragment",
+      colorFormat: .rgba32Uint
+    )
+    if let candidateBodyVaneDeformer,
+      let candidateBodyVaneAOVPipeline,
+      let candidateBodyVaneIdentityPipeline
+    {
+      bodyVaneGeometryDeformer = candidateBodyVaneDeformer
+      bodyVaneAOVPipeline = candidateBodyVaneAOVPipeline
+      bodyVaneIdentityPipeline = candidateBodyVaneIdentityPipeline
+    } else {
+      bodyVaneGeometryDeformer = nil
+      bodyVaneAOVPipeline = nil
+      bodyVaneIdentityPipeline = nil
+    }
     let createdMeshBuilder = CrowMeshBuilder(
       dataset: dataset,
       profile: profile,
       motion: motion,
       realityAsset: realityAsset,
       presentation: presentation,
-      explicitVentralBarbCurvesEnabled: explicitVentralBarbCurvesEnabled
+      explicitVentralBarbCurvesEnabled: explicitVentralBarbCurvesEnabled,
+      bodyVanesOwnedByMetal: bodyVaneGeometryDeformer != nil
     )
     meshBuilder = createdMeshBuilder
     if let realityAsset {
@@ -1287,6 +1317,18 @@ private final class CrowShowcaseRenderer {
     guard let commandBuffer = backend.queue.makeCommandBuffer() else {
       throw VisualizationError.pipeline("crow command buffer")
     }
+    let currentBodyVanePose = meshBuilder.bodyVanePose(phase: phase)
+    let previousBodyVanePose = meshBuilder.bodyVanePose(phase: priorPhase)
+    let bodyVaneFrame = try bodyVaneGeometryDeformer?.encode(
+      currentBodyCenter: currentAnatomyBodyCenter,
+      previousBodyCenter: previousAnatomyBodyCenter,
+      currentNeckPose: currentBodyVanePose.neckPose,
+      previousNeckPose: previousBodyVanePose.neckPose,
+      currentDeployment: currentBodyVanePose.deployment,
+      previousDeployment: previousBodyVanePose.deployment,
+      projectedPixelsPerMeter: projectedPixelsPerMeter,
+      commandBuffer: commandBuffer
+    )
     let rootFrame = try featherRootDeformer?.encode(
       currentPhase: phase,
       previousPhase: priorPhase,
@@ -1448,6 +1490,30 @@ private final class CrowShowcaseRenderer {
       vertexStart: 0,
       vertexCount: temporalVertices.count
     )
+    if let bodyVaneFrame, let bodyVaneGeometryDeformer,
+      let bodyVaneAOVPipeline
+    {
+      encoder.setRenderPipelineState(bodyVaneAOVPipeline)
+      encoder.setVertexBytes(
+        &cameraUniforms,
+        length: MemoryLayout<CrowTemporalCameraUniforms>.stride,
+        index: 2
+      )
+      encoder.setFragmentBytes(
+        &cameraUniforms,
+        length: MemoryLayout<CrowTemporalCameraUniforms>.stride,
+        index: 0
+      )
+      for batch in bodyVaneFrame.batches {
+        bodyVaneGeometryDeformer.bindRenderResources(for: batch, encoder: encoder)
+        encoder.drawPrimitives(
+          type: .triangle,
+          vertexStart: 0,
+          vertexCount: batch.vertexCount,
+          instanceCount: batch.recordCount
+        )
+      }
+    }
     if let featherAOVPipeline {
       encoder.setRenderPipelineState(featherAOVPipeline)
       encoder.setVertexBytes(
@@ -1560,6 +1626,28 @@ private final class CrowShowcaseRenderer {
       vertexStart: 0,
       vertexCount: temporalVertices.count
     )
+    if let bodyVaneFrame, let bodyVaneGeometryDeformer,
+      let bodyVaneIdentityPipeline
+    {
+      identityEncoder.setRenderPipelineState(bodyVaneIdentityPipeline)
+      identityEncoder.setVertexBytes(
+        &cameraUniforms,
+        length: MemoryLayout<CrowTemporalCameraUniforms>.stride,
+        index: 2
+      )
+      for batch in bodyVaneFrame.batches {
+        bodyVaneGeometryDeformer.bindRenderResources(
+          for: batch,
+          encoder: identityEncoder
+        )
+        identityEncoder.drawPrimitives(
+          type: .triangle,
+          vertexStart: 0,
+          vertexCount: batch.vertexCount,
+          instanceCount: batch.recordCount
+        )
+      }
+    }
     if let featherIdentityPipeline {
       identityEncoder.setRenderPipelineState(featherIdentityPipeline)
       identityEncoder.setVertexBytes(
@@ -1912,6 +2000,7 @@ private struct CrowMeshBuilder {
   private let persistentFeathers: [BirdRealityFeather]
   private let presentation: CrowShowcasePresentation
   private let explicitVentralBarbCurvesEnabled: Bool
+  private let bodyVanesOwnedByMetal: Bool
   private let leftWingAnchor: CrowWingAttachmentAnchor?
   private let rightWingAnchor: CrowWingAttachmentAnchor?
 
@@ -1927,13 +2016,15 @@ private struct CrowMeshBuilder {
     motion: any CrowShowcaseMotion,
     realityAsset: BirdRealityAsset?,
     presentation: CrowShowcasePresentation,
-    explicitVentralBarbCurvesEnabled: Bool
+    explicitVentralBarbCurvesEnabled: Bool,
+    bodyVanesOwnedByMetal: Bool
   ) {
     self.dataset = dataset
     self.profile = profile
     self.motion = motion
     self.presentation = presentation
     self.explicitVentralBarbCurvesEnabled = explicitVentralBarbCurvesEnabled
+    self.bodyVanesOwnedByMetal = bodyVanesOwnedByMetal
     persistentFeathers = realityAsset?.feathers ?? []
     surfaceIsEstimatedCrow =
       dataset.scientificTier == "estimated-hybrid-complete-surface"
@@ -2004,6 +2095,28 @@ private struct CrowMeshBuilder {
       return CrowTakeoffSequence.standingPose(phase: phase).bodyCenter
     case .wingbeat:
       return base
+    }
+  }
+
+  func bodyVanePose(
+    phase: Float
+  ) -> (neckPose: CrowStandingNeckPose?, deployment: Float) {
+    switch presentation {
+    case .standing:
+      return (
+        CrowStandingPose.sample(
+          phase: phase,
+          referenceBodyCenter: .zero
+        ).neckPose,
+        0
+      )
+    case .takeoff:
+      return (
+        CrowTakeoffSequence.standingPose(phase: phase).neckPose,
+        CrowTakeoffSequence.sample(phase: phase).transitionProgress
+      )
+    case .wingbeat:
+      return (nil, 1)
     }
   }
 
@@ -2860,35 +2973,37 @@ private struct CrowMeshBuilder {
           0.18
         )
       }
-      appendFeatherBlade(
-        root: bodyCenter + sample.rootOffset,
-        tip: bodyCenter + sample.tipOffset,
-        planeNormal: sample.planeNormal,
-        rootWidth: sample.rootWidthMeters,
-        maximumWidth: sample.maximumWidthMeters,
-        color: color,
-        sections: sample.region == .cervical ? 6 : 8,
-        camber: sample.camberMeters * deploymentCamberScale,
-        lateralSweep: sample.lateralSweepMeters,
-        transverseCamberRatio: transverseCamberRatio,
-        vaneAsymmetry: sample.vaneAsymmetry,
-        edgeRippleAmplitude: sample.edgeRippleAmplitude,
-        edgeRipplePhase: sample.edgeRipplePhase,
-        edgeRippleCycles: sample.edgeRippleCycles,
-        rootEnvelopeRatio: sample.rootEnvelopeRatio,
-        terminalWidthRatio: sample.terminalWidthRatio,
-        tipTaperExponent: sample.distalTaperExponent,
-        axialStartFraction: sample.pennaceousStartFraction,
-        surfaceFeatherClass: sample.surfaceFeatherClass,
-        lodLengthMeters: simd_distance(sample.rootOffset, sample.tipOffset),
-        minimumWidthSections:
-          CrowFeatherCoverageLOD.bodyTractMinimumWidthSections(
-            lengthMeters: simd_distance(sample.rootOffset, sample.tipOffset),
-            projectedPixelsPerMeter: projectedPixelsPerMeter
-          ),
-        projectedPixelsPerMeter: projectedPixelsPerMeter,
-        to: &vertices
-      )
+      if !bodyVanesOwnedByMetal {
+        appendFeatherBlade(
+          root: bodyCenter + sample.rootOffset,
+          tip: bodyCenter + sample.tipOffset,
+          planeNormal: sample.planeNormal,
+          rootWidth: sample.rootWidthMeters,
+          maximumWidth: sample.maximumWidthMeters,
+          color: color,
+          sections: sample.region == .cervical ? 6 : 8,
+          camber: sample.camberMeters * deploymentCamberScale,
+          lateralSweep: sample.lateralSweepMeters,
+          transverseCamberRatio: transverseCamberRatio,
+          vaneAsymmetry: sample.vaneAsymmetry,
+          edgeRippleAmplitude: sample.edgeRippleAmplitude,
+          edgeRipplePhase: sample.edgeRipplePhase,
+          edgeRippleCycles: sample.edgeRippleCycles,
+          rootEnvelopeRatio: sample.rootEnvelopeRatio,
+          terminalWidthRatio: sample.terminalWidthRatio,
+          tipTaperExponent: sample.distalTaperExponent,
+          axialStartFraction: sample.pennaceousStartFraction,
+          surfaceFeatherClass: sample.surfaceFeatherClass,
+          lodLengthMeters: simd_distance(sample.rootOffset, sample.tipOffset),
+          minimumWidthSections:
+            CrowFeatherCoverageLOD.bodyTractMinimumWidthSections(
+              lengthMeters: simd_distance(sample.rootOffset, sample.tipOffset),
+              projectedPixelsPerMeter: projectedPixelsPerMeter
+            ),
+          projectedPixelsPerMeter: projectedPixelsPerMeter,
+          to: &vertices
+        )
+      }
       appendBodyTractFeatherMesostructure(
         sample,
         bodyCenter: bodyCenter,
@@ -4975,7 +5090,8 @@ private struct CrowMeshBuilder {
         + (1 - rootEnvelope) * pow(max(sin(Float.pi * t), 0), 0.58)
       let boundedTerminalWidthRatio = min(max(terminalWidthRatio, 0), 1)
       let boundedTipTaperExponent = min(max(tipTaperExponent, 2), 5)
-      let tipTaper = 1
+      let tipTaper =
+        1
         - (1 - boundedTerminalWidthRatio) * pow(t, boundedTipTaperExponent)
       let envelope = bodyEnvelope * tipTaper
       let rippleEnvelope = pow(max(sin(Float.pi * t), 0), 2)

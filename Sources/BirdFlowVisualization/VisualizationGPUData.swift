@@ -231,6 +231,31 @@ struct CrowFeatherGeometryUniforms {
   var renderOffsetAndDetailScale: SIMD4<Float>
 }
 
+/// One temporal analytic body-vane record. Metal evaluates the exact crown,
+/// taper, ripple, and smooth-normal equations directly in the live raster
+/// vertex stage; the CPU uploads one compact record instead of triangle soup.
+struct CrowBodyVaneRecordGPU: Equatable {
+  var currentRootAndRootWidth: SIMD4<Float>
+  var currentTipAndMaximumWidth: SIMD4<Float>
+  var previousRootAndCurrentCamber: SIMD4<Float>
+  var previousTipAndPreviousCamber: SIMD4<Float>
+  var currentNormalAndTransverseCamber: SIMD4<Float>
+  var previousNormalAndTransverseCamber: SIMD4<Float>
+  /// Lateral sweep, vane asymmetry, ripple amplitude, ripple phase.
+  var sweepAsymmetryAndRipple: SIMD4<Float>
+  /// Ripple cycles, root envelope, terminal width, distal taper exponent.
+  var envelopeAndTaper: SIMD4<Float>
+  var color: SIMD4<Float>
+  /// Pennaceous start followed by reserved future morphology fields.
+  var morphology: SIMD4<Float>
+  var identity: SIMD4<UInt32>
+}
+
+struct CrowBodyVaneGeometryUniforms {
+  /// Axial sections, width sections, record count, vertices per instance.
+  var counts: SIMD4<UInt32>
+}
+
 /// One retained analytic crown-rachis curve for an interior class-7 body
 /// feather. Metal expands this 112-byte record into the selected radial tube
 /// tessellation; no per-triangle body-detail stream is authored on the CPU.
