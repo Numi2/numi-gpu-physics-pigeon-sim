@@ -2986,6 +2986,8 @@ private struct CrowMeshBuilder {
         0.009 * (1 + 0.06 * sample.materialVariation),
         0.015 * (1 + 0.04 * sample.materialVariation),
         0.14
+          + CrowCranialFeatherTracts.gularBridgeMaterialTagScale
+          * sample.gularBridgeMaterialBlend
       )
       appendFeatherBlade(
         root: sample.root,

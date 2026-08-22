@@ -94,6 +94,29 @@ func crowCranialContourTractsRemainAttachedAndRegionallyBounded() {
 
   #expect(samples.map(\.materialVariation).min()! < -0.90)
   #expect(samples.map(\.materialVariation).max()! > 0.90)
+  #expect(samples.allSatisfy { (0...1).contains($0.gularBridgeMaterialBlend) })
+  #expect(
+    samples.filter { $0.region != .throat }
+      .allSatisfy { $0.gularBridgeMaterialBlend == 0 }
+  )
+  let posteriorThroat = samples.filter {
+    $0.region == .throat && rings[$0.axialIndex].axialFraction <= -0.32
+  }
+  let anteriorThroat = samples.filter {
+    $0.region == .throat && rings[$0.axialIndex].axialFraction >= 0.52
+  }
+  let transitionThroat = samples.filter {
+    $0.region == .throat
+      && $0.gularBridgeMaterialBlend > 0
+      && $0.gularBridgeMaterialBlend < 1
+  }
+  #expect(
+    !posteriorThroat.isEmpty
+      && !transitionThroat.isEmpty
+      && !anteriorThroat.isEmpty
+  )
+  #expect(posteriorThroat.allSatisfy { $0.gularBridgeMaterialBlend == 1 })
+  #expect(anteriorThroat.allSatisfy { $0.gularBridgeMaterialBlend == 0 })
 
   let throatDirections =
     samples

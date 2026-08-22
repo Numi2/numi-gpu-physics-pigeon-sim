@@ -348,6 +348,20 @@ new neck or shoulder gap and less phase-locked terminal rake, but a readable
 collar remains; its next owner is not qualified by adding more terminal
 amplitude. These are simulated contour-feather offsets, not measured follicle
 or feather dimensions.
+The schema-`23` class-boundary audit then localized that visible arc to the
+class-`7` throat bridge against class-`10` gular vanes, rather than to another
+cervical geometry gap. A retained feather-local tag now tapers only posterior
+gular records and only toward each vane's distal `35...88%`; it reduces their
+sheen without changing roots, tips, class identity, topology, or the broad
+gular material. At the same five-frame gate, mean scene-linear class-`7/10`
+boundary contrast falls `14.38%` (`0.006095` to `0.005218`) while the complete
+non-optical AOV is exact. The neighboring class-`8/10` mean changes `1.36%`,
+and minimum beauty SSIM is `0.999981`. A new rear-high gate at yaw/pitch
+`(2.45, 0.30)`, `0.55 m`, is pixel- and AOV-exact; inspection retains the
+unmodified back, wing, tail, and planted silhouette. Global gular darkening was
+rejected because it raised the local maximum boundary jump. This is a bounded
+simulated optical handoff, not proof that the collar is perceptually absent or
+that feather reflectance matches a real crow.
 The first projected-size handoff now consumes those same records when an
 individual feather reaches `480` final-output pixels. Each eligible feather
 then resolves `72` identity-varied barb pairs per side as four connected,

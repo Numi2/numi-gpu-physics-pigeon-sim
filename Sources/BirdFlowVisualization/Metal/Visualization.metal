@@ -5545,6 +5545,9 @@ inline float3 showcaseCrowLinearRadiance(
     float headNeckVane=featherClass==8u?surfaceVane:0.0f;
     float foreheadVane=featherClass==9u?surfaceVane:0.0f;
     float gularVane=featherClass==10u?surfaceVane:0.0f;
+    float gularBridgeMaterialBlend=gularVane*saturate(
+        (material-0.14f)/0.01f
+    );
     float deepUnderplumageVane=featherClass==16u?surfaceVane:0.0f;
     float ventralFiberMaterial=featherClass==7u?explicitCurve:0.0f;
     float bodyContourVane=max(
@@ -5568,7 +5571,10 @@ inline float3 showcaseCrowLinearRadiance(
     );
     classSheenScale=mix(classSheenScale,0.60f,headNeckVane);
     classSheenScale=mix(classSheenScale,0.38f,foreheadVane);
-    classSheenScale=mix(classSheenScale,0.52f,gularVane);
+    float gularBridgeOpticalBlend=gularBridgeMaterialBlend
+        *smoothstep(0.35f,0.88f,axial);
+    float gularSheenScale=mix(0.52f,0.25f,gularBridgeOpticalBlend);
+    classSheenScale=mix(classSheenScale,gularSheenScale,gularVane);
     classSheenScale=mix(classSheenScale,0.12f,deepUnderplumageVane);
     float3 featherAxis=explicitCurve>0.5f
         ?safeNormalizeCrow(

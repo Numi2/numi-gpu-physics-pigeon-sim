@@ -20,6 +20,9 @@ struct CrowCranialFeatherSample: Equatable {
   let maximumWidthMeters: Float
   let camberMeters: Float
   let materialVariation: Float
+  /// Posterior gular-only optical handoff encoded in the otherwise body-range
+  /// material tag. Geometry and semantic class remain unchanged.
+  let gularBridgeMaterialBlend: Float
   let surfaceFeatherClass: UInt32
 }
 
@@ -39,6 +42,7 @@ enum CrowCranialFeatherTracts {
   static let anteriorLoftLimit: Float = 1.02
   static let standardCircumferentialOverlapScale: Float = 0.62
   static let throatCircumferentialOverlapScale: Float = 0.75
+  static let gularBridgeMaterialTagScale: Float = 0.01
 
   static var axialRings: [CrowCranialLoftRing] {
     CrowCranialAnatomy.sampledLoftRings()
@@ -244,6 +248,10 @@ enum CrowCranialFeatherTracts {
         camberMeters: (0.00055 + (region == .nape ? 0.00020 : 0))
           * (1 + 0.08 * materialIdentity),
         materialVariation: materialIdentity,
+        gularBridgeMaterialBlend: gularBridgeMaterialBlend(
+          region: region,
+          ring: ring
+        ),
         surfaceFeatherClass: surfaceFeatherClass(for: region)
       )
     )
@@ -271,6 +279,17 @@ enum CrowCranialFeatherTracts {
     region == .throat
       ? throatCircumferentialOverlapScale
       : standardCircumferentialOverlapScale
+  }
+
+  /// Smoothly limits collar suppression to the posterior throat rings that
+  /// overlap the class-7 bridge. Anterior gular material remains unchanged.
+  static func gularBridgeMaterialBlend(
+    region: CrowCranialFeatherRegion,
+    ring: CrowCranialLoftRing
+  ) -> Float {
+    guard region == .throat else { return 0 }
+    let bounded = min(max((0.52 - ring.axialFraction) / 0.84, 0), 1)
+    return bounded * bounded * (3 - 2 * bounded)
   }
 
   /// Below full output density, preserve broad head/body material bands; the
@@ -302,6 +321,7 @@ enum CrowCranialFeatherTracts {
       maximumWidthMeters: source.maximumWidthMeters,
       camberMeters: source.camberMeters,
       materialVariation: source.materialVariation,
+      gularBridgeMaterialBlend: source.gularBridgeMaterialBlend,
       surfaceFeatherClass: surfaceFeatherClass
     )
   }

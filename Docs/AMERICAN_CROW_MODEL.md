@@ -359,6 +359,34 @@ readable. This rejects additional terminal amplitude as a complete solution;
 the next pass must localize the material or neighboring-tract handoff instead.
 This is executable simulated morphology, not an anatomical measurement.
 
+Schema `23` next measured every ordered cross-class adjacency in scene-linear
+luminance. Across that same lateral-front sequence, the collar arc is the
+class-`7` body/throat bridge against class-`10` gular vanes; class `8/10` is a
+separate, higher cranial boundary and class `6/7` spans the flank. Uniformly
+brightening class `10` increased the target mean jump by roughly `9...18%`.
+Uniformly reducing its sheen could lower the mean by as much as `31.5%`, but
+increased the maximum jump by `29%`, so those global material experiments were
+rejected.
+
+The retained pass encodes a `0...1` posterior-gular weight in the otherwise
+body-range `0.14...0.15` material tag and reconstructs it only for class `10`.
+The optical weight is then multiplied by a distal-vane smoothstep over axial
+coordinates `0.35...0.88`; geometry, semantic class, projected-size LOD, and
+all non-optical AOV fields remain unchanged. Mean class-`7/10` boundary
+contrast over five frames falls from `0.0060948643` to `0.0052184042`
+(`14.3803%`), and its signed class-`7` minus class-`10` difference moves from
+`-0.0033948848` to `-0.0023696415`. The maximum changes from `0.03567496` to
+`0.03602520`. Class-`8/10` mean contrast changes by `+1.3609%`; class-`6/10`
+falls `7.6966%`. Minimum full-frame SSIM is `0.999981`.
+
+At the previously unused rear-high yaw/pitch `(2.45, 0.30)`, distance `0.55 m`,
+the five beauty frames are pixel-exact and every AOV field except duration is
+exact. The inspected simulated frame retains the existing back, folded-wing,
+tail, leg, and substrate silhouette. It also keeps visible future targets,
+notably smoother wing-layer transitions and under-tail/body continuity. The
+pass therefore qualifies a local optical handoff and rejects broad material
+tuning; it does not establish perceptual equivalence or a measured crow BSDF.
+
 At showcase material quality, body-feather anisotropy now resolves two bounded
 optical barb banks around a stable feather-local axis. The lobe pair follows
 the same identity and axial phase as its vane while body-class transverse

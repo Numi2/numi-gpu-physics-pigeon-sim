@@ -736,6 +736,33 @@ shows a less uniform cervical rake with no opened neck seam, but the collar is
 still visible. The pass is therefore retained as terminal-morphology progress,
 not evidence that the neck handoff is solved or that the offsets are measured.
 
+The subsequent schema-`23` boundary trace makes the remaining ownership more
+specific. The visible collar samples lie on class `7/10`: the body/throat
+bridge is locally darker than gular class `10` by a five-frame signed mean of
+`-0.0033948848` scene-linear luminance. Class `8/10` sits above it on the head,
+and the broad class `6/7` boundary belongs to the flank. This rules out more
+cervical displacement as the next intervention. Whole-class gular material
+changes were also rejected: the strongest mean reduction increased the local
+maximum jump from `0.03567496` to `0.046025`.
+
+Only posterior throat records now carry a smooth optical-handoff weight. The
+shader applies it toward the distal vane, leaving roots, geometry, semantic
+identity, anterior gular response, and the rest of class `10` untouched. At
+the established lateral-front gate, mean class-`7/10` contrast falls `14.3803%`
+to `0.0052184042`; all top-level AOV fields except class luminance/boundary
+statistics and nondeterministic GPU duration are exact. Hole pixels remain
+`4,5,4,3,4`, components `3,5,4,3,3`, largest holes `2,1,1,1,2`, and expected
+apertures zero. Minimum SSIM is `0.999981`.
+
+A new rear-high `(2.45, 0.30)` view from `0.55 m` is pixel-exact because the
+tagged distal gular region is occluded there. Its hole pixels
+`19,11,22,29,19`, components `8,6,8,12,8`, largest holes `10,4,11,16,10`, and
+expected apertures `6,4,6,5,6` are exact. Inspection shows no leakage into the
+back, folded wings, tail, legs, or silhouette. It also confirms that wing-layer
+smoothness and under-tail/body continuity remain open realism work. This is a
+simulated local optical correction, not a real-feather anatomical or material
+measurement.
+
 The next body-gap trace separated an actual femoral insertion seam from the
 larger intentional spaces bounded by class-`11` retracting toes. At high-side
 phase `0.3125`, the temporal identity AOV mapped the nine-pixel class-`0`/

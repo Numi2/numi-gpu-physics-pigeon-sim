@@ -178,6 +178,17 @@ error is exact, and the complete hole/component/largest-hole/aperture series is
 unchanged. Fully covered AOV deltas are `+7,+1,-2,-3,+7`; the localized beauty
 change has minimum SSIM `0.999853`. This is a topology and temporal-parity gate,
 not a claim that the remaining visible collar has been eliminated.
+The ordered class-boundary records localize that collar to class `7/10`, with
+class `7` darker by a five-frame signed mean of `-0.0033948848`. The retained
+posterior/distal gular optical handoff lowers mean absolute contrast from
+`0.0060948643` to `0.0052184042` (`14.3803%`) while every top-level field other
+than class luminance, class-boundary luminance, and GPU duration remains exact.
+The maximum jump changes only from `0.03567496` to `0.03602520`; class `8/10`
+mean contrast changes `+1.3609%`. The five-frame beauty minimum SSIM is
+`0.999981`. A rear-high `(2.45, 0.30)` safety view is pixel-exact and AOV-exact
+apart from duration, demonstrating that the class-`10` tag does not alter
+occluded geometry or leak into other tracts. These statistics qualify
+localization and bounded optical effect, not perceptual realism.
 Schema `23` separately records projected-size barbule candidates,
 frustum-visible and retained detailed owners, procedural barbule vertex count,
 and the exact number of identity pixels won by geometry kind `4`. This
