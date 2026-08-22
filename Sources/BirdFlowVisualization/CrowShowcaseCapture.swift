@@ -1497,7 +1497,7 @@ private final class CrowShowcaseRenderer {
       encoder.setVertexBytes(
         &cameraUniforms,
         length: MemoryLayout<CrowTemporalCameraUniforms>.stride,
-        index: 2
+        index: 3
       )
       encoder.setFragmentBytes(
         &cameraUniforms,
@@ -1509,7 +1509,7 @@ private final class CrowShowcaseRenderer {
         encoder.drawPrimitives(
           type: .triangle,
           indirectBuffer: batch.indirectDrawBuffer,
-          indirectBufferOffset: 0
+          indirectBufferOffset: batch.indirectDrawBufferOffset
         )
       }
     }
@@ -1632,7 +1632,7 @@ private final class CrowShowcaseRenderer {
       identityEncoder.setVertexBytes(
         &cameraUniforms,
         length: MemoryLayout<CrowTemporalCameraUniforms>.stride,
-        index: 2
+        index: 3
       )
       for batch in bodyVaneFrame.batches {
         bodyVaneGeometryDeformer.bindRenderResources(
@@ -1642,7 +1642,7 @@ private final class CrowShowcaseRenderer {
         identityEncoder.drawPrimitives(
           type: .triangle,
           indirectBuffer: batch.indirectDrawBuffer,
-          indirectBufferOffset: 0
+          indirectBufferOffset: batch.indirectDrawBufferOffset
         )
       }
     }
@@ -1819,6 +1819,14 @@ private final class CrowShowcaseRenderer {
       ? inputPixels * (32 + 4) * sampleCount
       : 0
     let outputBytes = outputPixels * (4 + (temporalEnabled ? 8 : 0))
+    let bodyVaneRecordCount =
+      bodyVaneFrame.map {
+        bodyVaneGeometryDeformer?.activeRecordCount(for: $0) ?? 0
+      } ?? 0
+    let bodyVaneExpandedVertexCount =
+      bodyVaneFrame.map {
+        bodyVaneGeometryDeformer?.expandedVertexCount(for: $0) ?? 0
+      } ?? 0
     let ventralBarbCandidateRecordCount =
       ventralBarbGeometryDeformer?
       .candidateRecordCount(projectedPixelsPerMeter: projectedPixelsPerMeter) ?? 0
@@ -1874,9 +1882,15 @@ private final class CrowShowcaseRenderer {
         (commandBuffer.gpuEndTime - commandBuffer.gpuStartTime) * 1_000
       ),
       allocatedRenderTargetBytes: resolvedInputBytes + multisampleBytes + outputBytes,
-      bodyVaneRecordCount: bodyVaneFrame?.recordCount ?? 0,
-      bodyVaneBatchCount: bodyVaneFrame?.batches.count ?? 0,
-      bodyVaneRecordBytes: bodyVaneFrame?.recordBytes ?? 0,
+      bodyVaneInputRecordCount: bodyVaneFrame?.inputRecordCount ?? 0,
+      bodyVaneInputRecordBytes: bodyVaneFrame?.inputRecordBytes ?? 0,
+      bodyVaneRecordCount: bodyVaneRecordCount,
+      bodyVaneBatchCount: bodyVaneFrame.map {
+        bodyVaneGeometryDeformer?.topologyCounts(for: $0).prefix(7)
+          .filter { $0 > 0 }.count ?? 0
+      } ?? 0,
+      bodyVaneRecordBytes: bodyVaneRecordCount
+        * MemoryLayout<CrowBodyVaneRecordGPU>.stride,
       bodyVaneRetainedRecordCapacityBytes:
         bodyVaneGeometryDeformer?.retainedRecordCapacityBytes ?? 0,
       bodyVaneRetainedIndirectDrawBytes:
@@ -1884,7 +1898,7 @@ private final class CrowShowcaseRenderer {
       bodyVaneRecordBufferAllocationCount:
         bodyVaneFrame?.recordBufferAllocationCount ?? 0,
       bodyVaneRasterVertexInvocationCount:
-        bodyVaneFrame?.expandedVertexCount ?? 0,
+        bodyVaneExpandedVertexCount,
       bodyVaneVertexGenerationMode: bodyVaneFrame == nil
         ? "cpu-surface-fallback"
         : "gpu-procedural-instanced-indirect",

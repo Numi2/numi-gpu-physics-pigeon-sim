@@ -745,10 +745,14 @@ func estimatedStandingCrowCaptureProducesLoopClosedFrames() throws {
     try VisualizationBackend(device: device).supportsMeshShaders
     ? "gpu-mesh-threadgroup-8-vertex-indexed"
     : "gpu-procedural-vertex-pulling"
-  #expect(audit.schemaVersion == 19)
+  #expect(audit.schemaVersion == 20)
   #expect(
     audit.frames.allSatisfy {
-      $0.bodyVaneRecordCount > 0
+      $0.bodyVaneInputRecordCount == 3_212
+        && $0.bodyVaneInputRecordBytes
+          == $0.bodyVaneInputRecordCount
+          * MemoryLayout<CrowBodyVaneRecordGPU>.stride
+        && $0.bodyVaneRecordCount > 0
         && $0.bodyVaneBatchCount > 0
         && $0.bodyVaneRecordBytes
           == $0.bodyVaneRecordCount * MemoryLayout<CrowBodyVaneRecordGPU>.stride
@@ -756,7 +760,7 @@ func estimatedStandingCrowCaptureProducesLoopClosedFrames() throws {
         && $0.bodyVaneRetainedIndirectDrawBytes
           >= $0.bodyVaneBatchCount
           * MemoryLayout<DrawPrimitivesIndirectArguments>.stride
-        && $0.bodyVaneRecordBufferAllocationCount >= $0.bodyVaneBatchCount
+        && (1...3).contains($0.bodyVaneRecordBufferAllocationCount)
         && $0.bodyVaneRasterVertexInvocationCount > 0
         && $0.bodyVaneVertexGenerationMode
           == "gpu-procedural-instanced-indirect"

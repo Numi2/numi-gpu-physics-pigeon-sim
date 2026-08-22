@@ -111,15 +111,18 @@ normal remains within `0.06 degrees`. At a new front-dorsal yaw/pitch
 metrics, the expected lower-body apertures, and normal-unit error are exact
 against the previous renderer; beauty SSIM is `0.999997`. This qualifies live
 Metal geometry ownership and visual parity, not measured anatomy or a speedup.
-Those records now reuse three in-flight storage slots and one retained indirect
-draw buffer per active topology instead of allocating fresh buffers every
-frame. In a new underside-port five-frame gate at yaw/pitch `(-0.62, -0.52)`
-and `0.48 m`, two batches carry `1,606` active records (`282,656` bytes) and
-`285,984` raster vertex invocations per frame. Residency warms to `847,968`
-record bytes plus `96` indirect bytes; allocation count advances `2, 4, 6, 6,
-6`, proving steady-state reuse. All five PNGs are byte-exact against the former
-direct-draw path. These counters exclude audit-only expanded output and do not
-constitute a performance claim.
+All `3,212` temporal records now enter three retained full-inventory slots;
+Metal applies the established density predicate, classifies seven possible
+tessellation topologies, scans stable offsets, emits compact record indices,
+and prepares indirect beauty/identity draws. The CPU grouping path remains only
+as an audit oracle. At yaw/pitch `(-1.12, 0.26)` and `0.50 m`, Metal selects
+the same `1,606` records in two active topology bins and requests `285,984`
+raster vertex invocations. Each full slot is `565,312` bytes, settles to
+`1,695,936` bytes across three slots, and shares `336` bytes of retained
+indirect arguments; allocation count advances `1, 2, 3, 3, 3`. All five
+left-flank PNGs are byte-exact against the previous CPU-selected renderer.
+These counters exclude audit-only expanded output and do not constitute a
+performance claim.
 The same retained path now owns all `12` rectrices throughout takeoff. Their
 stable roots unfold from the compact standing stack into the open-flight pose
 over transition progress `0.08...0.62`, while preserving full vane morphology
@@ -188,7 +191,7 @@ same-class luminance variation from `0.001235` to `0.001502` without changing
 the `0.105038` class maximum. This is simulated close-range mesostructure, not
 a measured barb count or a perceptual-realism qualification.
 The exact identity AOV now also reports visible and fully covered pixels for
-every persistent primary, secondary, and rectrix as schema `19`. The same
+every persistent primary, secondary, and rectrix as schema `20`. The same
 report retains the longest exterior-connected row/column slots with exact
 boundary classes, packed identities, and procedural owners, so open shoulder
 gaps are traceable without treating every silhouette concavity as a defect.

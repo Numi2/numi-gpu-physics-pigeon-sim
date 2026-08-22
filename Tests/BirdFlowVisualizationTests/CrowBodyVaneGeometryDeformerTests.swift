@@ -8,6 +8,7 @@ import simd
 func bodyVanesRetainCompactIdentityStableTemporalRecords() {
   #expect(MemoryLayout<CrowBodyVaneRecordGPU>.stride == 176)
   #expect(MemoryLayout<CrowBodyVaneGeometryUniforms>.stride == 16)
+  #expect(MemoryLayout<CrowBodyVaneSelectionUniforms>.stride == 32)
   let first = CrowBodyVaneRecords.groupedRecords(
     currentBodyCenter: SIMD3<Float>(0.01, -0.02, 0.03),
     previousBodyCenter: SIMD3<Float>(-0.01, 0.02, -0.03),
@@ -32,6 +33,17 @@ func bodyVanesRetainCompactIdentityStableTemporalRecords() {
   #expect(Set(records.map(\.identity)).count == records.count)
   #expect(first.keys.allSatisfy { $0.widthSections == 1 || $0.widthSections >= 5 })
   #expect(first.keys.allSatisfy { $0.verticesPerInstance > 0 })
+  #expect(CrowBodyVaneRecords.productionTopologies.count == 7)
+  #expect(
+    CrowBodyVaneRecords.temporalRecords(
+      currentBodyCenter: .zero,
+      previousBodyCenter: .zero,
+      currentNeckPose: nil,
+      previousNeckPose: nil,
+      currentDeployment: 1,
+      previousDeployment: 1
+    ).count == 3_212
+  )
 }
 
 @Test("Metal procedural body vanes match the Swift geometry oracle")
@@ -55,11 +67,12 @@ func metalProceduralBodyVanesMatchSwiftGeometryOracle() throws {
   commandBuffer.waitUntilCompleted()
   #expect(commandBuffer.status == .completed)
   #expect(frame.auditReadbackReady)
-  #expect(frame.recordCount == 3_212)
-  #expect(frame.expandedVertexCount > 0)
+  #expect(frame.inputRecordCount == 3_212)
+  #expect(deformer.activeRecordCount(for: frame) == 3_212)
+  #expect(deformer.expandedVertexCount(for: frame) > 0)
 
-  for batch in frame.batches {
-    let records = records(in: batch)
+  for batch in frame.batches where batch.auditRecordCount > 0 {
+    let records = deformer.auditRecords(for: batch)
     let vertices = deformer.vertices(for: batch)
     for recordIndex in Set([0, max(0, records.count - 1)]) {
       let record = records[recordIndex]
@@ -131,46 +144,88 @@ func bodyVaneProductionStorageIsTripleBufferedAndIndirect() throws {
   }
 
   let batchCount = frames[0].batches.count
-  #expect(batchCount > 0)
+  #expect(batchCount == CrowBodyVaneRecords.productionTopologies.count)
   #expect(frames.map(\.slot) == [0, 1, 2, 0])
-  #expect(frames[0].recordBufferAllocationCount == batchCount)
-  #expect(frames[1].recordBufferAllocationCount == batchCount * 2)
-  #expect(frames[2].recordBufferAllocationCount == batchCount * 3)
-  #expect(frames[3].recordBufferAllocationCount == batchCount * 3)
-  #expect(frames.allSatisfy { $0.recordCount == 3_212 })
+  #expect(frames.map(\.recordBufferAllocationCount) == [1, 2, 3, 3])
+  #expect(frames.allSatisfy { $0.inputRecordCount == 3_212 })
   #expect(
     frames.allSatisfy {
-      $0.recordBytes == $0.recordCount
+      $0.inputRecordBytes == $0.inputRecordCount
         * MemoryLayout<CrowBodyVaneRecordGPU>.stride
     }
   )
-  #expect(frames.allSatisfy { $0.recordCapacityBytes >= $0.recordBytes })
+  #expect(frames.allSatisfy { $0.recordCapacityBytes >= $0.inputRecordBytes })
+  #expect(frames.allSatisfy { deformer.activeRecordCount(for: $0) == 3_212 })
 
   for index in 0..<batchCount {
     let first = frames[0].batches[index]
     let reused = frames[3].batches[index]
     #expect(first.topology == reused.topology)
     #expect(first.recordBuffer === reused.recordBuffer)
+    #expect(first.workBuffer === reused.workBuffer)
     #expect(first.indirectDrawBuffer === reused.indirectDrawBuffer)
-    let arguments = reused.indirectDrawBuffer.contents().bindMemory(
-      to: DrawPrimitivesIndirectArguments.self,
-      capacity: 1
-    ).pointee
+    let arguments = deformer.drawArguments(for: reused)
     #expect(arguments.vertexCount == UInt32(reused.vertexCount))
-    #expect(arguments.instanceCount == UInt32(reused.recordCount))
     #expect(arguments.vertexStart == 0)
-    #expect(arguments.baseInstance == 0)
+    #expect(
+      arguments.instanceCount
+        == deformer.topologyCounts(for: frames[3])[index]
+    )
   }
 }
 
-private func records(
-  in batch: CrowBodyVaneGeometryBatchFrame
-) -> [CrowBodyVaneRecordGPU] {
-  let pointer = batch.recordBuffer.contents().bindMemory(
-    to: CrowBodyVaneRecordGPU.self,
-    capacity: batch.recordCount
-  )
-  return Array(UnsafeBufferPointer(start: pointer, count: batch.recordCount))
+@Test("Metal body vane LOD selection matches the deterministic CPU oracle")
+func metalBodyVaneLODSelectionMatchesCPUOracle() throws {
+  guard let device = MTLCreateSystemDefaultDevice() else { return }
+  let backend = try VisualizationBackend(device: device)
+  let deformer = try CrowBodyVaneGeometryDeformer(backend: backend)
+  for projectedPixelsPerMeter: Float in [800, 1_000, 1_600, 20_000] {
+    let allRecords = CrowBodyVaneRecords.temporalRecords(
+      currentBodyCenter: .zero,
+      previousBodyCenter: .zero,
+      currentNeckPose: nil,
+      previousNeckPose: nil,
+      currentDeployment: 1,
+      previousDeployment: 1
+    )
+    let expected = CrowBodyVaneRecords.groupedRecords(
+      currentBodyCenter: .zero,
+      previousBodyCenter: .zero,
+      currentNeckPose: nil,
+      previousNeckPose: nil,
+      currentDeployment: 1,
+      previousDeployment: 1,
+      projectedPixelsPerMeter: projectedPixelsPerMeter
+    )
+    let commandBuffer = try #require(backend.queue.makeCommandBuffer())
+    let frame = try deformer.encode(
+      currentBodyCenter: .zero,
+      previousBodyCenter: .zero,
+      currentNeckPose: nil,
+      previousNeckPose: nil,
+      currentDeployment: 1,
+      previousDeployment: 1,
+      projectedPixelsPerMeter: projectedPixelsPerMeter,
+      commandBuffer: commandBuffer
+    )
+    commandBuffer.commit()
+    commandBuffer.waitUntilCompleted()
+    #expect(commandBuffer.status == .completed)
+    let expectedCount = expected.values.reduce(0) { $0 + $1.count }
+    #expect(deformer.activeRecordCount(for: frame) == expectedCount)
+    for (topologyIndex, topology) in CrowBodyVaneRecords.productionTopologies.enumerated() {
+      let indices = deformer.selectedRecordIndices(
+        for: frame,
+        topologyIndex: topologyIndex
+      )
+      let selectedIdentities = indices.map { allRecords[Int($0)].identity }
+      let expectedIdentities = (expected[topology] ?? []).map(\.identity)
+      #expect(selectedIdentities == expectedIdentities)
+      let arguments = deformer.drawArguments(for: frame.batches[topologyIndex])
+      #expect(arguments.instanceCount == UInt32(expectedIdentities.count))
+      #expect(arguments.vertexCount == UInt32(topology.verticesPerInstance))
+    }
+  }
 }
 
 extension SIMD4 where Scalar == Float {

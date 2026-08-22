@@ -86,6 +86,11 @@ struct CrowBodyVaneRecordGPU {
 
 struct CrowBodyVaneGeometryUniforms { uint4 counts; };
 
+struct CrowBodyVaneSelectionUniforms {
+    float4 selection;
+    uint4 counts;
+};
+
 struct CrowVentralRachisCurveRecordGPU {
     float4 rootAndPennaceousStart;
     float4 tipAndCamber;
@@ -3007,6 +3012,107 @@ inline uint2 crowBodyVaneGridIndex(
     return uint2(cell/geometry.counts.y,cell%geometry.counts.y)+corner;
 }
 
+inline uint2 crowBodyVaneTopologySections(uint topologyIndex) {
+    switch(topologyIndex){
+        case 0u: return uint2(3u,1u);
+        case 1u: return uint2(4u,1u);
+        case 2u: return uint2(6u,5u);
+        case 3u: return uint2(8u,5u);
+        case 4u: return uint2(10u,5u);
+        case 5u: return uint2(12u,5u);
+        default: return uint2(16u,7u);
+    }
+}
+
+inline uint crowBodyVaneTopologyIndex(
+    CrowBodyVaneRecordGPU record,
+    constant CrowBodyVaneSelectionUniforms& selection) {
+    float projectedPixelsPerMeter=selection.selection.x;
+    uint region=uint(record.morphology.y);
+    uint row=uint(record.morphology.z);
+    uint column=uint(record.morphology.w);
+    bool active=projectedPixelsPerMeter>=1400.0f
+        ||(projectedPixelsPerMeter>=900.0f
+            ?((row+column)%2u==0u)
+            :(region==0u?column%2u==0u
+                :(row%2u==0u&&column%2u==0u)));
+    if(!active){return 0xffffffffu;}
+    float lengthMeters=length(
+        record.currentTipAndMaximumWidth.xyz
+            -record.currentRootAndRootWidth.xyz
+    );
+    float projectedLength=max(0.0f,lengthMeters*projectedPixelsPerMeter);
+    bool cervical=region==0u;
+    if(projectedLength>=480.0f){return 6u;}
+    if(projectedLength>=120.0f){return cervical?4u:5u;}
+    if(projectedLength>=24.0f){return cervical?2u:3u;}
+    return cervical?0u:1u;
+}
+
+kernel void classifyCrowBodyVaneRecords(
+    device const CrowBodyVaneRecordGPU* records [[buffer(0)]],
+    device uint* topologyIndices [[buffer(1)]],
+    constant CrowBodyVaneSelectionUniforms& selection [[buffer(2)]],
+    uint index [[thread_position_in_grid]]) {
+    if(index>=selection.counts.x){return;}
+    topologyIndices[index]=crowBodyVaneTopologyIndex(records[index],selection);
+}
+
+kernel void scanCrowBodyVaneRecords(
+    device const uint* topologyIndices [[buffer(0)]],
+    device uint* topologyOffsets [[buffer(1)]],
+    device uint* topologyCounts [[buffer(2)]],
+    constant CrowBodyVaneSelectionUniforms& selection [[buffer(3)]],
+    uint index [[thread_position_in_grid]]) {
+    if(index>0u){return;}
+    uint counts[7]={0u,0u,0u,0u,0u,0u,0u};
+    for(uint recordIndex=0u;recordIndex<selection.counts.x;++recordIndex){
+        uint topologyIndex=topologyIndices[recordIndex];
+        if(topologyIndex<7u){
+            topologyOffsets[recordIndex]=counts[topologyIndex]++;
+        }else{
+            topologyOffsets[recordIndex]=0xffffffffu;
+        }
+    }
+    uint total=0u;
+    for(uint topologyIndex=0u;topologyIndex<7u;++topologyIndex){
+        topologyCounts[topologyIndex]=counts[topologyIndex];
+        total+=counts[topologyIndex];
+    }
+    topologyCounts[7]=total;
+}
+
+kernel void emitCrowBodyVaneWork(
+    device const uint* topologyIndices [[buffer(0)]],
+    device const uint* topologyOffsets [[buffer(1)]],
+    device const uint* topologyCounts [[buffer(2)]],
+    device uint* recordWork [[buffer(3)]],
+    constant CrowBodyVaneSelectionUniforms& selection [[buffer(4)]],
+    uint index [[thread_position_in_grid]]) {
+    if(index>=selection.counts.x){return;}
+    uint topologyIndex=topologyIndices[index];
+    if(topologyIndex>=7u){return;}
+    uint base=0u;
+    for(uint prior=0u;prior<topologyIndex;++prior){base+=topologyCounts[prior];}
+    recordWork[base+topologyOffsets[index]]=index;
+}
+
+kernel void prepareCrowBodyVaneIndirectWork(
+    device const uint* topologyCounts [[buffer(0)]],
+    device DrawPrimitivesIndirectArguments* arguments [[buffer(1)]],
+    uint topologyIndex [[thread_position_in_grid]]) {
+    if(topologyIndex>=7u){return;}
+    uint base=0u;
+    for(uint prior=0u;prior<topologyIndex;++prior){base+=topologyCounts[prior];}
+    uint2 sections=crowBodyVaneTopologySections(topologyIndex);
+    arguments[topologyIndex]={
+        sections.x*sections.y*6u,
+        topologyCounts[topologyIndex],
+        0u,
+        base
+    };
+}
+
 inline float3 crowBodyVanePoint(
     CrowBodyVaneRecordGPU record,
     constant CrowBodyVaneGeometryUniforms& geometry,
@@ -3117,12 +3223,13 @@ kernel void probeCrowBodyVaneVertices(
 
 vertex CrowRasterVertex crowBodyVaneAOVVertex(
     device const CrowBodyVaneRecordGPU* records [[buffer(0)]],
-    constant CrowBodyVaneGeometryUniforms& geometry [[buffer(1)]],
-    constant CrowTemporalCameraUniforms& camera [[buffer(2)]],
+    device const uint* recordWork [[buffer(1)]],
+    constant CrowBodyVaneGeometryUniforms& geometry [[buffer(2)]],
+    constant CrowTemporalCameraUniforms& camera [[buffer(3)]],
     uint vertexIndex [[vertex_id]],
     uint instanceIndex [[instance_id]]) {
     CrowFeatherVertexGPU source=crowBodyVaneProceduralVertex(
-        records,geometry,vertexIndex,instanceIndex
+        records,geometry,vertexIndex,recordWork[instanceIndex]
     );
     CrowRasterVertex out;
     uint featherClass=source.identity.w&255u;

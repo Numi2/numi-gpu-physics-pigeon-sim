@@ -14,10 +14,14 @@ struct CrowBodyVaneTopology: Hashable, Comparable {
 }
 
 struct CrowBodyVaneGeometryBatchFrame {
+  let topologyIndex: Int
   let topology: CrowBodyVaneTopology
   let recordBuffer: MTLBuffer
+  let workBuffer: MTLBuffer
   let indirectDrawBuffer: MTLBuffer
-  let recordCount: Int
+  let indirectDrawBufferOffset: Int
+  let auditRecordBuffer: MTLBuffer?
+  let auditRecordCount: Int
   let auditOutputBuffer: MTLBuffer?
 
   var vertexCount: Int { topology.verticesPerInstance }
@@ -26,11 +30,10 @@ struct CrowBodyVaneGeometryBatchFrame {
 struct CrowBodyVaneGeometryFrame {
   let slot: Int
   let batches: [CrowBodyVaneGeometryBatchFrame]
-  let recordCount: Int
-  let recordBytes: Int
+  let inputRecordCount: Int
+  let inputRecordBytes: Int
   let recordCapacityBytes: Int
   let recordBufferAllocationCount: Int
-  let expandedVertexCount: Int
   let auditReadbackReady: Bool
 }
 
@@ -42,35 +45,67 @@ final class CrowBodyVaneGeometryDeformer {
   private static let bufferedFrameCount = 3
 
   private let backend: VisualizationBackend
+  private let classifyPipeline: MTLComputePipelineState
+  private let scanPipeline: MTLComputePipelineState
+  private let emitPipeline: MTLComputePipelineState
+  private let indirectPipeline: MTLComputePipelineState
   private let auditPipeline: MTLComputePipelineState
-  private var recordBuffers: [[CrowBodyVaneTopology: MTLBuffer]]
-  private var indirectDrawBuffers: [[CrowBodyVaneTopology: MTLBuffer]]
+  private var recordBuffers: [MTLBuffer]
+  private let topologyIndexBuffers: [MTLBuffer]
+  private let topologyOffsetBuffers: [MTLBuffer]
+  private let topologyCountBuffers: [MTLBuffer]
+  private let workBuffers: [MTLBuffer]
+  private let indirectDrawBuffers: [MTLBuffer]
   private var nextSlot = 0
   private(set) var recordBufferAllocationCount = 0
 
   var retainedRecordCapacityBytes: Int {
-    recordBuffers.reduce(0) { total, slot in
-      total + slot.values.reduce(0) { $0 + $1.length }
-    }
+    recordBuffers.reduce(0) { $0 + $1.length }
   }
 
   var retainedIndirectDrawBytes: Int {
-    indirectDrawBuffers.reduce(0) { total, slot in
-      total + slot.values.reduce(0) { $0 + $1.length }
-    }
+    indirectDrawBuffers.reduce(0) { $0 + $1.length }
   }
 
   init(backend: VisualizationBackend) throws {
     self.backend = backend
+    classifyPipeline = try backend.compute("classifyCrowBodyVaneRecords")
+    scanPipeline = try backend.compute("scanCrowBodyVaneRecords")
+    emitPipeline = try backend.compute("emitCrowBodyVaneWork")
+    indirectPipeline = try backend.compute("prepareCrowBodyVaneIndirectWork")
     auditPipeline = try backend.compute("probeCrowBodyVaneVertices")
-    recordBuffers = Array(
-      repeating: [CrowBodyVaneTopology: MTLBuffer](),
-      count: Self.bufferedFrameCount
-    )
-    indirectDrawBuffers = Array(
-      repeating: [CrowBodyVaneTopology: MTLBuffer](),
-      count: Self.bufferedFrameCount
-    )
+    let maximumRecordCount = CrowBodyFeatherTracts.samples().count
+    recordBuffers = try (0..<Self.bufferedFrameCount).map { _ in
+      try backend.buffer(length: 16, shared: true)
+    }
+    topologyIndexBuffers = try (0..<Self.bufferedFrameCount).map { _ in
+      try backend.buffer(
+        length: maximumRecordCount * MemoryLayout<UInt32>.stride,
+        shared: true
+      )
+    }
+    topologyOffsetBuffers = try (0..<Self.bufferedFrameCount).map { _ in
+      try backend.buffer(
+        length: maximumRecordCount * MemoryLayout<UInt32>.stride,
+        shared: true
+      )
+    }
+    topologyCountBuffers = try (0..<Self.bufferedFrameCount).map { _ in
+      try backend.buffer(length: 8 * MemoryLayout<UInt32>.stride, shared: true)
+    }
+    workBuffers = try (0..<Self.bufferedFrameCount).map { _ in
+      try backend.buffer(
+        length: maximumRecordCount * MemoryLayout<UInt32>.stride,
+        shared: true
+      )
+    }
+    indirectDrawBuffers = try (0..<Self.bufferedFrameCount).map { _ in
+      try backend.buffer(
+        length: CrowBodyVaneRecords.productionTopologies.count
+          * MemoryLayout<DrawPrimitivesIndirectArguments>.stride,
+        shared: true
+      )
+    }
   }
 
   func encode(
@@ -86,117 +121,183 @@ final class CrowBodyVaneGeometryDeformer {
   ) throws -> CrowBodyVaneGeometryFrame {
     let slot = nextSlot
     nextSlot = (nextSlot + 1) % Self.bufferedFrameCount
-    let grouped = CrowBodyVaneRecords.groupedRecords(
+    let records = CrowBodyVaneRecords.temporalRecords(
       currentBodyCenter: currentBodyCenter,
       previousBodyCenter: previousBodyCenter,
       currentNeckPose: currentNeckPose,
       previousNeckPose: previousNeckPose,
       currentDeployment: currentDeployment,
-      previousDeployment: previousDeployment,
-      projectedPixelsPerMeter: projectedPixelsPerMeter
+      previousDeployment: previousDeployment
     )
-    var batches: [CrowBodyVaneGeometryBatchFrame] = []
-    var recordBytes = 0
-    var recordCapacityBytes = 0
-    var expandedVertexCount = 0
-    for topology in grouped.keys.sorted() {
-      guard let records = grouped[topology], !records.isEmpty else { continue }
-      let requiredRecordBytes =
-        records.count
-        * MemoryLayout<CrowBodyVaneRecordGPU>.stride
-      let recordBuffer: MTLBuffer
-      if let existing = recordBuffers[slot][topology],
-        existing.length >= requiredRecordBytes
-      {
-        recordBuffer = existing
-      } else {
-        let created = try backend.buffer(length: requiredRecordBytes, shared: true)
-        created.label =
-          "Body vane records slot \(slot) \(topology.axialSections)x\(topology.widthSections)"
-        recordBuffers[slot][topology] = created
-        recordBufferAllocationCount += 1
-        recordBuffer = created
+    let requiredRecordBytes =
+      records.count
+      * MemoryLayout<CrowBodyVaneRecordGPU>.stride
+    if recordBuffers[slot].length < requiredRecordBytes {
+      let created = try backend.buffer(length: requiredRecordBytes, shared: true)
+      created.label = "Full body vane temporal records slot \(slot)"
+      recordBuffers[slot] = created
+      recordBufferAllocationCount += 1
+    }
+    records.withUnsafeBytes { bytes in
+      if let baseAddress = bytes.baseAddress, !bytes.isEmpty {
+        memcpy(recordBuffers[slot].contents(), baseAddress, bytes.count)
       }
-      records.withUnsafeBytes { bytes in
-        if let baseAddress = bytes.baseAddress, !bytes.isEmpty {
-          memcpy(recordBuffer.contents(), baseAddress, bytes.count)
-        }
-      }
-      let indirectDrawBuffer: MTLBuffer
-      if let existing = indirectDrawBuffers[slot][topology] {
-        indirectDrawBuffer = existing
-      } else {
-        let created = try backend.buffer(
-          length: MemoryLayout<DrawPrimitivesIndirectArguments>.stride,
-          shared: true
-        )
-        created.label =
-          "Body vane indirect draw slot \(slot) \(topology.axialSections)x\(topology.widthSections)"
-        indirectDrawBuffers[slot][topology] = created
-        indirectDrawBuffer = created
-      }
-      let drawArguments = DrawPrimitivesIndirectArguments(
-        vertexCount: UInt32(topology.verticesPerInstance),
-        instanceCount: UInt32(records.count),
-        vertexStart: 0,
-        baseInstance: 0
+    }
+    memset(
+      topologyCountBuffers[slot].contents(),
+      0,
+      8 * MemoryLayout<UInt32>.stride
+    )
+    memset(
+      indirectDrawBuffers[slot].contents(),
+      0,
+      CrowBodyVaneRecords.productionTopologies.count
+        * MemoryLayout<DrawPrimitivesIndirectArguments>.stride
+    )
+    var selection = CrowBodyVaneSelectionUniforms(
+      selection: SIMD4<Float>(projectedPixelsPerMeter, 0, 0, 0),
+      counts: SIMD4<UInt32>(
+        UInt32(records.count),
+        UInt32(CrowBodyVaneRecords.productionTopologies.count),
+        0,
+        0
       )
-      _ = withUnsafeBytes(of: drawArguments) { bytes in
-        memcpy(indirectDrawBuffer.contents(), bytes.baseAddress!, bytes.count)
-      }
-      recordBytes += requiredRecordBytes
-      recordCapacityBytes += recordBuffer.length
-      let batchVertexCount = topology.verticesPerInstance * records.count
-      expandedVertexCount += batchVertexCount
-      let auditOutput: MTLBuffer?
-      if auditReadback {
-        let output = try backend.buffer(
-          length: batchVertexCount * MemoryLayout<CrowFeatherVertexGPU>.stride,
+    )
+    guard let classify = commandBuffer.makeComputeCommandEncoder() else {
+      throw VisualizationError.pipeline("crow body vane selection encoder")
+    }
+    classify.label = "Classify full body vane inventory"
+    classify.setBuffer(recordBuffers[slot], offset: 0, index: 0)
+    classify.setBuffer(topologyIndexBuffers[slot], offset: 0, index: 1)
+    classify.setBytes(
+      &selection,
+      length: MemoryLayout<CrowBodyVaneSelectionUniforms>.stride,
+      index: 2
+    )
+    backend.dispatch1D(classify, pipeline: classifyPipeline, count: records.count)
+    classify.endEncoding()
+
+    guard let scan = commandBuffer.makeComputeCommandEncoder() else {
+      throw VisualizationError.pipeline("crow body vane selection scan")
+    }
+    scan.label = "Scan body vane topology selection"
+    scan.setBuffer(topologyIndexBuffers[slot], offset: 0, index: 0)
+    scan.setBuffer(topologyOffsetBuffers[slot], offset: 0, index: 1)
+    scan.setBuffer(topologyCountBuffers[slot], offset: 0, index: 2)
+    scan.setBytes(
+      &selection,
+      length: MemoryLayout<CrowBodyVaneSelectionUniforms>.stride,
+      index: 3
+    )
+    backend.dispatch1D(scan, pipeline: scanPipeline, count: 1)
+    scan.endEncoding()
+
+    guard let emit = commandBuffer.makeComputeCommandEncoder() else {
+      throw VisualizationError.pipeline("crow body vane compact work encoder")
+    }
+    emit.label = "Emit compact body vane topology work"
+    emit.setBuffer(topologyIndexBuffers[slot], offset: 0, index: 0)
+    emit.setBuffer(topologyOffsetBuffers[slot], offset: 0, index: 1)
+    emit.setBuffer(topologyCountBuffers[slot], offset: 0, index: 2)
+    emit.setBuffer(workBuffers[slot], offset: 0, index: 3)
+    emit.setBytes(
+      &selection,
+      length: MemoryLayout<CrowBodyVaneSelectionUniforms>.stride,
+      index: 4
+    )
+    backend.dispatch1D(emit, pipeline: emitPipeline, count: records.count)
+    emit.endEncoding()
+
+    guard let prepare = commandBuffer.makeComputeCommandEncoder() else {
+      throw VisualizationError.pipeline("crow body vane indirect-work encoder")
+    }
+    prepare.label = "Prepare body vane indirect draws"
+    prepare.setBuffer(topologyCountBuffers[slot], offset: 0, index: 0)
+    prepare.setBuffer(indirectDrawBuffers[slot], offset: 0, index: 1)
+    backend.dispatch1D(
+      prepare,
+      pipeline: indirectPipeline,
+      count: CrowBodyVaneRecords.productionTopologies.count
+    )
+    prepare.endEncoding()
+
+    let auditGroups =
+      auditReadback
+      ? CrowBodyVaneRecords.groupedRecords(
+        currentBodyCenter: currentBodyCenter,
+        previousBodyCenter: previousBodyCenter,
+        currentNeckPose: currentNeckPose,
+        previousNeckPose: previousNeckPose,
+        currentDeployment: currentDeployment,
+        previousDeployment: previousDeployment,
+        projectedPixelsPerMeter: projectedPixelsPerMeter
+      )
+      : [:]
+    var batches: [CrowBodyVaneGeometryBatchFrame] = []
+    for (topologyIndex, topology) in CrowBodyVaneRecords.productionTopologies.enumerated() {
+      let auditRecords = auditGroups[topology] ?? []
+      let auditRecordBuffer: MTLBuffer?
+      let auditOutputBuffer: MTLBuffer?
+      if auditReadback && !auditRecords.isEmpty {
+        let auditInput = try Self.sharedBuffer(values: auditRecords, backend: backend)
+        let auditVertexCount = topology.verticesPerInstance * auditRecords.count
+        let auditOutput = try backend.buffer(
+          length: auditVertexCount * MemoryLayout<CrowFeatherVertexGPU>.stride,
           shared: true
         )
         var uniforms = CrowBodyVaneGeometryUniforms(
           counts: SIMD4<UInt32>(
             UInt32(topology.axialSections),
             UInt32(topology.widthSections),
-            UInt32(records.count),
+            UInt32(auditRecords.count),
             UInt32(topology.verticesPerInstance)
           )
         )
-        guard let encoder = commandBuffer.makeComputeCommandEncoder() else {
+        guard let audit = commandBuffer.makeComputeCommandEncoder() else {
           throw VisualizationError.pipeline("crow body vane audit encoder")
         }
-        encoder.label = "Audit live procedural body vanes"
-        encoder.setBuffer(recordBuffer, offset: 0, index: 0)
-        encoder.setBytes(
+        audit.label = "Audit procedural body vane geometry"
+        audit.setBuffer(auditInput, offset: 0, index: 0)
+        audit.setBytes(
           &uniforms,
           length: MemoryLayout<CrowBodyVaneGeometryUniforms>.stride,
           index: 1
         )
-        encoder.setBuffer(output, offset: 0, index: 2)
-        backend.dispatch1D(encoder, pipeline: auditPipeline, count: batchVertexCount)
-        encoder.endEncoding()
-        auditOutput = output
+        audit.setBuffer(auditOutput, offset: 0, index: 2)
+        backend.dispatch1D(
+          audit,
+          pipeline: auditPipeline,
+          count: auditVertexCount
+        )
+        audit.endEncoding()
+        auditRecordBuffer = auditInput
+        auditOutputBuffer = auditOutput
       } else {
-        auditOutput = nil
+        auditRecordBuffer = nil
+        auditOutputBuffer = nil
       }
       batches.append(
         CrowBodyVaneGeometryBatchFrame(
+          topologyIndex: topologyIndex,
           topology: topology,
-          recordBuffer: recordBuffer,
-          indirectDrawBuffer: indirectDrawBuffer,
-          recordCount: records.count,
-          auditOutputBuffer: auditOutput
+          recordBuffer: recordBuffers[slot],
+          workBuffer: workBuffers[slot],
+          indirectDrawBuffer: indirectDrawBuffers[slot],
+          indirectDrawBufferOffset: topologyIndex
+            * MemoryLayout<DrawPrimitivesIndirectArguments>.stride,
+          auditRecordBuffer: auditRecordBuffer,
+          auditRecordCount: auditRecords.count,
+          auditOutputBuffer: auditOutputBuffer
         )
       )
     }
     return CrowBodyVaneGeometryFrame(
       slot: slot,
       batches: batches,
-      recordCount: grouped.values.reduce(0) { $0 + $1.count },
-      recordBytes: recordBytes,
-      recordCapacityBytes: recordCapacityBytes,
+      inputRecordCount: records.count,
+      inputRecordBytes: requiredRecordBytes,
+      recordCapacityBytes: recordBuffers[slot].length,
       recordBufferAllocationCount: recordBufferAllocationCount,
-      expandedVertexCount: expandedVertexCount,
       auditReadbackReady: auditReadback
     )
   }
@@ -209,15 +310,65 @@ final class CrowBodyVaneGeometryDeformer {
       counts: SIMD4<UInt32>(
         UInt32(batch.topology.axialSections),
         UInt32(batch.topology.widthSections),
-        UInt32(batch.recordCount),
+        0,
         UInt32(batch.vertexCount)
       )
     )
     encoder.setVertexBuffer(batch.recordBuffer, offset: 0, index: 0)
+    encoder.setVertexBuffer(batch.workBuffer, offset: 0, index: 1)
     encoder.setVertexBytes(
       &uniforms,
       length: MemoryLayout<CrowBodyVaneGeometryUniforms>.stride,
-      index: 1
+      index: 2
+    )
+  }
+
+  func drawArguments(
+    for batch: CrowBodyVaneGeometryBatchFrame
+  ) -> DrawPrimitivesIndirectArguments {
+    batch.indirectDrawBuffer.contents().advanced(
+      by: batch.indirectDrawBufferOffset
+    ).bindMemory(
+      to: DrawPrimitivesIndirectArguments.self,
+      capacity: 1
+    ).pointee
+  }
+
+  func activeRecordCount(for frame: CrowBodyVaneGeometryFrame) -> Int {
+    Int(topologyCounts(for: frame)[7])
+  }
+
+  func expandedVertexCount(for frame: CrowBodyVaneGeometryFrame) -> Int {
+    frame.batches.reduce(0) {
+      $0 + Int(drawArguments(for: $1).vertexCount)
+        * Int(drawArguments(for: $1).instanceCount)
+    }
+  }
+
+  func topologyCounts(for frame: CrowBodyVaneGeometryFrame) -> [UInt32] {
+    let pointer = topologyCountBuffers[frame.slot].contents().bindMemory(
+      to: UInt32.self,
+      capacity: 8
+    )
+    return Array(UnsafeBufferPointer(start: pointer, count: 8))
+  }
+
+  func selectedRecordIndices(
+    for frame: CrowBodyVaneGeometryFrame,
+    topologyIndex: Int
+  ) -> [UInt32] {
+    let counts = topologyCounts(for: frame)
+    let base = counts[..<topologyIndex].reduce(0, +)
+    let count = counts[topologyIndex]
+    let pointer = workBuffers[frame.slot].contents().bindMemory(
+      to: UInt32.self,
+      capacity: frame.inputRecordCount
+    )
+    return Array(
+      UnsafeBufferPointer(
+        start: pointer.advanced(by: Int(base)),
+        count: Int(count)
+      )
     )
   }
 
@@ -227,16 +378,80 @@ final class CrowBodyVaneGeometryDeformer {
     guard let buffer = batch.auditOutputBuffer else {
       preconditionFailure("body vane frame lacks audit readback")
     }
-    let count = batch.vertexCount * batch.recordCount
+    let count = batch.vertexCount * batch.auditRecordCount
     let pointer = buffer.contents().bindMemory(
       to: CrowFeatherVertexGPU.self,
       capacity: count
     )
     return Array(UnsafeBufferPointer(start: pointer, count: count))
   }
+
+  func auditRecords(
+    for batch: CrowBodyVaneGeometryBatchFrame
+  ) -> [CrowBodyVaneRecordGPU] {
+    guard let buffer = batch.auditRecordBuffer else { return [] }
+    let pointer = buffer.contents().bindMemory(
+      to: CrowBodyVaneRecordGPU.self,
+      capacity: batch.auditRecordCount
+    )
+    return Array(
+      UnsafeBufferPointer(start: pointer, count: batch.auditRecordCount)
+    )
+  }
+
+  private static func sharedBuffer<T>(
+    values: [T],
+    backend: VisualizationBackend
+  ) throws -> MTLBuffer {
+    let buffer = try backend.buffer(
+      length: values.count * MemoryLayout<T>.stride,
+      shared: true
+    )
+    values.withUnsafeBytes { bytes in
+      if let baseAddress = bytes.baseAddress, !bytes.isEmpty {
+        memcpy(buffer.contents(), baseAddress, bytes.count)
+      }
+    }
+    return buffer
+  }
 }
 
 enum CrowBodyVaneRecords {
+  static let productionTopologies: [CrowBodyVaneTopology] = [
+    CrowBodyVaneTopology(axialSections: 3, widthSections: 1),
+    CrowBodyVaneTopology(axialSections: 4, widthSections: 1),
+    CrowBodyVaneTopology(axialSections: 6, widthSections: 5),
+    CrowBodyVaneTopology(axialSections: 8, widthSections: 5),
+    CrowBodyVaneTopology(axialSections: 10, widthSections: 5),
+    CrowBodyVaneTopology(axialSections: 12, widthSections: 5),
+    CrowBodyVaneTopology(axialSections: 16, widthSections: 7),
+  ]
+
+  static func temporalRecords(
+    currentBodyCenter: SIMD3<Float>,
+    previousBodyCenter: SIMD3<Float>,
+    currentNeckPose: CrowStandingNeckPose?,
+    previousNeckPose: CrowStandingNeckPose?,
+    currentDeployment: Float,
+    previousDeployment: Float
+  ) -> [CrowBodyVaneRecordGPU] {
+    let current = CrowBodyFeatherTracts.samples(neckPose: currentNeckPose)
+    let previous = CrowBodyFeatherTracts.samples(neckPose: previousNeckPose)
+    precondition(current.count == previous.count, "body vane temporal inventory")
+    return zip(current, previous).enumerated().map { index, pair in
+      precondition(identity(of: pair.0) == identity(of: pair.1))
+      return record(
+        current: pair.0,
+        previous: pair.1,
+        currentBodyCenter: currentBodyCenter,
+        previousBodyCenter: previousBodyCenter,
+        currentDeployment: currentDeployment,
+        previousDeployment: previousDeployment,
+        inventoryIndex: index
+      )
+    }
+  }
+
   static func groupedRecords(
     currentBodyCenter: SIMD3<Float>,
     previousBodyCenter: SIMD3<Float>,
@@ -246,18 +461,18 @@ enum CrowBodyVaneRecords {
     previousDeployment: Float,
     projectedPixelsPerMeter: Float
   ) -> [CrowBodyVaneTopology: [CrowBodyVaneRecordGPU]] {
-    let current = CrowBodyFeatherTracts.visibleSamples(
-      neckPose: currentNeckPose,
-      projectedPixelsPerMeter: projectedPixelsPerMeter
-    )
-    let previous = CrowBodyFeatherTracts.visibleSamples(
-      neckPose: previousNeckPose,
-      projectedPixelsPerMeter: projectedPixelsPerMeter
-    )
+    let current = CrowBodyFeatherTracts.samples(neckPose: currentNeckPose)
+    let previous = CrowBodyFeatherTracts.samples(neckPose: previousNeckPose)
     precondition(current.count == previous.count, "body vane temporal inventory")
     var grouped: [CrowBodyVaneTopology: [CrowBodyVaneRecordGPU]] = [:]
     for (index, pair) in zip(current, previous).enumerated() {
       precondition(identity(of: pair.0) == identity(of: pair.1))
+      guard
+        isVisible(
+          pair.0,
+          projectedPixelsPerMeter: projectedPixelsPerMeter
+        )
+      else { continue }
       let topology = topology(
         for: pair.0,
         projectedPixelsPerMeter: projectedPixelsPerMeter
@@ -275,6 +490,20 @@ enum CrowBodyVaneRecords {
       )
     }
     return grouped
+  }
+
+  static func isVisible(
+    _ sample: CrowBodyFeatherTractSample,
+    projectedPixelsPerMeter: Float
+  ) -> Bool {
+    if projectedPixelsPerMeter >= 1_400 { return true }
+    if projectedPixelsPerMeter >= 900 {
+      return (sample.row + sample.column).isMultiple(of: 2)
+    }
+    if sample.region == .cervical {
+      return sample.column.isMultiple(of: 2)
+    }
+    return sample.row.isMultiple(of: 2) && sample.column.isMultiple(of: 2)
   }
 
   static func topology(
@@ -476,7 +705,12 @@ enum CrowBodyVaneRecords {
         current.distalTaperExponent
       ),
       color: color(for: current),
-      morphology: SIMD4<Float>(current.pennaceousStartFraction, 0, 0, 0),
+      morphology: SIMD4<Float>(
+        current.pennaceousStartFraction,
+        Float(current.region.rawValue),
+        Float(current.row),
+        Float(current.column)
+      ),
       identity: SIMD4<UInt32>(
         0x0200_0000 | UInt32(inventoryIndex),
         identityHash,

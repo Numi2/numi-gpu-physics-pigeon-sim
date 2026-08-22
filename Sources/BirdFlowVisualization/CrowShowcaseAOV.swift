@@ -16,6 +16,8 @@ struct CrowShowcaseFrame {
   let reactiveMaskEnabled: Bool
   let gpuDurationMilliseconds: Double
   let allocatedRenderTargetBytes: Int
+  let bodyVaneInputRecordCount: Int
+  let bodyVaneInputRecordBytes: Int
   let bodyVaneRecordCount: Int
   let bodyVaneBatchCount: Int
   let bodyVaneRecordBytes: Int
@@ -372,6 +374,8 @@ struct CrowShowcaseFrame {
       allocatedRenderTargetBytes: allocatedRenderTargetBytes,
       nativeReferenceAllocatedRenderTargetBytes:
         nativeReference?.allocatedRenderTargetBytes,
+      bodyVaneInputRecordCount: bodyVaneInputRecordCount,
+      bodyVaneInputRecordBytes: bodyVaneInputRecordBytes,
       bodyVaneRecordCount: bodyVaneRecordCount,
       bodyVaneBatchCount: bodyVaneBatchCount,
       bodyVaneRecordBytes: bodyVaneRecordBytes,
@@ -1211,6 +1215,8 @@ struct CrowShowcaseAOVFrameAudit: Codable, Equatable {
   let nativeReferenceGPUDurationMilliseconds: Double?
   let allocatedRenderTargetBytes: Int
   let nativeReferenceAllocatedRenderTargetBytes: Int?
+  let bodyVaneInputRecordCount: Int
+  let bodyVaneInputRecordBytes: Int
   let bodyVaneRecordCount: Int
   let bodyVaneBatchCount: Int
   let bodyVaneRecordBytes: Int
@@ -1412,7 +1418,7 @@ struct CrowShowcaseAOVAuditReport: Codable, Equatable {
   let frames: [CrowShowcaseAOVFrameAudit]
 
   init(frames: [CrowShowcaseAOVFrameAudit]) {
-    schemaVersion = 19
+    schemaVersion = 20
     colorSpace = "scene-linear extended range; display output is tone mapped separately"
     motionConvention =
       "current pixel to previous pixel in upper-left-origin pixel units; MetalFX scale 1"

@@ -256,6 +256,13 @@ struct CrowBodyVaneGeometryUniforms {
   var counts: SIMD4<UInt32>
 }
 
+struct CrowBodyVaneSelectionUniforms {
+  /// Projected pixels/metre followed by reserved future selection controls.
+  var selection: SIMD4<Float>
+  /// Full record count, topology count, and reserved fields.
+  var counts: SIMD4<UInt32>
+}
+
 /// One retained analytic crown-rachis curve for an interior class-7 body
 /// feather. Metal expands this 112-byte record into the selected radial tube
 /// tessellation; no per-triangle body-detail stream is authored on the CPU.
