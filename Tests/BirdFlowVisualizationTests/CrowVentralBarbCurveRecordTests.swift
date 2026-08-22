@@ -280,7 +280,10 @@ func metalExpandsRetainedVentralBarbIntervals() throws {
   #expect(deformer.compactedRecordCount(for: frame) == 1)
   #expect(deformer.segmentWork(for: frame) == work)
   #expect(deformer.drawArguments(for: frame).vertexCount == UInt32(frame.vertexCount))
-  #expect(deformer.meshThreadgroupCount(for: frame) == UInt32(work.count))
+  #expect(
+    deformer.meshDispatchDimensions(for: frame)
+      == SIMD3<UInt32>(UInt32(work.count), 1, 1)
+  )
   let vertices = deformer.vertices(for: frame)
   for workIndex in [0, work.count - 1] {
     let segment = CrowVentralBarbCurveRecords.segment(
@@ -347,7 +350,8 @@ func metalEmitsStableProceduralBarbules() throws {
       == UInt32(expectedWork.count * 24)
   )
   #expect(
-    deformer.meshThreadgroupCount(for: frame) == UInt32(expectedWork.count)
+    deformer.meshDispatchDimensions(for: frame)
+      == SIMD3<UInt32>(UInt32(expectedWork.count), 1, 1)
   )
 
   let vertices = deformer.vertices(for: frame)
@@ -480,7 +484,7 @@ func metalCompactsVisibleVentralBarbRecords() throws {
       )
   )
   #expect(deformer.drawArguments(for: dormantFrame).vertexCount == 0)
-  #expect(deformer.meshThreadgroupCount(for: dormantFrame) == 0)
+  #expect(deformer.meshDispatchDimensions(for: dormantFrame) == .zero)
 }
 
 @Test("capability-gated ventral mesh pipeline compiles on supported Metal GPUs")
@@ -495,6 +499,159 @@ func capabilityGatedVentralMeshPipelineCompiles() throws {
     maximumThreadsPerMeshThreadgroup: 8
   )
   #expect(backend.supportsMeshShaders)
+}
+
+@Test("isolated indexed mesh tubes match vertex raster ownership")
+func isolatedIndexedMeshTubesMatchVertexRasterOwnership() throws {
+  guard let device = MTLCreateSystemDefaultDevice() else { return }
+  let backend = try VisualizationBackend(device: device)
+  guard backend.supportsMeshShaders else { return }
+  let allRecords = CrowVentralRachisCurveRecords.records()
+  let records = CrowVentralBarbCurveRecords.activeRecordIndices(
+    records: allRecords,
+    projectedPixelsPerMeter: 14_440
+  ).map { allRecords[Int($0)] }
+  let deformer = try CrowVentralBarbGeometryDeformer(
+    backend: backend,
+    records: records
+  )
+  let prepare = try #require(backend.queue.makeCommandBuffer())
+  let frame = try deformer.encode(
+    currentBodyCenter: SIMD3<Float>(0, 0, 0.5),
+    previousBodyCenter: SIMD3<Float>(0, 0, 0.5),
+    projectedPixelsPerMeter: 14_440,
+    viewProjection: matrix_identity_float4x4,
+    commandBuffer: prepare
+  )
+  prepare.commit()
+  prepare.waitUntilCompleted()
+  #expect(prepare.status == .completed)
+  #expect(deformer.compactedRecordCount(for: frame) == records.count)
+  #expect(
+    deformer.visibilityCounts(for: frame).emittedWorkCount == 429_696
+  )
+  #expect(
+    deformer.meshDispatchDimensions(for: frame) == SIMD3<UInt32>(4_096, 105, 1)
+  )
+
+  let width = 512
+  let height = 512
+  var camera = CrowTemporalCameraUniforms(
+    viewProjection: matrix_identity_float4x4,
+    previousViewProjection: matrix_identity_float4x4,
+    eyeAndWidth: SIMD4<Float>(0, 0, 0, Float(width)),
+    viewportAndInverse: SIMD4<Float>(Float(width), Float(height), 1, 0),
+    plumageFilm: .zero,
+    plumageComplexIndices: .zero,
+    plumageMelanin: .zero,
+    plumageCortex: .zero,
+    plumageVisibilityShape: .zero,
+    plumageVisibilityLayout: .zero
+  )
+  let vertexPipeline = try backend.render(
+    vertex: "crowVentralBarbAOVVertex",
+    fragment: "showcaseCrowIdentityFragment",
+    colorFormat: .rgba32Uint
+  )
+  let meshPipeline = try backend.meshRender(
+    mesh: "crowVentralBarbAOVMesh",
+    fragment: "showcaseCrowIdentityFragment",
+    colorFormats: [.rgba32Uint],
+    maximumThreadsPerMeshThreadgroup: 8
+  )
+  let depthDescriptor = MTLDepthStencilDescriptor()
+  depthDescriptor.depthCompareFunction = .less
+  depthDescriptor.isDepthWriteEnabled = true
+  let depthState = try #require(
+    device.makeDepthStencilState(descriptor: depthDescriptor)
+  )
+
+  func render(mesh: Bool) throws -> [UInt32] {
+    let colorDescriptor = MTLTextureDescriptor.texture2DDescriptor(
+      pixelFormat: .rgba32Uint,
+      width: width,
+      height: height,
+      mipmapped: false
+    )
+    colorDescriptor.storageMode = .shared
+    colorDescriptor.usage = .renderTarget
+    let color = try #require(device.makeTexture(descriptor: colorDescriptor))
+    let depthTextureDescriptor = MTLTextureDescriptor.texture2DDescriptor(
+      pixelFormat: .depth32Float,
+      width: width,
+      height: height,
+      mipmapped: false
+    )
+    depthTextureDescriptor.storageMode = .private
+    depthTextureDescriptor.usage = .renderTarget
+    let depth = try #require(
+      device.makeTexture(descriptor: depthTextureDescriptor)
+    )
+    let command = try #require(backend.queue.makeCommandBuffer())
+    let pass = MTLRenderPassDescriptor()
+    pass.colorAttachments[0].texture = color
+    pass.colorAttachments[0].loadAction = .clear
+    pass.colorAttachments[0].storeAction = .store
+    pass.depthAttachment.texture = depth
+    pass.depthAttachment.loadAction = .clear
+    pass.depthAttachment.storeAction = .dontCare
+    pass.depthAttachment.clearDepth = 1
+    let encoder = try #require(
+      command.makeRenderCommandEncoder(descriptor: pass)
+    )
+    encoder.setCullMode(.none)
+    encoder.setDepthStencilState(depthState)
+    if mesh {
+      encoder.setRenderPipelineState(meshPipeline)
+      deformer.bindMeshRenderResources(for: frame, encoder: encoder)
+      encoder.setMeshBytes(
+        &camera,
+        length: MemoryLayout<CrowTemporalCameraUniforms>.stride,
+        index: 3
+      )
+      encoder.drawMeshThreadgroups(
+        indirectBuffer: try #require(frame.indirectMeshDispatchBuffer),
+        indirectBufferOffset: 0,
+        threadsPerObjectThreadgroup: MTLSize(width: 1, height: 1, depth: 1),
+        threadsPerMeshThreadgroup: MTLSize(width: 8, height: 1, depth: 1)
+      )
+    } else {
+      encoder.setRenderPipelineState(vertexPipeline)
+      deformer.bindRenderResources(for: frame, encoder: encoder)
+      encoder.setVertexBytes(
+        &camera,
+        length: MemoryLayout<CrowTemporalCameraUniforms>.stride,
+        index: 3
+      )
+      encoder.drawPrimitives(
+        type: .triangle,
+        indirectBuffer: frame.indirectDrawBuffer,
+        indirectBufferOffset: 0
+      )
+    }
+    encoder.endEncoding()
+    command.commit()
+    command.waitUntilCompleted()
+    #expect(command.status == .completed)
+    var values = [UInt32](repeating: 0, count: width * height * 4)
+    color.getBytes(
+      &values,
+      bytesPerRow: width * 4 * MemoryLayout<UInt32>.stride,
+      from: MTLRegionMake2D(0, 0, width, height),
+      mipmapLevel: 0
+    )
+    return values
+  }
+
+  let vertex = try render(mesh: false)
+  let mesh = try render(mesh: true)
+  let activePixels = stride(from: 0, to: vertex.count, by: 4).count {
+    vertex[$0] != 0 || vertex[$0 + 1] != 0 || vertex[$0 + 2] != 0
+      || vertex[$0 + 3] != 0
+  }
+  let differingComponents = zip(vertex, mesh).count { $0 != $1 }
+  #expect(activePixels > 0)
+  #expect(differingComponents == 0)
 }
 
 @Test("production ventral barbs pull vertices without materialized output")

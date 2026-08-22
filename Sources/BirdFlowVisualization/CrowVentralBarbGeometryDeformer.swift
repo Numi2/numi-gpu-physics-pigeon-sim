@@ -368,9 +368,12 @@ final class CrowVentralBarbGeometryDeformer {
     ).pointee
   }
 
-  func meshThreadgroupCount(for frame: CrowFeatherGeometryFrame) -> UInt32 {
-    guard let buffer = frame.indirectMeshDispatchBuffer else { return 0 }
-    return buffer.contents().bindMemory(to: UInt32.self, capacity: 3).pointee
+  func meshDispatchDimensions(
+    for frame: CrowFeatherGeometryFrame
+  ) -> SIMD3<UInt32> {
+    guard let buffer = frame.indirectMeshDispatchBuffer else { return .zero }
+    let values = buffer.contents().bindMemory(to: UInt32.self, capacity: 3)
+    return SIMD3<UInt32>(values[0], values[1], values[2])
   }
 
   /// Binds the GPU-resident compact work and stable procedural inputs. Camera
@@ -399,6 +402,11 @@ final class CrowVentralBarbGeometryDeformer {
       geometryUniformBuffers[frame.slot],
       offset: 0,
       index: 2
+    )
+    encoder.setMeshBuffer(
+      compactedCountBuffers[frame.slot],
+      offset: 0,
+      index: 4
     )
   }
 

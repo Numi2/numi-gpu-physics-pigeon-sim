@@ -110,9 +110,11 @@ Schema `17` additionally records projected-size ventral-barb candidate,
 frustum-visible, prior-depth-tested, occlusion-culled, and retained record
 counts; logical triangle-stream vertex count; actual raster vertex invocations;
 materialized output-capacity bytes; generation mode; and max-depth hierarchy
-mode/bytes. Production reports
-`gpu-procedural-vertex-pulling` and zero materialized bytes; compute expansion
-remains the audit-readback oracle. Prior-depth classification reports
+mode/bytes. Supported Metal 3 devices report
+`gpu-mesh-threadgroup-8-vertex-indexed`; unsupported devices fall back to
+`gpu-procedural-vertex-pulling`, which also remains the explicit audit oracle.
+Both paths retain zero materialized bytes, and compute expansion remains the
+audit-readback geometry oracle. Prior-depth classification reports
 `previous-max-device-depth-fail-open` only when close-up candidates own a
 hierarchy; ordinary coverage reports `inactive` and zero bytes. These are
 executable work/residency counters, not a GPU speed claim; duration still

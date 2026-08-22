@@ -2080,8 +2080,11 @@ kernel void prepareCrowVentralBarbIndirectWork(
         (vertexCount+threadsPerThreadgroup-1u)/threadsPerThreadgroup;
     dispatchArguments[0].threadgroupsPerGrid[1]=1u;
     dispatchArguments[0].threadgroupsPerGrid[2]=1u;
-    meshDispatchArguments[0].threadgroupsPerGrid[0]=compactedCount[6];
-    meshDispatchArguments[0].threadgroupsPerGrid[1]=1u;
+    uint meshWorkCount=compactedCount[6];
+    uint meshGridWidth=min(meshWorkCount,4096u);
+    meshDispatchArguments[0].threadgroupsPerGrid[0]=meshGridWidth;
+    meshDispatchArguments[0].threadgroupsPerGrid[1]=meshWorkCount==0u?1u:
+        (meshWorkCount+meshGridWidth-1u)/meshGridWidth;
     meshDispatchArguments[0].threadgroupsPerGrid[2]=1u;
 }
 
@@ -2308,10 +2311,18 @@ using CrowVentralCurveMesh = metal::mesh<
     device const CrowVentralBarbSegmentWorkGPU* work [[buffer(1)]],
     constant CrowVentralBarbGeometryUniforms& geometry [[buffer(2)]],
     constant CrowTemporalCameraUniforms& camera [[buffer(3)]],
+    device const uint* compactedCount [[buffer(4)]],
     CrowVentralCurveMesh outputMesh,
     uint tid [[thread_index_in_threadgroup]],
     uint3 workPosition [[threadgroup_position_in_grid]]) {
-    uint workVertexBase=workPosition.x*24u;
+    uint workCount=compactedCount[6];
+    uint gridWidth=min(workCount,4096u);
+    uint workIndex=workPosition.x+gridWidth*workPosition.y;
+    if(workIndex>=workCount){
+        if(tid==0u){outputMesh.set_primitive_count(0u);}
+        return;
+    }
+    uint workVertexBase=workIndex*24u;
     if(tid<8u){
         uint radialIndex=tid&3u;
         bool atEnd=tid>=4u;

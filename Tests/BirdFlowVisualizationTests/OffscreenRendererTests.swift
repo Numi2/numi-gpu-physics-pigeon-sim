@@ -459,7 +459,7 @@ func crowCaptureAcceptsBoundedCameraOverrides() throws {
   #expect(arguments.cameraDistanceMeters == 0.035)
   #expect(arguments.cameraTarget == SIMD3<Float>(0.02, 0.055, -0.04))
   #expect(!arguments.explicitVentralBarbCurvesEnabled)
-  #expect(arguments.ventralCurveEmissionMode == .vertex)
+  #expect(arguments.ventralCurveEmissionMode == .auto)
 
   let meshArguments = try CrowShowcaseCapture.Arguments(commandLine: [
     "birdflow-viewer",
@@ -737,6 +737,10 @@ func estimatedStandingCrowCaptureProducesLoopClosedFrames() throws {
     CrowShowcaseAOVAuditReport.self,
     from: Data(contentsOf: aovAuditURL)
   )
+  let expectedGenerationMode =
+    try VisualizationBackend(device: device).supportsMeshShaders
+    ? "gpu-mesh-threadgroup-8-vertex-indexed"
+    : "gpu-procedural-vertex-pulling"
   #expect(audit.schemaVersion == 17)
   #expect(
     audit.frames.allSatisfy {
@@ -750,8 +754,7 @@ func estimatedStandingCrowCaptureProducesLoopClosedFrames() throws {
         && $0.ventralBarbExpandedVertexCount == 0
         && $0.ventralBarbRasterVertexInvocationCount == 0
         && $0.ventralBarbOutputCapacityBytes == 0
-        && $0.ventralBarbVertexGenerationMode
-          == "gpu-procedural-vertex-pulling"
+        && $0.ventralBarbVertexGenerationMode == expectedGenerationMode
     })
   #expect(audit.formats["hdrColor"] == "rgba16Float")
   #expect(audit.formats["normalCoverage"] == "rgba16Float")

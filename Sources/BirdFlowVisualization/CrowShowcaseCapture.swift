@@ -117,7 +117,7 @@ public enum CrowShowcaseCapture {
       )
       let emissionValue =
         try value(after: "--capture-crow-ventral-curve-emission")
-        ?? CrowVentralCurveEmissionMode.vertex.rawValue
+        ?? CrowVentralCurveEmissionMode.auto.rawValue
       guard
         let parsedEmission = CrowVentralCurveEmissionMode(
           rawValue: emissionValue
@@ -836,7 +836,7 @@ private final class CrowShowcaseRenderer {
     realityAsset: BirdRealityAsset?,
     presentation: CrowShowcasePresentation,
     explicitVentralBarbCurvesEnabled: Bool = true,
-    ventralCurveEmissionMode: CrowVentralCurveEmissionMode = .vertex
+    ventralCurveEmissionMode: CrowVentralCurveEmissionMode = .auto
   ) throws {
     self.presentation = presentation
     self.plumageOptics = plumageOptics.gpuParameters

@@ -211,21 +211,24 @@ identity pixels. The ordinary view and established `800 x 450`, `0.035 m`
 close tier remain byte-exact against `dcc638f`; that close tier retains `746`
 barb candidates and zero barbule candidates. These are renderer-estimated
 geometry and local occlusion, not measured crow barbule dimensions, physical
-self-shadowing, or a speed claim. A capability-gated Metal mesh-stage prototype
+self-shadowing, or a speed claim. Capability-gated Metal mesh-stage emission
 now consumes the same compact GPU work directly: one threadgroup emits eight
 indexed ring vertices and eight flat-shaded triangles instead of duplicating
-24 triangle-stream vertices, while the existing vertex-pulling path remains the
-canonical default and audit oracle. On the M4 Pro, both paths retain `746`
-candidates, `621` visible owners, `357,696` emitted intervals, and `8,584,704`
-logical procedural vertices in the established close diagnostic. The indexed
-mesh stage invokes `2,861,568` output vertices and is byte-exact against its
-24-output-vertex prototype. Their silhouettes and
-active-pixel totals are exact, but `1,772 / 360,000` pixels (`0.492%`) change
-ownership only in a lower-left near-coincident feather overlap; normalized
-display RMSE is `0.00125` and the maximum channel difference is `25 / 255`.
-Mesh emission is therefore explicit/experimental rather than promoted, and no
-speed claim is made. Indexed vertex reuse, exact cross-stage raster ownership,
-and curve-aware ray visibility remain open.
+24 triangle-stream vertices. A `4096`-wide two-dimensional indirect grid keeps
+mesh coordinates below the one-dimensional `65,535` boundary, linearizes the
+authoritative work index in shader, and discards only padded final-row groups.
+The supported-device default is now mesh emission; the existing vertex-pulling
+path remains the exact fallback and explicit audit oracle. On the M4 Pro, both
+paths retain `746` candidates, `621` visible owners, `357,696` emitted
+intervals, and `8,584,704` logical procedural vertices in the established close
+diagnostic, while mesh invokes `2,861,568` output vertices. All five PNGs and
+every non-duration/non-mode AOV field are exact, including the three non-reset
+frames that each depth-cull two complete records. At the mixed `1200 x 675`
+barbule tier, both paths retain `557` parent and `392` barbule owners, generate
+`23,956,992` logical vertices, and give `369` pixels to exact barbule identity;
+mesh invokes `7,985,664` vertices and remains byte-exact. This qualifies
+cross-stage raster ownership and indexed vertex reuse on the M4 Pro; it is not
+a speed claim. Curve-aware ray visibility remains open.
 A separate versioned optics profile now drives the live eight-wavelength
 air/keratin/melanin film response. It records comparative glossy-corvid
 constraints independently from the renderer's American-crow estimates, so the
