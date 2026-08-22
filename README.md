@@ -126,7 +126,7 @@ fall from `593/157/28` to `165/121/8`; a new rear-port grazing view remains
 discrete rather than forming a tail plate. These are bounded simulated
 morphology and raster checks, not measured American-crow tip dimensions.
 The exact identity AOV now also reports visible and fully covered pixels for
-every persistent primary, secondary, and rectrix as schema `12`. The same
+every persistent primary, secondary, and rectrix as schema `13`. The same
 report retains the longest exterior-connected row/column slots with exact
 boundary classes, packed identities, and procedural owners, so open shoulder
 gaps are traceable without treating every silhouette concavity as a defect.
@@ -174,12 +174,18 @@ then resolves `72` identity-varied barb pairs per side as four connected,
 crown-following intervals; its coarse edge aggregates are retired while the
 explicit curves own temporal position, normal, class, and primitive identity.
 At the deliberately extreme `0.035 m`, `800 x 450` diagnostic, `746` records
-expand to `429,696` intervals and `10,312,704` triangle-stream vertices. This
-is a future-compute fidelity tier, not a performance optimization or measured
-American-crow barb anatomy. Ordinary showcase coverage emits zero such
-vertices and remains pixel/AOV identical with the tier disabled, so the fully
-simulated hold-to-flight GIF remains unchanged. GPU view/occlusion compaction,
-explicit barbules, and curve-aware self-shadowing remain open.
+are projected-size candidates for `429,696` intervals and `10,312,704`
+triangle-stream vertices. Metal now classifies conservative feather bounds
+against six world-space frustum planes, performs a deterministic record scan,
+emits only compacted interval work, and prepares indirect expansion/draw
+arguments. At a fresh front-flank frame, `432` visible records emit `5,971,968`
+vertices—a `42.09%` work reduction—with all five PNGs and every raster/AOV field
+exact against the pre-compaction renderer. Ordinary showcase coverage emits
+zero vertices, so the fully simulated hold-to-flight GIF remains unchanged.
+This is a future-compute fidelity tier, not a measured-anatomy or GPU-speed
+claim: candidate-sized output residency is still `990,019,584` bytes at that
+diagnostic. Previous-depth occlusion, visibility-sized residency, explicit
+barbules, and curve-aware self-shadowing remain open.
 A separate versioned optics profile now drives the live eight-wavelength
 air/keratin/melanin film response. It records comparative glossy-corvid
 constraints independently from the renderer's American-crow estimates, so the

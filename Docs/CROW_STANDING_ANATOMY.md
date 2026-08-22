@@ -190,7 +190,7 @@ inspection shows denser caudal surface breakup without a diagonal bridge or a
 new wing-tail membrane. This qualifies simulated contour density, not measured
 American-crow rump-feather counts.
 
-The native AOV report schema is now version `12`. Each frame records
+The native AOV report schema is now version `13`. Each frame records
 scene-linear luminance mean, standard deviation, maximum, and mean absolute
 same-class neighbour difference for every visible bird feather class. These
 statistics are computed before display tone mapping and exclude the support and
@@ -818,11 +818,31 @@ uniqueness, fallback ownership, and CPU/Metal temporal-tube parity. The close-up
 capture is a visual and ownership diagnostic, not a GPU benchmark: the present
 unindexed triangle stream intentionally spends future compute to establish the
 geometry oracle. These dimensions and densities are renderer estimates, not
-measured American-crow barb anatomy. GPU frustum/occlusion compaction, indexed
-or hardware-curve emission, explicit barbules, per-feather dynamics, and
+measured American-crow barb anatomy. Previous-depth occlusion, indexed or
+hardware-curve emission, explicit barbules, per-feather dynamics, and
 curve-aware self-shadowing remain open.
 
-Schema `12` resolves that rear-port priority to exact packed identities around
+The first visibility-scaling pass removes the CPU-authored close-up work list.
+Metal evaluates a conservative sphere for every retained record against six
+normalized world-space frustum planes, scans the `776` flags in stable record
+order, emits non-overlapping interval ranges, and writes indirect expansion and
+draw arguments. This preserves primitive IDs and avoids atomic ordering noise.
+At a fresh front-flank yaw/pitch `(0.92, -0.22)`, target
+`(0.05, 0.060, 0.020) m`, the inspected quiet-stance frame compacts `746`
+projected-size candidates to `432` visible records and `10,312,704` candidate
+vertices to `5,971,968` expanded vertices, a `42.09%` work reduction. Visible
+record counts over the five-frame loop are `429, 429, 432, 446, 429`.
+
+All five beauty PNGs are byte-exact and every pre-existing non-duration AOV
+field is exact against revision `c6f3add`; the new schema-`13` counters expose
+candidate records, visible records, expanded vertices, and capacity bytes.
+Normal-distance rendering remains five-frame PNG/AOV exact with all four
+counters zero. The short GPU timings are noisy and support no speed claim.
+Output allocation still reserves the candidate maximum—`990,019,584` bytes in
+the close-up—so previous-depth occlusion and visibility-sized residency are the
+next scaling gates before explicit barbules or curve self-shadowing.
+
+Schema `13` resolves that rear-port priority to exact packed identities around
 the largest enclosed component. The early `21-28`-pixel channels are bounded
 by rectrix orders `1`, `2`, and `3`; only frames `2-3` additionally touch the
 outermost proximal trailing covert. A broad presentation-tail width experiment

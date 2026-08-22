@@ -139,6 +139,33 @@ func ventralBarbIntervalsFormConnectedCrownCurves() {
   }
 }
 
+@Test("ventral barb visibility bounds enclose explicit curve geometry")
+func ventralBarbVisibilityBoundsEncloseCurveGeometry() {
+  let bodyCenter = SIMD3<Float>(0.031, -0.027, 0.044)
+  for record in CrowVentralRachisCurveRecords.records() {
+    let bounds = CrowVentralBarbCurveRecords.boundingSphere(
+      record: record,
+      bodyCenter: bodyCenter
+    )
+    #expect(bounds.radius.isFinite && bounds.radius > 0)
+    let work = CrowVentralBarbCurveRecords.segmentWork(
+      records: [record],
+      projectedPixelsPerMeter: 30_000
+    )
+    for selected in work where [0, 35, 71].contains(Int(selected.indices.y)) {
+      for fraction: Float in [0, 0.25, 0.5, 0.75, 1] {
+        let point =
+          CrowVentralBarbCurveRecords.point(
+            record: record,
+            work: selected,
+            curveFraction: fraction
+          ) + bodyCenter
+        #expect(simd_distance(point, bounds.center) <= bounds.radius + 1e-7)
+      }
+    }
+  }
+}
+
 @Test("Metal expands retained ventral barb intervals into temporal tubes")
 func metalExpandsRetainedVentralBarbIntervals() throws {
   guard let device = MTLCreateSystemDefaultDevice() else { return }
@@ -158,13 +185,14 @@ func metalExpandsRetainedVentralBarbIntervals() throws {
     backend: backend,
     records: records
   )
-  let currentCenter = SIMD3<Float>(0.014, -0.023, 0.031)
+  let currentCenter = SIMD3<Float>(0.014, -0.023, 0.5)
   let previousCenter = SIMD3<Float>(-0.009, 0.018, -0.026)
   let commandBuffer = try #require(backend.queue.makeCommandBuffer())
   let frame = try deformer.encode(
     currentBodyCenter: currentCenter,
     previousBodyCenter: previousCenter,
     projectedPixelsPerMeter: projectedPixelsPerMeter,
+    viewProjection: matrix_identity_float4x4,
     commandBuffer: commandBuffer,
     auditReadback: true
   )
@@ -172,6 +200,9 @@ func metalExpandsRetainedVentralBarbIntervals() throws {
   commandBuffer.waitUntilCompleted()
   #expect(commandBuffer.status == .completed)
   #expect(frame.vertexCount == 72 * 2 * 4 * 24)
+  #expect(deformer.compactedRecordCount(for: frame) == 1)
+  #expect(deformer.segmentWork(for: frame) == work)
+  #expect(deformer.drawArguments(for: frame).vertexCount == UInt32(frame.vertexCount))
   let vertices = deformer.vertices(for: frame)
   for workIndex in [0, work.count - 1] {
     let segment = CrowVentralBarbCurveRecords.segment(
@@ -193,6 +224,81 @@ func metalExpandsRetainedVentralBarbIntervals() throws {
       #expect(gpu.identity.w == 7)
     }
   }
+}
+
+@Test("Metal deterministically compacts visible ventral barb records")
+func metalCompactsVisibleVentralBarbRecords() throws {
+  guard let device = MTLCreateSystemDefaultDevice() else { return }
+  let backend = try VisualizationBackend(device: device)
+  var records = Array(CrowVentralRachisCurveRecords.records().prefix(4))
+  for index in records.indices {
+    let translation =
+      index < 2
+      ? SIMD3<Float>(0, 0, 0.5) : SIMD3<Float>(3, 0, 0.5)
+    records[index].rootAndPennaceousStart = translated(
+      records[index].rootAndPennaceousStart,
+      by: translation
+    )
+    records[index].tipAndCamber = translated(
+      records[index].tipAndCamber,
+      by: translation
+    )
+  }
+  let projectedPixelsPerMeter: Float = 30_000
+  let visibility = CrowVentralBarbCurveRecords.visibilityUniforms(
+    viewProjection: matrix_identity_float4x4,
+    currentBodyCenter: .zero,
+    projectedPixelsPerMeter: projectedPixelsPerMeter,
+    recordCount: records.count
+  )
+  #expect(
+    CrowVentralBarbCurveRecords.visibleRecordIndices(
+      records: records,
+      uniforms: visibility
+    ) == [0, 1]
+  )
+
+  let deformer = try CrowVentralBarbGeometryDeformer(
+    backend: backend,
+    records: records
+  )
+  let commandBuffer = try #require(backend.queue.makeCommandBuffer())
+  let frame = try deformer.encode(
+    currentBodyCenter: .zero,
+    previousBodyCenter: .zero,
+    projectedPixelsPerMeter: projectedPixelsPerMeter,
+    viewProjection: matrix_identity_float4x4,
+    commandBuffer: commandBuffer,
+    auditReadback: true
+  )
+  commandBuffer.commit()
+  commandBuffer.waitUntilCompleted()
+  #expect(commandBuffer.status == .completed)
+  #expect(deformer.compactedRecordCount(for: frame) == 2)
+  let expectedWork = CrowVentralBarbCurveRecords.segmentWork(
+    records: Array(records.prefix(2)),
+    projectedPixelsPerMeter: projectedPixelsPerMeter
+  )
+  #expect(deformer.segmentWork(for: frame) == expectedWork)
+  #expect(
+    deformer.drawArguments(for: frame).vertexCount
+      == UInt32(expectedWork.count * 24)
+  )
+  #expect(deformer.vertices(for: frame).count == expectedWork.count * 24)
+
+  let dormantCommand = try #require(backend.queue.makeCommandBuffer())
+  let dormantFrame = try deformer.encode(
+    currentBodyCenter: .zero,
+    previousBodyCenter: .zero,
+    projectedPixelsPerMeter: 1_600,
+    viewProjection: matrix_identity_float4x4,
+    commandBuffer: dormantCommand
+  )
+  dormantCommand.commit()
+  dormantCommand.waitUntilCompleted()
+  #expect(dormantCommand.status == .completed)
+  #expect(deformer.compactedRecordCount(for: dormantFrame) == 0)
+  #expect(deformer.drawArguments(for: dormantFrame).vertexCount == 0)
 }
 
 private struct BarbTubeVertexOracle {
@@ -258,6 +364,13 @@ private func tubeVertices(
 
 private func xyz(_ value: SIMD4<Float>) -> SIMD3<Float> {
   SIMD3<Float>(value.x, value.y, value.z)
+}
+
+private func translated(
+  _ value: SIMD4<Float>,
+  by translation: SIMD3<Float>
+) -> SIMD4<Float> {
+  SIMD4<Float>(xyz(value) + translation, value.w)
 }
 
 private func allFinite(_ value: SIMD3<Float>) -> Bool {

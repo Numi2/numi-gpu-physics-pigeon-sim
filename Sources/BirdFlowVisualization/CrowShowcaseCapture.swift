@@ -1243,15 +1243,20 @@ private final class CrowShowcaseRenderer {
         commandBuffer: commandBuffer
       )
     )
+    var ventralBarbFrame: CrowFeatherGeometryFrame?
     if let ventralBarbGeometryDeformer {
-      featherFrames.append(
-        try ventralBarbGeometryDeformer.encode(
-          currentBodyCenter: currentAnatomyBodyCenter,
-          previousBodyCenter: previousAnatomyBodyCenter,
-          projectedPixelsPerMeter: projectedPixelsPerMeter,
-          commandBuffer: commandBuffer
-        )
+      let frame = try ventralBarbGeometryDeformer.encode(
+        currentBodyCenter: currentAnatomyBodyCenter,
+        previousBodyCenter: previousAnatomyBodyCenter,
+        projectedPixelsPerMeter: projectedPixelsPerMeter,
+        viewProjection: camera.uniforms(
+          aspect: Float(renderWidth) / Float(renderHeight),
+          ribbonWidth: 0.001
+        ).viewProjection,
+        commandBuffer: commandBuffer
       )
+      ventralBarbFrame = frame
+      featherFrames.append(frame)
     }
 
     let pass = MTLRenderPassDescriptor()
@@ -1530,6 +1535,17 @@ private final class CrowShowcaseRenderer {
       ? inputPixels * (32 + 4) * sampleCount
       : 0
     let outputBytes = outputPixels * (4 + (temporalEnabled ? 8 : 0))
+    let ventralBarbCandidateVertexCount = ventralBarbFrame?.vertexCount ?? 0
+    let ventralBarbVerticesPerRecord =
+      CrowVentralBarbCurveRecords.explicitBarbPairCount * 2
+      * CrowVentralBarbCurveRecords.intervalCount
+      * CrowVentralBarbCurveRecords.verticesPerCurveInterval
+    let ventralBarbVisibleRecordCount = ventralBarbFrame.map {
+      ventralBarbGeometryDeformer?.compactedRecordCount(for: $0) ?? 0
+    } ?? 0
+    let ventralBarbExpandedVertexCount = ventralBarbFrame.map {
+      Int(ventralBarbGeometryDeformer?.drawArguments(for: $0).vertexCount ?? 0)
+    } ?? 0
     return CrowShowcaseFrame(
       displayTexture: display,
       hdrColorTexture: resolvedAOVs[0],
@@ -1547,7 +1563,13 @@ private final class CrowShowcaseRenderer {
         0,
         (commandBuffer.gpuEndTime - commandBuffer.gpuStartTime) * 1_000
       ),
-      allocatedRenderTargetBytes: resolvedInputBytes + multisampleBytes + outputBytes
+      allocatedRenderTargetBytes: resolvedInputBytes + multisampleBytes + outputBytes,
+      ventralBarbCandidateRecordCount: ventralBarbVerticesPerRecord > 0
+        ? ventralBarbCandidateVertexCount / ventralBarbVerticesPerRecord : 0,
+      ventralBarbVisibleRecordCount: ventralBarbVisibleRecordCount,
+      ventralBarbExpandedVertexCount: ventralBarbExpandedVertexCount,
+      ventralBarbOutputCapacityBytes: ventralBarbCandidateVertexCount
+        * MemoryLayout<CrowFeatherVertexGPU>.stride
     )
   }
 

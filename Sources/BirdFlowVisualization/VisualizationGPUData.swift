@@ -279,6 +279,23 @@ struct CrowVentralBarbGeometryUniforms {
   var previousBodyCenter: SIMD4<Float>
 }
 
+/// Six normalized world-space planes and the output-coverage contract used to
+/// select retained ventral-barb records before interval expansion.
+struct CrowVentralBarbVisibilityUniforms {
+  var leftPlane: SIMD4<Float>
+  var rightPlane: SIMD4<Float>
+  var bottomPlane: SIMD4<Float>
+  var topPlane: SIMD4<Float>
+  var nearPlane: SIMD4<Float>
+  var farPlane: SIMD4<Float>
+  /// Current body center and conservative additional bound padding in metres.
+  var bodyCenterAndPadding: SIMD4<Float>
+  /// Projected pixels/metre, activation threshold, pairs/side, intervals/curve.
+  var selection: SIMD4<Float>
+  /// Record count, vertices/interval, feather class, reserved.
+  var counts: SIMD4<UInt32>
+}
+
 /// Procedural crow geometry paired across two frames for true deformation
 /// motion rather than camera-only reprojection.
 struct CrowSurfaceTemporalVertexGPU {

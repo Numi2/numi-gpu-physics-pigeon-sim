@@ -13,23 +13,18 @@ enum CrowVentralBarbCurveRecords {
   static let maximumBarbPairCount = explicitBarbPairCount
   static let surfaceFeatherClass: UInt32 = 7
   static let projectedFeatherThresholdPixels: Float = 480
+  static let visibilityPaddingMeters: Float = 0.0004
 
   static func segmentWork(
     records: [CrowVentralRachisCurveRecordGPU],
     projectedPixelsPerMeter: Float
   ) -> [CrowVentralBarbSegmentWorkGPU] {
     var work: [CrowVentralBarbSegmentWorkGPU] = []
-    for (recordIndex, record) in records.enumerated() {
-      let length = simd_distance(
-        xyz(record.rootAndPennaceousStart),
-        xyz(record.tipAndCamber)
-      )
-      let tessellation = CrowFeatherCoverageLOD.tessellation(
-        lengthMeters: length,
-        projectedPixelsPerMeter: projectedPixelsPerMeter,
-        baseAxialSections: 7
-      )
-      guard tessellation.tier == 0 else { continue }
+    for packedRecordIndex in activeRecordIndices(
+      records: records,
+      projectedPixelsPerMeter: projectedPixelsPerMeter
+    ) {
+      let recordIndex = Int(packedRecordIndex)
       let pairCount = explicitBarbPairCount
       for pairIndex in 0..<pairCount {
         for sideIndex in 0..<2 {
@@ -49,6 +44,134 @@ enum CrowVentralBarbCurveRecords {
       }
     }
     return work
+  }
+
+  static func activeRecordIndices(
+    records: [CrowVentralRachisCurveRecordGPU],
+    projectedPixelsPerMeter: Float
+  ) -> [UInt32] {
+    records.indices.compactMap { index in
+      let record = records[index]
+      let length = simd_distance(
+        xyz(record.rootAndPennaceousStart),
+        xyz(record.tipAndCamber)
+      )
+      return length * projectedPixelsPerMeter
+        >= projectedFeatherThresholdPixels ? UInt32(index) : nil
+    }
+  }
+
+  static func visibilityUniforms(
+    viewProjection: simd_float4x4,
+    currentBodyCenter: SIMD3<Float>,
+    projectedPixelsPerMeter: Float,
+    recordCount: Int
+  ) -> CrowVentralBarbVisibilityUniforms {
+    let row0 = SIMD4<Float>(
+      viewProjection.columns.0.x,
+      viewProjection.columns.1.x,
+      viewProjection.columns.2.x,
+      viewProjection.columns.3.x
+    )
+    let row1 = SIMD4<Float>(
+      viewProjection.columns.0.y,
+      viewProjection.columns.1.y,
+      viewProjection.columns.2.y,
+      viewProjection.columns.3.y
+    )
+    let row2 = SIMD4<Float>(
+      viewProjection.columns.0.z,
+      viewProjection.columns.1.z,
+      viewProjection.columns.2.z,
+      viewProjection.columns.3.z
+    )
+    let row3 = SIMD4<Float>(
+      viewProjection.columns.0.w,
+      viewProjection.columns.1.w,
+      viewProjection.columns.2.w,
+      viewProjection.columns.3.w
+    )
+    return CrowVentralBarbVisibilityUniforms(
+      leftPlane: normalizedPlane(row3 + row0),
+      rightPlane: normalizedPlane(row3 - row0),
+      bottomPlane: normalizedPlane(row3 + row1),
+      topPlane: normalizedPlane(row3 - row1),
+      nearPlane: normalizedPlane(row2),
+      farPlane: normalizedPlane(row3 - row2),
+      bodyCenterAndPadding: SIMD4<Float>(
+        currentBodyCenter,
+        visibilityPaddingMeters
+      ),
+      selection: SIMD4<Float>(
+        projectedPixelsPerMeter,
+        projectedFeatherThresholdPixels,
+        Float(explicitBarbPairCount),
+        Float(intervalCount)
+      ),
+      counts: SIMD4<UInt32>(
+        UInt32(recordCount),
+        UInt32(verticesPerCurveInterval),
+        surfaceFeatherClass,
+        0
+      )
+    )
+  }
+
+  static func visibleRecordIndices(
+    records: [CrowVentralRachisCurveRecordGPU],
+    uniforms: CrowVentralBarbVisibilityUniforms
+  ) -> [UInt32] {
+    records.indices.compactMap { index in
+      isVisible(record: records[index], uniforms: uniforms)
+        ? UInt32(index) : nil
+    }
+  }
+
+  static func isVisible(
+    record: CrowVentralRachisCurveRecordGPU,
+    uniforms: CrowVentralBarbVisibilityUniforms
+  ) -> Bool {
+    let root = xyz(record.rootAndPennaceousStart)
+    let tip = xyz(record.tipAndCamber)
+    let length = simd_distance(root, tip)
+    guard length * uniforms.selection.x >= uniforms.selection.y else {
+      return false
+    }
+    let bounds = boundingSphere(
+      record: record,
+      bodyCenter: xyz(uniforms.bodyCenterAndPadding),
+      paddingMeters: uniforms.bodyCenterAndPadding.w
+    )
+    return [
+      uniforms.leftPlane,
+      uniforms.rightPlane,
+      uniforms.bottomPlane,
+      uniforms.topPlane,
+      uniforms.nearPlane,
+      uniforms.farPlane,
+    ].allSatisfy { plane in
+      simd_dot(xyz(plane), bounds.center) + plane.w >= -bounds.radius
+    }
+  }
+
+  static func boundingSphere(
+    record: CrowVentralRachisCurveRecordGPU,
+    bodyCenter: SIMD3<Float>,
+    paddingMeters: Float = visibilityPaddingMeters
+  ) -> (center: SIMD3<Float>, radius: Float) {
+    let root = xyz(record.rootAndPennaceousStart)
+    let tip = xyz(record.tipAndCamber)
+    let maximumWidth =
+      record.widthsEnvelopeAndAsymmetry.y
+      * (1 + abs(record.widthsEnvelopeAndAsymmetry.w))
+    return (
+      center: 0.5 * (root + tip) + bodyCenter,
+      radius: 0.5 * simd_distance(root, tip) + maximumWidth
+        + abs(record.tipAndCamber.w)
+        + abs(record.normalAndTransverseCamber.w) * maximumWidth
+        + abs(record.lateralSweepAndReserved.x)
+        + paddingMeters
+    )
   }
 
   /// CPU surface geometry keeps the vane, continuity shaft, and aggregate edge
@@ -230,6 +353,11 @@ enum CrowVentralBarbCurveRecords {
 
   private static func xyz(_ value: SIMD4<Float>) -> SIMD3<Float> {
     SIMD3<Float>(value.x, value.y, value.z)
+  }
+
+  private static func normalizedPlane(_ plane: SIMD4<Float>) -> SIMD4<Float> {
+    let length = simd_length(xyz(plane))
+    return length > 1e-12 ? plane / length : plane
   }
 
   private static func normalized(

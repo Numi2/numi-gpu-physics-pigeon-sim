@@ -11,12 +11,20 @@ final class CrowVentralBarbGeometryDeformer {
   private static let bufferedFrameCount = 3
 
   private let backend: VisualizationBackend
+  private let classifyPipeline: MTLComputePipelineState
+  private let scanPipeline: MTLComputePipelineState
+  private let emitPipeline: MTLComputePipelineState
+  private let indirectPipeline: MTLComputePipelineState
   private let pipeline: MTLComputePipelineState
   private let records: [CrowVentralRachisCurveRecordGPU]
   private let recordBuffer: MTLBuffer
+  private let selectedBuffers: [MTLBuffer]
+  private let offsetBuffers: [MTLBuffer]
+  private let compactedCountBuffers: [MTLBuffer]
   private let workBuffers: [MTLBuffer]
   private var outputBuffers: [MTLBuffer]
   private let indirectDrawBuffers: [MTLBuffer]
+  private let indirectDispatchBuffers: [MTLBuffer]
   private var readbackBuffers: [MTLBuffer?]
   private var nextSlot = 0
 
@@ -28,6 +36,10 @@ final class CrowVentralBarbGeometryDeformer {
   ) throws {
     self.backend = backend
     self.records = records
+    classifyPipeline = try backend.compute("classifyCrowVentralBarbRecords")
+    scanPipeline = try backend.compute("scanCrowVentralBarbRecordVisibility")
+    emitPipeline = try backend.compute("emitCrowVentralBarbWork")
+    indirectPipeline = try backend.compute("prepareCrowVentralBarbIndirectWork")
     pipeline = try backend.compute("expandCrowVentralBarbCurves")
     curveCount = records.count
     recordBuffer = try Self.sharedBuffer(values: records, backend: backend)
@@ -35,6 +47,21 @@ final class CrowVentralBarbGeometryDeformer {
       records.count
       * CrowVentralBarbCurveRecords.maximumBarbPairCount * 2
       * CrowVentralBarbCurveRecords.intervalCount
+    selectedBuffers = try (0..<Self.bufferedFrameCount).map { _ in
+      try backend.buffer(
+        length: max(records.count * MemoryLayout<UInt32>.stride, 16),
+        shared: true
+      )
+    }
+    offsetBuffers = try (0..<Self.bufferedFrameCount).map { _ in
+      try backend.buffer(
+        length: max(records.count * MemoryLayout<UInt32>.stride, 16),
+        shared: true
+      )
+    }
+    compactedCountBuffers = try (0..<Self.bufferedFrameCount).map { _ in
+      try backend.buffer(length: MemoryLayout<UInt32>.stride, shared: true)
+    }
     workBuffers = try (0..<Self.bufferedFrameCount).map { _ in
       try backend.buffer(
         length: max(
@@ -54,6 +81,9 @@ final class CrowVentralBarbGeometryDeformer {
         shared: true
       )
     }
+    indirectDispatchBuffers = try (0..<Self.bufferedFrameCount).map { _ in
+      try backend.buffer(length: 3 * MemoryLayout<UInt32>.stride, shared: true)
+    }
     readbackBuffers = Array(repeating: nil, count: Self.bufferedFrameCount)
   }
 
@@ -61,71 +91,153 @@ final class CrowVentralBarbGeometryDeformer {
     currentBodyCenter: SIMD3<Float>,
     previousBodyCenter: SIMD3<Float>,
     projectedPixelsPerMeter: Float,
+    viewProjection: simd_float4x4,
     commandBuffer: MTLCommandBuffer,
     auditReadback: Bool = false
   ) throws -> CrowFeatherGeometryFrame {
     let slot = nextSlot
     nextSlot = (nextSlot + 1) % Self.bufferedFrameCount
-    let work = CrowVentralBarbCurveRecords.segmentWork(
+    let candidateRecordCount = CrowVentralBarbCurveRecords.activeRecordIndices(
       records: records,
       projectedPixelsPerMeter: projectedPixelsPerMeter
-    )
-    let workBuffer = workBuffers[slot]
-    work.withUnsafeBytes { bytes in
-      if let baseAddress = bytes.baseAddress, !bytes.isEmpty {
-        memcpy(workBuffer.contents(), baseAddress, bytes.count)
-      }
-    }
-    let vertexCount =
-      work.count
+    ).count
+    let maximumWorkCount =
+      candidateRecordCount
+      * CrowVentralBarbCurveRecords.maximumBarbPairCount * 2
+      * CrowVentralBarbCurveRecords.intervalCount
+    let maximumVertexCount =
+      maximumWorkCount
       * CrowVentralBarbCurveRecords.verticesPerCurveInterval
     let requiredOutputBytes = max(
-      vertexCount * MemoryLayout<CrowFeatherVertexGPU>.stride,
+      maximumVertexCount * MemoryLayout<CrowFeatherVertexGPU>.stride,
       16
     )
     if requiredOutputBytes > outputBuffers[slot].length {
       outputBuffers[slot] = try backend.buffer(length: requiredOutputBytes)
     }
-    let drawArguments = DrawPrimitivesIndirectArguments(
-      vertexCount: UInt32(vertexCount),
+    let emptyDrawArguments = DrawPrimitivesIndirectArguments(
+      vertexCount: 0,
       instanceCount: 1,
       vertexStart: 0,
       baseInstance: 0
     )
-    _ = withUnsafeBytes(of: drawArguments) { bytes in
+    _ = withUnsafeBytes(of: emptyDrawArguments) { bytes in
       memcpy(
         indirectDrawBuffers[slot].contents(),
         bytes.baseAddress!,
         bytes.count
       )
     }
+    compactedCountBuffers[slot].contents().storeBytes(of: UInt32(0), as: UInt32.self)
     var uniforms = CrowVentralBarbGeometryUniforms(
       counts: SIMD4<UInt32>(
         UInt32(records.count),
-        UInt32(work.count),
+        UInt32(maximumWorkCount),
         UInt32(CrowVentralBarbCurveRecords.verticesPerCurveInterval),
         CrowVentralBarbCurveRecords.surfaceFeatherClass
       ),
       currentBodyCenter: SIMD4<Float>(currentBodyCenter, 1),
       previousBodyCenter: SIMD4<Float>(previousBodyCenter, 1)
     )
-    if vertexCount > 0 {
+    var visibilityUniforms = CrowVentralBarbCurveRecords.visibilityUniforms(
+      viewProjection: viewProjection,
+      currentBodyCenter: currentBodyCenter,
+      projectedPixelsPerMeter: projectedPixelsPerMeter,
+      recordCount: records.count
+    )
+    var threadsPerThreadgroup = UInt32(
+      min(pipeline.maxTotalThreadsPerThreadgroup, pipeline.threadExecutionWidth)
+    )
+    if maximumVertexCount > 0 {
+      guard let classify = commandBuffer.makeComputeCommandEncoder() else {
+        throw VisualizationError.pipeline("crow ventral barb visibility encoder")
+      }
+      classify.label = "Classify retained ventral barb records"
+      classify.setBuffer(recordBuffer, offset: 0, index: 0)
+      classify.setBuffer(selectedBuffers[slot], offset: 0, index: 1)
+      classify.setBytes(
+        &visibilityUniforms,
+        length: MemoryLayout<CrowVentralBarbVisibilityUniforms>.stride,
+        index: 2
+      )
+      backend.dispatch1D(classify, pipeline: classifyPipeline, count: records.count)
+      classify.endEncoding()
+
+      guard let scan = commandBuffer.makeComputeCommandEncoder() else {
+        throw VisualizationError.pipeline("crow ventral barb visibility scan")
+      }
+      scan.label = "Scan retained ventral barb visibility"
+      scan.setBuffer(selectedBuffers[slot], offset: 0, index: 0)
+      scan.setBuffer(offsetBuffers[slot], offset: 0, index: 1)
+      scan.setBuffer(compactedCountBuffers[slot], offset: 0, index: 2)
+      scan.setBytes(
+        &visibilityUniforms,
+        length: MemoryLayout<CrowVentralBarbVisibilityUniforms>.stride,
+        index: 3
+      )
+      backend.dispatch1D(scan, pipeline: scanPipeline, count: 1)
+      scan.endEncoding()
+
+      guard let emit = commandBuffer.makeComputeCommandEncoder() else {
+        throw VisualizationError.pipeline("crow ventral barb compact work encoder")
+      }
+      emit.label = "Emit compact retained ventral barb work"
+      emit.setBuffer(selectedBuffers[slot], offset: 0, index: 0)
+      emit.setBuffer(offsetBuffers[slot], offset: 0, index: 1)
+      emit.setBuffer(workBuffers[slot], offset: 0, index: 2)
+      emit.setBytes(
+        &visibilityUniforms,
+        length: MemoryLayout<CrowVentralBarbVisibilityUniforms>.stride,
+        index: 3
+      )
+      backend.dispatch1D(emit, pipeline: emitPipeline, count: records.count)
+      emit.endEncoding()
+
+      guard let prepare = commandBuffer.makeComputeCommandEncoder() else {
+        throw VisualizationError.pipeline("crow ventral barb indirect-work encoder")
+      }
+      prepare.label = "Prepare compact ventral barb indirect work"
+      prepare.setBuffer(compactedCountBuffers[slot], offset: 0, index: 0)
+      prepare.setBuffer(indirectDrawBuffers[slot], offset: 0, index: 1)
+      prepare.setBuffer(indirectDispatchBuffers[slot], offset: 0, index: 2)
+      prepare.setBytes(
+        &visibilityUniforms,
+        length: MemoryLayout<CrowVentralBarbVisibilityUniforms>.stride,
+        index: 3
+      )
+      prepare.setBytes(
+        &threadsPerThreadgroup,
+        length: MemoryLayout<UInt32>.stride,
+        index: 4
+      )
+      backend.dispatch1D(prepare, pipeline: indirectPipeline, count: 1)
+      prepare.endEncoding()
+
       guard let encoder = commandBuffer.makeComputeCommandEncoder() else {
         throw VisualizationError.pipeline("crow ventral barb geometry encoder")
       }
       encoder.label = "Retained ventral barb curve expansion"
       encoder.setBuffer(recordBuffer, offset: 0, index: 0)
-      encoder.setBuffer(workBuffer, offset: 0, index: 1)
+      encoder.setBuffer(workBuffers[slot], offset: 0, index: 1)
       encoder.setBuffer(outputBuffers[slot], offset: 0, index: 2)
       encoder.setBytes(
         &uniforms,
         length: MemoryLayout<CrowVentralBarbGeometryUniforms>.stride,
         index: 3
       )
-      backend.dispatch1D(encoder, pipeline: pipeline, count: vertexCount)
+      encoder.setComputePipelineState(pipeline)
+      encoder.dispatchThreadgroups(
+        indirectBuffer: indirectDispatchBuffers[slot],
+        indirectBufferOffset: 0,
+        threadsPerThreadgroup: MTLSize(
+          width: Int(threadsPerThreadgroup),
+          height: 1,
+          depth: 1
+        )
+      )
       encoder.endEncoding()
     }
-    if auditReadback && vertexCount > 0 {
+    if auditReadback && maximumVertexCount > 0 {
       let readback: MTLBuffer
       if let existing = readbackBuffers[slot],
         existing.length >= requiredOutputBytes
@@ -147,7 +259,7 @@ final class CrowVentralBarbGeometryDeformer {
         sourceOffset: 0,
         to: readback,
         destinationOffset: 0,
-        size: vertexCount * MemoryLayout<CrowFeatherVertexGPU>.stride
+        size: maximumVertexCount * MemoryLayout<CrowFeatherVertexGPU>.stride
       )
       blit.endEncoding()
     }
@@ -156,20 +268,54 @@ final class CrowVentralBarbGeometryDeformer {
       readbackReady: auditReadback,
       outputBuffer: outputBuffers[slot],
       indirectDrawBuffer: indirectDrawBuffers[slot],
-      vertexCount: vertexCount
+      vertexCount: maximumVertexCount
     )
+  }
+
+  func drawArguments(
+    for frame: CrowFeatherGeometryFrame
+  ) -> DrawPrimitivesIndirectArguments {
+    frame.indirectDrawBuffer.contents().bindMemory(
+      to: DrawPrimitivesIndirectArguments.self,
+      capacity: 1
+    ).pointee
+  }
+
+  func compactedRecordCount(for frame: CrowFeatherGeometryFrame) -> Int {
+    Int(
+      compactedCountBuffers[frame.slot].contents().bindMemory(
+        to: UInt32.self,
+        capacity: 1
+      ).pointee
+    )
+  }
+
+  func segmentWork(
+    for frame: CrowFeatherGeometryFrame
+  ) -> [CrowVentralBarbSegmentWorkGPU] {
+    let count =
+      compactedRecordCount(for: frame)
+      * CrowVentralBarbCurveRecords.explicitBarbPairCount * 2
+      * CrowVentralBarbCurveRecords.intervalCount
+    let pointer = workBuffers[frame.slot].contents().bindMemory(
+      to: CrowVentralBarbSegmentWorkGPU.self,
+      capacity: count
+    )
+    return Array(UnsafeBufferPointer(start: pointer, count: count))
   }
 
   func vertices(for frame: CrowFeatherGeometryFrame) -> [CrowFeatherVertexGPU] {
     precondition(frame.readbackReady, "ventral barb geometry lacks readback")
+    let actualVertexCount = Int(drawArguments(for: frame).vertexCount)
+    guard actualVertexCount > 0 else { return [] }
     guard let readback = readbackBuffers[frame.slot] else {
       preconditionFailure("ventral barb audit buffer is unavailable")
     }
     let pointer = readback.contents().bindMemory(
       to: CrowFeatherVertexGPU.self,
-      capacity: frame.vertexCount
+      capacity: actualVertexCount
     )
-    return Array(UnsafeBufferPointer(start: pointer, count: frame.vertexCount))
+    return Array(UnsafeBufferPointer(start: pointer, count: actualVertexCount))
   }
 
   func recordsForTesting() -> [CrowVentralRachisCurveRecordGPU] { records }

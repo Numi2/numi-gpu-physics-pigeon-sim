@@ -96,6 +96,18 @@ struct CrowVentralBarbGeometryUniforms {
     float4 previousBodyCenter;
 };
 
+struct CrowVentralBarbVisibilityUniforms {
+    float4 leftPlane;
+    float4 rightPlane;
+    float4 bottomPlane;
+    float4 topPlane;
+    float4 nearPlane;
+    float4 farPlane;
+    float4 bodyCenterAndPadding;
+    float4 selection;
+    uint4 counts;
+};
+
 struct CrowSurfaceTemporalVertexGPU {
     float4 position;
     float4 previousPosition;
@@ -1704,6 +1716,108 @@ inline float crowVentralBarbRadius(
     float t=clamp(curveFraction,0.0f,1.0f);
     return (1.0f+0.12f*variation)
         *mix(0.000026f,0.000004f,pow(t,0.88f));
+}
+
+inline bool crowVentralBarbInsidePlane(
+    float4 plane,float3 center,float radius) {
+    return dot(plane.xyz,center)+plane.w>=-radius;
+}
+
+inline bool crowVentralBarbRecordVisible(
+    thread const CrowVentralRachisCurveRecordGPU& record,
+    constant CrowVentralBarbVisibilityUniforms& uniforms) {
+    float3 root=record.rootAndPennaceousStart.xyz;
+    float3 tip=record.tipAndCamber.xyz;
+    float featherLength=distance(root,tip);
+    if(featherLength*uniforms.selection.x<uniforms.selection.y){return false;}
+    float maximumWidth=record.widthsEnvelopeAndAsymmetry.y
+        *(1.0f+abs(record.widthsEnvelopeAndAsymmetry.w));
+    float radius=0.5f*featherLength+maximumWidth
+        +abs(record.tipAndCamber.w)
+        +abs(record.normalAndTransverseCamber.w)*maximumWidth
+        +abs(record.lateralSweepAndReserved.x)
+        +uniforms.bodyCenterAndPadding.w;
+    float3 center=0.5f*(root+tip)+uniforms.bodyCenterAndPadding.xyz;
+    return crowVentralBarbInsidePlane(uniforms.leftPlane,center,radius)
+        &&crowVentralBarbInsidePlane(uniforms.rightPlane,center,radius)
+        &&crowVentralBarbInsidePlane(uniforms.bottomPlane,center,radius)
+        &&crowVentralBarbInsidePlane(uniforms.topPlane,center,radius)
+        &&crowVentralBarbInsidePlane(uniforms.nearPlane,center,radius)
+        &&crowVentralBarbInsidePlane(uniforms.farPlane,center,radius);
+}
+
+kernel void classifyCrowVentralBarbRecords(
+    device const CrowVentralRachisCurveRecordGPU* records [[buffer(0)]],
+    device uint* selected [[buffer(1)]],
+    constant CrowVentralBarbVisibilityUniforms& uniforms [[buffer(2)]],
+    uint recordIndex [[thread_position_in_grid]]) {
+    if(recordIndex>=uniforms.counts.x){return;}
+    CrowVentralRachisCurveRecordGPU record=records[recordIndex];
+    selected[recordIndex]=crowVentralBarbRecordVisible(record,uniforms)?1u:0u;
+}
+
+kernel void scanCrowVentralBarbRecordVisibility(
+    device const uint* selected [[buffer(0)]],
+    device uint* offsets [[buffer(1)]],
+    device uint* compactedCount [[buffer(2)]],
+    constant CrowVentralBarbVisibilityUniforms& uniforms [[buffer(3)]],
+    uint gid [[thread_position_in_grid]]) {
+    if(gid!=0u){return;}
+    uint running=0u;
+    for(uint recordIndex=0u;recordIndex<uniforms.counts.x;++recordIndex){
+        offsets[recordIndex]=running;
+        running+=selected[recordIndex];
+    }
+    compactedCount[0]=running;
+}
+
+kernel void emitCrowVentralBarbWork(
+    device const uint* selected [[buffer(0)]],
+    device const uint* offsets [[buffer(1)]],
+    device CrowVentralBarbSegmentWorkGPU* work [[buffer(2)]],
+    constant CrowVentralBarbVisibilityUniforms& uniforms [[buffer(3)]],
+    uint recordIndex [[thread_position_in_grid]]) {
+    if(recordIndex>=uniforms.counts.x||selected[recordIndex]==0u){return;}
+    uint pairCount=uint(uniforms.selection.z);
+    uint intervalCount=uint(uniforms.selection.w);
+    uint workPerRecord=pairCount*2u*intervalCount;
+    uint outputIndex=offsets[recordIndex]*workPerRecord;
+    for(uint pairIndex=0u;pairIndex<pairCount;++pairIndex){
+        for(uint sideIndex=0u;sideIndex<2u;++sideIndex){
+            for(uint intervalIndex=0u;intervalIndex<intervalCount;++intervalIndex){
+                CrowVentralBarbSegmentWorkGPU item;
+                item.indices=uint4(
+                    recordIndex,
+                    pairIndex,
+                    pairCount|(sideIndex<<16u),
+                    intervalIndex|(intervalCount<<16u)
+                );
+                work[outputIndex++]=item;
+            }
+        }
+    }
+}
+
+kernel void prepareCrowVentralBarbIndirectWork(
+    device const uint* compactedCount [[buffer(0)]],
+    device CrowFeatherDrawArguments* drawArguments [[buffer(1)]],
+    device CrowFeatherDispatchArguments* dispatchArguments [[buffer(2)]],
+    constant CrowVentralBarbVisibilityUniforms& uniforms [[buffer(3)]],
+    constant uint& threadsPerThreadgroup [[buffer(4)]],
+    uint gid [[thread_position_in_grid]]) {
+    if(gid!=0u){return;}
+    uint pairCount=uint(uniforms.selection.z);
+    uint intervalCount=uint(uniforms.selection.w);
+    uint intervalWork=compactedCount[0]*pairCount*2u*intervalCount;
+    uint vertexCount=intervalWork*uniforms.counts.y;
+    drawArguments[0].vertexCount=vertexCount;
+    drawArguments[0].instanceCount=1u;
+    drawArguments[0].vertexStart=0u;
+    drawArguments[0].baseInstance=0u;
+    dispatchArguments[0].threadgroupsPerGrid[0]=vertexCount==0u?0u:
+        (vertexCount+threadsPerThreadgroup-1u)/threadsPerThreadgroup;
+    dispatchArguments[0].threadgroupsPerGrid[1]=1u;
+    dispatchArguments[0].threadgroupsPerGrid[2]=1u;
 }
 
 kernel void expandCrowVentralBarbCurves(

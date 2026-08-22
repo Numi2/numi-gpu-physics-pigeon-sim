@@ -125,10 +125,13 @@ inventory or view-dependent patch geometry.
    activates at `480 px` feather length: `72` hashed barb pairs per side follow
    the changing crown in four connected curve intervals, replace the coarse
    edge aggregates, and retain temporal/AOV ownership. At ordinary coverage the
-   curve work list is exactly empty. The next future-compute step is GPU
-   frustum/occlusion selection and indirect meshlet or hardware-curve emission
-   from the same `1,304`-feather tract inventory; the current expanded triangle
-   stream is a high-cost correctness oracle, not the final scaling path.
+   curve work list is exactly empty. Metal now frustum-classifies conservative
+   record bounds, performs a deterministic scan, emits compact interval work,
+   and indirectly expands/draws only selected records. The next future-compute
+   step is previous-depth occlusion, visibility-sized residency, and indirect
+   meshlet or hardware-curve emission from the same `1,304`-feather tract
+   inventory; the current expanded triangle stream remains the high-cost
+   correctness oracle, not the final scaling path.
    The `270`-identity-per-side femoral field now has a compact, AOV-localized
    insertion-overlap oracle over rows `6...11`, courses `8...9`; the bounded
    width/tip envelope closes a transition seam without moving follicles or leg
