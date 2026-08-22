@@ -907,6 +907,17 @@ shaft/barb layer remain unchanged. Direct Metal/Swift vertex parity is the
 acceptance evidence for this pass; no new image was admitted as a realism
 reference.
 
+The interdigitated throat bridge now retains its `88` full-resolution vanes as
+family-`6` Metal morphology. Four immutable neck-coupling columns share exact
+current/previous affine transforms, so the established anterior-to-posterior
+motion gradient survives without CPU-expanded temporal triangles. The live
+`7 x 3` surface emits `11,088` vertices and avoids `1,064,448` bytes of CPU
+surface data per frame. Roots, tips, feather widths, material variation, and
+the full-resolution-only `1,400 px/m` visibility threshold are unchanged. A
+dedicated CPU baseline switch and Metal/Swift vertex oracle qualify ownership;
+the next visual gate is intentionally deferred to a new underside
+throat-to-bill camera angle.
+
 Across fresh 17-frame front-starboard and ventral-port audits at yaw/pitch
 `(-0.32,0.06)` and `(0.66,-0.34)`, enclosed-hole pixels stay `6 -> 6` and
 improve `36 -> 35`; components improve `5 -> 4` and `17 -> 16`; and the worst

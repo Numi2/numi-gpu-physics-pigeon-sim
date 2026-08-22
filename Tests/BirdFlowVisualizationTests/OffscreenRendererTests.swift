@@ -775,7 +775,7 @@ func estimatedStandingCrowCaptureProducesLoopClosedFrames() throws {
   #expect(audit.schemaVersion == 27)
   #expect(
     audit.frames.allSatisfy {
-      $0.bodyVaneMorphologyRecordCount == 5_380
+      $0.bodyVaneMorphologyRecordCount == 5_468
         && $0.bodyVaneMorphologyRecordBytes
           == $0.bodyVaneMorphologyRecordCount
           * MemoryLayout<CrowBodyVaneMorphologyGPU>.stride
@@ -786,8 +786,8 @@ func estimatedStandingCrowCaptureProducesLoopClosedFrames() throws {
           * MemoryLayout<CrowBodyVaneMorphologyGPU>.stride
         && $0.bodyVaneRetainedMorphologyCapacityBytes
           >= $0.bodyVaneSelectedMorphologyRecordBytes
-        && $0.bodyVanePoseInputBytes == 1_504
-        && $0.bodyVaneRetainedPoseCapacityBytes == 4_512
+        && $0.bodyVanePoseInputBytes == 1_888
+        && $0.bodyVaneRetainedPoseCapacityBytes == 5_664
         && $0.bodyVaneRetainedIndirectDrawBytes
           >= 3 * $0.bodyVaneBatchCount
           * MemoryLayout<DrawPrimitivesIndirectArguments>.stride
@@ -901,12 +901,17 @@ func estimatedStandingCrowCaptureProducesLoopClosedFrames() throws {
       }).count
         == frame.bodyVaneIdentities.count
         && frame.bodyVaneIdentities.allSatisfy {
-          ($0.familyCode == 2 || $0.familyCode == 3)
+          [2, 3, 6].contains($0.familyCode)
             && $0.inventoryIndex >= 0
             && ($0.familyCode == 2
-              ? $0.inventoryIndex < 3_212 : $0.inventoryIndex < 1_304)
-            && (4...7).contains($0.featherClassCode)
-            && $0.regionCode <= CrowBodyFeatherTractRegion.scapular.rawValue
+              ? $0.inventoryIndex < 3_212
+              : ($0.familyCode == 3
+                ? $0.inventoryIndex < 1_304 : $0.inventoryIndex < 88))
+            && ($0.familyCode == 6
+              ? $0.featherClassCode == 17 : (4...7).contains($0.featherClassCode))
+            && ($0.familyCode == 6
+              ? $0.regionCode == 6
+              : $0.regionCode <= CrowBodyFeatherTractRegion.scapular.rawValue)
             && $0.sideCode <= 1
             && $0.visiblePixelCount > 0
             && $0.fullyCoveredPixelCount <= $0.visiblePixelCount

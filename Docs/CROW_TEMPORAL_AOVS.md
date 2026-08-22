@@ -144,12 +144,14 @@ their parent identity.
 Schema `27` extends that census and the retained inventory to the `1,304`
 class-`7` pectoral/abdominal vane owners. Identity family `2` remains the
 `3,212` dorsal/body records; family `3` maps its own inventory index back to
-ventral region, side, row, and column. Throat blades remain separate surface
-primitives. The subsequent femoral-retention pass adds `540` family-`4`
-records whose inventory index maps to bilateral side, row, and course. The
+ventral region, side, row, and column. The subsequent femoral-retention pass
+adds `540` family-`4` records whose inventory index maps to bilateral side,
+row, and course. The
 crural-retention pass adds `324` family-`5` records mapping bilateral side,
-radial tract, and axial station. Aggregate retained-morphology counters now
-report `5,380` records and `688,640` bytes, while dedicated ventral fields
+radial tract, and axial station. The throat-bridge pass adds `88` family-`6`
+records mapping bilateral side, interdigitated row, and one of four graded
+neck-coupling columns. Aggregate retained-morphology counters now report
+`5,468` records and `699,904` bytes, while dedicated ventral fields
 continue to report
 `1,304` records, selected work, procedural raster invocations, eliminated CPU
 surface bytes, and `gpu-retained-identity-stable-procedural-vane` generation.
@@ -157,9 +159,10 @@ At the current `7 x 3` tier this is `164,304` raster vertices and `15,773,184`
 eliminated `CrowSurfaceTemporalVertexGPU` bytes per frame. Femoral family `4`
 adds `68,040` raster vertices and eliminates another `6,531,840` bytes per
 frame. Crural family `5` adds `46,656` raster vertices and eliminates another
-`4,478,976` bytes per frame. Exact limb-family selected counts are recoverable
-from the family census and aggregate selected count without widening the
-already large frame-audit ABI.
+`4,478,976` bytes per frame. Throat family `6` adds `11,088` raster vertices
+and eliminates another `1,064,448` bytes per frame. Exact retained-family
+selected counts are recoverable from the family census and aggregate selected
+count without widening the already large frame-audit ABI.
 This is a data-flow and residency audit, not a GPU-time or throughput result.
 Schema `24` deliberately keeps the existing body-vane counters: rachis and
 detail inherit their parent vane's stable identity, and the integer pass

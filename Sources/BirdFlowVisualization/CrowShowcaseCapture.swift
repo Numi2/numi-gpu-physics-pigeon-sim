@@ -47,6 +47,7 @@ public enum CrowShowcaseCapture {
     let explicitVentralBarbCurvesEnabled: Bool
     let retainedFemoralVanesEnabled: Bool
     let retainedCruralVanesEnabled: Bool
+    let retainedThroatBridgeVanesEnabled: Bool
     let ventralCurveEmissionMode: CrowVentralCurveEmissionMode
     let presentation: CrowShowcasePresentation
 
@@ -122,6 +123,9 @@ public enum CrowShowcaseCapture {
       )
       retainedCruralVanesEnabled = !commandLine.contains(
         "--capture-crow-cpu-crural-vanes"
+      )
+      retainedThroatBridgeVanesEnabled = !commandLine.contains(
+        "--capture-crow-cpu-throat-bridge-vanes"
       )
       let emissionValue =
         try value(after: "--capture-crow-ventral-curve-emission")
@@ -321,6 +325,8 @@ public enum CrowShowcaseCapture {
         arguments.explicitVentralBarbCurvesEnabled,
       retainedFemoralVanesEnabled: arguments.retainedFemoralVanesEnabled,
       retainedCruralVanesEnabled: arguments.retainedCruralVanesEnabled,
+      retainedThroatBridgeVanesEnabled:
+        arguments.retainedThroatBridgeVanesEnabled,
       ventralCurveEmissionMode: arguments.ventralCurveEmissionMode
     )
     let nativeReferenceRenderer =
@@ -338,6 +344,8 @@ public enum CrowShowcaseCapture {
           arguments.explicitVentralBarbCurvesEnabled,
         retainedFemoralVanesEnabled: arguments.retainedFemoralVanesEnabled,
         retainedCruralVanesEnabled: arguments.retainedCruralVanesEnabled,
+        retainedThroatBridgeVanesEnabled:
+          arguments.retainedThroatBridgeVanesEnabled,
         ventralCurveEmissionMode: arguments.ventralCurveEmissionMode
       )
       : nil
@@ -835,6 +843,7 @@ private final class CrowShowcaseRenderer {
   private let bodyVaneGeometryDeformer: CrowBodyVaneGeometryDeformer?
   private let femoralVanesOwnedByMetal: Bool
   private let cruralVanesOwnedByMetal: Bool
+  private let throatBridgeVanesOwnedByMetal: Bool
   private let ventralRachisGeometryDeformer: CrowVentralRachisGeometryDeformer
   private let ventralBarbGeometryDeformer: CrowVentralBarbGeometryDeformer?
   private let ventralBarbUsesMeshStage: Bool
@@ -857,6 +866,7 @@ private final class CrowShowcaseRenderer {
     explicitVentralBarbCurvesEnabled: Bool = true,
     retainedFemoralVanesEnabled: Bool = true,
     retainedCruralVanesEnabled: Bool = true,
+    retainedThroatBridgeVanesEnabled: Bool = true,
     ventralCurveEmissionMode: CrowVentralCurveEmissionMode = .auto
   ) throws {
     self.presentation = presentation
@@ -924,6 +934,9 @@ private final class CrowShowcaseRenderer {
     let createdCruralVanesOwnedByMetal = bodyVaneGeometryDeformer != nil
       && retainedCruralVanesEnabled
     cruralVanesOwnedByMetal = createdCruralVanesOwnedByMetal
+    let createdThroatBridgeVanesOwnedByMetal = bodyVaneGeometryDeformer != nil
+      && retainedThroatBridgeVanesEnabled
+    throatBridgeVanesOwnedByMetal = createdThroatBridgeVanesOwnedByMetal
     let createdMeshBuilder = CrowMeshBuilder(
       dataset: dataset,
       profile: profile,
@@ -934,7 +947,8 @@ private final class CrowShowcaseRenderer {
       bodyVanesOwnedByMetal: bodyVaneGeometryDeformer != nil,
       ventralVanesOwnedByMetal: bodyVaneGeometryDeformer != nil,
       femoralVanesOwnedByMetal: createdFemoralVanesOwnedByMetal,
-      cruralVanesOwnedByMetal: createdCruralVanesOwnedByMetal
+      cruralVanesOwnedByMetal: createdCruralVanesOwnedByMetal,
+      throatBridgeVanesOwnedByMetal: createdThroatBridgeVanesOwnedByMetal
     )
     meshBuilder = createdMeshBuilder
     if let realityAsset {
@@ -1377,8 +1391,9 @@ private final class CrowShowcaseRenderer {
       previousFemoralPose: femoralVanesOwnedByMetal
           || cruralVanesOwnedByMetal
         ? previousBodyVanePose.femoralPose : nil,
-      limbFamilyMask: (femoralVanesOwnedByMetal ? 0x1 : 0)
-        | (cruralVanesOwnedByMetal ? 0x2 : 0),
+      retainedFamilyMask: (femoralVanesOwnedByMetal ? 0x1 : 0)
+        | (cruralVanesOwnedByMetal ? 0x2 : 0)
+        | (throatBridgeVanesOwnedByMetal ? 0x4 : 0),
       currentDeployment: currentBodyVanePose.deployment,
       previousDeployment: previousBodyVanePose.deployment,
       projectedPixelsPerMeter: projectedPixelsPerMeter,
@@ -2167,6 +2182,7 @@ private struct CrowMeshBuilder {
   private let ventralVanesOwnedByMetal: Bool
   private let femoralVanesOwnedByMetal: Bool
   private let cruralVanesOwnedByMetal: Bool
+  private let throatBridgeVanesOwnedByMetal: Bool
   private let leftWingAnchor: CrowWingAttachmentAnchor?
   private let rightWingAnchor: CrowWingAttachmentAnchor?
 
@@ -2186,7 +2202,8 @@ private struct CrowMeshBuilder {
     bodyVanesOwnedByMetal: Bool,
     ventralVanesOwnedByMetal: Bool,
     femoralVanesOwnedByMetal: Bool,
-    cruralVanesOwnedByMetal: Bool
+    cruralVanesOwnedByMetal: Bool,
+    throatBridgeVanesOwnedByMetal: Bool
   ) {
     self.dataset = dataset
     self.profile = profile
@@ -2197,6 +2214,7 @@ private struct CrowMeshBuilder {
     self.ventralVanesOwnedByMetal = ventralVanesOwnedByMetal
     self.femoralVanesOwnedByMetal = femoralVanesOwnedByMetal
     self.cruralVanesOwnedByMetal = cruralVanesOwnedByMetal
+    self.throatBridgeVanesOwnedByMetal = throatBridgeVanesOwnedByMetal
     persistentFeathers = realityAsset?.feathers ?? []
     surfaceIsEstimatedCrow =
       dataset.scientificTier == "estimated-hybrid-complete-surface"
@@ -3261,6 +3279,9 @@ private struct CrowMeshBuilder {
     projectedPixelsPerMeter: Float,
     to vertices: inout [ColoredVertex]
   ) {
+    guard !throatBridgeVanesOwnedByMetal || projectedPixelsPerMeter < 1_400 else {
+      return
+    }
     for sample in CrowThroatBridgeFeathers.visibleSamples(
       neckPose: neckPose,
       projectedPixelsPerMeter: projectedPixelsPerMeter

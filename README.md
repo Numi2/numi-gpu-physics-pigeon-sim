@@ -120,11 +120,12 @@ against its CPU-expanded predecessor; beauty SSIM is `0.999997`. This remains
 the procedural-raster ownership gate; the retained-morphology gate follows
 below. Neither is measured anatomy or a speedup.
 The `3,212`-record dorsal/body subset occupies `411,136` bytes inside one
-`688,640`-byte retained inventory. The additional `1,304` pectoral and
+`699,904`-byte retained inventory. The additional `1,304` pectoral and
 abdominal vanes use the same immutable owner with a distinct `0x03` identity
-namespace, followed by the `540` femoral and `324` crural limb vanes; dedicated
-rachis and barb systems remain separate. Three pose slots retain `4,512` bytes
-total, while Metal applies the established density predicates, classifies ten
+namespace, followed by the `540` femoral, `324` crural, and `88` throat-bridge
+vanes; dedicated rachis and barb systems remain separate. Three pose slots
+retain `5,664` bytes total, while Metal applies the established density
+predicates, classifies ten
 possible tessellation topologies, scans stable offsets, emits
 compact morphology indices, and prepares indirect vane, rachis, and body-detail
 beauty draws. At
@@ -191,6 +192,19 @@ current-and-previous vertex parity and the optimized release renderer are the
 acceptance gates for this pass; the next image inspection is deliberately
 reserved for a different body boundary and camera angle. These remain
 simulated ownership and residency results, not measured anatomy or GPU timing.
+The cervical-to-pectoral throat bridge now adds `88` identity-stable family-`6`
+records. Immutable unposed blades share four exact current/previous neck
+couplings, preserving the established graded quiet-motion handoff without
+uploading 88 temporal surfaces. The live `7 x 3` tier emits `11,088`
+procedural vertices and removes `1,064,448` bytes of expanded temporal CPU
+geometry per frame; retained morphology totals `5,468` records / `699,904`
+bytes. Exact neck transport increases per-frame pose input from `1,504` to
+`1,888` bytes and the three-slot store from `4,512` to `5,664` bytes. The
+`--capture-crow-cpu-throat-bridge-vanes` baseline independently restores CPU
+ownership, and family `6` maps visible identity to bilateral side, row, and
+neck-coupling column. This pass changes data ownership, not the estimated
+throat anatomy; visual inspection remains reserved for a later underside
+throat-to-bill boundary gate from a new angle.
 The body-detail prepass retains one `96`-byte current/previous analytic segment
 instead of a fixed `18`-vertex triangle stream. Each resolved feather adds six
 three-segment curved basal barb chains beneath the unchanged continuous shell.

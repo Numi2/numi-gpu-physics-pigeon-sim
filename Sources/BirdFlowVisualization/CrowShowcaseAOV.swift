@@ -208,6 +208,7 @@ struct CrowShowcaseFrame {
           || id0 & 0xff00_0000 == 0x0300_0000
           || id0 & 0xff00_0000 == 0x0400_0000
           || id0 & 0xff00_0000 == 0x0500_0000
+          || id0 & 0xff00_0000 == 0x0600_0000
         {
           let bodyVaneIdentity = SIMD4(id0, id1, id2, id3)
           bodyVaneVisiblePixels[bodyVaneIdentity, default: 0] += 1
@@ -288,6 +289,7 @@ struct CrowShowcaseFrame {
           || id0 & 0xff00_0000 == 0x0300_0000
           || id0 & 0xff00_0000 == 0x0400_0000
           || id0 & 0xff00_0000 == 0x0500_0000
+          || id0 & 0xff00_0000 == 0x0600_0000
         {
           bodyVaneFullyCoveredPixels[SIMD4(id0, id1, id2, id3), default: 0] += 1
         }
@@ -411,6 +413,7 @@ struct CrowShowcaseFrame {
     let cruralVaneSamples = [-Float(1), Float(1)].flatMap {
       CrowLegPlumage.morphologySamples(side: $0)
     }
+    let throatBridgeVaneSamples = CrowThroatBridgeFeathers.morphologySamples()
     let bodyVaneIdentities = bodyVaneVisiblePixels.compactMap {
       identity, visiblePixelCount -> CrowBodyVaneIdentityAudit? in
       let inventoryIndex = Int(identity.x & 0x00ff_ffff)
@@ -449,6 +452,14 @@ struct CrowShowcaseFrame {
         sideCode = sample.side < 0 ? 0 : 1
         row = sample.radialIndex
         column = sample.stationIndex
+      } else if familyCode == 6
+        && throatBridgeVaneSamples.indices.contains(inventoryIndex)
+      {
+        let sample = throatBridgeVaneSamples[inventoryIndex]
+        regionCode = 6
+        sideCode = sample.side < 0 ? 0 : 1
+        row = sample.row
+        column = sample.column
       } else {
         return nil
       }

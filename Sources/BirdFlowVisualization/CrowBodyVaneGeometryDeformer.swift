@@ -23,6 +23,28 @@ struct CrowFemoralVanePoseSample: Equatable {
   let rightHip: SIMD3<Float>
   let rightHock: SIMD3<Float>
 
+  static let inactive = CrowFemoralVanePoseSample(
+    bodyCenter: .zero,
+    leftHip: .zero,
+    leftHock: .zero,
+    rightHip: .zero,
+    rightHock: .zero
+  )
+
+  init(
+    bodyCenter: SIMD3<Float>,
+    leftHip: SIMD3<Float>,
+    leftHock: SIMD3<Float>,
+    rightHip: SIMD3<Float>,
+    rightHock: SIMD3<Float>
+  ) {
+    self.bodyCenter = bodyCenter
+    self.leftHip = leftHip
+    self.leftHock = leftHock
+    self.rightHip = rightHip
+    self.rightHock = rightHock
+  }
+
   init(_ pose: CrowStandingPoseSample) {
     bodyCenter = pose.bodyCenter
     leftHip = pose.leftFoot.hip
@@ -215,6 +237,8 @@ final class CrowBodyVaneGeometryDeformer {
       let buffer = try backend.buffer(
         length: 2 * CrowBodyFeatherTracts.cervicalColumnCount
           * MemoryLayout<CrowBodyVaneNeckTransformGPU>.stride
+          + 2 * CrowThroatBridgeFeathers.columnCount
+          * MemoryLayout<CrowBodyVaneNeckTransformGPU>.stride
           + 8 * MemoryLayout<SIMD4<Float>>.stride,
         shared: true
       )
@@ -268,7 +292,7 @@ final class CrowBodyVaneGeometryDeformer {
     previousNeckPose: CrowStandingNeckPose?,
     currentFemoralPose: CrowFemoralVanePoseSample? = nil,
     previousFemoralPose: CrowFemoralVanePoseSample? = nil,
-    limbFamilyMask: UInt32 = 0x3,
+    retainedFamilyMask: UInt32 = 0x7,
     currentDeployment: Float,
     previousDeployment: Float,
     projectedPixelsPerMeter: Float,
@@ -321,14 +345,17 @@ final class CrowBodyVaneGeometryDeformer {
       3 * CrowBodyVaneRecords.productionTopologies.count
         * MemoryLayout<DrawPrimitivesIndirectArguments>.stride
     )
+    var activeFamilyMask = retainedFamilyMask
+    if currentFemoralPose == nil || previousFemoralPose == nil {
+      activeFamilyMask &= ~UInt32(0x3)
+    }
     var selection = CrowBodyVaneSelectionUniforms(
       selection: SIMD4<Float>(projectedPixelsPerMeter, 0, 0, 0),
       counts: SIMD4<UInt32>(
         UInt32(recordCount),
         UInt32(CrowBodyVaneRecords.productionTopologies.count),
         UInt32(retainedDetailSegmentCapacity),
-        currentFemoralPose != nil && previousFemoralPose != nil
-          ? limbFamilyMask : 0
+        activeFamilyMask
       )
     )
     guard let classify = commandBuffer.makeComputeCommandEncoder() else {
@@ -420,9 +447,10 @@ final class CrowBodyVaneGeometryDeformer {
       ? CrowBodyVaneRecords.retainedGroupedMorphologyIndices(
         projectedPixelsPerMeter: projectedPixelsPerMeter,
         femoralActive: currentFemoralPose != nil && previousFemoralPose != nil
-          && limbFamilyMask & 0x1 != 0,
+          && retainedFamilyMask & 0x1 != 0,
         cruralActive: currentFemoralPose != nil && previousFemoralPose != nil
-          && limbFamilyMask & 0x2 != 0
+          && retainedFamilyMask & 0x2 != 0,
+        throatBridgeActive: retainedFamilyMask & 0x4 != 0
       )
       : [:]
     var batches: [CrowBodyVaneGeometryBatchFrame] = []
@@ -746,9 +774,10 @@ final class CrowBodyVaneGeometryDeformer {
     let base = CrowBodyVaneRecords.bodyMorphologyRecordCount
       + CrowBodyVaneRecords.ventralMorphologyRecordCount
       + CrowBodyVaneRecords.femoralMorphologyRecordCount
+    let end = base + CrowBodyVaneRecords.cruralMorphologyRecordCount
     return frame.batches.indices.reduce(0) { partial, topologyIndex in
       partial + selectedRecordIndices(for: frame, topologyIndex: topologyIndex)
-        .count { Int($0) >= base }
+        .count { Int($0) >= base && Int($0) < end }
     }
   }
 
@@ -756,6 +785,32 @@ final class CrowBodyVaneGeometryDeformer {
     let base = CrowBodyVaneRecords.bodyMorphologyRecordCount
       + CrowBodyVaneRecords.ventralMorphologyRecordCount
       + CrowBodyVaneRecords.femoralMorphologyRecordCount
+    let end = base + CrowBodyVaneRecords.cruralMorphologyRecordCount
+    return frame.batches.enumerated().reduce(0) { partial, pair in
+      let selected = selectedRecordIndices(
+        for: frame,
+        topologyIndex: pair.offset
+      ).count { Int($0) >= base && Int($0) < end }
+      return partial + selected * pair.element.vertexCount
+    }
+  }
+
+  func activeThroatBridgeRecordCount(for frame: CrowBodyVaneGeometryFrame) -> Int {
+    let base = CrowBodyVaneRecords.bodyMorphologyRecordCount
+      + CrowBodyVaneRecords.ventralMorphologyRecordCount
+      + CrowBodyVaneRecords.femoralMorphologyRecordCount
+      + CrowBodyVaneRecords.cruralMorphologyRecordCount
+    return frame.batches.indices.reduce(0) { partial, topologyIndex in
+      partial + selectedRecordIndices(for: frame, topologyIndex: topologyIndex)
+        .count { Int($0) >= base }
+    }
+  }
+
+  func expandedThroatBridgeVertexCount(for frame: CrowBodyVaneGeometryFrame) -> Int {
+    let base = CrowBodyVaneRecords.bodyMorphologyRecordCount
+      + CrowBodyVaneRecords.ventralMorphologyRecordCount
+      + CrowBodyVaneRecords.femoralMorphologyRecordCount
+      + CrowBodyVaneRecords.cruralMorphologyRecordCount
     return frame.batches.enumerated().reduce(0) { partial, pair in
       let selected = selectedRecordIndices(
         for: frame,
@@ -896,6 +951,22 @@ final class CrowBodyVaneGeometryDeformer {
         memcpy(neckTransformBuffers[slot].contents(), baseAddress, bytes.count)
       }
     }
+    let throatBridgeTransforms = CrowBodyVaneRecords.throatBridgeTransforms(
+      current: currentNeckPose,
+      previous: previousNeckPose
+    )
+    throatBridgeTransforms.withUnsafeBytes { bytes in
+      if let baseAddress = bytes.baseAddress, !bytes.isEmpty {
+        memcpy(
+          neckTransformBuffers[slot].contents().advanced(
+            by: neckTransforms.count
+              * MemoryLayout<CrowBodyVaneNeckTransformGPU>.stride
+          ),
+          baseAddress,
+          bytes.count
+        )
+      }
+    }
     let limbPoseValues = [
       SIMD4<Float>(
         currentFemoralPose?.leftHip ?? .zero,
@@ -922,6 +993,8 @@ final class CrowBodyVaneGeometryDeformer {
       if let baseAddress = bytes.baseAddress, !bytes.isEmpty {
         memcpy(
           neckTransformBuffers[slot].contents().advanced(by: neckTransforms.count
+            * MemoryLayout<CrowBodyVaneNeckTransformGPU>.stride
+            + throatBridgeTransforms.count
             * MemoryLayout<CrowBodyVaneNeckTransformGPU>.stride),
           baseAddress,
           bytes.count
@@ -930,6 +1003,8 @@ final class CrowBodyVaneGeometryDeformer {
     }
     return MemoryLayout<CrowBodyVanePoseUniforms>.stride
       + neckTransforms.count * MemoryLayout<CrowBodyVaneNeckTransformGPU>.stride
+      + throatBridgeTransforms.count
+      * MemoryLayout<CrowBodyVaneNeckTransformGPU>.stride
       + limbPoseValues.count * MemoryLayout<SIMD4<Float>>.stride
   }
 
@@ -973,6 +1048,8 @@ enum CrowBodyVaneRecords {
     * CrowFemoralPlumage.rowCount * CrowFemoralPlumage.courseCount
   static let cruralMorphologyRecordCount = 2
     * CrowLegPlumage.radialCount * CrowLegPlumage.stationCount
+  static let throatBridgeMorphologyRecordCount = 2
+    * CrowThroatBridgeFeathers.rowCount * CrowThroatBridgeFeathers.columnCount
   /// Body topologies stay first. Because body morphology precedes ventral
   /// morphology, compact body work remains a prefix of the shared work list;
   /// body-only rachis/detail buffers can therefore retain their original
@@ -1076,6 +1153,7 @@ enum CrowBodyVaneRecords {
     morphologyRecords() + ventralMorphologyRecords()
       + femoralMorphologyRecords()
       + cruralMorphologyRecords()
+      + throatBridgeMorphologyRecords()
   }
 
   static func ventralMorphologyRecords() -> [CrowBodyVaneMorphologyGPU] {
@@ -1219,6 +1297,42 @@ enum CrowBodyVaneRecords {
     }
   }
 
+  static func throatBridgeMorphologyRecords() -> [CrowBodyVaneMorphologyGPU] {
+    CrowThroatBridgeFeathers.morphologySamples().enumerated().map { index, sample in
+      let material = sample.materialVariation
+      return CrowBodyVaneMorphologyGPU(
+        rootAndRootWidth: SIMD4<Float>(sample.rootOffset, sample.rootWidthMeters),
+        tipAndMaximumWidth: SIMD4<Float>(sample.tipOffset, sample.maximumWidthMeters),
+        normalAndCamber: SIMD4<Float>(sample.planeNormal, sample.camberMeters),
+        sweepAsymmetryAndRipple: SIMD4<Float>(
+          0,
+          0.035 * material,
+          0.018 + 0.008 * abs(material),
+          Float.pi * (material + 1)
+        ),
+        envelopeAndTaper: SIMD4<Float>(
+          1.5,
+          CrowThroatBridgeFeathers.visibleRootEnvelopeRatio,
+          0.015,
+          3.2
+        ),
+        color: throatBridgeColor(for: sample),
+        morphology: SIMD4<Float>(
+          CrowThroatBridgeFeathers.pennaceousStartFraction,
+          simd_distance(sample.rootOffset, sample.tipOffset),
+          Float(sample.column),
+          Float(sample.row)
+        ),
+        identity: SIMD4<UInt32>(
+          0x0600_0000 | UInt32(index),
+          stableHash(throatBridgeIdentity(of: sample)),
+          Float(0.12).bitPattern,
+          sample.surfaceFeatherClass
+        )
+      )
+    }
+  }
+
   static func groupedMorphologyIndices(
     projectedPixelsPerMeter: Float
   ) -> [CrowBodyVaneTopology: [Int]] {
@@ -1242,7 +1356,8 @@ enum CrowBodyVaneRecords {
   static func retainedGroupedMorphologyIndices(
     projectedPixelsPerMeter: Float,
     femoralActive: Bool = true,
-    cruralActive: Bool = true
+    cruralActive: Bool = true,
+    throatBridgeActive: Bool = true
   ) -> [CrowBodyVaneTopology: [Int]] {
     var grouped = groupedMorphologyIndices(
       projectedPixelsPerMeter: projectedPixelsPerMeter
@@ -1282,6 +1397,18 @@ enum CrowBodyVaneRecords {
         }
       )
     }
+    if throatBridgeActive && projectedPixelsPerMeter >= 1_400 {
+      let throatBase = bodyCount + ventralMorphologyRecordCount
+        + femoralMorphologyRecordCount + cruralMorphologyRecordCount
+      for (index, record) in throatBridgeMorphologyRecords().enumerated() {
+        let throatTopology = limbTopology(
+          referenceLengthMeters: record.morphology.y,
+          projectedPixelsPerMeter: projectedPixelsPerMeter,
+          isCrural: false
+        )
+        grouped[throatTopology, default: []].append(throatBase + index)
+      }
+    }
     return grouped
   }
 
@@ -1319,34 +1446,55 @@ enum CrowBodyVaneRecords {
     transforms(for: current) + transforms(for: previous)
   }
 
+  static func throatBridgeTransforms(
+    current: CrowStandingNeckPose?,
+    previous: CrowStandingNeckPose?
+  ) -> [CrowBodyVaneNeckTransformGPU] {
+    throatBridgeTransforms(for: current) + throatBridgeTransforms(for: previous)
+  }
+
   private static func transforms(
     for pose: CrowStandingNeckPose?
   ) -> [CrowBodyVaneNeckTransformGPU] {
-    guard let pose else {
-      let identity = CrowBodyVaneNeckTransformGPU(
-        row0: SIMD4<Float>(1, 0, 0, 0),
-        row1: SIMD4<Float>(0, 1, 0, 0),
-        row2: SIMD4<Float>(0, 0, 1, 0)
-      )
-      return Array(
-        repeating: identity,
-        count: CrowBodyFeatherTracts.cervicalColumnCount
-      )
-    }
     return (0..<CrowBodyFeatherTracts.cervicalColumnCount).map { column in
       let axial = Float(column)
         / Float(CrowBodyFeatherTracts.cervicalColumnCount - 1)
       let coupling = 0.10 + 0.78 * axial
-      let x = pose.rotated(SIMD3<Float>(1, 0, 0), coupling: coupling)
-      let y = pose.rotated(SIMD3<Float>(0, 1, 0), coupling: coupling)
-      let z = pose.rotated(SIMD3<Float>(0, 0, 1), coupling: coupling)
-      let translation = pose.transform(offset: .zero, coupling: coupling)
-      return CrowBodyVaneNeckTransformGPU(
-        row0: SIMD4<Float>(x.x, y.x, z.x, translation.x),
-        row1: SIMD4<Float>(x.y, y.y, z.y, translation.y),
-        row2: SIMD4<Float>(x.z, y.z, z.z, translation.z)
+      return transform(for: pose, coupling: coupling)
+    }
+  }
+
+  private static func throatBridgeTransforms(
+    for pose: CrowStandingNeckPose?
+  ) -> [CrowBodyVaneNeckTransformGPU] {
+    (0..<CrowThroatBridgeFeathers.columnCount).map { column in
+      transform(
+        for: pose,
+        coupling: CrowThroatBridgeFeathers.neckCoupling(column: column)
       )
     }
+  }
+
+  private static func transform(
+    for pose: CrowStandingNeckPose?,
+    coupling: Float
+  ) -> CrowBodyVaneNeckTransformGPU {
+    guard let pose else {
+      return CrowBodyVaneNeckTransformGPU(
+        row0: SIMD4<Float>(1, 0, 0, 0),
+        row1: SIMD4<Float>(0, 1, 0, 0),
+        row2: SIMD4<Float>(0, 0, 1, 0)
+      )
+    }
+    let x = pose.rotated(SIMD3<Float>(1, 0, 0), coupling: coupling)
+    let y = pose.rotated(SIMD3<Float>(0, 1, 0), coupling: coupling)
+    let z = pose.rotated(SIMD3<Float>(0, 0, 1), coupling: coupling)
+    let translation = pose.transform(offset: .zero, coupling: coupling)
+    return CrowBodyVaneNeckTransformGPU(
+      row0: SIMD4<Float>(x.x, y.x, z.x, translation.x),
+      row1: SIMD4<Float>(x.y, y.y, z.y, translation.y),
+      row2: SIMD4<Float>(x.z, y.z, z.z, translation.z)
+    )
   }
 
   static func temporalRecords(
@@ -1400,6 +1548,11 @@ enum CrowBodyVaneRecords {
     ) + cruralTemporalRecords(
       currentPose: currentFemoralPose,
       previousPose: previousFemoralPose
+    ) + throatBridgeTemporalRecords(
+      currentBodyCenter: currentBodyCenter,
+      previousBodyCenter: previousBodyCenter,
+      currentNeckPose: currentNeckPose,
+      previousNeckPose: previousNeckPose
     )
   }
 
@@ -1407,7 +1560,8 @@ enum CrowBodyVaneRecords {
     currentPose: CrowFemoralVanePoseSample?,
     previousPose: CrowFemoralVanePoseSample?
   ) -> [CrowBodyVaneRecordGPU] {
-    guard let currentPose, let previousPose else { return [] }
+    let currentPose = currentPose ?? .inactive
+    let previousPose = previousPose ?? .inactive
     let currentFeet = [
       (currentPose.rightHip, currentPose.rightHock),
       (currentPose.leftHip, currentPose.leftHock),
@@ -1444,7 +1598,8 @@ enum CrowBodyVaneRecords {
     currentPose: CrowFemoralVanePoseSample?,
     previousPose: CrowFemoralVanePoseSample?
   ) -> [CrowBodyVaneRecordGPU] {
-    guard let currentPose, let previousPose else { return [] }
+    let currentPose = currentPose ?? .inactive
+    let previousPose = previousPose ?? .inactive
     let currentFeet = [
       (currentPose.rightHip, currentPose.rightHock),
       (currentPose.leftHip, currentPose.leftHock),
@@ -1473,6 +1628,24 @@ enum CrowBodyVaneRecords {
       }
     }
     return records
+  }
+
+  static func throatBridgeTemporalRecords(
+    currentBodyCenter: SIMD3<Float>,
+    previousBodyCenter: SIMD3<Float>,
+    currentNeckPose: CrowStandingNeckPose?,
+    previousNeckPose: CrowStandingNeckPose?
+  ) -> [CrowBodyVaneRecordGPU] {
+    CrowThroatBridgeFeathers.morphologySamples().enumerated().map { index, morphology in
+      throatBridgeRecord(
+        morphology: morphology,
+        currentBodyCenter: currentBodyCenter,
+        previousBodyCenter: previousBodyCenter,
+        currentNeckPose: currentNeckPose,
+        previousNeckPose: previousNeckPose,
+        inventoryIndex: index
+      )
+    }
   }
 
   static func ventralTemporalRecords(
@@ -2729,6 +2902,70 @@ enum CrowBodyVaneRecords {
     )
   }
 
+  private static func throatBridgeRecord(
+    morphology: CrowThroatBridgeMorphology,
+    currentBodyCenter: SIMD3<Float>,
+    previousBodyCenter: SIMD3<Float>,
+    currentNeckPose: CrowStandingNeckPose?,
+    previousNeckPose: CrowStandingNeckPose?,
+    inventoryIndex: Int
+  ) -> CrowBodyVaneRecordGPU {
+    let current = CrowThroatBridgeFeathers.feather(
+      morphology: morphology,
+      neckPose: currentNeckPose
+    )
+    let previous = CrowThroatBridgeFeathers.feather(
+      morphology: morphology,
+      neckPose: previousNeckPose
+    )
+    let material = morphology.materialVariation
+    return CrowBodyVaneRecordGPU(
+      currentRootAndRootWidth: SIMD4<Float>(
+        currentBodyCenter + current.rootOffset,
+        current.rootWidthMeters
+      ),
+      currentTipAndMaximumWidth: SIMD4<Float>(
+        currentBodyCenter + current.tipOffset,
+        current.maximumWidthMeters
+      ),
+      previousRootAndCurrentCamber: SIMD4<Float>(
+        previousBodyCenter + previous.rootOffset,
+        current.camberMeters
+      ),
+      previousTipAndPreviousCamber: SIMD4<Float>(
+        previousBodyCenter + previous.tipOffset,
+        previous.camberMeters
+      ),
+      currentNormalAndTransverseCamber: SIMD4<Float>(current.planeNormal, 0.12),
+      previousNormalAndTransverseCamber: SIMD4<Float>(previous.planeNormal, 0.12),
+      sweepAsymmetryAndRipple: SIMD4<Float>(
+        0,
+        0.035 * material,
+        0.018 + 0.008 * abs(material),
+        Float.pi * (material + 1)
+      ),
+      envelopeAndTaper: SIMD4<Float>(
+        1.5,
+        CrowThroatBridgeFeathers.visibleRootEnvelopeRatio,
+        0.015,
+        3.2
+      ),
+      color: throatBridgeColor(for: morphology),
+      morphology: SIMD4<Float>(
+        CrowThroatBridgeFeathers.pennaceousStartFraction,
+        simd_distance(morphology.rootOffset, morphology.tipOffset),
+        Float(morphology.column),
+        Float(morphology.row)
+      ),
+      identity: SIMD4<UInt32>(
+        0x0600_0000 | UInt32(inventoryIndex),
+        stableHash(throatBridgeIdentity(of: morphology)),
+        Float(0.12).bitPattern,
+        morphology.surfaceFeatherClass
+      )
+    )
+  }
+
   private static func color(
     for sample: CrowBodyFeatherTractSample
   ) -> SIMD4<Float> {
@@ -2799,6 +3036,18 @@ enum CrowBodyVaneRecords {
     )
   }
 
+  private static func throatBridgeColor(
+    for sample: CrowThroatBridgeMorphology
+  ) -> SIMD4<Float> {
+    let material = sample.materialVariation
+    return SIMD4<Float>(
+      0.0058 * (1 + 0.10 * material),
+      0.0088 * (1 + 0.075 * material),
+      0.0158 * (1 + 0.05 * material),
+      0.145 + 0.010 * material
+    )
+  }
+
   private static func identity(
     of sample: CrowBodyFeatherTractSample
   ) -> SIMD4<UInt32> {
@@ -2840,6 +3089,17 @@ enum CrowBodyVaneRecords {
       sample.side < 0 ? 0 : 1,
       UInt32(sample.radialIndex),
       UInt32(sample.stationIndex)
+    )
+  }
+
+  private static func throatBridgeIdentity(
+    of sample: CrowThroatBridgeMorphology
+  ) -> SIMD4<UInt32> {
+    SIMD4<UInt32>(
+      0x0600,
+      sample.side < 0 ? 0 : 1,
+      UInt32(sample.row),
+      UInt32(sample.column)
     )
   }
 

@@ -16,6 +16,24 @@ struct CrowThroatBridgeFeather: Equatable {
   let surfaceFeatherClass: UInt32
 }
 
+/// Immutable identity and unposed geometry for one throat-bridge vane.
+/// Four shared neck-coupling transforms reconstruct the live field each frame.
+struct CrowThroatBridgeMorphology: Equatable {
+  let side: Float
+  let row: Int
+  let column: Int
+  let neckCoupling: Float
+  let rootSurfaceOffset: SIMD3<Float>
+  let rootOffset: SIMD3<Float>
+  let tipOffset: SIMD3<Float>
+  let planeNormal: SIMD3<Float>
+  let rootWidthMeters: Float
+  let maximumWidthMeters: Float
+  let camberMeters: Float
+  let materialVariation: Float
+  let surfaceFeatherClass: UInt32
+}
+
 /// Interdigitated throat feathers crossing the cervical/pectoral boundary.
 ///
 /// These feathers are rooted on the anterior body loft and receive a graded
@@ -41,7 +59,11 @@ enum CrowThroatBridgeFeathers {
   static func samples(
     neckPose: CrowStandingNeckPose? = nil
   ) -> [CrowThroatBridgeFeather] {
-    var result: [CrowThroatBridgeFeather] = []
+    morphologySamples().map { feather(morphology: $0, neckPose: neckPose) }
+  }
+
+  static func morphologySamples() -> [CrowThroatBridgeMorphology] {
+    var result: [CrowThroatBridgeMorphology] = []
     result.reserveCapacity(2 * rowCount * columnCount)
     for side: Float in [-1, 1] {
       for row in 0..<rowCount {
@@ -87,7 +109,7 @@ enum CrowThroatBridgeFeathers {
           let tipSurface = mirroredSurfacePoint(x: tipX, theta: tipTheta, side: side)
           let tipNormal = mirroredSurfaceNormal(x: tipX, theta: tipTheta, side: side)
           let unposedTip = tipSurface + shellClearanceMeters * tipNormal
-          let neckCoupling = 0.76 - 0.42 * columnFraction
+          let neckCoupling = neckCoupling(column: column)
           let halfAngularStep = 0.5 * 1.02 / Float(rowCount - 1)
           let circumferentialSpacing = simd_distance(
             mirroredSurfacePoint(
@@ -109,23 +131,15 @@ enum CrowThroatBridgeFeathers {
             fallback: rootNormal
           )
           result.append(
-            CrowThroatBridgeFeather(
+            CrowThroatBridgeMorphology(
               side: side,
               row: row,
               column: column,
               neckCoupling: neckCoupling,
-              rootSurfaceOffset:
-                neckPose?.transform(offset: rootSurface, coupling: neckCoupling)
-                ?? rootSurface,
-              rootOffset:
-                neckPose?.transform(offset: unposedRoot, coupling: neckCoupling)
-                ?? unposedRoot,
-              tipOffset:
-                neckPose?.transform(offset: unposedTip, coupling: neckCoupling)
-                ?? unposedTip,
-              planeNormal:
-                neckPose?.rotated(unposedPlaneNormal, coupling: neckCoupling)
-                ?? unposedPlaneNormal,
+              rootSurfaceOffset: rootSurface,
+              rootOffset: unposedRoot,
+              tipOffset: unposedTip,
+              planeNormal: unposedPlaneNormal,
               rootWidthMeters: rootWidthRatio * maximumWidth,
               maximumWidthMeters: maximumWidth,
               camberMeters: (0.0010 + 0.0003 * columnFraction)
@@ -140,9 +154,52 @@ enum CrowThroatBridgeFeathers {
     return result
   }
 
+  static func feather(
+    morphology: CrowThroatBridgeMorphology,
+    neckPose: CrowStandingNeckPose?
+  ) -> CrowThroatBridgeFeather {
+    CrowThroatBridgeFeather(
+      side: morphology.side,
+      row: morphology.row,
+      column: morphology.column,
+      neckCoupling: morphology.neckCoupling,
+      rootSurfaceOffset:
+        neckPose?.transform(
+          offset: morphology.rootSurfaceOffset,
+          coupling: morphology.neckCoupling
+        ) ?? morphology.rootSurfaceOffset,
+      rootOffset:
+        neckPose?.transform(
+          offset: morphology.rootOffset,
+          coupling: morphology.neckCoupling
+        ) ?? morphology.rootOffset,
+      tipOffset:
+        neckPose?.transform(
+          offset: morphology.tipOffset,
+          coupling: morphology.neckCoupling
+        ) ?? morphology.tipOffset,
+      planeNormal:
+        neckPose?.rotated(
+          morphology.planeNormal,
+          coupling: morphology.neckCoupling
+        ) ?? morphology.planeNormal,
+      rootWidthMeters: morphology.rootWidthMeters,
+      maximumWidthMeters: morphology.maximumWidthMeters,
+      camberMeters: morphology.camberMeters,
+      materialVariation: morphology.materialVariation,
+      surfaceFeatherClass: morphology.surfaceFeatherClass
+    )
+  }
+
   /// This field bridges two ventral pterylae and must retain their soft body
   /// contour material rather than introducing a generic-feather collar.
   static let surfaceFeatherClass: UInt32 = 17
+
+  static func neckCoupling(column: Int) -> Float {
+    let boundedColumn = min(max(column, 0), columnCount - 1)
+    let fraction = Float(boundedColumn) / Float(columnCount - 1)
+    return 0.76 - 0.42 * fraction
+  }
 
   /// Keeps the two field boundaries fixed while interleaving every interior
   /// course on both sides of the nominal root ring. The signed nine-slot

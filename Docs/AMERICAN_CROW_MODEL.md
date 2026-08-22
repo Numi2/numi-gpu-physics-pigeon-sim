@@ -580,6 +580,18 @@ output below `1,400 px/m` and standing-only crural mesostructure remain CPU
 owned. Metal/Swift temporal vertex parity is executable; this is not a visual
 realism or performance qualification.
 
+The `11 x 4` bilateral throat bridge now retains all `88` full-resolution
+vanes as immutable family-`6` Metal morphology. Four precomputed coupling
+transforms per temporal endpoint reproduce the exact graded neck motion used
+by the CPU oracle while keeping roots, tips, widths, material variation, and
+row/column identity unchanged. At the live `7 x 3` tier, `11,088` procedural
+vertices replace `1,064,448` bytes of expanded temporal CPU surface data per
+frame. The exact transform upload adds `384` bytes per frame, bringing the
+complete pose input to `1,888` bytes and its three-slot capacity to `5,664`
+bytes. Coarse output remains unchanged because this bridge is intentionally
+absent below `1,400 px/m`. This qualifies simulated ownership and temporal
+geometry parity, not measured gular anatomy or visual realism.
+
 At the five-by-seven distance LOD, a rear-right temporal-identity trace at
 yaw/pitch `(2.28, 0.38)` resolves the residual pelvic insertion owners to
 anterior course `6`: rows `1...2` receive a `1.52x` width and `1.06x` length
@@ -687,11 +699,11 @@ American-crow anatomical measurement.
 
 Body-vane morphology is retained once rather than triple-buffered per pose. The
 `3,212` immutable `128`-byte records occupy `411,136` bytes; three in-flight
-pose slots now retain `4,512` bytes total and each receives only `1,504` bytes
-of current/previous body, deployment, cervical affine transforms, and compact
-limb vectors. Metal
+pose slots now retain `5,664` bytes total and each receives only `1,888` bytes
+of current/previous body, deployment, cervical affine transforms, compact limb
+vectors, and exact throat-bridge coupling transforms. Metal
 reproduces the established whole/half/quarter density predicate, classifies
-each active morphology into one of seven topology bins, scans stable offsets,
+each active morphology into one of ten retained topology bins, scans stable offsets,
 emits compact inventory indices, and prepares vane, rachis, and body-detail
 `DrawPrimitivesIndirectArguments`. CPU temporal-record construction and
 grouping run only for explicit audit readback. Schema `21` reports morphology,

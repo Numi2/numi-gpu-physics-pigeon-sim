@@ -80,8 +80,18 @@ func bodyVanesRetainCompactIdentityStableTemporalRecords() {
     }
   )
   let retainedMorphology = CrowBodyVaneRecords.retainedMorphologyRecords()
-  #expect(retainedMorphology.count == 5_380)
-  #expect(Set(retainedMorphology.map(\.identity)).count == 5_380)
+  #expect(retainedMorphology.count == 5_468)
+  #expect(Set(retainedMorphology.map(\.identity)).count == 5_468)
+  let inactiveLimbRecords = CrowBodyVaneRecords.retainedTemporalRecords(
+    currentBodyCenter: .zero,
+    previousBodyCenter: .zero,
+    currentNeckPose: nil,
+    previousNeckPose: nil,
+    currentDeployment: 0,
+    previousDeployment: 0
+  )
+  #expect(inactiveLimbRecords.count == retainedMorphology.count)
+  #expect(inactiveLimbRecords.map(\.identity.x) == retainedMorphology.map(\.identity.x))
   let femoralMorphology = CrowBodyVaneRecords.femoralMorphologyRecords()
   #expect(femoralMorphology.count == 540)
   #expect(Set(femoralMorphology.map(\.identity)).count == 540)
@@ -96,6 +106,14 @@ func bodyVanesRetainCompactIdentityStableTemporalRecords() {
   #expect(
     cruralMorphology.allSatisfy {
       ($0.identity.x & 0xFF00_0000) == 0x0500_0000
+    }
+  )
+  let throatMorphology = CrowBodyVaneRecords.throatBridgeMorphologyRecords()
+  #expect(throatMorphology.count == 88)
+  #expect(Set(throatMorphology.map(\.identity)).count == 88)
+  #expect(
+    throatMorphology.allSatisfy {
+      ($0.identity.x & 0xFF00_0000) == 0x0600_0000
     }
   )
 }
@@ -327,12 +345,14 @@ func metalProceduralBodyVanesMatchSwiftGeometryOracle() throws {
   commandBuffer.waitUntilCompleted()
   #expect(commandBuffer.status == .completed)
   #expect(frame.auditReadbackReady)
-  #expect(frame.morphologyRecordCount == 5_380)
-  #expect(deformer.activeRecordCount(for: frame) == 5_380)
+  #expect(frame.morphologyRecordCount == 5_468)
+  #expect(deformer.activeRecordCount(for: frame) == 5_468)
   #expect(deformer.activeFemoralRecordCount(for: frame) == 540)
   #expect(deformer.expandedFemoralVertexCount(for: frame) == 68_040)
   #expect(deformer.activeCruralRecordCount(for: frame) == 324)
   #expect(deformer.expandedCruralVertexCount(for: frame) == 46_656)
+  #expect(deformer.activeThroatBridgeRecordCount(for: frame) == 88)
+  #expect(deformer.expandedThroatBridgeVertexCount(for: frame) == 11_088)
   #expect(deformer.expandedVertexCount(for: frame) > 0)
 
   for batch in frame.batches where batch.auditRecordCount > 0 {
@@ -477,7 +497,7 @@ func bodyVaneProductionStorageIsTripleBufferedAndIndirect() throws {
   #expect(batchCount == CrowBodyVaneRecords.productionTopologies.count)
   #expect(frames.map(\.slot) == [0, 1, 2, 0])
   #expect(frames.map(\.morphologyBufferAllocationCount) == [1, 1, 1, 1])
-  #expect(frames.allSatisfy { $0.morphologyRecordCount == 5_380 })
+  #expect(frames.allSatisfy { $0.morphologyRecordCount == 5_468 })
   #expect(
     frames.allSatisfy {
       $0.morphologyRecordBytes == $0.morphologyRecordCount
@@ -489,8 +509,8 @@ func bodyVaneProductionStorageIsTripleBufferedAndIndirect() throws {
       $0.morphologyCapacityBytes == $0.morphologyRecordBytes
     }
   )
-  #expect(frames.allSatisfy { $0.poseInputBytes == 1_504 })
-  #expect(frames.allSatisfy { $0.retainedPoseCapacityBytes == 4_512 })
+  #expect(frames.allSatisfy { $0.poseInputBytes == 1_888 })
+  #expect(frames.allSatisfy { $0.retainedPoseCapacityBytes == 5_664 })
   #expect(deformer.retainedIndirectDrawBytes == 1_440)
   #expect(
     frames.allSatisfy {
@@ -499,7 +519,7 @@ func bodyVaneProductionStorageIsTripleBufferedAndIndirect() throws {
     }
   )
   #expect(frames.allSatisfy { $0.detailSegmentBufferAllocationCount == 3 })
-  #expect(frames.allSatisfy { deformer.activeRecordCount(for: $0) == 4_516 })
+  #expect(frames.allSatisfy { deformer.activeRecordCount(for: $0) == 4_604 })
   #expect(frames.allSatisfy { deformer.expandedRachisVertexCount(for: $0) > 0 })
   #expect(frames.allSatisfy { deformer.expandedDetailVertexCount(for: $0) > 0 })
 
@@ -534,8 +554,8 @@ func bodyVaneProductionStorageIsTripleBufferedAndIndirect() throws {
   }
 }
 
-@Test("Metal limb family mask separates femoral and crural ownership")
-func metalLimbFamilyMaskSeparatesFemoralAndCruralOwnership() throws {
+@Test("Metal retained-family mask separates femoral crural and throat ownership")
+func metalRetainedFamilyMaskSeparatesIndependentOwners() throws {
   guard let device = MTLCreateSystemDefaultDevice() else { return }
   let backend = try VisualizationBackend(device: device)
   let deformer = try CrowBodyVaneGeometryDeformer(backend: backend)
@@ -551,7 +571,7 @@ func metalLimbFamilyMaskSeparatesFemoralAndCruralOwnership() throws {
       previousNeckPose: standingPose.neckPose,
       currentFemoralPose: pose,
       previousFemoralPose: pose,
-      limbFamilyMask: mask,
+      retainedFamilyMask: mask,
       currentDeployment: 0,
       previousDeployment: 0,
       projectedPixelsPerMeter: 1_600,
@@ -566,9 +586,15 @@ func metalLimbFamilyMaskSeparatesFemoralAndCruralOwnership() throws {
   let femoralOnly = try frame(mask: 0x1)
   #expect(deformer.activeFemoralRecordCount(for: femoralOnly) == 540)
   #expect(deformer.activeCruralRecordCount(for: femoralOnly) == 0)
+  #expect(deformer.activeThroatBridgeRecordCount(for: femoralOnly) == 0)
   let cruralOnly = try frame(mask: 0x2)
   #expect(deformer.activeFemoralRecordCount(for: cruralOnly) == 0)
   #expect(deformer.activeCruralRecordCount(for: cruralOnly) == 324)
+  #expect(deformer.activeThroatBridgeRecordCount(for: cruralOnly) == 0)
+  let throatOnly = try frame(mask: 0x4)
+  #expect(deformer.activeFemoralRecordCount(for: throatOnly) == 0)
+  #expect(deformer.activeCruralRecordCount(for: throatOnly) == 0)
+  #expect(deformer.activeThroatBridgeRecordCount(for: throatOnly) == 88)
 }
 
 @Test("Metal body vane LOD selection matches the deterministic CPU oracle")

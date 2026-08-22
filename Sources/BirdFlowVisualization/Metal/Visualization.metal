@@ -3115,6 +3115,7 @@ inline uint crowBodyVaneTopologyIndex(
     bool ventral=(record.identity.x&0xff000000u)==0x03000000u;
     bool femoral=(record.identity.x&0xff000000u)==0x04000000u;
     bool crural=(record.identity.x&0xff000000u)==0x05000000u;
+    bool throatBridge=(record.identity.x&0xff000000u)==0x06000000u;
     if(femoral||crural){
         uint familyBit=femoral?1u:2u;
         if((selection.counts.w&familyBit)==0u
@@ -3126,6 +3127,18 @@ inline uint crowBodyVaneTopologyIndex(
         if(projectedLength>=480.0f){return 6u;}
         if(projectedLength>=120.0f){return crural?5u:8u;}
         if(projectedLength>=24.0f){return crural?9u:7u;}
+        return 1u;
+    }
+    if(throatBridge){
+        if((selection.counts.w&4u)==0u
+            ||projectedPixelsPerMeter<1400.0f){
+            return 0xffffffffu;
+        }
+        float projectedLength=max(0.0f,record.morphology.y
+            *projectedPixelsPerMeter);
+        if(projectedLength>=480.0f){return 6u;}
+        if(projectedLength>=120.0f){return 8u;}
+        if(projectedLength>=24.0f){return 7u;}
         return 1u;
     }
     if(ventral){
@@ -3347,11 +3360,36 @@ inline CrowBodyVaneDynamicState crowBodyVaneDynamicState(
     bool ventral=(record.identity.x&0xff000000u)==0x03000000u;
     bool femoral=(record.identity.x&0xff000000u)==0x04000000u;
     bool crural=(record.identity.x&0xff000000u)==0x05000000u;
+    bool throatBridge=(record.identity.x&0xff000000u)==0x06000000u;
+    if(throatBridge){
+        uint column=uint(record.morphology.z);
+        uint transformIndex=28u+column+(current?0u:4u);
+        CrowBodyVaneNeckTransformGPU transform=neckTransforms[transformIndex];
+        float3 bodyCenter=current
+            ?pose.currentBodyCenterAndDeployment.xyz
+            :pose.previousBodyCenterAndDeployment.xyz;
+        state.root=bodyCenter+crowBodyVaneAffinePoint(
+            transform,record.rootAndRootWidth.xyz
+        );
+        state.tip=bodyCenter+crowBodyVaneAffinePoint(
+            transform,record.tipAndMaximumWidth.xyz
+        );
+        state.normal=safeNormalizeCrow(
+            crowBodyVaneAffineDirection(transform,record.normalAndCamber.xyz),
+            record.normalAndCamber.xyz
+        );
+        state.rootWidth=record.rootAndRootWidth.w;
+        state.maximumWidth=record.tipAndMaximumWidth.w;
+        state.lateralSweep=record.sweepAsymmetryAndRipple.x;
+        state.camber=record.normalAndCamber.w;
+        state.transverseCamber=as_type<float>(record.identity.z);
+        return state;
+    }
     if(crural){
         uint inventoryIndex=record.identity.x&0x00ffffffu;
         bool negativeSide=inventoryIndex<162u;
         device const float4* limbPose=(device const float4*)(
-            neckTransforms+28u
+            neckTransforms+36u
         );
         float3 hip;
         float3 hock;
@@ -3400,7 +3438,7 @@ inline CrowBodyVaneDynamicState crowBodyVaneDynamicState(
             ?pose.currentBodyCenterAndDeployment
             :pose.previousBodyCenterAndDeployment;
         device const float4* limbPose=(device const float4*)(
-            neckTransforms+28u
+            neckTransforms+36u
         );
         float3 hip;
         float3 hock;

@@ -6,7 +6,17 @@ import simd
 @Test("throat bridge breaks the cervical pectoral collar only at full resolution")
 func throatBridgeBreaksCervicalPectoralCollarAtFullResolution() {
   let samples = CrowThroatBridgeFeathers.samples()
+  let morphology = CrowThroatBridgeFeathers.morphologySamples()
   #expect(samples == CrowThroatBridgeFeathers.samples())
+  #expect(morphology.count == samples.count)
+  #expect(
+    samples == morphology.map {
+      CrowThroatBridgeFeathers.feather(morphology: $0, neckPose: nil)
+    }
+  )
+  #expect(Set(morphology.map(\.neckCoupling)).count == 4)
+  #expect(morphology.map(\.neckCoupling).min() == 0.34)
+  #expect(morphology.map(\.neckCoupling).max() == 0.76)
   #expect(
     samples.count
       == 2 * CrowThroatBridgeFeathers.rowCount * CrowThroatBridgeFeathers.columnCount

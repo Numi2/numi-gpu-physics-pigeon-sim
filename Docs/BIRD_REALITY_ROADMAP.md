@@ -151,6 +151,11 @@ inventory or view-dependent patch geometry.
    future-compute step is GPU visibility compaction plus indirect indexed or
    meshlet work for both limb families, followed by per-feather contact and
    bending that must preserve the accepted multi-angle silhouette oracle.
+   The `88`-identity throat bridge likewise retains immutable family-`6`
+   morphology and reconstructs temporal geometry from four exact graded neck
+   transforms per endpoint. Its next future-compute step is to merge those
+   shared transforms and family work into the same visibility-compacted
+   indexed/meshlet emission path before any anatomy-changing throat pass.
 
 3. **Measured appearance, bounded claims.** Implement an energy-bounded,
    anisotropic feather BSDF with separate eumelanin absorption, longitudinal
