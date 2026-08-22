@@ -16,11 +16,13 @@ struct CrowBodyVaneTopology: Hashable, Comparable {
 struct CrowBodyVaneGeometryBatchFrame {
   let topologyIndex: Int
   let topology: CrowBodyVaneTopology
-  let recordBuffer: MTLBuffer
+  let morphologyBuffer: MTLBuffer
+  let poseBuffer: MTLBuffer
+  let neckTransformBuffer: MTLBuffer
   let workBuffer: MTLBuffer
   let indirectDrawBuffer: MTLBuffer
   let indirectDrawBufferOffset: Int
-  let auditRecordBuffer: MTLBuffer?
+  let auditRecords: [CrowBodyVaneRecordGPU]
   let auditRecordCount: Int
   let auditOutputBuffer: MTLBuffer?
 
@@ -30,10 +32,12 @@ struct CrowBodyVaneGeometryBatchFrame {
 struct CrowBodyVaneGeometryFrame {
   let slot: Int
   let batches: [CrowBodyVaneGeometryBatchFrame]
-  let inputRecordCount: Int
-  let inputRecordBytes: Int
-  let recordCapacityBytes: Int
-  let recordBufferAllocationCount: Int
+  let morphologyRecordCount: Int
+  let morphologyRecordBytes: Int
+  let morphologyCapacityBytes: Int
+  let poseInputBytes: Int
+  let retainedPoseCapacityBytes: Int
+  let morphologyBufferAllocationCount: Int
   let auditReadbackReady: Bool
 }
 
@@ -50,17 +54,25 @@ final class CrowBodyVaneGeometryDeformer {
   private let emitPipeline: MTLComputePipelineState
   private let indirectPipeline: MTLComputePipelineState
   private let auditPipeline: MTLComputePipelineState
-  private var recordBuffers: [MTLBuffer]
+  private let morphologyRecords: [CrowBodyVaneMorphologyGPU]
+  private let morphologyBuffer: MTLBuffer
+  private let poseBuffers: [MTLBuffer]
+  private let neckTransformBuffers: [MTLBuffer]
   private let topologyIndexBuffers: [MTLBuffer]
   private let topologyOffsetBuffers: [MTLBuffer]
   private let topologyCountBuffers: [MTLBuffer]
   private let workBuffers: [MTLBuffer]
   private let indirectDrawBuffers: [MTLBuffer]
   private var nextSlot = 0
-  private(set) var recordBufferAllocationCount = 0
+  private(set) var morphologyBufferAllocationCount = 1
 
-  var retainedRecordCapacityBytes: Int {
-    recordBuffers.reduce(0) { $0 + $1.length }
+  var retainedMorphologyCapacityBytes: Int {
+    morphologyBuffer.length
+  }
+
+  var retainedPoseCapacityBytes: Int {
+    poseBuffers.reduce(0) { $0 + $1.length }
+      + neckTransformBuffers.reduce(0) { $0 + $1.length }
   }
 
   var retainedIndirectDrawBytes: Int {
@@ -74,9 +86,29 @@ final class CrowBodyVaneGeometryDeformer {
     emitPipeline = try backend.compute("emitCrowBodyVaneWork")
     indirectPipeline = try backend.compute("prepareCrowBodyVaneIndirectWork")
     auditPipeline = try backend.compute("probeCrowBodyVaneVertices")
-    let maximumRecordCount = CrowBodyFeatherTracts.samples().count
-    recordBuffers = try (0..<Self.bufferedFrameCount).map { _ in
-      try backend.buffer(length: 16, shared: true)
+    morphologyRecords = CrowBodyVaneRecords.morphologyRecords()
+    let maximumRecordCount = morphologyRecords.count
+    morphologyBuffer = try Self.sharedBuffer(
+      values: morphologyRecords,
+      backend: backend
+    )
+    morphologyBuffer.label = "Immutable body vane morphology inventory"
+    poseBuffers = try (0..<Self.bufferedFrameCount).map { slot in
+      let buffer = try backend.buffer(
+        length: MemoryLayout<CrowBodyVanePoseUniforms>.stride,
+        shared: true
+      )
+      buffer.label = "Body vane pose slot \(slot)"
+      return buffer
+    }
+    neckTransformBuffers = try (0..<Self.bufferedFrameCount).map { slot in
+      let buffer = try backend.buffer(
+        length: 2 * CrowBodyFeatherTracts.cervicalColumnCount
+          * MemoryLayout<CrowBodyVaneNeckTransformGPU>.stride,
+        shared: true
+      )
+      buffer.label = "Body vane neck transforms slot \(slot)"
+      return buffer
     }
     topologyIndexBuffers = try (0..<Self.bufferedFrameCount).map { _ in
       try backend.buffer(
@@ -121,28 +153,48 @@ final class CrowBodyVaneGeometryDeformer {
   ) throws -> CrowBodyVaneGeometryFrame {
     let slot = nextSlot
     nextSlot = (nextSlot + 1) % Self.bufferedFrameCount
-    let records = CrowBodyVaneRecords.temporalRecords(
-      currentBodyCenter: currentBodyCenter,
-      previousBodyCenter: previousBodyCenter,
-      currentNeckPose: currentNeckPose,
-      previousNeckPose: previousNeckPose,
-      currentDeployment: currentDeployment,
-      previousDeployment: previousDeployment
+    var pose = CrowBodyVanePoseUniforms(
+      currentBodyCenterAndDeployment: SIMD4<Float>(
+        currentBodyCenter,
+        currentDeployment
+      ),
+      previousBodyCenterAndDeployment: SIMD4<Float>(
+        previousBodyCenter,
+        previousDeployment
+      )
     )
-    let requiredRecordBytes =
-      records.count
-      * MemoryLayout<CrowBodyVaneRecordGPU>.stride
-    if recordBuffers[slot].length < requiredRecordBytes {
-      let created = try backend.buffer(length: requiredRecordBytes, shared: true)
-      created.label = "Full body vane temporal records slot \(slot)"
-      recordBuffers[slot] = created
-      recordBufferAllocationCount += 1
-    }
-    records.withUnsafeBytes { bytes in
+    memcpy(
+      poseBuffers[slot].contents(),
+      &pose,
+      MemoryLayout<CrowBodyVanePoseUniforms>.stride
+    )
+    let neckTransforms = CrowBodyVaneRecords.neckTransforms(
+      current: currentNeckPose,
+      previous: previousNeckPose
+    )
+    neckTransforms.withUnsafeBytes { bytes in
       if let baseAddress = bytes.baseAddress, !bytes.isEmpty {
-        memcpy(recordBuffers[slot].contents(), baseAddress, bytes.count)
+        memcpy(neckTransformBuffers[slot].contents(), baseAddress, bytes.count)
       }
     }
+    let recordCount = morphologyRecords.count
+    let requiredRecordBytes =
+      recordCount
+      * MemoryLayout<CrowBodyVaneMorphologyGPU>.stride
+    let poseInputBytes = MemoryLayout<CrowBodyVanePoseUniforms>.stride
+      + neckTransforms.count
+        * MemoryLayout<CrowBodyVaneNeckTransformGPU>.stride
+    let auditTemporalRecords =
+      auditReadback
+      ? CrowBodyVaneRecords.temporalRecords(
+        currentBodyCenter: currentBodyCenter,
+        previousBodyCenter: previousBodyCenter,
+        currentNeckPose: currentNeckPose,
+        previousNeckPose: previousNeckPose,
+        currentDeployment: currentDeployment,
+        previousDeployment: previousDeployment
+      )
+      : []
     memset(
       topologyCountBuffers[slot].contents(),
       0,
@@ -157,7 +209,7 @@ final class CrowBodyVaneGeometryDeformer {
     var selection = CrowBodyVaneSelectionUniforms(
       selection: SIMD4<Float>(projectedPixelsPerMeter, 0, 0, 0),
       counts: SIMD4<UInt32>(
-        UInt32(records.count),
+        UInt32(recordCount),
         UInt32(CrowBodyVaneRecords.productionTopologies.count),
         0,
         0
@@ -167,14 +219,14 @@ final class CrowBodyVaneGeometryDeformer {
       throw VisualizationError.pipeline("crow body vane selection encoder")
     }
     classify.label = "Classify full body vane inventory"
-    classify.setBuffer(recordBuffers[slot], offset: 0, index: 0)
+    classify.setBuffer(morphologyBuffer, offset: 0, index: 0)
     classify.setBuffer(topologyIndexBuffers[slot], offset: 0, index: 1)
     classify.setBytes(
       &selection,
       length: MemoryLayout<CrowBodyVaneSelectionUniforms>.stride,
       index: 2
     )
-    backend.dispatch1D(classify, pipeline: classifyPipeline, count: records.count)
+    backend.dispatch1D(classify, pipeline: classifyPipeline, count: recordCount)
     classify.endEncoding()
 
     guard let scan = commandBuffer.makeComputeCommandEncoder() else {
@@ -205,7 +257,7 @@ final class CrowBodyVaneGeometryDeformer {
       length: MemoryLayout<CrowBodyVaneSelectionUniforms>.stride,
       index: 4
     )
-    backend.dispatch1D(emit, pipeline: emitPipeline, count: records.count)
+    backend.dispatch1D(emit, pipeline: emitPipeline, count: recordCount)
     emit.endEncoding()
 
     guard let prepare = commandBuffer.makeComputeCommandEncoder() else {
@@ -223,23 +275,21 @@ final class CrowBodyVaneGeometryDeformer {
 
     let auditGroups =
       auditReadback
-      ? CrowBodyVaneRecords.groupedRecords(
-        currentBodyCenter: currentBodyCenter,
-        previousBodyCenter: previousBodyCenter,
-        currentNeckPose: currentNeckPose,
-        previousNeckPose: previousNeckPose,
-        currentDeployment: currentDeployment,
-        previousDeployment: previousDeployment,
+      ? CrowBodyVaneRecords.groupedMorphologyIndices(
         projectedPixelsPerMeter: projectedPixelsPerMeter
       )
       : [:]
     var batches: [CrowBodyVaneGeometryBatchFrame] = []
     for (topologyIndex, topology) in CrowBodyVaneRecords.productionTopologies.enumerated() {
-      let auditRecords = auditGroups[topology] ?? []
-      let auditRecordBuffer: MTLBuffer?
+      let auditIndices = auditGroups[topology] ?? []
+      let auditRecords = auditIndices.map { auditTemporalRecords[$0] }
       let auditOutputBuffer: MTLBuffer?
       if auditReadback && !auditRecords.isEmpty {
-        let auditInput = try Self.sharedBuffer(values: auditRecords, backend: backend)
+        let auditMorphologies = auditIndices.map { morphologyRecords[$0] }
+        let auditInput = try Self.sharedBuffer(
+          values: auditMorphologies,
+          backend: backend
+        )
         let auditVertexCount = topology.verticesPerInstance * auditRecords.count
         let auditOutput = try backend.buffer(
           length: auditVertexCount * MemoryLayout<CrowFeatherVertexGPU>.stride,
@@ -264,28 +314,30 @@ final class CrowBodyVaneGeometryDeformer {
           index: 1
         )
         audit.setBuffer(auditOutput, offset: 0, index: 2)
+        audit.setBuffer(poseBuffers[slot], offset: 0, index: 3)
+        audit.setBuffer(neckTransformBuffers[slot], offset: 0, index: 4)
         backend.dispatch1D(
           audit,
           pipeline: auditPipeline,
           count: auditVertexCount
         )
         audit.endEncoding()
-        auditRecordBuffer = auditInput
         auditOutputBuffer = auditOutput
       } else {
-        auditRecordBuffer = nil
         auditOutputBuffer = nil
       }
       batches.append(
         CrowBodyVaneGeometryBatchFrame(
           topologyIndex: topologyIndex,
           topology: topology,
-          recordBuffer: recordBuffers[slot],
+          morphologyBuffer: morphologyBuffer,
+          poseBuffer: poseBuffers[slot],
+          neckTransformBuffer: neckTransformBuffers[slot],
           workBuffer: workBuffers[slot],
           indirectDrawBuffer: indirectDrawBuffers[slot],
           indirectDrawBufferOffset: topologyIndex
             * MemoryLayout<DrawPrimitivesIndirectArguments>.stride,
-          auditRecordBuffer: auditRecordBuffer,
+          auditRecords: auditRecords,
           auditRecordCount: auditRecords.count,
           auditOutputBuffer: auditOutputBuffer
         )
@@ -294,10 +346,12 @@ final class CrowBodyVaneGeometryDeformer {
     return CrowBodyVaneGeometryFrame(
       slot: slot,
       batches: batches,
-      inputRecordCount: records.count,
-      inputRecordBytes: requiredRecordBytes,
-      recordCapacityBytes: recordBuffers[slot].length,
-      recordBufferAllocationCount: recordBufferAllocationCount,
+      morphologyRecordCount: recordCount,
+      morphologyRecordBytes: requiredRecordBytes,
+      morphologyCapacityBytes: morphologyBuffer.length,
+      poseInputBytes: poseInputBytes,
+      retainedPoseCapacityBytes: retainedPoseCapacityBytes,
+      morphologyBufferAllocationCount: morphologyBufferAllocationCount,
       auditReadbackReady: auditReadback
     )
   }
@@ -314,13 +368,15 @@ final class CrowBodyVaneGeometryDeformer {
         UInt32(batch.vertexCount)
       )
     )
-    encoder.setVertexBuffer(batch.recordBuffer, offset: 0, index: 0)
+    encoder.setVertexBuffer(batch.morphologyBuffer, offset: 0, index: 0)
     encoder.setVertexBuffer(batch.workBuffer, offset: 0, index: 1)
     encoder.setVertexBytes(
       &uniforms,
       length: MemoryLayout<CrowBodyVaneGeometryUniforms>.stride,
       index: 2
     )
+    encoder.setVertexBuffer(batch.poseBuffer, offset: 0, index: 4)
+    encoder.setVertexBuffer(batch.neckTransformBuffer, offset: 0, index: 5)
   }
 
   func drawArguments(
@@ -362,7 +418,7 @@ final class CrowBodyVaneGeometryDeformer {
     let count = counts[topologyIndex]
     let pointer = workBuffers[frame.slot].contents().bindMemory(
       to: UInt32.self,
-      capacity: frame.inputRecordCount
+      capacity: frame.morphologyRecordCount
     )
     return Array(
       UnsafeBufferPointer(
@@ -389,14 +445,7 @@ final class CrowBodyVaneGeometryDeformer {
   func auditRecords(
     for batch: CrowBodyVaneGeometryBatchFrame
   ) -> [CrowBodyVaneRecordGPU] {
-    guard let buffer = batch.auditRecordBuffer else { return [] }
-    let pointer = buffer.contents().bindMemory(
-      to: CrowBodyVaneRecordGPU.self,
-      capacity: batch.auditRecordCount
-    )
-    return Array(
-      UnsafeBufferPointer(start: pointer, count: batch.auditRecordCount)
-    )
+    batch.auditRecords
   }
 
   private static func sharedBuffer<T>(
@@ -426,6 +475,108 @@ enum CrowBodyVaneRecords {
     CrowBodyVaneTopology(axialSections: 12, widthSections: 5),
     CrowBodyVaneTopology(axialSections: 16, widthSections: 7),
   ]
+
+  static func morphologyRecords() -> [CrowBodyVaneMorphologyGPU] {
+    CrowBodyFeatherTracts.samples().enumerated().map { index, sample in
+      let identityHash = stableHash(identity(of: sample))
+      return CrowBodyVaneMorphologyGPU(
+        rootAndRootWidth: SIMD4<Float>(
+          sample.rootOffset,
+          sample.rootWidthMeters
+        ),
+        tipAndMaximumWidth: SIMD4<Float>(
+          sample.tipOffset,
+          sample.maximumWidthMeters
+        ),
+        normalAndCamber: SIMD4<Float>(
+          sample.planeNormal,
+          sample.camberMeters
+        ),
+        sweepAsymmetryAndRipple: SIMD4<Float>(
+          sample.lateralSweepMeters,
+          sample.vaneAsymmetry,
+          sample.edgeRippleAmplitude,
+          sample.edgeRipplePhase
+        ),
+        envelopeAndTaper: SIMD4<Float>(
+          sample.edgeRippleCycles,
+          sample.rootEnvelopeRatio,
+          sample.terminalWidthRatio,
+          sample.distalTaperExponent
+        ),
+        color: color(for: sample),
+        morphology: SIMD4<Float>(
+          sample.pennaceousStartFraction,
+          Float(sample.region.rawValue),
+          Float(sample.row),
+          Float(sample.column)
+        ),
+        identity: SIMD4<UInt32>(
+          0x0200_0000 | UInt32(index),
+          identityHash,
+          1,
+          sample.surfaceFeatherClass
+        )
+      )
+    }
+  }
+
+  static func groupedMorphologyIndices(
+    projectedPixelsPerMeter: Float
+  ) -> [CrowBodyVaneTopology: [Int]] {
+    var grouped: [CrowBodyVaneTopology: [Int]] = [:]
+    for (index, sample) in CrowBodyFeatherTracts.samples().enumerated()
+    where isVisible(
+      sample,
+      projectedPixelsPerMeter: projectedPixelsPerMeter
+    ) {
+      grouped[
+        topology(
+          for: sample,
+          projectedPixelsPerMeter: projectedPixelsPerMeter
+        ),
+        default: []
+      ].append(index)
+    }
+    return grouped
+  }
+
+  static func neckTransforms(
+    current: CrowStandingNeckPose?,
+    previous: CrowStandingNeckPose?
+  ) -> [CrowBodyVaneNeckTransformGPU] {
+    transforms(for: current) + transforms(for: previous)
+  }
+
+  private static func transforms(
+    for pose: CrowStandingNeckPose?
+  ) -> [CrowBodyVaneNeckTransformGPU] {
+    guard let pose else {
+      let identity = CrowBodyVaneNeckTransformGPU(
+        row0: SIMD4<Float>(1, 0, 0, 0),
+        row1: SIMD4<Float>(0, 1, 0, 0),
+        row2: SIMD4<Float>(0, 0, 1, 0)
+      )
+      return Array(
+        repeating: identity,
+        count: CrowBodyFeatherTracts.cervicalColumnCount
+      )
+    }
+    return (0..<CrowBodyFeatherTracts.cervicalColumnCount).map { column in
+      let axial = Float(column)
+        / Float(CrowBodyFeatherTracts.cervicalColumnCount - 1)
+      let coupling = 0.10 + 0.78 * axial
+      let x = pose.rotated(SIMD3<Float>(1, 0, 0), coupling: coupling)
+      let y = pose.rotated(SIMD3<Float>(0, 1, 0), coupling: coupling)
+      let z = pose.rotated(SIMD3<Float>(0, 0, 1), coupling: coupling)
+      let translation = pose.transform(offset: .zero, coupling: coupling)
+      return CrowBodyVaneNeckTransformGPU(
+        row0: SIMD4<Float>(x.x, y.x, z.x, translation.x),
+        row1: SIMD4<Float>(x.y, y.y, z.y, translation.y),
+        row2: SIMD4<Float>(x.z, y.z, z.z, translation.z)
+      )
+    }
+  }
 
   static func temporalRecords(
     currentBodyCenter: SIMD3<Float>,

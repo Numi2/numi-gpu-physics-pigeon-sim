@@ -1819,7 +1819,7 @@ private final class CrowShowcaseRenderer {
       ? inputPixels * (32 + 4) * sampleCount
       : 0
     let outputBytes = outputPixels * (4 + (temporalEnabled ? 8 : 0))
-    let bodyVaneRecordCount =
+    let bodyVaneSelectedMorphologyRecordCount =
       bodyVaneFrame.map {
         bodyVaneGeometryDeformer?.activeRecordCount(for: $0) ?? 0
       } ?? 0
@@ -1882,26 +1882,31 @@ private final class CrowShowcaseRenderer {
         (commandBuffer.gpuEndTime - commandBuffer.gpuStartTime) * 1_000
       ),
       allocatedRenderTargetBytes: resolvedInputBytes + multisampleBytes + outputBytes,
-      bodyVaneInputRecordCount: bodyVaneFrame?.inputRecordCount ?? 0,
-      bodyVaneInputRecordBytes: bodyVaneFrame?.inputRecordBytes ?? 0,
-      bodyVaneRecordCount: bodyVaneRecordCount,
+      bodyVaneMorphologyRecordCount: bodyVaneFrame?.morphologyRecordCount ?? 0,
+      bodyVaneMorphologyRecordBytes: bodyVaneFrame?.morphologyRecordBytes ?? 0,
+      bodyVaneSelectedMorphologyRecordCount:
+        bodyVaneSelectedMorphologyRecordCount,
       bodyVaneBatchCount: bodyVaneFrame.map {
         bodyVaneGeometryDeformer?.topologyCounts(for: $0).prefix(7)
           .filter { $0 > 0 }.count ?? 0
       } ?? 0,
-      bodyVaneRecordBytes: bodyVaneRecordCount
-        * MemoryLayout<CrowBodyVaneRecordGPU>.stride,
-      bodyVaneRetainedRecordCapacityBytes:
-        bodyVaneGeometryDeformer?.retainedRecordCapacityBytes ?? 0,
+      bodyVaneSelectedMorphologyRecordBytes:
+        bodyVaneSelectedMorphologyRecordCount
+        * MemoryLayout<CrowBodyVaneMorphologyGPU>.stride,
+      bodyVaneRetainedMorphologyCapacityBytes:
+        bodyVaneGeometryDeformer?.retainedMorphologyCapacityBytes ?? 0,
+      bodyVanePoseInputBytes: bodyVaneFrame?.poseInputBytes ?? 0,
+      bodyVaneRetainedPoseCapacityBytes:
+        bodyVaneGeometryDeformer?.retainedPoseCapacityBytes ?? 0,
       bodyVaneRetainedIndirectDrawBytes:
         bodyVaneGeometryDeformer?.retainedIndirectDrawBytes ?? 0,
-      bodyVaneRecordBufferAllocationCount:
-        bodyVaneFrame?.recordBufferAllocationCount ?? 0,
+      bodyVaneMorphologyBufferAllocationCount:
+        bodyVaneFrame?.morphologyBufferAllocationCount ?? 0,
       bodyVaneRasterVertexInvocationCount:
         bodyVaneExpandedVertexCount,
       bodyVaneVertexGenerationMode: bodyVaneFrame == nil
         ? "cpu-surface-fallback"
-        : "gpu-procedural-instanced-indirect",
+        : "gpu-resident-morphology-pose-instanced-indirect",
       ventralBarbCandidateRecordCount: ventralBarbCandidateRecordCount,
       ventralBarbuleCandidateRecordCount: ventralBarbuleCandidateRecordCount,
       ventralBarbFrustumVisibleRecordCount: Int(

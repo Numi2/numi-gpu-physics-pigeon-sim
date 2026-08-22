@@ -16,14 +16,16 @@ struct CrowShowcaseFrame {
   let reactiveMaskEnabled: Bool
   let gpuDurationMilliseconds: Double
   let allocatedRenderTargetBytes: Int
-  let bodyVaneInputRecordCount: Int
-  let bodyVaneInputRecordBytes: Int
-  let bodyVaneRecordCount: Int
+  let bodyVaneMorphologyRecordCount: Int
+  let bodyVaneMorphologyRecordBytes: Int
+  let bodyVaneSelectedMorphologyRecordCount: Int
   let bodyVaneBatchCount: Int
-  let bodyVaneRecordBytes: Int
-  let bodyVaneRetainedRecordCapacityBytes: Int
+  let bodyVaneSelectedMorphologyRecordBytes: Int
+  let bodyVaneRetainedMorphologyCapacityBytes: Int
+  let bodyVanePoseInputBytes: Int
+  let bodyVaneRetainedPoseCapacityBytes: Int
   let bodyVaneRetainedIndirectDrawBytes: Int
-  let bodyVaneRecordBufferAllocationCount: Int
+  let bodyVaneMorphologyBufferAllocationCount: Int
   let bodyVaneRasterVertexInvocationCount: Int
   let bodyVaneVertexGenerationMode: String
   let ventralBarbCandidateRecordCount: Int
@@ -374,14 +376,20 @@ struct CrowShowcaseFrame {
       allocatedRenderTargetBytes: allocatedRenderTargetBytes,
       nativeReferenceAllocatedRenderTargetBytes:
         nativeReference?.allocatedRenderTargetBytes,
-      bodyVaneInputRecordCount: bodyVaneInputRecordCount,
-      bodyVaneInputRecordBytes: bodyVaneInputRecordBytes,
-      bodyVaneRecordCount: bodyVaneRecordCount,
+      bodyVaneMorphologyRecordCount: bodyVaneMorphologyRecordCount,
+      bodyVaneMorphologyRecordBytes: bodyVaneMorphologyRecordBytes,
+      bodyVaneSelectedMorphologyRecordCount:
+        bodyVaneSelectedMorphologyRecordCount,
       bodyVaneBatchCount: bodyVaneBatchCount,
-      bodyVaneRecordBytes: bodyVaneRecordBytes,
-      bodyVaneRetainedRecordCapacityBytes: bodyVaneRetainedRecordCapacityBytes,
+      bodyVaneSelectedMorphologyRecordBytes:
+        bodyVaneSelectedMorphologyRecordBytes,
+      bodyVaneRetainedMorphologyCapacityBytes:
+        bodyVaneRetainedMorphologyCapacityBytes,
+      bodyVanePoseInputBytes: bodyVanePoseInputBytes,
+      bodyVaneRetainedPoseCapacityBytes: bodyVaneRetainedPoseCapacityBytes,
       bodyVaneRetainedIndirectDrawBytes: bodyVaneRetainedIndirectDrawBytes,
-      bodyVaneRecordBufferAllocationCount: bodyVaneRecordBufferAllocationCount,
+      bodyVaneMorphologyBufferAllocationCount:
+        bodyVaneMorphologyBufferAllocationCount,
       bodyVaneRasterVertexInvocationCount: bodyVaneRasterVertexInvocationCount,
       bodyVaneVertexGenerationMode: bodyVaneVertexGenerationMode,
       ventralBarbCandidateRecordCount: ventralBarbCandidateRecordCount,
@@ -1215,14 +1223,16 @@ struct CrowShowcaseAOVFrameAudit: Codable, Equatable {
   let nativeReferenceGPUDurationMilliseconds: Double?
   let allocatedRenderTargetBytes: Int
   let nativeReferenceAllocatedRenderTargetBytes: Int?
-  let bodyVaneInputRecordCount: Int
-  let bodyVaneInputRecordBytes: Int
-  let bodyVaneRecordCount: Int
+  let bodyVaneMorphologyRecordCount: Int
+  let bodyVaneMorphologyRecordBytes: Int
+  let bodyVaneSelectedMorphologyRecordCount: Int
   let bodyVaneBatchCount: Int
-  let bodyVaneRecordBytes: Int
-  let bodyVaneRetainedRecordCapacityBytes: Int
+  let bodyVaneSelectedMorphologyRecordBytes: Int
+  let bodyVaneRetainedMorphologyCapacityBytes: Int
+  let bodyVanePoseInputBytes: Int
+  let bodyVaneRetainedPoseCapacityBytes: Int
   let bodyVaneRetainedIndirectDrawBytes: Int
-  let bodyVaneRecordBufferAllocationCount: Int
+  let bodyVaneMorphologyBufferAllocationCount: Int
   let bodyVaneRasterVertexInvocationCount: Int
   let bodyVaneVertexGenerationMode: String
   let ventralBarbCandidateRecordCount: Int
@@ -1418,7 +1428,7 @@ struct CrowShowcaseAOVAuditReport: Codable, Equatable {
   let frames: [CrowShowcaseAOVFrameAudit]
 
   init(frames: [CrowShowcaseAOVFrameAudit]) {
-    schemaVersion = 20
+    schemaVersion = 21
     colorSpace = "scene-linear extended range; display output is tone mapped separately"
     motionConvention =
       "current pixel to previous pixel in upper-left-origin pixel units; MetalFX scale 1"

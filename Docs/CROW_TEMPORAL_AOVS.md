@@ -90,7 +90,7 @@ audit path and temporal scale:
   /tmp/crow.mp4 /tmp/crow.png standing /tmp/crow-aov-audit.json 2
 ```
 
-The schema-20 JSON report records format and coordinate conventions plus per-frame
+The schema-21 JSON report records format and coordinate conventions plus per-frame
 finite-pixel count, HDR values above one, exact active IDs, visible feather IDs,
 fully covered samples, unit-normal error, depth range, moving-pixel count,
 maximum motion, and bird/support vertical centroids. It also records exact
@@ -105,19 +105,20 @@ ordered class pair are retained, so one large projection cannot erase other
 anatomical owners. Wing-cell ownership additionally requires the scaffold's
 low-alpha material code, preventing the bare class-`11` pedal identity from
 aliasing the first left-wing cell. For the largest enclosed component, schema
-`20` also
+`21` also
 retains the sorted packed identities adjacent to its boundary. This resolves a
 gap directly to persistent class/side/order/count or live covert ownership
 without inferring the owner from color or a temporary debug render.
-Schema `20` additionally records body-vane full-input and Metal-selected record
-counts, input/active/retained record bytes, active topology-bin count, retained
-indirect-draw bytes, cumulative record-buffer allocations, raster vertex
-invocations, and the `gpu-procedural-instanced-indirect` generation mode. Full
-record buffers and indirect arguments use three retained in-flight slots;
-audit-expanded geometry is excluded. This makes selection, allocation
-stabilization, and residency executable without treating them as a speed
-result.
-Schema `20` also records projected-size ventral-barb candidate,
+Schema `21` records the body-vane immutable morphology count and bytes,
+Metal-selected morphology count and bytes, per-frame pose bytes, retained
+morphology/pose/indirect capacity, active topology-bin count, morphology-buffer
+allocations, raster invocations, and the
+`gpu-resident-morphology-pose-instanced-indirect` generation mode. The
+morphology inventory is retained once; only pose input uses three in-flight
+slots. CPU temporal records and expanded geometry exist only during explicit
+audit readback. This makes pose ownership, selection, allocation stability, and
+residency executable without treating them as a speed result.
+Schema `21` also records projected-size ventral-barb candidate,
 frustum-visible, prior-depth-tested, occlusion-culled, and retained record
 counts; logical triangle-stream vertex count; actual raster vertex invocations;
 materialized output-capacity bytes; generation mode; and max-depth hierarchy

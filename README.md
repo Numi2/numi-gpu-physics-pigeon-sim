@@ -98,29 +98,38 @@ and distal taper curvature, replacing one repeated cut-paper tip profile while
 the visible vane and retained detail continue to share one envelope. These are
 simulated presentation constraints, not measured American-crow feather
 linkages.
-The `3,212`-feather cervical, mantle, humeral, and scapular inventory now sends
-one `176`-byte current/previous analytic record per active vane to Metal. The
-live raster vertex stage evaluates its crown, asymmetric width, ripple, distal
-taper, smooth normal, motion, and stable identity directly; those vane
-triangles are no longer expanded into the CPU surface stream. The existing CPU
-path remains an initialization fallback, and body mesostructure remains a
-separate CPU-authored layer. A shared compute audit agrees with the Swift
-position oracle within `0.4 um`; the most cancellation-sensitive terminal
-normal remains within `0.06 degrees`. At a new front-dorsal yaw/pitch
+The `3,212`-feather cervical, mantle, humeral, and scapular inventory now lives
+in one retained `128`-byte-per-feather morphology buffer. Metal reconstructs
+current and previous roots, tips, normals, longitudinal camber, and transverse
+camber from `1,376` bytes of per-frame body/deployment and cervical-transform
+input; production no longer builds or uploads `176`-byte temporal records.
+The live raster vertex stage evaluates each crown, asymmetric width, ripple,
+distal taper, smooth normal, motion, and stable identity directly; those vane
+triangles are no longer expanded into the CPU surface stream. The CPU temporal
+path remains only as an explicit audit oracle, and body mesostructure remains a
+separate CPU-authored layer. A shared compute audit including nonzero neck pose
+and takeoff deployment agrees with that Swift oracle within `2 um`; the most
+cancellation-sensitive terminal normal remains within `0.06 degrees`. The
+earlier temporal-record renderer's front-dorsal yaw/pitch
 `(0.52, 0.64)`, `0.44 m` gate, coverage, finite pixels, all enclosed-hole
 metrics, the expected lower-body apertures, and normal-unit error are exact
-against the previous renderer; beauty SSIM is `0.999997`. This qualifies live
-Metal geometry ownership and visual parity, not measured anatomy or a speedup.
-All `3,212` temporal records now enter three retained full-inventory slots;
-Metal applies the established density predicate, classifies seven possible
-tessellation topologies, scans stable offsets, emits compact record indices,
-and prepares indirect beauty/identity draws. The CPU grouping path remains only
-as an audit oracle. At yaw/pitch `(-1.12, 0.26)` and `0.50 m`, Metal selects
-the same `1,606` records in two active topology bins and requests `285,984`
-raster vertex invocations. Each full slot is `565,312` bytes, settles to
-`1,695,936` bytes across three slots, and shares `336` bytes of retained
-indirect arguments; allocation count advances `1, 2, 3, 3, 3`. All five
-left-flank PNGs are byte-exact against the previous CPU-selected renderer.
+against its CPU-expanded predecessor; beauty SSIM is `0.999997`. This remains
+the procedural-raster ownership gate; the retained-morphology gate follows
+below. Neither is measured anatomy or a speedup.
+The immutable inventory occupies `411,136` bytes once. Three pose slots retain
+`4,128` bytes total, while Metal applies the established density predicate,
+classifies seven possible tessellation topologies, scans stable offsets, emits
+compact morphology indices, and prepares indirect beauty/identity draws. At
+yaw/pitch `(-1.12, 0.26)` and `0.50 m`, Metal selects the same `1,606` records
+in two active topology bins and requests `285,984` raster vertex invocations;
+the shared indirect arguments occupy `336` bytes. CPU grouping and temporal
+record construction now run only for explicit audit readback. A new five-frame
+release gate at rear-right yaw/pitch `(2.28, 0.38)` and `0.62 m` spans standing,
+deployment, and flight. Minimum beauty SSIM against the former temporal-record
+renderer is `0.999997`, with the middle frame byte-exact. Largest enclosed
+components are `5, 3, 1, 1, 10` pixels; the final component is bounded by wing
+and pedal owners rather than a body vane. Inspection exposes no new neck,
+shoulder, flank, or tail discontinuity.
 These counters exclude audit-only expanded output and do not constitute a
 performance claim.
 The same retained path now owns all `12` rectrices throughout takeoff. Their
@@ -191,7 +200,7 @@ same-class luminance variation from `0.001235` to `0.001502` without changing
 the `0.105038` class maximum. This is simulated close-range mesostructure, not
 a measured barb count or a perceptual-realism qualification.
 The exact identity AOV now also reports visible and fully covered pixels for
-every persistent primary, secondary, and rectrix as schema `20`. The same
+every persistent primary, secondary, and rectrix as schema `21`. The same
 report retains the longest exterior-connected row/column slots with exact
 boundary classes, packed identities, and procedural owners, so open shoulder
 gaps are traceable without treating every silhouette concavity as a defect.

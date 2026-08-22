@@ -745,25 +745,29 @@ func estimatedStandingCrowCaptureProducesLoopClosedFrames() throws {
     try VisualizationBackend(device: device).supportsMeshShaders
     ? "gpu-mesh-threadgroup-8-vertex-indexed"
     : "gpu-procedural-vertex-pulling"
-  #expect(audit.schemaVersion == 20)
+  #expect(audit.schemaVersion == 21)
   #expect(
     audit.frames.allSatisfy {
-      $0.bodyVaneInputRecordCount == 3_212
-        && $0.bodyVaneInputRecordBytes
-          == $0.bodyVaneInputRecordCount
-          * MemoryLayout<CrowBodyVaneRecordGPU>.stride
-        && $0.bodyVaneRecordCount > 0
+      $0.bodyVaneMorphologyRecordCount == 3_212
+        && $0.bodyVaneMorphologyRecordBytes
+          == $0.bodyVaneMorphologyRecordCount
+          * MemoryLayout<CrowBodyVaneMorphologyGPU>.stride
+        && $0.bodyVaneSelectedMorphologyRecordCount > 0
         && $0.bodyVaneBatchCount > 0
-        && $0.bodyVaneRecordBytes
-          == $0.bodyVaneRecordCount * MemoryLayout<CrowBodyVaneRecordGPU>.stride
-        && $0.bodyVaneRetainedRecordCapacityBytes >= $0.bodyVaneRecordBytes
+        && $0.bodyVaneSelectedMorphologyRecordBytes
+          == $0.bodyVaneSelectedMorphologyRecordCount
+          * MemoryLayout<CrowBodyVaneMorphologyGPU>.stride
+        && $0.bodyVaneRetainedMorphologyCapacityBytes
+          >= $0.bodyVaneSelectedMorphologyRecordBytes
+        && $0.bodyVanePoseInputBytes == 1_376
+        && $0.bodyVaneRetainedPoseCapacityBytes == 4_128
         && $0.bodyVaneRetainedIndirectDrawBytes
           >= $0.bodyVaneBatchCount
           * MemoryLayout<DrawPrimitivesIndirectArguments>.stride
-        && (1...3).contains($0.bodyVaneRecordBufferAllocationCount)
+        && $0.bodyVaneMorphologyBufferAllocationCount == 1
         && $0.bodyVaneRasterVertexInvocationCount > 0
         && $0.bodyVaneVertexGenerationMode
-          == "gpu-procedural-instanced-indirect"
+          == "gpu-resident-morphology-pose-instanced-indirect"
     })
   #expect(
     audit.frames.allSatisfy {

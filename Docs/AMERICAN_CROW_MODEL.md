@@ -210,7 +210,7 @@ or alter rectrix deployment. The dorsal folded-wing quad collapses over
 presentation phase `0.20...0.30`, while the narrow terminal axillary bridge
 overlaps live underwing deployment until progress `0.30`; this prevents either
 bridge from becoming a free-flight slab or exposing the root aperture. Crow AOV
-schema `20` carries exact visible and
+schema `21` carries exact visible and
 fully covered pixels plus image bounds per persistent feather, wing-surface
 cell, and topology-bound dorsal-covert identity. Ownership can therefore be
 traced to class/side/order or side/chord/span without inferring it from a beauty
@@ -493,20 +493,24 @@ native-resolution renderer remains its executable parity oracle.
 The beauty mesh and fluid boundary mesh are intentionally distinct: the former
 adds feather detail, while the latter remains the fixed-topology coupling input.
 
-The body-tract vane surface is now evaluated directly from compact temporal
-records in the live Metal raster vertex stage. At full inventory, `3,212`
-cervical, mantle, humeral, and scapular vanes each contribute one `176`-byte
-record containing current/previous roots, tips, normals, deployment camber,
-transverse crown, asymmetric width, ripple, terminal taper, color, and stable
-identity. Projected-size topology remains quantized exactly as before, but the
-CPU no longer appends those vane triangles to `CrowSurfaceTemporalVertexGPU`.
-The separate tract rachis/barb mesostructure is still CPU-authored, and failure
-to create all three required Metal pipelines restores the former CPU vane path.
-A compute-only audit invokes the same Metal point/normal helper used by raster;
-sampled positions agree with the independent Swift oracle within `0.4 um`, and
-terminal normals agree within `0.06 degrees` with fast math enabled. In the new
-front-dorsal `800 x 450` gate at yaw/pitch `(0.52, 0.64)` and `0.44 m`, both
-paths retain `92,467` active pixels, `91,727` fully covered AOV pixels, `14`
+The body-tract vane surface is evaluated from retained morphology in the live
+Metal raster vertex stage. At full inventory, `3,212` cervical, mantle,
+humeral, and scapular vanes each contribute one immutable `128`-byte record
+containing local roots, tips, normals, base camber, transverse crown inputs,
+asymmetric width, ripple, terminal taper, color, and stable identity. A compact
+pose stream reconstructs current and previous body translation, neck transport,
+deployment camber, and transverse settling. Projected-size topology remains
+quantized exactly as before, but the CPU no longer appends those vane triangles
+to `CrowSurfaceTemporalVertexGPU` or authors production temporal records. The
+separate tract rachis/barb mesostructure is still CPU-authored, and failure to
+create the required Metal pipelines restores the former CPU vane path. A
+compute-only audit invokes the same Metal pose/point/normal helpers used by
+raster; sampled positions including nonzero neck pose agree with the
+independent Swift temporal oracle within `2 um`, and terminal normals agree
+within `0.06 degrees` with fast math enabled. The earlier temporal-record
+renderer's front-dorsal `800 x 450` gate at yaw/pitch `(0.52, 0.64)` and
+`0.44 m` retained `92,467` active pixels, `91,727` fully covered AOV pixels,
+`14`
 enclosed pixels in `7` components, an `8`-pixel largest component, and `17`
 expected lower-body aperture pixels in `3` components. Beauty SSIM is
 `0.999997`; exact per-feather body identity raises the visible-identity census
@@ -514,24 +518,30 @@ from the legacy surface aggregate rather than changing coverage. This is an
 executable ownership/parity result, not a performance measurement or an
 American-crow anatomical measurement.
 
-Compact body-vane storage is triple buffered for three in-flight command
-buffers. Every slot receives all `3,212` current/previous analytic records;
-Metal reproduces the established whole/half/quarter density predicate,
-classifies each active record into one of seven possible topology bins, scans
-stable offsets, emits compact inventory indices, and prepares the beauty and
-identity `DrawPrimitivesIndirectArguments`. The CPU grouping path runs only for
-explicit audit readback. Schema `20` distinguishes full input from selected
-records, active bytes from total retained capacity, indirect bytes, cumulative
-record-buffer allocations, logical raster invocations, and generation mode.
-At the left-flank yaw/pitch `(-1.12, 0.26)`, `0.50 m` diagnostic, Metal selects
-the CPU-oracle-exact `1,606` records in two active bins and requests `285,984`
-raster vertices. Each full-inventory slot is `565,312` bytes; three slots settle
-at `1,695,936` bytes plus `336` indirect bytes, and allocation count is `1, 2,
-3, 3, 3` across five frames. GPU record identities and indirect counts are
-exact against the CPU oracle at `800`, `1,000`, `1,600`, and `20,000 px/m`.
-Every left-flank PNG is byte-identical to the previous CPU-selected renderer;
-inspection shows continuous neck, shoulder, flank, folded-wing, and tail
-overlap. Audit-only expanded buffers are excluded, and no timing improvement is
+Body-vane morphology is retained once rather than triple-buffered per pose. The
+`3,212` immutable `128`-byte records occupy `411,136` bytes; three in-flight
+pose slots retain `4,128` bytes total and each receives only `1,376` bytes of
+current/previous body, deployment, and cervical affine transforms. Metal
+reproduces the established whole/half/quarter density predicate, classifies
+each active morphology into one of seven topology bins, scans stable offsets,
+emits compact inventory indices, and prepares beauty and identity
+`DrawPrimitivesIndirectArguments`. CPU temporal-record construction and
+grouping run only for explicit audit readback. Schema `21` reports morphology,
+pose, selected work, retained capacity, indirect bytes, allocations, raster
+invocations, and generation mode separately. At the left-flank yaw/pitch
+`(-1.12, 0.26)`, `0.50 m` diagnostic, Metal selects the CPU-oracle-exact
+`1,606` records in two active bins and requests `285,984` raster vertices; the
+retained indirect arguments occupy `336` bytes. GPU identities and indirect
+counts are exact against the CPU oracle at `800`, `1,000`, `1,600`, and
+`20,000 px/m`. A nonzero-neck/deployment compute audit agrees with CPU temporal
+geometry within `2 um`. A new five-frame release diagnostic at rear-right
+yaw/pitch `(2.28, 0.38)` and `0.62 m` spans the grounded pose, deployment, and
+flight. Beauty SSIM against the previous temporal-record renderer is at least
+`0.999997`, and the middle frame is byte-identical. Enclosed-hole totals are
+`9, 11, 4, 3, 19` pixels with largest components `5, 3, 1, 1, 10`; the final
+component is bounded by wing class `4` and pedal class `11`, not body-vane
+ownership. Visual inspection shows continuous neck, shoulder, flank, and tail
+coverage. Audit-expanded buffers are excluded, and no timing improvement is
 claimed.
 
 The same executable renderer also has a distinct `standing` presentation. It

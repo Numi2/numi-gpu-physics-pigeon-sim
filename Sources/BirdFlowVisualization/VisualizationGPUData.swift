@@ -231,9 +231,24 @@ struct CrowFeatherGeometryUniforms {
   var renderOffsetAndDetailScale: SIMD4<Float>
 }
 
-/// One temporal analytic body-vane record. Metal evaluates the exact crown,
-/// taper, ripple, and smooth-normal equations directly in the live raster
-/// vertex stage; the CPU uploads one compact record instead of triangle soup.
+/// Immutable analytic morphology for one body vane. Production uploads this
+/// inventory once; compact pose inputs transport it through standing, takeoff,
+/// and flight without rebuilding per-feather records on the CPU.
+struct CrowBodyVaneMorphologyGPU: Equatable {
+  var rootAndRootWidth: SIMD4<Float>
+  var tipAndMaximumWidth: SIMD4<Float>
+  var normalAndCamber: SIMD4<Float>
+  /// Lateral sweep, vane asymmetry, ripple amplitude, ripple phase.
+  var sweepAsymmetryAndRipple: SIMD4<Float>
+  /// Ripple cycles, root envelope, terminal width, distal taper exponent.
+  var envelopeAndTaper: SIMD4<Float>
+  var color: SIMD4<Float>
+  /// Pennaceous start, region, row, and column.
+  var morphology: SIMD4<Float>
+  var identity: SIMD4<UInt32>
+}
+
+/// CPU-only temporal oracle retained to qualify Metal pose reconstruction.
 struct CrowBodyVaneRecordGPU: Equatable {
   var currentRootAndRootWidth: SIMD4<Float>
   var currentTipAndMaximumWidth: SIMD4<Float>
@@ -249,6 +264,19 @@ struct CrowBodyVaneRecordGPU: Equatable {
   /// Pennaceous start followed by reserved future morphology fields.
   var morphology: SIMD4<Float>
   var identity: SIMD4<UInt32>
+}
+
+struct CrowBodyVanePoseUniforms: Equatable {
+  var currentBodyCenterAndDeployment: SIMD4<Float>
+  var previousBodyCenterAndDeployment: SIMD4<Float>
+}
+
+/// Three affine rows transport one cervical column. The same upper 3x3 block
+/// rotates its vane normal; the row `w` components translate roots and tips.
+struct CrowBodyVaneNeckTransformGPU: Equatable {
+  var row0: SIMD4<Float>
+  var row1: SIMD4<Float>
+  var row2: SIMD4<Float>
 }
 
 struct CrowBodyVaneGeometryUniforms {
