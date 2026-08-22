@@ -319,8 +319,34 @@ func crowBodyFeatherTractsOverlapNeckAndCoverWingRoots() {
   #expect(samples.map(\.edgeRippleAmplitude).max()! <= 0.0341)
   #expect(samples.map(\.edgeRippleCycles).min()! >= 1.30)
   #expect(samples.map(\.edgeRippleCycles).max()! <= 2.101)
+  #expect(samples == CrowBodyFeatherTracts.samples())
   for region in CrowBodyFeatherTractRegion.allCases {
     let regionSamples = samples.filter { $0.region == region }
+    let terminalBounds = CrowBodyFeatherTracts.terminalWidthRatioBounds(
+      for: region
+    )
+    let terminalRatios = regionSamples.map(\.terminalWidthRatio)
+    let taperBounds = CrowBodyFeatherTracts.distalTaperExponentBounds(for: region)
+    let taperExponents = regionSamples.map(\.distalTaperExponent)
+    #expect(terminalRatios.allSatisfy { terminalBounds.contains($0) })
+    #expect(terminalRatios.min()! < terminalBounds.lowerBound + 0.0001)
+    #expect(terminalRatios.max()! > terminalBounds.upperBound - 0.0001)
+    #expect(Set(terminalRatios.map { Int(($0 * 10_000_000).rounded()) }).count > 100)
+    #expect(taperExponents.allSatisfy { taperBounds.contains($0) })
+    #expect(taperExponents.min()! < taperBounds.lowerBound + 0.01)
+    #expect(taperExponents.max()! > taperBounds.upperBound - 0.01)
+    #expect(Set(taperExponents.map { Int(($0 * 100_000).rounded()) }).count > 100)
+    let leftSamples = regionSamples.filter { $0.side < 0 }
+    let independentlyTaperedPairs = leftSamples.filter { left in
+      regionSamples.contains {
+        $0.side > 0
+          && $0.row == left.row
+          && $0.column == left.column
+          && abs($0.terminalWidthRatio - left.terminalWidthRatio) > 1e-7
+          && abs($0.distalTaperExponent - left.distalTaperExponent) > 1e-6
+      }
+    }.count
+    #expect(independentlyTaperedPairs > 9 * leftSamples.count / 10)
     #expect(
       Set(regionSamples.map(\.edgeRipplePhase)).count
         > 9 * regionSamples.count / 10

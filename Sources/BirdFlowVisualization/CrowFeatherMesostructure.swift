@@ -210,6 +210,8 @@ enum CrowFeatherMesostructure {
     let transverseCamberRatio: Float
     let barbTransverseCamberRatio: Float
     let rootEnvelopeRatio: Float
+    let terminalWidthRatio: Float
+    let distalTaperExponent: Float
     let pennaceousStartFraction: Float
     let vaneAsymmetry: Float
     let edgeRippleAmplitude: Float
@@ -242,6 +244,8 @@ enum CrowFeatherMesostructure {
       transverseCamberRatio = 0
       barbTransverseCamberRatio = 0
       rootEnvelopeRatio = 0.32
+      terminalWidthRatio = 0.015
+      distalTaperExponent = 3.2
       pennaceousStartFraction = feather.pennaceousStartFraction
       vaneAsymmetry = feather.vaneAsymmetry
       edgeRippleAmplitude = feather.edgeRippleAmplitude
@@ -279,6 +283,8 @@ enum CrowFeatherMesostructure {
       self.transverseCamberRatio = transverseCamberRatio
       barbTransverseCamberRatio = transverseCamberRatio
       rootEnvelopeRatio = feather.rootEnvelopeRatio
+      terminalWidthRatio = feather.terminalWidthRatio
+      distalTaperExponent = feather.distalTaperExponent
       pennaceousStartFraction = feather.pennaceousStartFraction
       vaneAsymmetry = feather.vaneAsymmetry
       edgeRippleAmplitude = feather.edgeRippleAmplitude
@@ -315,6 +321,8 @@ enum CrowFeatherMesostructure {
       self.transverseCamberRatio = transverseCamberRatio
       barbTransverseCamberRatio = 0
       rootEnvelopeRatio = feather.rootEnvelopeRatio
+      terminalWidthRatio = 0.015
+      distalTaperExponent = 3.2
       pennaceousStartFraction = feather.pennaceousStartFraction
       vaneAsymmetry = feather.vaneAsymmetry
       edgeRippleAmplitude = feather.edgeRippleAmplitude
@@ -348,6 +356,8 @@ enum CrowFeatherMesostructure {
       transverseCamberRatio = 0
       barbTransverseCamberRatio = 0
       rootEnvelopeRatio = feather.rootEnvelopeRatio
+      terminalWidthRatio = 0.015
+      distalTaperExponent = 3.2
       pennaceousStartFraction = 0
       vaneAsymmetry = feather.vaneAsymmetry
       edgeRippleAmplitude = feather.edgeRippleAmplitude
@@ -381,6 +391,8 @@ enum CrowFeatherMesostructure {
       transverseCamberRatio = 0
       barbTransverseCamberRatio = 0
       rootEnvelopeRatio = feather.rootEnvelopeRatio
+      terminalWidthRatio = 0.015
+      distalTaperExponent = 3.2
       pennaceousStartFraction = 0
       vaneAsymmetry = feather.vaneAsymmetry
       edgeRippleAmplitude = feather.edgeRippleAmplitude
@@ -414,6 +426,8 @@ enum CrowFeatherMesostructure {
       transverseCamberRatio = 0
       barbTransverseCamberRatio = 0
       rootEnvelopeRatio = feather.rootEnvelopeRatio
+      terminalWidthRatio = 0.015
+      distalTaperExponent = 3.2
       pennaceousStartFraction = feather.pennaceousStartFraction
       vaneAsymmetry = feather.vaneAsymmetry
       edgeRippleAmplitude = feather.edgeRippleAmplitude
@@ -450,7 +464,8 @@ enum CrowFeatherMesostructure {
       let bodyEnvelope =
         rootEnvelopeRatio
         + (1 - rootEnvelopeRatio) * pow(max(sin(Float.pi * t), 0), 0.58)
-      let tipTaper = 1 - 0.985 * pow(t, 3.2)
+      let tipTaper = 1
+        - (1 - terminalWidthRatio) * pow(t, distalTaperExponent)
       let rippleEnvelope = pow(max(sin(Float.pi * t), 0), 2)
       let edgeRipple =
         1

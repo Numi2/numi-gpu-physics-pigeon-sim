@@ -632,6 +632,24 @@ The inspected crop loses the repeated five-root comb without changing the vane
 tip. This qualifies one simulated view and the executable bounds, not measured
 barb anatomy or all-angle realism.
 
+Each body-tract feather now owns two additional deterministic distal-shape
+scalars instead of inheriting one shared `0.015` terminal-width ratio and `3.2`
+taper exponent. Cervical, mantle, humeral, and scapular terminal-width bounds
+are `0.008...0.016`, `0.010...0.020`, `0.012...0.022`, and `0.012...0.024`;
+their curvature bounds are `3.00...3.45`, `2.95...3.55`, `3.05...3.60`, and
+`3.00...3.65`. The vane mesh and retained mesostructure evaluate the same
+values. Exact replay, more than `100` quantized values per region, coverage of
+both ends of every interval, and independent tips at over `90%` of mirrored
+coordinates are executable gates. Roots, tips, widths, inventory, surface
+classes, and LOD are unchanged. At a previously unused low rear-quarter
+yaw/pitch `(2.30,-0.48)`, distance `0.42 m`, and `1200 x 675`, active coverage
+changes `266,721 -> 266,724`, fully covered active pixels `264,979 -> 264,987`,
+and enclosed pixels improve `33 -> 32`. Components change `25 -> 26`, the worst
+hole improves `4 -> 2` pixels, expected lower-body aperture remains zero, and
+matched SSIM is `0.999815`. The amplified difference remains localized to
+distal body-feather edges. This is one-view simulated evidence for bounded
+estimated morphology, not measured tip shape or all-angle realism.
+
 The exposed class-`6` scapular layer now shares its deployed transverse crown
 with retained rachis and barb geometry while preserving stable parent-class AOV
 ownership. Interior barbs remain inside `97%` of the local vane width and only
@@ -1026,9 +1044,9 @@ simulated terminal ownership and raster continuity, not measured rectrix
 morphology or perceptual realism.
 
 The canonical README sequence is fully simulated and contains the native hold,
-transition, and flight path: `800 x 450`, `72` frames at `24 fps`, `8,095,013`
+transition, and flight path: `800 x 450`, `72` frames at `24 fps`, `8,015,883`
 bytes, SHA-256
-`bd3dd0b85e219c9ea126d68ed5f575dffc9853f30c4766359ff61a031c8c8eb0`.
+`038d542db544d2b055702fda21bb385ee1f7c7fd7ce681a60637ab1285a886c5`.
 The audited stage PNGs at frames `0`, `35`, and `71` are distinct and retain
 the simulated hold, geometric deployment, and sustained-flight states.
 

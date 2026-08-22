@@ -2876,6 +2876,8 @@ private struct CrowMeshBuilder {
         edgeRipplePhase: sample.edgeRipplePhase,
         edgeRippleCycles: sample.edgeRippleCycles,
         rootEnvelopeRatio: sample.rootEnvelopeRatio,
+        terminalWidthRatio: sample.terminalWidthRatio,
+        tipTaperExponent: sample.distalTaperExponent,
         axialStartFraction: sample.pennaceousStartFraction,
         surfaceFeatherClass: sample.surfaceFeatherClass,
         lodLengthMeters: simd_distance(sample.rootOffset, sample.tipOffset),
@@ -4942,6 +4944,7 @@ private struct CrowMeshBuilder {
     edgeRippleCycles: Float = 1.5,
     rootEnvelopeRatio: Float = 0.32,
     terminalWidthRatio: Float = 0.015,
+    tipTaperExponent: Float = 3.2,
     axialStartFraction: Float = 0,
     surfaceFeatherClass: UInt32 = 0,
     lodLengthMeters: Float? = nil,
@@ -4971,7 +4974,9 @@ private struct CrowMeshBuilder {
         rootEnvelope
         + (1 - rootEnvelope) * pow(max(sin(Float.pi * t), 0), 0.58)
       let boundedTerminalWidthRatio = min(max(terminalWidthRatio, 0), 1)
-      let tipTaper = 1 - (1 - boundedTerminalWidthRatio) * pow(t, 3.2)
+      let boundedTipTaperExponent = min(max(tipTaperExponent, 2), 5)
+      let tipTaper = 1
+        - (1 - boundedTerminalWidthRatio) * pow(t, boundedTipTaperExponent)
       let envelope = bodyEnvelope * tipTaper
       let rippleEnvelope = pow(max(sin(Float.pi * t), 0), 2)
       let edgeRipple =

@@ -319,7 +319,9 @@ func bodyTractTerminalRootsFormContainedFan() {
         feather.rootEnvelopeRatio
         + (1 - feather.rootEnvelopeRatio)
         * pow(max(sin(Float.pi * rootAxial), 0), 0.58)
-      let tipTaper = 1 - 0.985 * pow(rootAxial, 3.2)
+      let tipTaper = 1
+        - (1 - feather.terminalWidthRatio)
+        * pow(rootAxial, feather.distalTaperExponent)
       let rippleEnvelope = pow(max(sin(Float.pi * rootAxial), 0), 2)
       let edgeRipple =
         1
@@ -447,7 +449,9 @@ func promotedShoulderBarbsStayInsideVaneBeforeTerminalTipBundles() throws {
       feather.rootEnvelopeRatio
       + (1 - feather.rootEnvelopeRatio)
       * pow(max(sin(Float.pi * axial), 0), 0.58)
-    let tipTaper = 1 - 0.985 * pow(axial, 3.2)
+    let tipTaper = 1
+      - (1 - feather.terminalWidthRatio)
+      * pow(axial, feather.distalTaperExponent)
     let rippleEnvelope = pow(max(sin(Float.pi * axial), 0), 2)
     let edgeRipple =
       1

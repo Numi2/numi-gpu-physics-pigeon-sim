@@ -31,6 +31,8 @@ struct CrowBodyFeatherTractSample: Equatable {
   let edgeRipplePhase: Float
   let edgeRippleCycles: Float
   let rootEnvelopeRatio: Float
+  let terminalWidthRatio: Float
+  let distalTaperExponent: Float
   let pennaceousStartFraction: Float
   let materialVariation: Float
   let headCoupling: Float
@@ -55,6 +57,51 @@ enum CrowBodyFeatherTracts {
   static let scapularFlightTransverseCamberStartCourseFraction: Float = 0.40
   static let scapularFlightOuterTransverseCamberRatio: Float = 0.08
   static let retainedDetailCrownInsetScale: Float = 0.96
+
+  /// Estimated, identity-stable distal shape bounds shared by the visible vane
+  /// and retained detail. Keeping them on the sample makes a future Metal
+  /// expansion consume the same topology and envelope without resampling.
+  static func terminalWidthRatioBounds(
+    for region: CrowBodyFeatherTractRegion
+  ) -> ClosedRange<Float> {
+    switch region {
+    case .cervical: return 0.008...0.016
+    case .mantle: return 0.010...0.020
+    case .humeral: return 0.012...0.022
+    case .scapular: return 0.012...0.024
+    }
+  }
+
+  static func distalTaperExponentBounds(
+    for region: CrowBodyFeatherTractRegion
+  ) -> ClosedRange<Float> {
+    switch region {
+    case .cervical: return 3.00...3.45
+    case .mantle: return 2.95...3.55
+    case .humeral: return 3.05...3.60
+    case .scapular: return 3.00...3.65
+    }
+  }
+
+  private static func terminalWidthRatio(
+    region: CrowBodyFeatherTractRegion,
+    identity: Float
+  ) -> Float {
+    let bounds = terminalWidthRatioBounds(for: region)
+    let unitIdentity = 0.5 + 0.5 * min(max(identity, -1), 1)
+    return bounds.lowerBound
+      + (bounds.upperBound - bounds.lowerBound) * unitIdentity
+  }
+
+  private static func distalTaperExponent(
+    region: CrowBodyFeatherTractRegion,
+    identity: Float
+  ) -> Float {
+    let bounds = distalTaperExponentBounds(for: region)
+    let unitIdentity = 0.5 + 0.5 * min(max(identity, -1), 1)
+    return bounds.lowerBound
+      + (bounds.upperBound - bounds.lowerBound) * unitIdentity
+  }
 
   static func visibleSamples(
     neckPose: CrowStandingNeckPose? = nil,
@@ -146,6 +193,18 @@ enum CrowBodyFeatherTracts {
             column: column,
             salt: 0x27D4_EB2F
           )
+          let distalIdentity = identityVariation(
+            side: side,
+            row: row,
+            column: column,
+            salt: 0x94D0_49BB
+          )
+          let distalCurveIdentity = identityVariation(
+            side: side,
+            row: row,
+            column: column,
+            salt: 0xD1B5_4A32
+          )
           let unposedRootSurface = cervicalRootSurface(
             side: side,
             row: row,
@@ -214,6 +273,14 @@ enum CrowBodyFeatherTracts {
               edgeRipplePhase: Float.pi * (edgeIdentity + 1),
               edgeRippleCycles: 1.30 + 0.50 * (0.5 + 0.5 * cycleIdentity),
               rootEnvelopeRatio: 0.48 + 0.07 * (0.5 + 0.5 * shapeIdentity),
+              terminalWidthRatio: terminalWidthRatio(
+                region: .cervical,
+                identity: distalIdentity
+              ),
+              distalTaperExponent: distalTaperExponent(
+                region: .cervical,
+                identity: distalCurveIdentity
+              ),
               pennaceousStartFraction: 0,
               materialVariation: identityVariation(
                 side: side,
@@ -344,6 +411,18 @@ enum CrowBodyFeatherTracts {
             column: column,
             salt: 0x7E95_761E
           )
+          let distalIdentity = identityVariation(
+            side: side,
+            row: row,
+            column: column,
+            salt: 0x94D0_49BB
+          )
+          let distalCurveIdentity = identityVariation(
+            side: side,
+            row: row,
+            column: column,
+            salt: 0xD1B5_4A32
+          )
           let axialStep = 1 / Float(mantleColumnCount - 1)
           let axial = min(
             1,
@@ -416,6 +495,14 @@ enum CrowBodyFeatherTracts {
               edgeRipplePhase: Float.pi * (edgeIdentity + 1),
               edgeRippleCycles: 1.35 + 0.65 * (0.5 + 0.5 * cycleIdentity),
               rootEnvelopeRatio: 0.62 - 0.06 * course,
+              terminalWidthRatio: terminalWidthRatio(
+                region: .mantle,
+                identity: distalIdentity
+              ),
+              distalTaperExponent: distalTaperExponent(
+                region: .mantle,
+                identity: distalCurveIdentity
+              ),
               pennaceousStartFraction: 0,
               materialVariation: materialIdentity,
               headCoupling: 0
@@ -472,6 +559,18 @@ enum CrowBodyFeatherTracts {
             row: row,
             column: column,
             salt: 0xD3A2_646C
+          )
+          let distalIdentity = identityVariation(
+            side: side,
+            row: row,
+            column: column,
+            salt: 0x94D0_49BB
+          )
+          let distalCurveIdentity = identityVariation(
+            side: side,
+            row: row,
+            column: column,
+            salt: 0xD1B5_4A32
           )
           let axialStep = 1 / Float(humeralColumnCount - 1)
           let axial = min(
@@ -535,6 +634,14 @@ enum CrowBodyFeatherTracts {
               edgeRipplePhase: Float.pi * (edgeIdentity + 1),
               edgeRippleCycles: 1.35 + 0.65 * (0.5 + 0.5 * cycleIdentity),
               rootEnvelopeRatio: 0.68 - 0.04 * course,
+              terminalWidthRatio: terminalWidthRatio(
+                region: .humeral,
+                identity: distalIdentity
+              ),
+              distalTaperExponent: distalTaperExponent(
+                region: .humeral,
+                identity: distalCurveIdentity
+              ),
               pennaceousStartFraction: 0,
               materialVariation: materialIdentity,
               headCoupling: 0
@@ -588,6 +695,18 @@ enum CrowBodyFeatherTracts {
             row: row,
             column: column,
             salt: 0xB529_7A4D
+          )
+          let distalIdentity = identityVariation(
+            side: side,
+            row: row,
+            column: column,
+            salt: 0x94D0_49BB
+          )
+          let distalCurveIdentity = identityVariation(
+            side: side,
+            row: row,
+            column: column,
+            salt: 0xD1B5_4A32
           )
           let axialStep = 1 / Float(scapularColumnCount - 1)
           let axial = min(
@@ -661,6 +780,14 @@ enum CrowBodyFeatherTracts {
               edgeRipplePhase: Float.pi * (edgeIdentity + 1),
               edgeRippleCycles: 1.40 + 0.70 * (0.5 + 0.5 * cycleIdentity),
               rootEnvelopeRatio: 0.64 - 0.05 * course,
+              terminalWidthRatio: terminalWidthRatio(
+                region: .scapular,
+                identity: distalIdentity
+              ),
+              distalTaperExponent: distalTaperExponent(
+                region: .scapular,
+                identity: distalCurveIdentity
+              ),
               pennaceousStartFraction: 0,
               materialVariation: materialIdentity,
               headCoupling: 0

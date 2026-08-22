@@ -396,6 +396,27 @@ full-frame SSIM is `0.999930`. This is bounded estimated rendering morphology
 qualified from one simulated view, not measured barb coordinates or all-angle
 perceptual realism.
 
+Body-tract vane tips no longer all use the same `0.015` terminal-width ratio and
+`3.2` distal taper exponent. Stable independent identities now select terminal
+width ranges of `0.008...0.016`, `0.010...0.020`, `0.012...0.022`, and
+`0.012...0.024` for cervical, mantle, humeral, and scapular tracts, respectively;
+their corresponding curvature ranges are `3.00...3.45`, `2.95...3.55`,
+`3.05...3.60`, and `3.00...3.65`. The visible blade and its retained
+mesostructure consume the same pair. Inventory, roots, tips, maximum widths,
+surface classes, and LOD selection remain unchanged. Replay and distribution
+tests reach both bounds in every region, retain more than `100` quantized values
+per region, and give over `90%` of mirrored coordinates independently shaped
+tips. At the new low rear-quarter yaw/pitch `(2.30,-0.48)`, distance `0.42 m`,
+and `1200 x 675`, active coverage changes `266,721 -> 266,724`, fully covered
+active pixels `264,979 -> 264,987`, enclosed pixels improve `33 -> 32`, and the
+largest hole improves `4 -> 2` pixels. Components change `25 -> 26`, expected
+lower-body aperture remains zero, and full-frame SSIM is `0.999815`. The
+amplified A/B difference is localized to distal dorsal/body feather edges.
+These bounds are estimated morphology, not measured American-crow tip profiles.
+Body vanes remain CPU-tessellated today; storing the scalars per stable feather
+keeps the envelope ready for a future retained Metal implementation without an
+identity or topology change.
+
 The estimated femoral field keeps its `15 x 18` body-surface-rooted inventory
 (`270` vanes per side) and all root and joint coordinates. A temporal-identity
 trace of the high-side transition opening localized the owning geometry to
