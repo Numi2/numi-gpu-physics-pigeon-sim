@@ -94,6 +94,14 @@ struct CrowShowcaseFrame {
     var persistentFeatherYTotal: [SIMD4<UInt32>: Int] = [:]
     var persistentFeatherPrimitiveVisiblePixels: [SIMD4<UInt32>: Int] = [:]
     var persistentFeatherPrimitiveFullyCoveredPixels: [SIMD4<UInt32>: Int] = [:]
+    var bodyVaneVisiblePixels: [SIMD4<UInt32>: Int] = [:]
+    var bodyVaneFullyCoveredPixels: [SIMD4<UInt32>: Int] = [:]
+    var bodyVaneMinimumX: [SIMD4<UInt32>: Int] = [:]
+    var bodyVaneMaximumX: [SIMD4<UInt32>: Int] = [:]
+    var bodyVaneMinimumY: [SIMD4<UInt32>: Int] = [:]
+    var bodyVaneMaximumY: [SIMD4<UInt32>: Int] = [:]
+    var bodyVaneXTotal: [SIMD4<UInt32>: Int] = [:]
+    var bodyVaneYTotal: [SIMD4<UInt32>: Int] = [:]
     var wingSurfaceCellVisiblePixels: [UInt32: Int] = [:]
     var wingSurfaceCellFullyCoveredPixels: [UInt32: Int] = [:]
     var wingSurfaceCellMinimumX: [UInt32: Int] = [:]
@@ -189,6 +197,30 @@ struct CrowShowcaseFrame {
           persistentFeatherXTotal[featherIdentity, default: 0] += x
           persistentFeatherYTotal[featherIdentity, default: 0] += y
         }
+        if id0 & 0xff00_0000 == 0x0200_0000 {
+          let bodyVaneIdentity = SIMD4(id0, id1, id2, id3)
+          bodyVaneVisiblePixels[bodyVaneIdentity, default: 0] += 1
+          let x = pixel % width
+          let y = pixel / width
+          bodyVaneMinimumX[bodyVaneIdentity] = min(
+            bodyVaneMinimumX[bodyVaneIdentity] ?? x,
+            x
+          )
+          bodyVaneMaximumX[bodyVaneIdentity] = max(
+            bodyVaneMaximumX[bodyVaneIdentity] ?? x,
+            x
+          )
+          bodyVaneMinimumY[bodyVaneIdentity] = min(
+            bodyVaneMinimumY[bodyVaneIdentity] ?? y,
+            y
+          )
+          bodyVaneMaximumY[bodyVaneIdentity] = max(
+            bodyVaneMaximumY[bodyVaneIdentity] ?? y,
+            y
+          )
+          bodyVaneXTotal[bodyVaneIdentity, default: 0] += x
+          bodyVaneYTotal[bodyVaneIdentity, default: 0] += y
+        }
         if id0 == UInt32.max
           && CrowWingSurfaceCellIdentity.isPacked(
             id3,
@@ -240,6 +272,9 @@ struct CrowShowcaseFrame {
           let primitiveIdentity = SIMD4(id0, id1, id2 >> 24, id3)
           persistentFeatherFullyCoveredPixels[featherIdentity, default: 0] += 1
           persistentFeatherPrimitiveFullyCoveredPixels[primitiveIdentity, default: 0] += 1
+        }
+        if id0 & 0xff00_0000 == 0x0200_0000 {
+          bodyVaneFullyCoveredPixels[SIMD4(id0, id1, id2, id3), default: 0] += 1
         }
         if id0 == UInt32.max
           && CrowWingSurfaceCellIdentity.isPacked(
@@ -351,6 +386,35 @@ struct CrowShowcaseFrame {
       ($0.featherClass, $0.sideCode, $0.order, $0.detailKind, $0.stableIdentifierHash)
         < ($1.featherClass, $1.sideCode, $1.order, $1.detailKind, $1.stableIdentifierHash)
     }
+    let bodyVaneSamples = CrowBodyFeatherTracts.samples(
+      appliesCervicalTerminalFlow: false
+    )
+    let bodyVaneIdentities = bodyVaneVisiblePixels.compactMap {
+      identity, visiblePixelCount -> CrowBodyVaneIdentityAudit? in
+      let inventoryIndex = Int(identity.x & 0x00ff_ffff)
+      guard bodyVaneSamples.indices.contains(inventoryIndex) else { return nil }
+      let sample = bodyVaneSamples[inventoryIndex]
+      return CrowBodyVaneIdentityAudit(
+        inventoryIndex: inventoryIndex,
+        stableIdentifierHash: identity.y,
+        physicsSurfacePartIdentifier: identity.z,
+        featherClassCode: identity.w & 255,
+        regionCode: sample.region.rawValue,
+        sideCode: sample.side < 0 ? 0 : 1,
+        row: sample.row,
+        column: sample.column,
+        visiblePixelCount: visiblePixelCount,
+        fullyCoveredPixelCount: bodyVaneFullyCoveredPixels[identity, default: 0],
+        minimumX: bodyVaneMinimumX[identity, default: 0],
+        maximumX: bodyVaneMaximumX[identity, default: 0],
+        minimumY: bodyVaneMinimumY[identity, default: 0],
+        maximumY: bodyVaneMaximumY[identity, default: 0],
+        centroidX: Float(bodyVaneXTotal[identity, default: 0])
+          / Float(visiblePixelCount),
+        centroidY: Float(bodyVaneYTotal[identity, default: 0])
+          / Float(visiblePixelCount)
+      )
+    }.sorted { $0.inventoryIndex < $1.inventoryIndex }
     let wingSurfaceCellIdentities = wingSurfaceCellVisiblePixels.map {
       identity, visiblePixelCount in
       CrowWingSurfaceCellIdentityAudit(
@@ -449,6 +513,7 @@ struct CrowShowcaseFrame {
       visibleFeatherIdentityCount: featherHashes.count,
       persistentFeatherIdentities: persistentFeatherIdentities,
       persistentFeatherPrimitives: persistentFeatherPrimitives,
+      bodyVaneIdentities: bodyVaneIdentities,
       wingSurfaceCellIdentities: wingSurfaceCellIdentities,
       wingCovertIdentities: wingCovertIdentities,
       visibleFeatherClassPixelCounts: visibleFeatherClassPixelCounts,
@@ -1411,6 +1476,9 @@ struct CrowShowcaseAOVFrameAudit: Codable, Equatable {
   /// rachis, and barb geometry. This is decoded from the diagnostic high byte
   /// without changing the stable anatomical identity above.
   let persistentFeatherPrimitives: [CrowPersistentFeatherPrimitiveAudit]
+  /// Visible-pixel ownership for every retained body contour vane, rachis, or
+  /// contained detail primitive, mapped back to tract region and grid index.
+  let bodyVaneIdentities: [CrowBodyVaneIdentityAudit]
   /// Exact visible-pixel census for the fixed 32 by 8 cells of each retained
   /// wing surface. This maps coarse silhouette evidence back to owning
   /// topology without storing an image-space target.
@@ -1501,6 +1569,26 @@ struct CrowPersistentFeatherPrimitiveAudit: Codable, Equatable {
   var sideCode: UInt32 { (packedIdentity >> 8) & 255 }
   var order: UInt32 { (packedIdentity >> 16) & 255 }
   var count: UInt32 { (packedIdentity >> 24) & 255 }
+}
+
+struct CrowBodyVaneIdentityAudit: Codable, Equatable {
+  let inventoryIndex: Int
+  let stableIdentifierHash: UInt32
+  let physicsSurfacePartIdentifier: UInt32
+  let featherClassCode: UInt32
+  let regionCode: UInt8
+  /// Zero is the negative tract side; one is the positive tract side.
+  let sideCode: UInt8
+  let row: Int
+  let column: Int
+  let visiblePixelCount: Int
+  let fullyCoveredPixelCount: Int
+  let minimumX: Int
+  let maximumX: Int
+  let minimumY: Int
+  let maximumY: Int
+  let centroidX: Float
+  let centroidY: Float
 }
 
 enum CrowWingSurfaceCellIdentity {
@@ -1596,7 +1684,7 @@ struct CrowShowcaseAOVAuditReport: Codable, Equatable {
   let frames: [CrowShowcaseAOVFrameAudit]
 
   init(frames: [CrowShowcaseAOVFrameAudit]) {
-    schemaVersion = 24
+    schemaVersion = 25
     colorSpace = "scene-linear extended range; display output is tone mapped separately"
     motionConvention =
       "current pixel to previous pixel in upper-left-origin pixel units; MetalFX scale 1"

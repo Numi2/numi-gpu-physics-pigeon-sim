@@ -90,7 +90,7 @@ audit path and temporal scale:
   /tmp/crow.mp4 /tmp/crow.png standing /tmp/crow-aov-audit.json 2
 ```
 
-The schema-24 JSON report records format and coordinate conventions plus per-frame
+The schema-25 JSON report records format and coordinate conventions plus per-frame
 finite-pixel count, HDR values above one, exact active IDs, visible feather IDs,
 fully covered samples, unit-normal error, depth range, moving-pixel count,
 maximum motion, and bird/support vertical centroids. It also records exact
@@ -135,6 +135,14 @@ plumulaceous chains, contained beneath each resolved feather's unchanged vane.
 The initial `96`-byte segment store retains `39,777,408` bytes over three
 in-flight slots and grows to `154,484,352` bytes only for the future `480 px`
 topology.
+Schema `25` adds exact visible/full-coverage ownership and image bounds for each
+of the `3,212` retained body-vane identities. Inventory index and stable hash
+remain coupled to tract region, bilateral side, row, and column, so a dorsal or
+flank patch can be traced to its owning simulated feather without a target
+image or color inference. Vane-contained rachis and detail primitives retain
+their parent identity. CPU-authored class-`7` ventral and throat blades remain
+separate surface primitives; the census does not mislabel those as retained
+body morphologies.
 Schema `24` deliberately keeps the existing body-vane counters: rachis and
 detail inherit their parent vane's stable identity, and the integer pass
 retains that underlying vane identity rather than issuing redundant subpixel
