@@ -538,6 +538,31 @@ func crowAOVAuditMeasuresFeatherClassLinearLuminance() {
   #expect(adjacentClass.meanSameClassNeighborAbsoluteLuminanceDifference == 4)
 }
 
+@Test("Crow AOV audit localizes cross-class luminance boundaries")
+func crowAOVAuditLocalizesCrossClassLuminanceBoundaries() {
+  let audits = CrowShowcaseFrame.featherClassBoundaryAudits(
+    birdMask: [true, true, false, true, true, true],
+    featherClassCodes: [7, 10, 0, 7, 10, 8],
+    linearLuminances: [1, 3, 0, 2, 6, 10],
+    width: 3,
+    height: 2
+  )
+  #expect(
+    audits.map { [$0.firstFeatherClassCode, $0.secondFeatherClassCode] }
+      == [[7, 10], [8, 10]]
+  )
+  let gular = audits[0]
+  #expect(gular.edgeCount == 2)
+  #expect(gular.minimumX == 0 && gular.maximumX == 0)
+  #expect(gular.minimumY == 0 && gular.maximumY == 1)
+  #expect(gular.meanAbsoluteLinearLuminanceDifference == 3)
+  #expect(gular.maximumAbsoluteLinearLuminanceDifference == 4)
+  #expect(gular.maximumDifferenceX == 0 && gular.maximumDifferenceY == 1)
+  let cheek = audits[1]
+  #expect(cheek.edgeCount == 1)
+  #expect(cheek.meanAbsoluteLinearLuminanceDifference == 4)
+}
+
 @Test("estimated crow body loft preserves asymmetric anatomical regions")
 func estimatedCrowBodyLoftPreservesAnatomicalRegions() {
   let rings = CrowBodyAnatomy.loftRings
@@ -745,7 +770,7 @@ func estimatedStandingCrowCaptureProducesLoopClosedFrames() throws {
     try VisualizationBackend(device: device).supportsMeshShaders
     ? "gpu-mesh-threadgroup-8-vertex-indexed"
     : "gpu-procedural-vertex-pulling"
-  #expect(audit.schemaVersion == 21)
+  #expect(audit.schemaVersion == 22)
   #expect(
     audit.frames.allSatisfy {
       $0.bodyVaneMorphologyRecordCount == 3_212
@@ -838,6 +863,7 @@ func estimatedStandingCrowCaptureProducesLoopClosedFrames() throws {
   )
   #expect(audit.frames.allSatisfy { $0.visibleFeatherClassPixelCounts.count == 32 })
   #expect(audit.frames.allSatisfy { !$0.featherClassLuminanceAudits.isEmpty })
+  #expect(audit.frames.allSatisfy { !$0.featherClassBoundaryAudits.isEmpty })
   #expect(
     audit.frames.allSatisfy { frame in
       frame.featherClassLuminanceAudits.allSatisfy {
@@ -846,6 +872,18 @@ func estimatedStandingCrowCaptureProducesLoopClosedFrames() throws {
           && $0.standardDeviationLinearLuminance.isFinite
           && $0.maximumLinearLuminance.isFinite
           && $0.meanSameClassNeighborAbsoluteLuminanceDifference.isFinite
+      }
+    }
+  )
+  #expect(
+    audit.frames.allSatisfy { frame in
+      frame.featherClassBoundaryAudits.allSatisfy {
+        $0.firstFeatherClassCode < $0.secondFeatherClassCode
+          && $0.edgeCount > 0
+          && $0.meanAbsoluteLinearLuminanceDifference.isFinite
+          && $0.maximumAbsoluteLinearLuminanceDifference.isFinite
+          && $0.maximumAbsoluteLinearLuminanceDifference
+            >= $0.meanAbsoluteLinearLuminanceDifference
       }
     }
   )

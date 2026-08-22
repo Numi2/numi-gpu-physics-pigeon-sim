@@ -90,7 +90,7 @@ audit path and temporal scale:
   /tmp/crow.mp4 /tmp/crow.png standing /tmp/crow-aov-audit.json 2
 ```
 
-The schema-21 JSON report records format and coordinate conventions plus per-frame
+The schema-22 JSON report records format and coordinate conventions plus per-frame
 finite-pixel count, HDR values above one, exact active IDs, visible feather IDs,
 fully covered samples, unit-normal error, depth range, moving-pixel count,
 maximum motion, and bird/support vertical centroids. It also records exact
@@ -100,16 +100,21 @@ exterior-connected background runs bracketed by bird pixels on image rows or
 columns retain both boundary class codes, surface-primitive identifiers, and
 full packed anatomical identities. Visible feather classes retain scene-linear
 luminance mean, standard deviation, maximum, the maximum's exact pixel
-coordinate, and same-class neighbour variation before tone mapping. At most four samples per axis and
+coordinate, and same-class neighbour variation before tone mapping. Every
+right/down adjacency between different visible feather classes is also retained
+as one ordered pair with edge count, image bounds, mean and maximum scene-linear
+luminance jump, and maximum-jump coordinate. This localizes optical seams such
+as the class-`7` body/bridge to class-`10` gular handoff without storing a
+segmentation image or any real-crow target. At most four samples per axis and
 ordered class pair are retained, so one large projection cannot erase other
 anatomical owners. Wing-cell ownership additionally requires the scaffold's
 low-alpha material code, preventing the bare class-`11` pedal identity from
 aliasing the first left-wing cell. For the largest enclosed component, schema
-`21` also
+`22` also
 retains the sorted packed identities adjacent to its boundary. This resolves a
 gap directly to persistent class/side/order/count or live covert ownership
 without inferring the owner from color or a temporary debug render.
-Schema `21` records the body-vane immutable morphology count and bytes,
+Schema `22` records the body-vane immutable morphology count and bytes,
 Metal-selected morphology count and bytes, per-frame pose bytes, retained
 morphology/pose/indirect capacity, active topology-bin count, morphology-buffer
 allocations, raster invocations, and the
@@ -128,7 +133,7 @@ plumulaceous chains, contained beneath each resolved feather's unchanged vane.
 The initial `96`-byte segment store retains `39,777,408` bytes over three
 in-flight slots and grows to `154,484,352` bytes only for the future `480 px`
 topology.
-Schema `21` deliberately keeps the existing body-vane counters: rachis and
+Schema `22` deliberately keeps the existing body-vane counters: rachis and
 detail inherit their parent vane's stable identity, and the integer pass
 retains that underlying vane identity rather than issuing redundant subpixel
 fiber draws. Beauty ownership is nevertheless Metal-native. These storage and
@@ -139,7 +144,7 @@ At near-front standing yaw/pitch `(0.12, 0.16)`, distance `0.55 m`, and
 aperture in every frame. Minimum beauty SSIM is `0.999999`, with at most `11`
 pixel values changed in a frame. The underlayer carries the parent vane
 identity, so these fibers do not add an integer-identity draw.
-Schema `21` also records projected-size ventral-barb candidate,
+Schema `22` also records projected-size ventral-barb candidate,
 frustum-visible, prior-depth-tested, occlusion-culled, and retained record
 counts; logical triangle-stream vertex count; actual raster vertex invocations;
 materialized output-capacity bytes; generation mode; and max-depth hierarchy
@@ -171,7 +176,7 @@ error is exact, and the complete hole/component/largest-hole/aperture series is
 unchanged. Fully covered AOV deltas are `+7,+1,-2,-3,+7`; the localized beauty
 change has minimum SSIM `0.999853`. This is a topology and temporal-parity gate,
 not a claim that the remaining visible collar has been eliminated.
-Schema `17` separately records projected-size barbule candidates,
+Schema `22` separately records projected-size barbule candidates,
 frustum-visible and retained detailed owners, procedural barbule vertex count,
 and the exact number of identity pixels won by geometry kind `4`. This
 distinguishes allocated work from raster contribution. The `800 px` handoff is

@@ -290,6 +290,13 @@ struct CrowShowcaseFrame {
       width: width,
       height: height
     )
+    let featherClassBoundaryAudits = Self.featherClassBoundaryAudits(
+      birdMask: birdMask,
+      featherClassCodes: featherClassCodes,
+      linearLuminances: linearLuminances,
+      width: width,
+      height: height
+    )
     let parity = nativeReference.map {
       Self.displayError(
         displayTexture,
@@ -422,6 +429,7 @@ struct CrowShowcaseFrame {
       visibleFeatherClassPixelCounts: visibleFeatherClassPixelCounts,
       fullyCoveredFeatherClassPixelCounts: fullyCoveredFeatherClassPixelCounts,
       featherClassLuminanceAudits: featherClassLuminanceAudits,
+      featherClassBoundaryAudits: featherClassBoundaryAudits,
       enclosedBirdSilhouetteHolePixelCount: silhouetteHoles.pixelCount,
       enclosedBirdSilhouetteHoleComponentCount: silhouetteHoles.componentCount,
       largestEnclosedBirdSilhouetteHolePixelCount:
@@ -540,6 +548,93 @@ struct CrowShowcaseFrame {
           )
           : 0
       )
+    }
+  }
+
+  /// Retains every right/down cross-class edge once. Ordered class pairs make
+  /// material handoffs localizable without storing a target image or mistaking
+  /// within-tract barb contrast for a region boundary.
+  static func featherClassBoundaryAudits(
+    birdMask: [Bool],
+    featherClassCodes: [UInt8],
+    linearLuminances: [Float],
+    width: Int,
+    height: Int
+  ) -> [CrowFeatherClassBoundaryAudit] {
+    let pixelCount = width * height
+    precondition(width >= 0 && height >= 0 && birdMask.count == pixelCount)
+    precondition(featherClassCodes.count == pixelCount)
+    precondition(linearLuminances.count == pixelCount)
+
+    struct Accumulator {
+      var edgeCount = 0
+      var luminanceDifferenceSum: Double = 0
+      var maximumLuminanceDifference: Float = 0
+      var maximumX = 0
+      var maximumY = 0
+      var minimumX = Int.max
+      var maximumBoundaryX = 0
+      var minimumY = Int.max
+      var maximumBoundaryY = 0
+    }
+    var accumulators: [UInt16: Accumulator] = [:]
+
+    func accumulate(_ firstPixel: Int, _ secondPixel: Int, atX x: Int, y: Int) {
+      let firstClass = min(featherClassCodes[firstPixel], 31)
+      let secondClass = min(featherClassCodes[secondPixel], 31)
+      guard firstClass != secondClass else { return }
+      let lower = min(firstClass, secondClass)
+      let upper = max(firstClass, secondClass)
+      let key = UInt16(lower) << 8 | UInt16(upper)
+      let difference = abs(
+        linearLuminances[firstPixel] - linearLuminances[secondPixel]
+      )
+      var accumulator = accumulators[key] ?? Accumulator()
+      accumulator.edgeCount += 1
+      accumulator.luminanceDifferenceSum += Double(difference)
+      accumulator.minimumX = min(accumulator.minimumX, x)
+      accumulator.maximumBoundaryX = max(accumulator.maximumBoundaryX, x)
+      accumulator.minimumY = min(accumulator.minimumY, y)
+      accumulator.maximumBoundaryY = max(accumulator.maximumBoundaryY, y)
+      if difference > accumulator.maximumLuminanceDifference {
+        accumulator.maximumLuminanceDifference = difference
+        accumulator.maximumX = x
+        accumulator.maximumY = y
+      }
+      accumulators[key] = accumulator
+    }
+
+    for pixel in 0..<pixelCount where birdMask[pixel] {
+      let x = pixel % width
+      let y = pixel / width
+      if x + 1 < width, birdMask[pixel + 1] {
+        accumulate(pixel, pixel + 1, atX: x, y: y)
+      }
+      if y + 1 < height, birdMask[pixel + width] {
+        accumulate(pixel, pixel + width, atX: x, y: y)
+      }
+    }
+
+    return accumulators.map { key, accumulator in
+      CrowFeatherClassBoundaryAudit(
+        firstFeatherClassCode: UInt8(key >> 8),
+        secondFeatherClassCode: UInt8(key & 255),
+        edgeCount: accumulator.edgeCount,
+        minimumX: accumulator.minimumX,
+        maximumX: accumulator.maximumBoundaryX,
+        minimumY: accumulator.minimumY,
+        maximumY: accumulator.maximumBoundaryY,
+        meanAbsoluteLinearLuminanceDifference: Float(
+          accumulator.luminanceDifferenceSum / Double(accumulator.edgeCount)
+        ),
+        maximumAbsoluteLinearLuminanceDifference:
+          accumulator.maximumLuminanceDifference,
+        maximumDifferenceX: accumulator.maximumX,
+        maximumDifferenceY: accumulator.maximumY
+      )
+    }.sorted {
+      ($0.firstFeatherClassCode, $0.secondFeatherClassCode)
+        < ($1.firstFeatherClassCode, $1.secondFeatherClassCode)
     }
   }
 
@@ -1206,6 +1301,20 @@ struct CrowFeatherClassLuminanceAudit: Codable, Equatable {
   let meanSameClassNeighborAbsoluteLuminanceDifference: Float
 }
 
+struct CrowFeatherClassBoundaryAudit: Codable, Equatable {
+  let firstFeatherClassCode: UInt8
+  let secondFeatherClassCode: UInt8
+  let edgeCount: Int
+  let minimumX: Int
+  let maximumX: Int
+  let minimumY: Int
+  let maximumY: Int
+  let meanAbsoluteLinearLuminanceDifference: Float
+  let maximumAbsoluteLinearLuminanceDifference: Float
+  let maximumDifferenceX: Int
+  let maximumDifferenceY: Int
+}
+
 struct CrowShowcaseAOVFrameAudit: Codable, Equatable {
   let frameIndex: Int
   let width: Int
@@ -1275,6 +1384,9 @@ struct CrowShowcaseAOVFrameAudit: Codable, Equatable {
   /// Scene-linear luminance distribution and local variation for each visible
   /// bird feather class. Support and environment identities are excluded.
   let featherClassLuminanceAudits: [CrowFeatherClassLuminanceAudit]
+  /// Right/down adjacency census for every visible ordered feather-class pair.
+  /// Bounds and scene-linear contrast localize material seams without media.
+  let featherClassBoundaryAudits: [CrowFeatherClassBoundaryAudit]
   let enclosedBirdSilhouetteHolePixelCount: Int
   let enclosedBirdSilhouetteHoleComponentCount: Int
   let largestEnclosedBirdSilhouetteHolePixelCount: Int
@@ -1428,7 +1540,7 @@ struct CrowShowcaseAOVAuditReport: Codable, Equatable {
   let frames: [CrowShowcaseAOVFrameAudit]
 
   init(frames: [CrowShowcaseAOVFrameAudit]) {
-    schemaVersion = 21
+    schemaVersion = 22
     colorSpace = "scene-linear extended range; display output is tone mapped separately"
     motionConvention =
       "current pixel to previous pixel in upper-left-origin pixel units; MetalFX scale 1"
