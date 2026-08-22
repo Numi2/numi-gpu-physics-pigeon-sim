@@ -3,11 +3,11 @@ import simd
 
 /// GPU-compacted explicit class-7 body-feather barb curves.
 ///
-/// Production allocates only a tiny dormant output buffer at ordinary viewing
-/// distances. Once a retained feather spans at least 480 output pixels, a
-/// compact interval list activates four-segment crown-following curves. The
-/// production raster stage pulls those vertices directly; compute expansion is
-/// retained only as an exact audit oracle.
+/// Once a retained feather spans at least 40 output pixels, a compact interval
+/// list activates ten paired four-segment crown-following curves; the existing
+/// 480-pixel tier promotes that record to 72 pairs. The production raster stage
+/// pulls those vertices directly; compute expansion is retained only as an
+/// exact audit oracle.
 final class CrowVentralBarbGeometryDeformer {
   private static let bufferedFrameCount = 3
 
@@ -36,6 +36,13 @@ final class CrowVentralBarbGeometryDeformer {
 
   func candidateRecordCount(projectedPixelsPerMeter: Float) -> Int {
     CrowVentralBarbCurveRecords.activeRecordIndices(
+      records: records,
+      projectedPixelsPerMeter: projectedPixelsPerMeter
+    ).count
+  }
+
+  func candidateCloseRecordCount(projectedPixelsPerMeter: Float) -> Int {
+    CrowVentralBarbCurveRecords.activeCloseRecordIndices(
       records: records,
       projectedPixelsPerMeter: projectedPixelsPerMeter
     ).count
@@ -142,16 +149,13 @@ final class CrowVentralBarbGeometryDeformer {
   ) throws -> CrowFeatherGeometryFrame {
     let slot = nextSlot
     nextSlot = (nextSlot + 1) % Self.bufferedFrameCount
-    let candidateRecordCount = candidateRecordCount(
-      projectedPixelsPerMeter: projectedPixelsPerMeter
-    )
     let candidateBarbuleRecordCount = candidateBarbuleRecordCount(
       projectedPixelsPerMeter: projectedPixelsPerMeter
     )
-    let barbWorkCount =
-      candidateRecordCount
-      * CrowVentralBarbCurveRecords.maximumBarbPairCount * 2
-      * CrowVentralBarbCurveRecords.intervalCount
+    let barbWorkCount = CrowVentralBarbCurveRecords.candidateBarbWorkCount(
+      records: records,
+      projectedPixelsPerMeter: projectedPixelsPerMeter
+    )
     let barbuleWorkCount =
       candidateBarbuleRecordCount
       * CrowVentralBarbCurveRecords.maximumBarbPairCount * 2

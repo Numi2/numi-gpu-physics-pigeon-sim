@@ -2066,14 +2066,16 @@ kernel void classifyCrowVentralBarbRecords(
         selected[recordIndex]=0u;
         return;
     }
-    bool barbules=crowVentralLODReferenceLength(record)*uniforms.selection.x
-        >=uniforms.barbuleSelection.x;
+    float projectedLength=crowVentralLODReferenceLength(record)
+        *uniforms.selection.x;
+    bool closeTier=projectedLength>=uniforms.barbuleSelection.w;
+    bool barbules=projectedLength>=uniforms.barbuleSelection.x;
     bool occluded=crowVentralBarbRecordOccluded(
         record,uniforms,previousDepth
     );
-    // 0 rejected, 1 visible barb-only, 2 occluded barb-only,
-    // 3 visible with barbules, 4 occluded with barbules.
-    selected[recordIndex]=barbules?(occluded?4u:3u):(occluded?2u:1u);
+    // 0 rejected; 1/2 visible/occluded aggregate; 3/4 close; 5/6 barbules.
+    selected[recordIndex]=barbules?(occluded?6u:5u)
+        :(closeTier?(occluded?4u:3u):(occluded?2u:1u));
 }
 
 kernel void scanCrowVentralBarbRecordVisibility(
@@ -2089,19 +2091,24 @@ kernel void scanCrowVentralBarbRecordVisibility(
     uint occlusionCulled=0u;
     uint retainedBarbules=0u;
     uint frustumBarbules=0u;
-    uint barbWork=uint(uniforms.selection.z)*2u*uint(uniforms.selection.w);
+    uint closeBarbWork=uint(uniforms.selection.z)*2u
+        *uint(uniforms.selection.w);
+    uint aggregateBarbWork=uniforms.counts.w*2u
+        *uint(uniforms.selection.w);
     uint barbuleWork=uint(uniforms.selection.z)*2u
         *uint(uniforms.barbuleSelection.y)*uint(uniforms.barbuleSelection.z);
     for(uint recordIndex=0u;recordIndex<uniforms.counts.x;++recordIndex){
         offsets[recordIndex]=runningWork;
         uint classification=selected[recordIndex];
-        bool visible=classification==1u||classification==3u;
-        bool barbules=classification>=3u;
+        bool visible=(classification&1u)!=0u;
+        bool closeTier=classification>=3u;
+        bool barbules=classification>=5u;
         retained+=visible?1u:0u;
         frustumVisible+=classification!=0u?1u:0u;
-        occlusionCulled+=(classification==2u||classification==4u)?1u:0u;
-        retainedBarbules+=classification==3u?1u:0u;
+        occlusionCulled+=(classification!=0u&&!visible)?1u:0u;
+        retainedBarbules+=classification==5u?1u:0u;
         frustumBarbules+=barbules?1u:0u;
+        uint barbWork=closeTier?closeBarbWork:aggregateBarbWork;
         runningWork+=visible?(barbWork+(barbules?barbuleWork:0u)):0u;
     }
     compactedCount[0]=retained;
@@ -2123,8 +2130,9 @@ kernel void emitCrowVentralBarbWork(
     uint recordIndex [[thread_position_in_grid]]) {
     if(recordIndex>=uniforms.counts.x){return;}
     uint classification=selected[recordIndex];
-    if(classification!=1u&&classification!=3u){return;}
-    uint pairCount=uint(uniforms.selection.z);
+    if((classification&1u)==0u){return;}
+    bool closeTier=classification>=3u;
+    uint pairCount=closeTier?uint(uniforms.selection.z):uniforms.counts.w;
     uint intervalCount=uint(uniforms.selection.w);
     uint outputIndex=offsets[recordIndex];
     for(uint pairIndex=0u;pairIndex<pairCount;++pairIndex){
@@ -2141,7 +2149,7 @@ kernel void emitCrowVentralBarbWork(
             }
         }
     }
-    if(classification==3u){
+    if(classification==5u){
         uint barbulesPerBranch=uint(uniforms.barbuleSelection.y);
         uint branchCount=uint(uniforms.barbuleSelection.z);
         for(uint pairIndex=0u;pairIndex<pairCount;++pairIndex){

@@ -1898,6 +1898,11 @@ private final class CrowShowcaseRenderer {
     let ventralBarbCandidateRecordCount =
       ventralBarbGeometryDeformer?
       .candidateRecordCount(projectedPixelsPerMeter: projectedPixelsPerMeter) ?? 0
+    let ventralBarbCloseCandidateRecordCount =
+      ventralBarbGeometryDeformer?
+      .candidateCloseRecordCount(
+        projectedPixelsPerMeter: projectedPixelsPerMeter
+      ) ?? 0
     let ventralBarbuleCandidateRecordCount =
       ventralBarbGeometryDeformer?
       .candidateBarbuleRecordCount(
@@ -1976,6 +1981,8 @@ private final class CrowShowcaseRenderer {
         ? "cpu-surface-fallback"
         : "gpu-resident-morphology-pose-instanced-indirect",
       ventralBarbCandidateRecordCount: ventralBarbCandidateRecordCount,
+      ventralBarbCloseCandidateRecordCount:
+        ventralBarbCloseCandidateRecordCount,
       ventralBarbuleCandidateRecordCount: ventralBarbuleCandidateRecordCount,
       ventralBarbFrustumVisibleRecordCount: Int(
         ventralBarbVisibilityCounts.frustumVisible

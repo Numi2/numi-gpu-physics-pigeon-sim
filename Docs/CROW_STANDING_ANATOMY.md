@@ -1250,10 +1250,30 @@ inside the broad terminal outline without a macroscopic opening. This is
 simulated layer separation and projected identity evidence, not a measured
 primary-stack depth or proof of perceptual equivalence.
 
+The next body-detail audit localizes the coarse lower flank below the retained
+scapular field to class-`7` pectoral and abdominal pterylae. The previous LOD
+jumped from ten broad aggregate edge bundles directly to `72` explicit barb
+pairs at `480` projected feather pixels. The retained `40 px` intermediate
+tier instead gives every eligible interior feather ten paired, four-interval
+crown-following curves while leaving boundary-feather geometry unchanged. At
+the near-level rear-port gate, all `776` records are aggregate candidates and
+none are close or barbule candidates. They emit `62,080` compact intervals,
+`1,489,920` logical vertices, and `496,640` indexed mesh-raster vertices with
+zero materialized output. Target-region gradient energy rises by
+`0.0288...0.0317` code values; minimum full-frame standing SSIM is `0.999605`.
+The complete standing and takeoff topology ledgers are exact, takeoff minimum
+SSIM is `0.999822`, and active-identity changes are at most five pixels. A
+fresh low front-starboard gate `(0.64,-0.34)` from `0.48 m` records enclosed
+pixels `13,16,13`, components `11,12,11`, largest components `2,3,2`, and zero
+unexpected lower-body aperture. Inspection confirms contained breast and
+abdominal fiber courses without a macroscopic flank or leg gap. This is a
+simulated projected-detail handoff, not a measured feather-density or
+performance result.
+
 The canonical README sequence is fully simulated and contains the native hold,
-transition, and flight path: `800 x 450`, `72` frames at `24 fps`, `8,015,883`
+transition, and flight path: `800 x 450`, `72` frames at `24 fps`, `7,984,745`
 bytes, SHA-256
-`038d542db544d2b055702fda21bb385ee1f7c7fd7ce681a60637ab1285a886c5`.
+`6ce221f52eac460a5409e5c0e9660ae3532e63b11032ba9403655045780880ca`.
 The audited stage PNGs at frames `0`, `35`, and `71` are distinct and retain
 the simulated hold, geometric deployment, and sustained-flight states.
 

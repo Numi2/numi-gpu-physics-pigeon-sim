@@ -772,7 +772,7 @@ func estimatedStandingCrowCaptureProducesLoopClosedFrames() throws {
     try VisualizationBackend(device: device).supportsMeshShaders
     ? "gpu-mesh-threadgroup-8-vertex-indexed"
     : "gpu-procedural-vertex-pulling"
-  #expect(audit.schemaVersion == 25)
+  #expect(audit.schemaVersion == 26)
   #expect(
     audit.frames.allSatisfy {
       $0.bodyVaneMorphologyRecordCount == 3_212
@@ -798,15 +798,21 @@ func estimatedStandingCrowCaptureProducesLoopClosedFrames() throws {
     })
   #expect(
     audit.frames.allSatisfy {
-      $0.ventralBarbCandidateRecordCount == 0
-        && $0.ventralBarbFrustumVisibleRecordCount == 0
-        && $0.ventralBarbVisibleRecordCount == 0
+      $0.ventralBarbCandidateRecordCount > 0
+        && $0.ventralBarbCloseCandidateRecordCount == 0
+        && $0.ventralBarbFrustumVisibleRecordCount
+          == $0.ventralBarbCandidateRecordCount
+        && $0.ventralBarbVisibleRecordCount
+          == $0.ventralBarbFrustumVisibleRecordCount
         && $0.ventralBarbOcclusionTestedRecordCount == 0
         && $0.ventralBarbOcclusionCulledRecordCount == 0
-        && $0.ventralBarbOcclusionDepthBytes == 0
-        && $0.ventralBarbOcclusionMode == "inactive"
-        && $0.ventralBarbExpandedVertexCount == 0
-        && $0.ventralBarbRasterVertexInvocationCount == 0
+        && $0.ventralBarbOcclusionDepthBytes > 0
+        && $0.ventralBarbOcclusionMode
+          == "previous-max-device-depth-fail-open"
+        && $0.ventralBarbExpandedVertexCount
+          == $0.ventralBarbVisibleRecordCount * 10 * 2 * 4 * 24
+        && $0.ventralBarbRasterVertexInvocationCount
+          == $0.ventralBarbVisibleRecordCount * 10 * 2 * 4 * 8
         && $0.ventralBarbOutputCapacityBytes == 0
         && $0.ventralBarbVertexGenerationMode == expectedGenerationMode
     })

@@ -162,6 +162,25 @@ Minimum beauty SSIM is `0.999999`, with at most `11 / 360,000` pixel values
 changing. The outer vane is deliberately unchanged: this is an estimated dark
 fiber backing for exposed overlaps and future close output, not measured
 American-crow barb density or proof of perceptual realism.
+The ventral pterylae now fill the missing ordinary-detail rung between those
+aggregate edges and the existing future-close curves. At `40` projected
+feather pixels, each interior pectoral or abdominal record replaces ten broad
+edge bundles with ten paired, four-interval crown-following barbs. Boundary
+feathers keep their existing silhouette-safe bundles; the `480`-pixel tier
+still promotes to `72` pairs, and the independent `800`-pixel barbule tier is
+unchanged. The same retained record scan, fail-open prior-depth test, compact
+work list, and capability-gated mesh stage own all three levels. At the
+`1280 x 720` near-level rear-port gate, `776` aggregate candidates emit
+`62,080` curve intervals: `1,489,920` logical triangle-stream vertices become
+`496,640` indexed mesh-raster vertices with zero materialized output. Standing
+minimum SSIM is `0.999605`; takeoff minimum SSIM is `0.999822`; every measured
+hole, component, largest-hole, and expected-aperture value is exact. A fresh
+low front-starboard view `(0.64,-0.34)` from `0.48 m` bounds its largest
+enclosed component to `2,3,2` pixels and retains zero unexpected lower-body
+aperture. Inspection shows contained breast and abdominal fiber courses
+without a new flank or leg opening. These are simulated mid-distance fibers
+and executable work counts, not measured American-crow barb density or a GPU
+performance result.
 These counters exclude audit-only expanded output and do not constitute a
 performance claim.
 The same retained path now owns all `12` rectrices throughout takeoff. Their

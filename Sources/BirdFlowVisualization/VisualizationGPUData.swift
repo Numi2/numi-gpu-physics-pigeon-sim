@@ -367,11 +367,11 @@ struct CrowVentralBarbVisibilityUniforms {
   var bodyCenterAndPadding: SIMD4<Float>
   /// Current body center reprojected into the prior camera and bound padding.
   var occlusionBodyCenterAndPadding: SIMD4<Float>
-  /// Projected pixels/metre, activation threshold, pairs/side, intervals/curve.
+  /// Pixels/metre, aggregate threshold, close pairs/side, intervals/curve.
   var selection: SIMD4<Float>
-  /// Record count, vertices/interval, feather class, reserved.
+  /// Record count, vertices/interval, feather class, aggregate pairs/side.
   var counts: SIMD4<UInt32>
-  /// Barbule threshold, barbules/branch, branch count, reserved.
+  /// Barbule threshold, barbules/branch, branch count, close-tier threshold.
   var barbuleSelection: SIMD4<Float>
   var previousViewProjection: simd_float4x4
   /// Width, height, device-depth bias, history-valid flag.

@@ -1,10 +1,9 @@
 import simd
 
-/// Explicit close-up barb curves derived from the retained class-7 crown
-/// records. Below the microstructure threshold the vane and analytic
-/// discontinuity-ray mask remain authoritative; no dormant curve vertices are
-/// emitted. At or above 480 projected feather pixels, each interior feather
-/// resolves paired, crown-following barbs without changing its stable owner.
+/// Explicit barb curves derived from the retained class-7 crown records.
+/// Once a feather spans 40 projected pixels, ten paired crown-following barbs
+/// replace its coarse edge ribbons. At or above 480 pixels, each interior
+/// feather resolves the full close tier without changing its stable owner.
 /// At 800 pixels a second, independently gated tier resolves two crossed
 /// barbule branches inside the parent vane; ordinary and barb-only closeups
 /// remain byte-identical.
@@ -12,9 +11,11 @@ enum CrowVentralBarbCurveRecords {
   static let radialSegmentCount = 4
   static let verticesPerCurveInterval = radialSegmentCount * 6
   static let intervalCount = 4
+  static let aggregateBarbPairCount = 10
   static let explicitBarbPairCount = 72
   static let maximumBarbPairCount = explicitBarbPairCount
   static let surfaceFeatherClass: UInt32 = 7
+  static let projectedAggregateBarbThresholdPixels: Float = 40
   static let projectedFeatherThresholdPixels: Float = 480
   static let projectedBarbuleThresholdPixels: Float = 800
   static let explicitBarbulesPerBranch = 6
@@ -32,7 +33,10 @@ enum CrowVentralBarbCurveRecords {
       projectedPixelsPerMeter: projectedPixelsPerMeter
     ) {
       let recordIndex = Int(packedRecordIndex)
-      let pairCount = explicitBarbPairCount
+      let pairCount = barbPairCount(
+        records[recordIndex],
+        projectedPixelsPerMeter: projectedPixelsPerMeter
+      )
       for pairIndex in 0..<pairCount {
         for sideIndex in 0..<2 {
           for intervalIndex in 0..<intervalCount {
@@ -92,6 +96,16 @@ enum CrowVentralBarbCurveRecords {
     }
   }
 
+  static func activeCloseRecordIndices(
+    records: [CrowVentralRachisCurveRecordGPU],
+    projectedPixelsPerMeter: Float
+  ) -> [UInt32] {
+    records.indices.compactMap { index in
+      lodReferenceLength(records[index]) * projectedPixelsPerMeter
+        >= projectedFeatherThresholdPixels ? UInt32(index) : nil
+    }
+  }
+
   static func recordSupportsBarbules(
     _ record: CrowVentralRachisCurveRecordGPU,
     projectedPixelsPerMeter: Float
@@ -105,10 +119,37 @@ enum CrowVentralBarbCurveRecords {
     projectedPixelsPerMeter: Float
   ) -> [UInt32] {
     records.indices.compactMap { index in
-      let record = records[index]
-      let length = lodReferenceLength(record)
-      return length * projectedPixelsPerMeter
-        >= projectedFeatherThresholdPixels ? UInt32(index) : nil
+      barbPairCount(
+        records[index],
+        projectedPixelsPerMeter: projectedPixelsPerMeter
+      ) > 0 ? UInt32(index) : nil
+    }
+  }
+
+  static func barbPairCount(
+    _ record: CrowVentralRachisCurveRecordGPU,
+    projectedPixelsPerMeter: Float
+  ) -> Int {
+    let projectedLength = lodReferenceLength(record) * projectedPixelsPerMeter
+    if projectedLength >= projectedFeatherThresholdPixels {
+      return explicitBarbPairCount
+    }
+    if projectedLength >= projectedAggregateBarbThresholdPixels {
+      return aggregateBarbPairCount
+    }
+    return 0
+  }
+
+  static func candidateBarbWorkCount(
+    records: [CrowVentralRachisCurveRecordGPU],
+    projectedPixelsPerMeter: Float
+  ) -> Int {
+    records.reduce(0) { result, record in
+      result
+        + barbPairCount(
+          record,
+          projectedPixelsPerMeter: projectedPixelsPerMeter
+        ) * 2 * intervalCount
     }
   }
 
@@ -174,7 +215,7 @@ enum CrowVentralBarbCurveRecords {
       ),
       selection: SIMD4<Float>(
         projectedPixelsPerMeter,
-        projectedFeatherThresholdPixels,
+        projectedAggregateBarbThresholdPixels,
         Float(explicitBarbPairCount),
         Float(intervalCount)
       ),
@@ -182,13 +223,13 @@ enum CrowVentralBarbCurveRecords {
         UInt32(recordCount),
         UInt32(verticesPerCurveInterval),
         surfaceFeatherClass,
-        0
+        UInt32(aggregateBarbPairCount)
       ),
       barbuleSelection: SIMD4<Float>(
         projectedBarbuleThresholdPixels,
         Float(explicitBarbulesPerBranch),
         Float(barbuleBranchCount),
-        0
+        projectedFeatherThresholdPixels
       ),
       previousViewProjection: previousViewProjection,
       occlusionViewportBiasAndEnabled: SIMD4<Float>(
@@ -269,7 +310,7 @@ enum CrowVentralBarbCurveRecords {
       explicitCurvesEnabled
       && CrowVentralFeatherTracts.retainsCrownRachis(feather)
       && feather.lodReferenceLengthMeters
-        * projectedPixelsPerMeter >= projectedFeatherThresholdPixels
+        * projectedPixelsPerMeter >= projectedAggregateBarbThresholdPixels
     let segments = CrowFeatherMesostructure.segments(
       for: feather,
       projectedPixelsPerMeter: projectedPixelsPerMeter,

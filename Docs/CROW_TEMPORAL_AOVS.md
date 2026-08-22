@@ -164,17 +164,30 @@ mode/bytes. Supported Metal 3 devices report
 Both paths retain zero materialized bytes, and compute expansion remains the
 audit-readback geometry oracle. Prior-depth classification reports
 `previous-max-device-depth-fail-open` only when close-up candidates own a
-hierarchy; ordinary coverage reports `inactive` and zero bytes. These are
-executable work/residency counters, not a GPU speed claim; duration still
-requires a controlled repeated benchmark.
+hierarchy; coverage below the `40 px` aggregate-curve threshold reports
+`inactive` and zero bytes. These are executable work/residency counters, not a
+GPU speed claim; duration still requires a controlled repeated benchmark.
 Ventral curve records now use the previously reserved second lateral-sweep
 component for a pre-terminal-flow reference length. CPU LOD work generation and
 Metal barb/barbule classification consume that value, falling back to endpoint
 distance for older or synthetic zero-reserved records. This keeps projected
-`480/800 px` topology stable while the beauty vane's class-`7` surface tip is
+`40/480/800 px` topology stable while the beauty vane's class-`7` surface tip is
 dephased; actual endpoint distance still owns conservative frustum and depth
 bounds. Record stride, identities, curve counts, and indirect layout are
 unchanged.
+
+Schema `26` separates all ventral-barb candidates from the subset promoted to
+the `480 px` close tier. The new `40 px` rung gives each eligible interior
+pectoral or abdominal record ten paired four-interval curves; it retires that
+record's coarse edge ribbons without changing boundary-feather geometry. At
+the `1280 x 720` near-level rear-port gate, all `776` retained records qualify
+for the aggregate rung, zero qualify for the close or barbule rungs, and
+`62,080` emitted intervals correspond to `1,489,920` logical vertices or
+`496,640` indexed mesh-raster vertices. Materialized output remains zero. The
+complete standing and takeoff hole/component/largest-hole/expected-aperture
+series is exact against schema `25`; active-identity changes are bounded to
+five pixels. These fields establish LOD ownership and work, not biological
+barb counts or measured GPU speed.
 Body-vane cervical flow follows the same classification boundary without
 adding a packed field. The immutable morphology's reference tip still owns
 projected-length topology; the dynamic CPU oracle and Metal state reconstruct

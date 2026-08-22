@@ -23,22 +23,53 @@ func ventralBarbCurvesActivateAtResolvableProjectedSize() {
     records: allRecords,
     projectedPixelsPerMeter: 1_600
   )
-  #expect(ordinaryWork.isEmpty)
+  #expect(Set(ordinaryWork.map { $0.indices.x }).count == 776)
+  #expect(ordinaryWork.count == 776 * 10 * 2 * 4)
+  #expect(
+    ordinaryWork.allSatisfy {
+      CrowVentralBarbCurveRecords.unpackPairCount($0) == 10
+    })
+  #expect(
+    CrowVentralBarbCurveRecords.activeCloseRecordIndices(
+      records: allRecords,
+      projectedPixelsPerMeter: 1_600
+    ).isEmpty
+  )
   let closeupWork = CrowVentralBarbCurveRecords.segmentWork(
     records: allRecords,
     projectedPixelsPerMeter: 14_440
   )
-  #expect(Set(closeupWork.map { $0.indices.x }).count == 746)
-  #expect(closeupWork.count == 429_696)
-  #expect(closeupWork.count * 24 == 10_312_704)
+  #expect(Set(closeupWork.map { $0.indices.x }).count == 776)
+  #expect(
+    CrowVentralBarbCurveRecords.activeCloseRecordIndices(
+      records: allRecords,
+      projectedPixelsPerMeter: 14_440
+    ).count == 746
+  )
+  #expect(closeupWork.count == 432_096)
+  #expect(closeupWork.count * 24 == 10_370_304)
 
   let record = CrowVentralRachisCurveRecords.records()[0]
   let length = ventralLODReferenceLength(record)
-  let below = CrowVentralBarbCurveRecords.segmentWork(
+  let belowAggregate = CrowVentralBarbCurveRecords.segmentWork(
+    records: [record],
+    projectedPixelsPerMeter: 39 / length
+  )
+  #expect(belowAggregate.isEmpty)
+  let aggregate = CrowVentralBarbCurveRecords.segmentWork(
+    records: [record],
+    projectedPixelsPerMeter: 41 / length
+  )
+  #expect(aggregate.count == 10 * 2 * 4)
+  #expect(
+    aggregate.allSatisfy {
+      CrowVentralBarbCurveRecords.unpackPairCount($0) == 10
+    })
+  let belowClose = CrowVentralBarbCurveRecords.segmentWork(
     records: [record],
     projectedPixelsPerMeter: 479 / length
   )
-  #expect(below.isEmpty)
+  #expect(belowClose.count == 10 * 2 * 4)
   let work = CrowVentralBarbCurveRecords.segmentWork(
     records: [record],
     projectedPixelsPerMeter: 481 / length
@@ -85,7 +116,7 @@ func ventralBarbCurvesActivateAtResolvableProjectedSize() {
     )!,
     projectedPixelsPerMeter: 1_600
   )
-  #expect(showcaseFallback.contains { $0.kind == .edgeBarbGroup })
+  #expect(showcaseFallback.allSatisfy { $0.kind != .edgeBarbGroup })
 
   let boundary = CrowVentralFeatherTracts.samples().first {
     !CrowVentralFeatherTracts.retainsCrownRachis($0)
@@ -455,11 +486,12 @@ func metalCompactsVisibleVentralBarbRecords() throws {
   )
   #expect(deformer.vertices(for: frame).count == expectedWork.count * 24)
 
+  let dormantPixelsPerMeter = 39 / records.map(ventralLODReferenceLength).max()!
   let dormantCommand = try #require(backend.queue.makeCommandBuffer())
   let dormantFrame = try deformer.encode(
     currentBodyCenter: .zero,
     previousBodyCenter: .zero,
-    projectedPixelsPerMeter: 1_600,
+    projectedPixelsPerMeter: dormantPixelsPerMeter,
     viewProjection: matrix_identity_float4x4,
     commandBuffer: dormantCommand
   )
@@ -525,10 +557,10 @@ func isolatedIndexedMeshTubesMatchVertexRasterOwnership() throws {
   #expect(prepare.status == .completed)
   #expect(deformer.compactedRecordCount(for: frame) == records.count)
   #expect(
-    deformer.visibilityCounts(for: frame).emittedWorkCount == 429_696
+    deformer.visibilityCounts(for: frame).emittedWorkCount == 432_096
   )
   #expect(
-    deformer.meshDispatchDimensions(for: frame) == SIMD3<UInt32>(4_096, 105, 1)
+    deformer.meshDispatchDimensions(for: frame) == SIMD3<UInt32>(4_096, 106, 1)
   )
 
   let width = 512

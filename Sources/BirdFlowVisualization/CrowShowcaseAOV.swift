@@ -29,6 +29,7 @@ struct CrowShowcaseFrame {
   let bodyVaneRasterVertexInvocationCount: Int
   let bodyVaneVertexGenerationMode: String
   let ventralBarbCandidateRecordCount: Int
+  let ventralBarbCloseCandidateRecordCount: Int
   let ventralBarbuleCandidateRecordCount: Int
   let ventralBarbFrustumVisibleRecordCount: Int
   let ventralBarbVisibleRecordCount: Int
@@ -488,6 +489,8 @@ struct CrowShowcaseFrame {
       bodyVaneRasterVertexInvocationCount: bodyVaneRasterVertexInvocationCount,
       bodyVaneVertexGenerationMode: bodyVaneVertexGenerationMode,
       ventralBarbCandidateRecordCount: ventralBarbCandidateRecordCount,
+      ventralBarbCloseCandidateRecordCount:
+        ventralBarbCloseCandidateRecordCount,
       ventralBarbuleCandidateRecordCount: ventralBarbuleCandidateRecordCount,
       ventralBarbFrustumVisibleRecordCount: ventralBarbFrustumVisibleRecordCount,
       ventralBarbVisibleRecordCount: ventralBarbVisibleRecordCount,
@@ -1447,6 +1450,9 @@ struct CrowShowcaseAOVFrameAudit: Codable, Equatable {
   let bodyVaneRasterVertexInvocationCount: Int
   let bodyVaneVertexGenerationMode: String
   let ventralBarbCandidateRecordCount: Int
+  /// Candidate records promoted from the 40-pixel aggregate tier to the
+  /// independently gated 480-pixel close tier.
+  let ventralBarbCloseCandidateRecordCount: Int
   let ventralBarbuleCandidateRecordCount: Int
   let ventralBarbFrustumVisibleRecordCount: Int
   let ventralBarbVisibleRecordCount: Int
@@ -1684,7 +1690,7 @@ struct CrowShowcaseAOVAuditReport: Codable, Equatable {
   let frames: [CrowShowcaseAOVFrameAudit]
 
   init(frames: [CrowShowcaseAOVFrameAudit]) {
-    schemaVersion = 25
+    schemaVersion = 26
     colorSpace = "scene-linear extended range; display output is tone mapped separately"
     motionConvention =
       "current pixel to previous pixel in upper-left-origin pixel units; MetalFX scale 1"
