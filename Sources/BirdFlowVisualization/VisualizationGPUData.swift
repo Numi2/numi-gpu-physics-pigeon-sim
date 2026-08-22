@@ -296,6 +296,8 @@ struct CrowVentralBarbVisibilityUniforms {
   var selection: SIMD4<Float>
   /// Record count, vertices/interval, feather class, reserved.
   var counts: SIMD4<UInt32>
+  /// Barbule threshold, barbules/branch, branch count, reserved.
+  var barbuleSelection: SIMD4<Float>
   var previousViewProjection: simd_float4x4
   /// Width, height, device-depth bias, history-valid flag.
   var occlusionViewportBiasAndEnabled: SIMD4<Float>
@@ -306,6 +308,10 @@ struct CrowVentralBarbVisibilityCounts: Equatable {
   var frustumVisible: UInt32
   var occlusionCulled: UInt32
   var occlusionTested: UInt32
+  var postOcclusionBarbuleVisible: UInt32
+  var frustumBarbuleVisible: UInt32
+  var emittedWorkCount: UInt32
+  var reserved: UInt32
 }
 
 /// Procedural crow geometry paired across two frames for true deformation

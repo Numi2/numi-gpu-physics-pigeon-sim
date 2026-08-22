@@ -94,6 +94,83 @@ func ventralBarbCurvesActivateAtResolvableProjectedSize() {
   )
 }
 
+@Test("ventral barbules activate independently and remain inside their vane")
+func ventralBarbulesActivateInsideOwnedVane() {
+  let record = CrowVentralRachisCurveRecords.records()[0]
+  let length = simd_distance(
+    xyz(record.rootAndPennaceousStart),
+    xyz(record.tipAndCamber)
+  )
+  let barbOnly = CrowVentralBarbCurveRecords.segmentWork(
+    records: [record],
+    projectedPixelsPerMeter: 799 / length
+  )
+  #expect(barbOnly.count == 72 * 2 * 4)
+  #expect(barbOnly.allSatisfy { !CrowVentralBarbCurveRecords.isBarbule($0) })
+
+  let detailed = CrowVentralBarbCurveRecords.segmentWork(
+    records: [record],
+    projectedPixelsPerMeter: 801 / length
+  )
+  let barbuleWork = detailed.filter(CrowVentralBarbCurveRecords.isBarbule)
+  #expect(detailed.count == 72 * 2 * (4 + 2 * 6))
+  #expect(barbuleWork.count == 72 * 2 * 2 * 6)
+  #expect(Set(detailed.map(\.indices)).count == detailed.count)
+
+  for pairIndex in [0, 35, 71] {
+    for sideIndex in 0..<2 {
+      for branchIndex in 0..<2 {
+        for barbuleIndex in [0, 5] {
+          let work = barbuleWork.first {
+            Int($0.indices.y) == pairIndex
+              && CrowVentralBarbCurveRecords.unpackSideIndex($0) == sideIndex
+              && CrowVentralBarbCurveRecords.unpackBarbuleBranchIndex($0)
+                == branchIndex
+              && CrowVentralBarbCurveRecords.unpackBarbuleIndex($0)
+                == barbuleIndex
+          }!
+          let segment = CrowVentralBarbCurveRecords.segment(
+            record: record,
+            work: work
+          )
+          #expect(segment.kind == .barbule)
+          #expect(allFinite(segment.start) && allFinite(segment.end))
+          #expect(segment.startRadiusMeters > segment.endRadiusMeters)
+          #expect(simd_distance(segment.start, segment.end) > 0.00005)
+          for endpoint: Float in [0, 1] {
+            let coordinates = CrowVentralBarbCurveRecords.barbuleVaneCoordinates(
+              record: record,
+              work: work,
+              segmentFraction: endpoint
+            )
+            #expect(coordinates.x >= record.rootAndPennaceousStart.w)
+            #expect(coordinates.x <= 0.96)
+            #expect(abs(coordinates.y) <= 0.93 + 1e-6)
+          }
+        }
+      }
+    }
+  }
+
+  let lower = barbuleWork.first {
+    CrowVentralBarbCurveRecords.unpackBarbuleBranchIndex($0) == 0
+      && CrowVentralBarbCurveRecords.unpackBarbuleIndex($0) == 2
+  }!
+  let upper = barbuleWork.first {
+    CrowVentralBarbCurveRecords.unpackBarbuleBranchIndex($0) == 1
+      && CrowVentralBarbCurveRecords.unpackBarbuleIndex($0) == 2
+  }!
+  let lowerOcclusion = CrowVentralBarbCurveRecords.barbuleLocalOcclusion(
+    work: lower
+  )
+  let upperOcclusion = CrowVentralBarbCurveRecords.barbuleLocalOcclusion(
+    work: upper
+  )
+  #expect(lowerOcclusion >= 0.82 && lowerOcclusion <= 0.90)
+  #expect(upperOcclusion >= 0.93 && upperOcclusion <= 0.98)
+  #expect(lowerOcclusion < upperOcclusion)
+}
+
 @Test("ventral barb intervals form connected crown-following curves")
 func ventralBarbIntervalsFormConnectedCrownCurves() {
   let records = CrowVentralRachisCurveRecords.records()
@@ -226,6 +303,80 @@ func metalExpandsRetainedVentralBarbIntervals() throws {
   }
 }
 
+@Test("Metal emits stable procedural barbules with CPU endpoint parity")
+func metalEmitsStableProceduralBarbules() throws {
+  guard let device = MTLCreateSystemDefaultDevice() else { return }
+  let backend = try VisualizationBackend(device: device)
+  let record = CrowVentralRachisCurveRecords.records()[0]
+  let length = simd_distance(
+    xyz(record.rootAndPennaceousStart),
+    xyz(record.tipAndCamber)
+  )
+  let projectedPixelsPerMeter: Float = 801 / length
+  let expectedWork = CrowVentralBarbCurveRecords.segmentWork(
+    records: [record],
+    projectedPixelsPerMeter: projectedPixelsPerMeter
+  )
+  let deformer = try CrowVentralBarbGeometryDeformer(
+    backend: backend,
+    records: [record]
+  )
+  let currentCenter = SIMD3<Float>(0.014, -0.023, 0.5)
+  let previousCenter = SIMD3<Float>(-0.009, 0.018, 0.47)
+  let commandBuffer = try #require(backend.queue.makeCommandBuffer())
+  let frame = try deformer.encode(
+    currentBodyCenter: currentCenter,
+    previousBodyCenter: previousCenter,
+    projectedPixelsPerMeter: projectedPixelsPerMeter,
+    viewProjection: matrix_identity_float4x4,
+    commandBuffer: commandBuffer,
+    auditReadback: true
+  )
+  commandBuffer.commit()
+  commandBuffer.waitUntilCompleted()
+  #expect(commandBuffer.status == .completed)
+  #expect(deformer.segmentWork(for: frame) == expectedWork)
+  let counts = deformer.visibilityCounts(for: frame)
+  #expect(counts.postOcclusionVisible == 1)
+  #expect(counts.postOcclusionBarbuleVisible == 1)
+  #expect(counts.frustumBarbuleVisible == 1)
+  #expect(counts.emittedWorkCount == UInt32(expectedWork.count))
+  #expect(
+    deformer.drawArguments(for: frame).vertexCount
+      == UInt32(expectedWork.count * 24)
+  )
+
+  let vertices = deformer.vertices(for: frame)
+  let selectedIndices = [
+    expectedWork.firstIndex(where: CrowVentralBarbCurveRecords.isBarbule)!,
+    expectedWork.indices.last!,
+  ]
+  var primitiveIdentifiers: Set<UInt32> = []
+  for workIndex in selectedIndices {
+    let segment = CrowVentralBarbCurveRecords.segment(
+      record: record,
+      work: expectedWork[workIndex]
+    )
+    let expected = tubeVertices(
+      segment: segment,
+      currentCenter: currentCenter,
+      previousCenter: previousCenter
+    )
+    let base = workIndex * 24
+    for (gpu, oracle) in zip(vertices[base..<(base + 24)], expected) {
+      #expect(simd_distance(xyz(gpu.position), oracle.position) < 5e-7)
+      #expect(simd_distance(xyz(gpu.previousPosition), oracle.previousPosition) < 5e-7)
+      #expect(simd_distance(xyz(gpu.normal), oracle.normal) < 7e-5)
+      #expect(gpu.identity.x == UInt32.max)
+      #expect(gpu.identity.z == 4)
+      #expect(gpu.identity.w == 7)
+      #expect(abs(gpu.parameters.y) <= 0.93 + 1e-6)
+      primitiveIdentifiers.insert(gpu.identity.y)
+    }
+  }
+  #expect(primitiveIdentifiers.count == 16)
+}
+
 @Test("Metal deterministically compacts visible ventral barb records")
 func metalCompactsVisibleVentralBarbRecords() throws {
   guard let device = MTLCreateSystemDefaultDevice() else { return }
@@ -281,7 +432,11 @@ func metalCompactsVisibleVentralBarbRecords() throws {
         postOcclusionVisible: 2,
         frustumVisible: 2,
         occlusionCulled: 0,
-        occlusionTested: 0
+        occlusionTested: 0,
+        postOcclusionBarbuleVisible: 2,
+        frustumBarbuleVisible: 2,
+        emittedWorkCount: 2 * 72 * 2 * (4 + 2 * 6),
+        reserved: 0
       )
   )
   let expectedWork = CrowVentralBarbCurveRecords.segmentWork(
@@ -313,7 +468,11 @@ func metalCompactsVisibleVentralBarbRecords() throws {
         postOcclusionVisible: 0,
         frustumVisible: 0,
         occlusionCulled: 0,
-        occlusionTested: 0
+        occlusionTested: 0,
+        postOcclusionBarbuleVisible: 0,
+        frustumBarbuleVisible: 0,
+        emittedWorkCount: 0,
+        reserved: 0
       )
   )
   #expect(deformer.drawArguments(for: dormantFrame).vertexCount == 0)

@@ -107,6 +107,7 @@ struct CrowVentralBarbVisibilityUniforms {
     float4 occlusionBodyCenterAndPadding;
     float4 selection;
     uint4 counts;
+    float4 barbuleSelection;
     float4x4 previousViewProjection;
     float4 occlusionViewportBiasAndEnabled;
 };
@@ -1747,6 +1748,103 @@ inline float crowVentralBarbRadius(
         *mix(0.000026f,0.000004f,pow(t,0.88f));
 }
 
+inline float2 crowVentralBarbuleVaneCoordinates(
+    thread const CrowVentralRachisCurveRecordGPU& record,
+    uint pairIndex,uint pairCount,uint sideIndex,
+    uint barbuleIndex,uint barbuleCount,uint branchIndex,
+    float segmentFraction) {
+    float safePairCount=max(float(pairCount),1.0f);
+    float attachmentVariation=crowVentralBarbVariation(
+        record,pairIndex,sideIndex,0x9E3779B9u
+    );
+    float curvatureVariation=crowVentralBarbVariation(
+        record,pairIndex,sideIndex,0x85EBCA6Bu
+    );
+    float spacing=0.77f/(safePairCount+1.0f);
+    float localAxial=0.10f+spacing*float(pairIndex+1u)
+        +0.24f*spacing*attachmentVariation;
+    float localReach=min(
+        0.94f,localAxial+0.030f+0.018f*localAxial
+            +0.16f*spacing*curvatureVariation
+    );
+    float pennaceousStart=record.rootAndPennaceousStart.w;
+    float firstAxial=mix(pennaceousStart,1.0f,localAxial);
+    float secondAxial=mix(pennaceousStart,1.0f,localReach);
+    float barbuleFraction=float(barbuleIndex+1u)
+        /float(max(barbuleCount,1u)+1u);
+    float rootFraction=0.10f+0.78f*barbuleFraction;
+    float rootAxial=mix(firstAxial,secondAxial,rootFraction);
+    float branchSign=branchIndex==0u?-1.0f:1.0f;
+    float axialSpacing=(1.0f-pennaceousStart)*spacing;
+    float targetAxial=clamp(
+        rootAxial+0.46f*branchSign*axialSpacing,
+        pennaceousStart+0.015f,0.96f
+    );
+    float lateralExponent=0.82f+0.08f*curvatureVariation;
+    float rootLateral=(0.955f+0.012f*attachmentVariation)
+        *pow(rootFraction,lateralExponent);
+    float side=sideIndex==0u?-1.0f:1.0f;
+    float targetLateral=min(
+        0.93f,rootLateral*(0.985f+0.012f*branchSign*side)
+    );
+    float t=clamp(segmentFraction,0.0f,1.0f);
+    return float2(
+        mix(rootAxial,targetAxial,t),
+        side*mix(rootLateral,targetLateral,t)
+    );
+}
+
+inline float3 crowVentralBarbulePoint(
+    thread const CrowVentralRachisCurveRecordGPU& record,
+    uint pairIndex,uint pairCount,uint sideIndex,
+    uint barbuleIndex,uint barbuleCount,uint branchIndex,
+    float segmentFraction) {
+    float2 coordinates=crowVentralBarbuleVaneCoordinates(
+        record,pairIndex,pairCount,sideIndex,
+        barbuleIndex,barbuleCount,branchIndex,segmentFraction
+    );
+    float side=coordinates.y<0.0f?-1.0f:1.0f;
+    float3 direction=safeNormalizeCrow(
+        record.tipAndCamber.xyz-record.rootAndPennaceousStart.xyz,
+        float3(-1,0,0));
+    float3 widthAxis=safeNormalizeCrow(
+        cross(record.normalAndTransverseCamber.xyz,direction),
+        float3(0,1,0));
+    float halfWidth=crowVentralBarbHalfWidth(record,coordinates.x,side);
+    float curvatureVariation=crowVentralBarbVariation(
+        record,pairIndex,sideIndex,0x85EBCA6Bu
+    );
+    float barbuleFraction=float(barbuleIndex+1u)
+        /float(max(barbuleCount,1u)+1u);
+    float rootFraction=0.10f+0.78f*barbuleFraction;
+    float crownSeparation=0.000030f
+        +(0.000022f+0.000008f*curvatureVariation)
+            *sin(M_PI_F*rootFraction);
+    float branchLift=branchIndex==0u?0.000005f:0.000016f;
+    float t=clamp(segmentFraction,0.0f,1.0f);
+    return crowVentralRachisCenter(record,coordinates.x)
+        +widthAxis*halfWidth*coordinates.y
+        +record.normalAndTransverseCamber.xyz
+            *(crownSeparation+t*branchLift);
+}
+
+inline float crowVentralBarbuleRadius(
+    thread const CrowVentralRachisCurveRecordGPU& record,
+    uint pairIndex,uint sideIndex,uint barbuleIndex,float segmentFraction) {
+    float variation=crowVentralBarbVariation(
+        record,pairIndex,sideIndex,0x165667B1u+barbuleIndex
+    );
+    float t=clamp(segmentFraction,0.0f,1.0f);
+    return (1.0f+0.10f*variation)*mix(0.000012f,0.000004f,t);
+}
+
+inline float crowVentralBarbuleLocalOcclusion(
+    uint barbuleIndex,uint barbuleCount,uint branchIndex) {
+    float fraction=float(barbuleIndex+1u)/float(max(barbuleCount,1u)+1u);
+    float edge=abs(2.0f*fraction-1.0f);
+    return branchIndex==0u?0.82f+0.08f*edge:0.93f+0.05f*edge;
+}
+
 inline bool crowVentralBarbInsidePlane(
     float4 plane,float3 center,float radius) {
     return dot(plane.xyz,center)+plane.w>=-radius;
@@ -1863,9 +1961,15 @@ kernel void classifyCrowVentralBarbRecords(
         selected[recordIndex]=0u;
         return;
     }
-    selected[recordIndex]=crowVentralBarbRecordOccluded(
+    bool barbules=distance(
+        record.rootAndPennaceousStart.xyz,record.tipAndCamber.xyz
+    )*uniforms.selection.x>=uniforms.barbuleSelection.x;
+    bool occluded=crowVentralBarbRecordOccluded(
         record,uniforms,previousDepth
-    )?2u:1u;
+    );
+    // 0 rejected, 1 visible barb-only, 2 occluded barb-only,
+    // 3 visible with barbules, 4 occluded with barbules.
+    selected[recordIndex]=barbules?(occluded?4u:3u):(occluded?2u:1u);
 }
 
 kernel void scanCrowVentralBarbRecordVisibility(
@@ -1875,21 +1979,36 @@ kernel void scanCrowVentralBarbRecordVisibility(
     constant CrowVentralBarbVisibilityUniforms& uniforms [[buffer(3)]],
     uint gid [[thread_position_in_grid]]) {
     if(gid!=0u){return;}
-    uint running=0u;
+    uint runningWork=0u;
+    uint retained=0u;
     uint frustumVisible=0u;
     uint occlusionCulled=0u;
+    uint retainedBarbules=0u;
+    uint frustumBarbules=0u;
+    uint barbWork=uint(uniforms.selection.z)*2u*uint(uniforms.selection.w);
+    uint barbuleWork=uint(uniforms.selection.z)*2u
+        *uint(uniforms.barbuleSelection.y)*uint(uniforms.barbuleSelection.z);
     for(uint recordIndex=0u;recordIndex<uniforms.counts.x;++recordIndex){
-        offsets[recordIndex]=running;
+        offsets[recordIndex]=runningWork;
         uint classification=selected[recordIndex];
-        running+=classification==1u?1u:0u;
+        bool visible=classification==1u||classification==3u;
+        bool barbules=classification>=3u;
+        retained+=visible?1u:0u;
         frustumVisible+=classification!=0u?1u:0u;
-        occlusionCulled+=classification==2u?1u:0u;
+        occlusionCulled+=(classification==2u||classification==4u)?1u:0u;
+        retainedBarbules+=classification==3u?1u:0u;
+        frustumBarbules+=barbules?1u:0u;
+        runningWork+=visible?(barbWork+(barbules?barbuleWork:0u)):0u;
     }
-    compactedCount[0]=running;
+    compactedCount[0]=retained;
     compactedCount[1]=frustumVisible;
     compactedCount[2]=occlusionCulled;
     compactedCount[3]=uniforms.occlusionViewportBiasAndEnabled.w>=0.5f
         ?frustumVisible:0u;
+    compactedCount[4]=retainedBarbules;
+    compactedCount[5]=frustumBarbules;
+    compactedCount[6]=runningWork;
+    compactedCount[7]=0u;
 }
 
 kernel void emitCrowVentralBarbWork(
@@ -1898,11 +2017,13 @@ kernel void emitCrowVentralBarbWork(
     device CrowVentralBarbSegmentWorkGPU* work [[buffer(2)]],
     constant CrowVentralBarbVisibilityUniforms& uniforms [[buffer(3)]],
     uint recordIndex [[thread_position_in_grid]]) {
-    if(recordIndex>=uniforms.counts.x||selected[recordIndex]!=1u){return;}
+    if(recordIndex>=uniforms.counts.x){return;}
+    uint classification=selected[recordIndex];
+    if(classification!=1u&&classification!=3u){return;}
     uint pairCount=uint(uniforms.selection.z);
     uint intervalCount=uint(uniforms.selection.w);
     uint workPerRecord=pairCount*2u*intervalCount;
-    uint outputIndex=offsets[recordIndex]*workPerRecord;
+    uint outputIndex=offsets[recordIndex];
     for(uint pairIndex=0u;pairIndex<pairCount;++pairIndex){
         for(uint sideIndex=0u;sideIndex<2u;++sideIndex){
             for(uint intervalIndex=0u;intervalIndex<intervalCount;++intervalIndex){
@@ -1917,6 +2038,29 @@ kernel void emitCrowVentralBarbWork(
             }
         }
     }
+    if(classification==3u){
+        uint barbulesPerBranch=uint(uniforms.barbuleSelection.y);
+        uint branchCount=uint(uniforms.barbuleSelection.z);
+        for(uint pairIndex=0u;pairIndex<pairCount;++pairIndex){
+            for(uint sideIndex=0u;sideIndex<2u;++sideIndex){
+                for(uint branchIndex=0u;branchIndex<branchCount;++branchIndex){
+                    for(uint barbuleIndex=0u;
+                        barbuleIndex<barbulesPerBranch;++barbuleIndex){
+                        CrowVentralBarbSegmentWorkGPU item;
+                        item.indices=uint4(
+                            recordIndex,
+                            pairIndex,
+                            pairCount|(sideIndex<<16u),
+                            0x80000000u|barbuleIndex
+                                |(barbulesPerBranch<<16u)
+                                |(branchIndex<<24u)
+                        );
+                        work[outputIndex++]=item;
+                    }
+                }
+            }
+        }
+    }
 }
 
 kernel void prepareCrowVentralBarbIndirectWork(
@@ -1927,10 +2071,7 @@ kernel void prepareCrowVentralBarbIndirectWork(
     constant uint& threadsPerThreadgroup [[buffer(4)]],
     uint gid [[thread_position_in_grid]]) {
     if(gid!=0u){return;}
-    uint pairCount=uint(uniforms.selection.z);
-    uint intervalCount=uint(uniforms.selection.w);
-    uint intervalWork=compactedCount[0]*pairCount*2u*intervalCount;
-    uint vertexCount=intervalWork*uniforms.counts.y;
+    uint vertexCount=compactedCount[6]*uniforms.counts.y;
     drawArguments[0].vertexCount=vertexCount;
     drawArguments[0].instanceCount=1u;
     drawArguments[0].vertexStart=0u;
@@ -2038,6 +2179,100 @@ __attribute__((noinline)) CrowFeatherVertexGPU crowVentralBarbVertex(
     return result;
 }
 
+__attribute__((noinline)) CrowFeatherVertexGPU crowVentralBarbuleVertex(
+    device const CrowVentralRachisCurveRecordGPU* records,
+    device const CrowVentralBarbSegmentWorkGPU* work,
+    constant CrowVentralBarbGeometryUniforms& uniforms,
+    uint outputIndex) {
+    uint verticesPerInterval=uniforms.counts.z;
+    uint workIndex=outputIndex/verticesPerInterval;
+    uint localVertex=outputIndex-workIndex*verticesPerInterval;
+    CrowVentralBarbSegmentWorkGPU selected=work[workIndex];
+    CrowVentralRachisCurveRecordGPU record=records[selected.indices.x];
+    uint pairCount=selected.indices.z&0xffffu;
+    uint sideIndex=(selected.indices.z>>16u)&1u;
+    uint barbuleIndex=selected.indices.w&0xffffu;
+    uint barbuleCount=max((selected.indices.w>>16u)&0xffu,1u);
+    uint branchIndex=(selected.indices.w>>24u)&1u;
+    float3 start=crowVentralBarbulePoint(
+        record,selected.indices.y,pairCount,sideIndex,
+        barbuleIndex,barbuleCount,branchIndex,0.0f
+    );
+    float3 end=crowVentralBarbulePoint(
+        record,selected.indices.y,pairCount,sideIndex,
+        barbuleIndex,barbuleCount,branchIndex,1.0f
+    );
+    float startRadius=crowVentralBarbuleRadius(
+        record,selected.indices.y,sideIndex,barbuleIndex,0.0f
+    );
+    float endRadius=crowVentralBarbuleRadius(
+        record,selected.indices.y,sideIndex,barbuleIndex,1.0f
+    );
+    uint triangle=localVertex/3u;
+    uint triangleCorner=localVertex%3u;
+    uint radialIndex=triangle/2u;
+    bool secondTriangle=(triangle&1u)!=0u;
+    uint corner=secondTriangle
+        ?uint3(0u,2u,3u)[triangleCorner]
+        :uint3(0u,1u,2u)[triangleCorner];
+    uint3 normalCorners=secondTriangle?uint3(0u,2u,3u):uint3(0u,1u,2u);
+    float3 a=crowVentralRachisTubePoint(
+        start,end,startRadius,endRadius,radialIndex,normalCorners.x
+    );
+    float3 b=crowVentralRachisTubePoint(
+        start,end,startRadius,endRadius,radialIndex,normalCorners.y
+    );
+    float3 c=crowVentralRachisTubePoint(
+        start,end,startRadius,endRadius,radialIndex,normalCorners.z
+    );
+    float3 localPosition=crowVentralRachisTubePoint(
+        start,end,startRadius,endRadius,radialIndex,corner
+    );
+    float3 normal=safeNormalizeCrow(cross(b-a,c-a),float3(0,0,1));
+    float material=record.edgeRippleAndMaterial.w;
+    float localOcclusion=crowVentralBarbuleLocalOcclusion(
+        barbuleIndex,barbuleCount,branchIndex
+    );
+    float3 color=localOcclusion*float3(
+        0.0080f*(1.0f+0.06f*material),
+        0.0120f*(1.0f+0.04f*material),
+        0.0200f*(1.0f+0.03f*material)
+    );
+    uint primitiveIdentifier=0x09000000u+selected.indices.x*65536u
+        +selected.indices.y*512u+sideIndex*256u+branchIndex*128u
+        +barbuleIndex*16u+triangle+1u;
+    float curveT=(corner==2u||corner==3u)?1.0f:0.0f;
+    float2 coordinates=crowVentralBarbuleVaneCoordinates(
+        record,selected.indices.y,pairCount,sideIndex,
+        barbuleIndex,barbuleCount,branchIndex,curveT
+    );
+    CrowFeatherVertexGPU result;
+    result.position=float4(localPosition+uniforms.currentBodyCenter.xyz,1);
+    result.previousPosition=float4(
+        localPosition+uniforms.previousBodyCenter.xyz,1
+    );
+    result.normal=float4(normal,0);
+    result.color=float4(color,0.14f);
+    result.identity=uint4(
+        0xffffffffu,primitiveIdentifier,4u,uniforms.counts.w
+    );
+    result.parameters=float4(
+        coordinates.x,coordinates.y,0.031f*float(selected.indices.x%97u),1
+    );
+    return result;
+}
+
+inline CrowFeatherVertexGPU crowVentralBarbProceduralVertex(
+    device const CrowVentralRachisCurveRecordGPU* records,
+    device const CrowVentralBarbSegmentWorkGPU* work,
+    constant CrowVentralBarbGeometryUniforms& uniforms,
+    uint outputIndex) {
+    uint workIndex=outputIndex/uniforms.counts.z;
+    return (work[workIndex].indices.w&0x80000000u)!=0u
+        ?crowVentralBarbuleVertex(records,work,uniforms,outputIndex)
+        :crowVentralBarbVertex(records,work,uniforms,outputIndex);
+}
+
 kernel void expandCrowVentralBarbCurves(
     device const CrowVentralRachisCurveRecordGPU* records [[buffer(0)]],
     device const CrowVentralBarbSegmentWorkGPU* work [[buffer(1)]],
@@ -2046,7 +2281,7 @@ kernel void expandCrowVentralBarbCurves(
     uint outputIndex [[thread_position_in_grid]]) {
     uint outputCount=uniforms.counts.y*uniforms.counts.z;
     if(outputIndex>=outputCount){return;}
-    output[outputIndex]=crowVentralBarbVertex(
+    output[outputIndex]=crowVentralBarbProceduralVertex(
         records,work,uniforms,outputIndex
     );
 }
@@ -2636,7 +2871,7 @@ vertex CrowRasterVertex crowVentralBarbAOVVertex(
     constant CrowVentralBarbGeometryUniforms& geometry [[buffer(2)]],
     constant CrowTemporalCameraUniforms& camera [[buffer(3)]],
     uint vid [[vertex_id]]) {
-    CrowFeatherVertexGPU source=crowVentralBarbVertex(
+    CrowFeatherVertexGPU source=crowVentralBarbProceduralVertex(
         records,work,geometry,vid
     );
     CrowRasterVertex out;

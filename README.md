@@ -126,7 +126,7 @@ fall from `593/157/28` to `165/121/8`; a new rear-port grazing view remains
 discrete rather than forming a tail plate. These are bounded simulated
 morphology and raster checks, not measured American-crow tip dimensions.
 The exact identity AOV now also reports visible and fully covered pixels for
-every persistent primary, secondary, and rectrix as schema `15`. The same
+every persistent primary, secondary, and rectrix as schema `16`. The same
 report retains the longest exterior-connected row/column slots with exact
 boundary classes, packed identities, and procedural owners, so open shoulder
 gaps are traceable without treating every silhouette concavity as a defect.
@@ -194,8 +194,25 @@ frustum-visible records on each non-reset frame, avoiding `27,648` procedural
 vertices while adding a `1,919,424`-byte depth hierarchy. All five close PNGs,
 all pre-existing raster/AOV fields, and the five-frame normal-distance path are
 exact against the non-occlusion renderer. This is an executable correctness and
-scaling step, not a speed claim. Indexed or hardware-curve emission, explicit
-barbules, and curve-aware self-shadowing remain open.
+scaling step, not a speed claim.
+
+A second independent handoff now activates only when a retained class-`7`
+feather reaches `800` final-output pixels. Each explicit parent barb owns six
+barbules on each of two crossed branches. Their endpoint coordinates remain
+inside `93%` of the owning vane half-width, radii taper from an estimated `12`
+to `4 um`, primitive IDs are stable, and a bounded `0.82...0.98` paired-branch
+occlusion term darkens the lower crossed branch without changing opacity or
+silhouette. Mixed LOD records share one GPU work scan: offsets count emitted
+work rather than records, the compact work buffer grows on demand, and raster
+still pulls vertices without a materialized output stream. At the fresh
+`1200 x 675` yaw/pitch `(0.90, -0.12)` grazing diagnostic, `392` visible
+barbule owners generate `16,257,024` procedural vertices and win `369` exact
+identity pixels. The ordinary view and established `800 x 450`, `0.035 m`
+close tier remain byte-exact against `dcc638f`; that close tier retains `746`
+barb candidates and zero barbule candidates. These are renderer-estimated
+geometry and local occlusion, not measured crow barbule dimensions, physical
+self-shadowing, or a speed claim. Indexed/mesh-stage emission and curve-aware
+ray visibility remain open.
 A separate versioned optics profile now drives the live eight-wavelength
 air/keratin/melanin film response. It records comparative glossy-corvid
 constraints independently from the renderer's American-crow estimates, so the

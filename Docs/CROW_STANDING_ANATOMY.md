@@ -819,8 +819,26 @@ capture is a visual and ownership diagnostic, not a GPU benchmark: the present
 unindexed triangle stream intentionally spends future compute to establish the
 geometry oracle. These dimensions and densities are renderer estimates, not
 measured American-crow barb anatomy. Previous-depth occlusion, indexed or
-hardware-curve emission, explicit barbules, per-feather dynamics, and
-curve-aware self-shadowing remain open.
+mesh-stage emission, per-feather dynamics, and curve-aware physical
+self-shadowing remain open.
+
+An independently gated `800 px` tier now gives every explicit parent barb six
+barbules on each of two crossed branches. Stable packed work records identify
+record, parent pair, vane side, branch, and barbule index. Both endpoints remain
+at or inside `0.93` normalized vane width and the estimated radius tapers
+`12 -> 4 um`, so this tier cannot become a new body-silhouette owner. The lower
+branch carries a bounded `0.82...0.90` local occlusion factor and the upper a
+`0.93...0.98` factor; this approximates unresolved paired-branch blockage and
+is not a cast-shadow solution.
+
+At `1200 x 675`, distance `0.035 m`, yaw/pitch `(0.90, -0.12)`, `484` records
+cross the barbule threshold, `392` are visible, `16,257,024` barbule vertices
+are procedurally pulled, and geometry kind `4` wins `369` identity pixels. The
+ordinary and prior `800 x 450` close paths are exact against `dcc638f`, with
+zero detailed owners. CPU/Metal endpoint parity, stable work uniqueness, vane
+containment, and the occlusion bounds are executable tests. The inspected frame
+is a sparse exterior grazing diagnostic, not evidence that the renderer is
+photoreal or that the estimated microgeometry matches a biological specimen.
 
 The first visibility-scaling pass removes the CPU-authored close-up work list.
 Metal evaluates a conservative sphere for every retained record against six
@@ -873,13 +891,13 @@ each, avoiding `27,648` procedural vertices per frame. The `800 x 450`
 hierarchy occupies `1,919,424` bytes. All five beauty PNGs are byte-exact and
 every pre-existing raster/non-duration AOV field is exact against revision
 `e266f5f`; normal distance remains five-frame exact with no hierarchy or barb
-work. Schema `15` exposes the hierarchy mode/bytes and all four visibility
+work. Schema `16` exposes the hierarchy mode/bytes and all four visibility
 counts. Synthetic Metal tests separately prove foreground culling, background
 fail-open behavior, reset-disabled testing, and max-depth propagation. No speed
-claim follows from this small accepted cull. Indexed or hardware-curve emission,
-explicit barbules, and curve self-shadowing remain next.
+claim follows from this small accepted cull. Indexed or mesh-stage emission and
+curve-aware physical self-shadowing remain next.
 
-Schema `15` resolves that rear-port priority to exact packed identities around
+Schema `16` resolves that rear-port priority to exact packed identities around
 the largest enclosed component. The early `21-28`-pixel channels are bounded
 by rectrix orders `1`, `2`, and `3`; only frames `2-3` additionally touch the
 outermost proximal trailing covert. A broad presentation-tail width experiment

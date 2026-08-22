@@ -23,7 +23,7 @@ final class CrowVentralBarbGeometryDeformer {
   private let selectedBuffers: [MTLBuffer]
   private let offsetBuffers: [MTLBuffer]
   private let compactedCountBuffers: [MTLBuffer]
-  private let workBuffers: [MTLBuffer]
+  private var workBuffers: [MTLBuffer]
   private let geometryUniformBuffers: [MTLBuffer]
   private var outputBuffers: [MTLBuffer]
   private let indirectDrawBuffers: [MTLBuffer]
@@ -35,6 +35,13 @@ final class CrowVentralBarbGeometryDeformer {
 
   func candidateRecordCount(projectedPixelsPerMeter: Float) -> Int {
     CrowVentralBarbCurveRecords.activeRecordIndices(
+      records: records,
+      projectedPixelsPerMeter: projectedPixelsPerMeter
+    ).count
+  }
+
+  func candidateBarbuleRecordCount(projectedPixelsPerMeter: Float) -> Int {
+    CrowVentralBarbCurveRecords.activeBarbuleRecordIndices(
       records: records,
       projectedPixelsPerMeter: projectedPixelsPerMeter
     ).count
@@ -74,10 +81,6 @@ final class CrowVentralBarbGeometryDeformer {
       bytesPerRow: MemoryLayout<Float>.stride
     )
     self.fallbackDepthTexture = fallbackDepthTexture
-    let maximumWorkCount =
-      records.count
-      * CrowVentralBarbCurveRecords.maximumBarbPairCount * 2
-      * CrowVentralBarbCurveRecords.intervalCount
     selectedBuffers = try (0..<Self.bufferedFrameCount).map { _ in
       try backend.buffer(
         length: max(records.count * MemoryLayout<UInt32>.stride, 16),
@@ -97,14 +100,7 @@ final class CrowVentralBarbGeometryDeformer {
       )
     }
     workBuffers = try (0..<Self.bufferedFrameCount).map { _ in
-      try backend.buffer(
-        length: max(
-          maximumWorkCount
-            * MemoryLayout<CrowVentralBarbSegmentWorkGPU>.stride,
-          16
-        ),
-        shared: true
-      )
+      try backend.buffer(length: 16, shared: true)
     }
     geometryUniformBuffers = try (0..<Self.bufferedFrameCount).map { _ in
       try backend.buffer(
@@ -143,13 +139,30 @@ final class CrowVentralBarbGeometryDeformer {
     let candidateRecordCount = candidateRecordCount(
       projectedPixelsPerMeter: projectedPixelsPerMeter
     )
-    let maximumWorkCount =
-      candidateRecordCount
+    let candidateBarbuleRecordCount = candidateBarbuleRecordCount(
+      projectedPixelsPerMeter: projectedPixelsPerMeter
+    )
+    let barbWorkCount = candidateRecordCount
       * CrowVentralBarbCurveRecords.maximumBarbPairCount * 2
       * CrowVentralBarbCurveRecords.intervalCount
+    let barbuleWorkCount = candidateBarbuleRecordCount
+      * CrowVentralBarbCurveRecords.maximumBarbPairCount * 2
+      * CrowVentralBarbCurveRecords.barbuleBranchCount
+      * CrowVentralBarbCurveRecords.explicitBarbulesPerBranch
+    let maximumWorkCount = barbWorkCount + barbuleWorkCount
     let maximumVertexCount =
       maximumWorkCount
       * CrowVentralBarbCurveRecords.verticesPerCurveInterval
+    let requiredWorkBytes = max(
+      maximumWorkCount * MemoryLayout<CrowVentralBarbSegmentWorkGPU>.stride,
+      16
+    )
+    if requiredWorkBytes > workBuffers[slot].length {
+      workBuffers[slot] = try backend.buffer(
+        length: requiredWorkBytes,
+        shared: true
+      )
+    }
     let requiredOutputBytes = max(
       maximumVertexCount * MemoryLayout<CrowFeatherVertexGPU>.stride,
       16
@@ -371,10 +384,7 @@ final class CrowVentralBarbGeometryDeformer {
   func segmentWork(
     for frame: CrowFeatherGeometryFrame
   ) -> [CrowVentralBarbSegmentWorkGPU] {
-    let count =
-      compactedRecordCount(for: frame)
-      * CrowVentralBarbCurveRecords.explicitBarbPairCount * 2
-      * CrowVentralBarbCurveRecords.intervalCount
+    let count = Int(visibilityCounts(for: frame).emittedWorkCount)
     let pointer = workBuffers[frame.slot].contents().bindMemory(
       to: CrowVentralBarbSegmentWorkGPU.self,
       capacity: count

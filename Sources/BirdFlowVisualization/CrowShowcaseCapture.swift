@@ -1614,11 +1614,12 @@ private final class CrowShowcaseRenderer {
       ? inputPixels * (32 + 4) * sampleCount
       : 0
     let outputBytes = outputPixels * (4 + (temporalEnabled ? 8 : 0))
-    let ventralBarbCandidateVertexCount = ventralBarbFrame?.vertexCount ?? 0
-    let ventralBarbVerticesPerRecord =
-      CrowVentralBarbCurveRecords.explicitBarbPairCount * 2
-      * CrowVentralBarbCurveRecords.intervalCount
-      * CrowVentralBarbCurveRecords.verticesPerCurveInterval
+    let ventralBarbCandidateRecordCount = ventralBarbGeometryDeformer?
+      .candidateRecordCount(projectedPixelsPerMeter: projectedPixelsPerMeter) ?? 0
+    let ventralBarbuleCandidateRecordCount = ventralBarbGeometryDeformer?
+      .candidateBarbuleRecordCount(
+        projectedPixelsPerMeter: projectedPixelsPerMeter
+      ) ?? 0
     let ventralBarbVisibleRecordCount = ventralBarbFrame.map {
       ventralBarbGeometryDeformer?.compactedRecordCount(for: $0) ?? 0
     } ?? 0
@@ -1628,11 +1629,21 @@ private final class CrowShowcaseRenderer {
       postOcclusionVisible: 0,
       frustumVisible: 0,
       occlusionCulled: 0,
-      occlusionTested: 0
+      occlusionTested: 0,
+      postOcclusionBarbuleVisible: 0,
+      frustumBarbuleVisible: 0,
+      emittedWorkCount: 0,
+      reserved: 0
     )
     let ventralBarbExpandedVertexCount = ventralBarbFrame.map {
       Int(ventralBarbGeometryDeformer?.drawArguments(for: $0).vertexCount ?? 0)
     } ?? 0
+    let ventralBarbuleExpandedVertexCount = Int(
+      ventralBarbVisibilityCounts.postOcclusionBarbuleVisible
+    ) * CrowVentralBarbCurveRecords.explicitBarbPairCount * 2
+      * CrowVentralBarbCurveRecords.barbuleBranchCount
+      * CrowVentralBarbCurveRecords.explicitBarbulesPerBranch
+      * CrowVentralBarbCurveRecords.verticesPerCurveInterval
     return CrowShowcaseFrame(
       displayTexture: display,
       hdrColorTexture: resolvedAOVs[0],
@@ -1651,12 +1662,18 @@ private final class CrowShowcaseRenderer {
         (commandBuffer.gpuEndTime - commandBuffer.gpuStartTime) * 1_000
       ),
       allocatedRenderTargetBytes: resolvedInputBytes + multisampleBytes + outputBytes,
-      ventralBarbCandidateRecordCount: ventralBarbVerticesPerRecord > 0
-        ? ventralBarbCandidateVertexCount / ventralBarbVerticesPerRecord : 0,
+      ventralBarbCandidateRecordCount: ventralBarbCandidateRecordCount,
+      ventralBarbuleCandidateRecordCount: ventralBarbuleCandidateRecordCount,
       ventralBarbFrustumVisibleRecordCount: Int(
         ventralBarbVisibilityCounts.frustumVisible
       ),
       ventralBarbVisibleRecordCount: ventralBarbVisibleRecordCount,
+      ventralBarbuleFrustumVisibleRecordCount: Int(
+        ventralBarbVisibilityCounts.frustumBarbuleVisible
+      ),
+      ventralBarbuleVisibleRecordCount: Int(
+        ventralBarbVisibilityCounts.postOcclusionBarbuleVisible
+      ),
       ventralBarbOcclusionTestedRecordCount: Int(
         ventralBarbVisibilityCounts.occlusionTested
       ),
@@ -1667,6 +1684,7 @@ private final class CrowShowcaseRenderer {
       ventralBarbOcclusionMode: hasVentralBarbCandidates
         ? "previous-max-device-depth-fail-open" : "inactive",
       ventralBarbExpandedVertexCount: ventralBarbExpandedVertexCount,
+      ventralBarbuleExpandedVertexCount: ventralBarbuleExpandedVertexCount,
       ventralBarbOutputCapacityBytes: 0,
       ventralBarbVertexGenerationMode: "gpu-procedural-vertex-pulling"
     )

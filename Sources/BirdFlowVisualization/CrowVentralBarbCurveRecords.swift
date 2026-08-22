@@ -5,6 +5,9 @@ import simd
 /// discontinuity-ray mask remain authoritative; no dormant curve vertices are
 /// emitted. At or above 480 projected feather pixels, each interior feather
 /// resolves paired, crown-following barbs without changing its stable owner.
+/// At 800 pixels a second, independently gated tier resolves two crossed
+/// barbule branches inside the parent vane; ordinary and barb-only closeups
+/// remain byte-identical.
 enum CrowVentralBarbCurveRecords {
   static let radialSegmentCount = 4
   static let verticesPerCurveInterval = radialSegmentCount * 6
@@ -13,6 +16,9 @@ enum CrowVentralBarbCurveRecords {
   static let maximumBarbPairCount = explicitBarbPairCount
   static let surfaceFeatherClass: UInt32 = 7
   static let projectedFeatherThresholdPixels: Float = 480
+  static let projectedBarbuleThresholdPixels: Float = 800
+  static let explicitBarbulesPerBranch = 6
+  static let barbuleBranchCount = 2
   static let visibilityPaddingMeters: Float = 0.0004
   static let previousDepthBias: Float = 0.00025
 
@@ -43,8 +49,57 @@ enum CrowVentralBarbCurveRecords {
           }
         }
       }
+      if recordSupportsBarbules(
+        records[recordIndex],
+        projectedPixelsPerMeter: projectedPixelsPerMeter
+      ) {
+        for pairIndex in 0..<pairCount {
+          for sideIndex in 0..<2 {
+            for branchIndex in 0..<barbuleBranchCount {
+              for barbuleIndex in 0..<explicitBarbulesPerBranch {
+                work.append(
+                  CrowVentralBarbSegmentWorkGPU(
+                    indices: SIMD4<UInt32>(
+                      UInt32(recordIndex),
+                      UInt32(pairIndex),
+                      packPairCount(pairCount, sideIndex: sideIndex),
+                      packBarbule(
+                        barbuleIndex,
+                        count: explicitBarbulesPerBranch,
+                        branchIndex: branchIndex
+                      )
+                    )
+                  )
+                )
+              }
+            }
+          }
+        }
+      }
     }
     return work
+  }
+
+  static func activeBarbuleRecordIndices(
+    records: [CrowVentralRachisCurveRecordGPU],
+    projectedPixelsPerMeter: Float
+  ) -> [UInt32] {
+    records.indices.compactMap { index in
+      recordSupportsBarbules(
+        records[index],
+        projectedPixelsPerMeter: projectedPixelsPerMeter
+      ) ? UInt32(index) : nil
+    }
+  }
+
+  static func recordSupportsBarbules(
+    _ record: CrowVentralRachisCurveRecordGPU,
+    projectedPixelsPerMeter: Float
+  ) -> Bool {
+    simd_distance(
+      xyz(record.rootAndPennaceousStart),
+      xyz(record.tipAndCamber)
+    ) * projectedPixelsPerMeter >= projectedBarbuleThresholdPixels
   }
 
   static func activeRecordIndices(
@@ -120,6 +175,12 @@ enum CrowVentralBarbCurveRecords {
         UInt32(recordCount),
         UInt32(verticesPerCurveInterval),
         surfaceFeatherClass,
+        0
+      ),
+      barbuleSelection: SIMD4<Float>(
+        projectedBarbuleThresholdPixels,
+        Float(explicitBarbulesPerBranch),
+        Float(barbuleBranchCount),
         0
       ),
       previousViewProjection: previousViewProjection,
@@ -217,6 +278,23 @@ enum CrowVentralBarbCurveRecords {
     record: CrowVentralRachisCurveRecordGPU,
     work: CrowVentralBarbSegmentWorkGPU
   ) -> CrowFeatherMesostructureSegment {
+    if isBarbule(work) {
+      return CrowFeatherMesostructureSegment(
+        kind: .barbule,
+        start: barbulePoint(record: record, work: work, segmentFraction: 0),
+        end: barbulePoint(record: record, work: work, segmentFraction: 1),
+        startRadiusMeters: barbuleRadius(
+          record: record,
+          work: work,
+          segmentFraction: 0
+        ),
+        endRadiusMeters: barbuleRadius(
+          record: record,
+          work: work,
+          segmentFraction: 1
+        )
+      )
+    }
     let intervalIndex = unpackIntervalIndex(work)
     let intervals = unpackIntervalCount(work)
     let first = Float(intervalIndex) / Float(max(intervals, 1))
@@ -236,6 +314,117 @@ enum CrowVentralBarbCurveRecords {
         curveFraction: second
       )
     )
+  }
+
+  /// Stable coordinates of the explicit barbule endpoints in the owning
+  /// vane. The lateral coordinate is bounded below one, so neither crossed
+  /// branch can become a new body silhouette owner.
+  static func barbuleVaneCoordinates(
+    record: CrowVentralRachisCurveRecordGPU,
+    work: CrowVentralBarbSegmentWorkGPU,
+    segmentFraction: Float
+  ) -> SIMD2<Float> {
+    precondition(isBarbule(work))
+    let rootFraction = barbuleRootFraction(work)
+    let rootAxial = barbAxial(record: record, work: work, curveFraction: rootFraction)
+    let pairCount = max(unpackPairCount(work), 1)
+    let pennaceousStart = record.rootAndPennaceousStart.w
+    let branchSign: Float = unpackBarbuleBranchIndex(work) == 0 ? -1 : 1
+    let axialSpacing = (1 - pennaceousStart) * 0.77 / Float(pairCount + 1)
+    let targetAxial = min(
+      0.96,
+      max(pennaceousStart + 0.015, rootAxial + 0.46 * branchSign * axialSpacing)
+    )
+    let rootLateral = barbLateralFraction(
+      record: record,
+      work: work,
+      curveFraction: rootFraction
+    )
+    let side: Float = unpackSideIndex(work) == 0 ? -1 : 1
+    let targetLateral = min(
+      0.93,
+      rootLateral * (0.985 + 0.012 * branchSign * side)
+    )
+    let t = min(max(segmentFraction, 0), 1)
+    return SIMD2<Float>(
+      rootAxial + t * (targetAxial - rootAxial),
+      side * (rootLateral + t * (targetLateral - rootLateral))
+    )
+  }
+
+  static func barbulePoint(
+    record: CrowVentralRachisCurveRecordGPU,
+    work: CrowVentralBarbSegmentWorkGPU,
+    segmentFraction: Float
+  ) -> SIMD3<Float> {
+    let coordinates = barbuleVaneCoordinates(
+      record: record,
+      work: work,
+      segmentFraction: segmentFraction
+    )
+    let root = xyz(record.rootAndPennaceousStart)
+    let tip = xyz(record.tipAndCamber)
+    let normal = xyz(record.normalAndTransverseCamber)
+    let direction = normalized(tip - root, fallback: SIMD3<Float>(-1, 0, 0))
+    let widthAxis = normalized(
+      simd_cross(normal, direction),
+      fallback: SIMD3<Float>(0, 1, 0)
+    )
+    let side: Float = coordinates.y < 0 ? -1 : 1
+    let halfWidth = CrowVentralRachisCurveRecords.halfWidth(
+      record: record,
+      axial: coordinates.x,
+      signedWidth: side
+    )
+    let rootFraction = barbuleRootFraction(work)
+    let curvatureVariation = variation(
+      record: record,
+      pairIndex: Int(work.indices.y),
+      sideIndex: unpackSideIndex(work),
+      salt: 0x85EB_CA6B
+    )
+    let crownSeparation =
+      0.000030
+      + (0.000022 + 0.000008 * curvatureVariation)
+      * sin(Float.pi * rootFraction)
+    let branchLift: Float = unpackBarbuleBranchIndex(work) == 0
+      ? 0.000005 : 0.000016
+    let t = min(max(segmentFraction, 0), 1)
+    return CrowVentralRachisCurveRecords.center(
+      record: record,
+      axial: coordinates.x
+    )
+      + widthAxis * halfWidth * coordinates.y
+      + normal * (crownSeparation + t * branchLift)
+  }
+
+  static func barbuleRadius(
+    record: CrowVentralRachisCurveRecordGPU,
+    work: CrowVentralBarbSegmentWorkGPU,
+    segmentFraction: Float
+  ) -> Float {
+    let scale = 1 + 0.10 * variation(
+      record: record,
+      pairIndex: Int(work.indices.y),
+      sideIndex: unpackSideIndex(work),
+      salt: 0x1656_67B1 &+ UInt32(unpackBarbuleIndex(work))
+    )
+    let t = min(max(segmentFraction, 0), 1)
+    return scale * (0.000012 + t * (0.000004 - 0.000012))
+  }
+
+  /// Bounded local paired-branch occlusion. The lower hook branch sits below
+  /// its crossed mate in the generated crown; this term approximates only
+  /// that unresolved local blockage and never changes geometry or opacity.
+  static func barbuleLocalOcclusion(
+    work: CrowVentralBarbSegmentWorkGPU
+  ) -> Float {
+    let count = max(unpackBarbuleCount(work), 1)
+    let fraction = Float(unpackBarbuleIndex(work) + 1) / Float(count + 1)
+    let edge = abs(2 * fraction - 1)
+    return unpackBarbuleBranchIndex(work) == 0
+      ? 0.82 + 0.08 * edge
+      : 0.93 + 0.05 * edge
   }
 
   static func point(
@@ -334,7 +523,25 @@ enum CrowVentralBarbCurveRecords {
   }
 
   static func unpackIntervalCount(_ work: CrowVentralBarbSegmentWorkGPU) -> Int {
-    Int(work.indices.w >> 16)
+    Int((work.indices.w >> 16) & 0xff)
+  }
+
+  static func isBarbule(_ work: CrowVentralBarbSegmentWorkGPU) -> Bool {
+    work.indices.w & 0x8000_0000 != 0
+  }
+
+  static func unpackBarbuleIndex(_ work: CrowVentralBarbSegmentWorkGPU) -> Int {
+    Int(work.indices.w & 0xffff)
+  }
+
+  static func unpackBarbuleCount(_ work: CrowVentralBarbSegmentWorkGPU) -> Int {
+    Int((work.indices.w >> 16) & 0xff)
+  }
+
+  static func unpackBarbuleBranchIndex(
+    _ work: CrowVentralBarbSegmentWorkGPU
+  ) -> Int {
+    Int((work.indices.w >> 24) & 1)
   }
 
   private static func packPairCount(_ count: Int, sideIndex: Int) -> UInt32 {
@@ -343,6 +550,82 @@ enum CrowVentralBarbCurveRecords {
 
   private static func packInterval(_ index: Int, count: Int) -> UInt32 {
     UInt32(index) | (UInt32(count) << 16)
+  }
+
+  private static func packBarbule(
+    _ index: Int,
+    count: Int,
+    branchIndex: Int
+  ) -> UInt32 {
+    0x8000_0000
+      | UInt32(index)
+      | (UInt32(count) << 16)
+      | (UInt32(branchIndex) << 24)
+  }
+
+  private static func barbuleRootFraction(
+    _ work: CrowVentralBarbSegmentWorkGPU
+  ) -> Float {
+    let count = max(unpackBarbuleCount(work), 1)
+    let fraction = Float(unpackBarbuleIndex(work) + 1) / Float(count + 1)
+    return 0.10 + 0.78 * fraction
+  }
+
+  private static func barbAxial(
+    record: CrowVentralRachisCurveRecordGPU,
+    work: CrowVentralBarbSegmentWorkGPU,
+    curveFraction: Float
+  ) -> Float {
+    let pairIndex = Int(work.indices.y)
+    let pairCount = max(unpackPairCount(work), 1)
+    let sideIndex = unpackSideIndex(work)
+    let spacing = 0.77 / Float(pairCount + 1)
+    let attachmentVariation = variation(
+      record: record,
+      pairIndex: pairIndex,
+      sideIndex: sideIndex,
+      salt: 0x9E37_79B9
+    )
+    let curvatureVariation = variation(
+      record: record,
+      pairIndex: pairIndex,
+      sideIndex: sideIndex,
+      salt: 0x85EB_CA6B
+    )
+    let localAxial = 0.10 + spacing * Float(pairIndex + 1)
+      + 0.24 * spacing * attachmentVariation
+    let localReach = min(
+      0.94,
+      localAxial + 0.030 + 0.018 * localAxial
+        + 0.16 * spacing * curvatureVariation
+    )
+    let pennaceousStart = record.rootAndPennaceousStart.w
+    let firstAxial = pennaceousStart + (1 - pennaceousStart) * localAxial
+    let secondAxial = pennaceousStart + (1 - pennaceousStart) * localReach
+    let t = min(max(curveFraction, 0), 1)
+    return firstAxial + (secondAxial - firstAxial) * t
+  }
+
+  private static func barbLateralFraction(
+    record: CrowVentralRachisCurveRecordGPU,
+    work: CrowVentralBarbSegmentWorkGPU,
+    curveFraction: Float
+  ) -> Float {
+    let attachmentVariation = variation(
+      record: record,
+      pairIndex: Int(work.indices.y),
+      sideIndex: unpackSideIndex(work),
+      salt: 0x9E37_79B9
+    )
+    let curvatureVariation = variation(
+      record: record,
+      pairIndex: Int(work.indices.y),
+      sideIndex: unpackSideIndex(work),
+      salt: 0x85EB_CA6B
+    )
+    let t = min(max(curveFraction, 0), 1)
+    return (0.955 + 0.012 * attachmentVariation)
+      * pow(t, 0.82 + 0.08 * curvatureVariation)
   }
 
   private static func variation(

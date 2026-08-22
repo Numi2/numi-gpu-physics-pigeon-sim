@@ -17,13 +17,17 @@ struct CrowShowcaseFrame {
   let gpuDurationMilliseconds: Double
   let allocatedRenderTargetBytes: Int
   let ventralBarbCandidateRecordCount: Int
+  let ventralBarbuleCandidateRecordCount: Int
   let ventralBarbFrustumVisibleRecordCount: Int
   let ventralBarbVisibleRecordCount: Int
+  let ventralBarbuleFrustumVisibleRecordCount: Int
+  let ventralBarbuleVisibleRecordCount: Int
   let ventralBarbOcclusionTestedRecordCount: Int
   let ventralBarbOcclusionCulledRecordCount: Int
   let ventralBarbOcclusionDepthBytes: Int
   let ventralBarbOcclusionMode: String
   let ventralBarbExpandedVertexCount: Int
+  let ventralBarbuleExpandedVertexCount: Int
   let ventralBarbOutputCapacityBytes: Int
   let ventralBarbVertexGenerationMode: String
 
@@ -51,6 +55,7 @@ struct CrowShowcaseFrame {
     var finitePixelCount = 0
     var aboveOneHDRPixelCount = 0
     var activeIdentityPixelCount = 0
+    var ventralBarbuleVisiblePixelCount = 0
     var fullyCoveredAOVPixelCount = 0
     var fullyCoveredActiveIdentityPixelCount = 0
     var movingActivePixelCount = 0
@@ -135,6 +140,9 @@ struct CrowShowcaseFrame {
       packedSurfaceIdentities[pixel] = id3
       if active {
         activeIdentityPixelCount += 1
+        if id0 == UInt32.max && id2 == 4 {
+          ventralBarbuleVisiblePixelCount += 1
+        }
         let featherClass = Int(min(id3 & 255, 31))
         visibleFeatherClassPixelCounts[featherClass] += 1
         if id0 != UInt32.max { featherHashes.insert(id1) }
@@ -347,13 +355,19 @@ struct CrowShowcaseFrame {
       nativeReferenceAllocatedRenderTargetBytes:
         nativeReference?.allocatedRenderTargetBytes,
       ventralBarbCandidateRecordCount: ventralBarbCandidateRecordCount,
+      ventralBarbuleCandidateRecordCount: ventralBarbuleCandidateRecordCount,
       ventralBarbFrustumVisibleRecordCount: ventralBarbFrustumVisibleRecordCount,
       ventralBarbVisibleRecordCount: ventralBarbVisibleRecordCount,
+      ventralBarbuleFrustumVisibleRecordCount:
+        ventralBarbuleFrustumVisibleRecordCount,
+      ventralBarbuleVisibleRecordCount: ventralBarbuleVisibleRecordCount,
       ventralBarbOcclusionTestedRecordCount: ventralBarbOcclusionTestedRecordCount,
       ventralBarbOcclusionCulledRecordCount: ventralBarbOcclusionCulledRecordCount,
       ventralBarbOcclusionDepthBytes: ventralBarbOcclusionDepthBytes,
       ventralBarbOcclusionMode: ventralBarbOcclusionMode,
       ventralBarbExpandedVertexCount: ventralBarbExpandedVertexCount,
+      ventralBarbuleExpandedVertexCount: ventralBarbuleExpandedVertexCount,
+      ventralBarbuleVisiblePixelCount: ventralBarbuleVisiblePixelCount,
       ventralBarbOutputCapacityBytes: ventralBarbOutputCapacityBytes,
       ventralBarbVertexGenerationMode: ventralBarbVertexGenerationMode,
       finitePixelCount: finitePixelCount,
@@ -1156,13 +1170,18 @@ struct CrowShowcaseAOVFrameAudit: Codable, Equatable {
   let allocatedRenderTargetBytes: Int
   let nativeReferenceAllocatedRenderTargetBytes: Int?
   let ventralBarbCandidateRecordCount: Int
+  let ventralBarbuleCandidateRecordCount: Int
   let ventralBarbFrustumVisibleRecordCount: Int
   let ventralBarbVisibleRecordCount: Int
+  let ventralBarbuleFrustumVisibleRecordCount: Int
+  let ventralBarbuleVisibleRecordCount: Int
   let ventralBarbOcclusionTestedRecordCount: Int
   let ventralBarbOcclusionCulledRecordCount: Int
   let ventralBarbOcclusionDepthBytes: Int
   let ventralBarbOcclusionMode: String
   let ventralBarbExpandedVertexCount: Int
+  let ventralBarbuleExpandedVertexCount: Int
+  let ventralBarbuleVisiblePixelCount: Int
   let ventralBarbOutputCapacityBytes: Int
   let ventralBarbVertexGenerationMode: String
   let finitePixelCount: Int
@@ -1332,7 +1351,7 @@ struct CrowShowcaseAOVAuditReport: Codable, Equatable {
   let frames: [CrowShowcaseAOVFrameAudit]
 
   init(frames: [CrowShowcaseAOVFrameAudit]) {
-    schemaVersion = 15
+    schemaVersion = 16
     colorSpace = "scene-linear extended range; display output is tone mapped separately"
     motionConvention =
       "current pixel to previous pixel in upper-left-origin pixel units; MetalFX scale 1"

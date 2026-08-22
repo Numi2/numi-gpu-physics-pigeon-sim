@@ -90,7 +90,7 @@ audit path and temporal scale:
   /tmp/crow.mp4 /tmp/crow.png standing /tmp/crow-aov-audit.json 2
 ```
 
-The schema-15 JSON report records format and coordinate conventions plus per-frame
+The schema-16 JSON report records format and coordinate conventions plus per-frame
 finite-pixel count, HDR values above one, exact active IDs, visible feather IDs,
 fully covered samples, unit-normal error, depth range, moving-pixel count,
 maximum motion, and bird/support vertical centroids. It also records exact
@@ -102,11 +102,11 @@ full packed anatomical identities. Visible feather classes retain scene-linear
 luminance mean, standard deviation, maximum, and same-class neighbour variation
 before tone mapping. At most four samples per axis and
 ordered class pair are retained, so one large projection cannot erase other
-anatomical owners. For the largest enclosed component, schema `15` also
+anatomical owners. For the largest enclosed component, schema `16` also
 retains the sorted packed identities adjacent to its boundary. This resolves a
 gap directly to persistent class/side/order/count or live covert ownership
 without inferring the owner from color or a temporary debug render.
-Schema `15` additionally records projected-size ventral-barb candidate,
+Schema `16` additionally records projected-size ventral-barb candidate,
 frustum-visible, prior-depth-tested, occlusion-culled, and retained record
 counts; indirectly generated vertex count; materialized output-capacity bytes;
 generation mode; and max-depth hierarchy mode/bytes. Production reports
@@ -116,6 +116,13 @@ remains the audit-readback oracle. Prior-depth classification reports
 hierarchy; ordinary coverage reports `inactive` and zero bytes. These are
 executable work/residency counters, not a GPU speed claim; duration still
 requires a controlled repeated benchmark.
+Schema `16` separately records projected-size barbule candidates,
+frustum-visible and retained detailed owners, procedural barbule vertex count,
+and the exact number of identity pixels won by geometry kind `4`. This
+distinguishes allocated work from raster contribution. The `800 px` handoff is
+independent of the `480 px` parent-barb handoff, so established close captures
+can prove zero barbule work while a higher-resolution diagnostic proves stable
+mixed-LOD ownership.
 These runs expose shoulder and feather-course slots that diagonal exterior
 flooding intentionally excludes from enclosed-hole counts. They are
 localization evidence, not a rule that every silhouette concavity should be

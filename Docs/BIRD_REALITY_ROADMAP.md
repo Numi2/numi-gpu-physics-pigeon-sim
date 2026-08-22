@@ -133,8 +133,13 @@ inventory or view-dependent patch geometry.
    diagnostic while retaining compute expansion as an executable audit oracle.
    A retained max-device-depth hierarchy now conservatively removes only
    complete record bounds covered by nearer prior depth, with background,
-   reset, viewport-edge, and projection uncertainty failing open. The next
-   future-compute step is indirect indexed, meshlet, or hardware-curve emission
+   reset, viewport-edge, and projection uncertainty failing open. The
+   `800 px` tier now adds six barbules on each of two crossed branches for every
+   explicit parent barb. Endpoints stay within `0.93` normalized vane width,
+   mixed record work remains GPU-compacted, and a bounded local paired-branch
+   occlusion estimate is carried by the geometry. This is explicit renderer
+   ownership, not measured anatomy or physical inter-feather shadowing. The
+   next future-compute step is indirect indexed or object/mesh-shader emission
    from the same `1,304`-feather tract inventory; the unindexed procedural
    triangle stream remains the high-cost correctness oracle, not the final
    scaling path.
@@ -183,18 +188,24 @@ inventory or view-dependent patch geometry.
    BSDF. The next material milestone is same-specimen American-crow
    gonioreflectance and cortex microscopy under measured illumination, followed
    by a fitted angular cortex/medulla/transmission model. The first
-   projected-size hybrid handoff to explicit barb geometry now exists; the next
-   renderer milestone is curve-aware self-shadowing and explicit barbules when
-   those structures exceed their own pixel thresholds. Do not substitute
-   further hand tuning for either measurement or geometry-aware visibility.
+   projected-size hybrid handoffs to explicit barb and barbule geometry now
+   exist. The next material milestone is measured cross-sectional barbule
+   geometry plus curve-aware light visibility; the current bounded paired-branch
+   attenuation is only a deterministic local occlusion estimate. Do not
+   substitute further hand tuning for either measurement or geometry-aware
+   visibility.
 
 4. **Physical light transport.** Add image-based lighting, multiple scattering,
-   soft self-shadowing, and curve/triangle ray geometry. Metal supports curve
-   primitives and motion triangle/curve acceleration structures, which map to
-   rachises/barbs and moving vanes without baking motion blur into textures.
+   soft self-shadowing, and curve/triangle ray geometry. Metal acceleration
+   structures support curve control points, bases, and motion-curve geometry
+   for ray tracing. Treat that as a visibility/shadow path, not as proof of a
+   raster curve primitive; retain the current procedural triangle oracle until
+   a capability-gated curve path matches beauty, motion, depth, and identity.
 
-5. **Future-compute scaling.** Add mesh-shader emission, indirect visibility,
-   residency-managed high LODs, and capability-gated ray tracing. Preserve a
+5. **Future-compute scaling.** Benchmark object/mesh-shader emission against the
+   current GPU-compacted vertex-pulling path on supported physical devices,
+   then add indirect visibility, residency-managed high LODs, and
+   capability-gated ray tracing. Preserve a
    common asset and AOV contract across M4, later Apple GPU families, and offline
    reference rendering. Never make a new hardware path the only correctness
    oracle.

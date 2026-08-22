@@ -183,7 +183,7 @@ or alter rectrix deployment. The dorsal folded-wing quad collapses over
 presentation phase `0.20...0.30`, while the narrow terminal axillary bridge
 overlaps live underwing deployment until progress `0.30`; this prevents either
 bridge from becoming a free-flight slab or exposing the root aperture. Crow AOV
-schema `15` carries exact visible and
+schema `16` carries exact visible and
 fully covered pixels plus image bounds per persistent feather, wing-surface
 cell, and topology-bound dorsal-covert identity. Ownership can therefore be
 traced to class/side/order or side/chord/span without inferring it from a beauty
@@ -216,6 +216,15 @@ detached decoration. Current and previous temporal geometry share one tier for
 stable motion vectors. The crow material derives a local feather axis from
 live vane coordinates where present and uses a surface-projected fallback on
 the body for a restrained anisotropic black-feather highlight.
+
+The retained class-`7` curve path now has a second `800 px` output-space
+handoff. Each parent barb owns two crossed six-segment barbule branches with
+stable primitive identity, an endpoint bound of `0.93` vane half-width, and an
+estimated `12 -> 4 um` taper. A branch-order term supplies bounded local
+occlusion without altering opacity. The work scan supports mixed barb-only and
+barbule records, and production keeps zero materialized output capacity. These
+are renderer estimates and an ownership/scaling contract, not measured
+American-crow barbule anatomy or physical self-shadowing.
 
 The rump-to-rectrix shell uses seven overlapping axial rows rather than five,
 raising its deterministic inventory from `120` to `168` contour vanes while
