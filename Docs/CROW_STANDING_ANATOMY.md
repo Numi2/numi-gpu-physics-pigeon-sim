@@ -617,6 +617,21 @@ strokes no longer terminate on one repeated ruler. This qualifies only the
 simulated station contract and one view, not measured barb spacing or all-angle
 realism.
 
+The five terminal aggregate bundles on each body-tract vane now retain their
+exact prior tips, radii, and inventory while their roots form an identity-stable
+axial fan bounded to `0.858...0.902` of feather length. Other feather families
+retain their common `0.88` terminal root. A 48-feather deterministic replay
+checks exact regeneration, root-envelope containment, internal fan diversity,
+more than `100` distinct quantized offsets, and unchanged contour-feather roots.
+At a previously unused rear-dorsal yaw/pitch `(2.18,0.72)`, distance `0.38 m`,
+and `1200 x 675`, active coverage changes `314,829 -> 314,828`, fully covered
+active pixels `313,826 -> 313,822`, and enclosed holes change
+`26/20 -> 27/21` pixels/components. The worst hole remains `3` pixels, expected
+lower-body aperture remains zero, and matched full-frame SSIM is `0.999930`.
+The inspected crop loses the repeated five-root comb without changing the vane
+tip. This qualifies one simulated view and the executable bounds, not measured
+barb anatomy or all-angle realism.
+
 The exposed class-`6` scapular layer now shares its deployed transverse crown
 with retained rachis and barb geometry while preserving stable parent-class AOV
 ownership. Interior barbs remain inside `97%` of the local vane width and only
@@ -1011,9 +1026,9 @@ simulated terminal ownership and raster continuity, not measured rectrix
 morphology or perceptual realism.
 
 The canonical README sequence is fully simulated and contains the native hold,
-transition, and flight path: `800 x 450`, `72` frames at `24 fps`, `8,111,434`
+transition, and flight path: `800 x 450`, `72` frames at `24 fps`, `8,095,013`
 bytes, SHA-256
-`d17433353b39c31a438027989249cc3459c19bc939e8ec530e7850a91a7a119c`.
+`bd3dd0b85e219c9ea126d68ed5f575dffc9853f30c4766359ff61a031c8c8eb0`.
 The audited stage PNGs at frames `0`, `35`, and `71` are distinct and retain
 the simulated hold, geometric deployment, and sustained-flight states.
 

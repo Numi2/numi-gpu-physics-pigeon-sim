@@ -91,8 +91,10 @@ remain body-owned while the vane directions and normals blend toward the live
 inner-wing topology. The body-seated folded shell retains stable geometry
 records but collapses to zero area as the articulated wing takes ownership, and
 showcase-scale humeral/scapular vanes promote their edge bundles into contained
-interior barb bundles. These are simulated presentation constraints, not
-measured American-crow feather linkages.
+interior barb bundles. Their five terminal aggregates now retain the same tips
+but begin from a deterministic body-feather-specific root fan instead of one
+repeated axial line. These are simulated presentation constraints, not measured
+American-crow feather linkages.
 The same retained path now owns all `12` rectrices throughout takeoff. Their
 stable roots unfold from the compact standing stack into the open-flight pose
 over transition progress `0.08...0.62`, while preserving full vane morphology

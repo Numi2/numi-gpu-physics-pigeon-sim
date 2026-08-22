@@ -381,6 +381,21 @@ holes change `27/18 -> 29/19` pixels/components; the matched image SSIM is
 phase and amplitude are estimated rendering morphology, not measured barb
 coordinates.
 
+The five terminal aggregate-barb bundles on each body-tract vane now start from
+a deterministic identity-derived axial fan spanning at most `0.858...0.902` of
+feather length. Their count, radii, and exact pre-existing tip endpoints remain
+unchanged; contour, ventral, tail, and leg feather paths retain the former
+shared `0.88` root. A 48-feather replay test checks byte-equivalent generation,
+more than `100` distinct quantized offsets, exact root-envelope containment,
+and unchanged non-body roots. At the new rear-dorsal yaw/pitch `(2.18,0.72)`,
+distance `0.38 m`, and `1200 x 675`, active coverage changes
+`314,829 -> 314,828`, fully covered active pixels `313,826 -> 313,822`, and
+small enclosed holes change `26/20 -> 27/21` pixels/components while the worst
+hole remains `3` pixels and expected lower-body aperture remains zero. Matched
+full-frame SSIM is `0.999930`. This is bounded estimated rendering morphology
+qualified from one simulated view, not measured barb coordinates or all-angle
+perceptual realism.
+
 The estimated femoral field keeps its `15 x 18` body-surface-rooted inventory
 (`270` vanes per side) and all root and joint coordinates. A temporal-identity
 trace of the high-side transition opening localized the owning geometry to

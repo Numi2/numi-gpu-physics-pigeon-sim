@@ -282,6 +282,87 @@ func bodyTractBarbStationsVaryWithoutCrossing() {
   #expect(quantizedOffsets.count > 100)
 }
 
+@Test("body tract terminal roots form a deterministic contained fan")
+func bodyTractTerminalRootsFormContainedFan() {
+  let feathers = Array(CrowBodyFeatherTracts.samples().prefix(48))
+  let maximumJitter = CrowFeatherMesostructure.bodyTractTerminalRootAxialJitter
+  var quantizedOffsets: Set<Int> = []
+  for feather in feathers {
+    let direction = simd_normalize(feather.tipOffset - feather.rootOffset)
+    let normal = simd_normalize(
+      feather.planeNormal - direction * simd_dot(feather.planeNormal, direction)
+    )
+    let widthAxis = simd_normalize(simd_cross(normal, direction))
+    let length = simd_distance(feather.rootOffset, feather.tipOffset)
+    let first = CrowFeatherMesostructure.segments(
+      for: feather,
+      projectedPixelsPerMeter: 48 / length
+    )
+    let replay = CrowFeatherMesostructure.segments(
+      for: feather,
+      projectedPixelsPerMeter: 48 / length
+    )
+    #expect(first == replay)
+
+    let terminalBundles = first.filter { $0.kind == .edgeBarbGroup }.suffix(5)
+    #expect(terminalBundles.count == 5)
+    var featherRootAxials: Set<Int> = []
+    for bundle in terminalBundles {
+      let rootAxial = simd_dot(
+        bundle.start - feather.rootOffset,
+        direction
+      ) / length
+      #expect(rootAxial >= 0.88 - maximumJitter - 2e-6)
+      #expect(rootAxial <= 0.88 + maximumJitter + 2e-6)
+
+      let bodyEnvelope =
+        feather.rootEnvelopeRatio
+        + (1 - feather.rootEnvelopeRatio)
+        * pow(max(sin(Float.pi * rootAxial), 0), 0.58)
+      let tipTaper = 1 - 0.985 * pow(rootAxial, 3.2)
+      let rippleEnvelope = pow(max(sin(Float.pi * rootAxial), 0), 2)
+      let edgeRipple =
+        1
+        + feather.edgeRippleAmplitude
+        * sin(
+          2 * Float.pi * feather.edgeRippleCycles * rootAxial
+            + feather.edgeRipplePhase
+        ) * rippleEnvelope
+      let rootHalfWidth =
+        (feather.rootWidthMeters * (1 - rootAxial)
+          + feather.maximumWidthMeters * rootAxial)
+        * bodyEnvelope * tipTaper * edgeRipple
+      let lateral = abs(
+        simd_dot(bundle.start - feather.rootOffset, widthAxis)
+          - feather.lateralSweepMeters * sin(Float.pi * rootAxial)
+      )
+      #expect(lateral <= 0.421 * rootHalfWidth + 1e-7)
+
+      let quantized = Int(((rootAxial - 0.88) * 10_000_000).rounded())
+      featherRootAxials.insert(quantized)
+      quantizedOffsets.insert(quantized)
+    }
+    #expect(featherRootAxials.count > 1)
+  }
+  #expect(quantizedOffsets.count > 100)
+
+  let contour = CrowBodyContourShingles.samples().first!
+  let contourLength = simd_distance(contour.rootOffset, contour.tipOffset)
+  let contourDirection = simd_normalize(contour.tipOffset - contour.rootOffset)
+  let contourBundles = CrowFeatherMesostructure.segments(
+    for: contour,
+    projectedPixelsPerMeter: 180 / contourLength
+  ).filter { $0.kind == .edgeBarbGroup }.suffix(5)
+  #expect(contourBundles.count == 5)
+  for bundle in contourBundles {
+    let rootAxial = simd_dot(
+      bundle.start - contour.rootOffset,
+      contourDirection
+    ) / contourLength
+    #expect(abs(rootAxial - 0.88) < 2e-6)
+  }
+}
+
 @Test("body tract detail follows deployment camber without changing inventory")
 func bodyTractDetailFollowsDeploymentCamber() throws {
   let feather = try #require(

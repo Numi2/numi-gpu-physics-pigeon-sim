@@ -26,6 +26,7 @@ enum CrowFeatherMesostructure {
   static let shoulderInteriorBarbThresholdPixels: Float = 40
   static let bodyTractResolvedRachisWidthThresholdPixels: Float = 24
   static let bodyTractBarbStationJitterFractionOfSpacing: Float = 0.18
+  static let bodyTractTerminalRootAxialJitter: Float = 0.022
 
   static func segments(
     for feather: CrowBodyContourShingle,
@@ -76,6 +77,7 @@ enum CrowFeatherMesostructure {
       containPromotedInteriorBarbs: true,
       barbStationJitterFractionOfSpacing:
         bodyTractBarbStationJitterFractionOfSpacing,
+      terminalRootAxialJitter: bodyTractTerminalRootAxialJitter,
       promoteInteriorBarbs: (feather.region == .humeral || feather.region == .scapular)
         && simd_distance(feather.rootOffset, feather.tipOffset)
           * projectedPixelsPerMeter >= shoulderInteriorBarbThresholdPixels
@@ -156,6 +158,7 @@ enum CrowFeatherMesostructure {
     lodLengthMeters: Float? = nil,
     containPromotedInteriorBarbs: Bool = false,
     barbStationJitterFractionOfSpacing: Float = 0,
+    terminalRootAxialJitter: Float = 0,
     promoteInteriorBarbs: Bool = false
   ) -> [CrowFeatherMesostructureSegment] {
     let tessellation = CrowFeatherCoverageLOD.tessellation(
@@ -186,6 +189,7 @@ enum CrowFeatherMesostructure {
       projectedPixelsPerMeter: projectedPixelsPerMeter,
       containPromotedInteriorBarbs: containPromotedInteriorBarbs,
       stationJitterFractionOfSpacing: barbStationJitterFractionOfSpacing,
+      terminalRootAxialJitter: terminalRootAxialJitter,
       frame: frame,
       to: &result
     )
@@ -496,6 +500,7 @@ enum CrowFeatherMesostructure {
     projectedPixelsPerMeter: Float,
     containPromotedInteriorBarbs: Bool,
     stationJitterFractionOfSpacing: Float,
+    terminalRootAxialJitter: Float,
     frame: Frame,
     to result: inout [CrowFeatherMesostructureSegment]
   ) {
@@ -572,6 +577,7 @@ enum CrowFeatherMesostructure {
     appendTerminalBarbGroups(
       radius: aggregateRadius,
       extensionMeters: baseExtension,
+      rootAxialJitter: terminalRootAxialJitter,
       frame: frame,
       to: &result
     )
@@ -584,12 +590,20 @@ enum CrowFeatherMesostructure {
   private static func appendTerminalBarbGroups(
     radius: Float,
     extensionMeters: Float,
+    rootAxialJitter: Float,
     frame: Frame,
     to result: inout [CrowFeatherMesostructureSegment]
   ) {
-    let rootAxial: Float = 0.88
-    let rootHalfWidth = frame.halfWidth(at: rootAxial)
+    let boundedRootAxialJitter = min(max(rootAxialJitter, 0), 0.04)
+    let tipReferenceHalfWidth = frame.halfWidth(at: 0.88)
     for lane: Float in [-1, -0.5, 0, 0.5, 1] {
+      let featherPhase =
+        Float(frame.identityFirst + 1) * Float(23.417)
+        + Float(frame.identitySecond + 1) * Float(51.193)
+      let lanePhase = lane * Float(5.173)
+      let rootIdentity = sin(featherPhase + lanePhase)
+      let rootAxial = 0.88 + boundedRootAxialJitter * rootIdentity
+      let rootHalfWidth = frame.halfWidth(at: rootAxial)
       let root =
         frame.barbCenter(at: rootAxial)
         + lane * frame.widthAxis * rootHalfWidth * 0.42
@@ -602,7 +616,7 @@ enum CrowFeatherMesostructure {
       let tip =
         frame.tip
         + frame.direction * extensionMeters * (0.82 + 0.12 * laneIdentity)
-        + lane * frame.widthAxis * 0.18 * rootHalfWidth
+        + lane * frame.widthAxis * 0.18 * tipReferenceHalfWidth
         + frame.normal * 0.00020
       result.append(
         CrowFeatherMesostructureSegment(
