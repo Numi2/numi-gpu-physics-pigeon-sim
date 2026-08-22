@@ -1181,6 +1181,26 @@ pre-existing bright wing-scaffold patch beneath the covert field; that surface
 handoff remains a separate body-gap target. The extra pairs are aggregate
 render proxies, not measured American-crow barb counts.
 
+The subsequent dorsal port-quarter audit `(-1.36,0.24)` from `0.48 m`
+localized a conspicuous shoulder patch without using color as its owner. A
+same-angle binary integer-AOV probe decoded surface triangle `818,478`, which
+is `820` triangles into the throat-bridge range and resolves to negative-side
+row `4`, posterior column `3`. A five-strip vane candidate left the localized
+bright component effectively unchanged (`1,933 -> 1,932` thresholded pixels)
+and was rejected. The retained correction gives the `88` throat-bridge vanes
+their own semantic class `17`, while the shader still treats them as body
+contours and applies only a bridge-specific sheen/sharp/anisotropy handoff.
+Geometry, diffuse albedo, class-`7` ventral plumage, and flight-feather optics
+remain unchanged. At matched phase zero, the owning display pixel changes from
+`(39,50,64)` to `(30,40,52)`, the localized thresholded patch falls
+`1,933 -> 1,823` pixels, and minimum five-frame-aligned SSIM is `0.999908`.
+Every hole/component/largest-hole/aperture field is exact. At the established
+takeoff gate, minimum SSIM is `0.999975` and the complete topology series is
+exact. A fresh low starboard-quarter view `(1.84,-0.18)` from `0.50 m` records
+hole pixels `10,4,10`, components `4,4,4`, and largest components `7,1,7`;
+inspection shows no bright collar or new throat/wing opening. The still-smooth
+folded wing/tail handoff remains a separate realism target.
+
 The canonical README sequence is fully simulated and contains the native hold,
 transition, and flight path: `800 x 450`, `72` frames at `24 fps`, `8,015,883`
 bytes, SHA-256

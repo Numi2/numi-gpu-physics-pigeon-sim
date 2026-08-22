@@ -233,6 +233,18 @@ standing and `0.999978` for the changed early-takeoff frames; frames `2...4`
 of takeoff are pixel-exact. This proves contained projected contribution and
 phase-bounded release, not biological barb density or a performance result.
 
+Class `17` now separates the CPU-authored throat bridge from class-`7` ventral
+plumage while preserving body-contour shading semantics. This makes the bridge
+visible in the existing 32-bin class and boundary ledgers without changing its
+surface geometry. A binary diagnostic of the raw surface primitive ID at the
+dorsal port-quarter patch maps triangle `818,478` to negative-side bridge row
+`4`, posterior column `3`. The retained class-specific optical handoff reduces
+the exact owning display pixel from `(39,50,64)` to `(30,40,52)` and the local
+thresholded patch from `1,933` to `1,823` pixels. Standing minimum SSIM is
+`0.999908`; takeoff minimum SSIM is `0.999975`. All recorded hole and expected
+aperture fields remain exact in both A/Bs. These are semantic ownership and
+bounded optical-continuity results, not a measured plumage reflectance fit.
+
 Schema `24` separately records projected-size barbule candidates,
 frustum-visible and retained detailed owners, procedural barbule vertex count,
 and the exact number of identity pixels won by geometry kind `4`. This

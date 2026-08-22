@@ -12,12 +12,12 @@ func throatBridgeBreaksCervicalPectoralCollarAtFullResolution() {
       == 2 * CrowThroatBridgeFeathers.rowCount * CrowThroatBridgeFeathers.columnCount
   )
   #expect(samples.count == 88)
-  #expect(CrowThroatBridgeFeathers.surfaceFeatherClass == 7)
+  #expect(CrowThroatBridgeFeathers.surfaceFeatherClass == 17)
   #expect(CrowThroatBridgeFeathers.rootWidthRatio > 0.80)
   #expect(CrowThroatBridgeFeathers.rootWidthRatio < 0.85)
   #expect(CrowThroatBridgeFeathers.visibleRootEnvelopeRatio == 0.70)
   #expect(CrowThroatBridgeFeathers.pennaceousStartFraction == 0)
-  #expect(samples.allSatisfy { $0.surfaceFeatherClass == 7 })
+  #expect(samples.allSatisfy { $0.surfaceFeatherClass == 17 })
   let courseStaggers = (0..<CrowThroatBridgeFeathers.rowCount).map {
     CrowThroatBridgeFeathers.courseStaggerMeters(row: $0)
   }

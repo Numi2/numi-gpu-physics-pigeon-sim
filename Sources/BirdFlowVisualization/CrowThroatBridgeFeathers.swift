@@ -142,7 +142,7 @@ enum CrowThroatBridgeFeathers {
 
   /// This field bridges two ventral pterylae and must retain their soft body
   /// contour material rather than introducing a generic-feather collar.
-  static let surfaceFeatherClass: UInt32 = 7
+  static let surfaceFeatherClass: UInt32 = 17
 
   /// Keeps the two field boundaries fixed while interleaving every interior
   /// course on both sides of the nominal root ring. The signed nine-slot
