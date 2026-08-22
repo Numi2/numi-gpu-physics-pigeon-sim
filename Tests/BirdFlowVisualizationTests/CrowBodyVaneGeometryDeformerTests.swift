@@ -12,6 +12,7 @@ func bodyVanesRetainCompactIdentityStableTemporalRecords() {
   #expect(MemoryLayout<CrowBodyVaneNeckTransformGPU>.stride == 48)
   #expect(MemoryLayout<CrowBodyVaneGeometryUniforms>.stride == 32)
   #expect(MemoryLayout<CrowBodyVaneSelectionUniforms>.stride == 32)
+  #expect(MemoryLayout<CrowBodyDetailSegmentGPU>.stride == 96)
   let first = CrowBodyVaneRecords.groupedRecords(
     currentBodyCenter: SIMD3<Float>(0.01, -0.02, 0.03),
     previousBodyCenter: SIMD3<Float>(-0.01, 0.02, -0.03),
@@ -47,6 +48,16 @@ func bodyVanesRetainCompactIdentityStableTemporalRecords() {
       CrowBodyVaneRecords.rachisVerticesPerInstance(for: $0)
     } == [0, 0, 96, 96, 192, 192, 288]
   )
+  #expect(
+    CrowBodyVaneRecords.productionTopologies.map {
+      CrowBodyVaneRecords.detailSegmentCount(for: $0)
+    } == [0, 0, 25, 25, 23, 23, 149]
+  )
+  #expect(
+    CrowBodyVaneRecords.productionTopologies.map {
+      CrowBodyVaneRecords.detailVerticesPerInstance(for: $0)
+    } == [0, 0, 450, 450, 414, 414, 2_682]
+  )
   let morphology = CrowBodyVaneRecords.morphologyRecords()
   #expect(morphology.count == 3_212)
   #expect(Set(morphology.map(\.identity)).count == morphology.count)
@@ -60,6 +71,147 @@ func bodyVanesRetainCompactIdentityStableTemporalRecords() {
       previousDeployment: 1
     ).count == 3_212
   )
+}
+
+@Test("retained body detail reproduces the CPU mesostructure hierarchy")
+func retainedBodyDetailReproducesCPUMesostructureHierarchy() {
+  let samples = CrowBodyFeatherTracts.samples()
+  let records = CrowBodyVaneRecords.temporalRecords(
+    currentBodyCenter: .zero,
+    previousBodyCenter: .zero,
+    currentNeckPose: nil,
+    previousNeckPose: nil,
+    currentDeployment: 0,
+    previousDeployment: 0
+  )
+  for recordIndex in [0, 896, 1_856, 2_156] {
+    let sample = samples[recordIndex]
+    let record = records[recordIndex]
+    for projectedPixelsPerMeter: Float in [3_000, 10_000, 30_000] {
+      let topology = CrowBodyVaneRecords.topology(
+        for: sample,
+        projectedPixelsPerMeter: projectedPixelsPerMeter
+      )
+      let expected = CrowFeatherMesostructure.segments(
+        for: sample,
+        projectedPixelsPerMeter: projectedPixelsPerMeter,
+        camberScale: 1,
+        transverseCamberRatio: CrowBodyFeatherTracts.transverseCamberRatio(
+          region: sample.region,
+          row: sample.row,
+          transitionProgress: 0
+        )
+      ).filter { $0.kind != .rachis }
+      let retained = CrowBodyVaneRecords.detailSegments(
+        record: record,
+        topology: topology,
+        projectedPixelsPerMeter: projectedPixelsPerMeter,
+        current: true
+      )
+      #expect(retained.count == expected.count)
+      for (candidate, oracle) in zip(retained, expected) {
+        #expect(candidate.kind == oracle.kind)
+        #expect(simd_distance(candidate.start, oracle.start) < 2e-6)
+        #expect(simd_distance(candidate.end, oracle.end) < 2e-6)
+        #expect(abs(candidate.startRadiusMeters - oracle.startRadiusMeters) < 2e-7)
+        #expect(abs(candidate.endRadiusMeters - oracle.endRadiusMeters) < 2e-7)
+      }
+    }
+  }
+}
+
+@Test("Metal future-close body barbules match the retained Swift oracle")
+func metalFutureCloseBodyBarbulesMatchRetainedSwiftOracle() throws {
+  guard let device = MTLCreateSystemDefaultDevice() else { return }
+  let backend = try VisualizationBackend(device: device)
+  let recordIndex = 2_156
+  let currentBodyCenter = SIMD3<Float>(0.011, -0.007, 0.019)
+  let previousBodyCenter = SIMD3<Float>(-0.006, 0.004, -0.013)
+  let morphology = CrowBodyVaneRecords.morphologyRecords()[recordIndex]
+  let temporal = CrowBodyVaneRecords.temporalRecords(
+    currentBodyCenter: currentBodyCenter,
+    previousBodyCenter: previousBodyCenter,
+    currentNeckPose: nil,
+    previousNeckPose: nil,
+    currentDeployment: 1,
+    previousDeployment: 0.35
+  )[recordIndex]
+  let topology = CrowBodyVaneTopology(axialSections: 16, widthSections: 7)
+  let vertexCount = CrowBodyVaneRecords.detailVerticesPerInstance(for: topology)
+  let projectedPixelsPerMeter: Float = 30_000
+
+  func sharedBuffer<T>(_ values: [T]) throws -> MTLBuffer {
+    let buffer = try backend.buffer(
+      length: values.count * MemoryLayout<T>.stride,
+      shared: true
+    )
+    values.withUnsafeBytes { bytes in
+      if let baseAddress = bytes.baseAddress {
+        buffer.contents().copyMemory(from: baseAddress, byteCount: bytes.count)
+      }
+    }
+    return buffer
+  }
+
+  let morphologyBuffer = try sharedBuffer([morphology])
+  let poseBuffer = try sharedBuffer([
+    CrowBodyVanePoseUniforms(
+      currentBodyCenterAndDeployment: SIMD4<Float>(currentBodyCenter, 1),
+      previousBodyCenterAndDeployment: SIMD4<Float>(previousBodyCenter, 0.35)
+    )
+  ])
+  let neckBuffer = try sharedBuffer(
+    CrowBodyVaneRecords.neckTransforms(current: nil, previous: nil)
+  )
+  let output = try backend.buffer(
+    length: vertexCount * MemoryLayout<CrowFeatherVertexGPU>.stride,
+    shared: true
+  )
+  var uniforms = CrowBodyVaneGeometryUniforms(
+    counts: SIMD4<UInt32>(16, 7, 1, UInt32(vertexCount)),
+    selection: SIMD4<Float>(projectedPixelsPerMeter, 0, 0, 0)
+  )
+  let pipeline = try backend.compute("probeCrowBodyDetailVertices")
+  let commandBuffer = try #require(backend.queue.makeCommandBuffer())
+  let encoder = try #require(commandBuffer.makeComputeCommandEncoder())
+  encoder.setBuffer(morphologyBuffer, offset: 0, index: 0)
+  encoder.setBytes(
+    &uniforms,
+    length: MemoryLayout<CrowBodyVaneGeometryUniforms>.stride,
+    index: 1
+  )
+  encoder.setBuffer(output, offset: 0, index: 2)
+  encoder.setBuffer(poseBuffer, offset: 0, index: 3)
+  encoder.setBuffer(neckBuffer, offset: 0, index: 4)
+  backend.dispatch1D(encoder, pipeline: pipeline, count: vertexCount)
+  encoder.endEncoding()
+  commandBuffer.commit()
+  commandBuffer.waitUntilCompleted()
+  #expect(commandBuffer.status == .completed)
+
+  let pointer = output.contents().bindMemory(
+    to: CrowFeatherVertexGPU.self,
+    capacity: vertexCount
+  )
+  let vertices = UnsafeBufferPointer(start: pointer, count: vertexCount)
+  for vertexIndex in [0, 18, 36, 72, vertexCount / 2, vertexCount - 1] {
+    let gpu = vertices[vertexIndex]
+    let expected = CrowBodyVaneRecords.detailVertex(
+      record: temporal,
+      topology: topology,
+      projectedPixelsPerMeter: projectedPixelsPerMeter,
+      vertexIndex: vertexIndex
+    )
+    #expect(simd_distance(gpu.position.xyz, expected.position.xyz) < 2e-6)
+    #expect(
+      simd_distance(gpu.previousPosition.xyz, expected.previousPosition.xyz)
+        < 2e-6
+    )
+    #expect(simd_distance(gpu.normal.xyz, expected.normal.xyz) < 1e-3)
+    #expect(simd_distance(gpu.color.xyz, expected.color.xyz) < 2e-6)
+    #expect(gpu.identity == expected.identity)
+    #expect(gpu.parameters == expected.parameters)
+  }
 }
 
 @Test("Metal procedural body vanes match the Swift geometry oracle")
@@ -179,6 +331,34 @@ func metalProceduralBodyVanesMatchSwiftGeometryOracle() throws {
       #expect(gpu.identity == expected.identity)
       #expect(gpu.parameters == expected.parameters)
     }
+    guard batch.detailVertexCount > 0 else { continue }
+    let detailVertices = deformer.detailVertices(for: batch)
+    let detailRecordIndex = min(recordIndex, records.count - 1)
+    for localVertex in Set([
+      0,
+      min(17, batch.detailVertexCount - 1),
+      batch.detailVertexCount / 2,
+      batch.detailVertexCount - 1,
+    ]) {
+      let gpu = detailVertices[
+        detailRecordIndex * batch.detailVertexCount + localVertex
+      ]
+      let expected = CrowBodyVaneRecords.detailVertex(
+        record: records[detailRecordIndex],
+        topology: batch.topology,
+        projectedPixelsPerMeter: batch.projectedPixelsPerMeter,
+        vertexIndex: localVertex
+      )
+      #expect(simd_distance(gpu.position.xyz, expected.position.xyz) < 2e-6)
+      #expect(
+        simd_distance(gpu.previousPosition.xyz, expected.previousPosition.xyz)
+          < 2e-6
+      )
+      #expect(simd_distance(gpu.normal.xyz, expected.normal.xyz) < 1e-3)
+      #expect(simd_distance(gpu.color.xyz, expected.color.xyz) < 2e-6)
+      #expect(gpu.identity == expected.identity)
+      #expect(gpu.parameters == expected.parameters)
+    }
   }
 }
 
@@ -224,9 +404,17 @@ func bodyVaneProductionStorageIsTripleBufferedAndIndirect() throws {
   )
   #expect(frames.allSatisfy { $0.poseInputBytes == 1_376 })
   #expect(frames.allSatisfy { $0.retainedPoseCapacityBytes == 4_128 })
-  #expect(deformer.retainedIndirectDrawBytes == 672)
+  #expect(deformer.retainedIndirectDrawBytes == 1_008)
+  #expect(
+    frames.allSatisfy {
+      $0.retainedDetailSegmentCapacityBytes
+        == 3 * 3_212 * 25 * MemoryLayout<CrowBodyDetailSegmentGPU>.stride
+    }
+  )
+  #expect(frames.allSatisfy { $0.detailSegmentBufferAllocationCount == 3 })
   #expect(frames.allSatisfy { deformer.activeRecordCount(for: $0) == 3_212 })
   #expect(frames.allSatisfy { deformer.expandedRachisVertexCount(for: $0) > 0 })
+  #expect(frames.allSatisfy { deformer.expandedDetailVertexCount(for: $0) > 0 })
 
   for index in 0..<batchCount {
     let first = frames[0].batches[index]
@@ -248,6 +436,10 @@ func bodyVaneProductionStorageIsTripleBufferedAndIndirect() throws {
     #expect(rachisArguments.vertexCount == UInt32(reused.rachisVertexCount))
     #expect(rachisArguments.vertexStart == 0)
     #expect(rachisArguments.instanceCount == arguments.instanceCount)
+    let detailArguments = deformer.drawDetailArguments(for: reused)
+    #expect(detailArguments.vertexCount == UInt32(reused.detailVertexCount))
+    #expect(detailArguments.vertexStart == 0)
+    #expect(detailArguments.instanceCount == arguments.instanceCount)
   }
 }
 
@@ -302,12 +494,20 @@ func metalBodyVaneLODSelectionMatchesCPUOracle() throws {
       let rachisArguments = deformer.drawRachisArguments(
         for: frame.batches[topologyIndex]
       )
+      let detailArguments = deformer.drawDetailArguments(
+        for: frame.batches[topologyIndex]
+      )
       #expect(arguments.instanceCount == UInt32(expectedIdentities.count))
       #expect(arguments.vertexCount == UInt32(topology.verticesPerInstance))
       #expect(rachisArguments.instanceCount == arguments.instanceCount)
       #expect(
         rachisArguments.vertexCount
           == UInt32(CrowBodyVaneRecords.rachisVerticesPerInstance(for: topology))
+      )
+      #expect(detailArguments.instanceCount == arguments.instanceCount)
+      #expect(
+        detailArguments.vertexCount
+          == UInt32(CrowBodyVaneRecords.detailVerticesPerInstance(for: topology))
       )
     }
   }

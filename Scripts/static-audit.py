@@ -129,6 +129,8 @@ REQUIRED_VISUALIZATION_KERNELS = {
     "probeCrowAnalyticBarbuleMask",
     "probeCrowBodyRachisOpticalLOD",
     "probeCrowBodyRachisVertices",
+    "probeCrowBodyDetailVertices",
+    "emitCrowBodyDetailSegments",
     "probeCrowBodyVaneVertices",
     "probeCrowProjectedFeatherVisibility",
     "probeCrowResolvedCurveVisibility",

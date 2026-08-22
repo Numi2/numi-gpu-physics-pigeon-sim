@@ -762,7 +762,7 @@ func estimatedStandingCrowCaptureProducesLoopClosedFrames() throws {
         && $0.bodyVanePoseInputBytes == 1_376
         && $0.bodyVaneRetainedPoseCapacityBytes == 4_128
         && $0.bodyVaneRetainedIndirectDrawBytes
-          >= 2 * $0.bodyVaneBatchCount
+          >= 3 * $0.bodyVaneBatchCount
           * MemoryLayout<DrawPrimitivesIndirectArguments>.stride
         && $0.bodyVaneMorphologyBufferAllocationCount == 1
         && $0.bodyVaneRasterVertexInvocationCount > 0

@@ -13,6 +13,28 @@ struct CrowBodyVaneTopology: Hashable, Comparable {
   var verticesPerInstance: Int { axialSections * widthSections * 6 }
 }
 
+/// One immutable lifetime root for the newly retained body-detail resources.
+/// Keeping these Metal existentials out of the already-wide value batch avoids
+/// copying their inline containers through the optimized showcase stack.
+final class CrowBodyVaneDetailBatchFrame {
+  let indirectDrawBufferOffset: Int
+  let segmentBuffer: MTLBuffer
+  let segmentCapacityPerRecord: Int
+  let auditOutputBuffer: MTLBuffer?
+
+  init(
+    indirectDrawBufferOffset: Int,
+    segmentBuffer: MTLBuffer,
+    segmentCapacityPerRecord: Int,
+    auditOutputBuffer: MTLBuffer?
+  ) {
+    self.indirectDrawBufferOffset = indirectDrawBufferOffset
+    self.segmentBuffer = segmentBuffer
+    self.segmentCapacityPerRecord = segmentCapacityPerRecord
+    self.auditOutputBuffer = auditOutputBuffer
+  }
+}
+
 struct CrowBodyVaneGeometryBatchFrame {
   let topologyIndex: Int
   let topology: CrowBodyVaneTopology
@@ -24,18 +46,29 @@ struct CrowBodyVaneGeometryBatchFrame {
   let indirectDrawBuffer: MTLBuffer
   let indirectDrawBufferOffset: Int
   let rachisIndirectDrawBufferOffset: Int
+  let detail: CrowBodyVaneDetailBatchFrame
   let auditRecords: [CrowBodyVaneRecordGPU]
   let auditRecordCount: Int
   let auditOutputBuffer: MTLBuffer?
   let auditRachisOutputBuffer: MTLBuffer?
 
+  var detailIndirectDrawBufferOffset: Int { detail.indirectDrawBufferOffset }
+  var detailSegmentBuffer: MTLBuffer { detail.segmentBuffer }
+  var detailSegmentCapacityPerRecord: Int {
+    detail.segmentCapacityPerRecord
+  }
+  var auditDetailOutputBuffer: MTLBuffer? { detail.auditOutputBuffer }
+
   var vertexCount: Int { topology.verticesPerInstance }
   var rachisVertexCount: Int {
     CrowBodyVaneRecords.rachisVerticesPerInstance(for: topology)
   }
+  var detailVertexCount: Int {
+    CrowBodyVaneRecords.detailVerticesPerInstance(for: topology)
+  }
 }
 
-struct CrowBodyVaneGeometryFrame {
+final class CrowBodyVaneGeometryFrame {
   let slot: Int
   let batches: [CrowBodyVaneGeometryBatchFrame]
   let morphologyRecordCount: Int
@@ -44,8 +77,35 @@ struct CrowBodyVaneGeometryFrame {
   let poseInputBytes: Int
   let retainedPoseCapacityBytes: Int
   let morphologyBufferAllocationCount: Int
+  let retainedDetailSegmentCapacityBytes: Int
+  let detailSegmentBufferAllocationCount: Int
   let auditReadbackReady: Bool
 
+  init(
+    slot: Int,
+    batches: [CrowBodyVaneGeometryBatchFrame],
+    morphologyRecordCount: Int,
+    morphologyRecordBytes: Int,
+    morphologyCapacityBytes: Int,
+    poseInputBytes: Int,
+    retainedPoseCapacityBytes: Int,
+    morphologyBufferAllocationCount: Int,
+    retainedDetailSegmentCapacityBytes: Int,
+    detailSegmentBufferAllocationCount: Int,
+    auditReadbackReady: Bool
+  ) {
+    self.slot = slot
+    self.batches = batches
+    self.morphologyRecordCount = morphologyRecordCount
+    self.morphologyRecordBytes = morphologyRecordBytes
+    self.morphologyCapacityBytes = morphologyCapacityBytes
+    self.poseInputBytes = poseInputBytes
+    self.retainedPoseCapacityBytes = retainedPoseCapacityBytes
+    self.morphologyBufferAllocationCount = morphologyBufferAllocationCount
+    self.retainedDetailSegmentCapacityBytes = retainedDetailSegmentCapacityBytes
+    self.detailSegmentBufferAllocationCount = detailSegmentBufferAllocationCount
+    self.auditReadbackReady = auditReadbackReady
+  }
 }
 
 /// Live procedural expansion of body contour vanes.
@@ -60,9 +120,12 @@ final class CrowBodyVaneGeometryDeformer {
   private let scanPipeline: MTLComputePipelineState
   private let emitPipeline: MTLComputePipelineState
   private let indirectPipeline: MTLComputePipelineState
+  private let detailSegmentPipeline: MTLComputePipelineState
   private let auditPipeline: MTLComputePipelineState
   private let auditRachisPipeline: MTLComputePipelineState
+  private let auditDetailPipeline: MTLComputePipelineState
   private let morphologyRecords: [CrowBodyVaneMorphologyGPU]
+  private let maximumMorphologyLength: Float
   private let morphologyBuffer: MTLBuffer
   private let poseBuffers: [MTLBuffer]
   private let neckTransformBuffers: [MTLBuffer]
@@ -71,8 +134,11 @@ final class CrowBodyVaneGeometryDeformer {
   private let topologyCountBuffers: [MTLBuffer]
   private let workBuffers: [MTLBuffer]
   private let indirectDrawBuffers: [MTLBuffer]
+  private var detailSegmentBuffers: [MTLBuffer]
+  private var detailSegmentCapacityPerRecord = 25
   private var nextSlot = 0
   private(set) var morphologyBufferAllocationCount = 1
+  private(set) var detailSegmentBufferAllocationCount = bufferedFrameCount
 
   var retainedMorphologyCapacityBytes: Int {
     morphologyBuffer.length
@@ -87,16 +153,30 @@ final class CrowBodyVaneGeometryDeformer {
     indirectDrawBuffers.reduce(0) { $0 + $1.length }
   }
 
+  var retainedDetailSegmentCapacityBytes: Int {
+    detailSegmentBuffers.reduce(0) { $0 + $1.length }
+  }
+
   init(backend: VisualizationBackend) throws {
     self.backend = backend
     classifyPipeline = try backend.compute("classifyCrowBodyVaneRecords")
     scanPipeline = try backend.compute("scanCrowBodyVaneRecords")
     emitPipeline = try backend.compute("emitCrowBodyVaneWork")
     indirectPipeline = try backend.compute("prepareCrowBodyVaneIndirectWork")
+    detailSegmentPipeline = try backend.compute("emitCrowBodyDetailSegments")
     auditPipeline = try backend.compute("probeCrowBodyVaneVertices")
     auditRachisPipeline = try backend.compute("probeCrowBodyRachisVertices")
-    morphologyRecords = CrowBodyVaneRecords.morphologyRecords()
-    let maximumRecordCount = morphologyRecords.count
+    auditDetailPipeline = try backend.compute("probeCrowBodyDetailVertices")
+    let createdMorphologyRecords = CrowBodyVaneRecords.morphologyRecords()
+    morphologyRecords = createdMorphologyRecords
+    maximumMorphologyLength = createdMorphologyRecords.reduce(.zero) {
+      partial, record in
+      max(
+        partial,
+        simd_distance(record.rootAndRootWidth.xyz, record.tipAndMaximumWidth.xyz)
+      )
+    }
+    let maximumRecordCount = createdMorphologyRecords.count
     morphologyBuffer = try Self.sharedBuffer(
       values: morphologyRecords,
       backend: backend
@@ -142,9 +222,15 @@ final class CrowBodyVaneGeometryDeformer {
     }
     indirectDrawBuffers = try (0..<Self.bufferedFrameCount).map { _ in
       try backend.buffer(
-        length: 2 * CrowBodyVaneRecords.productionTopologies.count
+        length: 3 * CrowBodyVaneRecords.productionTopologies.count
           * MemoryLayout<DrawPrimitivesIndirectArguments>.stride,
         shared: true
+      )
+    }
+    detailSegmentBuffers = try (0..<Self.bufferedFrameCount).map { _ in
+      try backend.buffer(
+        length: maximumRecordCount * 25
+          * MemoryLayout<CrowBodyDetailSegmentGPU>.stride
       )
     }
   }
@@ -187,6 +273,10 @@ final class CrowBodyVaneGeometryDeformer {
       }
     }
     let recordCount = morphologyRecords.count
+    try ensureDetailSegmentCapacity(
+      projectedPixelsPerMeter: projectedPixelsPerMeter
+    )
+    let retainedDetailSegmentCapacity = detailSegmentCapacityPerRecord
     let requiredRecordBytes =
       recordCount
       * MemoryLayout<CrowBodyVaneMorphologyGPU>.stride
@@ -212,7 +302,7 @@ final class CrowBodyVaneGeometryDeformer {
     memset(
       indirectDrawBuffers[slot].contents(),
       0,
-      2 * CrowBodyVaneRecords.productionTopologies.count
+      3 * CrowBodyVaneRecords.productionTopologies.count
         * MemoryLayout<DrawPrimitivesIndirectArguments>.stride
     )
     var selection = CrowBodyVaneSelectionUniforms(
@@ -220,7 +310,7 @@ final class CrowBodyVaneGeometryDeformer {
       counts: SIMD4<UInt32>(
         UInt32(recordCount),
         UInt32(CrowBodyVaneRecords.productionTopologies.count),
-        0,
+        UInt32(retainedDetailSegmentCapacity),
         0
       )
     )
@@ -281,6 +371,29 @@ final class CrowBodyVaneGeometryDeformer {
       count: CrowBodyVaneRecords.productionTopologies.count
     )
     prepare.endEncoding()
+
+    guard let detailSegments = commandBuffer.makeComputeCommandEncoder() else {
+      throw VisualizationError.pipeline("crow body detail segment encoder")
+    }
+    detailSegments.label = "Emit compact temporal body barb segments"
+    detailSegments.setBuffer(morphologyBuffer, offset: 0, index: 0)
+    detailSegments.setBuffer(topologyIndexBuffers[slot], offset: 0, index: 1)
+    detailSegments.setBuffer(topologyCountBuffers[slot], offset: 0, index: 2)
+    detailSegments.setBuffer(workBuffers[slot], offset: 0, index: 3)
+    detailSegments.setBuffer(detailSegmentBuffers[slot], offset: 0, index: 4)
+    detailSegments.setBuffer(poseBuffers[slot], offset: 0, index: 5)
+    detailSegments.setBuffer(neckTransformBuffers[slot], offset: 0, index: 6)
+    detailSegments.setBytes(
+      &selection,
+      length: MemoryLayout<CrowBodyVaneSelectionUniforms>.stride,
+      index: 7
+    )
+    backend.dispatch1D(
+      detailSegments,
+      pipeline: detailSegmentPipeline,
+      count: recordCount * retainedDetailSegmentCapacity
+    )
+    detailSegments.endEncoding()
 
     let auditGroups =
       auditReadback
@@ -385,6 +498,55 @@ final class CrowBodyVaneGeometryDeformer {
       } else {
         auditRachisOutputBuffer = nil
       }
+      let auditDetailOutputBuffer: MTLBuffer?
+      let auditDetailVertexCount =
+        CrowBodyVaneRecords.detailVerticesPerInstance(for: topology)
+        * auditRecords.count
+      if auditReadback && auditDetailVertexCount > 0 {
+        let auditMorphologies = auditIndices.map { morphologyRecords[$0] }
+        let auditInput = try Self.sharedBuffer(
+          values: auditMorphologies,
+          backend: backend
+        )
+        let auditOutput = try backend.buffer(
+          length: auditDetailVertexCount
+            * MemoryLayout<CrowFeatherVertexGPU>.stride,
+          shared: true
+        )
+        var uniforms = CrowBodyVaneGeometryUniforms(
+          counts: SIMD4<UInt32>(
+            UInt32(topology.axialSections),
+            UInt32(topology.widthSections),
+            UInt32(auditRecords.count),
+            UInt32(
+              CrowBodyVaneRecords.detailVerticesPerInstance(for: topology)
+            )
+          ),
+          selection: SIMD4<Float>(projectedPixelsPerMeter, 0, 0, 0)
+        )
+        guard let audit = commandBuffer.makeComputeCommandEncoder() else {
+          throw VisualizationError.pipeline("crow body detail audit encoder")
+        }
+        audit.label = "Audit procedural body barb hierarchy"
+        audit.setBuffer(auditInput, offset: 0, index: 0)
+        audit.setBytes(
+          &uniforms,
+          length: MemoryLayout<CrowBodyVaneGeometryUniforms>.stride,
+          index: 1
+        )
+        audit.setBuffer(auditOutput, offset: 0, index: 2)
+        audit.setBuffer(poseBuffers[slot], offset: 0, index: 3)
+        audit.setBuffer(neckTransformBuffers[slot], offset: 0, index: 4)
+        backend.dispatch1D(
+          audit,
+          pipeline: auditDetailPipeline,
+          count: auditDetailVertexCount
+        )
+        audit.endEncoding()
+        auditDetailOutputBuffer = auditOutput
+      } else {
+        auditDetailOutputBuffer = nil
+      }
       batches.append(
         CrowBodyVaneGeometryBatchFrame(
           topologyIndex: topologyIndex,
@@ -400,6 +562,14 @@ final class CrowBodyVaneGeometryDeformer {
           rachisIndirectDrawBufferOffset:
             (CrowBodyVaneRecords.productionTopologies.count + topologyIndex)
             * MemoryLayout<DrawPrimitivesIndirectArguments>.stride,
+          detail: CrowBodyVaneDetailBatchFrame(
+            indirectDrawBufferOffset:
+              (2 * CrowBodyVaneRecords.productionTopologies.count + topologyIndex)
+              * MemoryLayout<DrawPrimitivesIndirectArguments>.stride,
+            segmentBuffer: detailSegmentBuffers[slot],
+            segmentCapacityPerRecord: retainedDetailSegmentCapacity,
+            auditOutputBuffer: auditDetailOutputBuffer
+          ),
           auditRecords: auditRecords,
           auditRecordCount: auditRecords.count,
           auditOutputBuffer: auditOutputBuffer,
@@ -416,6 +586,8 @@ final class CrowBodyVaneGeometryDeformer {
       poseInputBytes: poseInputBytes,
       retainedPoseCapacityBytes: retainedPoseCapacityBytes,
       morphologyBufferAllocationCount: morphologyBufferAllocationCount,
+      retainedDetailSegmentCapacityBytes: retainedDetailSegmentCapacityBytes,
+      detailSegmentBufferAllocationCount: detailSegmentBufferAllocationCount,
       auditReadbackReady: auditReadback
     )
   }
@@ -431,7 +603,12 @@ final class CrowBodyVaneGeometryDeformer {
         0,
         UInt32(batch.vertexCount)
       ),
-      selection: SIMD4<Float>(batch.projectedPixelsPerMeter, 0, 0, 0)
+      selection: SIMD4<Float>(
+        batch.projectedPixelsPerMeter,
+        Float(batch.detailSegmentCapacityPerRecord),
+        0,
+        0
+      )
     )
     encoder.setVertexBuffer(batch.morphologyBuffer, offset: 0, index: 0)
     encoder.setVertexBuffer(batch.workBuffer, offset: 0, index: 1)
@@ -442,6 +619,7 @@ final class CrowBodyVaneGeometryDeformer {
     )
     encoder.setVertexBuffer(batch.poseBuffer, offset: 0, index: 4)
     encoder.setVertexBuffer(batch.neckTransformBuffer, offset: 0, index: 5)
+    encoder.setVertexBuffer(batch.detailSegmentBuffer, offset: 0, index: 6)
   }
 
   func drawArguments(
@@ -466,6 +644,17 @@ final class CrowBodyVaneGeometryDeformer {
     ).pointee
   }
 
+  func drawDetailArguments(
+    for batch: CrowBodyVaneGeometryBatchFrame
+  ) -> DrawPrimitivesIndirectArguments {
+    batch.indirectDrawBuffer.contents().advanced(
+      by: batch.detailIndirectDrawBufferOffset
+    ).bindMemory(
+      to: DrawPrimitivesIndirectArguments.self,
+      capacity: 1
+    ).pointee
+  }
+
   func activeRecordCount(for frame: CrowBodyVaneGeometryFrame) -> Int {
     Int(topologyCounts(for: frame)[7])
   }
@@ -481,6 +670,13 @@ final class CrowBodyVaneGeometryDeformer {
     frame.batches.reduce(0) {
       $0 + Int(drawRachisArguments(for: $1).vertexCount)
         * Int(drawRachisArguments(for: $1).instanceCount)
+    }
+  }
+
+  func expandedDetailVertexCount(for frame: CrowBodyVaneGeometryFrame) -> Int {
+    frame.batches.reduce(0) {
+      $0 + Int(drawDetailArguments(for: $1).vertexCount)
+        * Int(drawDetailArguments(for: $1).instanceCount)
     }
   }
 
@@ -540,10 +736,41 @@ final class CrowBodyVaneGeometryDeformer {
     return Array(UnsafeBufferPointer(start: pointer, count: count))
   }
 
+  func detailVertices(
+    for batch: CrowBodyVaneGeometryBatchFrame
+  ) -> [CrowFeatherVertexGPU] {
+    let count = batch.detailVertexCount * batch.auditRecordCount
+    guard count > 0 else { return [] }
+    guard let buffer = batch.auditDetailOutputBuffer else {
+      preconditionFailure("body detail frame lacks audit readback")
+    }
+    let pointer = buffer.contents().bindMemory(
+      to: CrowFeatherVertexGPU.self,
+      capacity: count
+    )
+    return Array(UnsafeBufferPointer(start: pointer, count: count))
+  }
+
   func auditRecords(
     for batch: CrowBodyVaneGeometryBatchFrame
   ) -> [CrowBodyVaneRecordGPU] {
     batch.auditRecords
+  }
+
+  private func ensureDetailSegmentCapacity(
+    projectedPixelsPerMeter: Float
+  ) throws {
+    let requiredCapacity = maximumMorphologyLength * projectedPixelsPerMeter >= 480
+      ? 149 : 25
+    guard requiredCapacity > detailSegmentCapacityPerRecord else { return }
+    detailSegmentBuffers = try (0..<Self.bufferedFrameCount).map { _ in
+      try backend.buffer(
+        length: morphologyRecords.count * requiredCapacity
+          * MemoryLayout<CrowBodyDetailSegmentGPU>.stride
+      )
+    }
+    detailSegmentCapacityPerRecord = requiredCapacity
+    detailSegmentBufferAllocationCount += Self.bufferedFrameCount
   }
 
   private static func sharedBuffer<T>(
@@ -587,6 +814,21 @@ enum CrowBodyVaneRecords {
     for topology: CrowBodyVaneTopology
   ) -> Int {
     rachisSections(for: topology) * 24
+  }
+
+  static func detailSegmentCount(for topology: CrowBodyVaneTopology) -> Int {
+    switch topology.axialSections {
+    case ...4: 0
+    case 6, 8: 25
+    case 10, 12: 23
+    default: 149
+    }
+  }
+
+  static func detailVerticesPerInstance(
+    for topology: CrowBodyVaneTopology
+  ) -> Int {
+    detailSegmentCount(for: topology) * 18
   }
 
   static func morphologyRecords() -> [CrowBodyVaneMorphologyGPU] {
@@ -1081,6 +1323,462 @@ enum CrowBodyVaneRecords {
       0.022 * (1 + 0.03 * material),
       0.14
     )
+  }
+
+  struct BodyDetailSegment: Equatable {
+    let kind: CrowFeatherMesostructureKind
+    let start: SIMD3<Float>
+    let end: SIMD3<Float>
+    let startRadiusMeters: Float
+    let endRadiusMeters: Float
+  }
+
+  private struct BodyDetailFrame {
+    let root: SIMD3<Float>
+    let tip: SIMD3<Float>
+    let direction: SIMD3<Float>
+    let normal: SIMD3<Float>
+    let widthAxis: SIMD3<Float>
+    let camber: Float
+    let transverseCamber: Float
+  }
+
+  static func detailSegments(
+    record: CrowBodyVaneRecordGPU,
+    topology: CrowBodyVaneTopology,
+    projectedPixelsPerMeter: Float,
+    current: Bool
+  ) -> [BodyDetailSegment] {
+    let edgePairCount: Int
+    let baseBarbPairCount: Int
+    let barbulesPerBarb: Int
+    switch topology.axialSections {
+    case ...4:
+      return []
+    case 6, 8:
+      edgePairCount = 10
+      baseBarbPairCount = 0
+      barbulesPerBarb = 0
+    case 10, 12:
+      edgePairCount = 9
+      baseBarbPairCount = 9
+      barbulesPerBarb = 0
+    default:
+      edgePairCount = 18
+      baseBarbPairCount = 18
+      barbulesPerBarb = 3
+    }
+    let region = Int(record.morphology.y)
+    let length = simd_distance(
+      record.currentRootAndRootWidth.xyz,
+      record.currentTipAndMaximumWidth.xyz
+    )
+    let promotesInterior =
+      (region == Int(CrowBodyFeatherTractRegion.humeral.rawValue)
+        || region == Int(CrowBodyFeatherTractRegion.scapular.rawValue))
+      && length * projectedPixelsPerMeter
+        >= CrowFeatherMesostructure.shoulderInteriorBarbThresholdPixels
+    let pairCount = promotesInterior
+      ? max(baseBarbPairCount, edgePairCount) : baseBarbPairCount
+    let coarseEdgeOnly = pairCount == 0
+    let safePixelsPerMeter = max(projectedPixelsPerMeter, 1)
+    let aggregateRadius = min(
+      0.00020,
+      max(0.000035, 0.30 / safePixelsPerMeter)
+    )
+    let baseExtension = min(
+      0.0012,
+      max(0.00050, 1.10 / safePixelsPerMeter)
+    )
+    let frame = bodyDetailFrame(record: record, current: current)
+    let identityFirst = Int(record.morphology.z) + 31 * region
+    let tractSide = bodyTractSide(record: record)
+    let identitySecond = Int(record.morphology.w) + (tractSide < 0 ? 97 : 0)
+    let stationSpacing = 0.77 / Float(edgePairCount + 1)
+    var result: [BodyDetailSegment] = []
+    result.reserveCapacity(detailSegmentCount(for: topology))
+    for pair in 0..<edgePairCount {
+      let featherPhase = Float(identityFirst + 1) * 19.193
+        + Float(identitySecond + 1) * 47.117
+      let stationPhase = Float(pair + 1) * 11.731
+      let stationIdentity = sin(featherPhase + stationPhase)
+      let localAxial = 0.10 + stationSpacing * Float(pair + 1)
+        + CrowFeatherMesostructure.bodyTractBarbStationJitterFractionOfSpacing
+          * stationSpacing * stationIdentity
+      let axial = pennaceousAxial(record: record, localFraction: localAxial)
+      let reachAxial = pennaceousAxial(
+        record: record,
+        localFraction: min(0.94, localAxial + 0.035 + 0.020 * localAxial)
+      )
+      for side: Float in [-1, 1] {
+        let identity = sin(
+          Float(identityFirst + 1) * 12.9898
+            + Float(identitySecond + 1) * 78.233
+            + Float(pair + 1) * 37.719
+            + side * 1.371
+        )
+        let start = bodyDetailCenter(
+          record: record,
+          frame: frame,
+          axial: axial
+        )
+          + side * frame.widthAxis
+            * detailHalfWidth(record: record, axial: axial, signedWidth: side)
+            * (coarseEdgeOnly ? 0.72 : 0)
+          + frame.normal * (coarseEdgeOnly ? 0.00010 : 0.00005)
+        let edgeExtension = baseExtension * (0.86 + 0.14 * identity)
+        let reachHalfWidth = detailHalfWidth(
+          record: record,
+          axial: reachAxial,
+          signedWidth: side
+        )
+        let lateralReach = coarseEdgeOnly
+          ? reachHalfWidth + edgeExtension : 0.97 * reachHalfWidth
+        let end = bodyDetailCenter(
+          record: record,
+          frame: frame,
+          axial: reachAxial
+        )
+          + side * frame.widthAxis * lateralReach
+          + frame.normal * (coarseEdgeOnly ? 0.00018 : 0.00008)
+        result.append(
+          BodyDetailSegment(
+            kind: coarseEdgeOnly ? .edgeBarbGroup : .barb,
+            start: start,
+            end: end,
+            startRadiusMeters: coarseEdgeOnly ? aggregateRadius : 0.000050,
+            endRadiusMeters: coarseEdgeOnly
+              ? 0.58 * aggregateRadius : 0.000018
+          )
+        )
+        if !coarseEdgeOnly && barbulesPerBarb > 0 {
+          let barbDirection = normalized(
+            end - start,
+            fallback: side * frame.widthAxis
+          )
+          let barbuleLength = min(0.0014, 0.22 * simd_distance(start, end))
+          for index in 0..<barbulesPerBarb {
+            let fraction = Float(index + 1) / Float(barbulesPerBarb + 1)
+            let root = start + fraction * (end - start)
+            let hookDirection = normalized(
+              0.82 * frame.direction - 0.24 * side * frame.widthAxis
+                + 0.10 * barbDirection,
+              fallback: frame.direction
+            )
+            result.append(
+              BodyDetailSegment(
+                kind: .barbule,
+                start: root,
+                end: root + barbuleLength * hookDirection,
+                startRadiusMeters: 0.000014,
+                endRadiusMeters: 0.000006
+              )
+            )
+          }
+        }
+      }
+    }
+    let tipReferenceHalfWidth = detailHalfWidth(
+      record: record,
+      axial: 0.88,
+      signedWidth: 0
+    )
+    for lane: Float in [-1, -0.5, 0, 0.5, 1] {
+      let featherPhase = Float(identityFirst + 1) * 23.417
+        + Float(identitySecond + 1) * 51.193
+      let rootIdentity = sin(featherPhase + lane * 5.173)
+      let rootAxial = 0.88
+        + CrowFeatherMesostructure.bodyTractTerminalRootAxialJitter
+          * rootIdentity
+      let root = bodyDetailCenter(
+        record: record,
+        frame: frame,
+        axial: rootAxial
+      )
+        + lane * frame.widthAxis
+          * detailHalfWidth(record: record, axial: rootAxial, signedWidth: 0)
+          * 0.42
+        + frame.normal * 0.00012
+      let laneIdentity = sin(
+        Float(identityFirst + 1) * 17.117
+          + Float(identitySecond + 1) * 43.731
+          + lane * 2.913
+      )
+      let tip = frame.tip
+        + frame.direction * baseExtension * (0.82 + 0.12 * laneIdentity)
+        + lane * frame.widthAxis * 0.18 * tipReferenceHalfWidth
+        + frame.normal * 0.00020
+      result.append(
+        BodyDetailSegment(
+          kind: .edgeBarbGroup,
+          start: root,
+          end: tip,
+          startRadiusMeters: 0.88 * aggregateRadius,
+          endRadiusMeters: 0.50 * aggregateRadius
+        )
+      )
+    }
+    precondition(result.count == detailSegmentCount(for: topology))
+    return result
+  }
+
+  static func detailVertex(
+    record: CrowBodyVaneRecordGPU,
+    topology: CrowBodyVaneTopology,
+    projectedPixelsPerMeter: Float,
+    vertexIndex: Int
+  ) -> CrowFeatherVertexGPU {
+    let count = detailVerticesPerInstance(for: topology)
+    precondition(vertexIndex >= 0 && vertexIndex < count)
+    let currentSegments = detailSegments(
+      record: record,
+      topology: topology,
+      projectedPixelsPerMeter: projectedPixelsPerMeter,
+      current: true
+    )
+    let previousSegments = detailSegments(
+      record: record,
+      topology: topology,
+      projectedPixelsPerMeter: projectedPixelsPerMeter,
+      current: false
+    )
+    let segmentIndex = vertexIndex / 18
+    let localVertex = vertexIndex % 18
+    let current = currentSegments[segmentIndex]
+    let previous = previousSegments[segmentIndex]
+    let currentGeometry: (point: SIMD3<Float>, normal: SIMD3<Float>)
+    let previousPoint: SIMD3<Float>
+    if current.kind == .edgeBarbGroup {
+      let currentRibbon = detailRibbonQuad(
+        segment: current,
+        surfaceNormal: bodyDetailFrame(record: record, current: true).normal
+      )
+      let previousRibbon = detailRibbonQuad(
+        segment: previous,
+        surfaceNormal: bodyDetailFrame(record: record, current: false).normal
+      )
+      let corners = [0, 1, 2, 0, 2, 3]
+      if localVertex < 6 {
+        currentGeometry = (
+          currentRibbon.points[corners[localVertex]],
+          currentRibbon.normal
+        )
+        previousPoint = previousRibbon.points[corners[localVertex]]
+      } else {
+        currentGeometry = (currentRibbon.points[0], currentRibbon.normal)
+        previousPoint = previousRibbon.points[0]
+      }
+    } else {
+      let radialSegment = localVertex / 6
+      let corner = [0, 1, 2, 0, 2, 3][localVertex % 6]
+      let currentTube = detailTubeQuad(
+        segment: current,
+        radialSegment: radialSegment
+      )
+      let previousTube = detailTubeQuad(
+        segment: previous,
+        radialSegment: radialSegment
+      )
+      currentGeometry = (currentTube.points[corner], currentTube.normal)
+      previousPoint = previousTube.points[corner]
+    }
+    return CrowFeatherVertexGPU(
+      position: SIMD4<Float>(currentGeometry.point, 1),
+      normal: SIMD4<Float>(currentGeometry.normal, 0),
+      color: detailColor(record: record, kind: current.kind),
+      previousPosition: SIMD4<Float>(previousPoint, 1),
+      identity: record.identity,
+      parameters: SIMD4<Float>(0.5, 0, 0, 0)
+    )
+  }
+
+  private static func bodyDetailFrame(
+    record: CrowBodyVaneRecordGPU,
+    current: Bool
+  ) -> BodyDetailFrame {
+    let root = current
+      ? record.currentRootAndRootWidth.xyz
+      : record.previousRootAndCurrentCamber.xyz
+    let tip = current
+      ? record.currentTipAndMaximumWidth.xyz
+      : record.previousTipAndPreviousCamber.xyz
+    let suppliedNormal = current
+      ? record.currentNormalAndTransverseCamber.xyz
+      : record.previousNormalAndTransverseCamber.xyz
+    let direction = normalized(tip - root, fallback: SIMD3<Float>(-1, 0, 0))
+    let normal = normalized(
+      suppliedNormal - direction * simd_dot(suppliedNormal, direction),
+      fallback: suppliedNormal
+    )
+    return BodyDetailFrame(
+      root: root,
+      tip: tip,
+      direction: direction,
+      normal: normal,
+      widthAxis: normalized(
+        simd_cross(normal, direction),
+        fallback: SIMD3<Float>(0, 1, 0)
+      ),
+      camber: current
+        ? record.previousRootAndCurrentCamber.w
+        : record.previousTipAndPreviousCamber.w,
+      transverseCamber: current
+        ? record.currentNormalAndTransverseCamber.w
+        : record.previousNormalAndTransverseCamber.w
+    )
+  }
+
+  private static func bodyDetailCenter(
+    record: CrowBodyVaneRecordGPU,
+    frame: BodyDetailFrame,
+    axial: Float
+  ) -> SIMD3<Float> {
+    frame.root + (frame.tip - frame.root) * axial
+      + frame.widthAxis
+        * (record.sweepAsymmetryAndRipple.x * sin(.pi * axial))
+      + frame.normal
+        * (frame.camber * sin(.pi * axial)
+          + frame.transverseCamber
+            * detailHalfWidth(record: record, axial: axial, signedWidth: 0)
+          + 0.00012)
+  }
+
+  private static func detailHalfWidth(
+    record: CrowBodyVaneRecordGPU,
+    axial: Float,
+    signedWidth: Float
+  ) -> Float {
+    bodyVaneHalfWidth(record: record, axial: axial)
+      * (1 + record.sweepAsymmetryAndRipple.y * min(max(signedWidth, -1), 1))
+  }
+
+  private static func pennaceousAxial(
+    record: CrowBodyVaneRecordGPU,
+    localFraction: Float
+  ) -> Float {
+    let start = min(max(record.morphology.x, 0), 0.95)
+    return start + (1 - start) * min(max(localFraction, 0), 1)
+  }
+
+  private static func bodyTractSide(
+    record: CrowBodyVaneRecordGPU
+  ) -> Float {
+    let inventoryIndex = Int(record.identity.x & 0x00FF_FFFF)
+    let region = Int(record.morphology.y)
+    let base: Int
+    let perSide: Int
+    switch region {
+    case 0:
+      base = 0
+      perSide = CrowBodyFeatherTracts.cervicalRowCount
+        * CrowBodyFeatherTracts.cervicalColumnCount
+    case 1:
+      base = 2 * CrowBodyFeatherTracts.cervicalRowCount
+        * CrowBodyFeatherTracts.cervicalColumnCount
+      perSide = CrowBodyFeatherTracts.mantleRowCount
+        * CrowBodyFeatherTracts.mantleColumnCount
+    case 2:
+      base = 2 * (
+        CrowBodyFeatherTracts.cervicalRowCount
+          * CrowBodyFeatherTracts.cervicalColumnCount
+          + CrowBodyFeatherTracts.mantleRowCount
+            * CrowBodyFeatherTracts.mantleColumnCount
+      )
+      perSide = CrowBodyFeatherTracts.humeralRowCount
+        * CrowBodyFeatherTracts.humeralColumnCount
+    default:
+      base = 2 * (
+        CrowBodyFeatherTracts.cervicalRowCount
+          * CrowBodyFeatherTracts.cervicalColumnCount
+          + CrowBodyFeatherTracts.mantleRowCount
+            * CrowBodyFeatherTracts.mantleColumnCount
+          + CrowBodyFeatherTracts.humeralRowCount
+            * CrowBodyFeatherTracts.humeralColumnCount
+      )
+      perSide = CrowBodyFeatherTracts.scapularRowCount
+        * CrowBodyFeatherTracts.scapularColumnCount
+    }
+    return inventoryIndex - base < perSide ? -1 : 1
+  }
+
+  private static func detailRibbonQuad(
+    segment: BodyDetailSegment,
+    surfaceNormal: SIMD3<Float>
+  ) -> (points: [SIMD3<Float>], normal: SIMD3<Float>) {
+    let axis = normalized(segment.end - segment.start, fallback: SIMD3<Float>(-1, 0, 0))
+    let normal = normalized(
+      surfaceNormal - axis * simd_dot(surfaceNormal, axis),
+      fallback: surfaceNormal
+    )
+    let across = normalized(
+      simd_cross(normal, axis),
+      fallback: SIMD3<Float>(0, 1, 0)
+    )
+    return (
+      [
+        segment.start - across * segment.startRadiusMeters,
+        segment.start + across * segment.startRadiusMeters,
+        segment.end + across * segment.endRadiusMeters,
+        segment.end - across * segment.endRadiusMeters,
+      ],
+      normal
+    )
+  }
+
+  private static func detailTubeQuad(
+    segment: BodyDetailSegment,
+    radialSegment: Int
+  ) -> (points: [SIMD3<Float>], normal: SIMD3<Float>) {
+    let axis = normalized(segment.end - segment.start, fallback: SIMD3<Float>(0, 0, 1))
+    let helper: SIMD3<Float> = abs(axis.z) < 0.82
+      ? SIMD3<Float>(0, 0, 1) : SIMD3<Float>(0, 1, 0)
+    let first = normalized(simd_cross(axis, helper), fallback: SIMD3<Float>(1, 0, 0))
+    let second = normalized(simd_cross(axis, first), fallback: SIMD3<Float>(0, 1, 0))
+    let next = (radialSegment + 1) % 3
+    let angle0 = 2 * Float.pi * Float(radialSegment) / 3
+    let angle1 = 2 * Float.pi * Float(next) / 3
+    let radial0 = cos(angle0) * first + sin(angle0) * second
+    let radial1 = cos(angle1) * first + sin(angle1) * second
+    let points = [
+      segment.start + segment.startRadiusMeters * radial0,
+      segment.start + segment.startRadiusMeters * radial1,
+      segment.end + segment.endRadiusMeters * radial1,
+      segment.end + segment.endRadiusMeters * radial0,
+    ]
+    return (
+      points,
+      normalized(
+        simd_cross(points[1] - points[0], points[2] - points[0]),
+        fallback: SIMD3<Float>(0, 0, 1)
+      )
+    )
+  }
+
+  private static func detailColor(
+    record: CrowBodyVaneRecordGPU,
+    kind: CrowFeatherMesostructureKind
+  ) -> SIMD4<Float> {
+    switch kind {
+    case .edgeBarbGroup:
+      let region = Int(record.morphology.y)
+      let base: Float = region == 0 ? 0.006
+        : (region == 1 ? 0.0065 : (region == 2 ? 0.0058 : 0.0060))
+      let scale: Float = region == 0 ? 0.07
+        : (region == 1 ? 0.09 : (region == 2 ? 0.080 : 0.085))
+      let material = (record.color.x / base - 1) / scale
+      return SIMD4<Float>(
+        0.0075 * (1 + 0.08 * material),
+        0.011 * (1 + 0.06 * material),
+        0.019 * (1 + 0.04 * material),
+        0.135
+      )
+    case .barb:
+      return SIMD4<Float>(0.008, 0.012, 0.020, 0.14)
+    case .barbule:
+      return SIMD4<Float>(0.006, 0.010, 0.017, 0.14)
+    case .rachis:
+      return rachisColor(record: record)
+    }
   }
 
   static func decodedVertex(

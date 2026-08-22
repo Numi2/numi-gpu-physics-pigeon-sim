@@ -516,10 +516,10 @@ asymmetric width, ripple, terminal taper, color, and stable identity. A compact
 pose stream reconstructs current and previous body translation, neck transport,
 deployment camber, and transverse settling. Projected-size topology remains
 quantized exactly as before, but the CPU no longer appends those vane triangles
-or their vane-contained tubular rachis to `CrowSurfaceTemporalVertexGPU` or
-authors production temporal records. Paired aggregate-barb and terminal
-microstructure remain CPU-authored, and failure to create the required Metal
-pipelines restores the former CPU vane-and-rachis path. A
+or their vane-contained tubular rachis, aggregate barbs, terminal bundles, or
+future-close barbules to `CrowSurfaceTemporalVertexGPU`, nor does it author
+production temporal records. Failure to create the required Metal pipelines
+restores the former complete CPU body-feather path. A
 compute-only audit invokes the same Metal pose/point/normal helpers used by
 raster; sampled positions including nonzero neck pose agree with the
 independent Swift temporal oracle within `2 um`, and terminal normals agree
@@ -540,14 +540,14 @@ pose slots retain `4,128` bytes total and each receives only `1,376` bytes of
 current/previous body, deployment, and cervical affine transforms. Metal
 reproduces the established whole/half/quarter density predicate, classifies
 each active morphology into one of seven topology bins, scans stable offsets,
-emits compact inventory indices, and prepares one set of vane plus one set of
-rachis `DrawPrimitivesIndirectArguments`. CPU temporal-record construction and
+emits compact inventory indices, and prepares vane, rachis, and body-detail
+`DrawPrimitivesIndirectArguments`. CPU temporal-record construction and
 grouping run only for explicit audit readback. Schema `21` reports morphology,
 pose, selected work, retained capacity, indirect bytes, allocations, raster
 invocations, and generation mode separately. At the left-flank yaw/pitch
 `(-1.12, 0.26)`, `0.50 m` diagnostic, Metal selects the CPU-oracle-exact
 `1,606` records in two active bins and requests `285,984` vane raster vertices;
-the retained indirect arguments occupy `672` bytes. GPU identities and indirect
+the retained indirect arguments occupy `1,008` bytes. GPU identities and indirect
 counts are exact against the CPU oracle at `800`, `1,000`, `1,600`, and
 `20,000 px/m`. A nonzero-neck/deployment compute audit agrees with CPU temporal
 geometry within `2 um`. A new five-frame release diagnostic at rear-right
@@ -572,6 +572,30 @@ tube carries its parent vane identity and stays on the vane centerline, so the
 integer pass retains the underlying vane identity instead of issuing a second
 indirect tube draw. This is ownership and parity evidence, not a speed or
 measured-anatomy claim.
+
+The remaining body mesostructure is now Metal-owned as compact temporal
+segments. Each `96`-byte record retains current and previous endpoints, taper,
+surface normal, and detail kind, then the vertex stage expands it into either a
+six-vertex ribbon or a three-sided tube within the established fixed
+`18`-vertex segment stride. The seven vane topologies retain
+`0/0/25/25/23/23/149` segments (`0/0/450/450/414/414/2,682` raster vertices)
+per selected feather. Initial three-slot capacity is `23,126,400` bytes; a
+future `480 px` feather grows it to `137,833,344` bytes without materializing
+the expanded triangle stream. The independent Swift oracle reproduces the
+former CPU edge groups, promoted shoulder barbs, five terminal bundles, and
+barbules at `3,000`, `10,000`, and `30,000 px/m`. A direct Metal future-close
+`16 x 7` probe agrees with current/previous positions within `2 um` and normals
+within `1e-3` vector distance. The integer pass deliberately retains the
+underlying vane identity instead of drawing every subpixel fiber again.
+
+A five-frame release diagnostic at the previously unused high-front yaw/pitch
+`(-0.72, 0.52)` and `0.48 m` preserves the predecessor's exact enclosed-hole
+pixels (`5, 10, 1, 0, 1`), components (`3, 5, 1, 0, 1`), largest components
+(`3, 6, 1, 0, 1`), and expected lower-body apertures (`4, 5, 2, 5, 2`). Beauty
+SSIM is at least `0.999796`; no frame changes more than `1,320 / 360,000`
+pixels. The inspected held frame retains continuous simulated neck, shoulder,
+and flank overlap. This qualifies ownership and bounded visual continuity, not
+performance, measured anatomy, or perceptual equivalence to a real crow.
 
 The same executable renderer also has a distinct `standing` presentation. It
 does not freeze or slow the flight surface. A dedicated Metal kernel folds the

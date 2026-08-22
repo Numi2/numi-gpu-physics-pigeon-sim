@@ -293,6 +293,19 @@ struct CrowBodyVaneSelectionUniforms {
   var counts: SIMD4<UInt32>
 }
 
+/// Compact current/previous body-detail segment emitted by Metal before
+/// rasterization. One record expands to either a ribbon or a three-sided tube;
+/// retaining endpoints avoids materializing the 18-vertex triangle stream.
+struct CrowBodyDetailSegmentGPU: Equatable {
+  var currentStartAndRadius: SIMD4<Float>
+  var currentEndAndRadius: SIMD4<Float>
+  var previousStartAndRadius: SIMD4<Float>
+  var previousEndAndRadius: SIMD4<Float>
+  /// Current feather normal and detail kind: 1 edge group, 2 barb, 3 barbule.
+  var currentNormalAndKind: SIMD4<Float>
+  var previousNormalAndReserved: SIMD4<Float>
+}
+
 /// One retained analytic crown-rachis curve for an interior class-7 body
 /// feather. Metal expands this 112-byte record into the selected radial tube
 /// tessellation; no per-triangle body-detail stream is authored on the CPU.

@@ -118,13 +118,18 @@ morphology inventory is retained once; only pose input uses three in-flight
 slots. CPU temporal records and expanded geometry exist only during explicit
 audit readback. This makes pose ownership, selection, allocation stability, and
 residency executable without treating them as a speed result.
-The retained body path now also allocates a second indirect-argument set for
-the vane-contained rachis, increasing the three-slot indirect capacity from
-`336` to `672` bytes. Dedicated Metal/Swift parity and indirect-storage tests
-qualify its `0/4/8/12`-section tube expansion. Schema `21` deliberately keeps
-the existing body-vane counters: the rachis inherits its parent vane's stable
-identity and the integer pass retains that underlying vane identity rather than
-issuing a redundant tube draw. Beauty ownership is nevertheless Metal-native.
+The retained body path now allocates second and third indirect-argument sets for
+the vane-contained rachis and body-detail hierarchy, increasing three-slot
+indirect capacity from `336` to `1,008` bytes. Dedicated Metal/Swift parity and
+indirect-storage tests qualify the rachis's `0/4/8/12`-section tube expansion
+and the detail path's `0/0/25/25/23/23/149` compact temporal segments. The
+initial `96`-byte segment store retains `23,126,400` bytes over three in-flight
+slots and grows to `137,833,344` bytes only for the future `480 px` topology.
+Schema `21` deliberately keeps the existing body-vane counters: rachis and
+detail inherit their parent vane's stable identity, and the integer pass
+retains that underlying vane identity rather than issuing redundant subpixel
+fiber draws. Beauty ownership is nevertheless Metal-native. These storage and
+parity observations are not a performance result.
 Schema `21` also records projected-size ventral-barb candidate,
 frustum-visible, prior-depth-tested, occlusion-culled, and retained record
 counts; logical triangle-stream vertex count; actual raster vertex invocations;
