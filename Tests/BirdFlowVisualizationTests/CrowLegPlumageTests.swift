@@ -3,6 +3,35 @@ import simd
 
 @testable import BirdFlowVisualization
 
+@Test("crural morphology is immutable and reconstructs live limb frames")
+func cruralMorphologyReconstructsLiveLimbFrames() {
+  let negative = CrowLegPlumage.morphologySamples(side: -1)
+  let positive = CrowLegPlumage.morphologySamples(side: 1)
+  #expect(negative.count == 162)
+  #expect(positive.count == 162)
+  #expect(negative.allSatisfy { $0.side == -1 })
+  #expect(positive.allSatisfy { $0.side == 1 })
+  #expect(
+    Set(negative.map { SIMD2<Int>($0.radialIndex, $0.stationIndex) }).count
+      == 162
+  )
+  let firstHip = SIMD3<Float>(-0.025, -0.035, -0.060)
+  let firstHock = SIMD3<Float>(-0.014, -0.040, -0.111)
+  let secondHip = SIMD3<Float>(-0.023, -0.034, -0.058)
+  let secondHock = SIMD3<Float>(-0.011, -0.039, -0.109)
+  let first = negative.map {
+    CrowLegPlumage.feather(morphology: $0, hip: firstHip, hock: firstHock)
+  }
+  let second = negative.map {
+    CrowLegPlumage.feather(morphology: $0, hip: secondHip, hock: secondHock)
+  }
+  #expect(first == CrowLegPlumage.samples(hip: firstHip, hock: firstHock))
+  #expect(second == CrowLegPlumage.samples(hip: secondHip, hock: secondHock))
+  #expect(zip(first, second).allSatisfy { $0.radialIndex == $1.radialIndex })
+  #expect(zip(first, second).allSatisfy { $0.stationIndex == $1.stationIndex })
+  #expect(zip(first, second).contains { simd_distance($0.root, $1.root) > 1e-4 })
+}
+
 @Test("crow crural plumage overlaps the leg and crosses the hock boundary")
 func crowCruralPlumageOverlapsLegAndCrossesHockBoundary() {
   let hip = SIMD3<Float>(-0.025, 0.035, -0.060)

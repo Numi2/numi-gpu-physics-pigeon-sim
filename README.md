@@ -120,16 +120,17 @@ against its CPU-expanded predecessor; beauty SSIM is `0.999997`. This remains
 the procedural-raster ownership gate; the retained-morphology gate follows
 below. Neither is measured anatomy or a speedup.
 The `3,212`-record dorsal/body subset occupies `411,136` bytes inside one
-`578,048`-byte retained inventory. The additional `1,304` pectoral and
+`688,640`-byte retained inventory. The additional `1,304` pectoral and
 abdominal vanes use the same immutable owner with a distinct `0x03` identity
-namespace; their dedicated retained rachis and barb systems remain separate.
-Three pose slots retain `4,128` bytes total, while Metal applies the established
-density predicates, classifies nine possible tessellation topologies, scans stable offsets, emits
+namespace, followed by the `540` femoral and `324` crural limb vanes; dedicated
+rachis and barb systems remain separate. Three pose slots retain `4,512` bytes
+total, while Metal applies the established density predicates, classifies ten
+possible tessellation topologies, scans stable offsets, emits
 compact morphology indices, and prepares indirect vane, rachis, and body-detail
 beauty draws. At
 yaw/pitch `(-1.12, 0.26)` and `0.50 m`, Metal selects the same `1,606` body records
 in two active topology bins and requests `285,984` raster vertex invocations;
-the current three-slot indirect arguments occupy `1,296` bytes. CPU grouping and temporal
+the current three-slot indirect arguments occupy `1,440` bytes. CPU grouping and temporal
 record construction now run only for explicit audit readback. A new five-frame
 release gate at rear-right yaw/pitch `(2.28, 0.38)` and `0.62 m` spans standing,
 deployment, and flight. Minimum beauty SSIM against the former temporal-record
@@ -176,10 +177,24 @@ simulated frame retains a closed pelvic-to-crural overlap from this new angle.
 server dependency for deterministic heavy captures over SSH. These are
 residency, ownership, and parity results—not a GPU-time result or measured
 American-crow anatomy.
+The adjoining crural shell now contributes another `324` identity-stable
+family-`5` records. Its immutable radial/station morphology reconstructs both
+live hip-to-hock frames on Metal using the same eight limb vectors, so pose
+traffic does not grow. The exact live `8 x 3` surface emits `46,656` procedural
+vertices and removes another `4,478,976` bytes of expanded temporal CPU
+geometry per frame. Total retained morphology is `5,380` records / `688,640`
+bytes. A dedicated topology-stable `0.035 m` LOD reference prevents quiet leg
+motion from changing mesh connectivity while preserving the coarse CPU
+fallback below `1,400 px/m` and the standing-only shaft/barb layer. Family `5`
+maps visible identity back to side, radial tract, and axial station. Metal/CPU
+current-and-previous vertex parity and the optimized release renderer are the
+acceptance gates for this pass; the next image inspection is deliberately
+reserved for a different body boundary and camera angle. These remain
+simulated ownership and residency results, not measured anatomy or GPU timing.
 The body-detail prepass retains one `96`-byte current/previous analytic segment
 instead of a fixed `18`-vertex triangle stream. Each resolved feather adds six
 three-segment curved basal barb chains beneath the unchanged continuous shell.
-The seven vane topologies own `0/0/43/43/41/41/167` segments per feather;
+The seven body-detail tiers own `0/0/43/43/41/41/167` segments per feather;
 ordinary tiers retain `39,777,408` bytes across three in-flight slots, while
 the `480 px` future-compute tier can grow that store to `154,484,352` bytes without changing
 identity or CPU ownership. Swift reproduces the former CPU mesostructure at

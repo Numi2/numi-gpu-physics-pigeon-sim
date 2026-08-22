@@ -3103,7 +3103,8 @@ inline uint2 crowBodyVaneTopologySections(uint topologyIndex) {
         case 5u: return uint2(12u,5u);
         case 6u: return uint2(16u,7u);
         case 7u: return uint2(7u,3u);
-        default: return uint2(11u,5u);
+        case 8u: return uint2(11u,5u);
+        default: return uint2(8u,3u);
     }
 }
 
@@ -3113,15 +3114,18 @@ inline uint crowBodyVaneTopologyIndex(
     float projectedPixelsPerMeter=selection.selection.x;
     bool ventral=(record.identity.x&0xff000000u)==0x03000000u;
     bool femoral=(record.identity.x&0xff000000u)==0x04000000u;
-    if(femoral){
-        if(selection.counts.w==0u||projectedPixelsPerMeter<1400.0f){
+    bool crural=(record.identity.x&0xff000000u)==0x05000000u;
+    if(femoral||crural){
+        uint familyBit=femoral?1u:2u;
+        if((selection.counts.w&familyBit)==0u
+            ||projectedPixelsPerMeter<1400.0f){
             return 0xffffffffu;
         }
         float projectedLength=max(0.0f,record.morphology.y
             *projectedPixelsPerMeter);
         if(projectedLength>=480.0f){return 6u;}
-        if(projectedLength>=120.0f){return 8u;}
-        if(projectedLength>=24.0f){return 7u;}
+        if(projectedLength>=120.0f){return crural?5u:8u;}
+        if(projectedLength>=24.0f){return crural?9u:7u;}
         return 1u;
     }
     if(ventral){
@@ -3169,21 +3173,21 @@ kernel void scanCrowBodyVaneRecords(
     constant CrowBodyVaneSelectionUniforms& selection [[buffer(3)]],
     uint index [[thread_position_in_grid]]) {
     if(index>0u){return;}
-    uint counts[9]={0u,0u,0u,0u,0u,0u,0u,0u,0u};
+    uint counts[10]={0u,0u,0u,0u,0u,0u,0u,0u,0u,0u};
     for(uint recordIndex=0u;recordIndex<selection.counts.x;++recordIndex){
         uint topologyIndex=topologyIndices[recordIndex];
-        if(topologyIndex<9u){
+        if(topologyIndex<10u){
             topologyOffsets[recordIndex]=counts[topologyIndex]++;
         }else{
             topologyOffsets[recordIndex]=0xffffffffu;
         }
     }
     uint total=0u;
-    for(uint topologyIndex=0u;topologyIndex<9u;++topologyIndex){
+    for(uint topologyIndex=0u;topologyIndex<10u;++topologyIndex){
         topologyCounts[topologyIndex]=counts[topologyIndex];
         total+=counts[topologyIndex];
     }
-    topologyCounts[9]=total;
+    topologyCounts[10]=total;
 }
 
 kernel void emitCrowBodyVaneWork(
@@ -3195,7 +3199,7 @@ kernel void emitCrowBodyVaneWork(
     uint index [[thread_position_in_grid]]) {
     if(index>=selection.counts.x){return;}
     uint topologyIndex=topologyIndices[index];
-    if(topologyIndex>=9u){return;}
+    if(topologyIndex>=10u){return;}
     uint base=0u;
     for(uint prior=0u;prior<topologyIndex;++prior){base+=topologyCounts[prior];}
     recordWork[base+topologyOffsets[index]]=index;
@@ -3207,7 +3211,7 @@ kernel void prepareCrowBodyVaneIndirectWork(
     device const CrowBodyVaneMorphologyGPU* records [[buffer(2)]],
     device const uint* recordWork [[buffer(3)]],
     uint topologyIndex [[thread_position_in_grid]]) {
-    if(topologyIndex>=9u){return;}
+    if(topologyIndex>=10u){return;}
     uint base=0u;
     for(uint prior=0u;prior<topologyIndex;++prior){base+=topologyCounts[prior];}
     uint2 sections=crowBodyVaneTopologySections(topologyIndex);
@@ -3226,7 +3230,7 @@ kernel void prepareCrowBodyVaneIndirectWork(
     }
     uint rachisSections=sections.x<=4u?0u:
         (sections.x<=8u?4u:(sections.x<=12u?8u:12u));
-    arguments[9u+topologyIndex]={
+    arguments[10u+topologyIndex]={
         rachisSections*24u,
         bodyInstanceCount,
         0u,
@@ -3234,7 +3238,7 @@ kernel void prepareCrowBodyVaneIndirectWork(
     };
     uint detailSegments=sections.x<=4u?0u:
         (sections.x<=8u?43u:(sections.x<=12u?41u:167u));
-    arguments[18u+topologyIndex]={
+    arguments[20u+topologyIndex]={
         detailSegments*18u,
         bodyInstanceCount,
         0u,
@@ -3281,6 +3285,12 @@ inline float crowBodyVaneTransverseCamber(
     );
     return 0.12f+(0.08f-0.12f)*courseWeight
         *crowBodyVaneSmoothstep(deployment);
+}
+
+inline float crowCruralRadius(float fraction) {
+    float bounded=clamp(fraction,0.0f,1.0f);
+    return 0.014f*(1.0f-bounded)+0.0065f*bounded
+        -0.002f*max(0.0f,fraction-1.0f)/0.10f;
 }
 
 inline float3 crowBodyVaneAffinePoint(
@@ -3336,23 +3346,70 @@ inline CrowBodyVaneDynamicState crowBodyVaneDynamicState(
     CrowBodyVaneDynamicState state;
     bool ventral=(record.identity.x&0xff000000u)==0x03000000u;
     bool femoral=(record.identity.x&0xff000000u)==0x04000000u;
+    bool crural=(record.identity.x&0xff000000u)==0x05000000u;
+    if(crural){
+        uint inventoryIndex=record.identity.x&0x00ffffffu;
+        bool negativeSide=inventoryIndex<162u;
+        device const float4* limbPose=(device const float4*)(
+            neckTransforms+28u
+        );
+        float3 hip;
+        float3 hock;
+        if(current){
+            hip=negativeSide?limbPose[2].xyz:limbPose[0].xyz;
+            hock=negativeSide?limbPose[3].xyz:limbPose[1].xyz;
+        }else{
+            hip=negativeSide?limbPose[6].xyz:limbPose[4].xyz;
+            hock=negativeSide?limbPose[7].xyz:limbPose[5].xyz;
+        }
+        float3 axis=safeNormalizeCrow(hock-hip,float3(0.0f,0.0f,-1.0f));
+        float3 helper=abs(axis.z)<0.82f
+            ?float3(0.0f,0.0f,1.0f):float3(0.0f,1.0f,0.0f);
+        float3 first=safeNormalizeCrow(
+            cross(axis,helper),float3(1.0f,0.0f,0.0f)
+        );
+        float3 second=safeNormalizeCrow(
+            cross(axis,first),float3(0.0f,1.0f,0.0f)
+        );
+        float theta=record.rootAndRootWidth.y;
+        float3 radial=cos(theta)*first+sin(theta)*second;
+        float rootFraction=record.rootAndRootWidth.x;
+        float tipFraction=record.rootAndRootWidth.z;
+        state.root=mix(hip,hock,rootFraction)
+            +crowCruralRadius(rootFraction)*radial;
+        float3 tangential=safeNormalizeCrow(cross(axis,radial),second);
+        float angularSweep=record.tipAndMaximumWidth.x;
+        float3 tipRadial=safeNormalizeCrow(
+            cos(angularSweep)*radial+sin(angularSweep)*tangential,radial
+        );
+        state.tip=mix(hip,hock,tipFraction)
+            +(crowCruralRadius(tipFraction)+record.tipAndMaximumWidth.y)
+                *tipRadial;
+        state.normal=safeNormalizeCrow(0.82f*radial+0.18f*tipRadial,radial);
+        state.rootWidth=record.rootAndRootWidth.w;
+        state.maximumWidth=record.tipAndMaximumWidth.w;
+        state.lateralSweep=record.sweepAsymmetryAndRipple.x;
+        state.camber=record.normalAndCamber.w;
+        state.transverseCamber=0.08f;
+        return state;
+    }
     if(femoral){
         uint inventoryIndex=record.identity.x&0x00ffffffu;
         bool negativeSide=inventoryIndex<270u;
         float4 centerAndDeployment=current
             ?pose.currentBodyCenterAndDeployment
             :pose.previousBodyCenterAndDeployment;
-        device const float4* femoralPose=(device const float4*)(
+        device const float4* limbPose=(device const float4*)(
             neckTransforms+28u
         );
         float3 hip;
         float3 hock;
         if(current){
-            hip=negativeSide?femoralPose[2].xyz:femoralPose[0].xyz;
-            hock=negativeSide?femoralPose[3].xyz:femoralPose[1].xyz;
+            hip=negativeSide?limbPose[2].xyz:limbPose[0].xyz;
+            hock=negativeSide?limbPose[3].xyz:limbPose[1].xyz;
         }else{
-            hip=negativeSide?femoralPose[6].xyz:femoralPose[4].xyz;
-            hock=negativeSide?femoralPose[7].xyz:femoralPose[5].xyz;
+            hip=negativeSide?limbPose[6].xyz:limbPose[4].xyz;
+            hock=negativeSide?limbPose[7].xyz:limbPose[5].xyz;
         }
         float side=negativeSide?-1.0f:1.0f;
         float3 legAxis=safeNormalizeCrow(hock-hip,float3(0.0f,0.0f,-1.0f));
@@ -3646,7 +3703,7 @@ inline CrowFeatherVertexGPU crowBodyRachisProceduralVertex(
     uint vertexIndex,uint instanceIndex) {
     CrowBodyVaneMorphologyGPU record=records[instanceIndex];
     CrowFeatherVertexGPU out;
-    if((record.identity.x&0xff000000u)==0x03000000u){
+    if((record.identity.x&0xff000000u)!=0x02000000u){
         CrowBodyVaneDynamicState currentState=crowBodyVaneDynamicState(
             record,pose,neckTransforms,true
         );
@@ -4065,7 +4122,7 @@ inline CrowFeatherVertexGPU crowBodyDetailProceduralVertex(
     device const CrowBodyVaneNeckTransformGPU* neckTransforms,
     uint vertexIndex,uint instanceIndex) {
     CrowBodyVaneMorphologyGPU record=records[instanceIndex];
-    if((record.identity.x&0xff000000u)==0x03000000u){
+    if((record.identity.x&0xff000000u)!=0x02000000u){
         CrowFeatherVertexGPU out;
         CrowBodyVaneDynamicState currentState=crowBodyVaneDynamicState(
             record,pose,neckTransforms,true
@@ -4136,7 +4193,7 @@ kernel void emitCrowBodyDetailSegments(
     uint capacity=selection.counts.z;
     uint compactIndex=index/capacity;
     uint segmentIndex=index-compactIndex*capacity;
-    if(compactIndex>=topologyCounts[9]){return;}
+    if(compactIndex>=topologyCounts[10]){return;}
     uint recordIndex=recordWork[compactIndex];
     uint topologyIndex=topologyIndices[recordIndex];
     uint2 sections=crowBodyVaneTopologySections(topologyIndex);
@@ -4150,7 +4207,7 @@ kernel void emitCrowBodyDetailSegments(
     uint segmentCount=crowBodyDetailSegmentCount(geometry);
     if(segmentIndex>=segmentCount){return;}
     CrowBodyVaneMorphologyGPU record=records[recordIndex];
-    if((record.identity.x&0xff000000u)==0x03000000u){
+    if((record.identity.x&0xff000000u)!=0x02000000u){
         CrowBodyVaneDynamicState currentState=crowBodyVaneDynamicState(
             record,pose,neckTransforms,true
         );

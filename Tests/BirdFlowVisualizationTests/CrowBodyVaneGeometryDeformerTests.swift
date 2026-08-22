@@ -37,26 +37,26 @@ func bodyVanesRetainCompactIdentityStableTemporalRecords() {
   #expect(Set(records.map(\.identity)).count == records.count)
   #expect(first.keys.allSatisfy { $0.widthSections == 1 || $0.widthSections >= 5 })
   #expect(first.keys.allSatisfy { $0.verticesPerInstance > 0 })
-  #expect(CrowBodyVaneRecords.productionTopologies.count == 9)
+  #expect(CrowBodyVaneRecords.productionTopologies.count == 10)
   #expect(
     CrowBodyVaneRecords.productionTopologies.map {
       CrowBodyVaneRecords.rachisSections(for: $0)
-    } == [0, 0, 4, 4, 8, 8, 12, 4, 8]
+    } == [0, 0, 4, 4, 8, 8, 12, 4, 8, 4]
   )
   #expect(
     CrowBodyVaneRecords.productionTopologies.map {
       CrowBodyVaneRecords.rachisVerticesPerInstance(for: $0)
-    } == [0, 0, 96, 96, 192, 192, 288, 96, 192]
+    } == [0, 0, 96, 96, 192, 192, 288, 96, 192, 96]
   )
   #expect(
     CrowBodyVaneRecords.productionTopologies.map {
       CrowBodyVaneRecords.detailSegmentCount(for: $0)
-    } == [0, 0, 43, 43, 41, 41, 167, 43, 41]
+    } == [0, 0, 43, 43, 41, 41, 167, 43, 41, 43]
   )
   #expect(
     CrowBodyVaneRecords.productionTopologies.map {
       CrowBodyVaneRecords.detailVerticesPerInstance(for: $0)
-    } == [0, 0, 774, 774, 738, 738, 3_006, 774, 738]
+    } == [0, 0, 774, 774, 738, 738, 3_006, 774, 738, 774]
   )
   let morphology = CrowBodyVaneRecords.morphologyRecords()
   #expect(morphology.count == 3_212)
@@ -80,14 +80,22 @@ func bodyVanesRetainCompactIdentityStableTemporalRecords() {
     }
   )
   let retainedMorphology = CrowBodyVaneRecords.retainedMorphologyRecords()
-  #expect(retainedMorphology.count == 5_056)
-  #expect(Set(retainedMorphology.map(\.identity)).count == 5_056)
+  #expect(retainedMorphology.count == 5_380)
+  #expect(Set(retainedMorphology.map(\.identity)).count == 5_380)
   let femoralMorphology = CrowBodyVaneRecords.femoralMorphologyRecords()
   #expect(femoralMorphology.count == 540)
   #expect(Set(femoralMorphology.map(\.identity)).count == 540)
   #expect(
     femoralMorphology.allSatisfy {
       ($0.identity.x & 0xFF00_0000) == 0x0400_0000
+    }
+  )
+  let cruralMorphology = CrowBodyVaneRecords.cruralMorphologyRecords()
+  #expect(cruralMorphology.count == 324)
+  #expect(Set(cruralMorphology.map(\.identity)).count == 324)
+  #expect(
+    cruralMorphology.allSatisfy {
+      ($0.identity.x & 0xFF00_0000) == 0x0500_0000
     }
   )
 }
@@ -319,10 +327,12 @@ func metalProceduralBodyVanesMatchSwiftGeometryOracle() throws {
   commandBuffer.waitUntilCompleted()
   #expect(commandBuffer.status == .completed)
   #expect(frame.auditReadbackReady)
-  #expect(frame.morphologyRecordCount == 5_056)
-  #expect(deformer.activeRecordCount(for: frame) == 5_056)
+  #expect(frame.morphologyRecordCount == 5_380)
+  #expect(deformer.activeRecordCount(for: frame) == 5_380)
   #expect(deformer.activeFemoralRecordCount(for: frame) == 540)
   #expect(deformer.expandedFemoralVertexCount(for: frame) == 68_040)
+  #expect(deformer.activeCruralRecordCount(for: frame) == 324)
+  #expect(deformer.expandedCruralVertexCount(for: frame) == 46_656)
   #expect(deformer.expandedVertexCount(for: frame) > 0)
 
   for batch in frame.batches where batch.auditRecordCount > 0 {
@@ -467,7 +477,7 @@ func bodyVaneProductionStorageIsTripleBufferedAndIndirect() throws {
   #expect(batchCount == CrowBodyVaneRecords.productionTopologies.count)
   #expect(frames.map(\.slot) == [0, 1, 2, 0])
   #expect(frames.map(\.morphologyBufferAllocationCount) == [1, 1, 1, 1])
-  #expect(frames.allSatisfy { $0.morphologyRecordCount == 5_056 })
+  #expect(frames.allSatisfy { $0.morphologyRecordCount == 5_380 })
   #expect(
     frames.allSatisfy {
       $0.morphologyRecordBytes == $0.morphologyRecordCount
@@ -481,7 +491,7 @@ func bodyVaneProductionStorageIsTripleBufferedAndIndirect() throws {
   )
   #expect(frames.allSatisfy { $0.poseInputBytes == 1_504 })
   #expect(frames.allSatisfy { $0.retainedPoseCapacityBytes == 4_512 })
-  #expect(deformer.retainedIndirectDrawBytes == 1_296)
+  #expect(deformer.retainedIndirectDrawBytes == 1_440)
   #expect(
     frames.allSatisfy {
       $0.retainedDetailSegmentCapacityBytes
@@ -524,17 +534,62 @@ func bodyVaneProductionStorageIsTripleBufferedAndIndirect() throws {
   }
 }
 
+@Test("Metal limb family mask separates femoral and crural ownership")
+func metalLimbFamilyMaskSeparatesFemoralAndCruralOwnership() throws {
+  guard let device = MTLCreateSystemDefaultDevice() else { return }
+  let backend = try VisualizationBackend(device: device)
+  let deformer = try CrowBodyVaneGeometryDeformer(backend: backend)
+  let standingPose = CrowStandingPose.sample(phase: 0.27)
+  let pose = CrowFemoralVanePoseSample(standingPose)
+
+  func frame(mask: UInt32) throws -> CrowBodyVaneGeometryFrame {
+    let commandBuffer = try #require(backend.queue.makeCommandBuffer())
+    let frame = try deformer.encode(
+      currentBodyCenter: pose.bodyCenter,
+      previousBodyCenter: pose.bodyCenter,
+      currentNeckPose: standingPose.neckPose,
+      previousNeckPose: standingPose.neckPose,
+      currentFemoralPose: pose,
+      previousFemoralPose: pose,
+      limbFamilyMask: mask,
+      currentDeployment: 0,
+      previousDeployment: 0,
+      projectedPixelsPerMeter: 1_600,
+      commandBuffer: commandBuffer
+    )
+    commandBuffer.commit()
+    commandBuffer.waitUntilCompleted()
+    #expect(commandBuffer.status == .completed)
+    return frame
+  }
+
+  let femoralOnly = try frame(mask: 0x1)
+  #expect(deformer.activeFemoralRecordCount(for: femoralOnly) == 540)
+  #expect(deformer.activeCruralRecordCount(for: femoralOnly) == 0)
+  let cruralOnly = try frame(mask: 0x2)
+  #expect(deformer.activeFemoralRecordCount(for: cruralOnly) == 0)
+  #expect(deformer.activeCruralRecordCount(for: cruralOnly) == 324)
+}
+
 @Test("Metal body vane LOD selection matches the deterministic CPU oracle")
 func metalBodyVaneLODSelectionMatchesCPUOracle() throws {
   guard let device = MTLCreateSystemDefaultDevice() else { return }
   let backend = try VisualizationBackend(device: device)
   let deformer = try CrowBodyVaneGeometryDeformer(backend: backend)
-  for projectedPixelsPerMeter: Float in [800, 1_000, 1_600, 20_000] {
+  let currentLimbPose = CrowFemoralVanePoseSample(
+    CrowStandingPose.sample(phase: 0.41)
+  )
+  let previousLimbPose = CrowFemoralVanePoseSample(
+    CrowStandingPose.sample(phase: 0.35)
+  )
+  for projectedPixelsPerMeter: Float in [800, 1_000, 1_600, 4_000, 20_000] {
     let allRecords = CrowBodyVaneRecords.retainedTemporalRecords(
       currentBodyCenter: .zero,
       previousBodyCenter: .zero,
       currentNeckPose: nil,
       previousNeckPose: nil,
+      currentFemoralPose: currentLimbPose,
+      previousFemoralPose: previousLimbPose,
       currentDeployment: 1,
       previousDeployment: 1
     )
@@ -543,6 +598,8 @@ func metalBodyVaneLODSelectionMatchesCPUOracle() throws {
       previousBodyCenter: .zero,
       currentNeckPose: nil,
       previousNeckPose: nil,
+      currentFemoralPose: currentLimbPose,
+      previousFemoralPose: previousLimbPose,
       currentDeployment: 1,
       previousDeployment: 1,
       projectedPixelsPerMeter: projectedPixelsPerMeter
@@ -553,6 +610,8 @@ func metalBodyVaneLODSelectionMatchesCPUOracle() throws {
       previousBodyCenter: .zero,
       currentNeckPose: nil,
       previousNeckPose: nil,
+      currentFemoralPose: currentLimbPose,
+      previousFemoralPose: previousLimbPose,
       currentDeployment: 1,
       previousDeployment: 1,
       projectedPixelsPerMeter: projectedPixelsPerMeter,

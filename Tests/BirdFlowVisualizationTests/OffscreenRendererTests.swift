@@ -775,7 +775,7 @@ func estimatedStandingCrowCaptureProducesLoopClosedFrames() throws {
   #expect(audit.schemaVersion == 27)
   #expect(
     audit.frames.allSatisfy {
-      $0.bodyVaneMorphologyRecordCount == 5_056
+      $0.bodyVaneMorphologyRecordCount == 5_380
         && $0.bodyVaneMorphologyRecordBytes
           == $0.bodyVaneMorphologyRecordCount
           * MemoryLayout<CrowBodyVaneMorphologyGPU>.stride

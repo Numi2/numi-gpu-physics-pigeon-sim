@@ -440,10 +440,10 @@ collar while the head moves.
 The pelvic-to-leg transition uses a distinct estimated femoral tract before the
 existing crural tract. Fifteen body-surface-rooted rows cross the dorsal/outer
 upper thigh in eighteen overlapping courses and advance toward the proximal
-fourteen-by-seven crural envelope without converging onto one cylindrical tip
+eighteen-by-nine crural envelope without converging onto one cylindrical tip
 ring. Identity-stable root, length, radial phase,
 width, and camber variation breaks the former broad cuff into `270` femoral and
-`98` crural vanes per side without changing hip, hock, ankle, or digital support
+`162` crural vanes per side without changing hip, hock, ankle, or digital support
 coordinates. This organization follows the corvid pterylography reported
 for Clark's Nutcracker by
 [Mewaldt (1958)](https://sora.unm.edu/sites/default/files/journals/condor/v060n03/p0165-p0187.pdf);
@@ -485,7 +485,7 @@ neighbour overlaps, and bounded course, length, tip-sweep, width, and camber
 variation prevents a regular tiled plate from replacing the former sparse grid.
 Final-output coverage keeps the proven coarse `130` folded-coverts plus `35`
 femoral and `50` crural vanes per side below `1400 px/m`, then switches to all
-`360`, `270`, and `98` identities at full density. The full `1280 x 720`
+`360`, `270`, and `162` identities at full density. The full `1280 x 720`
 standing view clears that gate and retains every high-quality identity.
 
 The standing-to-flight presentation now preserves that body coverage while
@@ -894,6 +894,18 @@ enclosed-hole pixels `11,13,11`, components `6,7,6`, largest components
 Minimum beauty SSIM is `0.999975`; inspection retains continuous simulated
 pelvic, femoral, and crural overlap. This is renderer parity, not a biological
 measurement.
+
+The full-density crural vane shell is now retained beside it as `324`
+family-`5` Metal records. Radial phase, axial root/tip fractions, angular
+sweep, lift, widths, material, and identity remain immutable; the existing
+current/previous hip and hock vectors reconstruct the live shell without any
+additional pose transport. The exact `8 x 3` tier emits `46,656` vertices and
+avoids `4,478,976` bytes of expanded temporal CPU surface data per frame. A
+single `0.035 m` representative length makes standing and takeoff topology
+stable at future output scales. Coarse distance vanes and the standing-only
+shaft/barb layer remain unchanged. Direct Metal/Swift vertex parity is the
+acceptance evidence for this pass; no new image was admitted as a realism
+reference.
 
 Across fresh 17-frame front-starboard and ventral-port audits at yaw/pitch
 `(-0.32,0.06)` and `(0.66,-0.34)`, enclosed-hole pixels stay `6 -> 6` and

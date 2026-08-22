@@ -46,6 +46,7 @@ public enum CrowShowcaseCapture {
     let cameraTarget: SIMD3<Float>?
     let explicitVentralBarbCurvesEnabled: Bool
     let retainedFemoralVanesEnabled: Bool
+    let retainedCruralVanesEnabled: Bool
     let ventralCurveEmissionMode: CrowVentralCurveEmissionMode
     let presentation: CrowShowcasePresentation
 
@@ -118,6 +119,9 @@ public enum CrowShowcaseCapture {
       )
       retainedFemoralVanesEnabled = !commandLine.contains(
         "--capture-crow-cpu-femoral-vanes"
+      )
+      retainedCruralVanesEnabled = !commandLine.contains(
+        "--capture-crow-cpu-crural-vanes"
       )
       let emissionValue =
         try value(after: "--capture-crow-ventral-curve-emission")
@@ -316,6 +320,7 @@ public enum CrowShowcaseCapture {
       explicitVentralBarbCurvesEnabled:
         arguments.explicitVentralBarbCurvesEnabled,
       retainedFemoralVanesEnabled: arguments.retainedFemoralVanesEnabled,
+      retainedCruralVanesEnabled: arguments.retainedCruralVanesEnabled,
       ventralCurveEmissionMode: arguments.ventralCurveEmissionMode
     )
     let nativeReferenceRenderer =
@@ -332,6 +337,7 @@ public enum CrowShowcaseCapture {
         explicitVentralBarbCurvesEnabled:
           arguments.explicitVentralBarbCurvesEnabled,
         retainedFemoralVanesEnabled: arguments.retainedFemoralVanesEnabled,
+        retainedCruralVanesEnabled: arguments.retainedCruralVanesEnabled,
         ventralCurveEmissionMode: arguments.ventralCurveEmissionMode
       )
       : nil
@@ -828,6 +834,7 @@ private final class CrowShowcaseRenderer {
   private let liveCovertGeometryDeformer: CrowFeatherGeometryDeformer?
   private let bodyVaneGeometryDeformer: CrowBodyVaneGeometryDeformer?
   private let femoralVanesOwnedByMetal: Bool
+  private let cruralVanesOwnedByMetal: Bool
   private let ventralRachisGeometryDeformer: CrowVentralRachisGeometryDeformer
   private let ventralBarbGeometryDeformer: CrowVentralBarbGeometryDeformer?
   private let ventralBarbUsesMeshStage: Bool
@@ -849,6 +856,7 @@ private final class CrowShowcaseRenderer {
     presentation: CrowShowcasePresentation,
     explicitVentralBarbCurvesEnabled: Bool = true,
     retainedFemoralVanesEnabled: Bool = true,
+    retainedCruralVanesEnabled: Bool = true,
     ventralCurveEmissionMode: CrowVentralCurveEmissionMode = .auto
   ) throws {
     self.presentation = presentation
@@ -913,6 +921,9 @@ private final class CrowShowcaseRenderer {
     let createdFemoralVanesOwnedByMetal = bodyVaneGeometryDeformer != nil
       && retainedFemoralVanesEnabled
     femoralVanesOwnedByMetal = createdFemoralVanesOwnedByMetal
+    let createdCruralVanesOwnedByMetal = bodyVaneGeometryDeformer != nil
+      && retainedCruralVanesEnabled
+    cruralVanesOwnedByMetal = createdCruralVanesOwnedByMetal
     let createdMeshBuilder = CrowMeshBuilder(
       dataset: dataset,
       profile: profile,
@@ -922,7 +933,8 @@ private final class CrowShowcaseRenderer {
       explicitVentralBarbCurvesEnabled: explicitVentralBarbCurvesEnabled,
       bodyVanesOwnedByMetal: bodyVaneGeometryDeformer != nil,
       ventralVanesOwnedByMetal: bodyVaneGeometryDeformer != nil,
-      femoralVanesOwnedByMetal: createdFemoralVanesOwnedByMetal
+      femoralVanesOwnedByMetal: createdFemoralVanesOwnedByMetal,
+      cruralVanesOwnedByMetal: createdCruralVanesOwnedByMetal
     )
     meshBuilder = createdMeshBuilder
     if let realityAsset {
@@ -1360,9 +1372,13 @@ private final class CrowShowcaseRenderer {
       currentNeckPose: currentBodyVanePose.neckPose,
       previousNeckPose: previousBodyVanePose.neckPose,
       currentFemoralPose: femoralVanesOwnedByMetal
+          || cruralVanesOwnedByMetal
         ? currentBodyVanePose.femoralPose : nil,
       previousFemoralPose: femoralVanesOwnedByMetal
+          || cruralVanesOwnedByMetal
         ? previousBodyVanePose.femoralPose : nil,
+      limbFamilyMask: (femoralVanesOwnedByMetal ? 0x1 : 0)
+        | (cruralVanesOwnedByMetal ? 0x2 : 0),
       currentDeployment: currentBodyVanePose.deployment,
       previousDeployment: previousBodyVanePose.deployment,
       projectedPixelsPerMeter: projectedPixelsPerMeter,
@@ -2150,6 +2166,7 @@ private struct CrowMeshBuilder {
   private let bodyVanesOwnedByMetal: Bool
   private let ventralVanesOwnedByMetal: Bool
   private let femoralVanesOwnedByMetal: Bool
+  private let cruralVanesOwnedByMetal: Bool
   private let leftWingAnchor: CrowWingAttachmentAnchor?
   private let rightWingAnchor: CrowWingAttachmentAnchor?
 
@@ -2168,7 +2185,8 @@ private struct CrowMeshBuilder {
     explicitVentralBarbCurvesEnabled: Bool,
     bodyVanesOwnedByMetal: Bool,
     ventralVanesOwnedByMetal: Bool,
-    femoralVanesOwnedByMetal: Bool
+    femoralVanesOwnedByMetal: Bool,
+    cruralVanesOwnedByMetal: Bool
   ) {
     self.dataset = dataset
     self.profile = profile
@@ -2178,6 +2196,7 @@ private struct CrowMeshBuilder {
     self.bodyVanesOwnedByMetal = bodyVanesOwnedByMetal
     self.ventralVanesOwnedByMetal = ventralVanesOwnedByMetal
     self.femoralVanesOwnedByMetal = femoralVanesOwnedByMetal
+    self.cruralVanesOwnedByMetal = cruralVanesOwnedByMetal
     persistentFeathers = realityAsset?.feathers ?? []
     surfaceIsEstimatedCrow =
       dataset.scientificTier == "estimated-hybrid-complete-surface"
@@ -3962,32 +3981,29 @@ private struct CrowMeshBuilder {
           materialVariation: feather.materialVariation,
           bodyMaterialBlend: feather.bodyMaterialBlend
         )
-        appendFeatherBlade(
-          root: feather.root,
-          tip: feather.tip,
-          planeNormal: feather.planeNormal,
-          rootWidth: feather.rootWidthMeters,
-          maximumWidth: feather.maximumWidthMeters,
-          color: color,
-          sections: 8,
-          camber: feather.camberMeters,
-          lateralSweep: feather.lateralSweepMeters,
-          transverseCamberRatio: 0.08,
-          vaneAsymmetry: feather.vaneAsymmetry,
-          edgeRippleAmplitude: feather.edgeRippleAmplitude,
-          edgeRipplePhase: feather.edgeRipplePhase,
-          edgeRippleCycles: feather.edgeRippleCycles,
-          rootEnvelopeRatio: feather.rootEnvelopeRatio,
-          surfaceFeatherClass: CrowLegPlumage.surfaceFeatherClass,
-          lodLengthMeters: takeoffSequence
-            ? 0.035
-            : max(
-              simd_distance(feather.root, feather.tip),
-              CrowLegPlumage.minimumLODTessellationLengthMeters
-            ),
-          projectedPixelsPerMeter: projectedPixelsPerMeter,
-          to: &vertices
-        )
+        if !cruralVanesOwnedByMetal || projectedPixelsPerMeter < 1_400 {
+          appendFeatherBlade(
+            root: feather.root,
+            tip: feather.tip,
+            planeNormal: feather.planeNormal,
+            rootWidth: feather.rootWidthMeters,
+            maximumWidth: feather.maximumWidthMeters,
+            color: color,
+            sections: 8,
+            camber: feather.camberMeters,
+            lateralSweep: feather.lateralSweepMeters,
+            transverseCamberRatio: 0.08,
+            vaneAsymmetry: feather.vaneAsymmetry,
+            edgeRippleAmplitude: feather.edgeRippleAmplitude,
+            edgeRipplePhase: feather.edgeRipplePhase,
+            edgeRippleCycles: feather.edgeRippleCycles,
+            rootEnvelopeRatio: feather.rootEnvelopeRatio,
+            surfaceFeatherClass: CrowLegPlumage.surfaceFeatherClass,
+            lodLengthMeters: CrowLegPlumage.topologyLODReferenceLengthMeters,
+            projectedPixelsPerMeter: projectedPixelsPerMeter,
+            to: &vertices
+          )
+        }
         if !takeoffSequence {
           appendTractFeatherMesostructure(
             CrowCruralFeatherDetail.segments(

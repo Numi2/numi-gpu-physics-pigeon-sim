@@ -147,15 +147,19 @@ class-`7` pectoral/abdominal vane owners. Identity family `2` remains the
 ventral region, side, row, and column. Throat blades remain separate surface
 primitives. The subsequent femoral-retention pass adds `540` family-`4`
 records whose inventory index maps to bilateral side, row, and course. The
-aggregate retained-morphology counters therefore report `5,056` records and
-`647,168` bytes, while dedicated ventral fields continue to report
+crural-retention pass adds `324` family-`5` records mapping bilateral side,
+radial tract, and axial station. Aggregate retained-morphology counters now
+report `5,380` records and `688,640` bytes, while dedicated ventral fields
+continue to report
 `1,304` records, selected work, procedural raster invocations, eliminated CPU
 surface bytes, and `gpu-retained-identity-stable-procedural-vane` generation.
 At the current `7 x 3` tier this is `164,304` raster vertices and `15,773,184`
 eliminated `CrowSurfaceTemporalVertexGPU` bytes per frame. Femoral family `4`
 adds `68,040` raster vertices and eliminates another `6,531,840` bytes per
-frame; its exact selected count is recoverable from the family census and the
-aggregate selected count without widening the already large frame-audit ABI.
+frame. Crural family `5` adds `46,656` raster vertices and eliminates another
+`4,478,976` bytes per frame. Exact limb-family selected counts are recoverable
+from the family census and aggregate selected count without widening the
+already large frame-audit ABI.
 This is a data-flow and residency audit, not a GPU-time or throughput result.
 Schema `24` deliberately keeps the existing body-vane counters: rachis and
 detail inherit their parent vane's stable identity, and the integer pass

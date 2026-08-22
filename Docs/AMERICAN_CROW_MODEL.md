@@ -568,6 +568,18 @@ aperture, and active/full-coverage counts with minimum SSIM `0.999975`. Family
 `4` exposes `221,227,221` visible owners across the three frames. This
 qualifies simulated ownership and parity, not measured anatomy or speed.
 
+The `18 x 9` bilateral crural shell likewise retains all `324` close-view
+vanes as immutable family-`5` Metal morphology. Each record stores its radial
+phase, axial root/tip fractions, angular sweep, radial lift, vane envelope,
+material, and stable radial/station identity. The same compact limb pose used
+by the femoral field reconstructs roots, tips, normals, widths, and both
+temporal positions, adding no pose bytes. Its topology-stable `0.035 m`
+reference selects the exact live `8 x 3` surface (`46,656` vertices) and
+removes `4,478,976` bytes of expanded CPU temporal geometry per frame. Coarse
+output below `1,400 px/m` and standing-only crural mesostructure remain CPU
+owned. Metal/Swift temporal vertex parity is executable; this is not a visual
+realism or performance qualification.
+
 At the five-by-seven distance LOD, a rear-right temporal-identity trace at
 yaw/pitch `(2.28, 0.38)` resolves the residual pelvic insertion owners to
 anterior course `6`: rows `1...2` receive a `1.52x` width and `1.06x` length
@@ -675,8 +687,9 @@ American-crow anatomical measurement.
 
 Body-vane morphology is retained once rather than triple-buffered per pose. The
 `3,212` immutable `128`-byte records occupy `411,136` bytes; three in-flight
-pose slots retain `4,128` bytes total and each receives only `1,376` bytes of
-current/previous body, deployment, and cervical affine transforms. Metal
+pose slots now retain `4,512` bytes total and each receives only `1,504` bytes
+of current/previous body, deployment, cervical affine transforms, and compact
+limb vectors. Metal
 reproduces the established whole/half/quarter density predicate, classifies
 each active morphology into one of seven topology bins, scans stable offsets,
 emits compact inventory indices, and prepares vane, rachis, and body-detail
@@ -716,7 +729,7 @@ The remaining body mesostructure is now Metal-owned as compact temporal
 segments. Each `96`-byte record retains current and previous endpoints, taper,
 surface normal, and detail kind, then the vertex stage expands it into either a
 six-vertex ribbon or a three-sided tube within the established fixed
-`18`-vertex segment stride. The seven vane topologies retain
+`18`-vertex segment stride. The seven body-detail tiers retain
 `0/0/43/43/41/41/167` segments
 (`0/0/774/774/738/738/3,006` raster vertices) per selected feather. The added
 `18` segments form three bilateral basal barbs, each reconstructed as a

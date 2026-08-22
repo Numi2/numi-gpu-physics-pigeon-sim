@@ -143,13 +143,14 @@ inventory or view-dependent patch geometry.
    from the same `1,304`-feather tract inventory; the unindexed procedural
    triangle stream remains the high-cost correctness oracle, not the final
    scaling path.
-   The `270`-identity-per-side femoral field now has a compact, AOV-localized
-   insertion-overlap oracle over rows `6...11`, courses `8...9`; the bounded
-   width/tip envelope closes a transition seam without moving follicles or leg
-   joints. The future-compute path should retain those root/vane records on the
-   GPU, visibility-cull them into indirect curve or meshlet work, and replace
-   the prescribed envelope with per-feather contact and bending while matching
-   the accepted three-angle silhouette oracle.
+   The `270`-identity-per-side femoral field and `162`-identity-per-side crural
+   field now retain immutable family-`4`/`5` morphology on Metal and
+   reconstruct temporal surfaces from compact limb pose. The femoral
+   insertion-overlap oracle remains localized to rows `6...11`, courses
+   `8...9`; neither field moves follicles or leg joints. The next
+   future-compute step is GPU visibility compaction plus indirect indexed or
+   meshlet work for both limb families, followed by per-feather contact and
+   bending that must preserve the accepted multi-angle silhouette oracle.
 
 3. **Measured appearance, bounded claims.** Implement an energy-bounded,
    anisotropic feather BSDF with separate eumelanin absorption, longitudinal
