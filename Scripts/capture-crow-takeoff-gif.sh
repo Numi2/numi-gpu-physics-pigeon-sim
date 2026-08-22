@@ -60,19 +60,35 @@ DISPLAY_DURATION="$(
   ffprobe -v error -select_streams v:0 \
     -show_entries stream=duration -of default=nw=1:nk=1 "$OUTPUT"
 )"
-FIRST_HASH="$(shasum -a 256 "$FRAMES/frame-000.png" | awk '{print $1}')"
-TRANSITION_HASH="$(shasum -a 256 "$FRAMES/frame-035.png" | awk '{print $1}')"
-FLIGHT_HASH="$(shasum -a 256 "$FRAMES/frame-071.png" | awk '{print $1}')"
+# `CrowTakeoffSequence` holds through normalized phase 0.20 and finishes its
+# geometric transition at phase 0.56. With the 72-frame inclusive sampling
+# contract, these probes bracket the exact still/transition/flight boundaries.
+HOLD_FIRST_HASH="$(shasum -a 256 "$FRAMES/frame-000.png" | awk '{print $1}')"
+HOLD_LAST_HASH="$(shasum -a 256 "$FRAMES/frame-014.png" | awk '{print $1}')"
+TRANSITION_FIRST_HASH="$(shasum -a 256 "$FRAMES/frame-015.png" | awk '{print $1}')"
+TRANSITION_LAST_HASH="$(shasum -a 256 "$FRAMES/frame-039.png" | awk '{print $1}')"
+FLIGHT_FIRST_HASH="$(shasum -a 256 "$FRAMES/frame-040.png" | awk '{print $1}')"
+FLIGHT_LAST_HASH="$(shasum -a 256 "$FRAMES/frame-071.png" | awk '{print $1}')"
+STAGE_PROBE_COUNT="$(
+  printf '%s\n' \
+    "$HOLD_FIRST_HASH" \
+    "$HOLD_LAST_HASH" \
+    "$TRANSITION_FIRST_HASH" \
+    "$TRANSITION_LAST_HASH" \
+    "$FLIGHT_FIRST_HASH" \
+    "$FLIGHT_LAST_HASH" \
+    | sort -u \
+    | wc -l \
+    | tr -d ' '
+)"
 
 if [[ "$DIMENSIONS" != "800x450" || "$FRAME_COUNT" != "72" \
   || "$DISPLAY_DURATION" != "3.000000" ]]; then
   echo "unexpected crow GIF contract: ${DIMENSIONS}, ${FRAME_COUNT} frames, ${DISPLAY_DURATION}s" >&2
   exit 1
 fi
-if [[ "$FIRST_HASH" == "$TRANSITION_HASH" \
-  || "$TRANSITION_HASH" == "$FLIGHT_HASH" \
-  || "$FIRST_HASH" == "$FLIGHT_HASH" ]]; then
-  echo "crow GIF stages are not visually distinct" >&2
+if [[ "$STAGE_PROBE_COUNT" != "6" ]]; then
+  echo "crow GIF still, transition, and flight probes are not all visually distinct" >&2
   exit 1
 fi
 
