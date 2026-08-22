@@ -917,11 +917,11 @@ simulated terminal ownership and raster continuity, not measured rectrix
 morphology or perceptual realism.
 
 The canonical README sequence is fully simulated and contains the native hold,
-transition, and flight path: `800 x 450`, `72` frames at `24 fps`, `8,312,298`
+transition, and flight path: `800 x 450`, `72` frames at `24 fps`, `7,999,691`
 bytes, SHA-256
-`2f17bb7a264465af6e11e3c89698533ac9855fa1d18350c0f0cc8e7578efdebe`.
-All `72` native source PNGs matched a detached clean replay of revision
-`875b799` exactly.
+`8e7cad46fa9e5e28df39f7d6b3e7e8b9208c7e65689f60ec66e38a4d56938ca3`.
+The audited stage PNGs at frames `0`, `35`, and `71` are distinct and retain
+the simulated hold, geometric deployment, and sustained-flight states.
 
 Run the presentation with:
 

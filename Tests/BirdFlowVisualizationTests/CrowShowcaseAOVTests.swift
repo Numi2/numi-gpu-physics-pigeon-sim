@@ -22,6 +22,18 @@ func wingSurfaceIdentityRetainsExactCellOwnership() {
     centroidY: 8
   )
   #expect(CrowWingSurfaceCellIdentity.isPacked(packed))
+  #expect(
+    CrowWingSurfaceCellIdentity.isPacked(
+      packed,
+      surfaceMaterialCode: 2
+    )
+  )
+  #expect(
+    !CrowWingSurfaceCellIdentity.isPacked(
+      CrowFootAnatomy.surfaceIdentityClassCode,
+      surfaceMaterialCode: 4
+    )
+  )
   #expect(packed < 1 << 24)
   #expect(audit.partIdentifier == 3)
   #expect(audit.spanIndex == 31)

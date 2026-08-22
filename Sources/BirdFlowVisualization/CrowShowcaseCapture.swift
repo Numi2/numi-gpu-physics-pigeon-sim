@@ -2847,16 +2847,16 @@ private struct CrowMeshBuilder {
         )
       case .humeral:
         color = SIMD4<Float>(
-          0.0068 * (1 + 0.095 * material),
-          0.0105 * (1 + 0.072 * material),
-          0.019 * (1 + 0.048 * material),
+          0.0058 * (1 + 0.080 * material),
+          0.0090 * (1 + 0.060 * material),
+          0.0162 * (1 + 0.040 * material),
           0.17
         )
       case .scapular:
         color = SIMD4<Float>(
-          0.007 * (1 + 0.10 * material),
-          0.011 * (1 + 0.075 * material),
-          0.020 * (1 + 0.05 * material),
+          0.0060 * (1 + 0.085 * material),
+          0.0094 * (1 + 0.065 * material),
+          0.0170 * (1 + 0.042 * material),
           0.18
         )
       }

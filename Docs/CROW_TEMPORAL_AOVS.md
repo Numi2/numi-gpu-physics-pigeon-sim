@@ -90,7 +90,7 @@ audit path and temporal scale:
   /tmp/crow.mp4 /tmp/crow.png standing /tmp/crow-aov-audit.json 2
 ```
 
-The schema-17 JSON report records format and coordinate conventions plus per-frame
+The schema-18 JSON report records format and coordinate conventions plus per-frame
 finite-pixel count, HDR values above one, exact active IDs, visible feather IDs,
 fully covered samples, unit-normal error, depth range, moving-pixel count,
 maximum motion, and bird/support vertical centroids. It also records exact
@@ -99,14 +99,17 @@ wing-surface cell, and topology-bound dorsal covert. Up to `128` longest
 exterior-connected background runs bracketed by bird pixels on image rows or
 columns retain both boundary class codes, surface-primitive identifiers, and
 full packed anatomical identities. Visible feather classes retain scene-linear
-luminance mean, standard deviation, maximum, and same-class neighbour variation
-before tone mapping. At most four samples per axis and
+luminance mean, standard deviation, maximum, the maximum's exact pixel
+coordinate, and same-class neighbour variation before tone mapping. At most four samples per axis and
 ordered class pair are retained, so one large projection cannot erase other
-anatomical owners. For the largest enclosed component, schema `17` also
+anatomical owners. Wing-cell ownership additionally requires the scaffold's
+low-alpha material code, preventing the bare class-`11` pedal identity from
+aliasing the first left-wing cell. For the largest enclosed component, schema
+`18` also
 retains the sorted packed identities adjacent to its boundary. This resolves a
 gap directly to persistent class/side/order/count or live covert ownership
 without inferring the owner from color or a temporary debug render.
-Schema `17` additionally records projected-size ventral-barb candidate,
+Schema `18` additionally records projected-size ventral-barb candidate,
 frustum-visible, prior-depth-tested, occlusion-culled, and retained record
 counts; logical triangle-stream vertex count; actual raster vertex invocations;
 materialized output-capacity bytes; generation mode; and max-depth hierarchy

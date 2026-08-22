@@ -4292,7 +4292,7 @@ inline float3 showcaseCrowLinearRadiance(
     classSheenScale=mix(classSheenScale,0.72f,greaterCovertVane);
     classSheenScale=mix(classSheenScale,0.66f,underwingCovertVane);
     classSheenScale=mix(classSheenScale,0.72f,dorsalBodyVane);
-    classSheenScale=mix(classSheenScale,0.67f,flankBodyVane);
+    classSheenScale=mix(classSheenScale,0.60f,flankBodyVane);
     classSheenScale=mix(
         classSheenScale,0.62f,max(ventralBodyVane,ventralFiberMaterial)
     );
@@ -4401,13 +4401,13 @@ inline float3 showcaseCrowLinearRadiance(
     transverseRoughness=mix(transverseRoughness,0.090f,secondaryVane);
     transverseRoughness=mix(transverseRoughness,0.075f,rectrixVane);
     longitudinalRoughness=mix(longitudinalRoughness,0.333f,dorsalBodyVane);
-    longitudinalRoughness=mix(longitudinalRoughness,0.340f,flankBodyVane);
+    longitudinalRoughness=mix(longitudinalRoughness,0.385f,flankBodyVane);
     longitudinalRoughness=mix(longitudinalRoughness,0.350f,ventralBodyVane);
     longitudinalRoughness=mix(longitudinalRoughness,0.360f,headNeckVane);
     longitudinalRoughness=mix(longitudinalRoughness,0.390f,foreheadVane);
     longitudinalRoughness=mix(longitudinalRoughness,0.370f,gularVane);
     transverseRoughness=mix(transverseRoughness,0.142f,dorsalBodyVane);
-    transverseRoughness=mix(transverseRoughness,0.148f,flankBodyVane);
+    transverseRoughness=mix(transverseRoughness,0.185f,flankBodyVane);
     transverseRoughness=mix(transverseRoughness,0.154f,ventralBodyVane);
     transverseRoughness=mix(transverseRoughness,0.156f,headNeckVane);
     transverseRoughness=mix(transverseRoughness,0.165f,foreheadVane);

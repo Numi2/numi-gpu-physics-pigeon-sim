@@ -171,7 +171,12 @@ struct CrowShowcaseFrame {
           persistentFeatherXTotal[featherIdentity, default: 0] += x
           persistentFeatherYTotal[featherIdentity, default: 0] += y
         }
-        if id0 == UInt32.max && CrowWingSurfaceCellIdentity.isPacked(id3) {
+        if id0 == UInt32.max
+          && CrowWingSurfaceCellIdentity.isPacked(
+            id3,
+            surfaceMaterialCode: id2
+          )
+        {
           wingSurfaceCellVisiblePixels[id3, default: 0] += 1
           let x = pixel % width
           let y = pixel / width
@@ -215,7 +220,12 @@ struct CrowShowcaseFrame {
         if id0 != UInt32.max && (1...3).contains(id3 & 255) {
           persistentFeatherFullyCoveredPixels[SIMD4(id0, id1, id2, id3), default: 0] += 1
         }
-        if id0 == UInt32.max && CrowWingSurfaceCellIdentity.isPacked(id3) {
+        if id0 == UInt32.max
+          && CrowWingSurfaceCellIdentity.isPacked(
+            id3,
+            surfaceMaterialCode: id2
+          )
+        {
           wingSurfaceCellFullyCoveredPixels[id3, default: 0] += 1
         }
         if id0 == UInt32.max && CrowWingCovertIdentity.isPacked(id3) {
@@ -445,6 +455,8 @@ struct CrowShowcaseFrame {
     var sums = [Double](repeating: 0, count: 32)
     var squaredSums = [Double](repeating: 0, count: 32)
     var maxima = [Float](repeating: 0, count: 32)
+    var maximumX = [Int](repeating: 0, count: 32)
+    var maximumY = [Int](repeating: 0, count: 32)
     var neighborCounts = [Int](repeating: 0, count: 32)
     var neighborDifferenceSums = [Double](repeating: 0, count: 32)
 
@@ -454,10 +466,13 @@ struct CrowShowcaseFrame {
       counts[featherClass] += 1
       sums[featherClass] += Double(luminance)
       squaredSums[featherClass] += Double(luminance * luminance)
-      maxima[featherClass] = max(maxima[featherClass], luminance)
-
       let x = pixel % width
       let y = pixel / width
+      if luminance > maxima[featherClass] {
+        maxima[featherClass] = luminance
+        maximumX[featherClass] = x
+        maximumY[featherClass] = y
+      }
       if x + 1 < width {
         let neighbor = pixel + 1
         if birdMask[neighbor] && featherClassCodes[neighbor] == featherClassCodes[pixel] {
@@ -487,6 +502,8 @@ struct CrowShowcaseFrame {
         meanLinearLuminance: Float(mean),
         standardDeviationLinearLuminance: Float(sqrt(variance)),
         maximumLinearLuminance: maxima[featherClass],
+        maximumLinearLuminanceX: maximumX[featherClass],
+        maximumLinearLuminanceY: maximumY[featherClass],
         meanSameClassNeighborAbsoluteLuminanceDifference:
           neighborCounts[featherClass] > 0
           ? Float(
@@ -1156,6 +1173,8 @@ struct CrowFeatherClassLuminanceAudit: Codable, Equatable {
   let meanLinearLuminance: Float
   let standardDeviationLinearLuminance: Float
   let maximumLinearLuminance: Float
+  let maximumLinearLuminanceX: Int
+  let maximumLinearLuminanceY: Int
   let meanSameClassNeighborAbsoluteLuminanceDifference: Float
 }
 
@@ -1298,6 +1317,16 @@ enum CrowWingSurfaceCellIdentity {
   static func isPacked(_ identity: UInt32) -> Bool {
     identity & 255 == featherClassCode
   }
+
+  /// Class 11 is also the deliberately separate pedal-keratin class. The
+  /// retained wing scaffold uses the low-alpha feather material bucket, so an
+  /// AOV owner must satisfy both fields before it is decoded as a wing cell.
+  static func isPacked(
+    _ identity: UInt32,
+    surfaceMaterialCode: UInt32
+  ) -> Bool {
+    surfaceMaterialCode == 2 && isPacked(identity)
+  }
 }
 
 struct CrowWingSurfaceCellIdentityAudit: Codable, Equatable {
@@ -1359,7 +1388,7 @@ struct CrowShowcaseAOVAuditReport: Codable, Equatable {
   let frames: [CrowShowcaseAOVFrameAudit]
 
   init(frames: [CrowShowcaseAOVFrameAudit]) {
-    schemaVersion = 17
+    schemaVersion = 18
     colorSpace = "scene-linear extended range; display output is tone mapped separately"
     motionConvention =
       "current pixel to previous pixel in upper-left-origin pixel units; MetalFX scale 1"

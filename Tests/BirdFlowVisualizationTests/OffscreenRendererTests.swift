@@ -525,12 +525,16 @@ func crowAOVAuditMeasuresFeatherClassLinearLuminance() {
   #expect(abs(body.meanLinearLuminance - 3) < 1e-6)
   #expect(abs(body.standardDeviationLinearLuminance - sqrt(8 / 3)) < 1e-5)
   #expect(body.maximumLinearLuminance == 5)
+  #expect(body.maximumLinearLuminanceX == 0)
+  #expect(body.maximumLinearLuminanceY == 1)
   #expect(abs(body.meanSameClassNeighborAbsoluteLuminanceDifference - 3) < 1e-6)
   let adjacentClass = audits[1]
   #expect(adjacentClass.pixelCount == 2)
   #expect(adjacentClass.meanLinearLuminance == 4)
   #expect(adjacentClass.standardDeviationLinearLuminance == 2)
   #expect(adjacentClass.maximumLinearLuminance == 6)
+  #expect(adjacentClass.maximumLinearLuminanceX == 2)
+  #expect(adjacentClass.maximumLinearLuminanceY == 1)
   #expect(adjacentClass.meanSameClassNeighborAbsoluteLuminanceDifference == 4)
 }
 
@@ -741,7 +745,7 @@ func estimatedStandingCrowCaptureProducesLoopClosedFrames() throws {
     try VisualizationBackend(device: device).supportsMeshShaders
     ? "gpu-mesh-threadgroup-8-vertex-indexed"
     : "gpu-procedural-vertex-pulling"
-  #expect(audit.schemaVersion == 17)
+  #expect(audit.schemaVersion == 18)
   #expect(
     audit.frames.allSatisfy {
       $0.ventralBarbCandidateRecordCount == 0

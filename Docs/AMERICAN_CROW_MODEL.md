@@ -183,11 +183,13 @@ or alter rectrix deployment. The dorsal folded-wing quad collapses over
 presentation phase `0.20...0.30`, while the narrow terminal axillary bridge
 overlaps live underwing deployment until progress `0.30`; this prevents either
 bridge from becoming a free-flight slab or exposing the root aperture. Crow AOV
-schema `17` carries exact visible and
+schema `18` carries exact visible and
 fully covered pixels plus image bounds per persistent feather, wing-surface
 cell, and topology-bound dorsal-covert identity. Ownership can therefore be
 traced to class/side/order or side/chord/span without inferring it from a beauty
-image.
+image. It also records each class-luminance maximum's pixel and requires the
+scaffold material code before decoding a wing cell, so pedal class `11` cannot
+alias the first left-wing cell.
 
 The retained rectrix surface preserves a nonzero width envelope over its
 terminal `16%` of length. Medial and outermost pairs remain at `13-16%`; a

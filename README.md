@@ -126,10 +126,14 @@ fall from `593/157/28` to `165/121/8`; a new rear-port grazing view remains
 discrete rather than forming a tail plate. These are bounded simulated
 morphology and raster checks, not measured American-crow tip dimensions.
 The exact identity AOV now also reports visible and fully covered pixels for
-every persistent primary, secondary, and rectrix as schema `17`. The same
+every persistent primary, secondary, and rectrix as schema `18`. The same
 report retains the longest exterior-connected row/column slots with exact
 boundary classes, packed identities, and procedural owners, so open shoulder
 gaps are traceable without treating every silhouette concavity as a defect.
+Each class luminance maximum now retains its exact pixel coordinate, and a
+wing-cell owner must also carry the low-alpha scaffold material. Bare pedal
+keratin can therefore no longer alias the numerically overlapping first wing
+cell.
 That census
 traced the early takeoff double-spear to the overlap-expanded terminal primary
 on each side, not to generic primary-tip anatomy. Those two folded oracles now
@@ -152,6 +156,12 @@ remaining on a buried centerline. Interior barbs stop at `97%` of the owning
 vane width, five bounded terminal bundles complete each tip, and all emitted
 detail keeps the parent class-`6` AOV identity. Follicles, centerline tips,
 widths, inventory, and standing anatomy remain unchanged.
+At the opposite standing diagnostic view, the humeral/scapular base spectrum
+and broader optical lobe reduce class-`6` mean scene-linear luminance by
+`8.31%`, standard deviation by `10.57%`, and same-class neighbour contrast by
+`8.55%` with the exact `5,988` visible pixels retained. This keeps anatomical
+scapular overlap while removing its pale-plate read; it is a simulated
+material refinement, not calibrated feather reflectance.
 Interior class-`7` pectoral and abdominal feathers now retain a subvane
 continuity shaft and add a second four-segment rachis on the visible `0.07`
 transverse crown. Boundary rows, terminal courses, and all edge-barb aggregates
