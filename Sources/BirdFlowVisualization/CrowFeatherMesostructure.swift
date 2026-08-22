@@ -24,6 +24,7 @@ enum CrowFeatherMesostructure {
   static let dorsalBodyContourDetailThresholdPixels: Float = 48
   static let dorsalBodyContourInteriorBarbStartAxialFraction: Float = 0.45
   static let shoulderInteriorBarbThresholdPixels: Float = 40
+  static let bodyTractResolvedRachisWidthThresholdPixels: Float = 24
 
   static func segments(
     for feather: CrowBodyContourShingle,
@@ -64,7 +65,7 @@ enum CrowFeatherMesostructure {
         row: feather.row,
         transitionProgress: 0
       )
-    return segments(
+    let resolved = segments(
       frame: Frame(
         feather: feather,
         camberScale: camberScale,
@@ -76,6 +77,13 @@ enum CrowFeatherMesostructure {
         && simd_distance(feather.rootOffset, feather.tipOffset)
           * projectedPixelsPerMeter >= shoulderInteriorBarbThresholdPixels
     )
+    let projectedVaneWidth = 2 * feather.maximumWidthMeters
+      * projectedPixelsPerMeter
+    guard
+      projectedVaneWidth
+        < bodyTractResolvedRachisWidthThresholdPixels
+    else { return resolved }
+    return resolved.filter { $0.kind != .rachis }
   }
 
   static func segments(

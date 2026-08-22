@@ -349,6 +349,21 @@ is supported by [Ng et al. (2014)](https://pmc.ncbi.nlm.nih.gov/articles/PMC4202
 and [Widelitz et al. (2019)](https://pmc.ncbi.nlm.nih.gov/articles/PMC6953487/),
 but neither source supplies these American-crow crown sections or thresholds.
 
+The body-tract rachis representation now uses vane width, rather than feather
+length, as its resolution owner. The analytic lobe is zero below `12` projected
+pixels across the full vane and reaches full strength at `24`; the retained
+tubular shaft is emitted only from `24 px` onward. Thus whole-bird and grazing
+views retain vane edges, barb aggregates, and optical banks without drawing a
+sub-resolution longitudinal wire, while close and future offline views restore
+both shaft layers. At the new high rear-port yaw/pitch `(-1.08,0.58)`, distance
+`0.48 m`, and `1200 x 675`, active coverage changes `193,941 -> 193,927`, fully
+covered pixels `192,879 -> 192,856`, enclosed one-pixel holes improve `7 -> 6`,
+and expected aperture remains zero. Class-`5`/`6` maxima are exact; local
+same-class neighbour variation changes `0.002467 -> 0.002264` and
+`0.001729 -> 0.001163`. A GPU probe locks the `0/0.5/1` response at
+`12/18/24 px`. These thresholds and the perceptual interpretation remain
+estimated rendering choices, not measured American-crow acuity or rachis size.
+
 The estimated femoral field keeps its `15 x 18` body-surface-rooted inventory
 (`270` vanes per side) and all root and joint coordinates. A temporal-identity
 trace of the high-side transition opening localized the owning geometry to

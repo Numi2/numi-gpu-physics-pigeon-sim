@@ -63,6 +63,48 @@ func crowPlumageOpticsProfilePreservesEvidenceBoundary() throws {
   #expect(MemoryLayout<CrowPlumageOpticsGPUParameters>.stride == 96)
 }
 
+@Test("body rachis optics promote only after transverse resolution")
+func bodyRachisOpticsFollowProjectedVaneWidth() throws {
+  guard let device = MTLCreateSystemDefaultDevice() else { return }
+  let backend = try VisualizationBackend(device: device)
+  let pipeline = try backend.compute("probeCrowBodyRachisOpticalLOD")
+  let projectedWidths: [Float] = [0, 11.5, 12, 18, 24, 36]
+  let expected: [Float] = [0, 0, 0, 0.5, 1, 1]
+  let input = try backend.buffer(
+    length: projectedWidths.count * MemoryLayout<Float>.stride,
+    shared: true
+  )
+  _ = projectedWidths.withUnsafeBytes { bytes in
+    memcpy(input.contents(), bytes.baseAddress!, bytes.count)
+  }
+  let output = try backend.buffer(
+    length: projectedWidths.count * MemoryLayout<Float>.stride,
+    shared: true
+  )
+  let commandBuffer = try #require(backend.queue.makeCommandBuffer())
+  let encoder = try #require(commandBuffer.makeComputeCommandEncoder())
+  encoder.setBuffer(input, offset: 0, index: 0)
+  encoder.setBuffer(output, offset: 0, index: 1)
+  backend.dispatch1D(encoder, pipeline: pipeline, count: projectedWidths.count)
+  encoder.endEncoding()
+  commandBuffer.commit()
+  commandBuffer.waitUntilCompleted()
+  #expect(commandBuffer.status == .completed)
+
+  let pointer = output.contents().bindMemory(
+    to: Float.self,
+    capacity: projectedWidths.count
+  )
+  let measured = Array(
+    UnsafeBufferPointer(start: pointer, count: projectedWidths.count)
+  )
+  for (actual, reference) in zip(measured, expected) {
+    #expect(actual.isFinite)
+    #expect(actual >= 0 && actual <= 1)
+    #expect(abs(actual - reference) < 2e-6)
+  }
+}
+
 @Test("crow plumage optics rejects invented raw spectral provenance")
 func crowPlumageOpticsProfileRejectsInventedRawData() throws {
   let data = try Data(contentsOf: crowPlumageOpticsProfileURL)

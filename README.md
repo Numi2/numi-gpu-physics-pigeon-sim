@@ -204,6 +204,17 @@ body aperture stays zero. Fully covered pixels change by only `+3`; class-`5`
 and class-`6` peak luminance remain exact while local neighbour variation rises
 by `4.28%` and `5.29%`, respectively. This is simulated screen-space feather
 refinement, not measured crow morphology or proof of perceptual equivalence.
+Body raches now follow a coupled transverse-resolution contract instead of
+surviving because a feather is merely long. Below `12 px` vane width the
+analytic shaft lobe is absent, it fades in through `24 px`, and explicit
+tubular rachis geometry is promoted only at `24 px`; close future-compute views
+therefore recover both layers. At a previously unused high rear-port view
+`(-1.08,0.58)` from `0.48 m`, active pixels change only
+`193,941 -> 193,927`, one-pixel holes improve `7 -> 6`, the worst hole stays
+one pixel, and the expected aperture stays zero. Class-`5` and class-`6` peak
+luminance remain exact while same-class neighbour contrast falls `8.2%` and
+`32.8%`, removing the engraved-groove read without smoothing away feather
+edges. These thresholds are simulated optical LOD, not measured visual acuity.
 At the opposite standing diagnostic view, the humeral/scapular base spectrum
 and broader optical lobe reduce class-`6` mean scene-linear luminance by
 `8.31%`, standard deviation by `10.57%`, and same-class neighbour contrast by

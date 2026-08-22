@@ -589,6 +589,19 @@ pixels increase by `3`; class-`5`/`6` maxima remain exact while same-class
 neighbour variation rises `4.28%`/`5.29%`. This qualifies one simulated raster
 view and the deterministic LOD contract, not all-angle or perceptual realism.
 
+Body-tract shaft geometry and its analytic optical lobe now share a transverse-
+resolution handoff. The lobe is absent below `12 px` full vane width and fades
+to full strength at `24 px`; explicit rachis tubes are retained but emitted
+only at and above `24 px`. This removes sub-resolution longitudinal wires at
+whole-bird distance while restoring both representations in close/future-
+compute views. At the new high rear-port yaw/pitch `(-1.08,0.58)`, distance
+`0.48 m`, and `1200 x 675`, active pixels change `193,941 -> 193,927`, fully
+covered pixels `192,879 -> 192,856`, one-pixel holes improve `7 -> 6`, and the
+expected aperture remains zero. Class-`5`/`6` peak luminance remains exact;
+same-class neighbour variation falls `8.2%`/`32.8%`. The retained vane edges
+remain visually distinct. This qualifies one simulated view and executable GPU
+threshold response, not all-angle closure or measured rachis visibility.
+
 The exposed class-`6` scapular layer now shares its deployed transverse crown
 with retained rachis and barb geometry while preserving stable parent-class AOV
 ownership. Interior barbs remain inside `97%` of the local vane width and only
@@ -983,9 +996,9 @@ simulated terminal ownership and raster continuity, not measured rectrix
 morphology or perceptual realism.
 
 The canonical README sequence is fully simulated and contains the native hold,
-transition, and flight path: `800 x 450`, `72` frames at `24 fps`, `7,917,054`
+transition, and flight path: `800 x 450`, `72` frames at `24 fps`, `8,015,902`
 bytes, SHA-256
-`f0fdc5a0c83e85b14a28ab75b870a8b7b8900272b9308192a4ea85ce47c37c28`.
+`bbc0eb1b0e260a027bfed0336e166a0161840af1ded7202a6ad0e5af0340b2cd`.
 The audited stage PNGs at frames `0`, `35`, and `71` are distinct and retain
 the simulated hold, geometric deployment, and sustained-flight states.
 

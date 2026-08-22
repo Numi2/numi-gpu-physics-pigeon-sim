@@ -184,7 +184,7 @@ func bodyFeatherMesostructureRemainsAttached() {
   }
 }
 
-@Test("body tract feathers inherit resolution-scaled rachis and barb detail")
+@Test("body tract shafts require resolved transverse vane width")
 func bodyTractFeathersResolveMesostructure() {
   for feather in CrowBodyFeatherTracts.samples() {
     let length = simd_distance(feather.rootOffset, feather.tipOffset)
@@ -196,8 +196,24 @@ func bodyTractFeathersResolveMesostructure() {
       for: feather,
       projectedPixelsPerMeter: 48 / length
     )
+    let closePixelsPerMeter =
+      (CrowFeatherMesostructure.bodyTractResolvedRachisWidthThresholdPixels + 1)
+      / (2 * feather.maximumWidthMeters)
+    let close = CrowFeatherMesostructure.segments(
+      for: feather,
+      projectedPixelsPerMeter: closePixelsPerMeter
+    )
+    let closeTessellation = CrowFeatherCoverageLOD.tessellation(
+      lengthMeters: length,
+      projectedPixelsPerMeter: closePixelsPerMeter,
+      baseAxialSections: 7
+    )
     #expect(silhouette.isEmpty)
-    #expect(resolved.filter { $0.kind == .rachis }.count == 4)
+    #expect(resolved.filter { $0.kind == .rachis }.isEmpty)
+    #expect(
+      close.filter { $0.kind == .rachis }.count
+        == closeTessellation.rachisSections
+    )
     if feather.region == .humeral || feather.region == .scapular {
       #expect(resolved.filter { $0.kind == .barb }.count == 20)
       #expect(resolved.filter { $0.kind == .edgeBarbGroup }.count == 5)

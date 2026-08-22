@@ -3152,6 +3152,40 @@ inline float crowBandLimitedSine(float phase) {
     return sin(phase)*max(boxAmplitude,0.0f)*nyquistFade;
 }
 
+constant float crowBodyRachisFadeStartPixels=12.0f;
+constant float crowBodyRachisFadeEndPixels=24.0f;
+
+/// Resolve a transverse feather feature only when its owning vane spans enough
+/// final-output pixels. The derivative form is conservative under grazing
+/// projection: a shaft cannot survive merely because the vane is long when its
+/// width has collapsed below useful discrimination.
+inline float crowResolvedTransverseFeatureVisibility(
+    float projectedSpanPixels,
+    float fadeStartPixels,
+    float fadeEndPixels) {
+    return smoothstep(
+        fadeStartPixels,
+        fadeEndPixels,
+        max(projectedSpanPixels,0.0f)
+    );
+}
+
+inline float crowScreenResolvedTransverseFeatureVisibility(
+    float signedTransverseCoordinate,
+    float fadeStartPixels,
+    float fadeEndPixels) {
+    float coordinateFootprint=max(
+        abs(dfdx(signedTransverseCoordinate)),
+        abs(dfdy(signedTransverseCoordinate))
+    );
+    float projectedSpanPixels=2.0f/max(coordinateFootprint,1.0e-4f);
+    return crowResolvedTransverseFeatureVisibility(
+        projectedSpanPixels,
+        fadeStartPixels,
+        fadeEndPixels
+    );
+}
+
 // Eight equal-energy visible samples keep the black-plumage response in a
 // wavelength domain until the final display conversion. The signed weights
 // are a normalized CIE 1931 2-degree / linear-sRGB quadrature: an equal value
@@ -4516,7 +4550,13 @@ inline float3 showcaseCrowLinearRadiance(
     float bodyRachisIdentity=0.5f+0.5f*crowBandLimitedSine(
         1.73f*featherCoordinates.z+0.31f*float(featherClass)
     );
-    float bodyRachisScale=0.16f+0.18f*bodyRachisIdentity;
+    float bodyRachisResolution=crowScreenResolvedTransverseFeatureVisibility(
+        signedWidth,
+        crowBodyRachisFadeStartPixels,
+        crowBodyRachisFadeEndPixels
+    );
+    float bodyRachisScale=(0.16f+0.18f*bodyRachisIdentity)
+        *bodyRachisResolution;
     float rachis=surfaceVane*(1.0f-greaterCovertVane)
         *mix(genericRachisAxial,bodyRachisAxial,bodyContourVane)
         *mix(1.0f,bodyRachisScale,bodyContourVane)
@@ -4673,6 +4713,19 @@ inline float3 showcaseCrowLinearRadiance(
     // rear camera cannot turn the hidden gap fill into a glossy capsule.
     color*=mix(1.0f,0.30f,deepUnderplumageVane);
     return 1.68f*color;
+}
+
+/// GPU contract for the body-rachis optical LOD. The fragment path supplies a
+/// derivative-derived span; this probe locks the threshold response itself.
+kernel void probeCrowBodyRachisOpticalLOD(
+    device const float* projectedSpanPixels [[buffer(0)]],
+    device float* visibility [[buffer(1)]],
+    uint index [[thread_position_in_grid]]) {
+    visibility[index]=crowResolvedTransverseFeatureVisibility(
+        projectedSpanPixels[index],
+        crowBodyRachisFadeStartPixels,
+        crowBodyRachisFadeEndPixels
+    );
 }
 
 /// Executable contract for the resolved-curve material boundary. Surface vanes
