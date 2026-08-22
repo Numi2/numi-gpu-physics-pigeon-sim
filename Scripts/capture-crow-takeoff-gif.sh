@@ -24,9 +24,14 @@ trap cleanup EXIT
 
 mkdir -p "$(dirname "$OUTPUT")"
 cd "$ROOT"
-swift build -c release --product birdflow-capture
+# The canonical offline encoder currently uses the Debug CPU coordinator: a
+# fresh Swift `-O` build faults before its first frame, while `-Osize`
+# miscompiles the phase-one camera/geometry state. Runtime Metal compilation,
+# fast math, and every GPU pipeline remain unchanged. Do not treat this media
+# path as a CPU performance qualification.
+swift build -c debug --product birdflow-capture
 
-.build/release/birdflow-capture \
+.build/debug/birdflow-capture \
   --capture-crow-frames "$FRAMES" \
   --capture-crow-surface-manifest "$MANIFEST" \
   --capture-crow-surface-generation-audit "$GENERATION_AUDIT" \

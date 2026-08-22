@@ -396,7 +396,11 @@ public enum CrowShowcaseCapture {
           SIMD3<Float>(0.010, 0, -0.050)
           + SIMD3<Float>(takeoff.bodyTranslation.x, 0, takeoff.bodyTranslation.z)
         camera.distance = 0.56 + 0.54 * framing + 0.08 * takeoff.flightProgress
-        camera.yaw = 0.92 - 1.30 * framing
+        // Begin near the front-biased qualitative standing reference so both
+        // planted feet, the keel, and the bilateral folded-wing envelope are
+        // readable. Swing toward the established flight view only as the same
+        // retained topology deploys.
+        camera.yaw = 0.45 - 0.83 * framing
         camera.pitch = 0.11 + 0.17 * framing
       } else {
         camera.target = SIMD3<Float>(-0.018, 0, 0.020)
@@ -593,9 +597,17 @@ public enum CrowShowcaseCapture {
       color: muted,
       graphics: graphics
     )
+    let phaseLabel =
+      presentation == .takeoff
+      ? String(
+        format: "%@  /  PHASE %03.0f%%",
+        CrowTakeoffSequence.stage(phase: phase).rawValue,
+        phase * 100
+      )
+      : String(format: "PHASE %03.0f%%", phase * 100)
     drawText(
-      String(format: "PHASE %03.0f%%", phase * 100),
-      at: CGPoint(x: CGFloat(width) - 136 * scale, y: 37 * scale),
+      phaseLabel,
+      at: CGPoint(x: CGFloat(width) - 236 * scale, y: 37 * scale),
       font: labelFont,
       color: muted,
       graphics: graphics,
@@ -2451,6 +2463,7 @@ private final class CrowShowcaseRenderer {
     if material > 0.24 { return 3 }
     return 2
   }
+
 }
 
 private struct CrowMeshBuilder {
@@ -2977,7 +2990,10 @@ private struct CrowMeshBuilder {
         projectedPixelsPerMeter: projectedPixelsPerMeter,
         to: &vertices
       )
-      if presentation == .standing {
+      if presentation == .standing || presentation == .takeoff {
+        // The support remains fixed in world space while the body lifts. This
+        // makes held toe contact and subsequent geometric separation explicit
+        // without compositing a photographed or image-space perch.
         appendStandingSupport(height: standingPose.supportHeight, to: &vertices)
       }
     }
@@ -3922,7 +3938,7 @@ private struct CrowMeshBuilder {
         radii: SIMD3<Float>(0.0016, 0.0006, 0.0016),
         latitudeCount: 8,
         longitudeCount: 12,
-        color: SIMD4<Float>(0.022, 0.010, 0.004, 0.82),
+        color: SIMD4<Float>(0.006, 0.004, 0.003, 0.82),
         to: &vertices
       )
     }

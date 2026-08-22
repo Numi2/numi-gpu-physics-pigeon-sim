@@ -3,7 +3,7 @@
   "referenceIdentifier": "american-crow-standing-qualitative-v1",
   "referenceURL": "https://x.com/ZeroStateReflex/status/2088717365177672110/video/1",
   "referencePostIdentifier": "2088717365177672110",
-  "accessedDate": "2026-08-16",
+  "accessedDate": "2026-08-22",
   "evidenceClass": "single-view-qualitative-appearance-reference",
   "redistributionPolicy": "URL and observations only; no image or video bytes are stored, redistributed, or shown as simulation output.",
   "qualitativeObservations": [
@@ -12,7 +12,10 @@
     "feet remain separated while the body projection stays between them",
     "three anterior digits spread over the support and a rear hallux opposes them",
     "upper leg plumage transitions into a narrower scaled tarsometatarsus",
-    "quiet standing includes low-amplitude head, body, and ankle motion without a step"
+    "quiet standing includes low-amplitude head, body, and ankle motion without a step",
+    "the front-biased projection reads as a continuous throat, deep keel, and rounded pectoral mass between the shoulders and feet",
+    "folded wings hang as bilateral overlapping flank panels instead of one exposed planar tail extension",
+    "the closed rectrix stack stays narrow and centered behind the planted body"
   ],
   "poseParameters": {
     "footSeparationMeters": 0.078,

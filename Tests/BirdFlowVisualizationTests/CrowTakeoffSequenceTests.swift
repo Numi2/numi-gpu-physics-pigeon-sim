@@ -11,6 +11,19 @@ func takeoffSequenceStagesAreOrderedAndBounded() {
   let flight = CrowTakeoffSequence.sample(phase: 1)
 
   #expect(start.transitionProgress == 0)
+  #expect(CrowTakeoffSequence.stage(phase: 0) == .still)
+  #expect(
+    CrowTakeoffSequence.stage(
+      phase: CrowTakeoffSequence.standingHoldEnd
+    ) == .still
+  )
+  #expect(CrowTakeoffSequence.stage(phase: 0.38) == .transition)
+  #expect(
+    CrowTakeoffSequence.stage(
+      phase: CrowTakeoffSequence.transitionEnd
+    ) == .flight
+  )
+  #expect(CrowTakeoffSequence.stage(phase: 1) == .flight)
   #expect(hold.transitionProgress == 0)
   #expect(hold.bodyTranslation.z == 0)
   #expect(transition.transitionProgress > 0)

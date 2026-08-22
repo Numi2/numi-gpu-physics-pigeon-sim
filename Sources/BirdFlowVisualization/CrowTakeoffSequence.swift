@@ -20,6 +20,12 @@ enum CrowTakeoffSequence {
     let bodyTranslation: SIMD3<Float>
   }
 
+  enum Stage: String, Equatable {
+    case still = "STILL"
+    case transition = "TRANSITION"
+    case flight = "FLIGHT"
+  }
+
   struct FlightRectrixPose: Equatable {
     let rootOffset: SIMD3<Float>
     let tipOffset: SIMD3<Float>
@@ -56,6 +62,13 @@ enum CrowTakeoffSequence {
   static let terminalPrimaryHandoffPeakProgress: Float = 0.018
   static let terminalPrimaryHandoffReleaseStartProgress: Float = 0.045
   static let terminalPrimaryHandoffEndProgress: Float = 0.080
+
+  static func stage(phase: Float) -> Stage {
+    let bounded = min(max(phase, 0), 1)
+    if bounded <= standingHoldEnd { return .still }
+    if bounded < transitionEnd { return .transition }
+    return .flight
+  }
 
   /// Briefly carries the terminal primary toward the deploying caudal covert
   /// shell after the standing hold. The retained vane returns to its normal
