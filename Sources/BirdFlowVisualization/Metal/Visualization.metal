@@ -88,6 +88,14 @@ struct CrowVentralRachisGeometryUniforms {
     float4 previousBodyCenter;
 };
 
+struct CrowVentralBarbSegmentWorkGPU { uint4 indices; };
+
+struct CrowVentralBarbGeometryUniforms {
+    uint4 counts;
+    float4 currentBodyCenter;
+    float4 previousBodyCenter;
+};
+
 struct CrowSurfaceTemporalVertexGPU {
     float4 position;
     float4 previousPosition;
@@ -1508,6 +1516,14 @@ inline float crowVentralRachisHalfWidth(
     )*bodyEnvelope*tipTaper*edgeRipple;
 }
 
+inline float crowVentralBarbHalfWidth(
+    thread const CrowVentralRachisCurveRecordGPU& record,
+    float axial,float signedWidth) {
+    return crowVentralRachisHalfWidth(record,axial)
+        *(1.0f+record.widthsEnvelopeAndAsymmetry.w
+            *clamp(signedWidth,-1.0f,1.0f));
+}
+
 inline float3 crowVentralRachisCenter(
     thread const CrowVentralRachisCurveRecordGPU& record,
     float axial) {
@@ -1618,6 +1634,172 @@ kernel void expandCrowVentralRachisCurves(
         0xffffffffu,primitiveIdentifier,2u,uniforms.counts.w
     );
     result.parameters=float4(0.5f,0,0,0);
+    output[outputIndex]=result;
+}
+
+inline float crowVentralBarbVariation(
+    thread const CrowVentralRachisCurveRecordGPU& record,
+    uint pairIndex,uint sideIndex,uint salt) {
+    uint value=record.identity.x*0xA511E9B3u;
+    value^=record.identity.y*0x63D83595u;
+    value^=record.identity.z*0x9E3779B9u;
+    value^=record.identity.w*0x85EBCA6Bu;
+    value^=pairIndex*0xC2B2AE35u;
+    value^=sideIndex*0x27D4EB2Fu;
+    value^=salt;
+    value^=value>>16u;
+    value*=0x7FEB352Du;
+    value^=value>>15u;
+    value*=0x846CA68Bu;
+    value^=value>>16u;
+    return 2.0f*float(value&0x00ffffffu)/float(0x00ffffffu)-1.0f;
+}
+
+inline float3 crowVentralBarbPoint(
+    thread const CrowVentralRachisCurveRecordGPU& record,
+    uint pairIndex,uint pairCount,float side,float curveFraction) {
+    float safePairCount=max(float(pairCount),1.0f);
+    uint sideIndex=side<0.0f?0u:1u;
+    float attachmentVariation=crowVentralBarbVariation(
+        record,pairIndex,sideIndex,0x9E3779B9u
+    );
+    float curvatureVariation=crowVentralBarbVariation(
+        record,pairIndex,sideIndex,0x85EBCA6Bu
+    );
+    float spacing=0.77f/(safePairCount+1.0f);
+    float localAxial=0.10f+spacing*float(pairIndex+1u)
+        +0.24f*spacing*attachmentVariation;
+    float localReach=min(
+        0.94f,localAxial+0.030f+0.018f*localAxial
+            +0.16f*spacing*curvatureVariation
+    );
+    float pennaceousStart=record.rootAndPennaceousStart.w;
+    float firstAxial=mix(pennaceousStart,1.0f,localAxial);
+    float secondAxial=mix(pennaceousStart,1.0f,localReach);
+    float t=clamp(curveFraction,0.0f,1.0f);
+    float axial=mix(firstAxial,secondAxial,t);
+    float3 center=crowVentralRachisCenter(record,axial);
+    float3 direction=safeNormalizeCrow(
+        record.tipAndCamber.xyz-record.rootAndPennaceousStart.xyz,
+        float3(-1,0,0));
+    float3 widthAxis=safeNormalizeCrow(
+        cross(record.normalAndTransverseCamber.xyz,direction),
+        float3(0,1,0));
+    float halfWidth=crowVentralBarbHalfWidth(record,axial,side);
+    float lateralExponent=0.82f+0.08f*curvatureVariation;
+    float lateralFraction=(0.955f+0.012f*attachmentVariation)
+        *pow(t,lateralExponent);
+    float crownSeparation=0.000030f
+        +(0.000022f+0.000008f*curvatureVariation)*sin(M_PI_F*t);
+    return center+side*widthAxis*halfWidth*lateralFraction
+        +record.normalAndTransverseCamber.xyz*crownSeparation;
+}
+
+inline float crowVentralBarbRadius(
+    thread const CrowVentralRachisCurveRecordGPU& record,
+    uint pairIndex,uint sideIndex,float curveFraction) {
+    float variation=crowVentralBarbVariation(
+        record,pairIndex,sideIndex,0xC2B2AE35u
+    );
+    float t=clamp(curveFraction,0.0f,1.0f);
+    return (1.0f+0.12f*variation)
+        *mix(0.000026f,0.000004f,pow(t,0.88f));
+}
+
+kernel void expandCrowVentralBarbCurves(
+    device const CrowVentralRachisCurveRecordGPU* records [[buffer(0)]],
+    device const CrowVentralBarbSegmentWorkGPU* work [[buffer(1)]],
+    device CrowFeatherVertexGPU* output [[buffer(2)]],
+    constant CrowVentralBarbGeometryUniforms& uniforms [[buffer(3)]],
+    uint outputIndex [[thread_position_in_grid]]) {
+    uint verticesPerInterval=uniforms.counts.z;
+    uint outputCount=uniforms.counts.y*verticesPerInterval;
+    if(outputIndex>=outputCount){return;}
+    uint workIndex=outputIndex/verticesPerInterval;
+    uint localVertex=outputIndex-workIndex*verticesPerInterval;
+    CrowVentralBarbSegmentWorkGPU selected=work[workIndex];
+    CrowVentralRachisCurveRecordGPU record=records[selected.indices.x];
+    uint pairCount=selected.indices.z&0xffffu;
+    uint sideIndex=(selected.indices.z>>16u)&1u;
+    float side=sideIndex==0u?-1.0f:1.0f;
+    uint intervalIndex=selected.indices.w&0xffffu;
+    uint intervalCount=max(selected.indices.w>>16u,1u);
+    float first=float(intervalIndex)/float(intervalCount);
+    float second=float(intervalIndex+1u)/float(intervalCount);
+    float3 start=crowVentralBarbPoint(
+        record,selected.indices.y,pairCount,side,first
+    );
+    float3 end=crowVentralBarbPoint(
+        record,selected.indices.y,pairCount,side,second
+    );
+    float startRadius=crowVentralBarbRadius(
+        record,selected.indices.y,sideIndex,first
+    );
+    float endRadius=crowVentralBarbRadius(
+        record,selected.indices.y,sideIndex,second
+    );
+    uint triangle=localVertex/3u;
+    uint triangleCorner=localVertex%3u;
+    uint radialIndex=triangle/2u;
+    bool secondTriangle=(triangle&1u)!=0u;
+    uint corner=secondTriangle
+        ?uint3(0u,2u,3u)[triangleCorner]
+        :uint3(0u,1u,2u)[triangleCorner];
+    uint3 normalCorners=secondTriangle?uint3(0u,2u,3u):uint3(0u,1u,2u);
+    float3 a=crowVentralRachisTubePoint(
+        start,end,startRadius,endRadius,radialIndex,normalCorners.x
+    );
+    float3 b=crowVentralRachisTubePoint(
+        start,end,startRadius,endRadius,radialIndex,normalCorners.y
+    );
+    float3 c=crowVentralRachisTubePoint(
+        start,end,startRadius,endRadius,radialIndex,normalCorners.z
+    );
+    float3 localPosition=crowVentralRachisTubePoint(
+        start,end,startRadius,endRadius,radialIndex,corner
+    );
+    float3 normal=safeNormalizeCrow(cross(b-a,c-a),float3(0,0,1));
+    float material=record.edgeRippleAndMaterial.w;
+    float3 color=float3(
+        0.0080f*(1.0f+0.06f*material),
+        0.0120f*(1.0f+0.04f*material),
+        0.0200f*(1.0f+0.03f*material)
+    );
+    uint primitiveIdentifier=0x07100000u+selected.indices.x*8192u
+        +selected.indices.y*64u+sideIndex*32u+intervalIndex*8u+triangle+1u;
+    float curveT=(corner==2u||corner==3u)?second:first;
+    float safePairCount=max(float(pairCount),1.0f);
+    float spacing=0.77f/(safePairCount+1.0f);
+    float attachmentVariation=crowVentralBarbVariation(
+        record,selected.indices.y,sideIndex,0x9E3779B9u
+    );
+    float curvatureVariation=crowVentralBarbVariation(
+        record,selected.indices.y,sideIndex,0x85EBCA6Bu
+    );
+    float localAxial=0.10f+spacing*float(selected.indices.y+1u)
+        +0.24f*spacing*attachmentVariation;
+    float localReach=min(
+        0.94f,localAxial+0.030f+0.018f*localAxial
+            +0.16f*spacing*curvatureVariation
+    );
+    float featherAxial=mix(
+        mix(record.rootAndPennaceousStart.w,1.0f,localAxial),
+        mix(record.rootAndPennaceousStart.w,1.0f,localReach),
+        curveT
+    );
+    CrowFeatherVertexGPU result;
+    result.position=float4(localPosition+uniforms.currentBodyCenter.xyz,1);
+    result.previousPosition=float4(
+        localPosition+uniforms.previousBodyCenter.xyz,1
+    );
+    result.normal=float4(normal,0);
+    result.color=float4(color,0.14f);
+    result.identity=uint4(
+        0xffffffffu,primitiveIdentifier,3u,uniforms.counts.w
+    );
+    result.parameters=float4(
+        featherAxial,side,0.031f*float(selected.indices.x%97u),1
+    );
     output[outputIndex]=result;
 }
 

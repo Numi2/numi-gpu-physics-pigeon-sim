@@ -789,6 +789,39 @@ mean GPU time and `10.13%` more median GPU time after the warm-up frame. That
 cost is accepted for the future-compute appearance tier; it is not a
 performance win or a claim of perceptual realism.
 
+The first projected-size geometry handoff now replaces that analytic-only
+far-field ownership when an interior class-`7` feather reaches `480` output
+pixels. The existing `776` crown records remain the authority. Each active
+record emits `72` identity-varied barb pairs per side; four connected intervals
+follow the changing transverse crown from the rachis to `95.5...96.7%` of the
+local edge, and four radial sides taper from an estimated `26` to `4 um` before
+identity variation. The old individual barb, barbule, and coarse edge-aggregate
+fallbacks are suppressed only while this explicit tier owns the feather.
+Current and previous body centers, normals, parent class, procedural owner, and
+unique primitive IDs are written by the same Metal expansion.
+
+At the deliberately extreme `0.035 m`, `800 x 450` diagnostic, output coverage
+is `14,438.8 px/m`; `746` records activate, producing `429,696` intervals and
+`10,312,704` temporal/AOV vertices. A previously unused oblique flank view at
+yaw/pitch `(1.42, 0.08)` and target `(0.05, 0.060, 0.020) m` rejected the first
+regular, ladder-like candidate. The retained denser tier changes `13,290` of
+`360,000` beauty pixels at the inspected quiet-stance frame, confined to the
+visible close-up feather bank, and replaces protruding aggregate bars with a
+continuous fine curve field. A five-frame normal-distance A/B produces exact
+PNG hashes and exact non-duration AOV JSON with the tier enabled and disabled,
+confirming that ordinary rendering emits no dormant vertices and that the
+canonical simulated hold-to-flight GIF remains current.
+
+Executable tests lock the ordinary empty work list, the close-up active-record,
+interval, and vertex counts, curve connectivity and taper, packed-work
+uniqueness, fallback ownership, and CPU/Metal temporal-tube parity. The close-up
+capture is a visual and ownership diagnostic, not a GPU benchmark: the present
+unindexed triangle stream intentionally spends future compute to establish the
+geometry oracle. These dimensions and densities are renderer estimates, not
+measured American-crow barb anatomy. GPU frustum/occlusion compaction, indexed
+or hardware-curve emission, explicit barbules, per-feather dynamics, and
+curve-aware self-shadowing remain open.
+
 Schema `12` resolves that rear-port priority to exact packed identities around
 the largest enclosed component. The early `21-28`-pixel channels are bounded
 by rectrix orders `1`, `2`, and `3`; only frames `2-3` additionally touch the

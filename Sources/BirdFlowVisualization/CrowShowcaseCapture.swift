@@ -34,6 +34,9 @@ public enum CrowShowcaseCapture {
     let temporalScale: Float
     let cameraYawRadians: Float?
     let cameraPitchRadians: Float?
+    let cameraDistanceMeters: Float?
+    let cameraTarget: SIMD3<Float>?
+    let explicitVentralBarbCurvesEnabled: Bool
     let presentation: CrowShowcasePresentation
 
     public init(commandLine: [String]) throws {
@@ -81,6 +84,28 @@ public enum CrowShowcaseCapture {
       )
       cameraYawRadians = try finiteFloat(after: "--capture-crow-camera-yaw")
       cameraPitchRadians = try finiteFloat(after: "--capture-crow-camera-pitch")
+      cameraDistanceMeters = try finiteFloat(
+        after: "--capture-crow-camera-distance"
+      )
+      let targetComponents = try [
+        finiteFloat(after: "--capture-crow-camera-target-x"),
+        finiteFloat(after: "--capture-crow-camera-target-y"),
+        finiteFloat(after: "--capture-crow-camera-target-z"),
+      ]
+      guard
+        targetComponents.allSatisfy({ $0 == nil })
+          || targetComponents.allSatisfy({ $0 != nil })
+      else {
+        throw CaptureError.invalidArguments(
+          "crow camera target override requires x, y, and z"
+        )
+      }
+      cameraTarget = targetComponents[0].map {
+        SIMD3<Float>($0, targetComponents[1]!, targetComponents[2]!)
+      }
+      explicitVentralBarbCurvesEnabled = !commandLine.contains(
+        "--capture-crow-disable-ventral-barb-curves"
+      )
       guard frameCount >= 2 else {
         throw CaptureError.invalidArguments("--capture-frames must be at least 2")
       }
@@ -92,6 +117,13 @@ public enum CrowShowcaseCapture {
       guard cameraPitchRadians.map({ abs($0) < 1.4 }) ?? true else {
         throw CaptureError.invalidArguments(
           "--capture-crow-camera-pitch must be between -1.4 and 1.4 radians"
+        )
+      }
+      guard
+        cameraDistanceMeters.map({ $0 >= 0.02 && $0 <= 4 }) ?? true
+      else {
+        throw CaptureError.invalidArguments(
+          "--capture-crow-camera-distance must be between 0.02 and 4 metres"
         )
       }
       surfaceManifestURL = URL(
@@ -254,7 +286,9 @@ public enum CrowShowcaseCapture {
       plumageOptics: plumageOptics,
       motion: motion,
       realityAsset: realityAsset,
-      presentation: arguments.presentation
+      presentation: arguments.presentation,
+      explicitVentralBarbCurvesEnabled:
+        arguments.explicitVentralBarbCurvesEnabled
     )
     let nativeReferenceRenderer =
       try arguments.temporalScale > 1
@@ -266,7 +300,9 @@ public enum CrowShowcaseCapture {
         plumageOptics: plumageOptics,
         motion: motion,
         realityAsset: realityAsset,
-        presentation: arguments.presentation
+        presentation: arguments.presentation,
+        explicitVentralBarbCurvesEnabled:
+          arguments.explicitVentralBarbCurvesEnabled
       )
       : nil
     try FileManager.default.createDirectory(
@@ -318,6 +354,12 @@ public enum CrowShowcaseCapture {
       }
       if let cameraPitchRadians = arguments.cameraPitchRadians {
         camera.pitch = cameraPitchRadians
+      }
+      if let cameraTarget = arguments.cameraTarget {
+        camera.target = cameraTarget
+      }
+      if let cameraDistanceMeters = arguments.cameraDistanceMeters {
+        camera.distance = cameraDistanceMeters
       }
       let rendered = try renderer.render(
         phase: phase,
@@ -746,6 +788,7 @@ private final class CrowShowcaseRenderer {
   private let liveCovertRootBuffer: CrowLiveWingCovertRootBuffer?
   private let liveCovertGeometryDeformer: CrowFeatherGeometryDeformer?
   private let ventralRachisGeometryDeformer: CrowVentralRachisGeometryDeformer
+  private let ventralBarbGeometryDeformer: CrowVentralBarbGeometryDeformer?
   private let featherRenderOffset: SIMD3<Float>
   private var previousPhase: Float?
   private var previousCamera: CameraState?
@@ -759,7 +802,8 @@ private final class CrowShowcaseRenderer {
     plumageOptics: CrowPlumageOpticsProfile,
     motion: any CrowShowcaseMotion,
     realityAsset: BirdRealityAsset?,
-    presentation: CrowShowcasePresentation
+    presentation: CrowShowcasePresentation,
+    explicitVentralBarbCurvesEnabled: Bool = true
   ) throws {
     self.presentation = presentation
     self.plumageOptics = plumageOptics.gpuParameters
@@ -770,7 +814,8 @@ private final class CrowShowcaseRenderer {
       profile: profile,
       motion: motion,
       realityAsset: realityAsset,
-      presentation: presentation
+      presentation: presentation,
+      explicitVentralBarbCurvesEnabled: explicitVentralBarbCurvesEnabled
     )
     meshBuilder = createdMeshBuilder
     if let realityAsset {
@@ -828,6 +873,10 @@ private final class CrowShowcaseRenderer {
     ventralRachisGeometryDeformer = try CrowVentralRachisGeometryDeformer(
       backend: createdBackend
     )
+    ventralBarbGeometryDeformer =
+      try explicitVentralBarbCurvesEnabled
+      ? CrowVentralBarbGeometryDeformer(backend: createdBackend)
+      : nil
     featherRenderOffset = createdMeshBuilder.featherRenderOffset
     let createdSampleCount = device.supportsTextureSampleCount(4) ? 4 : 1
     sampleCount = createdSampleCount
@@ -1194,6 +1243,16 @@ private final class CrowShowcaseRenderer {
         commandBuffer: commandBuffer
       )
     )
+    if let ventralBarbGeometryDeformer {
+      featherFrames.append(
+        try ventralBarbGeometryDeformer.encode(
+          currentBodyCenter: currentAnatomyBodyCenter,
+          previousBodyCenter: previousAnatomyBodyCenter,
+          projectedPixelsPerMeter: projectedPixelsPerMeter,
+          commandBuffer: commandBuffer
+        )
+      )
+    }
 
     let pass = MTLRenderPassDescriptor()
     for index in formats.indices {
@@ -1545,6 +1604,7 @@ private struct CrowMeshBuilder {
   private let vertexPartIdentifiers: [UInt8]
   private let persistentFeathers: [BirdRealityFeather]
   private let presentation: CrowShowcasePresentation
+  private let explicitVentralBarbCurvesEnabled: Bool
   private let leftWingAnchor: CrowWingAttachmentAnchor?
   private let rightWingAnchor: CrowWingAttachmentAnchor?
 
@@ -1559,12 +1619,14 @@ private struct CrowMeshBuilder {
     profile: CrowVisualProfile,
     motion: any CrowShowcaseMotion,
     realityAsset: BirdRealityAsset?,
-    presentation: CrowShowcasePresentation
+    presentation: CrowShowcasePresentation,
+    explicitVentralBarbCurvesEnabled: Bool
   ) {
     self.dataset = dataset
     self.profile = profile
     self.motion = motion
     self.presentation = presentation
+    self.explicitVentralBarbCurvesEnabled = explicitVentralBarbCurvesEnabled
     persistentFeathers = realityAsset?.feathers ?? []
     surfaceIsEstimatedCrow =
       dataset.scientificTier == "estimated-hybrid-complete-surface"
@@ -2196,13 +2258,10 @@ private struct CrowMeshBuilder {
     to vertices: inout [ColoredVertex]
   ) {
     appendTractFeatherMesostructure(
-      CrowFeatherMesostructure.segments(
+      CrowVentralBarbCurveRecords.surfaceFallbackSegments(
         for: feather,
         projectedPixelsPerMeter: projectedPixelsPerMeter,
-        // Visible crown rachises are retained analytic records expanded by
-        // Metal. Preserve only the established subvane continuity and barb
-        // aggregates in this CPU surface stream.
-        transverseCamberRatio: 0
+        explicitCurvesEnabled: explicitVentralBarbCurvesEnabled
       ),
       bodyCenter: bodyCenter,
       planeNormal: feather.planeNormal,
@@ -4175,7 +4234,7 @@ private struct CrowMeshBuilder {
               edgeRippleAmplitude: edgeRippleAmplitude,
               edgeRipplePhase: edgeRipplePhase,
               edgeRippleCycles: edgeRippleCycles,
-              surfaceFeatherClass: surfaceIdentity,
+            surfaceFeatherClass: surfaceIdentity,
               deployment: trailingRankDeployment,
               lodLengthMeters: 0.12,
               projectedPixelsPerMeter: projectedPixelsPerMeter,
@@ -4294,7 +4353,7 @@ private struct CrowMeshBuilder {
               endHalfWidth: segment.endRadiusMeters,
               surfaceNormal: dorsalNormal,
               color: segment.kind == .rachis ? rachisColor : barbColor,
-            surfaceFeatherClass: surfaceIdentity,
+              surfaceFeatherClass: surfaceIdentity,
               to: &vertices
             )
           }

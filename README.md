@@ -168,6 +168,18 @@ Metal expansion into `74,496` temporal/AOV vertices instead of authoring those
 tubes on the CPU. The continuity and barb oracle remains in the accepted body
 surface stream; future meshlet or hardware-curve emission can consume the same
 records without reducing the `1,304`-feather ventral inventory.
+The first projected-size handoff now consumes those same records when an
+individual feather reaches `480` final-output pixels. Each eligible feather
+then resolves `72` identity-varied barb pairs per side as four connected,
+crown-following intervals; its coarse edge aggregates are retired while the
+explicit curves own temporal position, normal, class, and primitive identity.
+At the deliberately extreme `0.035 m`, `800 x 450` diagnostic, `746` records
+expand to `429,696` intervals and `10,312,704` triangle-stream vertices. This
+is a future-compute fidelity tier, not a performance optimization or measured
+American-crow barb anatomy. Ordinary showcase coverage emits zero such
+vertices and remains pixel/AOV identical with the tier disabled, so the fully
+simulated hold-to-flight GIF remains unchanged. GPU view/occlusion compaction,
+explicit barbules, and curve-aware self-shadowing remain open.
 A separate versioned optics profile now drives the live eight-wavelength
 air/keratin/melanin film response. It records comparative glossy-corvid
 constraints independently from the renderer's American-crow estimates, so the

@@ -264,6 +264,21 @@ struct CrowVentralRachisGeometryUniforms {
   var previousBodyCenter: SIMD4<Float>
 }
 
+/// One projected-size-selected interval of an explicit ventral barb curve.
+/// Pair count/side and interval count/index are packed so the work list stays
+/// one SIMD register per interval at future close-up densities.
+struct CrowVentralBarbSegmentWorkGPU: Equatable {
+  /// Record, pair, packed pair-count/side, packed interval-index/count.
+  var indices: SIMD4<UInt32>
+}
+
+struct CrowVentralBarbGeometryUniforms {
+  /// Curve count, active interval count, vertices per interval, class code.
+  var counts: SIMD4<UInt32>
+  var currentBodyCenter: SIMD4<Float>
+  var previousBodyCenter: SIMD4<Float>
+}
+
 /// Procedural crow geometry paired across two frames for true deformation
 /// motion rather than camera-only reprojection.
 struct CrowSurfaceTemporalVertexGPU {

@@ -139,7 +139,7 @@ enum CrowVentralRachisCurveRecords {
     )
   }
 
-  private static func center(
+  static func center(
     record: CrowVentralRachisCurveRecordGPU,
     axial: Float
   ) -> SIMD3<Float> {
@@ -161,9 +161,10 @@ enum CrowVentralRachisCurveRecords {
       + normal * lift
   }
 
-  private static func halfWidth(
+  static func halfWidth(
     record: CrowVentralRachisCurveRecordGPU,
-    axial: Float
+    axial: Float,
+    signedWidth: Float = 0
   ) -> Float {
     let t = min(max(axial, 0), 1)
     let rootEnvelope = record.widthsEnvelopeAndAsymmetry.z
@@ -180,7 +181,10 @@ enum CrowVentralRachisCurveRecords {
     let rootWidth = record.widthsEnvelopeAndAsymmetry.x
     let maximumWidth = record.widthsEnvelopeAndAsymmetry.y
     let interpolatedWidth = rootWidth + (maximumWidth - rootWidth) * t
-    return interpolatedWidth * bodyEnvelope * tipTaper * edgeRipple
+    let sideScale = 1
+      + record.widthsEnvelopeAndAsymmetry.w
+      * min(max(signedWidth, -1), 1)
+    return interpolatedWidth * bodyEnvelope * tipTaper * edgeRipple * sideScale
   }
 
   private static func xyz(_ value: SIMD4<Float>) -> SIMD3<Float> {

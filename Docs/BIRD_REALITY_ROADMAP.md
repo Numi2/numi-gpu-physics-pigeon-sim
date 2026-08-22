@@ -119,11 +119,16 @@ inventory or view-dependent patch geometry.
    Class-`7` ventral body feathers now expose separate stable subvane-continuity
    and visible-crown rachis records for `776` interior feathers, while boundary
    records preserve the accepted silhouette. The visible layer now uses
-   `96`-byte retained analytic curves plus compact LOD interval records and a
+   `112`-byte retained analytic curves plus compact LOD interval records and a
    Metal temporal/AOV expansion pass; the continuity layer remains an occlusion
-   oracle in the accepted surface stream. The next future-compute step is GPU
-   visibility selection and indirect meshlet or hardware-curve emission from
-   the same `1,304`-feather tract inventory.
+   oracle in the accepted surface stream. A first output-space handoff now
+   activates at `480 px` feather length: `72` hashed barb pairs per side follow
+   the changing crown in four connected curve intervals, replace the coarse
+   edge aggregates, and retain temporal/AOV ownership. At ordinary coverage the
+   curve work list is exactly empty. The next future-compute step is GPU
+   frustum/occlusion selection and indirect meshlet or hardware-curve emission
+   from the same `1,304`-feather tract inventory; the current expanded triangle
+   stream is a high-cost correctness oracle, not the final scaling path.
    The `270`-identity-per-side femoral field now has a compact, AOV-localized
    insertion-overlap oracle over rows `6...11`, courses `8...9`; the bounded
    width/tip envelope closes a transition seam without moving follicles or leg
@@ -168,11 +173,11 @@ inventory or view-dependent patch geometry.
    wavelength-domain deterministic fallback, not a measured American-crow
    BSDF. The next material milestone is same-specimen American-crow
    gonioreflectance and cortex microscopy under measured illumination, followed
-   by a fitted angular cortex/medulla/transmission model. Before that data
-   exists, the next renderer milestone is a projected-size hybrid handoff to
-   explicit curve geometry and curve-aware self-shadowing when individual barbs
-   exceed a pixel threshold. Do not substitute further hand tuning for either
-   measurement or geometry-aware visibility.
+   by a fitted angular cortex/medulla/transmission model. The first
+   projected-size hybrid handoff to explicit barb geometry now exists; the next
+   renderer milestone is curve-aware self-shadowing and explicit barbules when
+   those structures exceed their own pixel thresholds. Do not substitute
+   further hand tuning for either measurement or geometry-aware visibility.
 
 4. **Physical light transport.** Add image-based lighting, multiple scattering,
    soft self-shadowing, and curve/triangle ray geometry. Metal supports curve
