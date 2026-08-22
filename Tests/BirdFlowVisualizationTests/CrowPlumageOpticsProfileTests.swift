@@ -262,7 +262,8 @@ func crowAnalyticFeatherMaskMatchesReferenceCases() throws {
   }
 
   let denseDirections: [SIMD4<Float>] = (0..<17).flatMap { elevationIndex in
-    let elevation = -Float.pi / 2
+    let elevation =
+      -Float.pi / 2
       + Float.pi * Float(elevationIndex) / 16
     return (0..<64).map { azimuthIndex in
       let azimuth = 2 * Float.pi * Float(azimuthIndex) / 64
@@ -283,6 +284,46 @@ func crowAnalyticFeatherMaskMatchesReferenceCases() throws {
     #expect(min(weights.x, min(weights.y, min(weights.z, weights.w))) >= 0)
     #expect(max(weights.x, max(weights.y, max(weights.z, weights.w))) <= 1)
   }
+}
+
+@Test("resolved feather curves own tangent visibility without surface remasking")
+func crowResolvedCurvesBypassSurfaceMaskAndRetainTheirTangent() throws {
+  guard let device = MTLCreateSystemDefaultDevice() else { return }
+  let backend = try VisualizationBackend(device: device)
+  let pipeline = try backend.compute("probeCrowResolvedCurveVisibility")
+  let sampleCount = 5
+  let output = try backend.buffer(
+    length: sampleCount * MemoryLayout<SIMD4<Float>>.stride,
+    shared: true
+  )
+  let commandBuffer = try #require(backend.queue.makeCommandBuffer())
+  let encoder = try #require(commandBuffer.makeComputeCommandEncoder())
+  encoder.setBuffer(output, offset: 0, index: 0)
+  backend.dispatch1D(encoder, pipeline: pipeline, count: sampleCount)
+  encoder.endEncoding()
+  commandBuffer.commit()
+  commandBuffer.waitUntilCompleted()
+  #expect(commandBuffer.status == .completed)
+
+  let pointer = output.contents().bindMemory(
+    to: SIMD4<Float>.self,
+    capacity: sampleCount
+  )
+  let samples = Array(
+    UnsafeBufferPointer(start: pointer, count: sampleCount)
+  )
+  #expect(
+    samples.allSatisfy { sample in
+      sample.x.isFinite && sample.y.isFinite && sample.z.isFinite
+        && sample.w == 1
+    })
+  // Explicit fibers are already visibility-resolved by raster/depth geometry,
+  // so toggling the far-field surface mask must not alter their radiance.
+  #expect(simd_length(samples[0] - samples[1]) < 1e-7)
+  // Their retained tangent must still rotate the anisotropic fiber response.
+  #expect(simd_length(samples[0] - samples[2]) > 1e-5)
+  // Unresolved vanes continue to use the cited analytic masking construction.
+  #expect(simd_length(samples[3] - samples[4]) > 1e-5)
 }
 
 @Test("crow barbule discontinuity intervals match the authors' ray construction")

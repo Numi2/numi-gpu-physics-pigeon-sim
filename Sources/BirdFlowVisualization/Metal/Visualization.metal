@@ -202,6 +202,7 @@ struct CrowRasterVertex {
     float3 normal;
     float4 albedoAndMaterial;
     float3 featherCoordinates;
+    float3 resolvedCurveTangent;
     uint4 identity [[flat]];
 };
 
@@ -2279,12 +2280,51 @@ inline CrowFeatherVertexGPU crowVentralBarbProceduralVertex(
         :crowVentralBarbVertex(records,work,uniforms,outputIndex);
 }
 
+inline float3 crowVentralBarbProceduralTangent(
+    device const CrowVentralRachisCurveRecordGPU* records,
+    device const CrowVentralBarbSegmentWorkGPU* work,
+    constant CrowVentralBarbGeometryUniforms& uniforms,
+    uint outputIndex) {
+    uint workIndex=outputIndex/uniforms.counts.z;
+    CrowVentralBarbSegmentWorkGPU selected=work[workIndex];
+    CrowVentralRachisCurveRecordGPU record=records[selected.indices.x];
+    uint pairCount=selected.indices.z&0xffffu;
+    uint sideIndex=(selected.indices.z>>16u)&1u;
+    if((selected.indices.w&0x80000000u)!=0u){
+        uint barbuleIndex=selected.indices.w&0xffffu;
+        uint barbuleCount=max((selected.indices.w>>16u)&0xffu,1u);
+        uint branchIndex=(selected.indices.w>>24u)&1u;
+        float3 start=crowVentralBarbulePoint(
+            record,selected.indices.y,pairCount,sideIndex,
+            barbuleIndex,barbuleCount,branchIndex,0.0f
+        );
+        float3 end=crowVentralBarbulePoint(
+            record,selected.indices.y,pairCount,sideIndex,
+            barbuleIndex,barbuleCount,branchIndex,1.0f
+        );
+        return safeNormalizeCrow(end-start,float3(1.0f,0.0f,0.0f));
+    }
+    uint intervalIndex=selected.indices.w&0xffffu;
+    uint intervalCount=max(selected.indices.w>>16u,1u);
+    float first=float(intervalIndex)/float(intervalCount);
+    float second=float(intervalIndex+1u)/float(intervalCount);
+    float side=sideIndex==0u?-1.0f:1.0f;
+    float3 start=crowVentralBarbPoint(
+        record,selected.indices.y,pairCount,side,first
+    );
+    float3 end=crowVentralBarbPoint(
+        record,selected.indices.y,pairCount,side,second
+    );
+    return safeNormalizeCrow(end-start,float3(1.0f,0.0f,0.0f));
+}
+
 struct CrowVentralCurveMeshVertex {
     float4 position [[position]];
     float4 previousClipPosition;
     float3 world;
     float4 albedoAndMaterial;
     float3 featherCoordinates;
+    float3 resolvedCurveTangent;
 };
 
 struct CrowVentralCurvePrimitive {
@@ -2341,6 +2381,9 @@ using CrowVentralCurveMesh = metal::mesh<
         out.world=source.position.xyz;
         out.albedoAndMaterial=source.color;
         out.featherCoordinates=source.parameters.xyz;
+        out.resolvedCurveTangent=crowVentralBarbProceduralTangent(
+            records,work,geometry,workVertexBase+representative
+        );
         outputMesh.set_vertex(tid,out);
 
         uint triangle=tid;
@@ -2927,6 +2970,7 @@ vertex CrowRasterVertex crowSurfaceAOVVertex(
     out.normal=normalize(source.normal.xyz);
     out.albedoAndMaterial=source.albedoAndMaterial;
     out.featherCoordinates=source.parameters.xyz;
+    out.resolvedCurveTangent=float3(0.0f);
     out.identity=source.identity;
     return out;
 }
@@ -2948,6 +2992,7 @@ vertex CrowRasterVertex crowFeatherAOVVertex(
     out.normal=normalize(source.normal.xyz);
     out.albedoAndMaterial=source.color;
     out.featherCoordinates=source.parameters.xyz;
+    out.resolvedCurveTangent=float3(0.0f);
     out.identity=source.identity;
     return out;
 }
@@ -2977,6 +3022,9 @@ vertex CrowRasterVertex crowVentralBarbAOVVertex(
     out.normal=normalize(source.normal.xyz);
     out.albedoAndMaterial=source.color;
     out.featherCoordinates=source.parameters.xyz;
+    out.resolvedCurveTangent=crowVentralBarbProceduralTangent(
+        records,work,geometry,vid
+    );
     out.identity=source.identity;
     return out;
 }
@@ -4084,13 +4132,24 @@ kernel void probeCrowAnalyticBarbMaskRates(
     );
 }
 
+inline uint crowResolvedCurveKind(uint4 identity) {
+    // CPU surface triangles also reserve identity.x == UINT_MAX and their
+    // material codes may equal the curve part codes. The explicit procedural
+    // primitive namespace starts at 0x07100000, so require both domains.
+    bool explicitPrimitive=identity.x==0xffffffffu
+        &&identity.y>=0x07100000u;
+    if(!explicitPrimitive){return 0u;}
+    return identity.z==3u?1u:(identity.z==4u?2u:0u);
+}
+
 inline float3 showcaseCrowLinearRadiance(
     float3 world,
     float3 normalInput,
     float4 albedoAndMaterial,
     float3 eyePosition,
     float3 featherCoordinates,
-    uint packedIdentity,
+    float3 resolvedCurveTangent,
+    uint4 identity,
     float4 plumageFilm,
     float4 plumageComplexIndices,
     float4 plumageMelanin,
@@ -4150,9 +4209,19 @@ inline float3 showcaseCrowLinearRadiance(
     float grazing=pow(1.0f-ndv,1.55f);
     float flightFeather=smoothstep(0.19f,0.25f,material);
     float featherMaterial=1.0f-smoothstep(0.46f,0.50f,material);
+    uint packedIdentity=identity.w;
+    uint resolvedCurveKind=crowResolvedCurveKind(identity);
+    float explicitBarbCurve=resolvedCurveKind==1u?1.0f:0.0f;
+    float explicitBarbuleCurve=resolvedCurveKind==2u?1.0f:0.0f;
+    float explicitCurve=max(explicitBarbCurve,explicitBarbuleCurve);
     float vaneCoordinates=step(1.0e-5f,
         abs(featherCoordinates.x)+abs(featherCoordinates.y));
     float persistentVane=featherMaterial*vaneCoordinates;
+    // The far-field discontinuity mask is a surface substitute for unresolved
+    // barb/barbule geometry. Once those fibers are explicit tubes, depth and
+    // their resolved normal/tangent own visibility; applying the surface mask
+    // again would double-occlude them.
+    float surfaceVane=persistentVane*(1.0f-explicitCurve);
     float axial=saturate(featherCoordinates.x);
     float signedWidth=clamp(featherCoordinates.y,-1.0f,1.0f);
     float melaninIdentity=0.5f+0.5f*crowBandLimitedSine(
@@ -4191,22 +4260,23 @@ inline float3 showcaseCrowLinearRadiance(
         plumageMelanin,plumageCortex
     );
     uint featherClass=packedIdentity&255u;
-    float primaryVane=featherClass==1u?persistentVane:0.0f;
-    float secondaryVane=featherClass==2u?persistentVane:0.0f;
-    float rectrixVane=featherClass==3u?persistentVane:0.0f;
+    float primaryVane=featherClass==1u?surfaceVane:0.0f;
+    float secondaryVane=featherClass==2u?surfaceVane:0.0f;
+    float rectrixVane=featherClass==3u?surfaceVane:0.0f;
     float underwingCovertVane=
-        (featherClass==12u||featherClass==13u)?persistentVane:0.0f;
+        (featherClass==12u||featherClass==13u)?surfaceVane:0.0f;
     float greaterCovertVane=
         (featherClass==4u||featherClass==12u||featherClass==13u
             ||featherClass==14u||featherClass==15u)
-            ?persistentVane:0.0f;
-    float dorsalBodyVane=featherClass==5u?persistentVane:0.0f;
-    float flankBodyVane=featherClass==6u?persistentVane:0.0f;
-    float ventralBodyVane=featherClass==7u?persistentVane:0.0f;
-    float headNeckVane=featherClass==8u?persistentVane:0.0f;
-    float foreheadVane=featherClass==9u?persistentVane:0.0f;
-    float gularVane=featherClass==10u?persistentVane:0.0f;
-    float deepUnderplumageVane=featherClass==16u?persistentVane:0.0f;
+            ?surfaceVane:0.0f;
+    float dorsalBodyVane=featherClass==5u?surfaceVane:0.0f;
+    float flankBodyVane=featherClass==6u?surfaceVane:0.0f;
+    float ventralBodyVane=featherClass==7u?surfaceVane:0.0f;
+    float headNeckVane=featherClass==8u?surfaceVane:0.0f;
+    float foreheadVane=featherClass==9u?surfaceVane:0.0f;
+    float gularVane=featherClass==10u?surfaceVane:0.0f;
+    float deepUnderplumageVane=featherClass==16u?surfaceVane:0.0f;
+    float ventralFiberMaterial=featherClass==7u?explicitCurve:0.0f;
     float bodyContourVane=max(
         max(dorsalBodyVane,max(flankBodyVane,ventralBodyVane)),
         max(headNeckVane,max(foreheadVane,gularVane))
@@ -4223,14 +4293,18 @@ inline float3 showcaseCrowLinearRadiance(
     classSheenScale=mix(classSheenScale,0.66f,underwingCovertVane);
     classSheenScale=mix(classSheenScale,0.72f,dorsalBodyVane);
     classSheenScale=mix(classSheenScale,0.67f,flankBodyVane);
-    classSheenScale=mix(classSheenScale,0.62f,ventralBodyVane);
+    classSheenScale=mix(
+        classSheenScale,0.62f,max(ventralBodyVane,ventralFiberMaterial)
+    );
     classSheenScale=mix(classSheenScale,0.60f,headNeckVane);
     classSheenScale=mix(classSheenScale,0.38f,foreheadVane);
     classSheenScale=mix(classSheenScale,0.52f,gularVane);
     classSheenScale=mix(classSheenScale,0.12f,deepUnderplumageVane);
-    float3 featherAxis=crowFeatherAxis(
-        world,normal,featherCoordinates.xy
-    );
+    float3 featherAxis=explicitCurve>0.5f
+        ?safeNormalizeCrow(
+            resolvedCurveTangent,float3(1.0f,0.0f,0.0f)
+        )
+        :crowFeatherAxis(world,normal,featherCoordinates.xy);
     // Short body feathers do not present one shared polished rachis direction.
     // Resolve two optical barb banks around a small, identity-stable tangent
     // turn. The phase is carried by the retained vane, so the microfacet field
@@ -4260,7 +4334,7 @@ inline float3 showcaseCrowLinearRadiance(
         viewInBarbFrame,plumageVisibilityShape,plumageVisibilityLayout
     );
     float projectedVisibilityStrength=
-        saturate(plumageVisibilityLayout.z)*persistentVane;
+        saturate(plumageVisibilityLayout.z)*surfaceVane;
     float opaqueProjectedVisibility=max(
         projectedVisibility.x+projectedVisibility.y+projectedVisibility.z,
         1.0e-5f
@@ -4420,7 +4494,7 @@ inline float3 showcaseCrowLinearRadiance(
         1.73f*featherCoordinates.z+0.31f*float(featherClass)
     );
     float bodyRachisScale=0.16f+0.18f*bodyRachisIdentity;
-    float rachis=persistentVane*(1.0f-greaterCovertVane)
+    float rachis=surfaceVane*(1.0f-greaterCovertVane)
         *mix(genericRachisAxial,bodyRachisAxial,bodyContourVane)
         *mix(1.0f,bodyRachisScale,bodyContourVane)
         *exp2(-42.0f*abs(signedWidth));
@@ -4460,14 +4534,14 @@ inline float3 showcaseCrowLinearRadiance(
     float2 interlockingBarbules=crowInterlockingBarbuleSignal(
         axial,signedWidth,featherCoordinates.z,
         max(flightFeather,0.55f*greaterCovertVane)
-    )*persistentVane;
+    )*surfaceVane;
     float barbPhase=520.0f*world.x+390.0f*world.y-270.0f*world.z;
     float barb=0.5f+0.5f*crowBandLimitedSine(barbPhase);
-    float barbSignal=mix(barb,localBarbs,persistentVane);
-    float barbMicro=persistentVane
+    float barbSignal=mix(barb,localBarbs,surfaceVane);
+    float barbMicro=surfaceVane
         *mix(0.006f+0.010f*barbSignal,0.010f+0.018f*barbSignal,flightFeather)
         *grazing*mix(0.25f,1.0f,flightFeather);
-    float vaneEdge=persistentVane*smoothstep(0.78f,0.98f,abs(signedWidth))
+    float vaneEdge=surfaceVane*smoothstep(0.78f,0.98f,abs(signedWidth))
         *mix(0.35f,1.0f,flightFeather);
     // Body vane barbs are not a single polished plate. Tilt only the specular
     // sample across the resolved barb direction, using the stable per-feather
@@ -4540,7 +4614,9 @@ inline float3 showcaseCrowLinearRadiance(
     classSharpScale=mix(classSharpScale,0.42f,underwingCovertVane);
     classSharpScale=mix(classSharpScale,0.32f,dorsalBodyVane);
     classSharpScale=mix(classSharpScale,0.30f,flankBodyVane);
-    classSharpScale=mix(classSharpScale,0.28f,ventralBodyVane);
+    classSharpScale=mix(
+        classSharpScale,0.28f,max(ventralBodyVane,ventralFiberMaterial)
+    );
     classSharpScale=mix(classSharpScale,0.28f,headNeckVane);
     classSharpScale=mix(classSharpScale,0.20f,foreheadVane);
     classSharpScale=mix(classSharpScale,0.24f,gularVane);
@@ -4552,7 +4628,7 @@ inline float3 showcaseCrowLinearRadiance(
         *mix(1.0f,0.12f,deepUnderplumageVane);
     color+=classAnisotropicScale*anisotropicSpecular
         *mix(float3(0.020f,0.030f,0.046f),float3(0.012f,0.020f,0.034f),flightFeather);
-    color*=1.0f-0.055f*persistentVane*(1.0f-localBarbs);
+    color*=1.0f-0.055f*surfaceVane*(1.0f-localBarbs);
     color+=rachis*mix(0.20f,1.0f,flightFeather)
         *(0.012f+0.025f*ndk)*float3(0.42f,0.56f,0.74f);
     color*=1.0f-0.022f*greaterCovertRachisGroove;
@@ -4567,7 +4643,7 @@ inline float3 showcaseCrowLinearRadiance(
     // broad body regions read brown, so only a restrained cool sky return is
     // added here; weak film structure stays view-dependent in `sheen`.
     color+=nds*float3(0.004f,0.006f,0.010f);
-    color+=rim*mix(1.0f,classSheenScale,persistentVane)
+    color+=rim*mix(1.0f,classSheenScale,max(surfaceVane,explicitCurve))
         *float3(0.022f,0.040f,0.065f);
     // This analytic lobe stands in only for shadowed feather volume inside the
     // folded wing-tail junction. Suppress exposed-cortex energy so a grazing
@@ -4576,11 +4652,52 @@ inline float3 showcaseCrowLinearRadiance(
     return 1.68f*color;
 }
 
+/// Executable contract for the resolved-curve material boundary. Surface vanes
+/// respond to the far-field discontinuity mask; explicit fibers do not, and
+/// instead respond to their retained geometric tangent.
+kernel void probeCrowResolvedCurveVisibility(
+    device float4* outputs [[buffer(0)]],
+    uint index [[thread_position_in_grid]]) {
+    if(index>=5u){return;}
+    uint4 identity=index<3u
+        ?uint4(0xffffffffu,0x07100001u,3u,7u)
+        :uint4(0xffffffffu,17u,3u,7u);
+    bool explicitCurve=crowResolvedCurveKind(identity)!=0u;
+    bool disableAnalyticMask=index==1u||index==4u;
+    float3 tangent=index==2u
+        ?normalize(float3(0.15f,0.92f,0.36f))
+        :normalize(float3(0.94f,0.18f,0.29f));
+    float4 visibilityShape=float4(
+        2.4f,3.2f,0.78539816f,0.31415927f
+    );
+    float4 visibilityLayout=float4(
+        5.0f,0.55f,0.62f,disableAnalyticMask?0.0f:1.0f
+    );
+    float4 projected=crowProjectedFeatherVisibilityLocal(
+        normalize(float3(0.37f,0.81f,0.45f)),
+        visibilityShape,visibilityLayout
+    );
+    float strength=visibilityLayout.z*(explicitCurve?0.0f:1.0f);
+    float energy=mix(
+        1.0f,
+        projected.x+0.92f*(projected.y+projected.z),
+        strength
+    );
+    float lobe=crowFeatherAnisotropicLobe(
+        normalize(float3(0.24f,-0.31f,0.92f)),
+        tangent,
+        normalize(float3(0.44f,-0.19f,0.88f)),
+        0.34f,0.12f
+    );
+    outputs[index]=float4(energy,lobe,strength,1.0f);
+}
+
 fragment float4 showcaseCrowFragment(
     RasterVertex in [[stage_in]],
     constant CameraUniforms& camera [[buffer(0)]]) {
     float3 radiance=showcaseCrowLinearRadiance(
-        in.world,in.normal,in.color,camera.eyeAndWidth.xyz,float3(in.uv,0),0u,
+        in.world,in.normal,in.color,camera.eyeAndWidth.xyz,float3(in.uv,0),
+        float3(0.0f),uint4(0u),
         float4(160.0f,18.0f,0.08f,0.016f),
         float4(1.56f,0.03f,2.00f,0.60f),
         float4(1.32f,0.88f,1.62f,1.84f),
@@ -4597,7 +4714,7 @@ fragment CrowAOVOutput showcaseCrowAOVFragment(
     float3 normal=in.normal;
     float3 radiance=showcaseCrowLinearRadiance(
         in.world,normal,in.albedoAndMaterial,camera.eyeAndWidth.xyz,
-        in.featherCoordinates,in.identity.w,
+        in.featherCoordinates,in.resolvedCurveTangent,in.identity,
         camera.plumageFilm,camera.plumageComplexIndices,
         camera.plumageMelanin,camera.plumageCortex,
         camera.plumageVisibilityShape,camera.plumageVisibilityLayout

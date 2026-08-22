@@ -228,7 +228,15 @@ barbule tier, both paths retain `557` parent and `392` barbule owners, generate
 `23,956,992` logical vertices, and give `369` pixels to exact barbule identity;
 mesh invokes `7,985,664` vertices and remains byte-exact. This qualifies
 cross-stage raster ownership and indexed vertex reuse on the M4 Pro; it is not
-a speed claim. Curve-aware ray visibility remains open.
+a speed claim. Resolved barb and barbule tubes now carry their retained curve
+tangent into the fragment stage. Their raster/depth geometry owns visibility,
+so the far-field surface mask is no longer applied a second time and their
+anisotropic response follows the actual curve rather than a reconstructed vane
+axis. An executable Metal probe verifies that surface-mask strength cannot
+change an explicit fiber, that rotating its tangent changes its fiber lobe, and
+that unresolved vanes still respond to the analytic construction. This is
+curve-resolved direct visibility, not feather-to-feather ray tracing, multiple
+scattering, or a measured American-crow optical calibration.
 A separate versioned optics profile now drives the live eight-wavelength
 air/keratin/melanin film response. It records comparative glossy-corvid
 constraints independently from the renderer's American-crow estimates, so the
