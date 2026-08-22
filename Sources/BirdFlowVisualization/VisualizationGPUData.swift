@@ -290,10 +290,22 @@ struct CrowVentralBarbVisibilityUniforms {
   var farPlane: SIMD4<Float>
   /// Current body center and conservative additional bound padding in metres.
   var bodyCenterAndPadding: SIMD4<Float>
+  /// Current body center reprojected into the prior camera and bound padding.
+  var occlusionBodyCenterAndPadding: SIMD4<Float>
   /// Projected pixels/metre, activation threshold, pairs/side, intervals/curve.
   var selection: SIMD4<Float>
   /// Record count, vertices/interval, feather class, reserved.
   var counts: SIMD4<UInt32>
+  var previousViewProjection: simd_float4x4
+  /// Width, height, device-depth bias, history-valid flag.
+  var occlusionViewportBiasAndEnabled: SIMD4<Float>
+}
+
+struct CrowVentralBarbVisibilityCounts: Equatable {
+  var postOcclusionVisible: UInt32
+  var frustumVisible: UInt32
+  var occlusionCulled: UInt32
+  var occlusionTested: UInt32
 }
 
 /// Procedural crow geometry paired across two frames for true deformation

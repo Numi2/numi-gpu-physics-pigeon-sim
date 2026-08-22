@@ -131,10 +131,13 @@ inventory or view-dependent patch geometry.
    vertices directly from the compact GPU work list, eliminating the former
    `990,019,584`-byte candidate-sized output allocation at the extreme close
    diagnostic while retaining compute expansion as an executable audit oracle.
-   The next future-compute step is previous-depth occlusion and indirect indexed,
-   meshlet, or hardware-curve emission from the same `1,304`-feather tract
-   inventory; the unindexed procedural triangle stream remains the high-cost
-   correctness oracle, not the final scaling path.
+   A retained max-device-depth hierarchy now conservatively removes only
+   complete record bounds covered by nearer prior depth, with background,
+   reset, viewport-edge, and projection uncertainty failing open. The next
+   future-compute step is indirect indexed, meshlet, or hardware-curve emission
+   from the same `1,304`-feather tract inventory; the unindexed procedural
+   triangle stream remains the high-cost correctness oracle, not the final
+   scaling path.
    The `270`-identity-per-side femoral field now has a compact, AOV-localized
    insertion-overlap oracle over rows `6...11`, courses `8...9`; the bounded
    width/tip envelope closes a transition seam without moving follicles or leg

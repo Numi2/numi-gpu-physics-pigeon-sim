@@ -14,6 +14,7 @@ enum CrowVentralBarbCurveRecords {
   static let surfaceFeatherClass: UInt32 = 7
   static let projectedFeatherThresholdPixels: Float = 480
   static let visibilityPaddingMeters: Float = 0.0004
+  static let previousDepthBias: Float = 0.00025
 
   static func segmentWork(
     records: [CrowVentralRachisCurveRecordGPU],
@@ -65,7 +66,10 @@ enum CrowVentralBarbCurveRecords {
     viewProjection: simd_float4x4,
     currentBodyCenter: SIMD3<Float>,
     projectedPixelsPerMeter: Float,
-    recordCount: Int
+    recordCount: Int,
+    previousViewProjection: simd_float4x4 = matrix_identity_float4x4,
+    occlusionViewport: SIMD2<Int> = .zero,
+    occlusionEnabled: Bool = false
   ) -> CrowVentralBarbVisibilityUniforms {
     let row0 = SIMD4<Float>(
       viewProjection.columns.0.x,
@@ -102,6 +106,10 @@ enum CrowVentralBarbCurveRecords {
         currentBodyCenter,
         visibilityPaddingMeters
       ),
+      occlusionBodyCenterAndPadding: SIMD4<Float>(
+        currentBodyCenter,
+        visibilityPaddingMeters
+      ),
       selection: SIMD4<Float>(
         projectedPixelsPerMeter,
         projectedFeatherThresholdPixels,
@@ -113,6 +121,13 @@ enum CrowVentralBarbCurveRecords {
         UInt32(verticesPerCurveInterval),
         surfaceFeatherClass,
         0
+      ),
+      previousViewProjection: previousViewProjection,
+      occlusionViewportBiasAndEnabled: SIMD4<Float>(
+        Float(occlusionViewport.x),
+        Float(occlusionViewport.y),
+        previousDepthBias,
+        occlusionEnabled ? 1 : 0
       )
     )
   }

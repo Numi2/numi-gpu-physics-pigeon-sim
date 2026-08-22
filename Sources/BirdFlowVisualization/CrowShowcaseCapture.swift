@@ -769,6 +769,7 @@ private struct CrowVisualProfile: Decodable {
 }
 
 private final class CrowShowcaseRenderer {
+  private static let occlusionCameraMatrixDeltaLimit: Float = 1e-5
   private let backend: VisualizationBackend
   private let meshBuilder: CrowMeshBuilder
   private let surfaceAOVPipeline: MTLRenderPipelineState
@@ -796,6 +797,8 @@ private final class CrowShowcaseRenderer {
   private var previousCamera: CameraState?
   private var previousJitter: SIMD2<Float>?
   private var temporalUpscaler: CrowTemporalUpscaler?
+  private var occlusionDepthPyramid: CrowOcclusionDepthPyramid?
+  private var occlusionDepthValid = false
 
   init(
     device: MTLDevice,
@@ -1004,6 +1007,44 @@ private final class CrowShowcaseRenderer {
         ? CrowTakeoffSequence.topologyLODReferenceCameraDistanceMeters
         : camera.distance
     )
+    let currentCamera = camera.uniforms(
+      aspect: Float(renderWidth) / Float(renderHeight),
+      ribbonWidth: 0.001
+    )
+    let priorCamera = (historyReset ? camera : (previousCamera ?? camera)).uniforms(
+      aspect: Float(renderWidth) / Float(renderHeight),
+      ribbonWidth: 0.001
+    )
+    let currentViewProjection = Self.jitteredViewProjection(
+      currentCamera.viewProjection,
+      jitter: jitter,
+      width: renderWidth,
+      height: renderHeight
+    )
+    let priorJitter = historyReset ? jitter : (previousJitter ?? jitter)
+    let previousViewProjection = Self.jitteredViewProjection(
+      priorCamera.viewProjection,
+      jitter: priorJitter,
+      width: renderWidth,
+      height: renderHeight
+    )
+    let hasVentralBarbCandidates =
+      (ventralBarbGeometryDeformer?.candidateRecordCount(
+        projectedPixelsPerMeter: projectedPixelsPerMeter
+      ) ?? 0) > 0
+    let depthPyramid = try hasVentralBarbCandidates
+      ? ensureOcclusionDepthPyramid(width: renderWidth, height: renderHeight)
+      : nil
+    if !hasVentralBarbCandidates {
+      occlusionDepthValid = false
+      occlusionDepthPyramid = nil
+    }
+    let canTestPreviousDepth =
+      !historyReset && occlusionDepthValid
+      && Self.maximumAbsoluteMatrixDelta(
+        currentCamera.viewProjection,
+        priorCamera.viewProjection
+      ) <= Self.occlusionCameraMatrixDeltaLimit
     let surfaceStates = meshBuilder.surfaceStates(phase: phase)
     let previousSurfaceStates = meshBuilder.surfaceStates(phase: priorPhase)
     let currentAnatomyBodyCenter = meshBuilder.anatomyBodyCenter(
@@ -1262,10 +1303,10 @@ private final class CrowShowcaseRenderer {
         currentBodyCenter: currentAnatomyBodyCenter,
         previousBodyCenter: previousAnatomyBodyCenter,
         projectedPixelsPerMeter: projectedPixelsPerMeter,
-        viewProjection: camera.uniforms(
-          aspect: Float(renderWidth) / Float(renderHeight),
-          ribbonWidth: 0.001
-        ).viewProjection,
+        viewProjection: currentCamera.viewProjection,
+        previousViewProjection: previousViewProjection,
+        previousDepthPyramid: canTestPreviousDepth ? depthPyramid?.texture : nil,
+        occlusionViewport: SIMD2<Int>(renderWidth, renderHeight),
         commandBuffer: commandBuffer
       )
       ventralBarbFrame = frame
@@ -1293,27 +1334,6 @@ private final class CrowShowcaseRenderer {
     } else {
       pass.depthAttachment.storeAction = .store
     }
-    let currentCamera = camera.uniforms(
-      aspect: Float(renderWidth) / Float(renderHeight),
-      ribbonWidth: 0.001
-    )
-    let priorCamera = (historyReset ? camera : (previousCamera ?? camera)).uniforms(
-      aspect: Float(renderWidth) / Float(renderHeight),
-      ribbonWidth: 0.001
-    )
-    let currentViewProjection = Self.jitteredViewProjection(
-      currentCamera.viewProjection,
-      jitter: jitter,
-      width: renderWidth,
-      height: renderHeight
-    )
-    let priorJitter = historyReset ? jitter : (previousJitter ?? jitter)
-    let previousViewProjection = Self.jitteredViewProjection(
-      priorCamera.viewProjection,
-      jitter: priorJitter,
-      width: renderWidth,
-      height: renderHeight
-    )
     var cameraUniforms = CrowTemporalCameraUniforms(
       viewProjection: currentViewProjection,
       previousViewProjection: previousViewProjection,
@@ -1411,6 +1431,13 @@ private final class CrowShowcaseRenderer {
       )
     }
     encoder.endEncoding()
+
+    if let depthPyramid {
+      try depthPyramid.encode(
+        deviceDepth: resolvedDeviceDepth,
+        commandBuffer: commandBuffer
+      )
+    }
 
     let identityPass = MTLRenderPassDescriptor()
     identityPass.colorAttachments[0].texture = identity
@@ -1573,6 +1600,7 @@ private final class CrowShowcaseRenderer {
         commandBuffer.error?.localizedDescription ?? "crow render failed"
       )
     }
+    if depthPyramid != nil { occlusionDepthValid = true }
     previousPhase = phase
     previousCamera = camera
     previousJitter = jitter
@@ -1594,6 +1622,14 @@ private final class CrowShowcaseRenderer {
     let ventralBarbVisibleRecordCount = ventralBarbFrame.map {
       ventralBarbGeometryDeformer?.compactedRecordCount(for: $0) ?? 0
     } ?? 0
+    let ventralBarbVisibilityCounts = ventralBarbFrame.flatMap { frame in
+      ventralBarbGeometryDeformer.map { $0.visibilityCounts(for: frame) }
+    } ?? CrowVentralBarbVisibilityCounts(
+      postOcclusionVisible: 0,
+      frustumVisible: 0,
+      occlusionCulled: 0,
+      occlusionTested: 0
+    )
     let ventralBarbExpandedVertexCount = ventralBarbFrame.map {
       Int(ventralBarbGeometryDeformer?.drawArguments(for: $0).vertexCount ?? 0)
     } ?? 0
@@ -1617,7 +1653,19 @@ private final class CrowShowcaseRenderer {
       allocatedRenderTargetBytes: resolvedInputBytes + multisampleBytes + outputBytes,
       ventralBarbCandidateRecordCount: ventralBarbVerticesPerRecord > 0
         ? ventralBarbCandidateVertexCount / ventralBarbVerticesPerRecord : 0,
+      ventralBarbFrustumVisibleRecordCount: Int(
+        ventralBarbVisibilityCounts.frustumVisible
+      ),
       ventralBarbVisibleRecordCount: ventralBarbVisibleRecordCount,
+      ventralBarbOcclusionTestedRecordCount: Int(
+        ventralBarbVisibilityCounts.occlusionTested
+      ),
+      ventralBarbOcclusionCulledRecordCount: Int(
+        ventralBarbVisibilityCounts.occlusionCulled
+      ),
+      ventralBarbOcclusionDepthBytes: depthPyramid?.allocatedBytes ?? 0,
+      ventralBarbOcclusionMode: hasVentralBarbCandidates
+        ? "previous-max-device-depth-fail-open" : "inactive",
       ventralBarbExpandedVertexCount: ventralBarbExpandedVertexCount,
       ventralBarbOutputCapacityBytes: 0,
       ventralBarbVertexGenerationMode: "gpu-procedural-vertex-pulling"
@@ -1634,6 +1682,42 @@ private final class CrowShowcaseRenderer {
     clipTranslation.columns.3.x = 2 * jitter.x / Float(width)
     clipTranslation.columns.3.y = -2 * jitter.y / Float(height)
     return clipTranslation * viewProjection
+  }
+
+  private static func maximumAbsoluteMatrixDelta(
+    _ first: simd_float4x4,
+    _ second: simd_float4x4
+  ) -> Float {
+    var maximum: Float = 0
+    for column in 0..<4 {
+      for row in 0..<4 {
+        maximum = max(
+          maximum,
+          abs(first[column][row] - second[column][row])
+        )
+      }
+    }
+    return maximum
+  }
+
+  private func ensureOcclusionDepthPyramid(
+    width: Int,
+    height: Int
+  ) throws -> CrowOcclusionDepthPyramid {
+    if let existing = occlusionDepthPyramid,
+      existing.width == width,
+      existing.height == height
+    {
+      return existing
+    }
+    let created = try CrowOcclusionDepthPyramid(
+      backend: backend,
+      width: width,
+      height: height
+    )
+    occlusionDepthPyramid = created
+    occlusionDepthValid = false
+    return created
   }
 
   private func makeTexture(

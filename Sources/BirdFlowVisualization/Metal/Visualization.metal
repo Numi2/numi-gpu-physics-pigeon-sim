@@ -104,9 +104,38 @@ struct CrowVentralBarbVisibilityUniforms {
     float4 nearPlane;
     float4 farPlane;
     float4 bodyCenterAndPadding;
+    float4 occlusionBodyCenterAndPadding;
     float4 selection;
     uint4 counts;
+    float4x4 previousViewProjection;
+    float4 occlusionViewportBiasAndEnabled;
 };
+
+kernel void copyCrowDeviceDepthToOcclusionLevel(
+    depth2d<float,access::read> source [[texture(0)]],
+    texture2d<float,access::write> destination [[texture(1)]],
+    uint2 gid [[thread_position_in_grid]]) {
+    if(any(gid>=uint2(destination.get_width(),destination.get_height()))){return;}
+    destination.write(source.read(gid),gid);
+}
+
+kernel void reduceCrowOcclusionDepthMax(
+    texture2d<float,access::read> source [[texture(0)]],
+    texture2d<float,access::write> destination [[texture(1)]],
+    uint2 gid [[thread_position_in_grid]]) {
+    uint2 destinationSize=uint2(destination.get_width(),destination.get_height());
+    if(any(gid>=destinationSize)){return;}
+    uint2 sourceSize=uint2(source.get_width(),source.get_height());
+    uint2 first=gid*2u;
+    float maximum=0.0f;
+    for(uint y=0u;y<2u;++y){
+        for(uint x=0u;x<2u;++x){
+            uint2 coordinate=min(first+uint2(x,y),sourceSize-1u);
+            maximum=max(maximum,source.read(coordinate).x);
+        }
+    }
+    destination.write(maximum,gid);
+}
 
 struct CrowSurfaceTemporalVertexGPU {
     float4 position;
@@ -1746,14 +1775,97 @@ inline bool crowVentralBarbRecordVisible(
         &&crowVentralBarbInsidePlane(uniforms.farPlane,center,radius);
 }
 
+inline bool crowVentralBarbRecordOccluded(
+    thread const CrowVentralRachisCurveRecordGPU& record,
+    constant CrowVentralBarbVisibilityUniforms& uniforms,
+    texture2d<float,access::read> previousDepth) {
+    if(uniforms.occlusionViewportBiasAndEnabled.w<0.5f){return false;}
+    float2 viewport=uniforms.occlusionViewportBiasAndEnabled.xy;
+    if(any(viewport<1.0f)){return false;}
+    float3 root=record.rootAndPennaceousStart.xyz;
+    float3 tip=record.tipAndCamber.xyz;
+    float featherLength=distance(root,tip);
+    float maximumWidth=record.widthsEnvelopeAndAsymmetry.y
+        *(1.0f+abs(record.widthsEnvelopeAndAsymmetry.w));
+    float radius=0.5f*featherLength+maximumWidth
+        +abs(record.tipAndCamber.w)
+        +abs(record.normalAndTransverseCamber.w)*maximumWidth
+        +abs(record.lateralSweepAndReserved.x)
+        +uniforms.occlusionBodyCenterAndPadding.w;
+    float3 center=0.5f*(root+tip)
+        +uniforms.occlusionBodyCenterAndPadding.xyz;
+    float2 minimumPixel=viewport;
+    float2 maximumPixel=float2(0.0f);
+    float nearestDepth=1.0f;
+    for(uint corner=0u;corner<8u;++corner){
+        float3 sign=float3(
+            (corner&1u)==0u?-1.0f:1.0f,
+            (corner&2u)==0u?-1.0f:1.0f,
+            (corner&4u)==0u?-1.0f:1.0f
+        );
+        float4 clip=uniforms.previousViewProjection
+            *float4(center+sign*radius,1.0f);
+        if(clip.w<=1.0e-6f){return false;}
+        float3 ndc=clip.xyz/clip.w;
+        if(ndc.z<=0.0f||ndc.z>=1.0f){return false;}
+        float2 pixel=(ndc.xy*0.5f+0.5f)*viewport;
+        minimumPixel=min(minimumPixel,pixel);
+        maximumPixel=max(maximumPixel,pixel);
+        nearestDepth=min(nearestDepth,ndc.z);
+    }
+    // Two output pixels absorb jitter, raster quantization, and subpixel body
+    // motion. Bounds touching the image edge fail open because prior background
+    // outside the viewport is unknown.
+    minimumPixel-=2.0f;
+    maximumPixel+=2.0f;
+    if(any(minimumPixel<0.0f)||any(maximumPixel>=viewport)){return false;}
+    float maximumExtent=max(
+        maximumPixel.x-minimumPixel.x,
+        maximumPixel.y-minimumPixel.y
+    );
+    uint level=uint(floor(log2(max(maximumExtent,1.0f))));
+    level=min(level,previousDepth.get_num_mip_levels()-1u);
+    float scale=exp2(float(level));
+    uint2 first=uint2(floor(minimumPixel/scale));
+    uint2 last=uint2(floor(maximumPixel/scale));
+    uint2 levelSize=uint2(
+        previousDepth.get_width(level),previousDepth.get_height(level)
+    );
+    first=min(first,levelSize-1u);
+    last=min(last,levelSize-1u);
+    if(any(last-first>2u)){return false;}
+    float maximumDepth=0.0f;
+    for(uint y=0u;y<3u;++y){
+        for(uint x=0u;x<3u;++x){
+            uint2 coordinate=first+uint2(x,y);
+            if(any(coordinate>last)){continue;}
+            maximumDepth=max(
+                maximumDepth,previousDepth.read(coordinate,level).x
+            );
+        }
+    }
+    // Clear depth is one, so any prior background in the covered hierarchy
+    // rejects the cull. The bias moves the occluder away from the camera.
+    if(maximumDepth>=0.999999f){return false;}
+    return maximumDepth+uniforms.occlusionViewportBiasAndEnabled.z
+        <nearestDepth;
+}
+
 kernel void classifyCrowVentralBarbRecords(
     device const CrowVentralRachisCurveRecordGPU* records [[buffer(0)]],
     device uint* selected [[buffer(1)]],
     constant CrowVentralBarbVisibilityUniforms& uniforms [[buffer(2)]],
+    texture2d<float,access::read> previousDepth [[texture(0)]],
     uint recordIndex [[thread_position_in_grid]]) {
     if(recordIndex>=uniforms.counts.x){return;}
     CrowVentralRachisCurveRecordGPU record=records[recordIndex];
-    selected[recordIndex]=crowVentralBarbRecordVisible(record,uniforms)?1u:0u;
+    if(!crowVentralBarbRecordVisible(record,uniforms)){
+        selected[recordIndex]=0u;
+        return;
+    }
+    selected[recordIndex]=crowVentralBarbRecordOccluded(
+        record,uniforms,previousDepth
+    )?2u:1u;
 }
 
 kernel void scanCrowVentralBarbRecordVisibility(
@@ -1764,11 +1876,20 @@ kernel void scanCrowVentralBarbRecordVisibility(
     uint gid [[thread_position_in_grid]]) {
     if(gid!=0u){return;}
     uint running=0u;
+    uint frustumVisible=0u;
+    uint occlusionCulled=0u;
     for(uint recordIndex=0u;recordIndex<uniforms.counts.x;++recordIndex){
         offsets[recordIndex]=running;
-        running+=selected[recordIndex];
+        uint classification=selected[recordIndex];
+        running+=classification==1u?1u:0u;
+        frustumVisible+=classification!=0u?1u:0u;
+        occlusionCulled+=classification==2u?1u:0u;
     }
     compactedCount[0]=running;
+    compactedCount[1]=frustumVisible;
+    compactedCount[2]=occlusionCulled;
+    compactedCount[3]=uniforms.occlusionViewportBiasAndEnabled.w>=0.5f
+        ?frustumVisible:0u;
 }
 
 kernel void emitCrowVentralBarbWork(
@@ -1777,7 +1898,7 @@ kernel void emitCrowVentralBarbWork(
     device CrowVentralBarbSegmentWorkGPU* work [[buffer(2)]],
     constant CrowVentralBarbVisibilityUniforms& uniforms [[buffer(3)]],
     uint recordIndex [[thread_position_in_grid]]) {
-    if(recordIndex>=uniforms.counts.x||selected[recordIndex]==0u){return;}
+    if(recordIndex>=uniforms.counts.x||selected[recordIndex]!=1u){return;}
     uint pairCount=uint(uniforms.selection.z);
     uint intervalCount=uint(uniforms.selection.w);
     uint workPerRecord=pairCount*2u*intervalCount;

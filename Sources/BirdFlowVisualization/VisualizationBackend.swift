@@ -148,4 +148,26 @@ final class VisualizationBackend {
       threadsPerThreadgroup: MTLSize(width: width, height: 1, depth: 1)
     )
   }
+
+  func dispatch2D(
+    _ encoder: MTLComputeCommandEncoder,
+    pipeline: MTLComputePipelineState,
+    width: Int,
+    height: Int
+  ) {
+    let threadWidth = pipeline.threadExecutionWidth
+    let threadHeight = max(
+      1,
+      min(8, pipeline.maxTotalThreadsPerThreadgroup / threadWidth)
+    )
+    encoder.setComputePipelineState(pipeline)
+    encoder.dispatchThreads(
+      MTLSize(width: width, height: height, depth: 1),
+      threadsPerThreadgroup: MTLSize(
+        width: threadWidth,
+        height: threadHeight,
+        depth: 1
+      )
+    )
+  }
 }

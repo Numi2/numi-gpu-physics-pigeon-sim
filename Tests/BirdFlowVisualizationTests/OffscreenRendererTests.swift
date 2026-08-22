@@ -713,10 +713,15 @@ func estimatedStandingCrowCaptureProducesLoopClosedFrames() throws {
     CrowShowcaseAOVAuditReport.self,
     from: Data(contentsOf: aovAuditURL)
   )
-  #expect(audit.schemaVersion == 14)
+  #expect(audit.schemaVersion == 15)
   #expect(audit.frames.allSatisfy {
     $0.ventralBarbCandidateRecordCount == 0
+      && $0.ventralBarbFrustumVisibleRecordCount == 0
       && $0.ventralBarbVisibleRecordCount == 0
+      && $0.ventralBarbOcclusionTestedRecordCount == 0
+      && $0.ventralBarbOcclusionCulledRecordCount == 0
+      && $0.ventralBarbOcclusionDepthBytes == 0
+      && $0.ventralBarbOcclusionMode == "inactive"
       && $0.ventralBarbExpandedVertexCount == 0
       && $0.ventralBarbOutputCapacityBytes == 0
       && $0.ventralBarbVertexGenerationMode

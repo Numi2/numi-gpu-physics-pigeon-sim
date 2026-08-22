@@ -17,7 +17,12 @@ struct CrowShowcaseFrame {
   let gpuDurationMilliseconds: Double
   let allocatedRenderTargetBytes: Int
   let ventralBarbCandidateRecordCount: Int
+  let ventralBarbFrustumVisibleRecordCount: Int
   let ventralBarbVisibleRecordCount: Int
+  let ventralBarbOcclusionTestedRecordCount: Int
+  let ventralBarbOcclusionCulledRecordCount: Int
+  let ventralBarbOcclusionDepthBytes: Int
+  let ventralBarbOcclusionMode: String
   let ventralBarbExpandedVertexCount: Int
   let ventralBarbOutputCapacityBytes: Int
   let ventralBarbVertexGenerationMode: String
@@ -342,7 +347,12 @@ struct CrowShowcaseFrame {
       nativeReferenceAllocatedRenderTargetBytes:
         nativeReference?.allocatedRenderTargetBytes,
       ventralBarbCandidateRecordCount: ventralBarbCandidateRecordCount,
+      ventralBarbFrustumVisibleRecordCount: ventralBarbFrustumVisibleRecordCount,
       ventralBarbVisibleRecordCount: ventralBarbVisibleRecordCount,
+      ventralBarbOcclusionTestedRecordCount: ventralBarbOcclusionTestedRecordCount,
+      ventralBarbOcclusionCulledRecordCount: ventralBarbOcclusionCulledRecordCount,
+      ventralBarbOcclusionDepthBytes: ventralBarbOcclusionDepthBytes,
+      ventralBarbOcclusionMode: ventralBarbOcclusionMode,
       ventralBarbExpandedVertexCount: ventralBarbExpandedVertexCount,
       ventralBarbOutputCapacityBytes: ventralBarbOutputCapacityBytes,
       ventralBarbVertexGenerationMode: ventralBarbVertexGenerationMode,
@@ -1146,7 +1156,12 @@ struct CrowShowcaseAOVFrameAudit: Codable, Equatable {
   let allocatedRenderTargetBytes: Int
   let nativeReferenceAllocatedRenderTargetBytes: Int?
   let ventralBarbCandidateRecordCount: Int
+  let ventralBarbFrustumVisibleRecordCount: Int
   let ventralBarbVisibleRecordCount: Int
+  let ventralBarbOcclusionTestedRecordCount: Int
+  let ventralBarbOcclusionCulledRecordCount: Int
+  let ventralBarbOcclusionDepthBytes: Int
+  let ventralBarbOcclusionMode: String
   let ventralBarbExpandedVertexCount: Int
   let ventralBarbOutputCapacityBytes: Int
   let ventralBarbVertexGenerationMode: String
@@ -1317,7 +1332,7 @@ struct CrowShowcaseAOVAuditReport: Codable, Equatable {
   let frames: [CrowShowcaseAOVFrameAudit]
 
   init(frames: [CrowShowcaseAOVFrameAudit]) {
-    schemaVersion = 14
+    schemaVersion = 15
     colorSpace = "scene-linear extended range; display output is tone mapped separately"
     motionConvention =
       "current pixel to previous pixel in upper-left-origin pixel units; MetalFX scale 1"

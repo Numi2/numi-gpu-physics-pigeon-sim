@@ -19,6 +19,7 @@ final class CrowVentralBarbGeometryDeformer {
   private let pipeline: MTLComputePipelineState
   private let records: [CrowVentralRachisCurveRecordGPU]
   private let recordBuffer: MTLBuffer
+  private let fallbackDepthTexture: MTLTexture
   private let selectedBuffers: [MTLBuffer]
   private let offsetBuffers: [MTLBuffer]
   private let compactedCountBuffers: [MTLBuffer]
@@ -31,6 +32,13 @@ final class CrowVentralBarbGeometryDeformer {
   private var nextSlot = 0
 
   let curveCount: Int
+
+  func candidateRecordCount(projectedPixelsPerMeter: Float) -> Int {
+    CrowVentralBarbCurveRecords.activeRecordIndices(
+      records: records,
+      projectedPixelsPerMeter: projectedPixelsPerMeter
+    ).count
+  }
 
   init(
     backend: VisualizationBackend,
@@ -45,6 +53,27 @@ final class CrowVentralBarbGeometryDeformer {
     pipeline = try backend.compute("expandCrowVentralBarbCurves")
     curveCount = records.count
     recordBuffer = try Self.sharedBuffer(values: records, backend: backend)
+    let fallbackDescriptor = MTLTextureDescriptor.texture2DDescriptor(
+      pixelFormat: .r32Float,
+      width: 1,
+      height: 1,
+      mipmapped: false
+    )
+    fallbackDescriptor.storageMode = .shared
+    fallbackDescriptor.usage = .shaderRead
+    guard let fallbackDepthTexture = backend.device.makeTexture(
+      descriptor: fallbackDescriptor
+    ) else {
+      throw VisualizationError.allocation(MemoryLayout<Float>.stride)
+    }
+    var clearDepth: Float = 1
+    fallbackDepthTexture.replace(
+      region: MTLRegionMake2D(0, 0, 1, 1),
+      mipmapLevel: 0,
+      withBytes: &clearDepth,
+      bytesPerRow: MemoryLayout<Float>.stride
+    )
+    self.fallbackDepthTexture = fallbackDepthTexture
     let maximumWorkCount =
       records.count
       * CrowVentralBarbCurveRecords.maximumBarbPairCount * 2
@@ -62,7 +91,10 @@ final class CrowVentralBarbGeometryDeformer {
       )
     }
     compactedCountBuffers = try (0..<Self.bufferedFrameCount).map { _ in
-      try backend.buffer(length: MemoryLayout<UInt32>.stride, shared: true)
+      try backend.buffer(
+        length: MemoryLayout<CrowVentralBarbVisibilityCounts>.stride,
+        shared: true
+      )
     }
     workBuffers = try (0..<Self.bufferedFrameCount).map { _ in
       try backend.buffer(
@@ -100,15 +132,17 @@ final class CrowVentralBarbGeometryDeformer {
     previousBodyCenter: SIMD3<Float>,
     projectedPixelsPerMeter: Float,
     viewProjection: simd_float4x4,
+    previousViewProjection: simd_float4x4 = matrix_identity_float4x4,
+    previousDepthPyramid: MTLTexture? = nil,
+    occlusionViewport: SIMD2<Int> = .zero,
     commandBuffer: MTLCommandBuffer,
     auditReadback: Bool = false
   ) throws -> CrowFeatherGeometryFrame {
     let slot = nextSlot
     nextSlot = (nextSlot + 1) % Self.bufferedFrameCount
-    let candidateRecordCount = CrowVentralBarbCurveRecords.activeRecordIndices(
-      records: records,
+    let candidateRecordCount = candidateRecordCount(
       projectedPixelsPerMeter: projectedPixelsPerMeter
-    ).count
+    )
     let maximumWorkCount =
       candidateRecordCount
       * CrowVentralBarbCurveRecords.maximumBarbPairCount * 2
@@ -136,7 +170,11 @@ final class CrowVentralBarbGeometryDeformer {
         bytes.count
       )
     }
-    compactedCountBuffers[slot].contents().storeBytes(of: UInt32(0), as: UInt32.self)
+    memset(
+      compactedCountBuffers[slot].contents(),
+      0,
+      MemoryLayout<CrowVentralBarbVisibilityCounts>.stride
+    )
     var uniforms = CrowVentralBarbGeometryUniforms(
       counts: SIMD4<UInt32>(
         UInt32(records.count),
@@ -158,7 +196,10 @@ final class CrowVentralBarbGeometryDeformer {
       viewProjection: viewProjection,
       currentBodyCenter: currentBodyCenter,
       projectedPixelsPerMeter: projectedPixelsPerMeter,
-      recordCount: records.count
+      recordCount: records.count,
+      previousViewProjection: previousViewProjection,
+      occlusionViewport: occlusionViewport,
+      occlusionEnabled: previousDepthPyramid != nil
     )
     var threadsPerThreadgroup = UInt32(
       min(pipeline.maxTotalThreadsPerThreadgroup, pipeline.threadExecutionWidth)
@@ -170,6 +211,7 @@ final class CrowVentralBarbGeometryDeformer {
       classify.label = "Classify retained ventral barb records"
       classify.setBuffer(recordBuffer, offset: 0, index: 0)
       classify.setBuffer(selectedBuffers[slot], offset: 0, index: 1)
+      classify.setTexture(previousDepthPyramid ?? fallbackDepthTexture, index: 0)
       classify.setBytes(
         &visibilityUniforms,
         length: MemoryLayout<CrowVentralBarbVisibilityUniforms>.stride,
@@ -314,12 +356,16 @@ final class CrowVentralBarbGeometryDeformer {
   }
 
   func compactedRecordCount(for frame: CrowFeatherGeometryFrame) -> Int {
-    Int(
-      compactedCountBuffers[frame.slot].contents().bindMemory(
-        to: UInt32.self,
-        capacity: 1
-      ).pointee
-    )
+    Int(visibilityCounts(for: frame).postOcclusionVisible)
+  }
+
+  func visibilityCounts(
+    for frame: CrowFeatherGeometryFrame
+  ) -> CrowVentralBarbVisibilityCounts {
+    compactedCountBuffers[frame.slot].contents().bindMemory(
+      to: CrowVentralBarbVisibilityCounts.self,
+      capacity: 1
+    ).pointee
   }
 
   func segmentWork(

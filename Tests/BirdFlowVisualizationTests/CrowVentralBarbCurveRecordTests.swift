@@ -275,6 +275,15 @@ func metalCompactsVisibleVentralBarbRecords() throws {
   commandBuffer.waitUntilCompleted()
   #expect(commandBuffer.status == .completed)
   #expect(deformer.compactedRecordCount(for: frame) == 2)
+  #expect(
+    deformer.visibilityCounts(for: frame)
+      == CrowVentralBarbVisibilityCounts(
+        postOcclusionVisible: 2,
+        frustumVisible: 2,
+        occlusionCulled: 0,
+        occlusionTested: 0
+      )
+  )
   let expectedWork = CrowVentralBarbCurveRecords.segmentWork(
     records: Array(records.prefix(2)),
     projectedPixelsPerMeter: projectedPixelsPerMeter
@@ -298,6 +307,15 @@ func metalCompactsVisibleVentralBarbRecords() throws {
   dormantCommand.waitUntilCompleted()
   #expect(dormantCommand.status == .completed)
   #expect(deformer.compactedRecordCount(for: dormantFrame) == 0)
+  #expect(
+    deformer.visibilityCounts(for: dormantFrame)
+      == CrowVentralBarbVisibilityCounts(
+        postOcclusionVisible: 0,
+        frustumVisible: 0,
+        occlusionCulled: 0,
+        occlusionTested: 0
+      )
+  )
   #expect(deformer.drawArguments(for: dormantFrame).vertexCount == 0)
 }
 
@@ -331,10 +349,144 @@ func productionVentralBarbsAvoidMaterializedVertexOutput() throws {
   #expect(!frame.readbackReady)
 }
 
+@Test("previous max depth conservatively culls retained ventral barbs")
+func previousMaxDepthCullsRetainedVentralBarbs() throws {
+  guard let device = MTLCreateSystemDefaultDevice() else { return }
+  let backend = try VisualizationBackend(device: device)
+  var record = CrowVentralRachisCurveRecords.records()[0]
+  let translation = SIMD3<Float>(0, 0, 0.5)
+  record.rootAndPennaceousStart = translated(
+    record.rootAndPennaceousStart,
+    by: translation
+  )
+  record.tipAndCamber = translated(record.tipAndCamber, by: translation)
+
+  func classify(depth: Float) throws -> CrowVentralBarbVisibilityCounts {
+    let deformer = try CrowVentralBarbGeometryDeformer(
+      backend: backend,
+      records: [record]
+    )
+    let pyramid = try constantDepthPyramid(
+      device: device,
+      width: 64,
+      height: 64,
+      depth: depth
+    )
+    let commandBuffer = try #require(backend.queue.makeCommandBuffer())
+    let frame = try deformer.encode(
+      currentBodyCenter: .zero,
+      previousBodyCenter: .zero,
+      projectedPixelsPerMeter: 30_000,
+      viewProjection: matrix_identity_float4x4,
+      previousViewProjection: matrix_identity_float4x4,
+      previousDepthPyramid: pyramid,
+      occlusionViewport: SIMD2<Int>(64, 64),
+      commandBuffer: commandBuffer
+    )
+    commandBuffer.commit()
+    commandBuffer.waitUntilCompleted()
+    #expect(commandBuffer.status == .completed)
+    return deformer.visibilityCounts(for: frame)
+  }
+
+  let occluded = try classify(depth: 0.2)
+  #expect(occluded.frustumVisible == 1)
+  #expect(occluded.occlusionTested == 1)
+  #expect(occluded.occlusionCulled == 1)
+  #expect(occluded.postOcclusionVisible == 0)
+
+  let background = try classify(depth: 1)
+  #expect(background.frustumVisible == 1)
+  #expect(background.occlusionTested == 1)
+  #expect(background.occlusionCulled == 0)
+  #expect(background.postOcclusionVisible == 1)
+}
+
+@Test("crow max-depth hierarchy propagates uncovered depth")
+func crowMaxDepthHierarchyPropagatesDepth() throws {
+  guard let device = MTLCreateSystemDefaultDevice() else { return }
+  let backend = try VisualizationBackend(device: device)
+  let width = 16
+  let height = 8
+  let descriptor = MTLTextureDescriptor.texture2DDescriptor(
+    pixelFormat: .depth32Float,
+    width: width,
+    height: height,
+    mipmapped: false
+  )
+  descriptor.storageMode = .private
+  descriptor.usage = [.renderTarget, .shaderRead]
+  let depth = try #require(device.makeTexture(descriptor: descriptor))
+  let pyramid = try CrowOcclusionDepthPyramid(
+    backend: backend,
+    width: width,
+    height: height
+  )
+  let commandBuffer = try #require(backend.queue.makeCommandBuffer())
+  let pass = MTLRenderPassDescriptor()
+  pass.depthAttachment.texture = depth
+  pass.depthAttachment.loadAction = .clear
+  pass.depthAttachment.storeAction = .store
+  pass.depthAttachment.clearDepth = 0.375
+  let render = try #require(commandBuffer.makeRenderCommandEncoder(descriptor: pass))
+  render.endEncoding()
+  try pyramid.encode(deviceDepth: depth, commandBuffer: commandBuffer)
+  let readback = try backend.buffer(length: MemoryLayout<Float>.stride, shared: true)
+  let blit = try #require(commandBuffer.makeBlitCommandEncoder())
+  blit.copy(
+    from: pyramid.texture,
+    sourceSlice: 0,
+    sourceLevel: pyramid.texture.mipmapLevelCount - 1,
+    sourceOrigin: MTLOrigin(x: 0, y: 0, z: 0),
+    sourceSize: MTLSize(width: 1, height: 1, depth: 1),
+    to: readback,
+    destinationOffset: 0,
+    destinationBytesPerRow: MemoryLayout<Float>.stride,
+    destinationBytesPerImage: MemoryLayout<Float>.stride
+  )
+  blit.endEncoding()
+  commandBuffer.commit()
+  commandBuffer.waitUntilCompleted()
+  #expect(commandBuffer.status == .completed)
+  let reduced = readback.contents().load(as: Float.self)
+  #expect(abs(reduced - 0.375) < 1e-7)
+}
+
 private struct BarbTubeVertexOracle {
   let position: SIMD3<Float>
   let previousPosition: SIMD3<Float>
   let normal: SIMD3<Float>
+}
+
+private func constantDepthPyramid(
+  device: MTLDevice,
+  width: Int,
+  height: Int,
+  depth: Float
+) throws -> MTLTexture {
+  let descriptor = MTLTextureDescriptor.texture2DDescriptor(
+    pixelFormat: .r32Float,
+    width: width,
+    height: height,
+    mipmapped: true
+  )
+  descriptor.storageMode = .shared
+  descriptor.usage = .shaderRead
+  let texture = try #require(device.makeTexture(descriptor: descriptor))
+  for level in 0..<texture.mipmapLevelCount {
+    let levelWidth = max(1, width >> level)
+    let levelHeight = max(1, height >> level)
+    let values = [Float](repeating: depth, count: levelWidth * levelHeight)
+    values.withUnsafeBytes { bytes in
+      texture.replace(
+        region: MTLRegionMake2D(0, 0, levelWidth, levelHeight),
+        mipmapLevel: level,
+        withBytes: bytes.baseAddress!,
+        bytesPerRow: levelWidth * MemoryLayout<Float>.stride
+      )
+    }
+  }
+  return texture
 }
 
 private func tubeVertices(

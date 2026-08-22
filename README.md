@@ -126,7 +126,7 @@ fall from `593/157/28` to `165/121/8`; a new rear-port grazing view remains
 discrete rather than forming a tail plate. These are bounded simulated
 morphology and raster checks, not measured American-crow tip dimensions.
 The exact identity AOV now also reports visible and fully covered pixels for
-every persistent primary, secondary, and rectrix as schema `14`. The same
+every persistent primary, secondary, and rectrix as schema `15`. The same
 report retains the longest exterior-connected row/column slots with exact
 boundary classes, packed identities, and procedural owners, so open shoulder
 gaps are traceable without treating every silhouette concavity as a defect.
@@ -186,8 +186,16 @@ beauty PNGs and every pre-existing non-duration AOV field are exact against the
 former compute-expanded path; normal-distance rendering is exact with zero
 active work. The fully simulated hold-to-flight GIF therefore remains
 unchanged. This is a future-compute fidelity tier, not a measured-anatomy or
-GPU-speed claim. Previous-depth occlusion, indexed or hardware-curve emission,
-explicit barbules, and curve-aware self-shadowing remain open.
+GPU-speed claim. A conservative previous-frame max-depth hierarchy now removes
+only records whose complete projected bound was covered by nearer resolved
+device depth; reset, camera motion, background, edge-touching, and uncertain
+projections fail open. At a fresh yaw/pitch `(0.98, -0.05)`, it culls `2` of `620-638`
+frustum-visible records on each non-reset frame, avoiding `27,648` procedural
+vertices while adding a `1,919,424`-byte depth hierarchy. All five close PNGs,
+all pre-existing raster/AOV fields, and the five-frame normal-distance path are
+exact against the non-occlusion renderer. This is an executable correctness and
+scaling step, not a speed claim. Indexed or hardware-curve emission, explicit
+barbules, and curve-aware self-shadowing remain open.
 A separate versioned optics profile now drives the live eight-wavelength
 air/keratin/melanin film response. It records comparative glossy-corvid
 constraints independently from the renderer's American-crow estimates, so the

@@ -855,10 +855,31 @@ AOVs are also exact with zero active work. Schema `14` adds the explicit
 `gpu-procedural-vertex-pulling` mode and reports zero output capacity. The
 compute expansion remains executable under audit readback and still matches
 the CPU temporal-tube oracle. No speed claim follows from these short runs.
-Previous-depth occlusion is the next visibility gate before indexed or
-hardware-curve emission, explicit barbules, or curve self-shadowing.
+The previous-depth gate now retains the resolved device depth as an `r32Float`
+max hierarchy. Because uncovered depth clears to one, any background within a
+record's conservative projected AABB propagates upward and rejects the cull.
+History resets, camera-matrix motion beyond jitter, bounds touching a viewport
+edge, near/far uncertainty, and projections spanning more than the bounded mip
+footprint also fail open. Current body bounds are reprojected through the prior
+camera, so known quiet-stance translation cannot reuse the record's stale
+position. The serial stable scan separately counts frustum-visible,
+occlusion-tested, culled, and retained records before emitting indirect work.
 
-Schema `14` resolves that rear-port priority to exact packed identities around
+At a previously unused yaw/pitch `(0.98, -0.05)`, target
+`(0.05, 0.060, 0.020) m`, the five-frame close loop begins and ends with reset
+frames of `621` retained records. Its three history-valid frames classify
+`620`, `622`, and `638` frustum-visible records and conservatively cull `2` on
+each, avoiding `27,648` procedural vertices per frame. The `800 x 450`
+hierarchy occupies `1,919,424` bytes. All five beauty PNGs are byte-exact and
+every pre-existing raster/non-duration AOV field is exact against revision
+`e266f5f`; normal distance remains five-frame exact with no hierarchy or barb
+work. Schema `15` exposes the hierarchy mode/bytes and all four visibility
+counts. Synthetic Metal tests separately prove foreground culling, background
+fail-open behavior, reset-disabled testing, and max-depth propagation. No speed
+claim follows from this small accepted cull. Indexed or hardware-curve emission,
+explicit barbules, and curve self-shadowing remain next.
+
+Schema `15` resolves that rear-port priority to exact packed identities around
 the largest enclosed component. The early `21-28`-pixel channels are bounded
 by rectrix orders `1`, `2`, and `3`; only frames `2-3` additionally touch the
 outermost proximal trailing covert. A broad presentation-tail width experiment
