@@ -27,6 +27,7 @@ struct CrowShowcaseFrame {
   let ventralBarbOcclusionDepthBytes: Int
   let ventralBarbOcclusionMode: String
   let ventralBarbExpandedVertexCount: Int
+  let ventralBarbRasterVertexInvocationCount: Int
   let ventralBarbuleExpandedVertexCount: Int
   let ventralBarbOutputCapacityBytes: Int
   let ventralBarbVertexGenerationMode: String
@@ -212,8 +213,7 @@ struct CrowShowcaseFrame {
         let featherClass = Int(min(id3 & 255, 31))
         fullyCoveredFeatherClassPixelCounts[featherClass] += 1
         if id0 != UInt32.max && (1...3).contains(id3 & 255) {
-          persistentFeatherFullyCoveredPixels[SIMD4(id0, id1, id2, id3), default: 0]
-            += 1
+          persistentFeatherFullyCoveredPixels[SIMD4(id0, id1, id2, id3), default: 0] += 1
         }
         if id0 == UInt32.max && CrowWingSurfaceCellIdentity.isPacked(id3) {
           wingSurfaceCellFullyCoveredPixels[id3, default: 0] += 1
@@ -366,6 +366,8 @@ struct CrowShowcaseFrame {
       ventralBarbOcclusionDepthBytes: ventralBarbOcclusionDepthBytes,
       ventralBarbOcclusionMode: ventralBarbOcclusionMode,
       ventralBarbExpandedVertexCount: ventralBarbExpandedVertexCount,
+      ventralBarbRasterVertexInvocationCount:
+        ventralBarbRasterVertexInvocationCount,
       ventralBarbuleExpandedVertexCount: ventralBarbuleExpandedVertexCount,
       ventralBarbuleVisiblePixelCount: ventralBarbuleVisiblePixelCount,
       ventralBarbOutputCapacityBytes: ventralBarbOutputCapacityBytes,
@@ -487,11 +489,11 @@ struct CrowShowcaseFrame {
         maximumLinearLuminance: maxima[featherClass],
         meanSameClassNeighborAbsoluteLuminanceDifference:
           neighborCounts[featherClass] > 0
-            ? Float(
-              neighborDifferenceSums[featherClass]
-                / Double(neighborCounts[featherClass])
-            )
-            : 0
+          ? Float(
+            neighborDifferenceSums[featherClass]
+              / Double(neighborCounts[featherClass])
+          )
+          : 0
       )
     }
   }
@@ -686,11 +688,13 @@ struct CrowShowcaseFrame {
       packedSurfaceIdentities.isEmpty
         || packedSurfaceIdentities.count == birdMask.count
     )
-    guard let silhouette = silhouetteExterior(
-      birdMask: birdMask,
-      width: width,
-      height: height
-    ) else { return [] }
+    guard
+      let silhouette = silhouetteExterior(
+        birdMask: birdMask,
+        width: width,
+        height: height
+      )
+    else { return [] }
 
     func classCode(_ pixel: Int) -> UInt8 {
       featherClassCodes.isEmpty ? 0 : featherClassCodes[pixel]
@@ -813,11 +817,13 @@ struct CrowShowcaseFrame {
       packedSurfaceIdentities.isEmpty
         || packedSurfaceIdentities.count == birdMask.count
     )
-    guard let silhouette = silhouetteExterior(
-      birdMask: birdMask,
-      width: width,
-      height: height
-    ) else { return .zero }
+    guard
+      let silhouette = silhouetteExterior(
+        birdMask: birdMask,
+        width: width,
+        height: height
+      )
+    else { return .zero }
     let minimumX = silhouette.minimumX
     let maximumX = silhouette.maximumX
     let minimumY = silhouette.minimumY
@@ -838,8 +844,7 @@ struct CrowShowcaseFrame {
     var largestCentroidX: Float = 0
     var largestCentroidY: Float = 0
     var largestAdjacentClassMask: UInt32 = 0
-    var largestAdjacentSurfacePrimitives:
-      [CrowSilhouetteSurfacePrimitiveReference] = []
+    var largestAdjacentSurfacePrimitives: [CrowSilhouetteSurfacePrimitiveReference] = []
     var largestAdjacentPackedIdentities: [UInt32] = []
     for y in minimumY...maximumY {
       for x in minimumX...maximumX {
@@ -856,8 +861,7 @@ struct CrowShowcaseFrame {
         var componentXTotal = 0
         var componentYTotal = 0
         var adjacentClassMask: UInt32 = 0
-        var adjacentSurfacePrimitives:
-          Set<CrowSilhouetteSurfacePrimitiveReference> = []
+        var adjacentSurfacePrimitives: Set<CrowSilhouetteSurfacePrimitiveReference> = []
         var adjacentPackedIdentities: Set<UInt32> = []
         while componentHead < componentQueue.count {
           let pixel = componentQueue[componentHead]
@@ -880,7 +884,8 @@ struct CrowShowcaseFrame {
               else { continue }
               let neighbor = neighborY * width + neighborX
               if birdMask[neighbor] {
-                let classCode = featherClassCodes.isEmpty
+                let classCode =
+                  featherClassCodes.isEmpty
                   ? 0
                   : min(UInt32(featherClassCodes[neighbor]), 31)
                 adjacentClassMask |= 1 << classCode
@@ -915,7 +920,8 @@ struct CrowShowcaseFrame {
         // A planted crow legitimately encloses background between its two
         // legs and between spread digits. Keep those scale-aware lower-body
         // apertures separate from plumage or body-shell defects.
-        let pedalSurfaceMask: UInt32 = 1
+        let pedalSurfaceMask: UInt32 =
+          1
           << CrowFootAnatomy.surfaceIdentityClassCode
         let lowerBodyBoundaryMask: UInt32 =
           (1 << 0) | (1 << 7) | pedalSurfaceMask
@@ -955,11 +961,12 @@ struct CrowShowcaseFrame {
         // projection. A compact component explicitly bounded by pedal keratin,
         // leg plumage, and wing coverts is anatomical negative space rather
         // than a missing body or feather surface.
-        let retractedPedalBoundaryMask = lowerBodyBoundaryMask | (1 << 4)
+        let retractedPedalBoundaryMask =
+          lowerBodyBoundaryMask | (1 << 4)
           | (1 << CrowFlightWingBodyIntegration.underwingCovertSurfaceFeatherClass)
           | (1
             << CrowFlightWingBodyIntegration
-              .underwingPrimaryCovertSurfaceFeatherClass)
+            .underwingPrimaryCovertSurfaceFeatherClass)
         let boundedByRetractedPedalSurfaces =
           adjacentClassMask & pedalSurfaceMask != 0
           && legFeatherBounded
@@ -1180,6 +1187,7 @@ struct CrowShowcaseAOVFrameAudit: Codable, Equatable {
   let ventralBarbOcclusionDepthBytes: Int
   let ventralBarbOcclusionMode: String
   let ventralBarbExpandedVertexCount: Int
+  let ventralBarbRasterVertexInvocationCount: Int
   let ventralBarbuleExpandedVertexCount: Int
   let ventralBarbuleVisiblePixelCount: Int
   let ventralBarbOutputCapacityBytes: Int
@@ -1351,7 +1359,7 @@ struct CrowShowcaseAOVAuditReport: Codable, Equatable {
   let frames: [CrowShowcaseAOVFrameAudit]
 
   init(frames: [CrowShowcaseAOVFrameAudit]) {
-    schemaVersion = 16
+    schemaVersion = 17
     colorSpace = "scene-linear extended range; display output is tone mapped separately"
     motionConvention =
       "current pixel to previous pixel in upper-left-origin pixel units; MetalFX scale 1"

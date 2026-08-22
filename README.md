@@ -126,7 +126,7 @@ fall from `593/157/28` to `165/121/8`; a new rear-port grazing view remains
 discrete rather than forming a tail plate. These are bounded simulated
 morphology and raster checks, not measured American-crow tip dimensions.
 The exact identity AOV now also reports visible and fully covered pixels for
-every persistent primary, secondary, and rectrix as schema `16`. The same
+every persistent primary, secondary, and rectrix as schema `17`. The same
 report retains the longest exterior-connected row/column slots with exact
 boundary classes, packed identities, and procedural owners, so open shoulder
 gaps are traceable without treating every silhouette concavity as a defect.
@@ -212,11 +212,14 @@ close tier remain byte-exact against `dcc638f`; that close tier retains `746`
 barb candidates and zero barbule candidates. These are renderer-estimated
 geometry and local occlusion, not measured crow barbule dimensions, physical
 self-shadowing, or a speed claim. A capability-gated Metal mesh-stage prototype
-now consumes the same compact GPU work directly: one threadgroup emits each
-24-vertex, eight-triangle interval, and the existing vertex-pulling path remains
-the canonical default and audit oracle. On the M4 Pro, both paths retain `746`
+now consumes the same compact GPU work directly: one threadgroup emits eight
+indexed ring vertices and eight flat-shaded triangles instead of duplicating
+24 triangle-stream vertices, while the existing vertex-pulling path remains the
+canonical default and audit oracle. On the M4 Pro, both paths retain `746`
 candidates, `621` visible owners, `357,696` emitted intervals, and `8,584,704`
-procedural vertices in the established close diagnostic. Their silhouettes and
+logical procedural vertices in the established close diagnostic. The indexed
+mesh stage invokes `2,861,568` output vertices and is byte-exact against its
+24-output-vertex prototype. Their silhouettes and
 active-pixel totals are exact, but `1,772 / 360,000` pixels (`0.492%`) change
 ownership only in a lower-left near-coincident feather overlap; normalized
 display RMSE is `0.00125` and the maximum channel difference is `25 / 255`.

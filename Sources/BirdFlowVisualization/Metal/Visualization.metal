@@ -2276,24 +2276,33 @@ inline CrowFeatherVertexGPU crowVentralBarbProceduralVertex(
         :crowVentralBarbVertex(records,work,uniforms,outputIndex);
 }
 
+struct CrowVentralCurveMeshVertex {
+    float4 position [[position]];
+    float4 previousClipPosition;
+    float3 world;
+    float4 albedoAndMaterial;
+    float3 featherCoordinates;
+};
+
 struct CrowVentralCurvePrimitive {
-    uint reserved;
+    float3 normal [[flat]];
+    uint4 identity [[flat]];
 };
 
 inline float4 crowSurfaceBiasedClipPosition(
     float4 clipPosition,uint featherClass);
 
 using CrowVentralCurveMesh = metal::mesh<
-    CrowRasterVertex,
+    CrowVentralCurveMeshVertex,
     CrowVentralCurvePrimitive,
-    24,
+    8,
     8,
     metal::topology::triangle
 >;
 
-/// Mesh-stage parity path: one compact interval work record owns one mesh
-/// threadgroup. Keep the duplicated flat-shaded vertices until a primitive-
-/// normal representation proves exact against this and the vertex oracle.
+/// One compact interval work record owns one mesh threadgroup. Eight shared
+/// ring vertices replace the 24-vertex triangle stream; flat normals and exact
+/// identities remain per primitive so tube facets do not become smoothed.
 [[mesh]] void crowVentralBarbAOVMesh(
     device const CrowVentralRachisCurveRecordGPU* records [[buffer(0)]],
     device const CrowVentralBarbSegmentWorkGPU* work [[buffer(1)]],
@@ -2302,12 +2311,15 @@ using CrowVentralCurveMesh = metal::mesh<
     CrowVentralCurveMesh outputMesh,
     uint tid [[thread_index_in_threadgroup]],
     uint3 workPosition [[threadgroup_position_in_grid]]) {
-    if(tid<24u){
-        uint vertexIndex=workPosition.x*24u+tid;
+    uint workVertexBase=workPosition.x*24u;
+    if(tid<8u){
+        uint radialIndex=tid&3u;
+        bool atEnd=tid>=4u;
+        uint representative=atEnd?radialIndex*6u+5u:radialIndex*6u;
         CrowFeatherVertexGPU source=crowVentralBarbProceduralVertex(
-            records,work,geometry,vertexIndex
+            records,work,geometry,workVertexBase+representative
         );
-        CrowRasterVertex out;
+        CrowVentralCurveMeshVertex out;
         uint featherClass=source.identity.w&255u;
         out.position=crowSurfaceBiasedClipPosition(
             camera.viewProjection*source.position,featherClass
@@ -2316,16 +2328,26 @@ using CrowVentralCurveMesh = metal::mesh<
             camera.previousViewProjection*source.previousPosition,featherClass
         );
         out.world=source.position.xyz;
-        out.normal=normalize(source.normal.xyz);
         out.albedoAndMaterial=source.color;
         out.featherCoordinates=source.parameters.xyz;
-        out.identity=source.identity;
         outputMesh.set_vertex(tid,out);
-        outputMesh.set_index(tid,tid);
-    }
-    if(tid<8u){
+
+        uint triangle=tid;
+        uint triangleRadial=triangle>>1u;
+        uint triangleNext=(triangleRadial+1u)&3u;
+        uint3 indices=(triangle&1u)==0u
+            ?uint3(triangleRadial,triangleNext,4u+triangleNext)
+            :uint3(triangleRadial,4u+triangleNext,4u+triangleRadial);
+        outputMesh.set_index(3u*triangle,uchar(indices.x));
+        outputMesh.set_index(3u*triangle+1u,uchar(indices.y));
+        outputMesh.set_index(3u*triangle+2u,uchar(indices.z));
+
+        CrowFeatherVertexGPU primitiveSource=crowVentralBarbProceduralVertex(
+            records,work,geometry,workVertexBase+3u*triangle
+        );
         CrowVentralCurvePrimitive primitive;
-        primitive.reserved=0u;
+        primitive.normal=normalize(primitiveSource.normal.xyz);
+        primitive.identity=primitiveSource.identity;
         outputMesh.set_primitive(tid,primitive);
     }
     if(tid==0u){outputMesh.set_primitive_count(8u);}

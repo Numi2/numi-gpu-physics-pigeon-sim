@@ -18,6 +18,8 @@ enum CrowVentralCurveEmissionMode: String {
   case auto
 }
 
+private let crowVentralCurveMeshThreadCount = 8
+
 /// Native Metal presentation of an explicitly estimated American-crow model.
 ///
 /// The measured Deetjen dove contributes only a deformation scaffold. Crow
@@ -952,7 +954,8 @@ private final class CrowShowcaseRenderer {
         mesh: "crowVentralBarbAOVMesh",
         fragment: "showcaseCrowAOVFragment",
         colorFormats: aovFormats,
-        sampleCount: createdSampleCount
+        sampleCount: createdSampleCount,
+        maximumThreadsPerMeshThreadgroup: crowVentralCurveMeshThreadCount
       )
     } else {
       ventralBarbMeshAOVPipeline = nil
@@ -982,7 +985,8 @@ private final class CrowShowcaseRenderer {
       ventralBarbMeshIdentityPipeline = try createdBackend.meshRender(
         mesh: "crowVentralBarbAOVMesh",
         fragment: "showcaseCrowIdentityFragment",
-        colorFormats: [.rgba32Uint]
+        colorFormats: [.rgba32Uint],
+        maximumThreadsPerMeshThreadgroup: crowVentralCurveMeshThreadCount
       )
     } else {
       ventralBarbMeshIdentityPipeline = nil
@@ -1492,7 +1496,11 @@ private final class CrowShowcaseRenderer {
           indirectBuffer: indirectMeshDispatchBuffer,
           indirectBufferOffset: 0,
           threadsPerObjectThreadgroup: MTLSize(width: 1, height: 1, depth: 1),
-          threadsPerMeshThreadgroup: MTLSize(width: 24, height: 1, depth: 1)
+          threadsPerMeshThreadgroup: MTLSize(
+            width: crowVentralCurveMeshThreadCount,
+            height: 1,
+            depth: 1
+          )
         )
       } else {
         encoder.setRenderPipelineState(ventralBarbAOVPipeline)
@@ -1594,7 +1602,11 @@ private final class CrowShowcaseRenderer {
           indirectBuffer: indirectMeshDispatchBuffer,
           indirectBufferOffset: 0,
           threadsPerObjectThreadgroup: MTLSize(width: 1, height: 1, depth: 1),
-          threadsPerMeshThreadgroup: MTLSize(width: 24, height: 1, depth: 1)
+          threadsPerMeshThreadgroup: MTLSize(
+            width: crowVentralCurveMeshThreadCount,
+            height: 1,
+            depth: 1
+          )
         )
       } else {
         identityEncoder.setRenderPipelineState(ventralBarbIdentityPipeline)
@@ -1798,10 +1810,14 @@ private final class CrowShowcaseRenderer {
       ventralBarbOcclusionMode: hasVentralBarbCandidates
         ? "previous-max-device-depth-fail-open" : "inactive",
       ventralBarbExpandedVertexCount: ventralBarbExpandedVertexCount,
+      ventralBarbRasterVertexInvocationCount: ventralBarbUsesMeshStage
+        ? Int(ventralBarbVisibilityCounts.emittedWorkCount)
+          * crowVentralCurveMeshThreadCount
+        : ventralBarbExpandedVertexCount,
       ventralBarbuleExpandedVertexCount: ventralBarbuleExpandedVertexCount,
       ventralBarbOutputCapacityBytes: 0,
       ventralBarbVertexGenerationMode: ventralBarbUsesMeshStage
-        ? "gpu-mesh-threadgroup-24-vertex"
+        ? "gpu-mesh-threadgroup-8-vertex-indexed"
         : "gpu-procedural-vertex-pulling"
     )
   }

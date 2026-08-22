@@ -491,7 +491,8 @@ func capabilityGatedVentralMeshPipelineCompiles() throws {
   _ = try backend.meshRender(
     mesh: "crowVentralBarbAOVMesh",
     fragment: "showcaseCrowIdentityFragment",
-    colorFormats: [.rgba32Uint]
+    colorFormats: [.rgba32Uint],
+    maximumThreadsPerMeshThreadgroup: 8
   )
   #expect(backend.supportsMeshShaders)
 }
