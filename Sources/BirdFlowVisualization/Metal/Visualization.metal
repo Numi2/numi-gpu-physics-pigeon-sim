@@ -122,6 +122,17 @@ struct CrowBodyVaneSelectionUniforms {
     uint4 counts;
 };
 
+struct CrowCranialVisibilityUniforms {
+    float4 leftPlane;
+    float4 rightPlane;
+    float4 bottomPlane;
+    float4 topPlane;
+    float4 nearPlane;
+    float4 farPlane;
+    float4 selection;
+    uint4 counts;
+};
+
 struct CrowBodyDetailSegmentGPU {
     float4 currentStartAndRadius;
     float4 currentEndAndRadius;
@@ -3248,20 +3259,22 @@ kernel void prepareCrowBodyVaneIndirectWork(
     uint base=0u;
     for(uint prior=0u;prior<topologyIndex;++prior){base+=topologyCounts[prior];}
     uint2 sections=crowBodyVaneTopologySections(topologyIndex);
-    arguments[topologyIndex]={
-        sections.x*sections.y*6u,
-        topologyCounts[topologyIndex],
-        0u,
-        base
-    };
+    uint vaneInstanceCount=0u;
     uint bodyInstanceCount=0u;
     for(uint local=0u;local<topologyCounts[topologyIndex];++local){
         uint recordIndex=recordWork[base+local];
         uint family=records[recordIndex].identity.x&0xff000000u;
+        if(family!=0x07000000u){++vaneInstanceCount;}
         if(family==0x02000000u){
             ++bodyInstanceCount;
         }
     }
+    arguments[topologyIndex]={
+        sections.x*sections.y*6u,
+        vaneInstanceCount,
+        0u,
+        base
+    };
     uint rachisSections=sections.x<=4u?0u:
         (sections.x<=8u?4u:(sections.x<=12u?8u:12u));
     arguments[11u+topologyIndex]={
@@ -3697,6 +3710,125 @@ inline CrowBodyVaneDynamicState crowBodyVaneDynamicState(
     state.transverseCamber=ventral?as_type<float>(record.identity.z):
         crowBodyVaneTransverseCamber(record,centerAndDeployment.w);
     return state;
+}
+
+inline bool crowCranialBoundIntersectsFrustum(
+    CrowBodyVaneMorphologyGPU record,
+    device const CrowBodyVanePoseUniforms& pose,
+    device const CrowBodyVaneNeckTransformGPU* neckTransforms,
+    constant CrowCranialVisibilityUniforms& visibility) {
+    CrowBodyVaneDynamicState state=crowBodyVaneDynamicState(
+        record,pose,neckTransforms,true
+    );
+    float3 root=crowCranialNeckPosition(state.root,pose,true);
+    float3 tip=crowCranialNeckPosition(state.tip,pose,true);
+    float3 center=0.5f*(root+tip);
+    float radius=0.5f*distance(root,tip)+state.maximumWidth
+        +abs(state.camber)+visibility.selection.y;
+    float4 point=float4(center,1.0f);
+    return dot(visibility.leftPlane,point)>=-radius
+        &&dot(visibility.rightPlane,point)>=-radius
+        &&dot(visibility.bottomPlane,point)>=-radius
+        &&dot(visibility.topPlane,point)>=-radius
+        &&dot(visibility.nearPlane,point)>=-radius
+        &&dot(visibility.farPlane,point)>=-radius;
+}
+
+kernel void classifyCrowCranialVisibility(
+    device const CrowBodyVaneMorphologyGPU* records [[buffer(0)]],
+    device const CrowBodyVanePoseUniforms& pose [[buffer(1)]],
+    device const CrowBodyVaneNeckTransformGPU* neckTransforms [[buffer(2)]],
+    device uint* topologyIndices [[buffer(3)]],
+    constant CrowCranialVisibilityUniforms& visibility [[buffer(4)]],
+    uint localIndex [[thread_position_in_grid]]) {
+    if(localIndex>=visibility.counts.y){return;}
+    uint recordIndex=visibility.counts.x+localIndex;
+    CrowBodyVaneMorphologyGPU record=records[recordIndex];
+    float projectedLength=max(
+        0.0f,record.morphology.y*visibility.selection.x
+    );
+    uint topologyIndex=projectedLength>=480.0f?6u:
+        (projectedLength>=120.0f?4u:
+            (projectedLength>=24.0f?10u:0u));
+    if((visibility.counts.w&8u)==0u||visibility.selection.x<1400.0f){
+        topologyIndex=0xffffffffu;
+    }
+    topologyIndices[localIndex]=topologyIndex<visibility.counts.z
+        &&crowCranialBoundIntersectsFrustum(
+            record,pose,neckTransforms,visibility
+        )?topologyIndex:0xffffffffu;
+}
+
+kernel void scanCrowCranialVisibility(
+    device const CrowBodyVaneMorphologyGPU* records [[buffer(0)]],
+    device const uint* topologyIndices [[buffer(1)]],
+    device uint* topologyOffsets [[buffer(2)]],
+    device uint* gularOffsets [[buffer(3)]],
+    device uint* counts [[buffer(4)]],
+    constant CrowCranialVisibilityUniforms& visibility [[buffer(5)]],
+    uint index [[thread_position_in_grid]]) {
+    if(index>0u){return;}
+    uint localCounts[11]={0u,0u,0u,0u,0u,0u,0u,0u,0u,0u,0u};
+    uint gularCount=0u;
+    for(uint localIndex=0u;localIndex<visibility.counts.y;++localIndex){
+        uint topologyIndex=topologyIndices[localIndex];
+        if(topologyIndex<11u){
+            topologyOffsets[localIndex]=localCounts[topologyIndex]++;
+            uint recordIndex=visibility.counts.x+localIndex;
+            if(records[recordIndex].identity.w==10u){
+                gularOffsets[localIndex]=gularCount++;
+            }else{
+                gularOffsets[localIndex]=0xffffffffu;
+            }
+        }else{
+            topologyOffsets[localIndex]=0xffffffffu;
+            gularOffsets[localIndex]=0xffffffffu;
+        }
+    }
+    uint total=0u;
+    for(uint topologyIndex=0u;topologyIndex<11u;++topologyIndex){
+        counts[topologyIndex]=localCounts[topologyIndex];
+        total+=localCounts[topologyIndex];
+    }
+    counts[11]=total;
+    counts[12]=gularCount;
+}
+
+kernel void emitCrowCranialVisibilityWork(
+    device const uint* topologyIndices [[buffer(1)]],
+    device const uint* topologyOffsets [[buffer(2)]],
+    device const uint* gularOffsets [[buffer(3)]],
+    device const uint* counts [[buffer(4)]],
+    device uint* recordWork [[buffer(5)]],
+    device uint* gularWork [[buffer(6)]],
+    constant CrowCranialVisibilityUniforms& visibility [[buffer(7)]],
+    uint localIndex [[thread_position_in_grid]]) {
+    if(localIndex>=visibility.counts.y){return;}
+    uint topologyIndex=topologyIndices[localIndex];
+    if(topologyIndex>=11u){return;}
+    uint base=0u;
+    for(uint prior=0u;prior<topologyIndex;++prior){base+=counts[prior];}
+    uint recordIndex=visibility.counts.x+localIndex;
+    recordWork[base+topologyOffsets[localIndex]]=recordIndex;
+    if(gularOffsets[localIndex]!=0xffffffffu){
+        gularWork[gularOffsets[localIndex]]=recordIndex;
+    }
+}
+
+kernel void prepareCrowCranialVisibilityIndirectWork(
+    device const uint* counts [[buffer(0)]],
+    device DrawPrimitivesIndirectArguments* arguments [[buffer(1)]],
+    uint workIndex [[thread_position_in_grid]]) {
+    if(workIndex<11u){
+        uint base=0u;
+        for(uint prior=0u;prior<workIndex;++prior){base+=counts[prior];}
+        uint2 sections=crowBodyVaneTopologySections(workIndex);
+        arguments[workIndex]={
+            sections.x*sections.y*6u,counts[workIndex],0u,base
+        };
+    }else if(workIndex==11u){
+        arguments[11]={126u,counts[12],0u,0u};
+    }
 }
 
 inline float3 crowBodyVaneUnwarpedPoint(
@@ -4823,16 +4955,13 @@ kernel void probeCrowGularDetailSegments(
 
 vertex CrowRasterVertex crowGularDetailAOVVertex(
     device const CrowBodyVaneMorphologyGPU* records [[buffer(0)]],
-    constant CrowBodyVaneGeometryUniforms& geometry [[buffer(2)]],
+    device const uint* recordWork [[buffer(1)]],
     constant CrowTemporalCameraUniforms& camera [[buffer(3)]],
     device const CrowBodyVanePoseUniforms& pose [[buffer(4)]],
     device const CrowBodyVaneNeckTransformGPU* neckTransforms [[buffer(5)]],
     uint vertexIndex [[vertex_id]],
     uint instanceIndex [[instance_id]]) {
-    // Family 7 is the immutable suffix after body, ventral, femoral, crural,
-    // and throat-bridge morphology. Direct indexing avoids another compaction
-    // or indirect-argument owner for a fixed seven-segment detail topology.
-    uint recordIndex=5468u+instanceIndex;
+    uint recordIndex=recordWork[instanceIndex];
     CrowFeatherVertexGPU source=crowGularDetailProceduralVertex(
         records[recordIndex],pose,neckTransforms,vertexIndex
     );

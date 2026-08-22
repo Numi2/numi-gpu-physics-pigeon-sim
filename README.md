@@ -218,14 +218,22 @@ three-slot store to `5,952` bytes. Coarse `152`/`291`-vane tiers remain on the
 CPU. The `225` gular owners now expand one rachis and three bilateral barb pairs
 directly from the same family-`7` morphology: `1,575` analytic tubes / `28,350`
 live vertices replace `2,721,600` bytes of expanded CPU geometry per frame.
-The fixed seven-segment topology draws the `711`-record cranial suffix directly,
-so it adds no segment buffer or indirect arguments; non-gular records collapse
-to zero area. The `--capture-crow-cpu-cranial-vanes` baseline restores both the
-former full-density vane and gular-detail owners. Independent Swift/Metal
+One shared family-`7` visibility pass now emits topology-grouped cranial work
+and a separate throat-only gular list. Whole-bird framing keeps all `711`
+cranial candidates, but the fixed gular draw now submits exactly `225` records
+instead of invoking `711` and collapsing `486` non-gular records to zero area:
+`28,350` rather than `89,586` detail vertices. The three-slot compactor retains
+`43,392` bytes for flags, offsets, counts, stable work, and `12` indirect draws;
+it adds no temporal segment buffer. Schema-`28` AOV reports candidates, visible
+records, and raster invocations for both owners. The
+`--capture-crow-cpu-cranial-vanes` baseline restores both the former
+full-density vane and gular-detail owners. Independent Swift/Metal
 checks cover breathing, two neck poses, current/previous positions, transformed
 gular endpoints and radii, warped normals, topology, identity, and material;
 this is simulated geometry parity, not measured head plumage or a realism
-claim. The reserved visual gate remains the new underside throat-to-bill view.
+claim. A new low broadside/underside gate at yaw/pitch `(1.62, -0.28)` retains
+the throat-to-bill boundary and reaches beauty SSIM `0.999629` against the CPU
+owner; this is an image-parity check, not a realism score.
 The body-detail prepass retains one `96`-byte current/previous analytic segment
 instead of a fixed `18`-vertex triangle stream. Each resolved feather adds six
 three-segment curved basal barb chains beneath the unchanged continuous shell.

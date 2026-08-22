@@ -12,6 +12,7 @@ func bodyVanesRetainCompactIdentityStableTemporalRecords() {
   #expect(MemoryLayout<CrowBodyVaneNeckTransformGPU>.stride == 48)
   #expect(MemoryLayout<CrowBodyVaneGeometryUniforms>.stride == 32)
   #expect(MemoryLayout<CrowBodyVaneSelectionUniforms>.stride == 32)
+  #expect(MemoryLayout<CrowCranialVisibilityUniforms>.stride == 128)
   #expect(MemoryLayout<CrowBodyDetailSegmentGPU>.stride == 96)
   let first = CrowBodyVaneRecords.groupedRecords(
     currentBodyCenter: SIMD3<Float>(0.01, -0.02, 0.03),
@@ -873,6 +874,87 @@ func metalRetainedFamilyMaskSeparatesIndependentOwners() throws {
   #expect(deformer.activeCranialRecordCount(for: cranialOnly) == 711)
 }
 
+@Test("Metal family-7 visibility compacts stable cranial and gular work")
+func metalFamilySevenVisibilityCompactsStableCranialAndGularWork() throws {
+  guard let device = MTLCreateSystemDefaultDevice() else { return }
+  let backend = try VisualizationBackend(device: device)
+  let deformer = try CrowBodyVaneGeometryDeformer(backend: backend)
+  let morphology = CrowBodyVaneRecords.retainedMorphologyRecords()
+
+  func visibility(target: SIMD3<Float>) throws -> CrowCranialVisibilityFrame {
+    let commandBuffer = try #require(backend.queue.makeCommandBuffer())
+    let bodyFrame = try deformer.encode(
+      currentBodyCenter: .zero,
+      previousBodyCenter: .zero,
+      currentNeckPose: nil,
+      previousNeckPose: nil,
+      cranialRadii: SIMD3<Float>(0.0447, 0.0328, 0.0387),
+      currentCranialBreathingScale: 1.006,
+      previousCranialBreathingScale: 0.997,
+      retainedFamilyMask: 0x8,
+      currentDeployment: 0,
+      previousDeployment: 0,
+      projectedPixelsPerMeter: 1_600,
+      commandBuffer: commandBuffer
+    )
+    var camera = CameraState()
+    camera.target = target
+    camera.distance = 0.50
+    camera.yaw = 1.18
+    camera.pitch = 0.075
+    let compact = try deformer.encodeCranialVisibility(
+      for: bodyFrame,
+      viewProjection: camera.uniforms(aspect: 16.0 / 9.0, ribbonWidth: 0.001)
+        .viewProjection,
+      commandBuffer: commandBuffer
+    )
+    commandBuffer.commit()
+    commandBuffer.waitUntilCompleted()
+    #expect(commandBuffer.status == .completed)
+    return compact
+  }
+
+  let visible = try visibility(target: SIMD3<Float>(0.158, 0, 0.052))
+  let cranialIndices = deformer.cranialVisibleRecordIndices(for: visible)
+  let gularIndices = deformer.gularVisibleRecordIndices(for: visible)
+  #expect(!cranialIndices.isEmpty)
+  #expect(cranialIndices.count <= CrowBodyVaneRecords.cranialMorphologyRecordCount)
+  #expect(Set(cranialIndices).count == cranialIndices.count)
+  #expect(
+    cranialIndices.allSatisfy {
+      Int($0) >= CrowBodyVaneRecords.cranialMorphologyBase
+        && (morphology[Int($0)].identity.x & 0xFF00_0000) == 0x0700_0000
+    }
+  )
+  #expect(gularIndices.count <= 225)
+  #expect(
+    gularIndices.allSatisfy {
+      cranialIndices.contains($0) && morphology[Int($0)].identity.w == 10
+    }
+  )
+  let arguments = visible.indirectDrawBuffer.contents().bindMemory(
+    to: DrawPrimitivesIndirectArguments.self,
+    capacity: 12
+  )
+  for topologyIndex in 0..<11 {
+    let base = Int(arguments[topologyIndex].baseInstance)
+    let count = Int(arguments[topologyIndex].instanceCount)
+    let selected = cranialIndices[base..<(base + count)]
+    #expect(Array(selected) == selected.sorted())
+  }
+  #expect(deformer.cranialExpandedVertexCount(for: visible) > 0)
+  #expect(
+    deformer.gularExpandedVertexCount(for: visible)
+      == gularIndices.count * (1 + 2 * CrowGularFeatherDetail.barbPairCount) * 18
+  )
+
+  let outside = try visibility(target: SIMD3<Float>(100, 100, 100))
+  #expect(deformer.cranialVisibleRecordCount(for: outside) == 0)
+  #expect(deformer.gularVisibleRecordCount(for: outside) == 0)
+  #expect(deformer.cranialExpandedVertexCount(for: outside) == 0)
+  #expect(deformer.gularExpandedVertexCount(for: outside) == 0)
+}
+
 @Test("Metal body vane LOD selection matches the deterministic CPU oracle")
 func metalBodyVaneLODSelectionMatchesCPUOracle() throws {
   guard let device = MTLCreateSystemDefaultDevice() else { return }
@@ -944,6 +1026,9 @@ func metalBodyVaneLODSelectionMatchesCPUOracle() throws {
       let expectedBodyIdentityCount = expectedIdentities.count {
         ($0.x & 0xFF00_0000) == 0x0200_0000
       }
+      let expectedMainVaneIdentityCount = expectedIdentities.count {
+        ($0.x & 0xFF00_0000) != 0x0700_0000
+      }
       #expect(selectedIdentities == expectedIdentities)
       let arguments = deformer.drawArguments(for: frame.batches[topologyIndex])
       let rachisArguments = deformer.drawRachisArguments(
@@ -952,7 +1037,7 @@ func metalBodyVaneLODSelectionMatchesCPUOracle() throws {
       let detailArguments = deformer.drawDetailArguments(
         for: frame.batches[topologyIndex]
       )
-      #expect(arguments.instanceCount == UInt32(expectedIdentities.count))
+      #expect(arguments.instanceCount == UInt32(expectedMainVaneIdentityCount))
       #expect(arguments.vertexCount == UInt32(topology.verticesPerInstance))
       #expect(rachisArguments.instanceCount == UInt32(expectedBodyIdentityCount))
       #expect(

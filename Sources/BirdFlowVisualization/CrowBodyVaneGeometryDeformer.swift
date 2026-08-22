@@ -1,3 +1,4 @@
+import Foundation
 import Metal
 import simd
 
@@ -149,6 +150,150 @@ final class CrowBodyVaneGeometryFrame {
   }
 }
 
+/// One GPU-resident visibility decision shared by family-7 vane and gular
+/// rasterization. Work remains topology-grouped and inventory-stable.
+final class CrowCranialVisibilityFrame {
+  let slot: Int
+  let workBuffer: MTLBuffer
+  let gularWorkBuffer: MTLBuffer
+  let indirectDrawBuffer: MTLBuffer
+  let countBuffer: MTLBuffer
+
+  init(
+    slot: Int,
+    workBuffer: MTLBuffer,
+    gularWorkBuffer: MTLBuffer,
+    indirectDrawBuffer: MTLBuffer,
+    countBuffer: MTLBuffer
+  ) {
+    self.slot = slot
+    self.workBuffer = workBuffer
+    self.gularWorkBuffer = gularWorkBuffer
+    self.indirectDrawBuffer = indirectDrawBuffer
+    self.countBuffer = countBuffer
+  }
+}
+
+/// Boxes the newest retained resources so extending family work does not widen
+/// the optimizer-sensitive showcase deformer value captured by the renderer.
+final class CrowCranialVisibilityResources {
+  let cranialVisibilityClassifyPipeline: MTLComputePipelineState
+  let cranialVisibilityScanPipeline: MTLComputePipelineState
+  let cranialVisibilityEmitPipeline: MTLComputePipelineState
+  let cranialVisibilityIndirectPipeline: MTLComputePipelineState
+  let cranialVisibilityTopologyBuffers: [MTLBuffer]
+  let cranialVisibilityOffsetBuffers: [MTLBuffer]
+  let cranialGularOffsetBuffers: [MTLBuffer]
+  let cranialVisibilityCountBuffers: [MTLBuffer]
+  let cranialVisibilityWorkBuffers: [MTLBuffer]
+  let cranialGularWorkBuffers: [MTLBuffer]
+  let cranialVisibilityIndirectBuffers: [MTLBuffer]
+  var frames: [CrowCranialVisibilityFrame?]
+
+  init(
+    backend: VisualizationBackend,
+    bufferedFrameCount: Int,
+    cranialRecordCount: Int
+  ) throws {
+    cranialVisibilityClassifyPipeline = try backend.compute(
+      "classifyCrowCranialVisibility"
+    )
+    cranialVisibilityScanPipeline = try backend.compute(
+      "scanCrowCranialVisibility"
+    )
+    cranialVisibilityEmitPipeline = try backend.compute(
+      "emitCrowCranialVisibilityWork"
+    )
+    cranialVisibilityIndirectPipeline = try backend.compute(
+      "prepareCrowCranialVisibilityIndirectWork"
+    )
+    cranialVisibilityTopologyBuffers = try (0..<bufferedFrameCount).map { _ in
+      try backend.buffer(length: cranialRecordCount * MemoryLayout<UInt32>.stride)
+    }
+    cranialVisibilityOffsetBuffers = try (0..<bufferedFrameCount).map { _ in
+      try backend.buffer(length: cranialRecordCount * MemoryLayout<UInt32>.stride)
+    }
+    cranialGularOffsetBuffers = try (0..<bufferedFrameCount).map { _ in
+      try backend.buffer(length: cranialRecordCount * MemoryLayout<UInt32>.stride)
+    }
+    cranialVisibilityCountBuffers = try (0..<bufferedFrameCount).map { _ in
+      try backend.buffer(length: 13 * MemoryLayout<UInt32>.stride, shared: true)
+    }
+    cranialVisibilityWorkBuffers = try (0..<bufferedFrameCount).map { _ in
+      try backend.buffer(length: cranialRecordCount * MemoryLayout<UInt32>.stride)
+    }
+    cranialGularWorkBuffers = try (0..<bufferedFrameCount).map { _ in
+      try backend.buffer(length: cranialRecordCount * MemoryLayout<UInt32>.stride)
+    }
+    cranialVisibilityIndirectBuffers = try (0..<bufferedFrameCount).map { _ in
+      try backend.buffer(
+        length: 12 * MemoryLayout<DrawPrimitivesIndirectArguments>.stride,
+        shared: true
+      )
+    }
+    frames = Array(repeating: nil, count: bufferedFrameCount)
+  }
+
+  var capacityBytes: Int {
+    [
+      cranialVisibilityTopologyBuffers,
+      cranialVisibilityOffsetBuffers,
+      cranialGularOffsetBuffers,
+      cranialVisibilityCountBuffers,
+      cranialVisibilityWorkBuffers,
+      cranialGularWorkBuffers,
+      cranialVisibilityIndirectBuffers,
+    ].reduce(0) { total, buffers in
+      total + buffers.reduce(0) { $0 + $1.length }
+    }
+  }
+}
+
+private final class CrowCranialVisibilityResourceEntry {
+  weak var backend: VisualizationBackend?
+  let resources: CrowCranialVisibilityResources
+
+  init(backend: VisualizationBackend, resources: CrowCranialVisibilityResources) {
+    self.backend = backend
+    self.resources = resources
+  }
+}
+
+private final class CrowCranialVisibilityResourceCache: @unchecked Sendable {
+  static let shared = CrowCranialVisibilityResourceCache()
+
+  private let lock = NSLock()
+  private var entries: [ObjectIdentifier: CrowCranialVisibilityResourceEntry] = [:]
+
+  func resources(
+    for backend: VisualizationBackend
+  ) throws -> CrowCranialVisibilityResources {
+    lock.lock()
+    defer { lock.unlock() }
+    entries = entries.filter { $0.value.backend != nil }
+    let key = ObjectIdentifier(backend)
+    if let existing = entries[key]?.resources { return existing }
+    let created = try CrowCranialVisibilityResources(
+      backend: backend,
+      bufferedFrameCount: 3,
+      cranialRecordCount: CrowBodyVaneRecords.cranialMorphologyRecordCount
+    )
+    entries[key] = CrowCranialVisibilityResourceEntry(
+      backend: backend,
+      resources: created
+    )
+    return created
+  }
+
+  func existing(
+    for backend: VisualizationBackend
+  ) -> CrowCranialVisibilityResources? {
+    lock.lock()
+    defer { lock.unlock() }
+    return entries[ObjectIdentifier(backend)]?.resources
+  }
+}
+
 /// Live procedural expansion of body contour vanes.
 ///
 /// Production rasterization pulls compact temporal records directly. The
@@ -196,6 +341,11 @@ final class CrowBodyVaneGeometryDeformer {
 
   var retainedDetailSegmentCapacityBytes: Int {
     detailSegmentBuffers.reduce(0) { $0 + $1.length }
+  }
+
+  var retainedCranialVisibilityCapacityBytes: Int {
+    CrowCranialVisibilityResourceCache.shared.existing(for: backend)?.capacityBytes
+      ?? 0
   }
 
   init(backend: VisualizationBackend) throws {
@@ -285,6 +435,7 @@ final class CrowBodyVaneGeometryDeformer {
     }
   }
 
+  @inline(never)
   func encode(
     currentBodyCenter: SIMD3<Float>,
     previousBodyCenter: SIMD3<Float>,
@@ -441,7 +592,9 @@ final class CrowBodyVaneGeometryDeformer {
     detailSegments.setBuffer(topologyIndexBuffers[slot], offset: 0, index: 1)
     detailSegments.setBuffer(topologyCountBuffers[slot], offset: 0, index: 2)
     detailSegments.setBuffer(workBuffers[slot], offset: 0, index: 3)
-    detailSegments.setBuffer(detailSegmentBuffers[slot], offset: 0, index: 4)
+    detailSegments.setBuffer(
+      detailSegmentBuffers[slot], offset: 0, index: 4
+    )
     detailSegments.setBuffer(poseBuffers[slot], offset: 0, index: 5)
     detailSegments.setBuffer(neckTransformBuffers[slot], offset: 0, index: 6)
     detailSegments.setBytes(
@@ -660,6 +813,266 @@ final class CrowBodyVaneGeometryDeformer {
       retainedDetailSegmentCapacityBytes: retainedDetailSegmentCapacityBytes,
       detailSegmentBufferAllocationCount: detailSegmentBufferAllocationCount,
       auditReadbackReady: auditReadback
+    )
+  }
+
+  func encodeCranialVisibility(
+    for frame: CrowBodyVaneGeometryFrame,
+    viewProjection: simd_float4x4,
+    commandBuffer: MTLCommandBuffer
+  ) throws -> CrowCranialVisibilityFrame {
+    let slot = frame.slot
+    let retainedResources = try CrowCranialVisibilityResourceCache.shared
+      .resources(for: backend)
+    memset(
+      retainedResources.cranialVisibilityCountBuffers[slot].contents(),
+      0,
+      13 * MemoryLayout<UInt32>.stride
+    )
+    memset(
+      retainedResources.cranialVisibilityIndirectBuffers[slot].contents(),
+      0,
+      12 * MemoryLayout<DrawPrimitivesIndirectArguments>.stride
+    )
+    var uniforms = Self.cranialVisibilityUniforms(
+      viewProjection: viewProjection,
+      projectedPixelsPerMeter: frame.batches.first?.projectedPixelsPerMeter ?? 0
+    )
+    guard let classify = commandBuffer.makeComputeCommandEncoder() else {
+      throw VisualizationError.pipeline("crow cranial visibility encoder")
+    }
+    classify.label = "Classify retained cranial visibility"
+    classify.setBuffer(morphologyBuffer, offset: 0, index: 0)
+    classify.setBuffer(poseBuffers[slot], offset: 0, index: 1)
+    classify.setBuffer(neckTransformBuffers[slot], offset: 0, index: 2)
+    classify.setBuffer(
+      retainedResources.cranialVisibilityTopologyBuffers[slot],
+      offset: 0,
+      index: 3
+    )
+    classify.setBytes(
+      &uniforms,
+      length: MemoryLayout<CrowCranialVisibilityUniforms>.stride,
+      index: 4
+    )
+    backend.dispatch1D(
+      classify,
+      pipeline: retainedResources.cranialVisibilityClassifyPipeline,
+      count: CrowBodyVaneRecords.cranialMorphologyRecordCount
+    )
+    classify.endEncoding()
+
+    guard let scan = commandBuffer.makeComputeCommandEncoder() else {
+      throw VisualizationError.pipeline("crow cranial visibility scan")
+    }
+    scan.label = "Scan retained cranial visibility"
+    scan.setBuffer(morphologyBuffer, offset: 0, index: 0)
+    scan.setBuffer(
+      retainedResources.cranialVisibilityTopologyBuffers[slot], offset: 0, index: 1
+    )
+    scan.setBuffer(
+      retainedResources.cranialVisibilityOffsetBuffers[slot], offset: 0, index: 2
+    )
+    scan.setBuffer(
+      retainedResources.cranialGularOffsetBuffers[slot], offset: 0, index: 3
+    )
+    scan.setBuffer(
+      retainedResources.cranialVisibilityCountBuffers[slot], offset: 0, index: 4
+    )
+    scan.setBytes(
+      &uniforms,
+      length: MemoryLayout<CrowCranialVisibilityUniforms>.stride,
+      index: 5
+    )
+    backend.dispatch1D(
+      scan, pipeline: retainedResources.cranialVisibilityScanPipeline, count: 1
+    )
+    scan.endEncoding()
+
+    guard let emit = commandBuffer.makeComputeCommandEncoder() else {
+      throw VisualizationError.pipeline("crow cranial compact work encoder")
+    }
+    emit.label = "Emit compact retained cranial work"
+    emit.setBuffer(
+      retainedResources.cranialVisibilityTopologyBuffers[slot], offset: 0, index: 1
+    )
+    emit.setBuffer(
+      retainedResources.cranialVisibilityOffsetBuffers[slot], offset: 0, index: 2
+    )
+    emit.setBuffer(
+      retainedResources.cranialGularOffsetBuffers[slot], offset: 0, index: 3
+    )
+    emit.setBuffer(
+      retainedResources.cranialVisibilityCountBuffers[slot], offset: 0, index: 4
+    )
+    emit.setBuffer(
+      retainedResources.cranialVisibilityWorkBuffers[slot], offset: 0, index: 5
+    )
+    emit.setBuffer(
+      retainedResources.cranialGularWorkBuffers[slot], offset: 0, index: 6
+    )
+    emit.setBytes(
+      &uniforms,
+      length: MemoryLayout<CrowCranialVisibilityUniforms>.stride,
+      index: 7
+    )
+    backend.dispatch1D(
+      emit,
+      pipeline: retainedResources.cranialVisibilityEmitPipeline,
+      count: CrowBodyVaneRecords.cranialMorphologyRecordCount
+    )
+    emit.endEncoding()
+
+    guard let prepare = commandBuffer.makeComputeCommandEncoder() else {
+      throw VisualizationError.pipeline("crow cranial indirect-work encoder")
+    }
+    prepare.label = "Prepare compact cranial and gular indirect draws"
+    prepare.setBuffer(
+      retainedResources.cranialVisibilityCountBuffers[slot], offset: 0, index: 0
+    )
+    prepare.setBuffer(
+      retainedResources.cranialVisibilityIndirectBuffers[slot], offset: 0, index: 1
+    )
+    backend.dispatch1D(
+      prepare,
+      pipeline: retainedResources.cranialVisibilityIndirectPipeline,
+      count: 12
+    )
+    prepare.endEncoding()
+
+    let visibilityFrame = CrowCranialVisibilityFrame(
+      slot: slot,
+      workBuffer: retainedResources.cranialVisibilityWorkBuffers[slot],
+      gularWorkBuffer: retainedResources.cranialGularWorkBuffers[slot],
+      indirectDrawBuffer: retainedResources.cranialVisibilityIndirectBuffers[slot],
+      countBuffer: retainedResources.cranialVisibilityCountBuffers[slot]
+    )
+    retainedResources.frames[slot] = visibilityFrame
+    return visibilityFrame
+  }
+
+  func cranialVisibilityFrame(
+    for frame: CrowBodyVaneGeometryFrame
+  ) -> CrowCranialVisibilityFrame? {
+    CrowCranialVisibilityResourceCache.shared.existing(for: backend)?
+      .frames[frame.slot]
+  }
+
+  func bindCranialRenderResources(
+    for batch: CrowBodyVaneGeometryBatchFrame,
+    visibility: CrowCranialVisibilityFrame,
+    gular: Bool = false,
+    encoder: MTLRenderCommandEncoder
+  ) {
+    var uniforms = CrowBodyVaneGeometryUniforms(
+      counts: SIMD4<UInt32>(
+        UInt32(batch.topology.axialSections),
+        UInt32(batch.topology.widthSections),
+        0,
+        UInt32(batch.vertexCount)
+      ),
+      selection: SIMD4<Float>(batch.projectedPixelsPerMeter, 0, 0, 0)
+    )
+    encoder.setVertexBuffer(batch.morphologyBuffer, offset: 0, index: 0)
+    encoder.setVertexBuffer(
+      gular ? visibility.gularWorkBuffer : visibility.workBuffer,
+      offset: 0,
+      index: 1
+    )
+    encoder.setVertexBytes(
+      &uniforms,
+      length: MemoryLayout<CrowBodyVaneGeometryUniforms>.stride,
+      index: 2
+    )
+    encoder.setVertexBuffer(batch.poseBuffer, offset: 0, index: 4)
+    encoder.setVertexBuffer(batch.neckTransformBuffer, offset: 0, index: 5)
+  }
+
+  func cranialVisibleRecordCount(for frame: CrowCranialVisibilityFrame) -> Int {
+    Int(frame.countBuffer.contents().bindMemory(to: UInt32.self, capacity: 13)[11])
+  }
+
+  func gularVisibleRecordCount(for frame: CrowCranialVisibilityFrame) -> Int {
+    Int(frame.countBuffer.contents().bindMemory(to: UInt32.self, capacity: 13)[12])
+  }
+
+  func cranialVisibleRecordIndices(
+    for frame: CrowCranialVisibilityFrame
+  ) -> [UInt32] {
+    let count = cranialVisibleRecordCount(for: frame)
+    let pointer = frame.workBuffer.contents().bindMemory(
+      to: UInt32.self,
+      capacity: CrowBodyVaneRecords.cranialMorphologyRecordCount
+    )
+    return Array(UnsafeBufferPointer(start: pointer, count: count))
+  }
+
+  func gularVisibleRecordIndices(
+    for frame: CrowCranialVisibilityFrame
+  ) -> [UInt32] {
+    let count = gularVisibleRecordCount(for: frame)
+    let pointer = frame.gularWorkBuffer.contents().bindMemory(
+      to: UInt32.self,
+      capacity: CrowBodyVaneRecords.cranialMorphologyRecordCount
+    )
+    return Array(UnsafeBufferPointer(start: pointer, count: count))
+  }
+
+  func cranialExpandedVertexCount(for frame: CrowCranialVisibilityFrame) -> Int {
+    let arguments = frame.indirectDrawBuffer.contents().bindMemory(
+      to: DrawPrimitivesIndirectArguments.self,
+      capacity: 12
+    )
+    return (0..<11).reduce(0) {
+      $0 + Int(arguments[$1].vertexCount) * Int(arguments[$1].instanceCount)
+    }
+  }
+
+  func gularExpandedVertexCount(for frame: CrowCranialVisibilityFrame) -> Int {
+    let argument = frame.indirectDrawBuffer.contents().advanced(
+      by: 11 * MemoryLayout<DrawPrimitivesIndirectArguments>.stride
+    ).bindMemory(to: DrawPrimitivesIndirectArguments.self, capacity: 1).pointee
+    return Int(argument.vertexCount) * Int(argument.instanceCount)
+  }
+
+  private static func cranialVisibilityUniforms(
+    viewProjection: simd_float4x4,
+    projectedPixelsPerMeter: Float
+  ) -> CrowCranialVisibilityUniforms {
+    let row0 = SIMD4<Float>(
+      viewProjection.columns.0.x, viewProjection.columns.1.x,
+      viewProjection.columns.2.x, viewProjection.columns.3.x
+    )
+    let row1 = SIMD4<Float>(
+      viewProjection.columns.0.y, viewProjection.columns.1.y,
+      viewProjection.columns.2.y, viewProjection.columns.3.y
+    )
+    let row2 = SIMD4<Float>(
+      viewProjection.columns.0.z, viewProjection.columns.1.z,
+      viewProjection.columns.2.z, viewProjection.columns.3.z
+    )
+    let row3 = SIMD4<Float>(
+      viewProjection.columns.0.w, viewProjection.columns.1.w,
+      viewProjection.columns.2.w, viewProjection.columns.3.w
+    )
+    func plane(_ value: SIMD4<Float>) -> SIMD4<Float> {
+      let length = simd_length(SIMD3<Float>(value.x, value.y, value.z))
+      return length > 1e-12 ? value / length : value
+    }
+    return CrowCranialVisibilityUniforms(
+      leftPlane: plane(row3 + row0),
+      rightPlane: plane(row3 - row0),
+      bottomPlane: plane(row3 + row1),
+      topPlane: plane(row3 - row1),
+      nearPlane: plane(row2),
+      farPlane: plane(row3 - row2),
+      selection: SIMD4<Float>(projectedPixelsPerMeter, 0.0015, 0, 0),
+      counts: SIMD4<UInt32>(
+        UInt32(CrowBodyVaneRecords.cranialMorphologyBase),
+        UInt32(CrowBodyVaneRecords.cranialMorphologyRecordCount),
+        UInt32(CrowBodyVaneRecords.productionTopologies.count),
+        0x8
+      )
     )
   }
 
@@ -1129,8 +1542,15 @@ enum CrowBodyVaneRecords {
     * CrowLegPlumage.radialCount * CrowLegPlumage.stationCount
   static let throatBridgeMorphologyRecordCount = 2
     * CrowThroatBridgeFeathers.rowCount * CrowThroatBridgeFeathers.columnCount
+  static let cranialMorphologyBase = bodyMorphologyRecordCount
+    + ventralMorphologyRecordCount
+    + femoralMorphologyRecordCount
+    + cruralMorphologyRecordCount
+    + throatBridgeMorphologyRecordCount
   static let cranialMorphologyRecordCount = CrowCranialFeatherTracts
     .morphologySamples().count
+  static let gularMorphologyRecordCount = CrowCranialFeatherTracts
+    .morphologySamples().count { $0.region == .throat }
   /// Body topologies stay first. Because body morphology precedes ventral
   /// morphology, compact body work remains a prefix of the shared work list;
   /// body-only rachis/detail buffers can therefore retain their original

@@ -160,8 +160,13 @@ inventory or view-dependent patch geometry.
    morphology and reconstruct breathing plus the spatially graded head warp on
    Metal. The `225` gular owners now derive their `1,575` rachis/barb tubes
    directly from that same family identity with no temporal segment buffer.
-   Coarse head tiers remain CPU owners. The next compute pass should compact
-   cranial and gular visibility before adding per-feather bending or contact.
+   One conservative GPU pass now compacts family-`7` visibility into stable
+   topology bins and a throat-only gular list, with `12` indirect draws shared
+   by beauty and identity rasterization. Normal whole-bird framing retains all
+   `711` cranial candidates, while gular submission falls from `711` to its
+   exact `225` owners. Coarse head tiers remain CPU owners. The next compute
+   pass should add fail-open previous-depth occlusion to the same stable work
+   owner before per-feather bending or contact.
 
 3. **Measured appearance, bounded claims.** Implement an energy-bounded,
    anisotropic feather BSDF with separate eumelanin absorption, longitudinal

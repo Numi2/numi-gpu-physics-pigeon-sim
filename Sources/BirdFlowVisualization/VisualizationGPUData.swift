@@ -299,6 +299,21 @@ struct CrowBodyVaneSelectionUniforms {
   var counts: SIMD4<UInt32>
 }
 
+/// Conservative world-space frustum planes and immutable family-7 inventory
+/// bounds used to compact retained cranial vanes and throat detail together.
+struct CrowCranialVisibilityUniforms {
+  var leftPlane: SIMD4<Float>
+  var rightPlane: SIMD4<Float>
+  var bottomPlane: SIMD4<Float>
+  var topPlane: SIMD4<Float>
+  var nearPlane: SIMD4<Float>
+  var farPlane: SIMD4<Float>
+  /// Projected pixels/metre followed by conservative bound padding in metres.
+  var selection: SIMD4<Float>
+  /// Inventory base, inventory count, topology count, retained-family mask.
+  var counts: SIMD4<UInt32>
+}
+
 /// Compact current/previous body-detail segment emitted by Metal before
 /// rasterization. One record expands to either a ribbon or a three-sided tube;
 /// retaining endpoints avoids materializing the 18-vertex triangle stream.

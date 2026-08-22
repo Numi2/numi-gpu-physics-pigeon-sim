@@ -20,6 +20,24 @@ enum CrowVentralCurveEmissionMode: String {
 
 private let crowVentralCurveMeshThreadCount = 8
 
+private final class CrowDepthReadbackBox {
+  let buffer: MTLBuffer?
+
+  init(buffer: MTLBuffer?) {
+    self.buffer = buffer
+  }
+}
+
+private struct CrowCranialVisibilityMetrics {
+  var retainedCapacityBytes = 0
+  var candidateRecordCount = 0
+  var visibleRecordCount = 0
+  var rasterVertexInvocationCount = 0
+  var gularCandidateRecordCount = 0
+  var gularVisibleRecordCount = 0
+  var gularRasterVertexInvocationCount = 0
+}
+
 /// Native Metal presentation of an explicitly estimated American-crow model.
 ///
 /// The measured Deetjen dove contributes only a deformation scaffold. Crow
@@ -1128,6 +1146,7 @@ private final class CrowShowcaseRenderer {
     depthState = state
   }
 
+  @inline(never)
   func render(
     phase: Float,
     camera: CameraState,
@@ -1312,10 +1331,10 @@ private final class CrowShowcaseRenderer {
       usage: [.renderTarget, .shaderRead],
       estimatedBytes: renderWidth * renderHeight * 4
     )
-    let deviceDepthReadback =
-      try auditReadback
-      ? backend.buffer(length: renderWidth * renderHeight * 4, shared: true)
-      : nil
+    let deviceDepthReadback = try makeDepthReadback(
+      enabled: auditReadback,
+      byteCount: renderWidth * renderHeight * 4
+    )
     let renderDepth: MTLTexture
     if sampleCount == 1 {
       renderDepth = resolvedDeviceDepth
@@ -1424,6 +1443,12 @@ private final class CrowShowcaseRenderer {
       currentDeployment: currentBodyVanePose.deployment,
       previousDeployment: previousBodyVanePose.deployment,
       projectedPixelsPerMeter: projectedPixelsPerMeter,
+      commandBuffer: commandBuffer
+    )
+    try encodeCranialVisibilityIfNeeded(
+      bodyVaneFrame: bodyVaneFrame,
+      projectedPixelsPerMeter: projectedPixelsPerMeter,
+      viewProjection: currentViewProjection,
       commandBuffer: commandBuffer
     )
     let rootFrame = try featherRootDeformer?.encode(
@@ -1610,6 +1635,11 @@ private final class CrowShowcaseRenderer {
         )
       }
     }
+    drawCranialVaneAOV(
+      bodyVaneFrame: bodyVaneFrame,
+      cameraUniforms: &cameraUniforms,
+      encoder: encoder
+    )
     if let bodyVaneFrame, let bodyVaneGeometryDeformer,
       let bodyRachisAOVPipeline
     {
@@ -1656,36 +1686,12 @@ private final class CrowShowcaseRenderer {
         )
       }
     }
-    if cranialVanesOwnedByMetal,
-      let bodyVaneFrame, let bodyVaneGeometryDeformer,
-      let batch = bodyVaneFrame.batches.first,
-      projectedPixelsPerMeter >= CrowCranialFeatherTracts.fullDensityPixelsPerMeter
-    {
-      let gularPipeline = try backend.render(
-        vertex: "crowGularDetailAOVVertex",
-        fragment: "showcaseCrowAOVFragment",
-        colorFormats: [.rgba16Float, .rgba16Float, .rgba16Float, .rg16Float, .r32Float],
-        sampleCount: sampleCount
-      )
-      encoder.setRenderPipelineState(gularPipeline)
-      encoder.setVertexBytes(
-        &cameraUniforms,
-        length: MemoryLayout<CrowTemporalCameraUniforms>.stride,
-        index: 3
-      )
-      encoder.setFragmentBytes(
-        &cameraUniforms,
-        length: MemoryLayout<CrowTemporalCameraUniforms>.stride,
-        index: 0
-      )
-      bodyVaneGeometryDeformer.bindRenderResources(for: batch, encoder: encoder)
-      encoder.drawPrimitives(
-        type: .triangle,
-        vertexStart: 0,
-        vertexCount: (1 + 2 * CrowGularFeatherDetail.barbPairCount) * 18,
-        instanceCount: 711
-      )
-    }
+    try drawGularDetailAOV(
+      bodyVaneFrame: bodyVaneFrame,
+      projectedPixelsPerMeter: projectedPixelsPerMeter,
+      cameraUniforms: &cameraUniforms,
+      encoder: encoder
+    )
     if let featherAOVPipeline {
       encoder.setRenderPipelineState(featherAOVPipeline)
       encoder.setVertexBytes(
@@ -1819,6 +1825,11 @@ private final class CrowShowcaseRenderer {
         )
       }
     }
+    drawCranialVaneIdentity(
+      bodyVaneFrame: bodyVaneFrame,
+      cameraUniforms: &cameraUniforms,
+      encoder: identityEncoder
+    )
     if let featherIdentityPipeline {
       identityEncoder.setRenderPipelineState(featherIdentityPipeline)
       identityEncoder.setVertexBytes(
@@ -1887,7 +1898,7 @@ private final class CrowShowcaseRenderer {
     }
     identityEncoder.endEncoding()
 
-    if let deviceDepthReadback {
+    if let deviceDepthReadback = deviceDepthReadback.buffer {
       guard let depthReadbackEncoder = commandBuffer.makeBlitCommandEncoder() else {
         throw VisualizationError.pipeline("crow device-depth readback encoder")
       }
@@ -1996,10 +2007,14 @@ private final class CrowShowcaseRenderer {
       bodyVaneFrame.map {
         bodyVaneGeometryDeformer?.activeRecordCount(for: $0) ?? 0
       } ?? 0
-    let bodyVaneExpandedVertexCount =
+    let mainBodyVaneExpandedVertexCount =
       bodyVaneFrame.map {
         bodyVaneGeometryDeformer?.expandedVertexCount(for: $0) ?? 0
       } ?? 0
+    let cranialMetrics = cranialVisibilityMetrics(for: bodyVaneFrame)
+    let bodyVaneExpandedVertexCount =
+      mainBodyVaneExpandedVertexCount
+      + cranialMetrics.rasterVertexInvocationCount
     let ventralVaneSelectedMorphologyRecordCount =
       bodyVaneFrame.map {
         bodyVaneGeometryDeformer?.activeVentralRecordCount(for: $0) ?? 0
@@ -2057,7 +2072,7 @@ private final class CrowShowcaseRenderer {
       normalCoverageTexture: normalizedNormal,
       motionTexture: resolvedAOVs[3],
       metricDepthTexture: resolvedAOVs[4],
-      deviceDepthReadbackBuffer: deviceDepthReadback,
+      deviceDepthReadbackBuffer: deviceDepthReadback.buffer,
       identityTexture: identity,
       reconstructionMode: temporalEnabled ? "metalfx-temporal" : "native",
       historyReset: historyReset,
@@ -2094,6 +2109,17 @@ private final class CrowShowcaseRenderer {
       bodyVaneVertexGenerationMode: bodyVaneFrame == nil
         ? "cpu-surface-fallback"
         : "gpu-resident-morphology-pose-instanced-indirect",
+      cranialVisibilityRetainedCapacityBytes:
+        cranialMetrics.retainedCapacityBytes,
+      cranialVaneCandidateRecordCount: cranialMetrics.candidateRecordCount,
+      cranialVaneVisibleRecordCount: cranialMetrics.visibleRecordCount,
+      cranialVaneRasterVertexInvocationCount:
+        cranialMetrics.rasterVertexInvocationCount,
+      gularDetailCandidateRecordCount:
+        cranialMetrics.gularCandidateRecordCount,
+      gularDetailVisibleRecordCount: cranialMetrics.gularVisibleRecordCount,
+      gularDetailRasterVertexInvocationCount:
+        cranialMetrics.gularRasterVertexInvocationCount,
       ventralVaneMorphologyRecordCount: bodyVaneFrame == nil
         ? 0 : CrowBodyVaneRecords.ventralMorphologyRecordCount,
       ventralVaneMorphologyRecordBytes: bodyVaneFrame == nil
@@ -2145,6 +2171,167 @@ private final class CrowShowcaseRenderer {
     )
   }
 
+  @inline(never)
+  private func encodeCranialVisibilityIfNeeded(
+    bodyVaneFrame: CrowBodyVaneGeometryFrame?,
+    projectedPixelsPerMeter: Float,
+    viewProjection: simd_float4x4,
+    commandBuffer: MTLCommandBuffer
+  ) throws {
+    guard cranialVanesOwnedByMetal,
+      let bodyVaneFrame,
+      let bodyVaneGeometryDeformer,
+      projectedPixelsPerMeter >= CrowCranialFeatherTracts.fullDensityPixelsPerMeter
+    else { return }
+    _ = try bodyVaneGeometryDeformer.encodeCranialVisibility(
+      for: bodyVaneFrame,
+      viewProjection: viewProjection,
+      commandBuffer: commandBuffer
+    )
+  }
+
+  @inline(never)
+  private func drawCranialVaneAOV(
+    bodyVaneFrame: CrowBodyVaneGeometryFrame?,
+    cameraUniforms: inout CrowTemporalCameraUniforms,
+    encoder: MTLRenderCommandEncoder
+  ) {
+    guard let bodyVaneFrame, let bodyVaneGeometryDeformer,
+      let visibility = bodyVaneGeometryDeformer.cranialVisibilityFrame(
+        for: bodyVaneFrame
+      ),
+      let bodyVaneAOVPipeline
+    else { return }
+    encoder.setRenderPipelineState(bodyVaneAOVPipeline)
+    encoder.setVertexBytes(
+      &cameraUniforms,
+      length: MemoryLayout<CrowTemporalCameraUniforms>.stride,
+      index: 3
+    )
+    encoder.setFragmentBytes(
+      &cameraUniforms,
+      length: MemoryLayout<CrowTemporalCameraUniforms>.stride,
+      index: 0
+    )
+    for batch in bodyVaneFrame.batches {
+      bodyVaneGeometryDeformer.bindCranialRenderResources(
+        for: batch,
+        visibility: visibility,
+        encoder: encoder
+      )
+      encoder.drawPrimitives(
+        type: .triangle,
+        indirectBuffer: visibility.indirectDrawBuffer,
+        indirectBufferOffset: batch.topologyIndex
+          * MemoryLayout<DrawPrimitivesIndirectArguments>.stride
+      )
+    }
+  }
+
+  @inline(never)
+  private func drawGularDetailAOV(
+    bodyVaneFrame: CrowBodyVaneGeometryFrame?,
+    projectedPixelsPerMeter: Float,
+    cameraUniforms: inout CrowTemporalCameraUniforms,
+    encoder: MTLRenderCommandEncoder
+  ) throws {
+    guard let bodyVaneFrame, let bodyVaneGeometryDeformer,
+      let visibility = bodyVaneGeometryDeformer.cranialVisibilityFrame(
+        for: bodyVaneFrame
+      ),
+      let batch = bodyVaneFrame.batches.first,
+      projectedPixelsPerMeter >= CrowCranialFeatherTracts.fullDensityPixelsPerMeter
+    else { return }
+    let pipeline = try backend.render(
+      vertex: "crowGularDetailAOVVertex",
+      fragment: "showcaseCrowAOVFragment",
+      colorFormats: [.rgba16Float, .rgba16Float, .rgba16Float, .rg16Float, .r32Float],
+      sampleCount: sampleCount
+    )
+    encoder.setRenderPipelineState(pipeline)
+    encoder.setVertexBytes(
+      &cameraUniforms,
+      length: MemoryLayout<CrowTemporalCameraUniforms>.stride,
+      index: 3
+    )
+    encoder.setFragmentBytes(
+      &cameraUniforms,
+      length: MemoryLayout<CrowTemporalCameraUniforms>.stride,
+      index: 0
+    )
+    bodyVaneGeometryDeformer.bindCranialRenderResources(
+      for: batch,
+      visibility: visibility,
+      gular: true,
+      encoder: encoder
+    )
+    encoder.drawPrimitives(
+      type: .triangle,
+      indirectBuffer: visibility.indirectDrawBuffer,
+      indirectBufferOffset: 11
+        * MemoryLayout<DrawPrimitivesIndirectArguments>.stride
+    )
+  }
+
+  @inline(never)
+  private func drawCranialVaneIdentity(
+    bodyVaneFrame: CrowBodyVaneGeometryFrame?,
+    cameraUniforms: inout CrowTemporalCameraUniforms,
+    encoder: MTLRenderCommandEncoder
+  ) {
+    guard let bodyVaneFrame, let bodyVaneGeometryDeformer,
+      let visibility = bodyVaneGeometryDeformer.cranialVisibilityFrame(
+        for: bodyVaneFrame
+      ),
+      let bodyVaneIdentityPipeline
+    else { return }
+    encoder.setRenderPipelineState(bodyVaneIdentityPipeline)
+    encoder.setVertexBytes(
+      &cameraUniforms,
+      length: MemoryLayout<CrowTemporalCameraUniforms>.stride,
+      index: 3
+    )
+    for batch in bodyVaneFrame.batches {
+      bodyVaneGeometryDeformer.bindCranialRenderResources(
+        for: batch,
+        visibility: visibility,
+        encoder: encoder
+      )
+      encoder.drawPrimitives(
+        type: .triangle,
+        indirectBuffer: visibility.indirectDrawBuffer,
+        indirectBufferOffset: batch.topologyIndex
+          * MemoryLayout<DrawPrimitivesIndirectArguments>.stride
+      )
+    }
+  }
+
+  @inline(never)
+  private func cranialVisibilityMetrics(
+    for bodyVaneFrame: CrowBodyVaneGeometryFrame?
+  ) -> CrowCranialVisibilityMetrics {
+    guard let bodyVaneFrame, let bodyVaneGeometryDeformer,
+      let visibility = bodyVaneGeometryDeformer.cranialVisibilityFrame(
+        for: bodyVaneFrame
+      )
+    else { return CrowCranialVisibilityMetrics() }
+    return CrowCranialVisibilityMetrics(
+      retainedCapacityBytes:
+        bodyVaneGeometryDeformer.retainedCranialVisibilityCapacityBytes,
+      candidateRecordCount: CrowBodyVaneRecords.cranialMorphologyRecordCount,
+      visibleRecordCount:
+        bodyVaneGeometryDeformer.cranialVisibleRecordCount(for: visibility),
+      rasterVertexInvocationCount:
+        bodyVaneGeometryDeformer.cranialExpandedVertexCount(for: visibility),
+      gularCandidateRecordCount:
+        CrowBodyVaneRecords.gularMorphologyRecordCount,
+      gularVisibleRecordCount:
+        bodyVaneGeometryDeformer.gularVisibleRecordCount(for: visibility),
+      gularRasterVertexInvocationCount:
+        bodyVaneGeometryDeformer.gularExpandedVertexCount(for: visibility)
+    )
+  }
+
   private static func jitteredViewProjection(
     _ viewProjection: simd_float4x4,
     jitter: SIMD2<Float>,
@@ -2191,6 +2378,17 @@ private final class CrowShowcaseRenderer {
     occlusionDepthPyramid = created
     occlusionDepthValid = false
     return created
+  }
+
+  @inline(never)
+  private func makeDepthReadback(
+    enabled: Bool,
+    byteCount: Int
+  ) throws -> CrowDepthReadbackBox {
+    guard enabled else { return CrowDepthReadbackBox(buffer: nil) }
+    return CrowDepthReadbackBox(
+      buffer: try backend.buffer(length: byteCount, shared: true)
+    )
   }
 
   private func makeTexture(
