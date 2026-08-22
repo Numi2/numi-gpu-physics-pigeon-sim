@@ -3153,7 +3153,7 @@ kernel void prepareCrowBodyVaneIndirectWork(
         base
     };
     uint detailSegments=topologyIndex<2u?0u
-        :(topologyIndex<4u?25u:(topologyIndex<6u?23u:149u));
+        :(topologyIndex<4u?43u:(topologyIndex<6u?41u:167u));
     arguments[14u+topologyIndex]={
         detailSegments*18u,
         topologyCounts[topologyIndex],
@@ -3543,7 +3543,7 @@ struct CrowBodyDetailSegment {
 inline uint crowBodyDetailSegmentCount(
     CrowBodyVaneGeometryUniforms geometry) {
     uint axial=geometry.counts.x;
-    return axial<=4u?0u:(axial<=8u?25u:(axial<=12u?23u:149u));
+    return axial<=4u?0u:(axial<=8u?43u:(axial<=12u?41u:167u));
 }
 
 inline CrowBodyDetailFrame crowBodyDetailFrame(
@@ -3665,6 +3665,58 @@ inline CrowBodyDetailSegment crowBodyPrimaryDetailSegment(
     return segment;
 }
 
+inline float3 crowBodyPlumulaceousNode(
+    CrowBodyVaneMorphologyGPU record,CrowBodyDetailFrame frame,
+    float side,float startAxial,float endAxial,float reach,
+    float identity,float fraction) {
+    float axial=mix(startAxial,endAxial,fraction);
+    float lateral=0.04f+reach*pow(fraction,0.78f);
+    float inset=-0.00025f+0.00018f*fraction
+        +0.00008f*sin(M_PI_F*fraction)*(0.60f+0.40f*identity);
+    return crowBodyDetailCenter(record,frame,axial)
+        +side*frame.widthAxis*crowBodyDetailHalfWidth(record,axial,side)
+            *lateral
+        +frame.normal*inset;
+}
+
+inline CrowBodyDetailSegment crowBodyPlumulaceousSegment(
+    CrowBodyVaneMorphologyGPU record,
+    device const CrowBodyVanePoseUniforms& pose,
+    device const CrowBodyVaneNeckTransformGPU* neckTransforms,
+    bool current,uint localIndex) {
+    uint chain=localIndex/3u;
+    uint section=localIndex-chain*3u;
+    uint pair=chain/2u;
+    float side=(chain&1u)==0u?-1.0f:1.0f;
+    CrowBodyDetailFrame frame=crowBodyDetailFrame(
+        record,pose,neckTransforms,current
+    );
+    uint region=uint(record.morphology.y);
+    int identityFirst=int(record.morphology.z)+31*int(region);
+    float tractSide=crowBodyDetailTractSide(record);
+    int identitySecond=int(record.morphology.w)+(tractSide<0.0f?97:0);
+    float identity=sin(
+        float(identityFirst+1)*15.317f+float(identitySecond+1)*39.173f
+        +float(pair+1u)*7.139f+side*1.913f
+    );
+    float startAxial=0.045f+0.025f*float(pair)+0.008f*identity;
+    float endAxial=0.235f+0.035f*float(pair)+0.012f*identity;
+    float reach=0.44f+0.06f*identity;
+    float firstFraction=float(section)/3.0f;
+    float secondFraction=float(section+1u)/3.0f;
+    CrowBodyDetailSegment segment;
+    segment.kind=4u;
+    segment.start=crowBodyPlumulaceousNode(
+        record,frame,side,startAxial,endAxial,reach,identity,firstFraction
+    );
+    segment.end=crowBodyPlumulaceousNode(
+        record,frame,side,startAxial,endAxial,reach,identity,secondFraction
+    );
+    segment.startRadius=mix(0.000032f,0.000008f,firstFraction);
+    segment.endRadius=mix(0.000032f,0.000008f,secondFraction);
+    return segment;
+}
+
 inline CrowBodyDetailSegment crowBodyDetailSegmentAt(
     CrowBodyVaneMorphologyGPU record,
     CrowBodyVaneGeometryUniforms geometry,
@@ -3708,6 +3760,13 @@ inline CrowBodyDetailSegment crowBodyDetailSegmentAt(
         barbule.startRadius=0.000014f;
         barbule.endRadius=0.000006f;
         return barbule;
+    }
+    uint legacySegmentCount=primaryBlock+5u;
+    if(segmentIndex>=legacySegmentCount){
+        return crowBodyPlumulaceousSegment(
+            record,pose,neckTransforms,current,
+            segmentIndex-legacySegmentCount
+        );
     }
     uint laneIndex=segmentIndex-primaryBlock;
     float lane=-1.0f+0.5f*float(laneIndex);
@@ -3800,6 +3859,7 @@ inline float4 crowBodyDetailColor(
     CrowBodyVaneMorphologyGPU record,uint kind) {
     if(kind==2u){return float4(0.008f,0.012f,0.020f,0.14f);}
     if(kind==3u){return float4(0.006f,0.010f,0.017f,0.14f);}
+    if(kind==4u){return float4(0.0045f,0.0068f,0.0118f,0.12f);}
     uint region=uint(record.morphology.y);
     float base=region==0u?0.006f:(region==1u?0.0065f:
         (region==2u?0.0058f:0.0060f));
@@ -3882,8 +3942,8 @@ kernel void emitCrowBodyDetailSegments(
     CrowBodyVaneGeometryUniforms geometry;
     geometry.counts=uint4(
         sections.x,sections.y,0u,
-        (topologyIndex<2u?0u:(topologyIndex<4u?25u:
-            (topologyIndex<6u?23u:149u)))*18u
+        (topologyIndex<2u?0u:(topologyIndex<4u?43u:
+            (topologyIndex<6u?41u:167u)))*18u
     );
     geometry.selection=float4(
         selection.selection.x,float(capacity),0.0f,0.0f

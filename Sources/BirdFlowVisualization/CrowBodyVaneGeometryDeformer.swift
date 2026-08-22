@@ -135,7 +135,7 @@ final class CrowBodyVaneGeometryDeformer {
   private let workBuffers: [MTLBuffer]
   private let indirectDrawBuffers: [MTLBuffer]
   private var detailSegmentBuffers: [MTLBuffer]
-  private var detailSegmentCapacityPerRecord = 25
+  private var detailSegmentCapacityPerRecord = 43
   private var nextSlot = 0
   private(set) var morphologyBufferAllocationCount = 1
   private(set) var detailSegmentBufferAllocationCount = bufferedFrameCount
@@ -229,7 +229,7 @@ final class CrowBodyVaneGeometryDeformer {
     }
     detailSegmentBuffers = try (0..<Self.bufferedFrameCount).map { _ in
       try backend.buffer(
-        length: maximumRecordCount * 25
+        length: maximumRecordCount * 43
           * MemoryLayout<CrowBodyDetailSegmentGPU>.stride
       )
     }
@@ -761,7 +761,7 @@ final class CrowBodyVaneGeometryDeformer {
     projectedPixelsPerMeter: Float
   ) throws {
     let requiredCapacity = maximumMorphologyLength * projectedPixelsPerMeter >= 480
-      ? 149 : 25
+      ? 167 : 43
     guard requiredCapacity > detailSegmentCapacityPerRecord else { return }
     detailSegmentBuffers = try (0..<Self.bufferedFrameCount).map { _ in
       try backend.buffer(
@@ -819,9 +819,9 @@ enum CrowBodyVaneRecords {
   static func detailSegmentCount(for topology: CrowBodyVaneTopology) -> Int {
     switch topology.axialSections {
     case ...4: 0
-    case 6, 8: 25
-    case 10, 12: 23
-    default: 149
+    case 6, 8: 43
+    case 10, 12: 41
+    default: 167
     }
   }
 
@@ -1518,8 +1518,92 @@ enum CrowBodyVaneRecords {
         )
       )
     }
+    appendBodyPlumulaceousSegments(
+      record: record,
+      frame: frame,
+      identityFirst: identityFirst,
+      identitySecond: identitySecond,
+      to: &result
+    )
     precondition(result.count == detailSegmentCount(for: topology))
     return result
+  }
+
+  private static func appendBodyPlumulaceousSegments(
+    record: CrowBodyVaneRecordGPU,
+    frame: BodyDetailFrame,
+    identityFirst: Int,
+    identitySecond: Int,
+    to result: inout [BodyDetailSegment]
+  ) {
+    for pair in 0..<3 {
+      for side: Float in [-1, 1] {
+        let identity = sin(
+          Float(identityFirst + 1) * 15.317
+            + Float(identitySecond + 1) * 39.173
+            + Float(pair + 1) * 7.139
+            + side * 1.913
+        )
+        let startAxial = 0.045 + 0.025 * Float(pair) + 0.008 * identity
+        let endAxial = 0.235 + 0.035 * Float(pair) + 0.012 * identity
+        let reach = 0.44 + 0.06 * identity
+        var previous = bodyPlumulaceousNode(
+          record: record,
+          frame: frame,
+          side: side,
+          startAxial: startAxial,
+          endAxial: endAxial,
+          reach: reach,
+          identity: identity,
+          fraction: 0
+        )
+        for section in 0..<3 {
+          let firstFraction = Float(section) / 3
+          let secondFraction = Float(section + 1) / 3
+          let next = bodyPlumulaceousNode(
+            record: record,
+            frame: frame,
+            side: side,
+            startAxial: startAxial,
+            endAxial: endAxial,
+            reach: reach,
+            identity: identity,
+            fraction: secondFraction
+          )
+          result.append(
+            BodyDetailSegment(
+              kind: .plumulaceousBarb,
+              start: previous,
+              end: next,
+              startRadiusMeters: 0.000032 - 0.000024 * firstFraction,
+              endRadiusMeters: 0.000032 - 0.000024 * secondFraction
+            )
+          )
+          previous = next
+        }
+      }
+    }
+  }
+
+  private static func bodyPlumulaceousNode(
+    record: CrowBodyVaneRecordGPU,
+    frame: BodyDetailFrame,
+    side: Float,
+    startAxial: Float,
+    endAxial: Float,
+    reach: Float,
+    identity: Float,
+    fraction: Float
+  ) -> SIMD3<Float> {
+    let axial = startAxial + (endAxial - startAxial) * fraction
+    let lateral = 0.04 + reach * pow(fraction, 0.78)
+    let inset = -0.00025 + 0.00018 * fraction
+      + 0.00008 * sin(.pi * fraction) * (0.60 + 0.40 * identity)
+    return bodyDetailCenter(record: record, frame: frame, axial: axial)
+      + side * frame.widthAxis
+        * detailHalfWidth(record: record, axial: axial, signedWidth: side)
+        * lateral
+      + frame.normal * inset
   }
 
   static func detailVertex(
@@ -1776,6 +1860,8 @@ enum CrowBodyVaneRecords {
       return SIMD4<Float>(0.008, 0.012, 0.020, 0.14)
     case .barbule:
       return SIMD4<Float>(0.006, 0.010, 0.017, 0.14)
+    case .plumulaceousBarb:
+      return SIMD4<Float>(0.0045, 0.0068, 0.0118, 0.12)
     case .rachis:
       return rachisColor(record: record)
     }

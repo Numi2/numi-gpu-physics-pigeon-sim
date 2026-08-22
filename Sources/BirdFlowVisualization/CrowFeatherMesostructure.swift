@@ -5,6 +5,7 @@ enum CrowFeatherMesostructureKind: UInt8, CaseIterable {
   case edgeBarbGroup
   case barb
   case barbule
+  case plumulaceousBarb
 }
 
 struct CrowFeatherMesostructureSegment: Equatable {
@@ -67,7 +68,7 @@ enum CrowFeatherMesostructure {
         row: feather.row,
         transitionProgress: 0
       )
-    let resolved = segments(
+    var resolved = segments(
       frame: Frame(
         feather: feather,
         camberScale: camberScale,
@@ -82,6 +83,16 @@ enum CrowFeatherMesostructure {
         && simd_distance(feather.rootOffset, feather.tipOffset)
           * projectedPixelsPerMeter >= shoulderInteriorBarbThresholdPixels
     )
+    if !resolved.isEmpty {
+      appendBodyPlumulaceousBarbs(
+        frame: Frame(
+          feather: feather,
+          camberScale: camberScale,
+          transverseCamberRatio: resolvedTransverseCamberRatio
+        ),
+        to: &resolved
+      )
+    }
     let projectedVaneWidth = 2 * feather.maximumWidthMeters
       * projectedPixelsPerMeter
     guard
@@ -675,6 +686,80 @@ enum CrowFeatherMesostructure {
         )
       )
     }
+  }
+
+  /// Three bilateral, piecewise-curved basal barb pairs provide a dark,
+  /// compliant-looking underlayer when neighboring body vanes separate.
+  /// Their density and reach are renderer estimates; every node remains well
+  /// inside the accepted vane envelope and therefore cannot alter its outline.
+  private static func appendBodyPlumulaceousBarbs(
+    frame: Frame,
+    to result: inout [CrowFeatherMesostructureSegment]
+  ) {
+    for pair in 0..<3 {
+      for side: Float in [-1, 1] {
+        let identity = sin(
+          Float(frame.identityFirst + 1) * 15.317
+            + Float(frame.identitySecond + 1) * 39.173
+            + Float(pair + 1) * 7.139
+            + side * 1.913
+        )
+        let startAxial = 0.045 + 0.025 * Float(pair) + 0.008 * identity
+        let endAxial = 0.235 + 0.035 * Float(pair) + 0.012 * identity
+        let reach = 0.44 + 0.06 * identity
+        var previous = bodyPlumulaceousNode(
+          frame: frame,
+          side: side,
+          startAxial: startAxial,
+          endAxial: endAxial,
+          reach: reach,
+          identity: identity,
+          fraction: 0
+        )
+        for section in 0..<3 {
+          let firstFraction = Float(section) / 3
+          let secondFraction = Float(section + 1) / 3
+          let next = bodyPlumulaceousNode(
+            frame: frame,
+            side: side,
+            startAxial: startAxial,
+            endAxial: endAxial,
+            reach: reach,
+            identity: identity,
+            fraction: secondFraction
+          )
+          result.append(
+            CrowFeatherMesostructureSegment(
+              kind: .plumulaceousBarb,
+              start: previous,
+              end: next,
+              startRadiusMeters: mix(0.000032, 0.000008, firstFraction),
+              endRadiusMeters: mix(0.000032, 0.000008, secondFraction)
+            )
+          )
+          previous = next
+        }
+      }
+    }
+  }
+
+  private static func bodyPlumulaceousNode(
+    frame: Frame,
+    side: Float,
+    startAxial: Float,
+    endAxial: Float,
+    reach: Float,
+    identity: Float,
+    fraction: Float
+  ) -> SIMD3<Float> {
+    let axial = mix(startAxial, endAxial, fraction)
+    let lateral = 0.04 + reach * pow(fraction, 0.78)
+    let inset = -0.00025 + 0.00018 * fraction
+      + 0.00008 * sin(.pi * fraction) * (0.60 + 0.40 * identity)
+    return frame.center(at: axial)
+      + side * frame.widthAxis * frame.halfWidth(at: axial, signedWidth: side)
+        * lateral
+      + frame.normal * inset
   }
 
   private static func normalized(

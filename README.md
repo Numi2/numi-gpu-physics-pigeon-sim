@@ -107,8 +107,9 @@ The live raster vertex stage evaluates each crown, asymmetric width, ripple,
 distal taper, smooth normal, motion, and stable identity directly; those vane
 triangles are no longer expanded into the CPU surface stream. The CPU temporal
 path remains only as an explicit audit oracle. The vane-contained tubular
-rachis, paired aggregate barbs, terminal bundles, and future-close barbules now
-expand from the same retained morphology and pose records in Metal. A shared
+rachis, paired aggregate barbs, terminal bundles, basal plumulaceous chains,
+and future-close barbules now expand from the same retained morphology and pose
+records in Metal. A shared
 compute audit including nonzero neck pose
 and takeoff deployment agrees with that Swift oracle within `2 um`; the most
 cancellation-sensitive terminal normal remains within `0.06 degrees`. The
@@ -140,18 +141,27 @@ change in any frame. The rachis uses its parent vane identity, so the redundant
 integer-identity tube draw is intentionally omitted while beauty remains
 GPU-generated.
 The body-detail prepass retains one `96`-byte current/previous analytic segment
-instead of a fixed `18`-vertex triangle stream. The seven vane topologies own
-`0/0/25/25/23/23/149` segments per feather; ordinary tiers retain
-`23,126,400` bytes across three in-flight slots, while the `480 px`
-future-compute tier can grow that store to `137,833,344` bytes without changing
+instead of a fixed `18`-vertex triangle stream. Each resolved feather adds six
+three-segment curved basal barb chains beneath the unchanged continuous shell.
+The seven vane topologies own `0/0/43/43/41/41/167` segments per feather;
+ordinary tiers retain `39,777,408` bytes across three in-flight slots, while
+the `480 px` future-compute tier can grow that store to `154,484,352` bytes without changing
 identity or CPU ownership. Swift reproduces the former CPU mesostructure at
-`3,000`, `10,000`, and `30,000 px/m`, and a direct Metal `16 x 7` probe agrees
-within `2 um` at the future-close tier. A new five-frame high-front takeoff gate
+`3,000`, `10,000`, and `30,000 px/m`, independently checks the new chains for
+basal containment and exact piecewise continuity, and a direct Metal `16 x 7`
+probe agrees within `2 um` at the future-close tier. A new five-frame high-front takeoff gate
 at yaw/pitch `(-0.72, 0.52)` and `0.48 m` preserves exact enclosed-hole pixels
 `5, 10, 1, 0, 1` and components `3, 5, 1, 0, 1`. Beauty SSIM is at least
 `0.999796`; at most `1,320 / 360,000` pixels change in a frame. Inspection shows
 continuous simulated neck, shoulder, and flank overlap. Detail inherits the
 owning vane's integer identity, so it adds no redundant identity draw.
+The new underlayer additionally preserves exact hole pixels `1, 0, 1, 2, 1`,
+components `1, 0, 1, 1, 1`, and expected apertures `0, 0, 0, 0, 0` at a
+previously unused near-front standing yaw/pitch `(0.12, 0.16)` and `0.55 m`.
+Minimum beauty SSIM is `0.999999`, with at most `11 / 360,000` pixel values
+changing. The outer vane is deliberately unchanged: this is an estimated dark
+fiber backing for exposed overlaps and future close output, not measured
+American-crow barb density or proof of perceptual realism.
 These counters exclude audit-only expanded output and do not constitute a
 performance claim.
 The same retained path now owns all `12` rectrices throughout takeoff. Their

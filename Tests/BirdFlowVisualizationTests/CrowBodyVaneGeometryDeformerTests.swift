@@ -51,12 +51,12 @@ func bodyVanesRetainCompactIdentityStableTemporalRecords() {
   #expect(
     CrowBodyVaneRecords.productionTopologies.map {
       CrowBodyVaneRecords.detailSegmentCount(for: $0)
-    } == [0, 0, 25, 25, 23, 23, 149]
+    } == [0, 0, 43, 43, 41, 41, 167]
   )
   #expect(
     CrowBodyVaneRecords.productionTopologies.map {
       CrowBodyVaneRecords.detailVerticesPerInstance(for: $0)
-    } == [0, 0, 450, 450, 414, 414, 2_682]
+    } == [0, 0, 774, 774, 738, 738, 3_006]
   )
   let morphology = CrowBodyVaneRecords.morphologyRecords()
   #expect(morphology.count == 3_212)
@@ -117,6 +117,53 @@ func retainedBodyDetailReproducesCPUMesostructureHierarchy() {
         #expect(abs(candidate.endRadiusMeters - oracle.endRadiusMeters) < 2e-7)
       }
     }
+  }
+}
+
+@Test("retained body plumulaceous chains stay basal and continuous")
+func retainedBodyPlumulaceousChainsStayBasalAndContinuous() {
+  let record = CrowBodyVaneRecords.temporalRecords(
+    currentBodyCenter: .zero,
+    previousBodyCenter: SIMD3<Float>(0.004, -0.003, 0.002),
+    currentNeckPose: nil,
+    previousNeckPose: nil,
+    currentDeployment: 1,
+    previousDeployment: 0.4
+  )[2_156]
+  let topology = CrowBodyVaneTopology(axialSections: 8, widthSections: 5)
+  let segments = CrowBodyVaneRecords.detailSegments(
+    record: record,
+    topology: topology,
+    projectedPixelsPerMeter: 3_000,
+    current: true
+  ).filter { $0.kind == .plumulaceousBarb }
+
+  #expect(segments.count == 18)
+  let root = record.currentRootAndRootWidth.xyz
+  let tip = record.currentTipAndMaximumWidth.xyz
+  let length = simd_distance(root, tip)
+  let axis = simd_normalize(tip - root)
+  for segment in segments {
+    let startAxial = simd_dot(segment.start - root, axis) / length
+    let endAxial = simd_dot(segment.end - root, axis) / length
+    #expect(startAxial > 0.02 && startAxial < 0.35)
+    #expect(endAxial > startAxial && endAxial < 0.35)
+    #expect(segment.startRadiusMeters > segment.endRadiusMeters)
+    #expect(segment.endRadiusMeters > 0)
+  }
+  for chainStart in stride(from: 0, to: segments.count, by: 3) {
+    #expect(
+      simd_distance(
+        segments[chainStart].end,
+        segments[chainStart + 1].start
+      ) < 1e-8
+    )
+    #expect(
+      simd_distance(
+        segments[chainStart + 1].end,
+        segments[chainStart + 2].start
+      ) < 1e-8
+    )
   }
 }
 
@@ -408,7 +455,7 @@ func bodyVaneProductionStorageIsTripleBufferedAndIndirect() throws {
   #expect(
     frames.allSatisfy {
       $0.retainedDetailSegmentCapacityBytes
-        == 3 * 3_212 * 25 * MemoryLayout<CrowBodyDetailSegmentGPU>.stride
+        == 3 * 3_212 * 43 * MemoryLayout<CrowBodyDetailSegmentGPU>.stride
     }
   )
   #expect(frames.allSatisfy { $0.detailSegmentBufferAllocationCount == 3 })

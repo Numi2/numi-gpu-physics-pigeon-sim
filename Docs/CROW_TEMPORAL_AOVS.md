@@ -122,14 +122,23 @@ The retained body path now allocates second and third indirect-argument sets for
 the vane-contained rachis and body-detail hierarchy, increasing three-slot
 indirect capacity from `336` to `1,008` bytes. Dedicated Metal/Swift parity and
 indirect-storage tests qualify the rachis's `0/4/8/12`-section tube expansion
-and the detail path's `0/0/25/25/23/23/149` compact temporal segments. The
-initial `96`-byte segment store retains `23,126,400` bytes over three in-flight
-slots and grows to `137,833,344` bytes only for the future `480 px` topology.
+and the detail path's `0/0/43/43/41/41/167` compact temporal segments. The
+additional `18` segments are six deterministic three-section proximal
+plumulaceous chains, contained beneath each resolved feather's unchanged vane.
+The initial `96`-byte segment store retains `39,777,408` bytes over three
+in-flight slots and grows to `154,484,352` bytes only for the future `480 px`
+topology.
 Schema `21` deliberately keeps the existing body-vane counters: rachis and
 detail inherit their parent vane's stable identity, and the integer pass
 retains that underlying vane identity rather than issuing redundant subpixel
 fiber draws. Beauty ownership is nevertheless Metal-native. These storage and
 parity observations are not a performance result.
+At near-front standing yaw/pitch `(0.12, 0.16)`, distance `0.55 m`, and
+`800 x 450`, the five-frame underlayer A/B preserves exact enclosed-hole pixels
+`1, 0, 1, 2, 1`, components `1, 0, 1, 1, 1`, and zero expected lower-body
+aperture in every frame. Minimum beauty SSIM is `0.999999`, with at most `11`
+pixel values changed in a frame. The underlayer carries the parent vane
+identity, so these fibers do not add an integer-identity draw.
 Schema `21` also records projected-size ventral-barb candidate,
 frustum-visible, prior-depth-tested, occlusion-culled, and retained record
 counts; logical triangle-stream vertex count; actual raster vertex invocations;

@@ -2820,6 +2820,8 @@ private struct CrowMeshBuilder {
         color = SIMD4<Float>(0.008, 0.012, 0.020, 0.14)
       case .barbule:
         color = SIMD4<Float>(0.006, 0.010, 0.017, 0.14)
+      case .plumulaceousBarb:
+        color = SIMD4<Float>(0.0045, 0.0068, 0.0118, 0.12)
       }
       if segment.kind == .edgeBarbGroup {
         appendTaperedRibbon(
@@ -2936,6 +2938,9 @@ private struct CrowMeshBuilder {
         radialSegments = 3
       case .barbule:
         color = SIMD4<Float>(0.006, 0.010, 0.017, 0.14)
+        radialSegments = 3
+      case .plumulaceousBarb:
+        color = SIMD4<Float>(0.0045, 0.0068, 0.0118, 0.12)
         radialSegments = 3
       }
       if segment.kind == .edgeBarbGroup {

@@ -578,12 +578,17 @@ segments. Each `96`-byte record retains current and previous endpoints, taper,
 surface normal, and detail kind, then the vertex stage expands it into either a
 six-vertex ribbon or a three-sided tube within the established fixed
 `18`-vertex segment stride. The seven vane topologies retain
-`0/0/25/25/23/23/149` segments (`0/0/450/450/414/414/2,682` raster vertices)
-per selected feather. Initial three-slot capacity is `23,126,400` bytes; a
-future `480 px` feather grows it to `137,833,344` bytes without materializing
+`0/0/43/43/41/41/167` segments
+(`0/0/774/774/738/738/3,006` raster vertices) per selected feather. The added
+`18` segments form three bilateral basal barbs, each reconstructed as a
+continuous three-section curve beneath the unchanged outer shell. Initial
+three-slot capacity is `39,777,408` bytes; a future `480 px` feather grows it
+to `154,484,352` bytes without materializing
 the expanded triangle stream. The independent Swift oracle reproduces the
 former CPU edge groups, promoted shoulder barbs, five terminal bundles, and
-barbules at `3,000`, `10,000`, and `30,000 px/m`. A direct Metal future-close
+barbules at `3,000`, `10,000`, and `30,000 px/m`, then independently verifies
+that all basal chains remain proximal, taper monotonically, and join exactly.
+A direct Metal future-close
 `16 x 7` probe agrees with current/previous positions within `2 um` and normals
 within `1e-3` vector distance. The integer pass deliberately retains the
 underlying vane identity instead of drawing every subpixel fiber again.
@@ -596,6 +601,19 @@ SSIM is at least `0.999796`; no frame changes more than `1,320 / 360,000`
 pixels. The inspected held frame retains continuous simulated neck, shoulder,
 and flank overlap. This qualifies ownership and bounded visual continuity, not
 performance, measured anatomy, or perceptual equivalence to a real crow.
+
+Unlike the earlier rejected proximal-vane split, this underlayer does not move,
+shorten, or cut the accepted pennaceous coverage shell. A new five-frame
+near-front standing gate at yaw/pitch `(0.12, 0.16)` and `0.55 m` preserves
+exact enclosed-hole pixels (`1, 0, 1, 2, 1`), components (`1, 0, 1, 1, 1`),
+largest components (`1, 0, 1, 2, 1`), and zero expected lower-body aperture.
+Minimum beauty SSIM is `0.999999`; at most `11 / 360,000` pixel values change.
+The six-chain density, `4-50%` half-width reach, and `37-317 permille` axial
+envelope are bounded renderer estimates. General contour-feather separation
+into a fluffy proximal plumulaceous region and structured distal pennaceous
+vane is supported by [Ng et al. (2014)](https://pmc.ncbi.nlm.nih.gov/articles/PMC4202321/)
+and [Widelitz et al. (2019)](https://pmc.ncbi.nlm.nih.gov/articles/PMC6953487/),
+but neither source measures these American-crow counts or dimensions.
 
 The same executable renderer also has a distinct `standing` presentation. It
 does not freeze or slow the flight surface. A dedicated Metal kernel folds the

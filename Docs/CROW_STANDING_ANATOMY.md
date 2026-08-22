@@ -589,6 +589,20 @@ pixels increase by `3`; class-`5`/`6` maxima remain exact while same-class
 neighbour variation rises `4.28%`/`5.29%`. This qualifies one simulated raster
 view and the deterministic LOD contract, not all-angle or perceptual realism.
 
+The retained body path now adds plumulaceous backing without repeating that
+rejected split: its continuous outer vane remains unchanged. Each resolved
+feather carries three bilateral basal barbs, represented by three joined tube
+sections and tucked within the proximal `37-317 permille` of vane length and
+`4-50%` of local half-width. The chains follow current and previous camber in
+Metal and remain available in the CPU fallback. A new near-front standing gate
+at yaw/pitch `(0.12, 0.16)`, distance `0.55 m`, and `800 x 450` preserves hole
+pixels `1, 0, 1, 2, 1`, largest components `1, 0, 1, 2, 1`, and zero expected
+leg aperture; minimum beauty SSIM is `0.999999`. The count, reach, and fiber
+radii are renderer estimates guided only by the general
+proximal-plumulaceous/distal-pennaceous contour-feather organization described
+by [Ng et al. (2014)](https://pmc.ncbi.nlm.nih.gov/articles/PMC4202321/) and
+[Widelitz et al. (2019)](https://pmc.ncbi.nlm.nih.gov/articles/PMC6953487/).
+
 Body-tract shaft geometry and its analytic optical lobe now share a transverse-
 resolution handoff. The lobe is absent below `12 px` full vane width and fades
 to full strength at `24 px`; explicit rachis tubes are retained but emitted
