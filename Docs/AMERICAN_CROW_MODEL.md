@@ -210,7 +210,7 @@ or alter rectrix deployment. The dorsal folded-wing quad collapses over
 presentation phase `0.20...0.30`, while the narrow terminal axillary bridge
 overlaps live underwing deployment until progress `0.30`; this prevents either
 bridge from becoming a free-flight slab or exposing the root aperture. Crow AOV
-schema `18` carries exact visible and
+schema `19` carries exact visible and
 fully covered pixels plus image bounds per persistent feather, wing-surface
 cell, and topology-bound dorsal-covert identity. Ownership can therefore be
 traced to class/side/order or side/chord/span without inferring it from a beauty
@@ -513,6 +513,22 @@ expected lower-body aperture pixels in `3` components. Beauty SSIM is
 from the legacy surface aggregate rather than changing coverage. This is an
 executable ownership/parity result, not a performance measurement or an
 American-crow anatomical measurement.
+
+Compact body-vane storage is triple buffered for three in-flight command
+buffers. Each slot retains capacity by quantized topology, while a retained
+`DrawPrimitivesIndirectArguments` record supplies vertex and instance counts
+to both beauty and identity passes. The new schema-`19` AOV fields distinguish
+active bytes from total retained record capacity, indirect bytes, cumulative
+record-buffer allocations, logical raster invocations, and generation mode.
+At the underside-port yaw/pitch `(-0.62, -0.52)`, `0.48 m` diagnostic, two
+batches carry `1,606` records in `282,656` active bytes and request `285,984`
+raster vertices each frame. The three slots settle at `847,968` record bytes
+plus `96` indirect bytes; allocation count is `2, 4, 6, 6, 6` across five
+frames. Every candidate PNG is byte-identical to the previous direct-draw
+renderer. Visual inspection covers ventral body, axillary handoff, folded-wing
+underside, femoral transition, and tail overlap without exposing a new gap.
+Audit-only expanded buffers are excluded from these production-residency
+counters, and no timing improvement is claimed.
 
 The same executable renderer also has a distinct `standing` presentation. It
 does not freeze or slow the flight surface. A dedicated Metal kernel folds the

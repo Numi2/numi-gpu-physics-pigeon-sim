@@ -1508,9 +1508,8 @@ private final class CrowShowcaseRenderer {
         bodyVaneGeometryDeformer.bindRenderResources(for: batch, encoder: encoder)
         encoder.drawPrimitives(
           type: .triangle,
-          vertexStart: 0,
-          vertexCount: batch.vertexCount,
-          instanceCount: batch.recordCount
+          indirectBuffer: batch.indirectDrawBuffer,
+          indirectBufferOffset: 0
         )
       }
     }
@@ -1642,9 +1641,8 @@ private final class CrowShowcaseRenderer {
         )
         identityEncoder.drawPrimitives(
           type: .triangle,
-          vertexStart: 0,
-          vertexCount: batch.vertexCount,
-          instanceCount: batch.recordCount
+          indirectBuffer: batch.indirectDrawBuffer,
+          indirectBufferOffset: 0
         )
       }
     }
@@ -1876,6 +1874,20 @@ private final class CrowShowcaseRenderer {
         (commandBuffer.gpuEndTime - commandBuffer.gpuStartTime) * 1_000
       ),
       allocatedRenderTargetBytes: resolvedInputBytes + multisampleBytes + outputBytes,
+      bodyVaneRecordCount: bodyVaneFrame?.recordCount ?? 0,
+      bodyVaneBatchCount: bodyVaneFrame?.batches.count ?? 0,
+      bodyVaneRecordBytes: bodyVaneFrame?.recordBytes ?? 0,
+      bodyVaneRetainedRecordCapacityBytes:
+        bodyVaneGeometryDeformer?.retainedRecordCapacityBytes ?? 0,
+      bodyVaneRetainedIndirectDrawBytes:
+        bodyVaneGeometryDeformer?.retainedIndirectDrawBytes ?? 0,
+      bodyVaneRecordBufferAllocationCount:
+        bodyVaneFrame?.recordBufferAllocationCount ?? 0,
+      bodyVaneRasterVertexInvocationCount:
+        bodyVaneFrame?.expandedVertexCount ?? 0,
+      bodyVaneVertexGenerationMode: bodyVaneFrame == nil
+        ? "cpu-surface-fallback"
+        : "gpu-procedural-instanced-indirect",
       ventralBarbCandidateRecordCount: ventralBarbCandidateRecordCount,
       ventralBarbuleCandidateRecordCount: ventralBarbuleCandidateRecordCount,
       ventralBarbFrustumVisibleRecordCount: Int(

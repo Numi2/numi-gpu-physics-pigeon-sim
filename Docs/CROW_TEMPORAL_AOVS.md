@@ -90,7 +90,7 @@ audit path and temporal scale:
   /tmp/crow.mp4 /tmp/crow.png standing /tmp/crow-aov-audit.json 2
 ```
 
-The schema-18 JSON report records format and coordinate conventions plus per-frame
+The schema-19 JSON report records format and coordinate conventions plus per-frame
 finite-pixel count, HDR values above one, exact active IDs, visible feather IDs,
 fully covered samples, unit-normal error, depth range, moving-pixel count,
 maximum motion, and bird/support vertical centroids. It also records exact
@@ -105,11 +105,18 @@ ordered class pair are retained, so one large projection cannot erase other
 anatomical owners. Wing-cell ownership additionally requires the scaffold's
 low-alpha material code, preventing the bare class-`11` pedal identity from
 aliasing the first left-wing cell. For the largest enclosed component, schema
-`18` also
+`19` also
 retains the sorted packed identities adjacent to its boundary. This resolves a
 gap directly to persistent class/side/order/count or live covert ownership
 without inferring the owner from color or a temporary debug render.
-Schema `18` additionally records projected-size ventral-barb candidate,
+Schema `19` additionally records body-vane active record and topology-batch
+counts, active and retained record bytes, retained indirect-draw bytes,
+cumulative record-buffer allocations, raster vertex invocations, and the
+`gpu-procedural-instanced-indirect` generation mode. Active record buffers and
+indirect arguments use three retained in-flight slots; audit-expanded geometry
+is excluded. This makes allocation stabilization and residency executable
+without treating either as a speed result.
+Schema `19` also records projected-size ventral-barb candidate,
 frustum-visible, prior-depth-tested, occlusion-culled, and retained record
 counts; logical triangle-stream vertex count; actual raster vertex invocations;
 materialized output-capacity bytes; generation mode; and max-depth hierarchy

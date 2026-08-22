@@ -106,6 +106,63 @@ func metalProceduralBodyVanesMatchSwiftGeometryOracle() throws {
   }
 }
 
+@Test("body vane production storage is triple buffered and indirect")
+func bodyVaneProductionStorageIsTripleBufferedAndIndirect() throws {
+  guard let device = MTLCreateSystemDefaultDevice() else { return }
+  let backend = try VisualizationBackend(device: device)
+  let deformer = try CrowBodyVaneGeometryDeformer(backend: backend)
+  var frames: [CrowBodyVaneGeometryFrame] = []
+  for index in 0..<4 {
+    let commandBuffer = try #require(backend.queue.makeCommandBuffer())
+    let frame = try deformer.encode(
+      currentBodyCenter: SIMD3<Float>(Float(index) * 0.001, 0, 0),
+      previousBodyCenter: SIMD3<Float>(Float(index - 1) * 0.001, 0, 0),
+      currentNeckPose: nil,
+      previousNeckPose: nil,
+      currentDeployment: 1,
+      previousDeployment: 1,
+      projectedPixelsPerMeter: 1_600,
+      commandBuffer: commandBuffer
+    )
+    commandBuffer.commit()
+    commandBuffer.waitUntilCompleted()
+    #expect(commandBuffer.status == .completed)
+    frames.append(frame)
+  }
+
+  let batchCount = frames[0].batches.count
+  #expect(batchCount > 0)
+  #expect(frames.map(\.slot) == [0, 1, 2, 0])
+  #expect(frames[0].recordBufferAllocationCount == batchCount)
+  #expect(frames[1].recordBufferAllocationCount == batchCount * 2)
+  #expect(frames[2].recordBufferAllocationCount == batchCount * 3)
+  #expect(frames[3].recordBufferAllocationCount == batchCount * 3)
+  #expect(frames.allSatisfy { $0.recordCount == 3_212 })
+  #expect(
+    frames.allSatisfy {
+      $0.recordBytes == $0.recordCount
+        * MemoryLayout<CrowBodyVaneRecordGPU>.stride
+    }
+  )
+  #expect(frames.allSatisfy { $0.recordCapacityBytes >= $0.recordBytes })
+
+  for index in 0..<batchCount {
+    let first = frames[0].batches[index]
+    let reused = frames[3].batches[index]
+    #expect(first.topology == reused.topology)
+    #expect(first.recordBuffer === reused.recordBuffer)
+    #expect(first.indirectDrawBuffer === reused.indirectDrawBuffer)
+    let arguments = reused.indirectDrawBuffer.contents().bindMemory(
+      to: DrawPrimitivesIndirectArguments.self,
+      capacity: 1
+    ).pointee
+    #expect(arguments.vertexCount == UInt32(reused.vertexCount))
+    #expect(arguments.instanceCount == UInt32(reused.recordCount))
+    #expect(arguments.vertexStart == 0)
+    #expect(arguments.baseInstance == 0)
+  }
+}
+
 private func records(
   in batch: CrowBodyVaneGeometryBatchFrame
 ) -> [CrowBodyVaneRecordGPU] {

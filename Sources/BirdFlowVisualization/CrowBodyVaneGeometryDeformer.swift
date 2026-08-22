@@ -16,6 +16,7 @@ struct CrowBodyVaneTopology: Hashable, Comparable {
 struct CrowBodyVaneGeometryBatchFrame {
   let topology: CrowBodyVaneTopology
   let recordBuffer: MTLBuffer
+  let indirectDrawBuffer: MTLBuffer
   let recordCount: Int
   let auditOutputBuffer: MTLBuffer?
 
@@ -23,8 +24,12 @@ struct CrowBodyVaneGeometryBatchFrame {
 }
 
 struct CrowBodyVaneGeometryFrame {
+  let slot: Int
   let batches: [CrowBodyVaneGeometryBatchFrame]
   let recordCount: Int
+  let recordBytes: Int
+  let recordCapacityBytes: Int
+  let recordBufferAllocationCount: Int
   let expandedVertexCount: Int
   let auditReadbackReady: Bool
 }
@@ -34,12 +39,38 @@ struct CrowBodyVaneGeometryFrame {
 /// Production rasterization pulls compact temporal records directly. The
 /// compute pipeline invokes the same Metal helper only as a parity oracle.
 final class CrowBodyVaneGeometryDeformer {
+  private static let bufferedFrameCount = 3
+
   private let backend: VisualizationBackend
   private let auditPipeline: MTLComputePipelineState
+  private var recordBuffers: [[CrowBodyVaneTopology: MTLBuffer]]
+  private var indirectDrawBuffers: [[CrowBodyVaneTopology: MTLBuffer]]
+  private var nextSlot = 0
+  private(set) var recordBufferAllocationCount = 0
+
+  var retainedRecordCapacityBytes: Int {
+    recordBuffers.reduce(0) { total, slot in
+      total + slot.values.reduce(0) { $0 + $1.length }
+    }
+  }
+
+  var retainedIndirectDrawBytes: Int {
+    indirectDrawBuffers.reduce(0) { total, slot in
+      total + slot.values.reduce(0) { $0 + $1.length }
+    }
+  }
 
   init(backend: VisualizationBackend) throws {
     self.backend = backend
     auditPipeline = try backend.compute("probeCrowBodyVaneVertices")
+    recordBuffers = Array(
+      repeating: [CrowBodyVaneTopology: MTLBuffer](),
+      count: Self.bufferedFrameCount
+    )
+    indirectDrawBuffers = Array(
+      repeating: [CrowBodyVaneTopology: MTLBuffer](),
+      count: Self.bufferedFrameCount
+    )
   }
 
   func encode(
@@ -53,6 +84,8 @@ final class CrowBodyVaneGeometryDeformer {
     commandBuffer: MTLCommandBuffer,
     auditReadback: Bool = false
   ) throws -> CrowBodyVaneGeometryFrame {
+    let slot = nextSlot
+    nextSlot = (nextSlot + 1) % Self.bufferedFrameCount
     let grouped = CrowBodyVaneRecords.groupedRecords(
       currentBodyCenter: currentBodyCenter,
       previousBodyCenter: previousBodyCenter,
@@ -63,10 +96,56 @@ final class CrowBodyVaneGeometryDeformer {
       projectedPixelsPerMeter: projectedPixelsPerMeter
     )
     var batches: [CrowBodyVaneGeometryBatchFrame] = []
+    var recordBytes = 0
+    var recordCapacityBytes = 0
     var expandedVertexCount = 0
     for topology in grouped.keys.sorted() {
       guard let records = grouped[topology], !records.isEmpty else { continue }
-      let recordBuffer = try Self.sharedBuffer(values: records, backend: backend)
+      let requiredRecordBytes =
+        records.count
+        * MemoryLayout<CrowBodyVaneRecordGPU>.stride
+      let recordBuffer: MTLBuffer
+      if let existing = recordBuffers[slot][topology],
+        existing.length >= requiredRecordBytes
+      {
+        recordBuffer = existing
+      } else {
+        let created = try backend.buffer(length: requiredRecordBytes, shared: true)
+        created.label =
+          "Body vane records slot \(slot) \(topology.axialSections)x\(topology.widthSections)"
+        recordBuffers[slot][topology] = created
+        recordBufferAllocationCount += 1
+        recordBuffer = created
+      }
+      records.withUnsafeBytes { bytes in
+        if let baseAddress = bytes.baseAddress, !bytes.isEmpty {
+          memcpy(recordBuffer.contents(), baseAddress, bytes.count)
+        }
+      }
+      let indirectDrawBuffer: MTLBuffer
+      if let existing = indirectDrawBuffers[slot][topology] {
+        indirectDrawBuffer = existing
+      } else {
+        let created = try backend.buffer(
+          length: MemoryLayout<DrawPrimitivesIndirectArguments>.stride,
+          shared: true
+        )
+        created.label =
+          "Body vane indirect draw slot \(slot) \(topology.axialSections)x\(topology.widthSections)"
+        indirectDrawBuffers[slot][topology] = created
+        indirectDrawBuffer = created
+      }
+      let drawArguments = DrawPrimitivesIndirectArguments(
+        vertexCount: UInt32(topology.verticesPerInstance),
+        instanceCount: UInt32(records.count),
+        vertexStart: 0,
+        baseInstance: 0
+      )
+      _ = withUnsafeBytes(of: drawArguments) { bytes in
+        memcpy(indirectDrawBuffer.contents(), bytes.baseAddress!, bytes.count)
+      }
+      recordBytes += requiredRecordBytes
+      recordCapacityBytes += recordBuffer.length
       let batchVertexCount = topology.verticesPerInstance * records.count
       expandedVertexCount += batchVertexCount
       let auditOutput: MTLBuffer?
@@ -104,14 +183,19 @@ final class CrowBodyVaneGeometryDeformer {
         CrowBodyVaneGeometryBatchFrame(
           topology: topology,
           recordBuffer: recordBuffer,
+          indirectDrawBuffer: indirectDrawBuffer,
           recordCount: records.count,
           auditOutputBuffer: auditOutput
         )
       )
     }
     return CrowBodyVaneGeometryFrame(
+      slot: slot,
       batches: batches,
       recordCount: grouped.values.reduce(0) { $0 + $1.count },
+      recordBytes: recordBytes,
+      recordCapacityBytes: recordCapacityBytes,
+      recordBufferAllocationCount: recordBufferAllocationCount,
       expandedVertexCount: expandedVertexCount,
       auditReadbackReady: auditReadback
     )
@@ -149,22 +233,6 @@ final class CrowBodyVaneGeometryDeformer {
       capacity: count
     )
     return Array(UnsafeBufferPointer(start: pointer, count: count))
-  }
-
-  private static func sharedBuffer<T>(
-    values: [T],
-    backend: VisualizationBackend
-  ) throws -> MTLBuffer {
-    let buffer = try backend.buffer(
-      length: values.count * MemoryLayout<T>.stride,
-      shared: true
-    )
-    values.withUnsafeBytes { bytes in
-      if let baseAddress = bytes.baseAddress, !bytes.isEmpty {
-        memcpy(buffer.contents(), baseAddress, bytes.count)
-      }
-    }
-    return buffer
   }
 }
 

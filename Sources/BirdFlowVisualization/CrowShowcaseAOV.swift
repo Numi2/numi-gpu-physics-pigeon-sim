@@ -16,6 +16,14 @@ struct CrowShowcaseFrame {
   let reactiveMaskEnabled: Bool
   let gpuDurationMilliseconds: Double
   let allocatedRenderTargetBytes: Int
+  let bodyVaneRecordCount: Int
+  let bodyVaneBatchCount: Int
+  let bodyVaneRecordBytes: Int
+  let bodyVaneRetainedRecordCapacityBytes: Int
+  let bodyVaneRetainedIndirectDrawBytes: Int
+  let bodyVaneRecordBufferAllocationCount: Int
+  let bodyVaneRasterVertexInvocationCount: Int
+  let bodyVaneVertexGenerationMode: String
   let ventralBarbCandidateRecordCount: Int
   let ventralBarbuleCandidateRecordCount: Int
   let ventralBarbFrustumVisibleRecordCount: Int
@@ -364,6 +372,14 @@ struct CrowShowcaseFrame {
       allocatedRenderTargetBytes: allocatedRenderTargetBytes,
       nativeReferenceAllocatedRenderTargetBytes:
         nativeReference?.allocatedRenderTargetBytes,
+      bodyVaneRecordCount: bodyVaneRecordCount,
+      bodyVaneBatchCount: bodyVaneBatchCount,
+      bodyVaneRecordBytes: bodyVaneRecordBytes,
+      bodyVaneRetainedRecordCapacityBytes: bodyVaneRetainedRecordCapacityBytes,
+      bodyVaneRetainedIndirectDrawBytes: bodyVaneRetainedIndirectDrawBytes,
+      bodyVaneRecordBufferAllocationCount: bodyVaneRecordBufferAllocationCount,
+      bodyVaneRasterVertexInvocationCount: bodyVaneRasterVertexInvocationCount,
+      bodyVaneVertexGenerationMode: bodyVaneVertexGenerationMode,
       ventralBarbCandidateRecordCount: ventralBarbCandidateRecordCount,
       ventralBarbuleCandidateRecordCount: ventralBarbuleCandidateRecordCount,
       ventralBarbFrustumVisibleRecordCount: ventralBarbFrustumVisibleRecordCount,
@@ -1195,6 +1211,14 @@ struct CrowShowcaseAOVFrameAudit: Codable, Equatable {
   let nativeReferenceGPUDurationMilliseconds: Double?
   let allocatedRenderTargetBytes: Int
   let nativeReferenceAllocatedRenderTargetBytes: Int?
+  let bodyVaneRecordCount: Int
+  let bodyVaneBatchCount: Int
+  let bodyVaneRecordBytes: Int
+  let bodyVaneRetainedRecordCapacityBytes: Int
+  let bodyVaneRetainedIndirectDrawBytes: Int
+  let bodyVaneRecordBufferAllocationCount: Int
+  let bodyVaneRasterVertexInvocationCount: Int
+  let bodyVaneVertexGenerationMode: String
   let ventralBarbCandidateRecordCount: Int
   let ventralBarbuleCandidateRecordCount: Int
   let ventralBarbFrustumVisibleRecordCount: Int
@@ -1388,7 +1412,7 @@ struct CrowShowcaseAOVAuditReport: Codable, Equatable {
   let frames: [CrowShowcaseAOVFrameAudit]
 
   init(frames: [CrowShowcaseAOVFrameAudit]) {
-    schemaVersion = 18
+    schemaVersion = 19
     colorSpace = "scene-linear extended range; display output is tone mapped separately"
     motionConvention =
       "current pixel to previous pixel in upper-left-origin pixel units; MetalFX scale 1"
