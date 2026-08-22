@@ -451,14 +451,17 @@ inline CrowStandingRootPose crowStandingRootPose(
     CrowStandingRootPose result;
     if(featherClass==1u){
         float featherLength=0.155f+0.050f*fraction;
+        float primaryRootLateralOffset=0.042f-0.0024f
+            *fraction*fraction*fraction;
         result.root=center+float3(
             0.040f-0.132f*fraction,
-            side*0.042f,
+            side*primaryRootLateralOffset,
             0.032f-0.024f*fraction
         );
         float primaryTipLateralOffset=0.003f+0.001f*fraction
             -0.003f*fraction*fraction*fraction;
-        float lateralDirection=side*(primaryTipLateralOffset-0.042f)/featherLength;
+        float lateralDirection=side
+            *(primaryTipLateralOffset-primaryRootLateralOffset)/featherLength;
         float tipHeight=-0.068f*fraction*fraction+0.062f*fraction-0.018f;
         float verticalDirection=(tipHeight-(result.root.z-center.z))/featherLength;
         result.direction=safeNormalizeCrow(
@@ -471,7 +474,12 @@ inline CrowStandingRootPose crowStandingRootPose(
             float3(-1,0,0)
         );
         result.normal=safeNormalizeCrow(
-            float3(0.030f,side,0.20f+0.08f*fraction),
+            float3(
+                0.030f,
+                side,
+                0.20f+0.08f*fraction
+                    +0.18f*pow(sin(M_PI_F*fraction),2.0f)
+            ),
             float3(0,side,0)
         );
     }else if(featherClass==2u){
@@ -557,8 +565,18 @@ kernel void poseStandingCrowFeatherRoots(
     float fraction=float(binding.orderCountClassSide.x)/float(max(count-1u,1u));
     float lengthScale=featherClass==3u
         ?crowClosedRectrixLengthScale(abs(2.0f*fraction-1.0f)):1.0f;
-    float widthScale=featherClass==2u
-        ?1.0f-0.18f*pow(fraction,6.0f):1.0f;
+    float widthScale=1.0f;
+    if(featherClass==1u){
+        float exposureCoordinate=clamp((fraction-0.58f)/0.42f,0.0f,1.0f);
+        float exposure=sin(M_PI_F*exposureCoordinate);
+        float intermediateScale=1.0f+0.12f*exposure*exposure;
+        float terminalCoordinate=clamp((fraction-0.88f)/0.12f,0.0f,1.0f);
+        float terminalWeight=terminalCoordinate*terminalCoordinate
+            *(3.0f-2.0f*terminalCoordinate);
+        widthScale=intermediateScale*(1.0f-0.12f*terminalWeight);
+    }else if(featherClass==2u){
+        widthScale=1.0f-0.18f*pow(fraction,6.0f);
+    }
     state.currentPositionAndLength=float4(
         current.root,binding.morphology.x*lengthScale
     );

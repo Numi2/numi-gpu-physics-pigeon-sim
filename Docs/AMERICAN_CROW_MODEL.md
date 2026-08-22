@@ -387,6 +387,40 @@ notably smoother wing-layer transitions and under-tail/body continuity. The
 pass therefore qualifies a local optical handoff and rejects broad material
 tuning; it does not establish perceptual equivalence or a measured crow BSDF.
 
+The same rear-high identity trace assigns `18,548` of the `18,887` class-`1`
+pixels in its first inspected frame, and `18,723` in the held frame, to the
+single side-`1`, order-`9` primary. The ten-feather retained primary series was
+therefore present but optically collapsed into one terminal plate. The retained
+standing-only correction moves primary roots progressively inward with a cubic
+envelope capped at `2.4 mm`, while recomputing each direction so every accepted
+tip stays exact. Intermediate posterior primary widths receive a smooth
+`1.00...1.12` exposure envelope, the already broadened terminal width is
+reduced to `0.88x`, and a bounded mid-series crown-normal lift separates their
+overlap. Stable identity, feather count, asset length, tips, and flight
+morphology remain unchanged.
+
+At rear-high frame `2`, terminal-primary ownership falls from `18,723` to
+`14,199` pixels (`24.1628%`). Order `7` rises from `100` to `163` visible
+pixels and order `8` from `48` to `62`; the class-`4` covert shell rises from
+`26,764` to `29,234` pixels. Five-frame hole pixels, component counts, largest
+holes, and expected apertures remain exact; minimum SSIM is `0.994344`. At the
+previously unused opposite rear-quarter yaw/pitch `(-2.18, 0.18)` from
+`0.55 m`, terminal ownership at frame `2` falls from `16,627` to `12,665`
+(`23.8287%`). Its hole pixels `28,23,33,38,28`, components `7,6,9,10,7`,
+largest holes `19,15,19,25,19`, and expected apertures
+`2746,2557,2734,2979,2746` are exact; minimum SSIM is `0.994816`. The inspected
+simulated frame keeps a continuous wing-body and tail silhouette while the
+covert courses reclaim more of the folded surface.
+
+The canonical five-frame takeoff A/B keeps hole pixels
+`16,18,1,1,1`, components `10,15,1,1,1`, largest holes `4,2,1,1,1`, and zero
+expected apertures exact. Minimum SSIM is `0.999305`; frame `2` reaches
+`0.999954`, and frames `3...4` are pixel-exact because live flight geometry is
+unchanged. The first transition frame exposes one additional persistent owner
+(`372` versus `371`) without a new gap. These gates qualify a bounded
+standing-to-flight imbrication handoff, not measured folded-primary stacking or
+perceptual realism.
+
 At showcase material quality, body-feather anisotropy now resolves two bounded
 optical barb banks around a stable feather-local axis. The lobe pair follows
 the same identity and axial phase as its vane while body-class transverse

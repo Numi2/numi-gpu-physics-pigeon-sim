@@ -189,6 +189,17 @@ mean contrast changes `+1.3609%`. The five-frame beauty minimum SSIM is
 apart from duration, demonstrating that the class-`10` tag does not alter
 occluded geometry or leak into other tracts. These statistics qualify
 localization and bounded optical effect, not perceptual realism.
+The persistent-identity ledger at rear-high frame `2` separately reveals that
+one side-`1`, order-`9` primary owns `18,723 / 18,887` class-`1` pixels. After
+the standing-only imbrication correction it owns `14,199` (`-24.1628%`), while
+orders `7/8` rise from `100/48` to `163/62` pixels and class `4` gains `2,470`
+pixels. Every hole/component/largest-hole/aperture count remains exact over the
+five frames. At new opposite rear-quarter yaw/pitch `(-2.18, 0.18)`, the same
+topology fields are exact and minimum SSIM is `0.994816`. The takeoff A/B is
+topology-exact, has minimum SSIM `0.999305`, and becomes pixel-exact in frames
+`3...4`, proving the standing morphology does not leak into sustained flight.
+These records diagnose raster ownership and temporal release; they do not
+measure biological primary overlap.
 Schema `23` separately records projected-size barbule candidates,
 frustum-visible and retained detailed owners, procedural barbule vertex count,
 and the exact number of identity pixels won by geometry kind `4`. This

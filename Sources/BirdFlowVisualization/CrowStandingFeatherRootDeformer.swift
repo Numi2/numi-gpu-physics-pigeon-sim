@@ -176,11 +176,13 @@ final class CrowStandingFeatherRootDeformer: CrowFeatherRootDeforming {
         ) / CrowClosedTailAnatomy.rectrixLengthMeters
         : 1
       let widthScale =
-        featherClass == 2
-        ? CrowFoldedWingAnatomy.secondaryStandingWidthScale(
-          fraction: fraction
-        )
-        : 1
+        featherClass == 1
+        ? CrowFoldedWingAnatomy.primaryStandingWidthScale(fraction: fraction)
+        : (featherClass == 2
+          ? CrowFoldedWingAnatomy.secondaryStandingWidthScale(
+            fraction: fraction
+          )
+          : 1)
       var previousMorphology = binding.morphology
       previousMorphology.x *= lengthScale
       previousMorphology.y *= widthScale

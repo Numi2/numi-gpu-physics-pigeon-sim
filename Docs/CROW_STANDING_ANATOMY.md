@@ -763,6 +763,35 @@ smoothness and under-tail/body continuity remain open realism work. This is a
 simulated local optical correction, not a real-feather anatomical or material
 measurement.
 
+That rear-high AOV also exposes a distinct folded-wing ownership failure. At
+frame `2`, the side-`1`, order-`9` primary owns `18,723 / 18,887` class-`1`
+pixels; the remaining retained primaries contribute only thin fragments. The
+stack therefore reads as one large vane even though all ten stable roots and
+identities execute. Instead of adding a display-space seam, the retained pass
+seats posterior primary roots progressively inward by at most `2.4 mm`, keeps
+their tips fixed, gives intermediate posterior widths a maximum `1.12x`
+standing exposure, reduces the terminal standing width to `0.88x`, and raises
+only intermediate crowns with a smooth series envelope. The takeoff path
+inherits that folded state and naturally retires it as the live wing deploys;
+flight morphology is exact.
+
+At the same rear-high gate, order-`9` ownership falls `24.1628%` to `14,199`
+pixels, order `7` rises from `100` to `163`, order `8` from `48` to `62`, and
+class-`4` folded-coverts gain `2,470` visible pixels. The five-frame enclosed
+hole, component, largest-hole, and expected-aperture sequences are exact. At a
+new opposite rear-quarter `(-2.18, 0.18)`, distance `0.55 m`, those sequences
+are respectively `28,23,33,38,28`, `7,6,9,10,7`, `19,15,19,25,19`, and
+`2746,2557,2734,2979,2746`, all exact against the predecessor. Minimum SSIM is
+`0.994816`; inspection shows the overlying covert courses reclaiming the flank
+without opening the folded wing, tail, or leg silhouette.
+
+The five-frame native takeoff check preserves hole pixels
+`16,18,1,1,1`, components `10,15,1,1,1`, largest holes `4,2,1,1,1`, and zero
+expected apertures. Its minimum SSIM is `0.999305`; later deployed frames
+`3...4` are pixel-exact. The broad exposed primary region and low feather-edge
+contrast remain visible limitations. This is estimated imbrication geometry,
+not measured American-crow primary stacking.
+
 The next body-gap trace separated an actual femoral insertion seam from the
 larger intentional spaces bounded by class-`11` retracting toes. At high-side
 phase `0.3125`, the temporal identity AOV mapped the nine-pixel class-`0`/

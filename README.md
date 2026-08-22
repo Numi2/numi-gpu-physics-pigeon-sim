@@ -362,6 +362,20 @@ unmodified back, wing, tail, and planted silhouette. Global gular darkening was
 rejected because it raised the local maximum boundary jump. This is a bounded
 simulated optical handoff, not proof that the collar is perceptually absent or
 that feather reflectance matches a real crow.
+The following folded-primary audit found that one posterior primary owned
+`18,723 / 18,887` class-`1` pixels at the rear-high held frame, making ten
+retained feathers read as one plate. Standing now seats primary roots inward by
+at most `2.4 mm`, lifts only intermediate crowns, gives the penultimate courses
+a bounded width envelope, and reduces the already broadened terminal width by
+`12%`; every primary tip and the flight morphology remain fixed. Terminal
+ownership falls `24.2%` to `14,199` pixels while the overlying class-`4` covert
+shell gains `2,470` pixels. Both the rear-high and new opposite rear-quarter
+five-frame gates preserve exact hole/component/largest-hole/aperture series.
+The latter has minimum SSIM `0.994816` and inspection shows no new wing-body or
+tail gap. A five-frame takeoff A/B preserves those topology series, reaches
+pixel-exact flight by frame `3`, and has minimum SSIM `0.999305`. This is
+simulated imbrication progress; the remaining broad primary surface and
+feather-edge contrast are still open realism targets.
 The first projected-size handoff now consumes those same records when an
 individual feather reaches `480` final-output pixels. Each eligible feather
 then resolves `72` identity-varied barb pairs per side as four connected,

@@ -257,7 +257,17 @@ func standingCrowFeatherRootsMatchMetalReference() throws {
       fraction: 1
     )
     #expect(leftRear.rootOffset.x < leftFront.rootOffset.x)
-    #expect(abs(leftRear.rootOffset.y - leftFront.rootOffset.y) < 1e-7)
+    if featherClass == 1 {
+      #expect(leftRear.rootOffset.y < leftFront.rootOffset.y)
+      #expect(
+        abs(
+          leftFront.rootOffset.y - leftRear.rootOffset.y
+            - CrowFoldedWingAnatomy.posteriorPrimaryRootInsetMeters
+        ) < 1e-7
+      )
+    } else {
+      #expect(abs(leftRear.rootOffset.y - leftFront.rootOffset.y) < 1e-7)
+    }
     #expect(leftRear.rootOffset.z < leftFront.rootOffset.z)
     #expect(leftRear.direction.y < 0 && leftFront.direction.y < 0)
     #expect(leftRear.direction.z < 0 && leftFront.direction.z < 0)
@@ -288,7 +298,20 @@ func standingCrowFeatherRootsMatchMetalReference() throws {
     .secondaryTipLateralOffsetMeters(fraction: 0)
   let posteriorSecondaryTipOffset = CrowFoldedWingAnatomy
     .secondaryTipLateralOffsetMeters(fraction: 1)
-  #expect(abs(CrowFoldedWingAnatomy.primaryRootLateralOffsetMeters - 0.042) < 1e-7)
+  #expect(
+    abs(CrowFoldedWingAnatomy.anteriorPrimaryRootLateralOffsetMeters - 0.042)
+      < 1e-7
+  )
+  #expect(abs(
+    CrowFoldedWingAnatomy.primaryRootLateralOffsetMeters(fraction: 0) - 0.042
+  ) < 1e-7)
+  #expect(abs(
+    CrowFoldedWingAnatomy.primaryRootLateralOffsetMeters(fraction: 1) - 0.0396
+  ) < 1e-7)
+  #expect(
+    CrowFoldedWingAnatomy.primaryRootLateralOffsetMeters(fraction: 8.0 / 9.0)
+      > CrowFoldedWingAnatomy.primaryRootLateralOffsetMeters(fraction: 1)
+  )
   #expect(abs(anteriorPrimaryTipOffset - 0.003) < 1e-7)
   #expect(abs(posteriorPrimaryTipOffset - 0.001) < 1e-7)
   #expect(abs(anteriorSecondaryTipOffset - 0.027) < 1e-7)
@@ -307,6 +330,25 @@ func standingCrowFeatherRootsMatchMetalReference() throws {
   )
   #expect(abs(
     CrowFoldedWingAnatomy.secondaryStandingWidthScale(fraction: 1) - 0.82
+  ) < 1e-7)
+  #expect(CrowFoldedWingAnatomy.primaryStandingWidthScale(fraction: 0) == 1)
+  #expect(abs(
+    CrowFoldedWingAnatomy.primaryStandingWidthScale(fraction: 1) - 0.88
+  ) < 1e-7)
+  #expect(
+    CrowFoldedWingAnatomy.primaryStandingWidthScale(fraction: 7.0 / 9.0)
+      > 1.11
+  )
+  #expect(
+    CrowFoldedWingAnatomy.primaryStandingWidthScale(fraction: 8.0 / 9.0)
+      > 1.05
+  )
+  #expect(CrowFoldedWingAnatomy.primaryStackNormalLift(fraction: 0) == 0)
+  #expect(abs(
+    CrowFoldedWingAnatomy.primaryStackNormalLift(fraction: 0.5) - 0.18
+  ) < 1e-7)
+  #expect(abs(
+    CrowFoldedWingAnatomy.primaryStackNormalLift(fraction: 1)
   ) < 1e-7)
   #expect(
     CrowFoldedWingAnatomy.primaryTipLateralOffsetMeters(fraction: 7.0 / 9.0)

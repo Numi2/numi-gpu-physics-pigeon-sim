@@ -12,7 +12,8 @@ struct CrowFoldedFeatherPose: Equatable {
 /// flank. This avoids collapsing every vane into one planar slab while keeping
 /// the retained feather lengths and stable identities from the reality asset.
 enum CrowFoldedWingAnatomy {
-  static let primaryRootLateralOffsetMeters: Float = 0.042
+  static let anteriorPrimaryRootLateralOffsetMeters: Float = 0.042
+  static let posteriorPrimaryRootInsetMeters: Float = 0.0024
 
   static func pose(
     featherClass: UInt32,
@@ -26,15 +27,18 @@ enum CrowFoldedWingAnatomy {
     switch featherClass {
     case 1:
       let length = 0.155 + 0.050 * fraction
+      let rootLateralOffset = primaryRootLateralOffsetMeters(
+        fraction: fraction
+      )
       rootOffset = SIMD3<Float>(
         0.040 - 0.132 * fraction,
-        side * primaryRootLateralOffsetMeters,
+        side * rootLateralOffset,
         0.032 - 0.024 * fraction
       )
       let lateralDirection =
         side
         * (primaryTipLateralOffsetMeters(fraction: fraction)
-          - primaryRootLateralOffsetMeters)
+          - rootLateralOffset)
         / length
       let tipHeight = -0.068 * fraction * fraction + 0.062 * fraction - 0.018
       let verticalDirection = (tipHeight - rootOffset.z) / length
@@ -51,7 +55,11 @@ enum CrowFoldedWingAnatomy {
         fallback: SIMD3<Float>(-1, 0, 0)
       )
       normal = safeNormalize(
-        SIMD3<Float>(0.030, side, 0.20 + 0.08 * fraction),
+        SIMD3<Float>(
+          0.030,
+          side,
+          0.20 + 0.08 * fraction + primaryStackNormalLift(fraction: fraction)
+        ),
         fallback: SIMD3<Float>(0, side, 0)
       )
     case 2:
@@ -103,9 +111,40 @@ enum CrowFoldedWingAnatomy {
 
   /// Primaries settle medially over the outer rectrix, with posterior vanes
   /// carrying a little farther inward to preserve overlap through their taper.
+  static func primaryRootLateralOffsetMeters(
+    fraction rawFraction: Float
+  ) -> Float {
+    let fraction = min(max(rawFraction, 0), 1)
+    return anteriorPrimaryRootLateralOffsetMeters
+      - posteriorPrimaryRootInsetMeters * fraction * fraction * fraction
+  }
+
   static func primaryTipLateralOffsetMeters(fraction rawFraction: Float) -> Float {
     let fraction = min(max(rawFraction, 0), 1)
     return 0.003 + 0.001 * fraction - 0.003 * fraction * fraction * fraction
+  }
+
+  /// Redistributes the standing primary stack away from a single terminal
+  /// plate. Intermediate posterior vanes retain more exposed overlap while
+  /// the already broadened terminal vane gives back a bounded twelve percent.
+  /// Flight morphology remains unchanged.
+  static func primaryStandingWidthScale(fraction rawFraction: Float) -> Float {
+    let fraction = min(max(rawFraction, 0), 1)
+    let exposureCoordinate = min(max((fraction - 0.58) / 0.42, 0), 1)
+    let exposure = sin(Float.pi * exposureCoordinate)
+    let intermediateScale = 1 + 0.12 * exposure * exposure
+    let terminalCoordinate = min(max((fraction - 0.88) / 0.12, 0), 1)
+    let terminalWeight = terminalCoordinate * terminalCoordinate
+      * (3 - 2 * terminalCoordinate)
+    return intermediateScale * (1 - 0.12 * terminalWeight)
+  }
+
+  /// Raises the intermediate primary crowns between fixed roots and tips so
+  /// their exposed overlap edges remain distinct from the terminal vane.
+  static func primaryStackNormalLift(fraction rawFraction: Float) -> Float {
+    let fraction = min(max(rawFraction, 0), 1)
+    let envelope = sin(Float.pi * fraction)
+    return 0.18 * envelope * envelope
   }
 
   /// Posterior secondaries settle inward over the terminal primary instead of
