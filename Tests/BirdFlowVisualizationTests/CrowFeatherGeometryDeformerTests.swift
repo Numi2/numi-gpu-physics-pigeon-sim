@@ -169,6 +169,68 @@ func crowFeatherTemplateGPUDeformationMatchesCPUReference() throws {
     simd_distance(rachisSpan.min(by: { $0.x < $1.x })!, rachisSpan.max(by: { $0.x < $1.x })!)
       > 0.10
   )
+  let resolvedRectrixBarbs = resolvedVertices.filter {
+    ($0.identity.w & 255) == 3 && abs($0.parameters.w - 2) < 1e-7
+  }
+  #expect(resolvedRectrixBarbs.count == 12 * (20 * 2 * 6))
+  #expect(
+    resolvedRectrixBarbs.allSatisfy {
+      $0.parameters.x >= 0.10 && $0.parameters.x <= 0.95 + 1e-6
+        && abs($0.parameters.y) <= 0.94 + 1e-6
+    }
+  )
+  #expect(
+    resolvedRectrixBarbs.allSatisfy { vertex in
+      guard let root = movingRoots.first(where: { $0.identity == vertex.identity }) else {
+        return false
+      }
+      return simd_distance(
+        SIMD3<Float>(vertex.position.x, vertex.position.y, vertex.position.z),
+        SIMD3<Float>(
+          root.currentPositionAndLength.x + renderOffset.x,
+          root.currentPositionAndLength.y + renderOffset.y,
+          root.currentPositionAndLength.z + renderOffset.z
+        )
+      ) > 0.01
+    }
+  )
+  let resolvedRectrixRachis = resolvedVertices.filter {
+    ($0.identity.w & 255) == 3 && abs($0.parameters.w - 1) < 1e-7
+  }
+  #expect(resolvedRectrixRachis.count == 12 * 24 * 6)
+  #expect(
+    resolvedRectrixRachis.allSatisfy { vertex in
+      guard let root = movingRoots.first(where: { $0.identity == vertex.identity }) else {
+        return false
+      }
+      return simd_distance(
+        SIMD3<Float>(vertex.position.x, vertex.position.y, vertex.position.z),
+        SIMD3<Float>(
+          root.currentPositionAndLength.x + renderOffset.x,
+          root.currentPositionAndLength.y + renderOffset.y,
+          root.currentPositionAndLength.z + renderOffset.z
+        )
+      ) < 1e-7
+    }
+  )
+  let unresolvedRectrixDetail = movingVertices.filter {
+    ($0.identity.w & 255) == 3 && $0.parameters.w > 0.5
+  }
+  #expect(
+    unresolvedRectrixDetail.allSatisfy { vertex in
+      guard let root = movingRoots.first(where: { $0.identity == vertex.identity }) else {
+        return false
+      }
+      return simd_distance(
+        SIMD3<Float>(vertex.position.x, vertex.position.y, vertex.position.z),
+        SIMD3<Float>(
+          root.currentPositionAndLength.x + renderOffset.x,
+          root.currentPositionAndLength.y + renderOffset.y,
+          root.currentPositionAndLength.z + renderOffset.z
+        )
+      ) < 1e-7
+    }
+  )
   #expect(Set(movingVertices.map { $0.identity.y }).count == 54)
   #expect(movingVertices.allSatisfy { $0.parameters.x >= 0 && $0.parameters.x <= 1 })
   #expect(movingVertices.contains { $0.parameters.y == -1 })

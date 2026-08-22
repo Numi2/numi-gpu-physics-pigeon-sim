@@ -124,6 +124,21 @@ changing feather identity.
 The full tier preserves the established root-major submission order exactly;
 only reduced tiers switch to the triangle-major density prefixes.
 
+The full tier now also activates the retained aggregate-barb ribbons for all
+`12` persistent rectrices: `20` bilateral barb pairs per feather, or `2,880`
+triangle vertices, without allocating a second stream or changing stable
+identity. Lower coverage collapses them to the root. Rectrix rachis ribbons
+remain suppressed because a tested depth-owned shaft pass produced long
+parallel wires across the closed tail; the accepted pass depth-orders only the
+short contained barbs over their owning vane. At a previously unused elevated
+rear-quarter camera `(yaw 2.64, pitch 0.42, distance 0.48 m)`, the matched
+`1200 x 675` A/B keeps `216,275` active pixels, `3/3/1` enclosed
+pixels/components/largest component, zero expected lower-body aperture, and
+zero rectrix-to-rectrix exterior slots. Class-`3` maximum scene-linear
+luminance remains `0.105038`, while mean same-class neighbour difference rises
+from `0.001235` to `0.001502`. The count and placement are estimated rendering
+mesostructure, not measured American-crow barb anatomy.
+
 Deployment now settles only the chord-`3` live covert course into the proximal
 wing surface. Its camber and dorsal clearance blend from the unchanged folded
 state to `48%` at the root and recover smoothly to `100%` by span station `12`.

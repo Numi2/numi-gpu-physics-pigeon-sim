@@ -1489,10 +1489,12 @@ kernel void deformCrowFeatherTemplates(
     uint featherClass=packedIdentity&255u;
     bool isUnderwingCovert=featherClass==12u||featherClass==13u;
     bool isLiveCovert=crowIsLiveCovert(featherClass);
+    bool isRectrixBarb=featherClass==3u&&parameter.z>1.5f;
     bool temporallyVariableMorphology=isLiveCovert;
     bool detailEnabled=parameter.z<0.5f
         ||(uniforms.renderOffsetAndDetailScale.w>=parameter.z
-            &&(featherClass==1u||featherClass==2u||isLiveCovert));
+            &&(featherClass==1u||featherClass==2u||isLiveCovert
+                ||isRectrixBarb));
     float3 current=detailEnabled
         ?crowFeatherDetailPosition(
             root.currentPositionAndLength.xyz,currentDirection,currentNormal,
@@ -2960,6 +2962,19 @@ inline float4 crowSurfaceBiasedClipPosition(float4 clipPosition,uint featherClas
     return clipPosition;
 }
 
+// Retained barb ribbons sit only a fraction of a millimetre above the owning
+// vane and can quantize to the same depth sample. At close-detail LOD, let
+// rectrix microstructure own that coincident sample without moving any
+// world-space vertex or altering the tail silhouette.
+inline float4 crowRectrixDetailBiasedClipPosition(
+    float4 clipPosition,uint featherClass,float detailKind){
+    clipPosition=crowSurfaceBiasedClipPosition(clipPosition,featherClass);
+    if(featherClass==3u&&detailKind>1.5f){
+        clipPosition.z-=2.0e-5f*clipPosition.w;
+    }
+    return clipPosition;
+}
+
 vertex CrowRasterVertex crowSurfaceAOVVertex(
     device const CrowSurfaceTemporalVertexGPU* vertices [[buffer(0)]],
     constant CrowTemporalCameraUniforms& camera [[buffer(1)]],
@@ -2989,11 +3004,12 @@ vertex CrowRasterVertex crowFeatherAOVVertex(
     CrowFeatherVertexGPU source=vertices[vid];
     CrowRasterVertex out;
     uint featherClass=source.identity.w&255u;
-    out.position=crowSurfaceBiasedClipPosition(
-        camera.viewProjection*source.position,featherClass
+    out.position=crowRectrixDetailBiasedClipPosition(
+        camera.viewProjection*source.position,featherClass,source.parameters.w
     );
-    out.previousClipPosition=crowSurfaceBiasedClipPosition(
-        camera.previousViewProjection*source.previousPosition,featherClass
+    out.previousClipPosition=crowRectrixDetailBiasedClipPosition(
+        camera.previousViewProjection*source.previousPosition,featherClass,
+        source.parameters.w
     );
     out.world=source.position.xyz;
     out.normal=normalize(source.normal.xyz);

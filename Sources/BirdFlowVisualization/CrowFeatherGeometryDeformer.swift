@@ -264,6 +264,8 @@ final class CrowFeatherGeometryDeformer {
         let featherClass = packedIdentity & 255
         let isUnderwingCovert = featherClass == 12 || featherClass == 13
         let isLiveCovert = CrowCovertVaneAnatomy.isLiveCovertClass(featherClass)
+        let isRectrixBarb =
+          featherClass == 3 && detailKind == TemplateKind.barb.rawValue
         let temporallyVariableMorphology = isLiveCovert
         let material: Float =
           featherClass == 1
@@ -278,7 +280,8 @@ final class CrowFeatherGeometryDeformer {
         let detailEnabled =
           detailKind == TemplateKind.vane.rawValue
           || (detailScale >= detailKind
-            && (featherClass == 1 || featherClass == 2 || isLiveCovert))
+            && (featherClass == 1 || featherClass == 2 || isLiveCovert
+              || isRectrixBarb))
         let currentPosition =
           detailEnabled
           ? Self.detailPosition(

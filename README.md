@@ -149,6 +149,17 @@ component fall `47/30/5 -> 4/2/3`; rectrix-to-rectrix exterior slots fall from
 `7` runs and `10` pixels to one `1`-pixel run. A fresh elevated rear-starboard
 view retains individual layers with `2/1/2` enclosed metrics and zero rectrix
 slots. No reference image is rendered or stored.
+At the full close-detail tier, those same `12` retained rectrices now expose
+`2,880` contained aggregate-barb vertices from their already allocated Metal
+template. The barbs remain collapsed at lower coverage and their rachis ribbons
+remain suppressed: an explicit-shaft candidate was rejected because it formed
+long parallel wires over the closed tail. In a new `1200 x 675` elevated
+rear-quarter A/B, active coverage stays `216,275` pixels, enclosed holes stay
+`3` one-pixel components, the expected lower-body aperture stays zero, and
+rectrix-to-rectrix exterior slots stay zero. The accepted barbs raise local
+same-class luminance variation from `0.001235` to `0.001502` without changing
+the `0.105038` class maximum. This is simulated close-range mesostructure, not
+a measured barb count or a perceptual-realism qualification.
 The exact identity AOV now also reports visible and fully covered pixels for
 every persistent primary, secondary, and rectrix as schema `18`. The same
 report retains the longest exterior-connected row/column slots with exact

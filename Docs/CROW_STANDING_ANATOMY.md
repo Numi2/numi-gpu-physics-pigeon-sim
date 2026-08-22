@@ -185,6 +185,21 @@ zero expected lower-body aperture, and zero rectrix-to-rectrix slots without
 forming a broad tail plate. Stable identity, length graduation, vane width,
 root depth, and open-flight targets remain exact. No source image enters the
 renderer or repository.
+The retained full-detail tier now resolves `20` bilateral aggregate-barb pairs
+inside each of the `12` rectrix vanes (`2,880` triangle vertices total), while
+lower coverage collapses them to the root. A first candidate also exposed the
+retained rachis ribbons, but the close rear-quarter render showed long parallel
+shaft wires and was rejected. The accepted path keeps those shafts suppressed
+and gives only the short barb ribbons deterministic depth ownership over their
+own vane; it does not displace world-space geometry. At a new elevated
+rear-quarter view `(2.64,0.42)` from `0.48 m`, the `1200 x 675` matched A/B
+retains exactly `216,275` active pixels, `3/3/1` enclosed
+pixels/components/largest component, zero expected aperture, and zero
+rectrix-to-rectrix exterior slots. Class-`3` peak luminance is unchanged at
+`0.105038`; same-class neighbour variation changes from `0.001235` to
+`0.001502`, localizing the added structure without a new bright shaft or tail
+plate. These are deterministic simulated-raster checks, not measured barb
+counts or proof of perceptual equivalence.
 This ordering follows the general folded-tail overlap described by
 [Clark (2010)](https://academic.oup.com/auk/article/127/1/44/5148514); only the
 ordering transfers here. All vane asymmetry, width, crown, and camber values are
@@ -953,9 +968,9 @@ simulated terminal ownership and raster continuity, not measured rectrix
 morphology or perceptual realism.
 
 The canonical README sequence is fully simulated and contains the native hold,
-transition, and flight path: `800 x 450`, `72` frames at `24 fps`, `7,855,272`
+transition, and flight path: `800 x 450`, `72` frames at `24 fps`, `7,855,116`
 bytes, SHA-256
-`4761bf6abe82df20ed96041c1c0c71c7f0047d503da2e0da84bcbc3083d025c1`.
+`20f931d68a7fcfd6c79bc7a1995b9dee1d4081df7633433ae74a37eb3d22c9a0`.
 The audited stage PNGs at frames `0`, `35`, and `71` are distinct and retain
 the simulated hold, geometric deployment, and sustained-flight states.
 
