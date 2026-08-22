@@ -219,6 +219,43 @@ func femoralPelvicAxillaryHandoffIsCompactAndBilateral() {
   #expect(CrowFemoralPlumage.insertionSeamLengthScale(row: 5, course: 8) == 1)
 }
 
+@Test("coarse femoral insertion roof is bounded to the AOV owners")
+func coarseFemoralInsertionRoofIsBounded() {
+  #expect(CrowFemoralPlumage.coarseInsertionSeamMaximumWidthScale == 1.52)
+  #expect(CrowFemoralPlumage.coarseInsertionSeamWidthScale(row: 1, course: 6) == 1.52)
+  #expect(CrowFemoralPlumage.coarseInsertionSeamWidthScale(row: 2, course: 6) == 1.52)
+  #expect(
+    abs(CrowFemoralPlumage.coarseInsertionSeamWidthScale(row: 0, course: 6) - 1.26)
+      < 1e-6
+  )
+  #expect(
+    abs(CrowFemoralPlumage.coarseInsertionSeamWidthScale(row: 3, course: 6) - 1.26)
+      < 1e-6
+  )
+  #expect(CrowFemoralPlumage.coarseInsertionSeamWidthScale(row: 4, course: 6) == 1)
+  #expect(CrowFemoralPlumage.coarseInsertionSeamWidthScale(row: 2, course: 5) == 1)
+  #expect(CrowFemoralPlumage.coarseInsertionSeamLengthScale(row: 1, course: 6) == 1.06)
+  #expect(CrowFemoralPlumage.coarseInsertionSeamLengthScale(row: 2, course: 6) == 1.06)
+  #expect(
+    abs(CrowFemoralPlumage.coarseInsertionSeamLengthScale(row: 0, course: 6) - 1.03)
+      < 1e-6
+  )
+
+  let coarse = CrowFemoralPlumage.visibleSamples(
+    bodyCenter: .zero,
+    hip: SIMD3<Float>(-0.025, 0.035, -0.060),
+    hock: SIMD3<Float>(-0.014, 0.040, -0.111),
+    projectedPixelsPerMeter: 1_000
+  )
+  let full = coarse.first { $0.row == 1 && $0.course == 6 }!
+  let taper = coarse.first { $0.row == 0 && $0.course == 6 }!
+  let untouched = coarse.first { $0.row == 2 && $0.course == 5 }!
+  #expect(full.maximumWidthMeters > taper.maximumWidthMeters)
+  #expect(taper.maximumWidthMeters > untouched.maximumWidthMeters)
+  #expect(full.maximumWidthMeters < 0.0168)
+  #expect(simd_distance(full.root, full.tip) < 0.052)
+}
+
 @Test("femoral plumage resolves shafts and barbs with output coverage")
 func femoralPlumageResolvesMesostructure() {
   let feathers = CrowFemoralPlumage.samples(

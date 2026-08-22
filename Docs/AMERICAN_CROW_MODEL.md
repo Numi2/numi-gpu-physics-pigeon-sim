@@ -413,9 +413,10 @@ largest hole improves `4 -> 2` pixels. Components change `25 -> 26`, expected
 lower-body aperture remains zero, and full-frame SSIM is `0.999815`. The
 amplified A/B difference is localized to distal dorsal/body feather edges.
 These bounds are estimated morphology, not measured American-crow tip profiles.
-Body vanes remain CPU-tessellated today; storing the scalars per stable feather
-keeps the envelope ready for a future retained Metal implementation without an
-identity or topology change.
+The stable scalars now live in the retained Metal morphology inventory; Metal
+reconstructs current and previous vane pose from the compact per-frame body,
+deployment, and cervical-transform inputs without changing identity or
+topology.
 
 The estimated femoral field keeps its `15 x 18` body-surface-rooted inventory
 (`270` vanes per side) and all root and joint coordinates. A temporal-identity
@@ -427,6 +428,20 @@ closes the nine-pixel body/femoral opening without adding a row or covering the
 intentional negative space between articulated digits. It is a presentation
 continuity estimate, not measured American-crow femoral dimensions or contact
 mechanics.
+
+At the five-by-seven distance LOD, a rear-right temporal-identity trace at
+yaw/pitch `(2.28, 0.38)` resolves the residual pelvic insertion owners to
+anterior course `6`: rows `1...2` receive a `1.52x` width and `1.06x` length
+ceiling, while rows `0` and `3` taper those values halfway back to unity. All
+other coarse rows and courses remain exact. The existing hip-to-hock tube now
+also carries femoral surface class `7`, making its AOV ownership truthful.
+Across five standing-through-flight frames, enclosed pixels/components improve
+from `46/28` to `38/27`; the targeted `5`- and `3`-pixel openings become `2`
+and `0` pixels. The `654`-pixel planted inter-leg aperture is exact, later
+expected-aperture counts remain zero, and the unrelated `10`-pixel flight
+wing/pedal component is unchanged. Minimum full-frame beauty SSIM is
+`0.999519`. This is a topology-stable presentation estimate, not measured
+American-crow thigh plumage.
 
 ## Native Metal capture
 

@@ -393,6 +393,17 @@ components to `135` in `73`, while the zero expected-aperture count and
 `33`-pixel worst articulated-foot hole remain unchanged. Underbody and
 front-starboard hole totals remain exact. Feather roots, hip/hock/ankle/digit
 coordinates, inventory, and identities do not change.
+The five-by-seven distance LOD now carries that same continuity obligation.
+Rear-right identity tracing at yaw/pitch `(2.28, 0.38)` localizes its remaining
+insertion slit to anterior course `6`, specifically rows `1...2` with tapered
+neighbors `0` and `3`; the hip-to-hock underlayer is also labeled with its
+actual femoral surface class. A bounded `1.52x` maximum width and `1.06x`
+maximum tip-length roof reduces five-frame enclosed pixels/components from
+`46/28` to `38/27`. The two targeted largest openings change `5 -> 2` and
+`3 -> 0` pixels, while the first frame's intentional `654`-pixel planted
+inter-leg aperture remains exact. The unrelated flight wing/pedal maximum
+remains `10` pixels. Minimum full-frame beauty SSIM is `0.999519`; this is an
+estimated coarse presentation overlap, not measured anatomy.
 A locked
 `2,157`-vertex, `3,968`-triangle estimated-hybrid surface now also passes the
 live Apple-Metal geometry and production TRT moving-boundary coupling gates.

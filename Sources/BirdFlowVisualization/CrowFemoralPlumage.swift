@@ -49,6 +49,7 @@ enum CrowFemoralPlumage {
   /// without adding a new row, moving roots, or changing leg articulation.
   static let insertionSeamMaximumWidthScale: Float = 1.36
   static let insertionSeamMaximumLengthScale: Float = 1.06
+  static let coarseInsertionSeamMaximumWidthScale: Float = 1.52
 
   static func visibleSamples(
     bodyCenter: SIMD3<Float>,
@@ -304,9 +305,12 @@ enum CrowFemoralPlumage {
           0.105 + 0.165 * courseFraction
           + (row.isMultiple(of: 2) ? 0 : 0.012)
         let tipRadius = 0.0132 - 0.0015 * courseFraction
-        let tip = mix(hip, hock, tipFraction) + tipRadius * radial
+        let unscaledTip = mix(hip, hock, tipFraction) + tipRadius * radial
+        let tip = root + coarseInsertionSeamLengthScale(row: row, course: course)
+          * (unscaledTip - root)
         let length = simd_distance(root, tip)
         let maximumWidth = min(0.011, max(0.006, 0.30 * length))
+          * coarseInsertionSeamWidthScale(row: row, course: course)
         result.append(
           CrowFemoralPlumageFeather(
             side: side,
@@ -333,6 +337,29 @@ enum CrowFemoralPlumage {
       }
     }
     return result
+  }
+
+  /// The five-by-seven distance LOD retains the same visible insertion roof as
+  /// the dense tract. Its anterior lateral course contains the exact owners
+  /// adjacent to the rear-quarter pelvic slit; the neighboring rows taper the
+  /// expansion instead of creating a broad cuff around the upper leg.
+  static func coarseInsertionSeamWidthScale(row: Int, course: Int) -> Float {
+    1 + (coarseInsertionSeamMaximumWidthScale - 1)
+      * coarseInsertionSeamWeight(row: row, course: course)
+  }
+
+  static func coarseInsertionSeamLengthScale(row: Int, course: Int) -> Float {
+    1 + (insertionSeamMaximumLengthScale - 1)
+      * coarseInsertionSeamWeight(row: row, course: course)
+  }
+
+  private static func coarseInsertionSeamWeight(row: Int, course: Int) -> Float {
+    guard course == 6 else { return 0 }
+    return switch row {
+    case 1, 2: 1
+    case 0, 3: 0.5
+    default: 0
+    }
   }
 
   /// Signed non-repeating course offsets interdigitate the pelvic roots

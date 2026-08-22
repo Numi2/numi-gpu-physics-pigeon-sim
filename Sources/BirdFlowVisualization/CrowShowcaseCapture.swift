@@ -3765,6 +3765,7 @@ private struct CrowMeshBuilder {
         endRadius: CrowLegPlumage.distalUnderlayerRadiusMeters,
         color: featheredLeg,
         radialSegments: 12,
+        surfaceFeatherClass: CrowLegPlumage.surfaceFeatherClass,
         to: &vertices
       )
       for feather in CrowFemoralPlumage.visibleSamples(
