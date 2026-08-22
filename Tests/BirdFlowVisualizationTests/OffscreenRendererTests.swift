@@ -713,12 +713,14 @@ func estimatedStandingCrowCaptureProducesLoopClosedFrames() throws {
     CrowShowcaseAOVAuditReport.self,
     from: Data(contentsOf: aovAuditURL)
   )
-  #expect(audit.schemaVersion == 13)
+  #expect(audit.schemaVersion == 14)
   #expect(audit.frames.allSatisfy {
     $0.ventralBarbCandidateRecordCount == 0
       && $0.ventralBarbVisibleRecordCount == 0
       && $0.ventralBarbExpandedVertexCount == 0
       && $0.ventralBarbOutputCapacityBytes == 0
+      && $0.ventralBarbVertexGenerationMode
+        == "gpu-procedural-vertex-pulling"
   })
   #expect(audit.formats["hdrColor"] == "rgba16Float")
   #expect(audit.formats["normalCoverage"] == "rgba16Float")

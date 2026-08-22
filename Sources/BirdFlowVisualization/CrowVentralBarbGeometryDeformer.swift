@@ -1,12 +1,13 @@
 import Metal
 import simd
 
-/// Future-compute expansion of explicit class-7 body-feather barb curves.
+/// GPU-compacted explicit class-7 body-feather barb curves.
 ///
 /// Production allocates only a tiny dormant output buffer at ordinary viewing
 /// distances. Once a retained feather spans at least 480 output pixels, a
-/// compact interval list activates four-segment crown-following curves and
-/// Metal writes the complete temporal/AOV tube stream.
+/// compact interval list activates four-segment crown-following curves. The
+/// production raster stage pulls those vertices directly; compute expansion is
+/// retained only as an exact audit oracle.
 final class CrowVentralBarbGeometryDeformer {
   private static let bufferedFrameCount = 3
 
@@ -22,6 +23,7 @@ final class CrowVentralBarbGeometryDeformer {
   private let offsetBuffers: [MTLBuffer]
   private let compactedCountBuffers: [MTLBuffer]
   private let workBuffers: [MTLBuffer]
+  private let geometryUniformBuffers: [MTLBuffer]
   private var outputBuffers: [MTLBuffer]
   private let indirectDrawBuffers: [MTLBuffer]
   private let indirectDispatchBuffers: [MTLBuffer]
@@ -72,6 +74,12 @@ final class CrowVentralBarbGeometryDeformer {
         shared: true
       )
     }
+    geometryUniformBuffers = try (0..<Self.bufferedFrameCount).map { _ in
+      try backend.buffer(
+        length: MemoryLayout<CrowVentralBarbGeometryUniforms>.stride,
+        shared: true
+      )
+    }
     outputBuffers = try (0..<Self.bufferedFrameCount).map { _ in
       try backend.buffer(length: 16)
     }
@@ -112,7 +120,7 @@ final class CrowVentralBarbGeometryDeformer {
       maximumVertexCount * MemoryLayout<CrowFeatherVertexGPU>.stride,
       16
     )
-    if requiredOutputBytes > outputBuffers[slot].length {
+    if auditReadback && requiredOutputBytes > outputBuffers[slot].length {
       outputBuffers[slot] = try backend.buffer(length: requiredOutputBytes)
     }
     let emptyDrawArguments = DrawPrimitivesIndirectArguments(
@@ -139,6 +147,13 @@ final class CrowVentralBarbGeometryDeformer {
       currentBodyCenter: SIMD4<Float>(currentBodyCenter, 1),
       previousBodyCenter: SIMD4<Float>(previousBodyCenter, 1)
     )
+    _ = withUnsafeBytes(of: uniforms) { bytes in
+      memcpy(
+        geometryUniformBuffers[slot].contents(),
+        bytes.baseAddress!,
+        bytes.count
+      )
+    }
     var visibilityUniforms = CrowVentralBarbCurveRecords.visibilityUniforms(
       viewProjection: viewProjection,
       currentBodyCenter: currentBodyCenter,
@@ -213,29 +228,31 @@ final class CrowVentralBarbGeometryDeformer {
       backend.dispatch1D(prepare, pipeline: indirectPipeline, count: 1)
       prepare.endEncoding()
 
-      guard let encoder = commandBuffer.makeComputeCommandEncoder() else {
-        throw VisualizationError.pipeline("crow ventral barb geometry encoder")
-      }
-      encoder.label = "Retained ventral barb curve expansion"
-      encoder.setBuffer(recordBuffer, offset: 0, index: 0)
-      encoder.setBuffer(workBuffers[slot], offset: 0, index: 1)
-      encoder.setBuffer(outputBuffers[slot], offset: 0, index: 2)
-      encoder.setBytes(
-        &uniforms,
-        length: MemoryLayout<CrowVentralBarbGeometryUniforms>.stride,
-        index: 3
-      )
-      encoder.setComputePipelineState(pipeline)
-      encoder.dispatchThreadgroups(
-        indirectBuffer: indirectDispatchBuffers[slot],
-        indirectBufferOffset: 0,
-        threadsPerThreadgroup: MTLSize(
-          width: Int(threadsPerThreadgroup),
-          height: 1,
-          depth: 1
+      if auditReadback {
+        guard let encoder = commandBuffer.makeComputeCommandEncoder() else {
+          throw VisualizationError.pipeline("crow ventral barb geometry encoder")
+        }
+        encoder.label = "Audit retained ventral barb curve expansion"
+        encoder.setBuffer(recordBuffer, offset: 0, index: 0)
+        encoder.setBuffer(workBuffers[slot], offset: 0, index: 1)
+        encoder.setBuffer(outputBuffers[slot], offset: 0, index: 2)
+        encoder.setBytes(
+          &uniforms,
+          length: MemoryLayout<CrowVentralBarbGeometryUniforms>.stride,
+          index: 3
         )
-      )
-      encoder.endEncoding()
+        encoder.setComputePipelineState(pipeline)
+        encoder.dispatchThreadgroups(
+          indirectBuffer: indirectDispatchBuffers[slot],
+          indirectBufferOffset: 0,
+          threadsPerThreadgroup: MTLSize(
+            width: Int(threadsPerThreadgroup),
+            height: 1,
+            depth: 1
+          )
+        )
+        encoder.endEncoding()
+      }
     }
     if auditReadback && maximumVertexCount > 0 {
       let readback: MTLBuffer
@@ -279,6 +296,21 @@ final class CrowVentralBarbGeometryDeformer {
       to: DrawPrimitivesIndirectArguments.self,
       capacity: 1
     ).pointee
+  }
+
+  /// Binds the GPU-resident compact work and stable procedural inputs. Camera
+  /// uniforms intentionally occupy index 3 in the specialized vertex stage.
+  func bindRenderResources(
+    for frame: CrowFeatherGeometryFrame,
+    encoder: MTLRenderCommandEncoder
+  ) {
+    encoder.setVertexBuffer(recordBuffer, offset: 0, index: 0)
+    encoder.setVertexBuffer(workBuffers[frame.slot], offset: 0, index: 1)
+    encoder.setVertexBuffer(
+      geometryUniformBuffers[frame.slot],
+      offset: 0,
+      index: 2
+    )
   }
 
   func compactedRecordCount(for frame: CrowFeatherGeometryFrame) -> Int {

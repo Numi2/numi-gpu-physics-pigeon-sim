@@ -1820,15 +1820,15 @@ kernel void prepareCrowVentralBarbIndirectWork(
     dispatchArguments[0].threadgroupsPerGrid[2]=1u;
 }
 
-kernel void expandCrowVentralBarbCurves(
-    device const CrowVentralRachisCurveRecordGPU* records [[buffer(0)]],
-    device const CrowVentralBarbSegmentWorkGPU* work [[buffer(1)]],
-    device CrowFeatherVertexGPU* output [[buffer(2)]],
-    constant CrowVentralBarbGeometryUniforms& uniforms [[buffer(3)]],
-    uint outputIndex [[thread_position_in_grid]]) {
+// One compiled helper is shared by compute audit expansion and production
+// vertex pulling. Prevent per-stage reassociation so both paths remain
+// raster/AOV exact rather than merely visually close.
+__attribute__((noinline)) CrowFeatherVertexGPU crowVentralBarbVertex(
+    device const CrowVentralRachisCurveRecordGPU* records,
+    device const CrowVentralBarbSegmentWorkGPU* work,
+    constant CrowVentralBarbGeometryUniforms& uniforms,
+    uint outputIndex) {
     uint verticesPerInterval=uniforms.counts.z;
-    uint outputCount=uniforms.counts.y*verticesPerInterval;
-    if(outputIndex>=outputCount){return;}
     uint workIndex=outputIndex/verticesPerInterval;
     uint localVertex=outputIndex-workIndex*verticesPerInterval;
     CrowVentralBarbSegmentWorkGPU selected=work[workIndex];
@@ -1914,7 +1914,20 @@ kernel void expandCrowVentralBarbCurves(
     result.parameters=float4(
         featherAxial,side,0.031f*float(selected.indices.x%97u),1
     );
-    output[outputIndex]=result;
+    return result;
+}
+
+kernel void expandCrowVentralBarbCurves(
+    device const CrowVentralRachisCurveRecordGPU* records [[buffer(0)]],
+    device const CrowVentralBarbSegmentWorkGPU* work [[buffer(1)]],
+    device CrowFeatherVertexGPU* output [[buffer(2)]],
+    constant CrowVentralBarbGeometryUniforms& uniforms [[buffer(3)]],
+    uint outputIndex [[thread_position_in_grid]]) {
+    uint outputCount=uniforms.counts.y*uniforms.counts.z;
+    if(outputIndex>=outputCount){return;}
+    output[outputIndex]=crowVentralBarbVertex(
+        records,work,uniforms,outputIndex
+    );
 }
 
 inline float4 quaternionConjugate(float4 q) { return float4(-q.xyz, q.w); }
@@ -2476,6 +2489,35 @@ vertex CrowRasterVertex crowFeatherAOVVertex(
     constant CrowTemporalCameraUniforms& camera [[buffer(1)]],
     uint vid [[vertex_id]]) {
     CrowFeatherVertexGPU source=vertices[vid];
+    CrowRasterVertex out;
+    uint featherClass=source.identity.w&255u;
+    out.position=crowSurfaceBiasedClipPosition(
+        camera.viewProjection*source.position,featherClass
+    );
+    out.previousClipPosition=crowSurfaceBiasedClipPosition(
+        camera.previousViewProjection*source.previousPosition,featherClass
+    );
+    out.world=source.position.xyz;
+    out.normal=normalize(source.normal.xyz);
+    out.albedoAndMaterial=source.color;
+    out.featherCoordinates=source.parameters.xyz;
+    out.identity=source.identity;
+    return out;
+}
+
+// The compact interval list is already the authoritative production geometry.
+// Pull its vertices in raster so close-up detail does not require a second,
+// candidate-sized materialized vertex stream. The compute expansion above is
+// retained as the byte-for-byte audit oracle.
+vertex CrowRasterVertex crowVentralBarbAOVVertex(
+    device const CrowVentralRachisCurveRecordGPU* records [[buffer(0)]],
+    device const CrowVentralBarbSegmentWorkGPU* work [[buffer(1)]],
+    constant CrowVentralBarbGeometryUniforms& geometry [[buffer(2)]],
+    constant CrowTemporalCameraUniforms& camera [[buffer(3)]],
+    uint vid [[vertex_id]]) {
+    CrowFeatherVertexGPU source=crowVentralBarbVertex(
+        records,work,geometry,vid
+    );
     CrowRasterVertex out;
     uint featherClass=source.identity.w&255u;
     out.position=crowSurfaceBiasedClipPosition(

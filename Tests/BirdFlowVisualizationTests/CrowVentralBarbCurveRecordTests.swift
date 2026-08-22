@@ -301,6 +301,36 @@ func metalCompactsVisibleVentralBarbRecords() throws {
   #expect(deformer.drawArguments(for: dormantFrame).vertexCount == 0)
 }
 
+@Test("production ventral barbs pull vertices without materialized output")
+func productionVentralBarbsAvoidMaterializedVertexOutput() throws {
+  guard let device = MTLCreateSystemDefaultDevice() else { return }
+  let backend = try VisualizationBackend(device: device)
+  let record = CrowVentralRachisCurveRecords.records()[0]
+  let length = simd_distance(
+    xyz(record.rootAndPennaceousStart),
+    xyz(record.tipAndCamber)
+  )
+  let deformer = try CrowVentralBarbGeometryDeformer(
+    backend: backend,
+    records: [record]
+  )
+  let commandBuffer = try #require(backend.queue.makeCommandBuffer())
+  let frame = try deformer.encode(
+    currentBodyCenter: SIMD3<Float>(0, 0, 0.5),
+    previousBodyCenter: SIMD3<Float>(0, 0, 0.5),
+    projectedPixelsPerMeter: 481 / length,
+    viewProjection: matrix_identity_float4x4,
+    commandBuffer: commandBuffer
+  )
+  commandBuffer.commit()
+  commandBuffer.waitUntilCompleted()
+  #expect(commandBuffer.status == .completed)
+  #expect(deformer.compactedRecordCount(for: frame) == 1)
+  #expect(deformer.drawArguments(for: frame).vertexCount == UInt32(frame.vertexCount))
+  #expect(frame.outputBuffer.length == 16)
+  #expect(!frame.readbackReady)
+}
+
 private struct BarbTubeVertexOracle {
   let position: SIMD3<Float>
   let previousPosition: SIMD3<Float>

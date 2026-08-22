@@ -20,6 +20,7 @@ struct CrowShowcaseFrame {
   let ventralBarbVisibleRecordCount: Int
   let ventralBarbExpandedVertexCount: Int
   let ventralBarbOutputCapacityBytes: Int
+  let ventralBarbVertexGenerationMode: String
 
   func audit(
     frameIndex: Int,
@@ -344,6 +345,7 @@ struct CrowShowcaseFrame {
       ventralBarbVisibleRecordCount: ventralBarbVisibleRecordCount,
       ventralBarbExpandedVertexCount: ventralBarbExpandedVertexCount,
       ventralBarbOutputCapacityBytes: ventralBarbOutputCapacityBytes,
+      ventralBarbVertexGenerationMode: ventralBarbVertexGenerationMode,
       finitePixelCount: finitePixelCount,
       aboveOneHDRPixelCount: aboveOneHDRPixelCount,
       activeIdentityPixelCount: activeIdentityPixelCount,
@@ -1147,6 +1149,7 @@ struct CrowShowcaseAOVFrameAudit: Codable, Equatable {
   let ventralBarbVisibleRecordCount: Int
   let ventralBarbExpandedVertexCount: Int
   let ventralBarbOutputCapacityBytes: Int
+  let ventralBarbVertexGenerationMode: String
   let finitePixelCount: Int
   let aboveOneHDRPixelCount: Int
   let activeIdentityPixelCount: Int
@@ -1314,7 +1317,7 @@ struct CrowShowcaseAOVAuditReport: Codable, Equatable {
   let frames: [CrowShowcaseAOVFrameAudit]
 
   init(frames: [CrowShowcaseAOVFrameAudit]) {
-    schemaVersion = 13
+    schemaVersion = 14
     colorSpace = "scene-linear extended range; display output is tone mapped separately"
     motionConvention =
       "current pixel to previous pixel in upper-left-origin pixel units; MetalFX scale 1"

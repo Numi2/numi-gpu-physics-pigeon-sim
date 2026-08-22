@@ -834,15 +834,31 @@ vertices to `5,971,968` expanded vertices, a `42.09%` work reduction. Visible
 record counts over the five-frame loop are `429, 429, 432, 446, 429`.
 
 All five beauty PNGs are byte-exact and every pre-existing non-duration AOV
-field is exact against revision `c6f3add`; the new schema-`13` counters expose
+field is exact against revision `c6f3add`; the schema-`14` counters expose
 candidate records, visible records, expanded vertices, and capacity bytes.
 Normal-distance rendering remains five-frame PNG/AOV exact with all four
 counters zero. The short GPU timings are noisy and support no speed claim.
-Output allocation still reserves the candidate maximum—`990,019,584` bytes in
-the close-up—so previous-depth occlusion and visibility-sized residency are the
-next scaling gates before explicit barbules or curve self-shadowing.
+The second scaling pass removes that candidate-sized output allocation. A
+single non-inlined Metal helper now owns procedural vertex construction for
+both the compute audit oracle and production raster-stage vertex pulling. The
+GPU-compacted work list and indirect draw remain authoritative; production no
+longer expands the list into a separate buffer. At a fresh yaw/pitch
+`(0.80, -0.15)` with the same target and distance, frame `2` compacts `746`
+candidates to `487` visible records and generates `6,732,288` raster vertices
+with zero materialized-output bytes. Counts over the five-frame loop are
+`481, 489, 487, 512, 481` visible records and `6,649,344`, `6,759,936`,
+`6,732,288`, `7,077,888`, `6,649,344` generated vertices.
 
-Schema `13` resolves that rear-port priority to exact packed identities around
+All five close beauty PNGs are byte-exact and every pre-existing non-duration
+AOV field is exact against revision `7709775`; five normal-distance PNGs and
+AOVs are also exact with zero active work. Schema `14` adds the explicit
+`gpu-procedural-vertex-pulling` mode and reports zero output capacity. The
+compute expansion remains executable under audit readback and still matches
+the CPU temporal-tube oracle. No speed claim follows from these short runs.
+Previous-depth occlusion is the next visibility gate before indexed or
+hardware-curve emission, explicit barbules, or curve self-shadowing.
+
+Schema `14` resolves that rear-port priority to exact packed identities around
 the largest enclosed component. The early `21-28`-pixel channels are bounded
 by rectrix orders `1`, `2`, and `3`; only frames `2-3` additionally touch the
 outermost proximal trailing covert. A broad presentation-tail width experiment

@@ -774,8 +774,10 @@ private final class CrowShowcaseRenderer {
   private let surfaceAOVPipeline: MTLRenderPipelineState
   private let backgroundAOVPipeline: MTLRenderPipelineState
   private let featherAOVPipeline: MTLRenderPipelineState?
+  private let ventralBarbAOVPipeline: MTLRenderPipelineState
   private let surfaceIdentityPipeline: MTLRenderPipelineState
   private let featherIdentityPipeline: MTLRenderPipelineState?
+  private let ventralBarbIdentityPipeline: MTLRenderPipelineState
   private let normalResolvePipeline: MTLRenderPipelineState
   private let reactiveMaskPipeline: MTLRenderPipelineState
   private let toneMapPipeline: MTLRenderPipelineState
@@ -899,6 +901,12 @@ private final class CrowShowcaseRenderer {
       colorFormats: aovFormats,
       sampleCount: createdSampleCount
     )
+    ventralBarbAOVPipeline = try createdBackend.render(
+      vertex: "crowVentralBarbAOVVertex",
+      fragment: "showcaseCrowAOVFragment",
+      colorFormats: aovFormats,
+      sampleCount: createdSampleCount
+    )
     backgroundAOVPipeline = try backend.render(
       vertex: "showcaseBackgroundVertex",
       fragment: "showcaseCrowBackgroundAOVFragment",
@@ -912,6 +920,11 @@ private final class CrowShowcaseRenderer {
     )
     featherIdentityPipeline = try createdBackend.render(
       vertex: "crowFeatherAOVVertex",
+      fragment: "showcaseCrowIdentityFragment",
+      colorFormat: .rgba32Uint
+    )
+    ventralBarbIdentityPipeline = try createdBackend.render(
+      vertex: "crowVentralBarbAOVVertex",
       fragment: "showcaseCrowIdentityFragment",
       colorFormat: .rgba32Uint
     )
@@ -1256,7 +1269,6 @@ private final class CrowShowcaseRenderer {
         commandBuffer: commandBuffer
       )
       ventralBarbFrame = frame
-      featherFrames.append(frame)
     }
 
     let pass = MTLRenderPassDescriptor()
@@ -1376,6 +1388,28 @@ private final class CrowShowcaseRenderer {
         )
       }
     }
+    if let ventralBarbFrame, let ventralBarbGeometryDeformer {
+      encoder.setRenderPipelineState(ventralBarbAOVPipeline)
+      ventralBarbGeometryDeformer.bindRenderResources(
+        for: ventralBarbFrame,
+        encoder: encoder
+      )
+      encoder.setVertexBytes(
+        &cameraUniforms,
+        length: MemoryLayout<CrowTemporalCameraUniforms>.stride,
+        index: 3
+      )
+      encoder.setFragmentBytes(
+        &cameraUniforms,
+        length: MemoryLayout<CrowTemporalCameraUniforms>.stride,
+        index: 0
+      )
+      encoder.drawPrimitives(
+        type: .triangle,
+        indirectBuffer: ventralBarbFrame.indirectDrawBuffer,
+        indirectBufferOffset: 0
+      )
+    }
     encoder.endEncoding()
 
     let identityPass = MTLRenderPassDescriptor()
@@ -1428,6 +1462,23 @@ private final class CrowShowcaseRenderer {
           indirectBufferOffset: 0
         )
       }
+    }
+    if let ventralBarbFrame, let ventralBarbGeometryDeformer {
+      identityEncoder.setRenderPipelineState(ventralBarbIdentityPipeline)
+      ventralBarbGeometryDeformer.bindRenderResources(
+        for: ventralBarbFrame,
+        encoder: identityEncoder
+      )
+      identityEncoder.setVertexBytes(
+        &cameraUniforms,
+        length: MemoryLayout<CrowTemporalCameraUniforms>.stride,
+        index: 3
+      )
+      identityEncoder.drawPrimitives(
+        type: .triangle,
+        indirectBuffer: ventralBarbFrame.indirectDrawBuffer,
+        indirectBufferOffset: 0
+      )
     }
     identityEncoder.endEncoding()
 
@@ -1568,8 +1619,8 @@ private final class CrowShowcaseRenderer {
         ? ventralBarbCandidateVertexCount / ventralBarbVerticesPerRecord : 0,
       ventralBarbVisibleRecordCount: ventralBarbVisibleRecordCount,
       ventralBarbExpandedVertexCount: ventralBarbExpandedVertexCount,
-      ventralBarbOutputCapacityBytes: ventralBarbCandidateVertexCount
-        * MemoryLayout<CrowFeatherVertexGPU>.stride
+      ventralBarbOutputCapacityBytes: 0,
+      ventralBarbVertexGenerationMode: "gpu-procedural-vertex-pulling"
     )
   }
 
