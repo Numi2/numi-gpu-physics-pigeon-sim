@@ -68,6 +68,7 @@ public enum CrowShowcaseCapture {
     let retainedCranialVanesEnabled: Bool
     let ventralCurveEmissionMode: CrowVentralCurveEmissionMode
     let ventralBarbRayGeometryAuditEnabled: Bool
+    let ventralBarbFullImageRayAuditEnabled: Bool
     let presentation: CrowShowcasePresentation
 
     public init(commandLine: [String]) throws {
@@ -151,6 +152,9 @@ public enum CrowShowcaseCapture {
       )
       ventralBarbRayGeometryAuditEnabled = commandLine.contains(
         "--capture-crow-ventral-barb-ray-geometry-audit"
+      )
+      ventralBarbFullImageRayAuditEnabled = commandLine.contains(
+        "--capture-crow-ventral-barb-full-image-ray-audit"
       )
       let emissionValue =
         try value(after: "--capture-crow-ventral-curve-emission")
@@ -355,7 +359,9 @@ public enum CrowShowcaseCapture {
       retainedCranialVanesEnabled: arguments.retainedCranialVanesEnabled,
       ventralCurveEmissionMode: arguments.ventralCurveEmissionMode,
       ventralBarbRayGeometryAuditEnabled:
-        arguments.ventralBarbRayGeometryAuditEnabled
+        arguments.ventralBarbRayGeometryAuditEnabled,
+      ventralBarbFullImageRayAuditEnabled:
+        arguments.ventralBarbFullImageRayAuditEnabled
     )
     let nativeReferenceRenderer =
       try arguments.temporalScale > 1
@@ -377,7 +383,9 @@ public enum CrowShowcaseCapture {
         retainedCranialVanesEnabled: arguments.retainedCranialVanesEnabled,
         ventralCurveEmissionMode: arguments.ventralCurveEmissionMode,
         ventralBarbRayGeometryAuditEnabled:
-          arguments.ventralBarbRayGeometryAuditEnabled
+          arguments.ventralBarbRayGeometryAuditEnabled,
+        ventralBarbFullImageRayAuditEnabled:
+          arguments.ventralBarbFullImageRayAuditEnabled
       )
       : nil
     try FileManager.default.createDirectory(
@@ -893,6 +901,7 @@ private final class CrowShowcaseRenderer {
   private let ventralBarbGeometryDeformer: CrowVentralBarbGeometryDeformer?
   private let ventralBarbUsesMeshStage: Bool
   private let ventralBarbRayGeometryAuditEnabled: Bool
+  private let ventralBarbFullImageRayAuditEnabled: Bool
   private let featherRenderOffset: SIMD3<Float>
   private var previousPhase: Float?
   private var previousCamera: CameraState?
@@ -915,10 +924,13 @@ private final class CrowShowcaseRenderer {
     retainedThroatBridgeVanesEnabled: Bool = true,
     retainedCranialVanesEnabled: Bool = true,
     ventralCurveEmissionMode: CrowVentralCurveEmissionMode = .auto,
-    ventralBarbRayGeometryAuditEnabled: Bool = false
+    ventralBarbRayGeometryAuditEnabled: Bool = false,
+    ventralBarbFullImageRayAuditEnabled: Bool = false
   ) throws {
     self.presentation = presentation
     self.ventralBarbRayGeometryAuditEnabled = ventralBarbRayGeometryAuditEnabled
+      || ventralBarbFullImageRayAuditEnabled
+    self.ventralBarbFullImageRayAuditEnabled = ventralBarbFullImageRayAuditEnabled
     self.plumageOptics = plumageOptics.gpuParameters
     let cranialRadiiRaw = profile.visualTransform.headRadiusXYZMeters
     cranialRadii = SIMD3<Float>(
@@ -2129,6 +2141,10 @@ private final class CrowShowcaseRenderer {
     var ventralBarbRasterRayIdentityParityCount = 0
     var ventralBarbRasterRayRachisOwnerParityCount = 0
     var ventralBarbRasterRayDepthParityCount = 0
+    var ventralBarbFullImageRaySampleCount = 0
+    var ventralBarbFullImageRayHitCount = 0
+    var ventralBarbFullImageRayRachisOwnerParityCount = 0
+    var ventralBarbFullImageRayDepthParityCount = 0
     if let ventralBarbRayGeometryBuild,
       let ventralBarbFrame,
       let ventralBarbGeometryDeformer
@@ -2191,6 +2207,60 @@ private final class CrowShowcaseRenderer {
           return owner == sample.rasterRachisOwnerIndex
         }.count
         ventralBarbRasterRayDepthParityCount = zip(results, samples).filter {
+          result, sample in
+          result.hit == 1 && abs(result.distance - sample.rasterDepthMeters) < 0.02
+        }.count
+      }
+    }
+    if ventralBarbFullImageRayAuditEnabled,
+      let ventralBarbRayGeometryBuild,
+      let ventralBarbFrame,
+      let ventralBarbGeometryDeformer
+    {
+      let rayVertices = ventralBarbGeometryDeformer.vertices(for: ventralBarbFrame)
+      let samples = Self.rasterRaySamples(
+        vertices: rayVertices,
+        viewProjection: currentViewProjection,
+        eye: SIMD3<Float>(currentCamera.eyeAndWidth.x, currentCamera.eyeAndWidth.y,
+                          currentCamera.eyeAndWidth.z),
+        identity: identity,
+        identityDepth: identityDepth,
+        width: renderWidth,
+        height: renderHeight,
+        maximumSamples: nil
+      )
+      if !samples.isEmpty {
+        guard let auditCommandBuffer = backend.queue.makeCommandBuffer() else {
+          throw VisualizationError.pipeline("crow full-image ray audit command buffer")
+        }
+        let audit = try CrowPlumageRayImageAudit(backend: backend)
+        let resultsBuffer = try audit.encode(
+          build: ventralBarbRayGeometryBuild,
+          rays: samples.map(\.ray),
+          vertices: ventralBarbFrame.outputBuffer,
+          commandBuffer: auditCommandBuffer
+        )
+        auditCommandBuffer.commit()
+        auditCommandBuffer.waitUntilCompleted()
+        guard auditCommandBuffer.status == .completed else {
+          throw VisualizationError.shader(
+            auditCommandBuffer.error?.localizedDescription
+              ?? "crow full-image ray audit failed"
+          )
+        }
+        let results = CrowPlumageRayImageAudit.results(
+          from: resultsBuffer,
+          count: samples.count
+        )
+        ventralBarbFullImageRaySampleCount = samples.count
+        ventralBarbFullImageRayHitCount = results.filter { $0.hit == 1 }.count
+        ventralBarbFullImageRayRachisOwnerParityCount = zip(results, samples).filter {
+          result, sample in
+          guard let owner = Self.ventralBarbRachisOwnerIndex(result.identity)
+          else { return false }
+          return result.hit == 1 && owner == sample.rasterRachisOwnerIndex
+        }.count
+        ventralBarbFullImageRayDepthParityCount = zip(results, samples).filter {
           result, sample in
           result.hit == 1 && abs(result.distance - sample.rasterDepthMeters) < 0.02
         }.count
@@ -2309,6 +2379,12 @@ private final class CrowShowcaseRenderer {
       plumageRasterRayRachisOwnerParityCount:
         ventralBarbRasterRayRachisOwnerParityCount,
       plumageRasterRayDepthParityCount: ventralBarbRasterRayDepthParityCount,
+      plumageFullImageRayAuditRequested: ventralBarbFullImageRayAuditEnabled,
+      plumageFullImageRaySampleCount: ventralBarbFullImageRaySampleCount,
+      plumageFullImageRayHitCount: ventralBarbFullImageRayHitCount,
+      plumageFullImageRayRachisOwnerParityCount:
+        ventralBarbFullImageRayRachisOwnerParityCount,
+      plumageFullImageRayDepthParityCount: ventralBarbFullImageRayDepthParityCount,
       historyReset: historyReset,
       jitter: jitter,
       reactiveMaskEnabled: reactiveMask != nil,

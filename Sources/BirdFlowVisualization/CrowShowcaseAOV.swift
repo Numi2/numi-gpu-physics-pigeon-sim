@@ -46,6 +46,11 @@ struct CrowShowcaseFrame {
   let plumageRasterRayIdentityParityCount: Int
   let plumageRasterRayRachisOwnerParityCount: Int
   let plumageRasterRayDepthParityCount: Int
+  let plumageFullImageRayAuditRequested: Bool
+  let plumageFullImageRaySampleCount: Int
+  let plumageFullImageRayHitCount: Int
+  let plumageFullImageRayRachisOwnerParityCount: Int
+  let plumageFullImageRayDepthParityCount: Int
   let historyReset: Bool
   let jitter: SIMD2<Float>
   let reactiveMaskEnabled: Bool
@@ -609,6 +614,12 @@ struct CrowShowcaseFrame {
       plumageRasterRayRachisOwnerParityCount:
         plumageRasterRayRachisOwnerParityCount,
       plumageRasterRayDepthParityCount: plumageRasterRayDepthParityCount,
+      plumageFullImageRayAuditRequested: plumageFullImageRayAuditRequested,
+      plumageFullImageRaySampleCount: plumageFullImageRaySampleCount,
+      plumageFullImageRayHitCount: plumageFullImageRayHitCount,
+      plumageFullImageRayRachisOwnerParityCount:
+        plumageFullImageRayRachisOwnerParityCount,
+      plumageFullImageRayDepthParityCount: plumageFullImageRayDepthParityCount,
       historyReset: historyReset,
       jitterOffsetX: jitter.x,
       jitterOffsetY: jitter.y,
@@ -1635,6 +1646,11 @@ struct CrowShowcaseAOVFrameAudit: Codable, Equatable {
   let plumageRasterRayIdentityParityCount: Int
   let plumageRasterRayRachisOwnerParityCount: Int
   let plumageRasterRayDepthParityCount: Int
+  let plumageFullImageRayAuditRequested: Bool
+  let plumageFullImageRaySampleCount: Int
+  let plumageFullImageRayHitCount: Int
+  let plumageFullImageRayRachisOwnerParityCount: Int
+  let plumageFullImageRayDepthParityCount: Int
   let historyReset: Bool
   let jitterOffsetX: Float
   let jitterOffsetY: Float
@@ -1921,7 +1937,7 @@ struct CrowShowcaseAOVAuditReport: Codable, Equatable {
   let frames: [CrowShowcaseAOVFrameAudit]
 
   init(frames: [CrowShowcaseAOVFrameAudit]) {
-    schemaVersion = 36
+    schemaVersion = 37
     colorSpace = "scene-linear extended range; display output is tone mapped separately"
     motionConvention =
       "current pixel to previous pixel in upper-left-origin pixel units; MetalFX scale 1"

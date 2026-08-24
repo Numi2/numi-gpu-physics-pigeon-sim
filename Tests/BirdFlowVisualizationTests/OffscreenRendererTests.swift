@@ -39,8 +39,8 @@ func crowCaptureRayGeometryAuditPreservesRasterAuthority() throws {
     "--capture-crow-frames", output.path,
     "--capture-crow-presentation", "standing",
     "--capture-crow-ventral-barb-ray-geometry-audit",
+    "--capture-crow-ventral-barb-full-image-ray-audit",
     "--capture-crow-aov-audit", auditURL.path,
-    "--capture-crow-camera-distance", "0.12",
     "--capture-width", "720",
     "--capture-height", "540",
     "--capture-frames", "2",
@@ -71,7 +71,7 @@ func crowCaptureRayGeometryAuditPreservesRasterAuthority() throws {
     from: Data(contentsOf: auditURL)
   )
 
-  #expect(audit.schemaVersion == 36)
+  #expect(audit.schemaVersion == 37)
   #expect(audit.frames.count == 2)
   #expect(
     audit.frames.allSatisfy {
@@ -98,6 +98,14 @@ func crowCaptureRayGeometryAuditPreservesRasterAuthority() throws {
           == $0.plumageRasterRaySampleCount
         && $0.plumageRasterRayDepthParityCount
           == $0.plumageRasterRaySampleCount
+        && $0.plumageFullImageRayAuditRequested
+        && $0.plumageFullImageRaySampleCount > 0
+        && $0.plumageFullImageRayHitCount
+          <= $0.plumageFullImageRaySampleCount
+        && $0.plumageFullImageRayRachisOwnerParityCount
+          == $0.plumageFullImageRayHitCount
+        && $0.plumageFullImageRayDepthParityCount
+          == $0.plumageFullImageRayHitCount
         && !$0.plumageExperimentalRayVisibilityEnabled
         && $0.plumageExplicitCurveVisibilityAuthority
           == "raster-depth-resolved-explicit-curves"
@@ -158,7 +166,7 @@ func takeoffCrowRayGeometryAuditMatchesAcrossMotionAndElevation() throws {
     from: Data(contentsOf: auditURL)
   )
 
-  #expect(audit.schemaVersion == 36)
+  #expect(audit.schemaVersion == 37)
   #expect(audit.frames.count == 3)
   #expect(
     audit.frames.allSatisfy {
@@ -230,7 +238,7 @@ func rearObliqueTakeoffCrowRayGeometryAuditMatchesAcrossMotion() throws {
     from: Data(contentsOf: auditURL)
   )
 
-  #expect(audit.schemaVersion == 36)
+  #expect(audit.schemaVersion == 37)
   #expect(audit.frames.count == 3)
   #expect(
     audit.frames.allSatisfy {
@@ -1018,7 +1026,7 @@ func estimatedStandingCrowCaptureProducesLoopClosedFrames() throws {
     try VisualizationBackend(device: device).supportsMeshShaders
     ? "gpu-mesh-threadgroup-8-vertex-indexed"
     : "gpu-procedural-vertex-pulling"
-  #expect(audit.schemaVersion == 36)
+  #expect(audit.schemaVersion == 37)
   #expect(
     audit.frames.allSatisfy {
       $0.plumageSurfaceVisibilityAuthority
@@ -1044,6 +1052,11 @@ func estimatedStandingCrowCaptureProducesLoopClosedFrames() throws {
         && $0.plumageRasterRayIdentityParityCount == 0
         && $0.plumageRasterRayRachisOwnerParityCount == 0
         && $0.plumageRasterRayDepthParityCount == 0
+        && !$0.plumageFullImageRayAuditRequested
+        && $0.plumageFullImageRaySampleCount == 0
+        && $0.plumageFullImageRayHitCount == 0
+        && $0.plumageFullImageRayRachisOwnerParityCount == 0
+        && $0.plumageFullImageRayDepthParityCount == 0
     }
   )
   #expect(
