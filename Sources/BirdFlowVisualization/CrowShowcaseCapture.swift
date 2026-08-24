@@ -30,6 +30,8 @@ private final class CrowDepthReadbackBox {
 
 private struct CrowRayRasterSample {
   let ray: CrowRayProbeInputGPU
+  let pixelX: Int
+  let pixelY: Int
   let rasterIdentity: SIMD4<UInt32>
   let rasterPrimitiveIndex: UInt32
   let rasterRachisOwnerIndex: UInt32
@@ -2573,6 +2575,8 @@ private final class CrowShowcaseRenderer {
               depth + 0.01
             )
           ),
+          pixelX: x,
+          pixelY: y,
           rasterIdentity: pixelIdentity,
           rasterPrimitiveIndex: primitiveIndex,
           rasterRachisOwnerIndex: rachisOwnerIndex,
