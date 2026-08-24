@@ -2406,7 +2406,8 @@ private final class CrowShowcaseRenderer {
     identity: MTLTexture,
     identityDepth: MTLTexture,
     width: Int,
-    height: Int
+    height: Int,
+    maximumSamples: Int? = 16
   ) -> [CrowRayRasterSample] {
     let triangleCount = vertices.count / 3
     guard triangleCount > 0, width > 0, height > 0 else { return [] }
@@ -2441,6 +2442,7 @@ private final class CrowShowcaseRenderer {
     }
     var samplesByPrimitive: [UInt32: CrowRayRasterSample] = [:]
     samplesByPrimitive.reserveCapacity(16)
+    var allPixelSamples: [CrowRayRasterSample] = []
     for y in 0..<height {
       for x in 0..<width {
         let pixelIndex = y * width + x
@@ -2466,7 +2468,8 @@ private final class CrowShowcaseRenderer {
             support += 1
           }
         }
-        if let prior = samplesByPrimitive[primitiveIndex],
+        if maximumSamples != nil,
+          let prior = samplesByPrimitive[primitiveIndex],
           prior.rasterInteriorSupport >= interiorSupport
         {
           continue
@@ -2486,7 +2489,7 @@ private final class CrowShowcaseRenderer {
         let direction = hitPoint - eye
         guard simd_length_squared(direction) > 1e-8 else { continue }
         let depth = simd_length(direction)
-        samplesByPrimitive[primitiveIndex] = CrowRayRasterSample(
+        let sample = CrowRayRasterSample(
           ray: CrowRayProbeInputGPU(
             originAndMinimumDistance: SIMD4<Float>(eye, 0.0001),
             directionAndMaximumDistance: SIMD4<Float>(
@@ -2500,8 +2503,14 @@ private final class CrowShowcaseRenderer {
           rasterInteriorSupport: interiorSupport,
           rasterDepthMeters: depth
         )
+        if maximumSamples == nil {
+          allPixelSamples.append(sample)
+        } else {
+          samplesByPrimitive[primitiveIndex] = sample
+        }
       }
     }
+    if maximumSamples == nil { return allPixelSamples }
     return samplesByPrimitive.values
       .sorted {
         let lhsRank = ($0.rasterPrimitiveIndex &* 0x9e37_79b9)
@@ -2512,7 +2521,7 @@ private final class CrowShowcaseRenderer {
           ? $0.rasterPrimitiveIndex < $1.rasterPrimitiveIndex
           : lhsRank < rhsRank
       }
-      .prefix(16)
+      .prefix(maximumSamples ?? 16)
       .map { $0 }
   }
 
