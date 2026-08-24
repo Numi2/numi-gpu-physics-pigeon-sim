@@ -1,5 +1,7 @@
 #include <metal_stdlib>
+#include <metal_raytracing>
 using namespace metal;
+using namespace metal::raytracing;
 
 struct SurfaceVertex { float4 position; float4 normal; };
 struct ColoredVertex {
@@ -63,6 +65,18 @@ struct CrowFeatherVertexGPU {
     float4 previousPosition;
     uint4 identity;
     float4 parameters;
+};
+
+struct CrowRayProbeInputGPU {
+    float4 originAndMinimumDistance;
+    float4 directionAndMaximumDistance;
+};
+
+struct CrowRayProbeResultGPU {
+    uint hit;
+    uint primitiveIndex;
+    float distance;
+    float reserved;
 };
 
 struct CrowFeatherGeometryUniforms {
@@ -2550,6 +2564,33 @@ kernel void expandCrowVentralBarbCurves(
     output[outputIndex]=crowVentralBarbProceduralVertex(
         records,work,uniforms,outputIndex
     );
+}
+
+// Experimental visibility probe over the exact triangle-ribbon expansion.
+// This reports only an intersection result. It deliberately does not modify
+// radiance, raster depth, motion, or identity; those AOV comparisons remain a
+// separate promotion gate before ray visibility can own any output.
+kernel void probeCrowRayGeometry(
+    device const CrowRayProbeInputGPU* inputs [[buffer(0)]],
+    device CrowRayProbeResultGPU* outputs [[buffer(1)]],
+    primitive_acceleration_structure accelerationStructure [[buffer(2)]],
+    uint index [[thread_position_in_grid]]) {
+    CrowRayProbeInputGPU input=inputs[index];
+    ray probe;
+    probe.origin=input.originAndMinimumDistance.xyz;
+    probe.direction=normalize(input.directionAndMaximumDistance.xyz);
+    probe.min_distance=input.originAndMinimumDistance.w;
+    probe.max_distance=input.directionAndMaximumDistance.w;
+    intersector<triangle_data> triangleIntersector;
+    triangleIntersector.accept_any_intersection(true);
+    intersection_result<triangle_data> result=
+        triangleIntersector.intersect(probe,accelerationStructure);
+    CrowRayProbeResultGPU output;
+    output.hit=result.type==intersection_type::triangle?1u:0u;
+    output.primitiveIndex=output.hit!=0u?result.primitive_id:uint(-1);
+    output.distance=output.hit!=0u?result.distance:0.0f;
+    output.reserved=0.0f;
+    outputs[index]=output;
 }
 
 inline float4 quaternionConjugate(float4 q) { return float4(-q.xyz, q.w); }
