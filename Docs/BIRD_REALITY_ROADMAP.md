@@ -181,9 +181,10 @@ inventory or view-dependent patch geometry.
    same compact retained curve work used by rasterization, builds a
    triangle-ribbon acceleration structure after the beauty frame, and records
    triangle-count, structure-byte, and scratch-byte evidence in the AOV audit.
-   It also fires one deterministic probe ray at the first retained triangle
-   recovered from that same expansion and records its hit, primitive index, and
-   distance. The probe never changes radiance, raster depth, motion, identity,
+   It also fires deterministic root, middle, and distal probe rays at retained
+   triangles recovered from that same expansion and records their hit coverage,
+   first primitive index, and first distance. The probes never change radiance,
+   raster depth, motion, identity,
    or the ray-visibility authority. Geometry-count equality and a structural
    probe hit are input correspondence, not beauty/motion/depth/identity AOV
    parity; those comparisons remain the next required gate before a ray path

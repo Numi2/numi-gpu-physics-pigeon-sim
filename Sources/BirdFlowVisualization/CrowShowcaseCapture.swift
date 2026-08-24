@@ -2050,7 +2050,7 @@ private final class CrowShowcaseRenderer {
         ventralBarbRayGeometryBuild = build
       }
     }
-    var ventralBarbRayProbeResult: CrowRayProbeResultGPU?
+    var ventralBarbRayProbeResults: [CrowRayProbeResultGPU] = []
     if let ventralBarbRayGeometryBuild,
       let ventralBarbFrame,
       let ventralBarbGeometryDeformer
@@ -2063,28 +2063,39 @@ private final class CrowShowcaseRenderer {
         let normal = { (vertex: CrowFeatherVertexGPU) in
           SIMD3<Float>(vertex.normal.x, vertex.normal.y, vertex.normal.z)
         }
-        let triangleCenter = (
-          position(vertices[0]) + position(vertices[1]) + position(vertices[2])
-        ) / 3
-        let summedNormal =
-          normal(vertices[0]) + normal(vertices[1]) + normal(vertices[2])
-        if simd_length_squared(summedNormal) > 1e-8 {
+        let triangleStarts = Array(
+          Set([
+            0,
+            max(0, ((vertices.count / 2) / 3) * 3),
+            vertices.count - 3,
+          ])
+        ).sorted()
+        let rays = triangleStarts.compactMap { start -> CrowRayProbeInputGPU? in
+          let triangleCenter = (
+            position(vertices[start]) + position(vertices[start + 1])
+              + position(vertices[start + 2])
+          ) / 3
+          let summedNormal =
+            normal(vertices[start]) + normal(vertices[start + 1])
+              + normal(vertices[start + 2])
+          guard simd_length_squared(summedNormal) > 1e-8 else { return nil }
           let triangleNormal = simd_normalize(summedNormal)
+          return CrowRayProbeInputGPU(
+            originAndMinimumDistance: SIMD4<Float>(
+              triangleCenter + triangleNormal * 0.04,
+              0.0001
+            ),
+            directionAndMaximumDistance: SIMD4<Float>(-triangleNormal, 0.08)
+          )
+        }
+        if !rays.isEmpty {
           guard let probeCommandBuffer = backend.queue.makeCommandBuffer() else {
             throw VisualizationError.pipeline("crow ray-geometry probe command buffer")
           }
           let probe = try CrowPlumageRayGeometryProbe(backend: backend)
           let probeResults = try probe.encode(
             build: ventralBarbRayGeometryBuild,
-            rays: [
-              CrowRayProbeInputGPU(
-                originAndMinimumDistance: SIMD4<Float>(
-                  triangleCenter + triangleNormal * 0.04,
-                  0.0001
-                ),
-                directionAndMaximumDistance: SIMD4<Float>(-triangleNormal, 0.08)
-              )
-            ],
+            rays: rays,
             commandBuffer: probeCommandBuffer
           )
           probeCommandBuffer.commit()
@@ -2095,10 +2106,10 @@ private final class CrowShowcaseRenderer {
                 ?? "crow ray-geometry probe failed"
             )
           }
-          ventralBarbRayProbeResult = CrowPlumageRayGeometryProbe.results(
+          ventralBarbRayProbeResults = CrowPlumageRayGeometryProbe.results(
             from: probeResults,
-            count: 1
-          )[0]
+            count: rays.count
+          )
         }
       }
     }
@@ -2199,12 +2210,16 @@ private final class CrowShowcaseRenderer {
         ventralBarbRayGeometryBuild?.accelerationStructureSize ?? 0,
       plumageRayGeometryBuildScratchBytes:
         ventralBarbRayGeometryBuild?.buildScratchBufferSize ?? 0,
-      plumageRayGeometryProbeAttempted: ventralBarbRayGeometryBuild != nil,
-      plumageRayGeometryProbeHit: ventralBarbRayProbeResult?.hit == 1,
+      plumageRayGeometryProbeAttempted: !ventralBarbRayProbeResults.isEmpty,
+      plumageRayGeometryProbeHit: !ventralBarbRayProbeResults.isEmpty
+        && ventralBarbRayProbeResults.allSatisfy { $0.hit == 1 },
       plumageRayGeometryProbePrimitiveIndex:
-        ventralBarbRayProbeResult.map { Int($0.primitiveIndex) } ?? -1,
+        ventralBarbRayProbeResults.first.map { Int($0.primitiveIndex) } ?? -1,
       plumageRayGeometryProbeDistanceMeters:
-        ventralBarbRayProbeResult?.distance ?? 0,
+        ventralBarbRayProbeResults.first?.distance ?? 0,
+      plumageRayGeometryProbeRayCount: ventralBarbRayProbeResults.count,
+      plumageRayGeometryProbeHitCount:
+        ventralBarbRayProbeResults.filter { $0.hit == 1 }.count,
       historyReset: historyReset,
       jitter: jitter,
       reactiveMaskEnabled: reactiveMask != nil,

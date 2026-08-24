@@ -39,6 +39,8 @@ struct CrowShowcaseFrame {
   let plumageRayGeometryProbeHit: Bool
   let plumageRayGeometryProbePrimitiveIndex: Int
   let plumageRayGeometryProbeDistanceMeters: Float
+  let plumageRayGeometryProbeRayCount: Int
+  let plumageRayGeometryProbeHitCount: Int
   let historyReset: Bool
   let jitter: SIMD2<Float>
   let reactiveMaskEnabled: Bool
@@ -594,6 +596,8 @@ struct CrowShowcaseFrame {
         plumageRayGeometryProbePrimitiveIndex,
       plumageRayGeometryProbeDistanceMeters:
         plumageRayGeometryProbeDistanceMeters,
+      plumageRayGeometryProbeRayCount: plumageRayGeometryProbeRayCount,
+      plumageRayGeometryProbeHitCount: plumageRayGeometryProbeHitCount,
       historyReset: historyReset,
       jitterOffsetX: jitter.x,
       jitterOffsetY: jitter.y,
@@ -1613,6 +1617,8 @@ struct CrowShowcaseAOVFrameAudit: Codable, Equatable {
   let plumageRayGeometryProbeHit: Bool
   let plumageRayGeometryProbePrimitiveIndex: Int
   let plumageRayGeometryProbeDistanceMeters: Float
+  let plumageRayGeometryProbeRayCount: Int
+  let plumageRayGeometryProbeHitCount: Int
   let historyReset: Bool
   let jitterOffsetX: Float
   let jitterOffsetY: Float
@@ -1899,7 +1905,7 @@ struct CrowShowcaseAOVAuditReport: Codable, Equatable {
   let frames: [CrowShowcaseAOVFrameAudit]
 
   init(frames: [CrowShowcaseAOVFrameAudit]) {
-    schemaVersion = 32
+    schemaVersion = 33
     colorSpace = "scene-linear extended range; display output is tone mapped separately"
     motionConvention =
       "current pixel to previous pixel in upper-left-origin pixel units; MetalFX scale 1"
