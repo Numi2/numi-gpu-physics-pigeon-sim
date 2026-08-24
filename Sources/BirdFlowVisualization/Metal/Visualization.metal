@@ -3264,13 +3264,17 @@ kernel void prepareCrowBodyVaneIndirectWork(
     for(uint prior=0u;prior<topologyIndex;++prior){base+=topologyCounts[prior];}
     uint2 sections=crowBodyVaneTopologySections(topologyIndex);
     uint vaneInstanceCount=0u;
-    uint bodyInstanceCount=0u;
+    uint rachisInstanceCount=0u;
+    uint detailInstanceCount=0u;
     for(uint local=0u;local<topologyCounts[topologyIndex];++local){
         uint recordIndex=recordWork[base+local];
         uint family=records[recordIndex].identity.x&0xff000000u;
         if(family!=0x07000000u){++vaneInstanceCount;}
+        if(family==0x02000000u||family==0x01000000u){
+            ++rachisInstanceCount;
+        }
         if(family==0x02000000u){
-            ++bodyInstanceCount;
+            ++detailInstanceCount;
         }
     }
     arguments[topologyIndex]={
@@ -3283,7 +3287,7 @@ kernel void prepareCrowBodyVaneIndirectWork(
         (sections.x<=8u?4u:(sections.x<=12u?8u:12u));
     arguments[11u+topologyIndex]={
         rachisSections*24u,
-        bodyInstanceCount,
+        rachisInstanceCount,
         0u,
         base
     };
@@ -3291,7 +3295,7 @@ kernel void prepareCrowBodyVaneIndirectWork(
         (sections.x<=8u?43u:(sections.x<=12u?41u:167u));
     arguments[22u+topologyIndex]={
         detailSegments*18u,
-        bodyInstanceCount,
+        detailInstanceCount,
         0u,
         base
     };
@@ -4242,6 +4246,9 @@ inline CrowBodyRachisQuad crowBodyRachisTubeQuad(
 }
 
 inline float4 crowBodyRachisColor(CrowBodyVaneMorphologyGPU record) {
+    if((record.identity.x&0xff000000u)==0x01000000u){
+        return float4(0.010f,0.014f,0.022f,0.14f);
+    }
     uint region=uint(record.morphology.y);
     float base=region==0u?0.006f:(region==1u?0.0065f:
         (region==2u?0.0058f:0.0060f));
@@ -4263,7 +4270,8 @@ inline CrowFeatherVertexGPU crowBodyRachisProceduralVertex(
     uint vertexIndex,uint instanceIndex) {
     CrowBodyVaneMorphologyGPU record=records[instanceIndex];
     CrowFeatherVertexGPU out;
-    if((record.identity.x&0xff000000u)!=0x02000000u){
+    uint family=record.identity.x&0xff000000u;
+    if(family!=0x02000000u&&family!=0x01000000u){
         CrowBodyVaneDynamicState currentState=crowBodyVaneDynamicState(
             record,pose,neckTransforms,true
         );

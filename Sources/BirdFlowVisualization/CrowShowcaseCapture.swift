@@ -3149,6 +3149,7 @@ private struct CrowMeshBuilder {
         shingle,
         bodyCenter: bodyCenter,
         projectedPixelsPerMeter: projectedPixelsPerMeter,
+        includeRachis: !bodyContoursOwnedByMetal,
         to: &vertices
       )
     }
@@ -3325,12 +3326,14 @@ private struct CrowMeshBuilder {
     _ shingle: CrowBodyContourShingle,
     bodyCenter: SIMD3<Float>,
     projectedPixelsPerMeter: Float,
+    includeRachis: Bool,
     to vertices: inout [ColoredVertex]
   ) {
     for segment in CrowFeatherMesostructure.segments(
       for: shingle,
       projectedPixelsPerMeter: projectedPixelsPerMeter
     ) {
+      guard includeRachis || segment.kind != .rachis else { continue }
       let color: SIMD4<Float>
       let radialSegments: Int
       switch segment.kind {

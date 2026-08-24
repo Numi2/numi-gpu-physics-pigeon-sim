@@ -3021,6 +3021,9 @@ enum CrowBodyVaneRecords {
   private static func rachisColor(
     record: CrowBodyVaneRecordGPU
   ) -> SIMD4<Float> {
+    if (record.identity.x & 0xFF00_0000) == 0x0100_0000 {
+      return SIMD4<Float>(0.010, 0.014, 0.022, 0.14)
+    }
     let region = Int(record.morphology.y)
     let baseAndScale: (Float, Float)
     switch region {

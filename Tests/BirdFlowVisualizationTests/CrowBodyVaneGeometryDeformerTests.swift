@@ -800,6 +800,66 @@ func metalProceduralBodyVanesMatchSwiftGeometryOracle() throws {
   }
 }
 
+@Test("Metal dense body contour rachides match the static retained oracle")
+func metalDenseBodyContourRachidesMatchStaticRetainedOracle() throws {
+  guard let device = MTLCreateSystemDefaultDevice() else { return }
+  let backend = try VisualizationBackend(device: device)
+  let deformer = try CrowBodyVaneGeometryDeformer(backend: backend)
+  let commandBuffer = try #require(backend.queue.makeCommandBuffer())
+  let frame = try deformer.encode(
+    currentBodyCenter: .zero,
+    previousBodyCenter: .zero,
+    currentNeckPose: nil,
+    previousNeckPose: nil,
+    currentDeployment: 0,
+    previousDeployment: 0,
+    projectedPixelsPerMeter: 1_600,
+    commandBuffer: commandBuffer,
+    auditReadback: true
+  )
+  commandBuffer.commit()
+  commandBuffer.waitUntilCompleted()
+  #expect(commandBuffer.status == .completed)
+
+  var validated = 0
+  for batch in frame.batches where batch.rachisVertexCount > 0 {
+    let records = deformer.auditRecords(for: batch)
+    guard let recordIndex = records.firstIndex(where: {
+      ($0.identity.x & 0xFF00_0000) == 0x0100_0000
+        && CrowBodyVaneRecords.rachisIsResolved(
+          record: $0,
+          projectedPixelsPerMeter: batch.projectedPixelsPerMeter
+        )
+    }) else { continue }
+    let gpuVertices = deformer.rachisVertices(for: batch)
+    for vertexIndex in Set([
+      0,
+      batch.rachisVertexCount / 2,
+      batch.rachisVertexCount - 1,
+    ]) {
+      let gpu = gpuVertices[
+        recordIndex * batch.rachisVertexCount + vertexIndex
+      ]
+      let expected = CrowBodyVaneRecords.rachisVertex(
+        record: records[recordIndex],
+        topology: batch.topology,
+        projectedPixelsPerMeter: batch.projectedPixelsPerMeter,
+        vertexIndex: vertexIndex
+      )
+      #expect(simd_distance(gpu.position.xyz, expected.position.xyz) < 2e-6)
+      #expect(
+        simd_distance(gpu.previousPosition.xyz, expected.previousPosition.xyz)
+          < 2e-6
+      )
+      #expect(simd_distance(gpu.normal.xyz, expected.normal.xyz) < 1e-3)
+      #expect(simd_distance(gpu.color.xyz, expected.color.xyz) < 2e-6)
+      #expect(gpu.identity == expected.identity)
+    }
+    validated += 1
+  }
+  #expect(validated > 0)
+}
+
 @Test("body vane production retains morphology and triple-buffers pose")
 func bodyVaneProductionStorageIsTripleBufferedAndIndirect() throws {
   guard let device = MTLCreateSystemDefaultDevice() else { return }
@@ -879,9 +939,16 @@ func bodyVaneProductionStorageIsTripleBufferedAndIndirect() throws {
       let record = retainedRecords[Int($0)]
       return (record.identity.x & 0xFF00_0000) == 0x0200_0000
     }
+    let rachisInstanceCount = deformer.selectedRecordIndices(
+      for: frames[3],
+      topologyIndex: index
+    ).count {
+      let family = retainedRecords[Int($0)].identity.x & 0xFF00_0000
+      return family == 0x0200_0000 || family == 0x0100_0000
+    }
     #expect(rachisArguments.vertexCount == UInt32(reused.rachisVertexCount))
     #expect(rachisArguments.vertexStart == 0)
-    #expect(rachisArguments.instanceCount == UInt32(bodyInstanceCount))
+    #expect(rachisArguments.instanceCount == UInt32(rachisInstanceCount))
     let detailArguments = deformer.drawDetailArguments(for: reused)
     #expect(detailArguments.vertexCount == UInt32(reused.detailVertexCount))
     #expect(detailArguments.vertexStart == 0)
@@ -1240,6 +1307,10 @@ func metalBodyVaneLODSelectionMatchesCPUOracle() throws {
       let expectedBodyIdentityCount = expectedIdentities.count {
         ($0.x & 0xFF00_0000) == 0x0200_0000
       }
+      let expectedRachisIdentityCount = expectedIdentities.count {
+        let family = $0.x & 0xFF00_0000
+        return family == 0x0200_0000 || family == 0x0100_0000
+      }
       let expectedMainVaneIdentityCount = expectedIdentities.count {
         ($0.x & 0xFF00_0000) != 0x0700_0000
       }
@@ -1253,7 +1324,9 @@ func metalBodyVaneLODSelectionMatchesCPUOracle() throws {
       )
       #expect(arguments.instanceCount == UInt32(expectedMainVaneIdentityCount))
       #expect(arguments.vertexCount == UInt32(topology.verticesPerInstance))
-      #expect(rachisArguments.instanceCount == UInt32(expectedBodyIdentityCount))
+      #expect(
+        rachisArguments.instanceCount == UInt32(expectedRachisIdentityCount)
+      )
       #expect(
         rachisArguments.vertexCount
           == UInt32(CrowBodyVaneRecords.rachisVerticesPerInstance(for: topology))
