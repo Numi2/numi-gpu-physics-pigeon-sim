@@ -3150,6 +3150,7 @@ private struct CrowMeshBuilder {
         bodyCenter: bodyCenter,
         projectedPixelsPerMeter: projectedPixelsPerMeter,
         includeRachis: !bodyContoursOwnedByMetal,
+        includeCoarseDetail: !bodyContoursOwnedByMetal,
         to: &vertices
       )
     }
@@ -3327,13 +3328,22 @@ private struct CrowMeshBuilder {
     bodyCenter: SIMD3<Float>,
     projectedPixelsPerMeter: Float,
     includeRachis: Bool,
+    includeCoarseDetail: Bool,
     to vertices: inout [ColoredVertex]
   ) {
+    let projectedLength = shingle.referenceLengthMeters * projectedPixelsPerMeter
     for segment in CrowFeatherMesostructure.segments(
       for: shingle,
       projectedPixelsPerMeter: projectedPixelsPerMeter
     ) {
       guard includeRachis || segment.kind != .rachis else { continue }
+      // Metal owns aggregate edge bundles through the tier-2 detail boundary.
+      // At closer tiers, Swift retains individual barbs/barbules while Metal
+      // continues to own the terminal aggregate, so no segment is doubled.
+      guard includeCoarseDetail
+        || (segment.kind != .edgeBarbGroup
+          && (projectedLength >= 120 || segment.kind != .barb))
+      else { continue }
       let color: SIMD4<Float>
       let radialSegments: Int
       switch segment.kind {

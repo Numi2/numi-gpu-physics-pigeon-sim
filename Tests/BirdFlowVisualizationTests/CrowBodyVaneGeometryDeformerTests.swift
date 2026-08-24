@@ -906,7 +906,8 @@ func bodyVaneProductionStorageIsTripleBufferedAndIndirect() throws {
   #expect(
     frames.allSatisfy {
       $0.retainedDetailSegmentCapacityBytes
-        == 3 * 3_212 * 43 * MemoryLayout<CrowBodyDetailSegmentGPU>.stride
+        == 3 * 3_212 * 43
+          * MemoryLayout<CrowBodyDetailSegmentGPU>.stride
     }
   )
   #expect(frames.allSatisfy { $0.detailSegmentBufferAllocationCount == 3 })
@@ -932,13 +933,6 @@ func bodyVaneProductionStorageIsTripleBufferedAndIndirect() throws {
         == deformer.topologyCounts(for: frames[3])[index]
     )
     let rachisArguments = deformer.drawRachisArguments(for: reused)
-    let bodyInstanceCount = deformer.selectedRecordIndices(
-      for: frames[3],
-      topologyIndex: index
-    ).count {
-      let record = retainedRecords[Int($0)]
-      return (record.identity.x & 0xFF00_0000) == 0x0200_0000
-    }
     let rachisInstanceCount = deformer.selectedRecordIndices(
       for: frames[3],
       topologyIndex: index
@@ -952,7 +946,7 @@ func bodyVaneProductionStorageIsTripleBufferedAndIndirect() throws {
     let detailArguments = deformer.drawDetailArguments(for: reused)
     #expect(detailArguments.vertexCount == UInt32(reused.detailVertexCount))
     #expect(detailArguments.vertexStart == 0)
-    #expect(detailArguments.instanceCount == UInt32(bodyInstanceCount))
+    #expect(detailArguments.instanceCount == UInt32(rachisInstanceCount))
   }
 }
 
@@ -1304,9 +1298,6 @@ func metalBodyVaneLODSelectionMatchesCPUOracle() throws {
       )
       let selectedIdentities = indices.map { allRecords[Int($0)].identity }
       let expectedIdentities = (expected[topology] ?? []).map(\.identity)
-      let expectedBodyIdentityCount = expectedIdentities.count {
-        ($0.x & 0xFF00_0000) == 0x0200_0000
-      }
       let expectedRachisIdentityCount = expectedIdentities.count {
         let family = $0.x & 0xFF00_0000
         return family == 0x0200_0000 || family == 0x0100_0000
@@ -1331,7 +1322,9 @@ func metalBodyVaneLODSelectionMatchesCPUOracle() throws {
         rachisArguments.vertexCount
           == UInt32(CrowBodyVaneRecords.rachisVerticesPerInstance(for: topology))
       )
-      #expect(detailArguments.instanceCount == UInt32(expectedBodyIdentityCount))
+      #expect(
+        detailArguments.instanceCount == UInt32(expectedRachisIdentityCount)
+      )
       #expect(
         detailArguments.vertexCount
           == UInt32(CrowBodyVaneRecords.detailVerticesPerInstance(for: topology))

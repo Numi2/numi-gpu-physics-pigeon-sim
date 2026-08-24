@@ -458,9 +458,6 @@ final class CrowBodyVaneGeometryDeformer {
     }
     detailSegmentBuffers = try (0..<Self.bufferedFrameCount).map { _ in
       try backend.buffer(
-        // Dense contour vanes share the retained raster inventory, but their
-        // microstructure remains CPU-owned until it has its own compact work
-        // list. Keep this buffer indexed by the tract detail owner only.
         length: CrowBodyVaneRecords.bodyTractMorphologyRecordCount * 43
           * MemoryLayout<CrowBodyDetailSegmentGPU>.stride
       )
@@ -1637,12 +1634,20 @@ final class CrowBodyVaneGeometryDeformer {
     guard requiredCapacity > detailSegmentCapacityPerRecord else { return }
     detailSegmentBuffers = try (0..<Self.bufferedFrameCount).map { _ in
       try backend.buffer(
-        length: CrowBodyVaneRecords.bodyTractMorphologyRecordCount * requiredCapacity
-          * MemoryLayout<CrowBodyDetailSegmentGPU>.stride
+        length: Self.detailSegmentBufferLength(
+          bodyCapacity: requiredCapacity
+        )
       )
     }
     detailSegmentCapacityPerRecord = requiredCapacity
     detailSegmentBufferAllocationCount += Self.bufferedFrameCount
+  }
+
+  private static func detailSegmentBufferLength(
+    bodyCapacity: Int
+  ) -> Int {
+    CrowBodyVaneRecords.bodyTractMorphologyRecordCount * bodyCapacity
+      * MemoryLayout<CrowBodyDetailSegmentGPU>.stride
   }
 
   private static func sharedBuffer<T>(

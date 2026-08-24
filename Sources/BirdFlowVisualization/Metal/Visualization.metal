@@ -3273,7 +3273,7 @@ kernel void prepareCrowBodyVaneIndirectWork(
         if(family==0x02000000u||family==0x01000000u){
             ++rachisInstanceCount;
         }
-        if(family==0x02000000u){
+        if(family==0x02000000u||family==0x01000000u){
             ++detailInstanceCount;
         }
     }
@@ -4356,6 +4356,33 @@ inline uint crowBodyDetailSegmentCount(
     return axial<=4u?0u:(axial<=8u?43u:(axial<=12u?41u:167u));
 }
 
+inline bool crowBodyContourDetailOwner(CrowBodyVaneMorphologyGPU record) {
+    return (record.identity.x&0xff000000u)==0x01000000u;
+}
+
+/// The contour system keeps a single compact aggregate tier: tier-2 owns its
+/// twenty bilateral edge bundles plus five terminal bundles; closer tiers
+/// leave resolved barbs/barbules with the CPU hierarchy and retain terminals.
+inline uint crowBodyContourDetailSegmentCount(
+    CrowBodyVaneGeometryUniforms geometry) {
+    uint axial=geometry.counts.x;
+    if(axial<=4u){return 0u;}
+    return axial<=8u?25u:5u;
+}
+
+inline uint crowBodyContourDetailSourceSegmentIndex(
+    CrowBodyVaneGeometryUniforms geometry,uint compactIndex) {
+    if(geometry.counts.x<=8u){return compactIndex;}
+    uint edgePairCount=geometry.counts.x<=12u?9u:18u;
+    return edgePairCount*2u+compactIndex;
+}
+
+inline int crowBodyDetailIdentityFirst(CrowBodyVaneMorphologyGPU record) {
+    return crowBodyContourDetailOwner(record)
+        ?int(record.morphology.z)
+        :int(record.morphology.z)+31*int(record.morphology.y);
+}
+
 inline CrowBodyDetailFrame crowBodyDetailFrame(
     CrowBodyVaneMorphologyGPU record,
     device const CrowBodyVanePoseUniforms& pose,
@@ -4378,7 +4405,8 @@ inline CrowBodyDetailFrame crowBodyDetailFrame(
         cross(frame.normal,frame.direction),float3(0.0f,1.0f,0.0f)
     );
     frame.camber=state.camber;
-    frame.transverseCamber=state.transverseCamber;
+    frame.transverseCamber=crowBodyContourDetailOwner(record)
+        ?0.0f:state.transverseCamber;
     return frame;
 }
 
@@ -4424,6 +4452,12 @@ inline float crowBodyDetailTractSide(CrowBodyVaneMorphologyGPU record) {
     return inventoryIndex-base<perSide?-1.0f:1.0f;
 }
 
+inline int crowBodyDetailIdentitySecond(CrowBodyVaneMorphologyGPU record) {
+    if(crowBodyContourDetailOwner(record)){return int(record.morphology.w);}
+    return int(record.morphology.w)
+        +(crowBodyDetailTractSide(record)<0.0f?97:0);
+}
+
 inline CrowBodyDetailSegment crowBodyPrimaryDetailSegment(
     CrowBodyVaneMorphologyGPU record,
     CrowBodyVaneGeometryUniforms geometry,
@@ -4435,8 +4469,14 @@ inline CrowBodyDetailSegment crowBodyPrimaryDetailSegment(
     uint baseBarbPairCount=axialSections<=8u?0u:edgePairCount;
     uint region=uint(record.morphology.y);
     float length=distance(record.rootAndRootWidth.xyz,record.tipAndMaximumWidth.xyz);
+    bool contour=crowBodyContourDetailOwner(record);
+    bool contourPromotesInterior=contour
+        &&(record.identity.w&255u)==5u
+        &&record.morphology.w/71.0f>=0.45f
+        &&length*geometry.selection.x>=48.0f;
     bool promotesInterior=(region==2u||region==3u)
         &&length*geometry.selection.x>=40.0f;
+    promotesInterior=promotesInterior||contourPromotesInterior;
     uint pairCount=promotesInterior
         ?max(baseBarbPairCount,edgePairCount):baseBarbPairCount;
     bool coarseEdgeOnly=pairCount==0u;
@@ -4446,16 +4486,15 @@ inline CrowBodyDetailSegment crowBodyPrimaryDetailSegment(
     CrowBodyDetailFrame frame=crowBodyDetailFrame(
         record,pose,neckTransforms,current
     );
-    int identityFirst=int(record.morphology.z)+31*int(region);
-    float tractSide=crowBodyDetailTractSide(record);
-    int identitySecond=int(record.morphology.w)+(tractSide<0.0f?97:0);
+    int identityFirst=crowBodyDetailIdentityFirst(record);
+    int identitySecond=crowBodyDetailIdentitySecond(record);
     float stationSpacing=0.77f/float(edgePairCount+1u);
     float featherPhase=float(identityFirst+1)*19.193f
         +float(identitySecond+1)*47.117f;
     float stationPhase=float(pair+1u)*11.731f;
     float stationIdentity=sin(featherPhase+stationPhase);
     float localAxial=0.10f+stationSpacing*float(pair+1u)
-        +0.18f*stationSpacing*stationIdentity;
+        +(contour?0.0f:0.18f)*stationSpacing*stationIdentity;
     float axial=crowBodyDetailPennaceousAxial(record,localAxial);
     float reachAxial=crowBodyDetailPennaceousAxial(
         record,min(0.94f,localAxial+0.035f+0.020f*localAxial)
@@ -4470,7 +4509,7 @@ inline CrowBodyDetailSegment crowBodyPrimaryDetailSegment(
         +frame.normal*(coarseEdgeOnly?0.00010f:0.00005f);
     float edgeExtension=baseExtension*(0.86f+0.14f*identity);
     float reachHalfWidth=crowBodyDetailHalfWidth(record,reachAxial,side);
-    float lateralReach=coarseEdgeOnly
+    float lateralReach=(coarseEdgeOnly||contour)
         ?reachHalfWidth+edgeExtension:0.97f*reachHalfWidth;
     float3 end=crowBodyDetailCenter(record,frame,reachAxial)
         +side*frame.widthAxis*lateralReach
@@ -4510,10 +4549,8 @@ inline CrowBodyDetailSegment crowBodyPlumulaceousSegment(
     CrowBodyDetailFrame frame=crowBodyDetailFrame(
         record,pose,neckTransforms,current
     );
-    uint region=uint(record.morphology.y);
-    int identityFirst=int(record.morphology.z)+31*int(region);
-    float tractSide=crowBodyDetailTractSide(record);
-    int identitySecond=int(record.morphology.w)+(tractSide<0.0f?97:0);
+    int identityFirst=crowBodyDetailIdentityFirst(record);
+    int identitySecond=crowBodyDetailIdentitySecond(record);
     float identity=sin(
         float(identityFirst+1)*15.317f+float(identitySecond+1)*39.173f
         +float(pair+1u)*7.139f+side*1.913f
@@ -4595,14 +4632,13 @@ inline CrowBodyDetailSegment crowBodyDetailSegmentAt(
     CrowBodyDetailFrame frame=crowBodyDetailFrame(
         record,pose,neckTransforms,current
     );
-    uint region=uint(record.morphology.y);
-    int identityFirst=int(record.morphology.z)+31*int(region);
-    float tractSide=crowBodyDetailTractSide(record);
-    int identitySecond=int(record.morphology.w)+(tractSide<0.0f?97:0);
+    int identityFirst=crowBodyDetailIdentityFirst(record);
+    int identitySecond=crowBodyDetailIdentitySecond(record);
     float featherPhase=float(identityFirst+1)*23.417f
         +float(identitySecond+1)*51.193f;
     float rootIdentity=sin(featherPhase+lane*5.173f);
-    float rootAxial=0.88f+0.022f*rootIdentity;
+    float rootAxial=0.88f+(crowBodyContourDetailOwner(record)
+        ?0.0f:0.022f*rootIdentity);
     float3 root=crowBodyDetailCenter(record,frame,rootAxial)
         +lane*frame.widthAxis
             *crowBodyDetailHalfWidth(record,rootAxial,0.0f)*0.42f
@@ -4679,6 +4715,9 @@ inline float4 crowBodyDetailColor(
     if(kind==2u){return float4(0.008f,0.012f,0.020f,0.14f);}
     if(kind==3u){return float4(0.006f,0.010f,0.017f,0.14f);}
     if(kind==4u){return float4(0.0045f,0.0068f,0.0118f,0.12f);}
+    if(crowBodyContourDetailOwner(record)){
+        return float4(0.0075f,0.011f,0.019f,0.135f);
+    }
     uint region=uint(record.morphology.y);
     float base=region==0u?0.006f:(region==1u?0.0065f:
         (region==2u?0.0058f:0.0060f));
@@ -4699,7 +4738,8 @@ inline CrowFeatherVertexGPU crowBodyDetailProceduralVertex(
     device const CrowBodyVaneNeckTransformGPU* neckTransforms,
     uint vertexIndex,uint instanceIndex) {
     CrowBodyVaneMorphologyGPU record=records[instanceIndex];
-    if((record.identity.x&0xff000000u)!=0x02000000u){
+    uint family=record.identity.x&0xff000000u;
+    if(family!=0x02000000u&&family!=0x01000000u){
         CrowFeatherVertexGPU out;
         CrowBodyVaneDynamicState currentState=crowBodyVaneDynamicState(
             record,pose,neckTransforms,true
@@ -4717,11 +4757,34 @@ inline CrowFeatherVertexGPU crowBodyDetailProceduralVertex(
     }
     uint segmentIndex=vertexIndex/18u;
     uint localVertex=vertexIndex-segmentIndex*18u;
+    bool contour=crowBodyContourDetailOwner(record);
+    uint segmentCount=contour
+        ?crowBodyContourDetailSegmentCount(geometry)
+        :crowBodyDetailSegmentCount(geometry);
+    if(segmentIndex>=segmentCount){
+        CrowFeatherVertexGPU out;
+        CrowBodyVaneDynamicState currentState=crowBodyVaneDynamicState(
+            record,pose,neckTransforms,true
+        );
+        CrowBodyVaneDynamicState previousState=crowBodyVaneDynamicState(
+            record,pose,neckTransforms,false
+        );
+        out.position=float4(currentState.root,1.0f);
+        out.previousPosition=float4(previousState.root,1.0f);
+        out.normal=float4(currentState.normal,0.0f);
+        out.color=float4(0.0f);
+        out.identity=record.identity;
+        out.parameters=float4(0.0f);
+        return out;
+    }
+    uint sourceSegmentIndex=contour
+        ?crowBodyContourDetailSourceSegmentIndex(geometry,segmentIndex)
+        :segmentIndex;
     CrowBodyDetailSegment current=crowBodyDetailSegmentAt(
-        record,geometry,pose,neckTransforms,true,segmentIndex
+        record,geometry,pose,neckTransforms,true,sourceSegmentIndex
     );
     CrowBodyDetailSegment previous=crowBodyDetailSegmentAt(
-        record,geometry,pose,neckTransforms,false,segmentIndex
+        record,geometry,pose,neckTransforms,false,sourceSegmentIndex
     );
     uint corners[6]={0u,1u,2u,0u,2u,3u};
     uint corner=corners[localVertex%6u];
@@ -4768,11 +4831,10 @@ kernel void emitCrowBodyDetailSegments(
     constant CrowBodyVaneSelectionUniforms& selection [[buffer(7)]],
     uint index [[thread_position_in_grid]]) {
     uint capacity=selection.counts.z;
-    uint compactIndex=index/capacity;
-    uint segmentIndex=index-compactIndex*capacity;
-    if(compactIndex>=topologyCounts[11]){return;}
-    uint recordIndex=recordWork[compactIndex];
-    if((records[recordIndex].identity.x&0xff000000u)!=0x02000000u){return;}
+    uint recordIndex=index/capacity;
+    uint segmentIndex=index-recordIndex*capacity;
+    uint family=records[recordIndex].identity.x&0xff000000u;
+    if(family!=0x02000000u&&family!=0x01000000u){return;}
     uint topologyIndex=topologyIndices[recordIndex];
     uint2 sections=crowBodyVaneTopologySections(topologyIndex);
     CrowBodyVaneGeometryUniforms geometry;
@@ -4782,14 +4844,36 @@ kernel void emitCrowBodyDetailSegments(
     geometry.selection=float4(
         selection.selection.x,float(capacity),0.0f,0.0f
     );
-    uint segmentCount=crowBodyDetailSegmentCount(geometry);
-    if(segmentIndex>=segmentCount){return;}
     CrowBodyVaneMorphologyGPU record=records[recordIndex];
+    bool contour=crowBodyContourDetailOwner(record);
+    uint segmentCount=contour
+        ?crowBodyContourDetailSegmentCount(geometry)
+        :crowBodyDetailSegmentCount(geometry);
+    if(segmentIndex>=segmentCount){
+        CrowBodyVaneDynamicState currentState=crowBodyVaneDynamicState(
+            record,pose,neckTransforms,true
+        );
+        CrowBodyVaneDynamicState previousState=crowBodyVaneDynamicState(
+            record,pose,neckTransforms,false
+        );
+        CrowBodyDetailSegmentGPU degenerate;
+        degenerate.currentStartAndRadius=float4(currentState.root,0.0f);
+        degenerate.currentEndAndRadius=float4(currentState.root,0.0f);
+        degenerate.previousStartAndRadius=float4(previousState.root,0.0f);
+        degenerate.previousEndAndRadius=float4(previousState.root,0.0f);
+        degenerate.currentNormalAndKind=float4(currentState.normal,1.0f);
+        degenerate.previousNormalAndReserved=float4(previousState.normal,0.0f);
+        output[recordIndex*capacity+segmentIndex]=degenerate;
+        return;
+    }
+    uint sourceSegmentIndex=contour
+        ?crowBodyContourDetailSourceSegmentIndex(geometry,segmentIndex)
+        :segmentIndex;
     CrowBodyDetailSegment current=crowBodyDetailSegmentAt(
-        record,geometry,pose,neckTransforms,true,segmentIndex
+        record,geometry,pose,neckTransforms,true,sourceSegmentIndex
     );
     CrowBodyDetailSegment previous=crowBodyDetailSegmentAt(
-        record,geometry,pose,neckTransforms,false,segmentIndex
+        record,geometry,pose,neckTransforms,false,sourceSegmentIndex
     );
     CrowBodyDetailFrame currentFrame=crowBodyDetailFrame(
         record,pose,neckTransforms,true
@@ -4917,6 +5001,8 @@ vertex CrowRasterVertex crowBodyDetailAOVVertex(
     device const uint* recordWork [[buffer(1)]],
     constant CrowBodyVaneGeometryUniforms& geometry [[buffer(2)]],
     constant CrowTemporalCameraUniforms& camera [[buffer(3)]],
+    device const CrowBodyVanePoseUniforms& pose [[buffer(4)]],
+    device const CrowBodyVaneNeckTransformGPU* neckTransforms [[buffer(5)]],
     device const CrowBodyDetailSegmentGPU* segments [[buffer(6)]],
     uint vertexIndex [[vertex_id]],
     uint instanceIndex [[instance_id]]) {
@@ -4924,8 +5010,29 @@ vertex CrowRasterVertex crowBodyDetailAOVVertex(
     uint localVertex=vertexIndex-segmentIndex*18u;
     uint capacity=uint(geometry.selection.y);
     uint recordIndex=recordWork[instanceIndex];
-    CrowBodyDetailSegmentGPU retained=
-        segments[recordIndex*capacity+segmentIndex];
+    CrowBodyVaneMorphologyGPU record=records[recordIndex];
+    bool contour=crowBodyContourDetailOwner(record);
+    if(contour){
+        CrowFeatherVertexGPU source=crowBodyDetailProceduralVertex(
+            records,geometry,pose,neckTransforms,vertexIndex,recordIndex
+        );
+        CrowRasterVertex out;
+        uint featherClass=source.identity.w&255u;
+        out.position=crowSurfaceBiasedClipPosition(
+            camera.viewProjection*source.position,featherClass
+        );
+        out.previousClipPosition=crowSurfaceBiasedClipPosition(
+            camera.previousViewProjection*source.previousPosition,featherClass
+        );
+        out.world=source.position.xyz;
+        out.normal=normalize(source.normal.xyz);
+        out.albedoAndMaterial=source.color;
+        out.featherCoordinates=source.parameters.xyz;
+        out.resolvedCurveTangent=float3(0.0f);
+        out.identity=source.identity;
+        return out;
+    }
+    CrowBodyDetailSegmentGPU retained=segments[recordIndex*capacity+segmentIndex];
     uint kind=uint(retained.currentNormalAndKind.w);
     CrowBodyDetailSegment current;
     current.kind=kind;
@@ -4961,7 +5068,6 @@ vertex CrowRasterVertex crowBodyDetailAOVVertex(
     float3 previousPoints[4]={
         previousQuad.a,previousQuad.b,previousQuad.c,previousQuad.d
     };
-    CrowBodyVaneMorphologyGPU record=records[recordIndex];
     CrowFeatherVertexGPU source;
     source.position=float4(currentPoints[corner],1.0f);
     source.previousPosition=float4(previousPoints[corner],1.0f);
