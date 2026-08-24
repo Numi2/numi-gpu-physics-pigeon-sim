@@ -60,6 +60,41 @@ enum CrowCranialFeatherTracts {
   static let throatCircumferentialOverlapScale: Float = 0.75
   static let gularBridgeMaterialTagScale: Float = 0.01
 
+  /// Bounded, deterministic contour relaxation for the estimated cranial
+  /// tracts. This is deliberately a qualitative visual model, not a claimed
+  /// measurement of crow rachis stiffness: feather stiffness varies strongly
+  /// by location and feather interaction, so it stays below 0.45 mm even at a
+  /// fully inhaled showcase pose.
+  static func relaxedBladeOffset(
+    sample: CrowCranialFeatherSample,
+    axialFraction: Float,
+    signedWidth: Float,
+    breathingScale: Float
+  ) -> SIMD3<Float> {
+    let axial = max(0, min(1, axialFraction))
+    let distal = pow(axial, 1.65)
+    let edgeEnvelope = 1 - 0.22 * signedWidth * signedWidth
+    let direction = normalized(
+      sample.tip - sample.root,
+      fallback: SIMD3<Float>(-1, 0, 0)
+    )
+    let normal = normalized(sample.planeNormal, fallback: SIMD3<Float>(0, 0, 1))
+    let widthAxis = normalized(
+      simd_cross(normal, direction),
+      fallback: SIMD3<Float>(0, 1, 0)
+    )
+    let phase = 3 * sample.thetaRadians
+      + 0.37 * Float(sample.axialIndex)
+      + 0.19 * Float(sample.angularIndex)
+    let restingLift = 0.00024 * (0.72 + 0.28 * sin(phase))
+    let breathingLift = 0.012 * (breathingScale - 1)
+    let lateralSet = 0.000075 * cos(phase) * signedWidth
+    return distal * edgeEnvelope * (
+      normal * (restingLift + breathingLift)
+        + widthAxis * lateralSet
+    )
+  }
+
   static var axialRings: [CrowCranialLoftRing] {
     CrowCranialAnatomy.sampledLoftRings()
       .enumerated()

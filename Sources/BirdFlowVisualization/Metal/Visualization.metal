@@ -3726,7 +3726,7 @@ inline bool crowCranialBoundIntersectsFrustum(
     float3 tip=crowCranialNeckPosition(state.tip,pose,true);
     float3 center=0.5f*(root+tip);
     float radius=0.5f*distance(root,tip)+state.maximumWidth
-        +abs(state.camber)+visibility.selection.y;
+        +abs(state.camber)+0.00045f+visibility.selection.y;
     float4 point=float4(center,1.0f);
     return dot(visibility.leftPlane,point)>=-radius
         &&dot(visibility.rightPlane,point)>=-radius
@@ -3752,7 +3752,7 @@ inline bool crowCranialBoundOccluded(
     float3 tip=crowCranialNeckPosition(state.tip,pose,false);
     float3 center=0.5f*(root+tip);
     float radius=0.5f*distance(root,tip)+state.maximumWidth
-        +abs(state.camber)+visibility.selection.y;
+        +abs(state.camber)+0.00045f+visibility.selection.y;
     float2 minimumPixel=viewport;
     float2 maximumPixel=float2(0.0f);
     float nearestDepth=1.0f;
@@ -3974,9 +3974,24 @@ inline float3 crowBodyVaneUnwarpedPoint(
     float signedWidth=2.0f*float(widthIndex)/float(geometry.counts.y)-1.0f;
     float asymmetry=cranial?0.0f:record.sweepAsymmetryAndRipple.y;
     float localWidth=width*(1.0f+asymmetry*signedWidth);
-    return center+widthAxis*(signedWidth*localWidth)
+    float3 point=center+widthAxis*(signedWidth*localWidth)
         +normal*(localWidth*state.transverseCamber
             *max(0.0f,1.0f-signedWidth*signedWidth));
+    if(!cranial){return point;}
+    // Qualitative, bounded contour relaxation. It is identity-stable and is
+    // evaluated before shared cranial neck transport so beauty, AOV, motion,
+    // and identity all receive identical geometry.
+    float distal=pow(clamp(t,0.0f,1.0f),1.65f);
+    float edgeEnvelope=1.0f-0.22f*signedWidth*signedWidth;
+    float phase=3.0f*record.sweepAsymmetryAndRipple.w
+        +0.37f*record.morphology.z+0.19f*record.morphology.w;
+    float breathing=(current?pose.currentCranialRadiiAndBreathing.w:
+        pose.previousCranialRadiiAndBreathing.w)-1.0f;
+    float restingLift=0.00024f*(0.72f+0.28f*sin(phase));
+    float breathingLift=0.012f*breathing;
+    float lateralSet=0.000075f*cos(phase)*signedWidth;
+    return point+distal*edgeEnvelope*(normal*(restingLift+breathingLift)
+        +widthAxis*lateralSet);
 }
 
 inline float3 crowBodyVanePoint(

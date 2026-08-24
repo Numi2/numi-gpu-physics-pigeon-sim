@@ -127,6 +127,36 @@ func bodyVanesRetainCompactIdentityStableTemporalRecords() {
   )
 }
 
+@Test("cranial contour relaxation is deterministic, root-bound, and bounded")
+func cranialContourRelaxationIsBounded() {
+  let sample = try! #require(CrowCranialFeatherTracts.samples(
+    center: SIMD3<Float>(0.158, 0, 0.052),
+    radii: SIMD3<Float>(0.0447, 0.0328, 0.0387),
+    breathingScale: 1.012
+  ).first)
+  let root = CrowCranialFeatherTracts.relaxedBladeOffset(
+    sample: sample,
+    axialFraction: 0,
+    signedWidth: 0,
+    breathingScale: 1.012
+  )
+  let first = CrowCranialFeatherTracts.relaxedBladeOffset(
+    sample: sample,
+    axialFraction: 1,
+    signedWidth: 0.75,
+    breathingScale: 1.012
+  )
+  let replay = CrowCranialFeatherTracts.relaxedBladeOffset(
+    sample: sample,
+    axialFraction: 1,
+    signedWidth: 0.75,
+    breathingScale: 1.012
+  )
+  #expect(simd_length(root) < 1e-8)
+  #expect(first == replay)
+  #expect(simd_length(first) < 0.00045)
+}
+
 @Test("retained body detail reproduces the CPU mesostructure hierarchy")
 func retainedBodyDetailReproducesCPUMesostructureHierarchy() {
   let samples = CrowBodyFeatherTracts.samples()
@@ -634,13 +664,15 @@ func metalProceduralBodyVanesMatchSwiftGeometryOracle() throws {
           sample: currentSample,
           topology: batch.topology,
           axialIndex: grid.axial,
-          widthIndex: grid.width
+          widthIndex: grid.width,
+          breathingScale: currentCranialBreathing
         )
         let sourcePrevious = cranialBladePoint(
           sample: previousSample,
           topology: batch.topology,
           axialIndex: grid.axial,
-          widthIndex: grid.width
+          widthIndex: grid.width,
+          breathingScale: previousCranialBreathing
         )
         let expectedCurrent = CrowHeadNeckBlend.position(
           sourceCurrent,
@@ -656,7 +688,8 @@ func metalProceduralBodyVanesMatchSwiftGeometryOracle() throws {
           sample: currentSample,
           topology: batch.topology,
           axialIndex: grid.axial,
-          widthIndex: grid.width
+          widthIndex: grid.width,
+          breathingScale: currentCranialBreathing
         )
         let expectedNormal = CrowHeadNeckBlend.normal(
           sourceNormal,
@@ -1238,7 +1271,8 @@ private func cranialBladePoint(
   sample: CrowCranialFeatherSample,
   topology: CrowBodyVaneTopology,
   axialIndex: Int,
-  widthIndex: Int
+  widthIndex: Int,
+  breathingScale: Float
 ) -> SIMD3<Float> {
   let t = Float(axialIndex) / Float(topology.axialSections)
   let direction = normalizedTest(
@@ -1263,37 +1297,48 @@ private func cranialBladePoint(
   let signedWidth = 2 * Float(widthIndex) / Float(topology.widthSections) - 1
   return center + widthAxis * (signedWidth * width)
     + normal * (width * 0.18 * max(0, 1 - signedWidth * signedWidth))
+    + CrowCranialFeatherTracts.relaxedBladeOffset(
+      sample: sample,
+      axialFraction: t,
+      signedWidth: signedWidth,
+      breathingScale: breathingScale
+    )
 }
 
 private func cranialBladeNormal(
   sample: CrowCranialFeatherSample,
   topology: CrowBodyVaneTopology,
   axialIndex: Int,
-  widthIndex: Int
+  widthIndex: Int,
+  breathingScale: Float
 ) -> SIMD3<Float> {
   let axialFirst = cranialBladePoint(
     sample: sample,
     topology: topology,
     axialIndex: max(0, axialIndex - 1),
-    widthIndex: widthIndex
+    widthIndex: widthIndex,
+    breathingScale: breathingScale
   )
   let axialSecond = cranialBladePoint(
     sample: sample,
     topology: topology,
     axialIndex: min(topology.axialSections, axialIndex + 1),
-    widthIndex: widthIndex
+    widthIndex: widthIndex,
+    breathingScale: breathingScale
   )
   let widthFirst = cranialBladePoint(
     sample: sample,
     topology: topology,
     axialIndex: axialIndex,
-    widthIndex: max(0, widthIndex - 1)
+    widthIndex: max(0, widthIndex - 1),
+    breathingScale: breathingScale
   )
   let widthSecond = cranialBladePoint(
     sample: sample,
     topology: topology,
     axialIndex: axialIndex,
-    widthIndex: min(topology.widthSections, widthIndex + 1)
+    widthIndex: min(topology.widthSections, widthIndex + 1),
+    breathingScale: breathingScale
   )
   let supplied = normalizedTest(
     sample.planeNormal,
