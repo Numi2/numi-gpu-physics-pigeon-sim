@@ -169,6 +169,14 @@ inventory or view-dependent patch geometry.
    parameters, or (b) capability-gated explicit curve/ray visibility that is
    compared against the current AOV contract. Do not add another opaque
    texture/ribbon layer in place of either measurement or geometric visibility.
+   The live AOV report now records that boundary and the current device's
+   compute/render ray-tracing eligibility, but always reports ray visibility
+   disabled: an explicit curve acceleration structure plus AOV parity must
+   exist before it can replace either current authority. Metal exposes compute
+   ray-tracing eligibility separately from render eligibility; Apple documents
+   both the device checks and acceleration-structure build path. This preserves
+   a portable raster/mesh-shader path while making future hardware capability
+   observable rather than assumed. [Apple MTLDevice ray tracing properties](https://developer.apple.com/documentation/metal/mtldevice/supportsraytracing), [Apple acceleration-structure workflow](https://developer.apple.com/documentation/metal/ray-tracing-with-acceleration-structures)
    The `711` full-density cranial vanes now retain family-`7` loft-neighbour
    morphology and reconstruct breathing plus the spatially graded head warp on
    Metal. The `225` gular owners now derive their `1,575` rachis/barb tubes

@@ -787,10 +787,21 @@ func estimatedStandingCrowCaptureProducesLoopClosedFrames() throws {
     try VisualizationBackend(device: device).supportsMeshShaders
     ? "gpu-mesh-threadgroup-8-vertex-indexed"
     : "gpu-procedural-vertex-pulling"
-  #expect(audit.schemaVersion == 29)
+  #expect(audit.schemaVersion == 30)
   #expect(
     audit.frames.allSatisfy {
-      $0.bodyVaneMorphologyRecordCount == 6_179
+      $0.plumageSurfaceVisibilityAuthority
+        == "analytic-discontinuity-ray-regular-cross-section-estimate"
+        && $0.plumageExplicitCurveVisibilityAuthority
+          == "raster-depth-resolved-explicit-curves"
+        && !$0.plumageExperimentalRayVisibilityEnabled
+        && $0.plumageRayVisibilityEnablementGate
+          == "explicit-curve-acceleration-structure-and-AOV-parity-required"
+    }
+  )
+  #expect(
+    audit.frames.allSatisfy {
+      $0.bodyVaneMorphologyRecordCount == 13_091
         && $0.bodyVaneMorphologyRecordBytes
           == $0.bodyVaneMorphologyRecordCount
           * MemoryLayout<CrowBodyVaneMorphologyGPU>.stride
@@ -801,8 +812,8 @@ func estimatedStandingCrowCaptureProducesLoopClosedFrames() throws {
           * MemoryLayout<CrowBodyVaneMorphologyGPU>.stride
         && $0.bodyVaneRetainedMorphologyCapacityBytes
           >= $0.bodyVaneSelectedMorphologyRecordBytes
-        && $0.bodyVanePoseInputBytes == 1_984
-        && $0.bodyVaneRetainedPoseCapacityBytes == 5_952
+        && $0.bodyVanePoseInputBytes == 2_016
+        && $0.bodyVaneRetainedPoseCapacityBytes == 6_048
         && $0.bodyVaneRetainedIndirectDrawBytes
           >= 3 * $0.bodyVaneBatchCount
           * MemoryLayout<DrawPrimitivesIndirectArguments>.stride

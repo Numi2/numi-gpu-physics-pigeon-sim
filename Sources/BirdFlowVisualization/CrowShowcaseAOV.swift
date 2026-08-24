@@ -29,6 +29,7 @@ struct CrowShowcaseFrame {
   let deviceDepthReadbackBuffer: MTLBuffer?
   let identityTexture: MTLTexture
   let reconstructionMode: String
+  let plumageRayVisibilityCapability: CrowPlumageRayVisibilityCapability
   let historyReset: Bool
   let jitter: SIMD2<Float>
   let reactiveMaskEnabled: Bool
@@ -560,6 +561,18 @@ struct CrowShowcaseFrame {
       outputWidth: displayTexture.width,
       outputHeight: displayTexture.height,
       reconstructionMode: reconstructionMode,
+      plumageSurfaceVisibilityAuthority:
+        plumageRayVisibilityCapability.surfaceVisibilityAuthority,
+      plumageExplicitCurveVisibilityAuthority:
+        plumageRayVisibilityCapability.explicitCurveVisibilityAuthority,
+      plumageComputeRayTracingSupported:
+        plumageRayVisibilityCapability.computeRayTracingSupported,
+      plumageRenderRayTracingSupported:
+        plumageRayVisibilityCapability.renderRayTracingSupported,
+      plumageExperimentalRayVisibilityEnabled:
+        plumageRayVisibilityCapability.experimentalRayVisibilityEnabled,
+      plumageRayVisibilityEnablementGate:
+        plumageRayVisibilityCapability.enablementGate,
       historyReset: historyReset,
       jitterOffsetX: jitter.x,
       jitterOffsetY: jitter.y,
@@ -1564,6 +1577,12 @@ struct CrowShowcaseAOVFrameAudit: Codable, Equatable {
   let outputWidth: Int
   let outputHeight: Int
   let reconstructionMode: String
+  let plumageSurfaceVisibilityAuthority: String
+  let plumageExplicitCurveVisibilityAuthority: String
+  let plumageComputeRayTracingSupported: Bool
+  let plumageRenderRayTracingSupported: Bool
+  let plumageExperimentalRayVisibilityEnabled: Bool
+  let plumageRayVisibilityEnablementGate: String
   let historyReset: Bool
   let jitterOffsetX: Float
   let jitterOffsetY: Float
@@ -1850,7 +1869,7 @@ struct CrowShowcaseAOVAuditReport: Codable, Equatable {
   let frames: [CrowShowcaseAOVFrameAudit]
 
   init(frames: [CrowShowcaseAOVFrameAudit]) {
-    schemaVersion = 29
+    schemaVersion = 30
     colorSpace = "scene-linear extended range; display output is tone mapped separately"
     motionConvention =
       "current pixel to previous pixel in upper-left-origin pixel units; MetalFX scale 1"

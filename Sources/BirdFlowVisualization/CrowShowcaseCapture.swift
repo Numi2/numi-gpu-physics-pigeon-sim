@@ -2093,6 +2093,8 @@ private final class CrowShowcaseRenderer {
       deviceDepthReadbackBuffer: deviceDepthReadback.buffer,
       identityTexture: identity,
       reconstructionMode: temporalEnabled ? "metalfx-temporal" : "native",
+      plumageRayVisibilityCapability:
+        CrowPlumageRayVisibilityCapability.current(on: backend.device),
       historyReset: historyReset,
       jitter: jitter,
       reactiveMaskEnabled: reactiveMask != nil,
