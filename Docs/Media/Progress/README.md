@@ -324,3 +324,38 @@ bytes with SHA-256
 its endpoint is pixel-identical, encoded seam is `0.979x` the median adjacent
 change, and maximum high-edge density is `1.182x` the median. The lens and all
 finishing remain presentation-only. The V10 audit passes `64/64` checks.
+
+## Simulated American crow branch — V1 native wingbeat
+
+Commit: `e520856` · 2026-08-16 · `1280 × 720` still and H.264 clip · 24 fps ·
+2.0 s
+
+This dated capture records the native Metal estimated-crow wingbeat presentation
+introduced with the body-integrated flight wings. The still is `903,967` bytes
+with SHA-256
+`cb990bd413683767e252e85fb54d0a1a82dece1383285494476a5766418b8d81`; the
+linked clip is `243,201` bytes with SHA-256
+`83fd17ae078abd49fb195d8d6ac6d4f3334058ecdc7284c381ff0704e8870b54`.
+
+<a href="2026-08-16-v1-estimated-crow-native-wingbeat.mp4"><img src="2026-08-16-v1-estimated-crow-native-wingbeat.png" width="66%" alt="Native Metal rendering of the estimated American crow during a wingbeat; opens the archived clip"></a>
+
+The crow’s geometry, feathering, pose, and wingbeat are simulated/estimated.
+This capture is not real crow footage, same-specimen kinematics, measured crow
+aerodynamics, or a quantitative validation result.
+
+## Simulated American crow branch — V2 standing to flight
+
+Commit: `7a23b3b` · 2026-08-24 · `800 × 450` · 72 frames · 25 fps · 3.0 s
+
+This exact GIF records the standing, small body-motion, takeoff, and flight
+transition after the simulated plumage/body continuity pass. It is `7,886,767`
+bytes with SHA-256
+`73c2ab9abc0ec2bb25cbc47cbc53f029cf878ae916f2b110f6085c384db7b964`.
+
+![V2 simulated American crow standing to flight](2026-08-24-v2-estimated-crow-standing-to-flight.gif)
+
+It is a dated visual-development capture, not a claim that the model is
+indistinguishable from a real crow. The current full-image retained-plumage ray
+audit remains diagnostic-only: raster depth and identity retain visibility
+authority while mapped acceleration-structure misses and owner substitutions are
+investigated.
