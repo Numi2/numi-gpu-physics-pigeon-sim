@@ -245,6 +245,68 @@ func metalProbesCrowRayGeometryHit() throws {
   )
 }
 
+@Test("Metal image audit returns retained triangle identity without enabling visibility")
+func metalImageAuditReturnsCrowRayIdentity() throws {
+  guard let device = MTLCreateSystemDefaultDevice(), device.supportsRaytracing
+  else { return }
+  let backend = try VisualizationBackend(device: device)
+  let vertexCount = 3
+  let buffer = try backend.buffer(
+    length: vertexCount * MemoryLayout<CrowFeatherVertexGPU>.stride,
+    shared: true
+  )
+  let vertices = buffer.contents().bindMemory(
+    to: CrowFeatherVertexGPU.self,
+    capacity: vertexCount
+  )
+  let identity = SIMD4<UInt32>(0xffff_ffff, 0x0710_0001, 3, 7)
+  vertices[0] = rayVertex(position: SIMD3<Float>(-0.02, -0.02, 0))
+  vertices[1] = rayVertex(position: SIMD3<Float>(0.02, -0.02, 0))
+  vertices[2] = rayVertex(position: SIMD3<Float>(0, 0.02, 0))
+  vertices[0].identity = identity
+  vertices[1].identity = identity
+  vertices[2].identity = identity
+  let buildCommand = try #require(backend.queue.makeCommandBuffer())
+  let build = try CrowPlumageRayGeometryBuild.encode(
+    on: device,
+    vertexBuffer: buffer,
+    vertexCount: vertexCount,
+    commandBuffer: buildCommand
+  )
+  buildCommand.commit()
+  buildCommand.waitUntilCompleted()
+  #expect(buildCommand.status == .completed)
+
+  let audit = try CrowPlumageRayImageAudit(backend: backend)
+  let auditCommand = try #require(backend.queue.makeCommandBuffer())
+  let resultsBuffer = try audit.encode(
+    build: build,
+    rays: [
+      CrowRayProbeInputGPU(
+        originAndMinimumDistance: SIMD4<Float>(0, 0, 1, 0.001),
+        directionAndMaximumDistance: SIMD4<Float>(0, 0, -1, 2)
+      )
+    ],
+    vertices: buffer,
+    commandBuffer: auditCommand
+  )
+  auditCommand.commit()
+  auditCommand.waitUntilCompleted()
+  let result = CrowPlumageRayImageAudit.results(
+    from: resultsBuffer,
+    count: 1
+  )[0]
+  #expect(auditCommand.status == .completed)
+  #expect(result.hit == 1)
+  #expect(result.primitiveIndex == 0)
+  #expect(result.distance == 1)
+  #expect(result.identity == identity)
+  #expect(
+    CrowPlumageRayVisibilityCapability.current(on: device)
+      .experimentalRayVisibilityEnabled == false
+  )
+}
+
 private func rayVertex(position: SIMD3<Float>) -> CrowFeatherVertexGPU {
   CrowFeatherVertexGPU(
     position: SIMD4<Float>(position, 1),

@@ -79,6 +79,14 @@ struct CrowRayProbeResultGPU {
     float reserved;
 };
 
+struct CrowRayImageAuditResultGPU {
+    uint hit;
+    uint primitiveIndex;
+    float distance;
+    float reserved;
+    uint4 identity;
+};
+
 struct CrowFeatherGeometryUniforms {
     uint4 counts;
     float4 renderOffsetAndDetailScale;
@@ -2589,6 +2597,34 @@ kernel void probeCrowRayGeometry(
     output.primitiveIndex=output.hit!=0u?result.primitive_id:uint(-1);
     output.distance=output.hit!=0u?result.distance:0.0f;
     output.reserved=0.0f;
+    outputs[index]=output;
+}
+
+// Per-pixel diagnostic query used by the future full-image retained-plumage
+// parity audit. It writes no color/depth/identity render target and is never
+// bound by production visibility code.
+kernel void auditCrowRayImageGeometry(
+    device const CrowRayProbeInputGPU* inputs [[buffer(0)]],
+    device CrowRayImageAuditResultGPU* outputs [[buffer(1)]],
+    primitive_acceleration_structure accelerationStructure [[buffer(2)]],
+    device const CrowFeatherVertexGPU* vertices [[buffer(3)]],
+    uint index [[thread_position_in_grid]]) {
+    CrowRayProbeInputGPU input=inputs[index];
+    ray probe;
+    probe.origin=input.originAndMinimumDistance.xyz;
+    probe.direction=normalize(input.directionAndMaximumDistance.xyz);
+    probe.min_distance=input.originAndMinimumDistance.w;
+    probe.max_distance=input.directionAndMaximumDistance.w;
+    intersector<triangle_data> triangleIntersector;
+    intersection_result<triangle_data> result=
+        triangleIntersector.intersect(probe,accelerationStructure);
+    CrowRayImageAuditResultGPU output;
+    output.hit=result.type==intersection_type::triangle?1u:0u;
+    output.primitiveIndex=output.hit!=0u?result.primitive_id:uint(-1);
+    output.distance=output.hit!=0u?result.distance:0.0f;
+    output.reserved=0.0f;
+    output.identity=output.hit!=0u
+        ?vertices[3u*output.primitiveIndex].identity:uint4(0u);
     outputs[index]=output;
 }
 
