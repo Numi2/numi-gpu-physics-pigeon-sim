@@ -181,10 +181,13 @@ inventory or view-dependent patch geometry.
    same compact retained curve work used by rasterization, builds a
    triangle-ribbon acceleration structure after the beauty frame, and records
    triangle-count, structure-byte, and scratch-byte evidence in the AOV audit.
-   It never dispatches a ray query, changes radiance, or flips the ray-visibility
-   authority. Geometry-count equality with the raster expansion is input parity,
-   not beauty/motion/depth/identity AOV parity; those comparisons remain the
-   next required gate before a ray path can own visibility.
+   It also fires one deterministic probe ray at the first retained triangle
+   recovered from that same expansion and records its hit, primitive index, and
+   distance. The probe never changes radiance, raster depth, motion, identity,
+   or the ray-visibility authority. Geometry-count equality and a structural
+   probe hit are input correspondence, not beauty/motion/depth/identity AOV
+   parity; those comparisons remain the next required gate before a ray path
+   can own visibility.
    The `711` full-density cranial vanes now retain family-`7` loft-neighbour
    morphology and reconstruct breathing plus the spatially graded head warp on
    Metal. The `225` gular owners now derive their `1,575` rachis/barb tubes

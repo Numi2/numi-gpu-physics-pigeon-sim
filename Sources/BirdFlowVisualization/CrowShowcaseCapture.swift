@@ -1558,6 +1558,7 @@ private final class CrowShowcaseRenderer {
         previousDepthPyramid: canTestPreviousDepth ? depthPyramid?.texture : nil,
         occlusionViewport: SIMD2<Int>(renderWidth, renderHeight),
         commandBuffer: commandBuffer,
+        auditReadback: ventralBarbRayGeometryAuditEnabled,
         rayGeometryStaging: ventralBarbRayGeometryAuditEnabled
       )
       ventralBarbFrame = frame
@@ -2049,6 +2050,58 @@ private final class CrowShowcaseRenderer {
         ventralBarbRayGeometryBuild = build
       }
     }
+    var ventralBarbRayProbeResult: CrowRayProbeResultGPU?
+    if let ventralBarbRayGeometryBuild,
+      let ventralBarbFrame,
+      let ventralBarbGeometryDeformer
+    {
+      let vertices = ventralBarbGeometryDeformer.vertices(for: ventralBarbFrame)
+      if vertices.count >= 3 {
+        let position = { (vertex: CrowFeatherVertexGPU) in
+          SIMD3<Float>(vertex.position.x, vertex.position.y, vertex.position.z)
+        }
+        let normal = { (vertex: CrowFeatherVertexGPU) in
+          SIMD3<Float>(vertex.normal.x, vertex.normal.y, vertex.normal.z)
+        }
+        let triangleCenter = (
+          position(vertices[0]) + position(vertices[1]) + position(vertices[2])
+        ) / 3
+        let summedNormal =
+          normal(vertices[0]) + normal(vertices[1]) + normal(vertices[2])
+        if simd_length_squared(summedNormal) > 1e-8 {
+          let triangleNormal = simd_normalize(summedNormal)
+          guard let probeCommandBuffer = backend.queue.makeCommandBuffer() else {
+            throw VisualizationError.pipeline("crow ray-geometry probe command buffer")
+          }
+          let probe = try CrowPlumageRayGeometryProbe(backend: backend)
+          let probeResults = try probe.encode(
+            build: ventralBarbRayGeometryBuild,
+            rays: [
+              CrowRayProbeInputGPU(
+                originAndMinimumDistance: SIMD4<Float>(
+                  triangleCenter + triangleNormal * 0.04,
+                  0.0001
+                ),
+                directionAndMaximumDistance: SIMD4<Float>(-triangleNormal, 0.08)
+              )
+            ],
+            commandBuffer: probeCommandBuffer
+          )
+          probeCommandBuffer.commit()
+          probeCommandBuffer.waitUntilCompleted()
+          guard probeCommandBuffer.status == .completed else {
+            throw VisualizationError.shader(
+              probeCommandBuffer.error?.localizedDescription
+                ?? "crow ray-geometry probe failed"
+            )
+          }
+          ventralBarbRayProbeResult = CrowPlumageRayGeometryProbe.results(
+            from: probeResults,
+            count: 1
+          )[0]
+        }
+      }
+    }
     let inputPixels = renderWidth * renderHeight
     let outputPixels = outputWidth * outputHeight
     let resolvedInputBytes =
@@ -2146,6 +2199,12 @@ private final class CrowShowcaseRenderer {
         ventralBarbRayGeometryBuild?.accelerationStructureSize ?? 0,
       plumageRayGeometryBuildScratchBytes:
         ventralBarbRayGeometryBuild?.buildScratchBufferSize ?? 0,
+      plumageRayGeometryProbeAttempted: ventralBarbRayGeometryBuild != nil,
+      plumageRayGeometryProbeHit: ventralBarbRayProbeResult?.hit == 1,
+      plumageRayGeometryProbePrimitiveIndex:
+        ventralBarbRayProbeResult.map { Int($0.primitiveIndex) } ?? -1,
+      plumageRayGeometryProbeDistanceMeters:
+        ventralBarbRayProbeResult?.distance ?? 0,
       historyReset: historyReset,
       jitter: jitter,
       reactiveMaskEnabled: reactiveMask != nil,

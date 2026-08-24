@@ -71,7 +71,7 @@ func crowCaptureRayGeometryAuditPreservesRasterAuthority() throws {
     from: Data(contentsOf: auditURL)
   )
 
-  #expect(audit.schemaVersion == 31)
+  #expect(audit.schemaVersion == 32)
   #expect(audit.frames.count == 2)
   #expect(
     audit.frames.allSatisfy {
@@ -82,6 +82,11 @@ func crowCaptureRayGeometryAuditPreservesRasterAuthority() throws {
           == $0.ventralBarbExpandedVertexCount
         && $0.plumageRayGeometryAccelerationStructureBytes > 0
         && $0.plumageRayGeometryBuildScratchBytes > 0
+        && $0.plumageRayGeometryProbeAttempted
+        && $0.plumageRayGeometryProbeHit
+        && $0.plumageRayGeometryProbePrimitiveIndex >= 0
+        && $0.plumageRayGeometryProbeDistanceMeters > 0
+        && $0.plumageRayGeometryProbeDistanceMeters < 0.08
         && !$0.plumageExperimentalRayVisibilityEnabled
         && $0.plumageExplicitCurveVisibilityAuthority
           == "raster-depth-resolved-explicit-curves"
@@ -856,7 +861,7 @@ func estimatedStandingCrowCaptureProducesLoopClosedFrames() throws {
     try VisualizationBackend(device: device).supportsMeshShaders
     ? "gpu-mesh-threadgroup-8-vertex-indexed"
     : "gpu-procedural-vertex-pulling"
-  #expect(audit.schemaVersion == 31)
+  #expect(audit.schemaVersion == 32)
   #expect(
     audit.frames.allSatisfy {
       $0.plumageSurfaceVisibilityAuthority
@@ -871,6 +876,10 @@ func estimatedStandingCrowCaptureProducesLoopClosedFrames() throws {
         && $0.plumageRayGeometryTriangleCount == 0
         && $0.plumageRayGeometryAccelerationStructureBytes == 0
         && $0.plumageRayGeometryBuildScratchBytes == 0
+        && !$0.plumageRayGeometryProbeAttempted
+        && !$0.plumageRayGeometryProbeHit
+        && $0.plumageRayGeometryProbePrimitiveIndex == -1
+        && $0.plumageRayGeometryProbeDistanceMeters == 0
     }
   )
   #expect(
