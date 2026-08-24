@@ -275,6 +275,10 @@ struct CrowBodyVanePoseUniforms: Equatable {
   var currentNeckPitchRollAndActive: SIMD4<Float> = .zero
   var previousNeckTranslationAndYaw: SIMD4<Float> = .zero
   var previousNeckPitchRollAndActive: SIMD4<Float> = .zero
+  /// Normalized standing/takeoff phase and active flag for dense body contour
+  /// tips. Wingbeat leaves the flag clear and retains its static loft.
+  var currentBodyContourPhaseAndActive: SIMD4<Float> = .zero
+  var previousBodyContourPhaseAndActive: SIMD4<Float> = .zero
 }
 
 /// Three affine rows transport one cervical column. The same upper 3x3 block

@@ -983,6 +983,7 @@ private final class CrowShowcaseRenderer {
       presentation: presentation,
       explicitVentralBarbCurvesEnabled: explicitVentralBarbCurvesEnabled,
       bodyVanesOwnedByMetal: bodyVaneGeometryDeformer != nil,
+      bodyContoursOwnedByMetal: bodyVaneGeometryDeformer != nil,
       ventralVanesOwnedByMetal: bodyVaneGeometryDeformer != nil,
       femoralVanesOwnedByMetal: createdFemoralVanesOwnedByMetal,
       cruralVanesOwnedByMetal: createdCruralVanesOwnedByMetal,
@@ -1450,6 +1451,8 @@ private final class CrowShowcaseRenderer {
         | (cranialVanesOwnedByMetal ? 0x8 : 0),
       currentDeployment: currentBodyVanePose.deployment,
       previousDeployment: previousBodyVanePose.deployment,
+      currentBodyContourPhase: presentation == .wingbeat ? nil : phase,
+      previousBodyContourPhase: presentation == .wingbeat ? nil : priorPhase,
       projectedPixelsPerMeter: projectedPixelsPerMeter,
       commandBuffer: commandBuffer
     )
@@ -2477,6 +2480,7 @@ private struct CrowMeshBuilder {
   private let presentation: CrowShowcasePresentation
   private let explicitVentralBarbCurvesEnabled: Bool
   private let bodyVanesOwnedByMetal: Bool
+  private let bodyContoursOwnedByMetal: Bool
   private let ventralVanesOwnedByMetal: Bool
   private let femoralVanesOwnedByMetal: Bool
   private let cruralVanesOwnedByMetal: Bool
@@ -2499,6 +2503,7 @@ private struct CrowMeshBuilder {
     presentation: CrowShowcasePresentation,
     explicitVentralBarbCurvesEnabled: Bool,
     bodyVanesOwnedByMetal: Bool,
+    bodyContoursOwnedByMetal: Bool,
     ventralVanesOwnedByMetal: Bool,
     femoralVanesOwnedByMetal: Bool,
     cruralVanesOwnedByMetal: Bool,
@@ -2511,6 +2516,7 @@ private struct CrowMeshBuilder {
     self.presentation = presentation
     self.explicitVentralBarbCurvesEnabled = explicitVentralBarbCurvesEnabled
     self.bodyVanesOwnedByMetal = bodyVanesOwnedByMetal
+    self.bodyContoursOwnedByMetal = bodyContoursOwnedByMetal
     self.ventralVanesOwnedByMetal = ventralVanesOwnedByMetal
     self.femoralVanesOwnedByMetal = femoralVanesOwnedByMetal
     self.cruralVanesOwnedByMetal = cruralVanesOwnedByMetal
@@ -3112,7 +3118,7 @@ private struct CrowMeshBuilder {
         0.016 * (1 + 0.055 * shingle.materialVariation),
         0.14 + 0.012 * shingle.materialVariation
       )
-      appendFeatherBlade(
+      if !bodyContoursOwnedByMetal { appendFeatherBlade(
         root: bodyCenter + shingle.rootOffset,
         tip: bodyCenter + shingle.tipOffset,
         planeNormal: shingle.planeNormal,
@@ -3132,7 +3138,7 @@ private struct CrowMeshBuilder {
         lodLengthMeters: shingle.referenceLengthMeters,
         projectedPixelsPerMeter: projectedPixelsPerMeter,
         to: &vertices
-      )
+      ) }
       appendBodyContourUnderlayer(
         shingle,
         bodyCenter: bodyCenter,

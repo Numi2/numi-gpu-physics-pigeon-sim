@@ -8,7 +8,7 @@ import simd
 func bodyVanesRetainCompactIdentityStableTemporalRecords() {
   #expect(MemoryLayout<CrowBodyVaneMorphologyGPU>.stride == 128)
   #expect(MemoryLayout<CrowBodyVaneRecordGPU>.stride == 176)
-  #expect(MemoryLayout<CrowBodyVanePoseUniforms>.stride == 128)
+  #expect(MemoryLayout<CrowBodyVanePoseUniforms>.stride == 160)
   #expect(MemoryLayout<CrowBodyVaneNeckTransformGPU>.stride == 48)
   #expect(MemoryLayout<CrowBodyVaneGeometryUniforms>.stride == 32)
   #expect(MemoryLayout<CrowBodyVaneSelectionUniforms>.stride == 32)
@@ -81,8 +81,8 @@ func bodyVanesRetainCompactIdentityStableTemporalRecords() {
     }
   )
   let retainedMorphology = CrowBodyVaneRecords.retainedMorphologyRecords()
-  #expect(retainedMorphology.count == 6_179)
-  #expect(Set(retainedMorphology.map(\.identity)).count == 6_179)
+  #expect(retainedMorphology.count == 13_091)
+  #expect(Set(retainedMorphology.map(\.identity)).count == 13_091)
   let inactiveLimbRecords = CrowBodyVaneRecords.retainedTemporalRecords(
     currentBodyCenter: .zero,
     previousBodyCenter: .zero,
@@ -588,8 +588,8 @@ func metalProceduralBodyVanesMatchSwiftGeometryOracle() throws {
   commandBuffer.waitUntilCompleted()
   #expect(commandBuffer.status == .completed)
   #expect(frame.auditReadbackReady)
-  #expect(frame.morphologyRecordCount == 6_179)
-  #expect(deformer.activeRecordCount(for: frame) == 6_179)
+  #expect(frame.morphologyRecordCount == 13_091)
+  #expect(deformer.activeRecordCount(for: frame) == 13_091)
   #expect(deformer.activeFemoralRecordCount(for: frame) == 540)
   #expect(deformer.expandedFemoralVertexCount(for: frame) == 68_040)
   #expect(deformer.activeCruralRecordCount(for: frame) == 324)
@@ -828,7 +828,7 @@ func bodyVaneProductionStorageIsTripleBufferedAndIndirect() throws {
   #expect(batchCount == CrowBodyVaneRecords.productionTopologies.count)
   #expect(frames.map(\.slot) == [0, 1, 2, 0])
   #expect(frames.map(\.morphologyBufferAllocationCount) == [1, 1, 1, 1])
-  #expect(frames.allSatisfy { $0.morphologyRecordCount == 6_179 })
+  #expect(frames.allSatisfy { $0.morphologyRecordCount == 13_091 })
   #expect(
     frames.allSatisfy {
       $0.morphologyRecordBytes == $0.morphologyRecordCount
@@ -840,8 +840,8 @@ func bodyVaneProductionStorageIsTripleBufferedAndIndirect() throws {
       $0.morphologyCapacityBytes == $0.morphologyRecordBytes
     }
   )
-  #expect(frames.allSatisfy { $0.poseInputBytes == 1_984 })
-  #expect(frames.allSatisfy { $0.retainedPoseCapacityBytes == 5_952 })
+  #expect(frames.allSatisfy { $0.poseInputBytes == 2_016 })
+  #expect(frames.allSatisfy { $0.retainedPoseCapacityBytes == 6_048 })
   #expect(deformer.retainedIndirectDrawBytes == 1_584)
   #expect(
     frames.allSatisfy {
@@ -850,10 +850,11 @@ func bodyVaneProductionStorageIsTripleBufferedAndIndirect() throws {
     }
   )
   #expect(frames.allSatisfy { $0.detailSegmentBufferAllocationCount == 3 })
-  #expect(frames.allSatisfy { deformer.activeRecordCount(for: $0) == 4_604 })
+  #expect(frames.allSatisfy { deformer.activeRecordCount(for: $0) == 11_516 })
   #expect(frames.allSatisfy { deformer.expandedRachisVertexCount(for: $0) > 0 })
   #expect(frames.allSatisfy { deformer.expandedDetailVertexCount(for: $0) > 0 })
 
+  let retainedRecords = CrowBodyVaneRecords.retainedMorphologyRecords()
   for index in 0..<batchCount {
     let first = frames[0].batches[index]
     let reused = frames[3].batches[index]
@@ -874,7 +875,10 @@ func bodyVaneProductionStorageIsTripleBufferedAndIndirect() throws {
     let bodyInstanceCount = deformer.selectedRecordIndices(
       for: frames[3],
       topologyIndex: index
-    ).count { Int($0) < CrowBodyVaneRecords.bodyMorphologyRecordCount }
+    ).count {
+      let record = retainedRecords[Int($0)]
+      return (record.identity.x & 0xFF00_0000) == 0x0200_0000
+    }
     #expect(rachisArguments.vertexCount == UInt32(reused.rachisVertexCount))
     #expect(rachisArguments.vertexStart == 0)
     #expect(rachisArguments.instanceCount == UInt32(bodyInstanceCount))
