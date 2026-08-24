@@ -171,6 +171,76 @@ func takeoffCrowRayGeometryAuditMatchesAcrossMotionAndElevation() throws {
   )
 }
 
+@Test("rear-oblique takeoff crow ray audit preserves retained raster correspondence")
+func rearObliqueTakeoffCrowRayGeometryAuditMatchesAcrossMotion() throws {
+  guard let device = MTLCreateSystemDefaultDevice(), device.supportsRaytracing
+  else { return }
+  let root = URL(fileURLWithPath: #filePath)
+    .deletingLastPathComponent()
+    .deletingLastPathComponent()
+    .deletingLastPathComponent()
+  let output = FileManager.default.temporaryDirectory.appendingPathComponent(
+    "birdflow-rear-takeoff-crow-ray-audit-\(UUID().uuidString)",
+    isDirectory: true
+  )
+  defer { try? FileManager.default.removeItem(at: output) }
+  let auditURL = output.appendingPathComponent("aov-audit.json")
+  let arguments = try CrowShowcaseCapture.Arguments(commandLine: [
+    "birdflow-capture",
+    "--capture-crow-frames", output.path,
+    "--capture-crow-presentation", "takeoff",
+    "--capture-crow-ventral-barb-ray-geometry-audit",
+    "--capture-crow-aov-audit", auditURL.path,
+    "--capture-crow-camera-yaw", "2.35",
+    "--capture-crow-camera-pitch", "0.55",
+    "--capture-crow-camera-distance", "0.22",
+    "--capture-width", "960",
+    "--capture-height", "720",
+    "--capture-frames", "3",
+    "--capture-crow-surface-manifest",
+    root.appendingPathComponent(
+      "ValidationInputs/american-crow-hybrid-surface-v1/manifest.json"
+    ).path,
+    "--capture-crow-surface-generation-audit",
+    root.appendingPathComponent(
+      "ValidationArtifacts/american-crow-hybrid-surface-generation-v1.json"
+    ).path,
+    "--capture-crow-profile",
+    root.appendingPathComponent(
+      "ValidationInputs/american-crow-hybrid-visual-v1.json"
+    ).path,
+    "--capture-crow-reality-asset",
+    root.appendingPathComponent(
+      "ValidationInputs/american-crow-hybrid-reality-v1.json"
+    ).path,
+    "--capture-crow-standing-reference",
+    root.appendingPathComponent(
+      "ValidationInputs/american-crow-standing-reference-v1.json"
+    ).path,
+  ])
+  try CrowShowcaseCapture.run(arguments)
+  let audit = try JSONDecoder().decode(
+    CrowShowcaseAOVAuditReport.self,
+    from: Data(contentsOf: auditURL)
+  )
+
+  #expect(audit.schemaVersion == 34)
+  #expect(audit.frames.count == 3)
+  #expect(
+    audit.frames.allSatisfy {
+      $0.plumageRayGeometryAuditRequested
+        && $0.plumageRayGeometryBuildSucceeded
+        && $0.plumageRayGeometryTriangleCount * 3
+          == $0.ventralBarbExpandedVertexCount
+        && $0.plumageRasterRaySampleCount > 0
+        && $0.plumageRasterRayHitCount == $0.plumageRasterRaySampleCount
+        && $0.plumageRasterRayDepthParityCount
+          == $0.plumageRasterRaySampleCount
+        && !$0.plumageExperimentalRayVisibilityEnabled
+    }
+  )
+}
+
 private func bitmapRGBDifference(
   _ firstData: Data,
   _ secondData: Data

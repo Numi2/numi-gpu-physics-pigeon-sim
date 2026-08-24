@@ -1388,7 +1388,7 @@ private final class CrowShowcaseRenderer {
       width: renderWidth,
       height: renderHeight,
       sampleCount: 1,
-      storageMode: .private,
+      storageMode: ventralBarbRayGeometryAuditEnabled ? .shared : .private,
       usage: .renderTarget,
       estimatedBytes: renderWidth * renderHeight * 4
     )
@@ -1812,7 +1812,9 @@ private final class CrowShowcaseRenderer {
     identityPass.colorAttachments[0].clearColor = MTLClearColorMake(0, 0, 0, 0)
     identityPass.depthAttachment.texture = identityDepth
     identityPass.depthAttachment.loadAction = .clear
-    identityPass.depthAttachment.storeAction = .dontCare
+    identityPass.depthAttachment.storeAction = ventralBarbRayGeometryAuditEnabled
+      ? .store
+      : .dontCare
     identityPass.depthAttachment.clearDepth = 1
     guard
       let identityEncoder = commandBuffer.makeRenderCommandEncoder(
@@ -2134,7 +2136,7 @@ private final class CrowShowcaseRenderer {
           currentCamera.eyeAndWidth.z
         ),
         identity: identity,
-        metricDepth: resolvedAOVs[4],
+        identityDepth: identityDepth,
         width: renderWidth,
         height: renderHeight
       )
@@ -2374,7 +2376,7 @@ private final class CrowShowcaseRenderer {
     viewProjection: simd_float4x4,
     eye: SIMD3<Float>,
     identity: MTLTexture,
-    metricDepth: MTLTexture,
+    identityDepth: MTLTexture,
     width: Int,
     height: Int
   ) -> [CrowRayRasterSample] {
@@ -2400,9 +2402,9 @@ private final class CrowShowcaseRenderer {
         mipmapLevel: 0
       )
     }
-    var rasterDepths = Array(repeating: Float.zero, count: width * height)
-    rasterDepths.withUnsafeMutableBytes { bytes in
-      metricDepth.getBytes(
+    var rasterDeviceDepths = Array(repeating: Float.zero, count: width * height)
+    rasterDeviceDepths.withUnsafeMutableBytes { bytes in
+      identityDepth.getBytes(
         bytes.baseAddress!,
         bytesPerRow: width * MemoryLayout<Float>.stride,
         from: MTLRegionMake2D(0, 0, width, height),
@@ -2417,29 +2419,28 @@ private final class CrowShowcaseRenderer {
         guard let start = retainedTriangleStarts[pixelIdentity.y],
           pixelIdentity == vertices[start].identity
         else { continue }
-        let depth = rasterDepths[pixelIndex]
-        guard depth.isFinite, depth > 0 else { continue }
+        let deviceDepth = rasterDeviceDepths[pixelIndex]
+        guard deviceDepth.isFinite, deviceDepth > 0, deviceDepth < 1 else { continue }
         let ndcX = (Float(x) + 0.5) / Float(width) * 2 - 1
         let ndcY = 1 - (Float(y) + 0.5) / Float(height) * 2
-        let nearHomogeneous = inverseViewProjection * SIMD4<Float>(ndcX, ndcY, 0, 1)
-        let farHomogeneous = inverseViewProjection * SIMD4<Float>(ndcX, ndcY, 1, 1)
-        guard abs(nearHomogeneous.w) > 1e-6, abs(farHomogeneous.w) > 1e-6
+        let hitHomogeneous = inverseViewProjection * SIMD4<Float>(
+          ndcX, ndcY, deviceDepth, 1
+        )
+        guard abs(hitHomogeneous.w) > 1e-6
         else { continue }
-        let nearPoint = SIMD3<Float>(
-          nearHomogeneous.x, nearHomogeneous.y, nearHomogeneous.z
-        ) / nearHomogeneous.w
-        let farPoint = SIMD3<Float>(
-          farHomogeneous.x, farHomogeneous.y, farHomogeneous.z
-        ) / farHomogeneous.w
-        let direction = farPoint - nearPoint
+        let hitPoint = SIMD3<Float>(
+          hitHomogeneous.x, hitHomogeneous.y, hitHomogeneous.z
+        ) / hitHomogeneous.w
+        let direction = hitPoint - eye
         guard simd_length_squared(direction) > 1e-8 else { continue }
+        let depth = simd_length(direction)
         samples.append(
           CrowRayRasterSample(
             ray: CrowRayProbeInputGPU(
               originAndMinimumDistance: SIMD4<Float>(eye, 0.0001),
               directionAndMaximumDistance: SIMD4<Float>(
                 simd_normalize(direction),
-                depth + 0.02
+                depth + 0.002
               )
             ),
             rasterDepthMeters: depth
