@@ -38,26 +38,26 @@ func bodyVanesRetainCompactIdentityStableTemporalRecords() {
   #expect(Set(records.map(\.identity)).count == records.count)
   #expect(first.keys.allSatisfy { $0.widthSections == 1 || $0.widthSections >= 5 })
   #expect(first.keys.allSatisfy { $0.verticesPerInstance > 0 })
-  #expect(CrowBodyVaneRecords.productionTopologies.count == 11)
+  #expect(CrowBodyVaneRecords.productionTopologies.count == 12)
   #expect(
     CrowBodyVaneRecords.productionTopologies.map {
       CrowBodyVaneRecords.rachisSections(for: $0)
-    } == [0, 0, 4, 4, 8, 8, 12, 4, 8, 4, 4]
+    } == [0, 0, 4, 4, 8, 8, 12, 18, 4, 8, 4, 4]
   )
   #expect(
     CrowBodyVaneRecords.productionTopologies.map {
       CrowBodyVaneRecords.rachisVerticesPerInstance(for: $0)
-    } == [0, 0, 96, 96, 192, 192, 288, 96, 192, 96, 96]
+    } == [0, 0, 96, 96, 192, 192, 288, 432, 96, 192, 96, 96]
   )
   #expect(
     CrowBodyVaneRecords.productionTopologies.map {
       CrowBodyVaneRecords.detailSegmentCount(for: $0)
-    } == [0, 0, 43, 43, 41, 41, 167, 43, 41, 43, 43]
+    } == [0, 0, 43, 43, 41, 41, 167, 167, 43, 41, 43, 43]
   )
   #expect(
     CrowBodyVaneRecords.productionTopologies.map {
       CrowBodyVaneRecords.detailVerticesPerInstance(for: $0)
-    } == [0, 0, 774, 774, 738, 738, 3_006, 774, 738, 774, 774]
+    } == [0, 0, 774, 774, 738, 738, 3_006, 3_006, 774, 738, 774, 774]
   )
   let morphology = CrowBodyVaneRecords.morphologyRecords()
   #expect(morphology.count == 3_212)
@@ -201,7 +201,7 @@ func retainedBodyDetailReproducesCPUMesostructureHierarchy() {
   for recordIndex in [0, 896, 1_856, 2_156] {
     let sample = samples[recordIndex]
     let record = records[recordIndex]
-    for projectedPixelsPerMeter: Float in [3_000, 10_000, 30_000] {
+    for projectedPixelsPerMeter: Float in [3_000, 10_000, 96_000] {
       let topology = CrowBodyVaneRecords.topology(
         for: sample,
         projectedPixelsPerMeter: projectedPixelsPerMeter
@@ -297,9 +297,9 @@ func metalFutureCloseBodyBarbulesMatchRetainedSwiftOracle() throws {
     currentDeployment: 1,
     previousDeployment: 0.35
   )[recordIndex]
-  let topology = CrowBodyVaneTopology(axialSections: 16, widthSections: 7)
+  let topology = CrowBodyVaneTopology(axialSections: 24, widthSections: 9)
   let vertexCount = CrowBodyVaneRecords.detailVerticesPerInstance(for: topology)
-  let projectedPixelsPerMeter: Float = 30_000
+  let projectedPixelsPerMeter: Float = 96_000
 
   func sharedBuffer<T>(_ values: [T]) throws -> MTLBuffer {
     let buffer = try backend.buffer(
@@ -902,7 +902,11 @@ func bodyVaneProductionStorageIsTripleBufferedAndIndirect() throws {
   )
   #expect(frames.allSatisfy { $0.poseInputBytes == 2_016 })
   #expect(frames.allSatisfy { $0.retainedPoseCapacityBytes == 6_048 })
-  #expect(deformer.retainedIndirectDrawBytes == 1_584)
+  #expect(
+    deformer.retainedIndirectDrawBytes
+      == 9 * CrowBodyVaneRecords.productionTopologies.count
+        * MemoryLayout<DrawPrimitivesIndirectArguments>.stride
+  )
   #expect(
     frames.allSatisfy {
       $0.retainedDetailSegmentCapacityBytes
@@ -1071,9 +1075,9 @@ func metalFamilySevenVisibilityCompactsStableCranialAndGularWork() throws {
   )
   let arguments = visible.indirectDrawBuffer.contents().bindMemory(
     to: DrawPrimitivesIndirectArguments.self,
-    capacity: 12
+    capacity: CrowBodyVaneRecords.productionTopologies.count + 1
   )
-  for topologyIndex in 0..<11 {
+  for topologyIndex in 0..<CrowBodyVaneRecords.productionTopologies.count {
     let base = Int(arguments[topologyIndex].baseInstance)
     let count = Int(arguments[topologyIndex].instanceCount)
     let selected = cranialIndices[base..<(base + count)]
@@ -1242,7 +1246,7 @@ func metalBodyVaneLODSelectionMatchesCPUOracle() throws {
     CrowStandingPose.sample(phase: 0.35)
   )
   let cranialRadii = SIMD3<Float>(0.0447, 0.0328, 0.0387)
-  for projectedPixelsPerMeter: Float in [800, 1_000, 1_600, 4_000, 20_000] {
+  for projectedPixelsPerMeter: Float in [800, 1_000, 1_600, 4_000, 20_000, 96_000] {
     let allRecords = CrowBodyVaneRecords.retainedTemporalRecords(
       currentBodyCenter: .zero,
       previousBodyCenter: .zero,

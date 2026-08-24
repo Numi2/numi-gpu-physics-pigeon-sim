@@ -3123,9 +3123,10 @@ inline uint2 crowBodyVaneTopologySections(uint topologyIndex) {
         case 4u: return uint2(10u,5u);
         case 5u: return uint2(12u,5u);
         case 6u: return uint2(16u,7u);
-        case 7u: return uint2(7u,3u);
-        case 8u: return uint2(11u,5u);
-        case 9u: return uint2(8u,3u);
+        case 7u: return uint2(24u,9u);
+        case 8u: return uint2(7u,3u);
+        case 9u: return uint2(11u,5u);
+        case 10u: return uint2(8u,3u);
         default: return uint2(6u,3u);
     }
 }
@@ -3146,9 +3147,10 @@ inline uint crowBodyVaneTopologyIndex(
         }
         float projectedLength=max(0.0f,record.morphology.y
             *projectedPixelsPerMeter);
+        if(projectedLength>=1920.0f){return 7u;}
         if(projectedLength>=480.0f){return 6u;}
         if(projectedLength>=120.0f){return 4u;}
-        if(projectedLength>=24.0f){return 10u;}
+        if(projectedLength>=24.0f){return 11u;}
         return 0u;
     }
     if(femoral||crural){
@@ -3159,9 +3161,10 @@ inline uint crowBodyVaneTopologyIndex(
         }
         float projectedLength=max(0.0f,record.morphology.y
             *projectedPixelsPerMeter);
+        if(projectedLength>=1920.0f){return 7u;}
         if(projectedLength>=480.0f){return 6u;}
-        if(projectedLength>=120.0f){return crural?5u:8u;}
-        if(projectedLength>=24.0f){return crural?9u:7u;}
+        if(projectedLength>=120.0f){return crural?5u:9u;}
+        if(projectedLength>=24.0f){return crural?10u:8u;}
         return 1u;
     }
     if(throatBridge){
@@ -3171,18 +3174,20 @@ inline uint crowBodyVaneTopologyIndex(
         }
         float projectedLength=max(0.0f,record.morphology.y
             *projectedPixelsPerMeter);
+        if(projectedLength>=1920.0f){return 7u;}
         if(projectedLength>=480.0f){return 6u;}
-        if(projectedLength>=120.0f){return 8u;}
-        if(projectedLength>=24.0f){return 7u;}
+        if(projectedLength>=120.0f){return 9u;}
+        if(projectedLength>=24.0f){return 8u;}
         return 1u;
     }
     if(ventral){
         if(projectedPixelsPerMeter<1400.0f){return 0xffffffffu;}
         float projectedLength=max(0.0f,record.morphology.y
             *projectedPixelsPerMeter);
+        if(projectedLength>=1920.0f){return 7u;}
         if(projectedLength>=480.0f){return 6u;}
-        if(projectedLength>=120.0f){return 8u;}
-        if(projectedLength>=24.0f){return 7u;}
+        if(projectedLength>=120.0f){return 9u;}
+        if(projectedLength>=24.0f){return 8u;}
         return 1u;
     }
     uint region=uint(record.morphology.y);
@@ -3199,6 +3204,7 @@ inline uint crowBodyVaneTopologyIndex(
     );
     float projectedLength=max(0.0f,lengthMeters*projectedPixelsPerMeter);
     bool cervical=region==0u;
+    if(projectedLength>=1920.0f){return 7u;}
     if(projectedLength>=480.0f){return 6u;}
     if(projectedLength>=120.0f){return cervical?4u:5u;}
     if(projectedLength>=24.0f){return cervical?2u:3u;}
@@ -3221,21 +3227,21 @@ kernel void scanCrowBodyVaneRecords(
     constant CrowBodyVaneSelectionUniforms& selection [[buffer(3)]],
     uint index [[thread_position_in_grid]]) {
     if(index>0u){return;}
-    uint counts[11]={0u,0u,0u,0u,0u,0u,0u,0u,0u,0u,0u};
+    uint counts[12]={0u,0u,0u,0u,0u,0u,0u,0u,0u,0u,0u,0u};
     for(uint recordIndex=0u;recordIndex<selection.counts.x;++recordIndex){
         uint topologyIndex=topologyIndices[recordIndex];
-        if(topologyIndex<11u){
+        if(topologyIndex<12u){
             topologyOffsets[recordIndex]=counts[topologyIndex]++;
         }else{
             topologyOffsets[recordIndex]=0xffffffffu;
         }
     }
     uint total=0u;
-    for(uint topologyIndex=0u;topologyIndex<11u;++topologyIndex){
+    for(uint topologyIndex=0u;topologyIndex<12u;++topologyIndex){
         topologyCounts[topologyIndex]=counts[topologyIndex];
         total+=counts[topologyIndex];
     }
-    topologyCounts[11]=total;
+    topologyCounts[12]=total;
 }
 
 kernel void emitCrowBodyVaneWork(
@@ -3247,7 +3253,7 @@ kernel void emitCrowBodyVaneWork(
     uint index [[thread_position_in_grid]]) {
     if(index>=selection.counts.x){return;}
     uint topologyIndex=topologyIndices[index];
-    if(topologyIndex>=11u){return;}
+    if(topologyIndex>=12u){return;}
     uint base=0u;
     for(uint prior=0u;prior<topologyIndex;++prior){base+=topologyCounts[prior];}
     recordWork[base+topologyOffsets[index]]=index;
@@ -3259,7 +3265,7 @@ kernel void prepareCrowBodyVaneIndirectWork(
     device const CrowBodyVaneMorphologyGPU* records [[buffer(2)]],
     device const uint* recordWork [[buffer(3)]],
     uint topologyIndex [[thread_position_in_grid]]) {
-    if(topologyIndex>=11u){return;}
+    if(topologyIndex>=12u){return;}
     uint base=0u;
     for(uint prior=0u;prior<topologyIndex;++prior){base+=topologyCounts[prior];}
     uint2 sections=crowBodyVaneTopologySections(topologyIndex);
@@ -3284,8 +3290,9 @@ kernel void prepareCrowBodyVaneIndirectWork(
         base
     };
     uint rachisSections=sections.x<=4u?0u:
-        (sections.x<=8u?4u:(sections.x<=12u?8u:12u));
-    arguments[11u+topologyIndex]={
+        (sections.x<=8u?4u:(sections.x<=12u?8u:
+            (sections.x<=20u?12u:18u)));
+    arguments[12u+topologyIndex]={
         rachisSections*24u,
         rachisInstanceCount,
         0u,
@@ -3293,7 +3300,7 @@ kernel void prepareCrowBodyVaneIndirectWork(
     };
     uint detailSegments=sections.x<=4u?0u:
         (sections.x<=8u?43u:(sections.x<=12u?41u:167u));
-    arguments[22u+topologyIndex]={
+    arguments[24u+topologyIndex]={
         detailSegments*18u,
         detailInstanceCount,
         0u,
@@ -3861,9 +3868,10 @@ kernel void classifyCrowCranialVisibility(
     float projectedLength=max(
         0.0f,record.morphology.y*visibility.selection.x
     );
-    uint topologyIndex=projectedLength>=480.0f?6u:
-        (projectedLength>=120.0f?4u:
-            (projectedLength>=24.0f?10u:0u));
+    uint topologyIndex=projectedLength>=1920.0f?7u:
+        (projectedLength>=480.0f?6u:
+            (projectedLength>=120.0f?4u:
+                (projectedLength>=24.0f?11u:0u)));
     if((visibility.counts.w&8u)==0u||visibility.selection.x<1400.0f){
         topologyIndex=0xffffffffu;
     }
@@ -3889,7 +3897,7 @@ kernel void scanCrowCranialVisibility(
     constant CrowCranialVisibilityUniforms& visibility [[buffer(5)]],
     uint index [[thread_position_in_grid]]) {
     if(index>0u){return;}
-    uint localCounts[11]={0u,0u,0u,0u,0u,0u,0u,0u,0u,0u,0u};
+    uint localCounts[12]={0u,0u,0u,0u,0u,0u,0u,0u,0u,0u,0u,0u};
     uint gularCount=0u;
     uint frustumCount=0u;
     uint frustumGularCount=0u;
@@ -3924,18 +3932,18 @@ kernel void scanCrowCranialVisibility(
         }
     }
     uint total=0u;
-    for(uint topologyIndex=0u;topologyIndex<11u;++topologyIndex){
+    for(uint topologyIndex=0u;topologyIndex<12u;++topologyIndex){
         counts[topologyIndex]=localCounts[topologyIndex];
         total+=localCounts[topologyIndex];
     }
-    counts[11]=total;
-    counts[12]=gularCount;
-    counts[13]=frustumCount;
-    counts[14]=frustumGularCount;
-    counts[15]=occlusionCulled;
-    counts[16]=occlusionEnabled?frustumCount:0u;
-    counts[17]=occlusionGularCulled;
-    counts[18]=occlusionEnabled?frustumGularCount:0u;
+    counts[12]=total;
+    counts[13]=gularCount;
+    counts[14]=frustumCount;
+    counts[15]=frustumGularCount;
+    counts[16]=occlusionCulled;
+    counts[17]=occlusionEnabled?frustumCount:0u;
+    counts[18]=occlusionGularCulled;
+    counts[19]=occlusionEnabled?frustumGularCount:0u;
 }
 
 kernel void emitCrowCranialVisibilityWork(
@@ -3949,7 +3957,7 @@ kernel void emitCrowCranialVisibilityWork(
     uint localIndex [[thread_position_in_grid]]) {
     if(localIndex>=visibility.counts.y){return;}
     uint topologyIndex=topologyIndices[localIndex];
-    if(topologyIndex>=11u){return;}
+    if(topologyIndex>=12u){return;}
     uint base=0u;
     for(uint prior=0u;prior<topologyIndex;++prior){base+=counts[prior];}
     uint recordIndex=visibility.counts.x+localIndex;
@@ -3963,15 +3971,15 @@ kernel void prepareCrowCranialVisibilityIndirectWork(
     device const uint* counts [[buffer(0)]],
     device DrawPrimitivesIndirectArguments* arguments [[buffer(1)]],
     uint workIndex [[thread_position_in_grid]]) {
-    if(workIndex<11u){
+    if(workIndex<12u){
         uint base=0u;
         for(uint prior=0u;prior<workIndex;++prior){base+=counts[prior];}
         uint2 sections=crowBodyVaneTopologySections(workIndex);
         arguments[workIndex]={
             sections.x*sections.y*6u,counts[workIndex],0u,base
         };
-    }else if(workIndex==11u){
-        arguments[11]={126u,counts[12],0u,0u};
+    }else if(workIndex==12u){
+        arguments[12]={126u,counts[13],0u,0u};
     }
 }
 

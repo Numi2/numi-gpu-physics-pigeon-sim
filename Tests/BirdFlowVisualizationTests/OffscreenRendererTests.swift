@@ -671,6 +671,11 @@ func crowFeatherTessellationFollowsProjectedCoverage() {
     projectedPixelsPerMeter: pixelsPerMeter,
     baseAxialSections: 6
   )
+  let macroGeometry = CrowFeatherCoverageLOD.tessellation(
+    lengthMeters: 1_920 / pixelsPerMeter,
+    projectedPixelsPerMeter: pixelsPerMeter,
+    baseAxialSections: 6
+  )
 
   let tiers: [Int] = [
     silhouette.tier, vaneShell.tier, barbRibbon.tier, microstructureThreshold.tier,
@@ -692,6 +697,13 @@ func crowFeatherTessellationFollowsProjectedCoverage() {
   #expect(microstructureThreshold.edgeBarbPairs == 18)
   #expect(microstructureThreshold.barbPairs == 18)
   #expect(microstructureThreshold.barbulesPerBarb == 3)
+  #expect(macroGeometry.tier == -1)
+  #expect(macroGeometry.axialSections == 24)
+  #expect(macroGeometry.widthSections == 9)
+  #expect(macroGeometry.rachisSections == 18)
+  #expect(macroGeometry.edgeBarbPairs == microstructureThreshold.edgeBarbPairs)
+  #expect(macroGeometry.barbPairs == microstructureThreshold.barbPairs)
+  #expect(macroGeometry.barbulesPerBarb == microstructureThreshold.barbulesPerBarb)
   #expect(
     silhouette.axialSections < vaneShell.axialSections
       && vaneShell.axialSections < barbRibbon.axialSections

@@ -2,7 +2,7 @@ import Foundation
 import Metal
 import simd
 
-private let crowCranialVisibilityCounterCount = 19
+private let crowCranialVisibilityCounterCount = 20
 
 struct CrowBodyVaneTopology: Hashable, Comparable {
   let axialSections: Int
@@ -256,7 +256,8 @@ final class CrowCranialVisibilityResources {
     }
     cranialVisibilityIndirectBuffers = try (0..<bufferedFrameCount).map { _ in
       try backend.buffer(
-        length: 12 * MemoryLayout<DrawPrimitivesIndirectArguments>.stride,
+        length: (CrowBodyVaneRecords.productionTopologies.count + 1)
+          * MemoryLayout<DrawPrimitivesIndirectArguments>.stride,
         shared: true
       )
     }
@@ -868,7 +869,8 @@ final class CrowBodyVaneGeometryDeformer {
     memset(
       retainedResources.cranialVisibilityIndirectBuffers[slot].contents(),
       0,
-      12 * MemoryLayout<DrawPrimitivesIndirectArguments>.stride
+      (CrowBodyVaneRecords.productionTopologies.count + 1)
+        * MemoryLayout<DrawPrimitivesIndirectArguments>.stride
     )
     var uniforms = Self.cranialVisibilityUniforms(
       viewProjection: viewProjection,
@@ -979,7 +981,7 @@ final class CrowBodyVaneGeometryDeformer {
     backend.dispatch1D(
       prepare,
       pipeline: retainedResources.cranialVisibilityIndirectPipeline,
-      count: 12
+      count: CrowBodyVaneRecords.productionTopologies.count + 1
     )
     prepare.endEncoding()
 
@@ -1036,7 +1038,7 @@ final class CrowBodyVaneGeometryDeformer {
       frame.countBuffer.contents().bindMemory(
         to: UInt32.self,
         capacity: crowCranialVisibilityCounterCount
-      )[11]
+      )[CrowBodyVaneRecords.productionTopologies.count]
     )
   }
 
@@ -1045,44 +1047,56 @@ final class CrowBodyVaneGeometryDeformer {
       frame.countBuffer.contents().bindMemory(
         to: UInt32.self,
         capacity: crowCranialVisibilityCounterCount
-      )[12]
+      )[CrowBodyVaneRecords.productionTopologies.count + 1]
     )
   }
 
   func cranialFrustumVisibleRecordCount(
     for frame: CrowCranialVisibilityFrame
   ) -> Int {
-    cranialVisibilityCounter(frame, index: 13)
+    cranialVisibilityCounter(
+      frame, index: CrowBodyVaneRecords.productionTopologies.count + 2
+    )
   }
 
   func gularFrustumVisibleRecordCount(
     for frame: CrowCranialVisibilityFrame
   ) -> Int {
-    cranialVisibilityCounter(frame, index: 14)
+    cranialVisibilityCounter(
+      frame, index: CrowBodyVaneRecords.productionTopologies.count + 3
+    )
   }
 
   func cranialOcclusionCulledRecordCount(
     for frame: CrowCranialVisibilityFrame
   ) -> Int {
-    cranialVisibilityCounter(frame, index: 15)
+    cranialVisibilityCounter(
+      frame, index: CrowBodyVaneRecords.productionTopologies.count + 4
+    )
   }
 
   func cranialOcclusionTestedRecordCount(
     for frame: CrowCranialVisibilityFrame
   ) -> Int {
-    cranialVisibilityCounter(frame, index: 16)
+    cranialVisibilityCounter(
+      frame, index: CrowBodyVaneRecords.productionTopologies.count + 5
+    )
   }
 
   func gularOcclusionCulledRecordCount(
     for frame: CrowCranialVisibilityFrame
   ) -> Int {
-    cranialVisibilityCounter(frame, index: 17)
+    cranialVisibilityCounter(
+      frame, index: CrowBodyVaneRecords.productionTopologies.count + 6
+    )
   }
 
   func gularOcclusionTestedRecordCount(
     for frame: CrowCranialVisibilityFrame
   ) -> Int {
-    cranialVisibilityCounter(frame, index: 18)
+    cranialVisibilityCounter(
+      frame, index: CrowBodyVaneRecords.productionTopologies.count + 7
+    )
   }
 
   func cranialVisibleRecordIndices(
@@ -1110,16 +1124,17 @@ final class CrowBodyVaneGeometryDeformer {
   func cranialExpandedVertexCount(for frame: CrowCranialVisibilityFrame) -> Int {
     let arguments = frame.indirectDrawBuffer.contents().bindMemory(
       to: DrawPrimitivesIndirectArguments.self,
-      capacity: 12
+      capacity: CrowBodyVaneRecords.productionTopologies.count + 1
     )
-    return (0..<11).reduce(0) {
+    return (0..<CrowBodyVaneRecords.productionTopologies.count).reduce(0) {
       $0 + Int(arguments[$1].vertexCount) * Int(arguments[$1].instanceCount)
     }
   }
 
   func gularExpandedVertexCount(for frame: CrowCranialVisibilityFrame) -> Int {
     let argument = frame.indirectDrawBuffer.contents().advanced(
-      by: 11 * MemoryLayout<DrawPrimitivesIndirectArguments>.stride
+      by: CrowBodyVaneRecords.productionTopologies.count
+        * MemoryLayout<DrawPrimitivesIndirectArguments>.stride
     ).bindMemory(to: DrawPrimitivesIndirectArguments.self, capacity: 1).pointee
     return Int(argument.vertexCount) * Int(argument.instanceCount)
   }
@@ -1701,6 +1716,7 @@ enum CrowBodyVaneRecords {
     CrowBodyVaneTopology(axialSections: 10, widthSections: 5),
     CrowBodyVaneTopology(axialSections: 12, widthSections: 5),
     CrowBodyVaneTopology(axialSections: 16, widthSections: 7),
+    CrowBodyVaneTopology(axialSections: 24, widthSections: 9),
     CrowBodyVaneTopology(axialSections: 7, widthSections: 3),
     CrowBodyVaneTopology(axialSections: 11, widthSections: 5),
     CrowBodyVaneTopology(axialSections: 8, widthSections: 3),
@@ -1712,7 +1728,8 @@ enum CrowBodyVaneRecords {
     case ...4: 0
     case 5...8: 4
     case 9...12: 8
-    default: 12
+    case 13...20: 12
+    default: 18
     }
   }
 
@@ -2209,6 +2226,9 @@ enum CrowBodyVaneRecords {
       0,
       referenceLengthMeters * projectedPixelsPerMeter
     )
+    if projectedLength >= 1_920 {
+      return CrowBodyVaneTopology(axialSections: 24, widthSections: 9)
+    }
     if projectedLength >= 480 {
       return CrowBodyVaneTopology(axialSections: 16, widthSections: 7)
     }

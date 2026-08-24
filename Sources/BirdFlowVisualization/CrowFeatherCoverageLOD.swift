@@ -48,6 +48,21 @@ enum CrowFeatherCoverageLOD {
   ) -> CrowFeatherTessellation {
     let projectedLength = max(0, lengthMeters * projectedPixelsPerMeter)
     let base = max(baseAxialSections, 2)
+    // This tier is intentionally reserved for offline or future-device macro
+    // output. It preserves the same feather identity, vane envelope, and
+    // barb/barbule budget as tier 0 while removing the last visible faceting
+    // from a close body vane. Ordinary presentation never reaches it.
+    if projectedLength >= 1_920 {
+      return CrowFeatherTessellation(
+        tier: -1,
+        axialSections: max(base * 3, 24),
+        widthSections: 9,
+        rachisSections: 18,
+        edgeBarbPairs: 18,
+        barbPairs: 18,
+        barbulesPerBarb: 3
+      )
+    }
     if projectedLength >= 480 {
       return CrowFeatherTessellation(
         tier: 0,
