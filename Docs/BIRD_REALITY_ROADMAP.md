@@ -189,7 +189,7 @@ inventory or view-dependent patch geometry.
    that the raster identity AOV assigns to retained curve triangles, casts
    camera rays through them, and requires their ray-hit distances to match the
    raster metric depth. Geometry-count equality, three structural probes, and
-   four sampled pixel correspondences are not full beauty/motion/depth/identity
+   sixteen sampled pixel correspondences are not full beauty/motion/depth/identity
    AOV parity; exhaustive comparisons remain the next required gate before a
    ray path can own visibility.
    The `711` full-density cranial vanes now retain family-`7` loft-neighbour

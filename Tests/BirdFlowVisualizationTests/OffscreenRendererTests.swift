@@ -90,7 +90,7 @@ func crowCaptureRayGeometryAuditPreservesRasterAuthority() throws {
         && $0.plumageRayGeometryProbeRayCount == 3
         && $0.plumageRayGeometryProbeHitCount
           == $0.plumageRayGeometryProbeRayCount
-        && $0.plumageRasterRaySampleCount > 0
+        && $0.plumageRasterRaySampleCount == 16
         && $0.plumageRasterRayHitCount == $0.plumageRasterRaySampleCount
         && $0.plumageRasterRayDepthParityCount
           == $0.plumageRasterRaySampleCount

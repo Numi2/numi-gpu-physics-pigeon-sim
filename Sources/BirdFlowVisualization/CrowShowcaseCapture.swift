@@ -2410,8 +2410,8 @@ private final class CrowShowcaseRenderer {
       )
     }
     var samples: [CrowRayRasterSample] = []
-    for y in stride(from: 0, to: height, by: 2) where samples.count < 4 {
-      for x in stride(from: 0, to: width, by: 2) where samples.count < 4 {
+    for y in stride(from: 0, to: height, by: 2) where samples.count < 16 {
+      for x in stride(from: 0, to: width, by: 2) where samples.count < 16 {
         let pixelIndex = y * width + x
         let pixelIdentity = rasterIdentities[pixelIndex]
         guard let start = retainedTriangleStarts[pixelIdentity.y],
