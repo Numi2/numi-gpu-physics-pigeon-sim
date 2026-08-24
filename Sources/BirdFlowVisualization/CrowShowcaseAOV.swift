@@ -51,6 +51,9 @@ struct CrowShowcaseFrame {
   let plumageFullImageRayHitCount: Int
   let plumageFullImageRayRachisOwnerParityCount: Int
   let plumageFullImageRayDepthParityCount: Int
+  /// Coordinate-indexed diagnostic evidence for full-image ray differences.
+  /// This never participates in beauty or AOV visibility resolution.
+  let plumageFullImageRayMismatchMap: [CrowPlumageRayMismatchAudit]
   let historyReset: Bool
   let jitter: SIMD2<Float>
   let reactiveMaskEnabled: Bool
@@ -620,6 +623,7 @@ struct CrowShowcaseFrame {
       plumageFullImageRayRachisOwnerParityCount:
         plumageFullImageRayRachisOwnerParityCount,
       plumageFullImageRayDepthParityCount: plumageFullImageRayDepthParityCount,
+      plumageFullImageRayMismatchMap: plumageFullImageRayMismatchMap,
       historyReset: historyReset,
       jitterOffsetX: jitter.x,
       jitterOffsetY: jitter.y,
@@ -1651,6 +1655,9 @@ struct CrowShowcaseAOVFrameAudit: Codable, Equatable {
   let plumageFullImageRayHitCount: Int
   let plumageFullImageRayRachisOwnerParityCount: Int
   let plumageFullImageRayDepthParityCount: Int
+  /// Each record names its raster pixel and the precise diagnostic failure.
+  /// The list is a sparse coordinate map rather than a rendering resource.
+  let plumageFullImageRayMismatchMap: [CrowPlumageRayMismatchAudit]
   let historyReset: Bool
   let jitterOffsetX: Float
   let jitterOffsetY: Float
@@ -1937,7 +1944,7 @@ struct CrowShowcaseAOVAuditReport: Codable, Equatable {
   let frames: [CrowShowcaseAOVFrameAudit]
 
   init(frames: [CrowShowcaseAOVFrameAudit]) {
-    schemaVersion = 37
+    schemaVersion = 38
     colorSpace = "scene-linear extended range; display output is tone mapped separately"
     motionConvention =
       "current pixel to previous pixel in upper-left-origin pixel units; MetalFX scale 1"
@@ -1955,4 +1962,19 @@ struct CrowShowcaseAOVAuditReport: Codable, Equatable {
     ]
     self.frames = frames
   }
+}
+
+/// A sparse, independently inspectable full-image raster-to-ray discrepancy.
+/// It intentionally records diagnostic state only: raster remains the sole
+/// authority for explicit curve visibility.
+struct CrowPlumageRayMismatchAudit: Codable, Equatable {
+  let pixelX: Int
+  let pixelY: Int
+  let classification: String
+  let rasterPrimitiveIndex: Int
+  let rayPrimitiveIndex: Int
+  let rasterRachisOwnerIndex: Int
+  let rayRachisOwnerIndex: Int?
+  let rasterDepthMeters: Float
+  let rayDistanceMeters: Float?
 }

@@ -202,15 +202,16 @@ inventory or view-dependent patch geometry.
    takeoff phases from elevated oblique and rear-oblique cameras; it is not yet
    a full-image qualification.
 
-   The next implementation milestone is an opt-in, diagnostic-only full-image
-   retained-ribbon ray AOV. It must trace every raster-owned ventral-barb pixel
-   through the same completed acceleration structure, retain hit/miss, exact
-   primitive identity, parent rachis-owner identity, and metric distance, and
-   write a mismatch map inspectable independently of beauty. Promotion requires
-   deterministic standing and takeoff captures from the elevated-oblique and
-   rear-oblique cameras, explicit accounting for every target pixel, and zero
-   unexplained parent-owner or depth disagreement. Thin overlapping ribbon
-   primitives may differ at the exact-triangle level, but those cases must be
+   The opt-in, diagnostic-only full-image retained-ribbon ray audit now traces
+   every raster-owned ventral-barb pixel through the completed acceleration
+   structure, retains hit/miss, exact primitive identity, parent rachis-owner
+   identity, and metric distance, and writes a sparse coordinate-indexed
+   mismatch map in the AOV audit independently of beauty. Promotion still
+   requires deterministic standing and takeoff captures from the
+   elevated-oblique and rear-oblique cameras, explicit accounting for every
+   target pixel, and zero unexplained parent-owner or depth disagreement. Thin
+   overlapping ribbon primitives may differ at the exact-triangle level, but
+   those cases must be
    counted and rendered in the diagnostic rather than silently accepted. This
    remains a diagnostic AOV: current raster depth, identity, motion, radiance,
    and visibility authority cannot be changed by this milestone.

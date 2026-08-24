@@ -2147,6 +2147,7 @@ private final class CrowShowcaseRenderer {
     var ventralBarbFullImageRayHitCount = 0
     var ventralBarbFullImageRayRachisOwnerParityCount = 0
     var ventralBarbFullImageRayDepthParityCount = 0
+    var ventralBarbFullImageRayMismatchMap: [CrowPlumageRayMismatchAudit] = []
     if let ventralBarbRayGeometryBuild,
       let ventralBarbFrame,
       let ventralBarbGeometryDeformer
@@ -2266,6 +2267,10 @@ private final class CrowShowcaseRenderer {
           result, sample in
           result.hit == 1 && abs(result.distance - sample.rasterDepthMeters) < 0.02
         }.count
+        ventralBarbFullImageRayMismatchMap = Self.fullImageRayMismatchMap(
+          results: results,
+          samples: samples
+        )
       }
     }
     let inputPixels = renderWidth * renderHeight
@@ -2387,6 +2392,7 @@ private final class CrowShowcaseRenderer {
       plumageFullImageRayRachisOwnerParityCount:
         ventralBarbFullImageRayRachisOwnerParityCount,
       plumageFullImageRayDepthParityCount: ventralBarbFullImageRayDepthParityCount,
+      plumageFullImageRayMismatchMap: ventralBarbFullImageRayMismatchMap,
       historyReset: historyReset,
       jitter: jitter,
       reactiveMaskEnabled: reactiveMask != nil,
@@ -2603,6 +2609,47 @@ private final class CrowShowcaseRenderer {
       }
       .prefix(maximumSamples ?? 16)
       .map { $0 }
+  }
+
+  /// Produces a stable sparse coordinate map for every full-image audit
+  /// discrepancy. The map is serialized in the AOV audit; it is never sampled
+  /// by the renderer and cannot alter raster visibility.
+  private static func fullImageRayMismatchMap(
+    results: [CrowRayImageAuditResultGPU],
+    samples: [CrowRayRasterSample]
+  ) -> [CrowPlumageRayMismatchAudit] {
+    precondition(results.count == samples.count)
+    return zip(results, samples).compactMap { result, sample in
+      let hit = result.hit == 1
+      let rayOwner = hit
+        ? ventralBarbRachisOwnerIndex(result.identity).map(Int.init)
+        : nil
+      let classification: String?
+      if !hit {
+        classification = "no-acceleration-structure-hit"
+      } else if rayOwner != Int(sample.rasterRachisOwnerIndex) {
+        classification = "rachis-owner-mismatch"
+      } else if abs(result.distance - sample.rasterDepthMeters) >= 0.02 {
+        classification = "metric-depth-mismatch"
+      } else {
+        classification = nil
+      }
+      guard let classification else { return nil }
+      return CrowPlumageRayMismatchAudit(
+        pixelX: sample.pixelX,
+        pixelY: sample.pixelY,
+        classification: classification,
+        rasterPrimitiveIndex: Int(sample.rasterPrimitiveIndex),
+        rayPrimitiveIndex: hit ? Int(result.primitiveIndex) : -1,
+        rasterRachisOwnerIndex: Int(sample.rasterRachisOwnerIndex),
+        rayRachisOwnerIndex: rayOwner,
+        rasterDepthMeters: sample.rasterDepthMeters,
+        rayDistanceMeters: hit ? result.distance : nil
+      )
+    }.sorted {
+      ($0.pixelY, $0.pixelX, $0.classification)
+        < ($1.pixelY, $1.pixelX, $1.classification)
+    }
   }
 
   /// The ventral-barb primitive identifier reserves a contiguous 8,192-value
