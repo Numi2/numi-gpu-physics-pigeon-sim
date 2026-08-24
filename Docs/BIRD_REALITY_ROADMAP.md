@@ -156,6 +156,19 @@ inventory or view-dependent patch geometry.
    transforms per endpoint. Its next future-compute step is to merge those
    shared transforms and family work into the same visibility-compacted
    indexed/meshlet emission path before any anatomy-changing throat pass.
+
+   **Closure boundary for future compute:** the current analytic far-field
+   visibility construction is a bounded regular-cross-section estimate, while
+   resolved barbs and barbules own their own raster/depth visibility. This is
+   sufficient as a deterministic rendering oracle, but it must not be mistaken
+   for a measured American-crow porosity field. Feather-mechanics literature
+   supports the hierarchy—rachis, barbs, and interlocking barbules—not a single
+   species-independent spacing, hook angle, repair state, or directional
+   permeability. The next credible upgrade is therefore either (a) a
+   same-specimen micrograph/goniometric fit of those feather-local closure
+   parameters, or (b) capability-gated explicit curve/ray visibility that is
+   compared against the current AOV contract. Do not add another opaque
+   texture/ribbon layer in place of either measurement or geometric visibility.
    The `711` full-density cranial vanes now retain family-`7` loft-neighbour
    morphology and reconstruct breathing plus the spatially graded head warp on
    Metal. The `225` gular owners now derive their `1,575` rachis/barb tubes
@@ -268,6 +281,13 @@ and the separation between solver boundary and beauty geometry. Promotion needs:
 - Apple, [MetalFX temporal-scaler contract](https://developer.apple.com/documentation/metalfx/mtlfxtemporalscalerbase)
   and [Metal feature-set tables](https://developer.apple.com/metal/capabilities/).
 - Apple, [Metal Performance Primitives programming guide](https://developer.apple.com/download/files/Metal-Performance-Primitives-Programming-Guide.pdf).
+- Yu et al., [The Making of a Flight Feather: Bio-architectural Principles and
+  Adaptation](https://pmc.ncbi.nlm.nih.gov/articles/PMC6953487/)—hierarchical
+  rachis/barb/barbule architecture and interlocking vane closure.
+- Wang et al., [A lightweight, biological structure with tailored stiffness:
+  The feather vane](https://pubmed.ncbi.nlm.nih.gov/27184403/)—barb flexure and
+  reinforcement by barbule connections.
+- Kornev et al., [Unzipping bird feathers](https://pmc.ncbi.nlm.nih.gov/articles/PMC3899865/)—hook/bow barbule interlocking and collective failure/recovery.
 - Huang et al., [Rendering Iridescent Rock Dove Neck Feathers](https://light.informatik.uni-bonn.de/rendering-iridescent-rock-dove-neck-feathers/), SIGGRAPH 2022.
 - Padrón-Griffe et al., [A Surface-based Appearance Model for Pennaceous Feathers](https://doi.org/10.1111/cgf.15235), *Computer Graphics Forum* 43(4), 2024, and the authors' [MIT reference implementation](https://github.com/juanraul8/PennaceousFeathersRendering).
 - Harvey et al., [Measuring Spatially- and Directionally-varying Light Scattering from Biological Material](https://doi.org/10.3791/50254), *Journal of Visualized Experiments* 75 (2013).
