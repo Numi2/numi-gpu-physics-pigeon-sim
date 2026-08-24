@@ -2959,6 +2959,12 @@ private struct CrowMeshBuilder {
       projectedPixelsPerMeter: projectedPixelsPerMeter,
       to: &vertices
     )
+    appendTailRootContinuityCoverts(
+      bodyCenter: posedBodyCenter,
+      transitionProgress: bodyPlumageDeploymentProgress,
+      projectedPixelsPerMeter: projectedPixelsPerMeter,
+      to: &vertices
+    )
     appendRumpTailContourFeathers(
       bodyCenter: posedBodyCenter,
       projectedPixelsPerMeter: projectedPixelsPerMeter,
@@ -3781,6 +3787,56 @@ private struct CrowMeshBuilder {
         bodyCenter: bodyCenter,
         planeNormal: sample.planeNormal,
         material: material,
+        to: &vertices
+      )
+    }
+  }
+
+  private func appendTailRootContinuityCoverts(
+    bodyCenter: SIMD3<Float>,
+    transitionProgress: Float,
+    projectedPixelsPerMeter: Float,
+    to vertices: inout [ColoredVertex]
+  ) {
+    let deployment = CrowTailRootContinuityCoverts.deploymentWeight(
+      transitionProgress: transitionProgress
+    )
+    for sample in CrowTailRootContinuityCoverts.visibleSamples(
+      projectedPixelsPerMeter: projectedPixelsPerMeter
+    ) {
+      let tipOffset = CrowTailRootContinuityCoverts.tipOffset(
+        for: sample,
+        transitionProgress: transitionProgress
+      )
+      let normal = CrowTailRootContinuityCoverts.resolvedPlaneNormal(
+        for: sample,
+        tipOffset: tipOffset
+      )
+      let material = sample.materialVariation
+      appendFeatherBlade(
+        root: bodyCenter + sample.rootOffset,
+        tip: bodyCenter + tipOffset,
+        planeNormal: normal,
+        rootWidth: deployment * sample.rootWidthMeters,
+        maximumWidth: deployment * sample.maximumWidthMeters,
+        color: SIMD4<Float>(
+          0.0058 * (1 + 0.08 * material),
+          0.0087 * (1 + 0.06 * material),
+          0.0155 * (1 + 0.04 * material),
+          deployment * (0.115 + 0.006 * material)
+        ),
+        sections: 7,
+        camber: deployment * sample.camberMeters,
+        transverseCamberRatio: 0.08,
+        vaneAsymmetry: 0.018 * material,
+        edgeRippleAmplitude: 0.006,
+        edgeRipplePhase: Float.pi * (material + 1),
+        edgeRippleCycles: 1.25,
+        rootEnvelopeRatio: 0.66,
+        surfaceFeatherClass: 5,
+        lodLengthMeters:
+          CrowTailRootContinuityCoverts.topologyLODReferenceLengthMeters,
+        projectedPixelsPerMeter: projectedPixelsPerMeter,
         to: &vertices
       )
     }
