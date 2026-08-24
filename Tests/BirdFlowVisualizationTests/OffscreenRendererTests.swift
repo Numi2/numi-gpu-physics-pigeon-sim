@@ -20,6 +20,75 @@ private func imagePixelDimensions(_ data: Data) -> (width: Int, height: Int)? {
   return (width.intValue, height.intValue)
 }
 
+@Test("crow capture ray audit stages retained curves without enabling ray visibility")
+func crowCaptureRayGeometryAuditPreservesRasterAuthority() throws {
+  guard let device = MTLCreateSystemDefaultDevice(), device.supportsRaytracing
+  else { return }
+  let root = URL(fileURLWithPath: #filePath)
+    .deletingLastPathComponent()
+    .deletingLastPathComponent()
+    .deletingLastPathComponent()
+  let output = FileManager.default.temporaryDirectory.appendingPathComponent(
+    "birdflow-crow-ray-audit-\(UUID().uuidString)",
+    isDirectory: true
+  )
+  defer { try? FileManager.default.removeItem(at: output) }
+  let auditURL = output.appendingPathComponent("aov-audit.json")
+  let arguments = try CrowShowcaseCapture.Arguments(commandLine: [
+    "birdflow-capture",
+    "--capture-crow-frames", output.path,
+    "--capture-crow-presentation", "standing",
+    "--capture-crow-ventral-barb-ray-geometry-audit",
+    "--capture-crow-aov-audit", auditURL.path,
+    "--capture-crow-camera-distance", "0.12",
+    "--capture-width", "720",
+    "--capture-height", "540",
+    "--capture-frames", "2",
+    "--capture-crow-surface-manifest",
+    root.appendingPathComponent(
+      "ValidationInputs/american-crow-hybrid-surface-v1/manifest.json"
+    ).path,
+    "--capture-crow-surface-generation-audit",
+    root.appendingPathComponent(
+      "ValidationArtifacts/american-crow-hybrid-surface-generation-v1.json"
+    ).path,
+    "--capture-crow-profile",
+    root.appendingPathComponent(
+      "ValidationInputs/american-crow-hybrid-visual-v1.json"
+    ).path,
+    "--capture-crow-reality-asset",
+    root.appendingPathComponent(
+      "ValidationInputs/american-crow-hybrid-reality-v1.json"
+    ).path,
+    "--capture-crow-standing-reference",
+    root.appendingPathComponent(
+      "ValidationInputs/american-crow-standing-reference-v1.json"
+    ).path,
+  ])
+  try CrowShowcaseCapture.run(arguments)
+  let audit = try JSONDecoder().decode(
+    CrowShowcaseAOVAuditReport.self,
+    from: Data(contentsOf: auditURL)
+  )
+
+  #expect(audit.schemaVersion == 31)
+  #expect(audit.frames.count == 2)
+  #expect(
+    audit.frames.allSatisfy {
+      $0.plumageRayGeometryAuditRequested
+        && $0.plumageRayGeometryBuildSucceeded
+        && $0.plumageRayGeometryTriangleCount > 0
+        && $0.plumageRayGeometryTriangleCount * 3
+          == $0.ventralBarbExpandedVertexCount
+        && $0.plumageRayGeometryAccelerationStructureBytes > 0
+        && $0.plumageRayGeometryBuildScratchBytes > 0
+        && !$0.plumageExperimentalRayVisibilityEnabled
+        && $0.plumageExplicitCurveVisibilityAuthority
+          == "raster-depth-resolved-explicit-curves"
+    }
+  )
+}
+
 private func bitmapRGBDifference(
   _ firstData: Data,
   _ secondData: Data
@@ -787,7 +856,7 @@ func estimatedStandingCrowCaptureProducesLoopClosedFrames() throws {
     try VisualizationBackend(device: device).supportsMeshShaders
     ? "gpu-mesh-threadgroup-8-vertex-indexed"
     : "gpu-procedural-vertex-pulling"
-  #expect(audit.schemaVersion == 30)
+  #expect(audit.schemaVersion == 31)
   #expect(
     audit.frames.allSatisfy {
       $0.plumageSurfaceVisibilityAuthority
@@ -797,6 +866,11 @@ func estimatedStandingCrowCaptureProducesLoopClosedFrames() throws {
         && !$0.plumageExperimentalRayVisibilityEnabled
         && $0.plumageRayVisibilityEnablementGate
           == "explicit-curve-acceleration-structure-and-AOV-parity-required"
+        && !$0.plumageRayGeometryAuditRequested
+        && !$0.plumageRayGeometryBuildSucceeded
+        && $0.plumageRayGeometryTriangleCount == 0
+        && $0.plumageRayGeometryAccelerationStructureBytes == 0
+        && $0.plumageRayGeometryBuildScratchBytes == 0
     }
   )
   #expect(

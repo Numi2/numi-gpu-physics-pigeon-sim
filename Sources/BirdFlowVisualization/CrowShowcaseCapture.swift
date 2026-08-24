@@ -58,6 +58,7 @@ public enum CrowShowcaseCapture {
     let retainedThroatBridgeVanesEnabled: Bool
     let retainedCranialVanesEnabled: Bool
     let ventralCurveEmissionMode: CrowVentralCurveEmissionMode
+    let ventralBarbRayGeometryAuditEnabled: Bool
     let presentation: CrowShowcasePresentation
 
     public init(commandLine: [String]) throws {
@@ -138,6 +139,9 @@ public enum CrowShowcaseCapture {
       )
       retainedCranialVanesEnabled = !commandLine.contains(
         "--capture-crow-cpu-cranial-vanes"
+      )
+      ventralBarbRayGeometryAuditEnabled = commandLine.contains(
+        "--capture-crow-ventral-barb-ray-geometry-audit"
       )
       let emissionValue =
         try value(after: "--capture-crow-ventral-curve-emission")
@@ -340,7 +344,9 @@ public enum CrowShowcaseCapture {
       retainedThroatBridgeVanesEnabled:
         arguments.retainedThroatBridgeVanesEnabled,
       retainedCranialVanesEnabled: arguments.retainedCranialVanesEnabled,
-      ventralCurveEmissionMode: arguments.ventralCurveEmissionMode
+      ventralCurveEmissionMode: arguments.ventralCurveEmissionMode,
+      ventralBarbRayGeometryAuditEnabled:
+        arguments.ventralBarbRayGeometryAuditEnabled
     )
     let nativeReferenceRenderer =
       try arguments.temporalScale > 1
@@ -360,7 +366,9 @@ public enum CrowShowcaseCapture {
         retainedThroatBridgeVanesEnabled:
           arguments.retainedThroatBridgeVanesEnabled,
         retainedCranialVanesEnabled: arguments.retainedCranialVanesEnabled,
-        ventralCurveEmissionMode: arguments.ventralCurveEmissionMode
+        ventralCurveEmissionMode: arguments.ventralCurveEmissionMode,
+        ventralBarbRayGeometryAuditEnabled:
+          arguments.ventralBarbRayGeometryAuditEnabled
       )
       : nil
     try FileManager.default.createDirectory(
@@ -875,6 +883,7 @@ private final class CrowShowcaseRenderer {
   private let ventralRachisGeometryDeformer: CrowVentralRachisGeometryDeformer
   private let ventralBarbGeometryDeformer: CrowVentralBarbGeometryDeformer?
   private let ventralBarbUsesMeshStage: Bool
+  private let ventralBarbRayGeometryAuditEnabled: Bool
   private let featherRenderOffset: SIMD3<Float>
   private var previousPhase: Float?
   private var previousCamera: CameraState?
@@ -896,9 +905,11 @@ private final class CrowShowcaseRenderer {
     retainedCruralVanesEnabled: Bool = true,
     retainedThroatBridgeVanesEnabled: Bool = true,
     retainedCranialVanesEnabled: Bool = true,
-    ventralCurveEmissionMode: CrowVentralCurveEmissionMode = .auto
+    ventralCurveEmissionMode: CrowVentralCurveEmissionMode = .auto,
+    ventralBarbRayGeometryAuditEnabled: Bool = false
   ) throws {
     self.presentation = presentation
+    self.ventralBarbRayGeometryAuditEnabled = ventralBarbRayGeometryAuditEnabled
     self.plumageOptics = plumageOptics.gpuParameters
     let cranialRadiiRaw = profile.visualTransform.headRadiusXYZMeters
     cranialRadii = SIMD3<Float>(
@@ -1546,7 +1557,8 @@ private final class CrowShowcaseRenderer {
         previousViewProjection: previousViewProjection,
         previousDepthPyramid: canTestPreviousDepth ? depthPyramid?.texture : nil,
         occlusionViewport: SIMD2<Int>(renderWidth, renderHeight),
-        commandBuffer: commandBuffer
+        commandBuffer: commandBuffer,
+        rayGeometryStaging: ventralBarbRayGeometryAuditEnabled
       )
       ventralBarbFrame = frame
     }
@@ -2007,6 +2019,36 @@ private final class CrowShowcaseRenderer {
     previousPhase = phase
     previousCamera = camera
     previousJitter = jitter
+    var ventralBarbRayGeometryBuild: CrowPlumageRayGeometryBuild?
+    if ventralBarbRayGeometryAuditEnabled,
+      let ventralBarbFrame,
+      backend.device.supportsRaytracing
+    {
+      let rayVertexCount = Int(
+        ventralBarbGeometryDeformer?.drawArguments(for: ventralBarbFrame)
+          .vertexCount ?? 0
+      )
+      if rayVertexCount > 0 {
+        guard let rayCommandBuffer = backend.queue.makeCommandBuffer() else {
+          throw VisualizationError.pipeline("crow ray-geometry audit command buffer")
+        }
+        let build = try CrowPlumageRayGeometryBuild.encode(
+          on: backend.device,
+          vertexBuffer: ventralBarbFrame.outputBuffer,
+          vertexCount: rayVertexCount,
+          commandBuffer: rayCommandBuffer
+        )
+        rayCommandBuffer.commit()
+        rayCommandBuffer.waitUntilCompleted()
+        guard rayCommandBuffer.status == .completed else {
+          throw VisualizationError.shader(
+            rayCommandBuffer.error?.localizedDescription
+              ?? "crow ray-geometry audit build failed"
+          )
+        }
+        ventralBarbRayGeometryBuild = build
+      }
+    }
     let inputPixels = renderWidth * renderHeight
     let outputPixels = outputWidth * outputHeight
     let resolvedInputBytes =
@@ -2095,6 +2137,15 @@ private final class CrowShowcaseRenderer {
       reconstructionMode: temporalEnabled ? "metalfx-temporal" : "native",
       plumageRayVisibilityCapability:
         CrowPlumageRayVisibilityCapability.current(on: backend.device),
+      plumageRayGeometryAuditRequested: ventralBarbRayGeometryAuditEnabled,
+      plumageRayGeometryBuildSucceeded: ventralBarbRayGeometryBuild != nil,
+      plumageRayGeometryTriangleCount:
+        ventralBarbRayGeometryBuild.map { _ in ventralBarbExpandedVertexCount / 3 }
+        ?? 0,
+      plumageRayGeometryAccelerationStructureBytes:
+        ventralBarbRayGeometryBuild?.accelerationStructureSize ?? 0,
+      plumageRayGeometryBuildScratchBytes:
+        ventralBarbRayGeometryBuild?.buildScratchBufferSize ?? 0,
       historyReset: historyReset,
       jitter: jitter,
       reactiveMaskEnabled: reactiveMask != nil,

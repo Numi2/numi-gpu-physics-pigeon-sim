@@ -145,7 +145,8 @@ final class CrowVentralBarbGeometryDeformer {
     previousDepthPyramid: MTLTexture? = nil,
     occlusionViewport: SIMD2<Int> = .zero,
     commandBuffer: MTLCommandBuffer,
-    auditReadback: Bool = false
+    auditReadback: Bool = false,
+    rayGeometryStaging: Bool = false
   ) throws -> CrowFeatherGeometryFrame {
     let slot = nextSlot
     nextSlot = (nextSlot + 1) % Self.bufferedFrameCount
@@ -179,7 +180,9 @@ final class CrowVentralBarbGeometryDeformer {
       maximumVertexCount * MemoryLayout<CrowFeatherVertexGPU>.stride,
       16
     )
-    if auditReadback && requiredOutputBytes > outputBuffers[slot].length {
+    if (auditReadback || rayGeometryStaging)
+      && requiredOutputBytes > outputBuffers[slot].length
+    {
       outputBuffers[slot] = try backend.buffer(length: requiredOutputBytes)
     }
     let emptyDrawArguments = DrawPrimitivesIndirectArguments(
@@ -301,11 +304,13 @@ final class CrowVentralBarbGeometryDeformer {
       backend.dispatch1D(prepare, pipeline: indirectPipeline, count: 1)
       prepare.endEncoding()
 
-      if auditReadback {
+      if auditReadback || rayGeometryStaging {
         guard let encoder = commandBuffer.makeComputeCommandEncoder() else {
           throw VisualizationError.pipeline("crow ventral barb geometry encoder")
         }
-        encoder.label = "Audit retained ventral barb curve expansion"
+        encoder.label = auditReadback
+          ? "Audit retained ventral barb curve expansion"
+          : "Stage retained ventral barb curve ribbons for ray audit"
         encoder.setBuffer(recordBuffer, offset: 0, index: 0)
         encoder.setBuffer(workBuffers[slot], offset: 0, index: 1)
         encoder.setBuffer(outputBuffers[slot], offset: 0, index: 2)
