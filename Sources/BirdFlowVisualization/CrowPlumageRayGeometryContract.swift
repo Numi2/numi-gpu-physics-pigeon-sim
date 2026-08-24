@@ -49,3 +49,73 @@ enum CrowPlumageRayGeometryContract {
     return descriptor
   }
 }
+
+/// Retains the resources for one explicit-curve ribbon acceleration-structure
+/// build. It is an experimental compute-only utility: no production render
+/// pass queries this structure, and the raster/AOV authorities remain intact.
+struct CrowPlumageRayGeometryBuild {
+  let accelerationStructure: MTLAccelerationStructure
+  let accelerationStructureSize: Int
+  let buildScratchBufferSize: Int
+  private let scratchBuffer: MTLBuffer
+
+  enum BuildError: Error, Equatable {
+    case rayTracingUnsupported
+    case accelerationStructureAllocation(Int)
+    case scratchBufferAllocation(Int)
+    case commandEncoderUnavailable
+  }
+
+  /// Encodes a bottom-level acceleration-structure build over the exact
+  /// triangle ribbons produced from retained crow curve work. The caller must
+  /// keep the returned value alive until the command buffer completes.
+  static func encode(
+    on device: MTLDevice,
+    vertexBuffer: MTLBuffer,
+    vertexCount: Int,
+    commandBuffer: MTLCommandBuffer
+  ) throws -> Self {
+    guard device.supportsRaytracing else {
+      throw BuildError.rayTracingUnsupported
+    }
+    let triangles = try CrowPlumageRayGeometryContract.triangleGeometryDescriptor(
+      vertexBuffer: vertexBuffer,
+      vertexCount: vertexCount
+    )
+    triangles.opaque = false
+    let descriptor = MTLPrimitiveAccelerationStructureDescriptor()
+    descriptor.geometryDescriptors = [triangles]
+    let sizes = device.accelerationStructureSizes(descriptor: descriptor)
+    guard let accelerationStructure = device.makeAccelerationStructure(
+      size: sizes.accelerationStructureSize
+    ) else {
+      throw BuildError.accelerationStructureAllocation(
+        sizes.accelerationStructureSize
+      )
+    }
+    guard let scratchBuffer = device.makeBuffer(
+      length: sizes.buildScratchBufferSize,
+      options: .storageModePrivate
+    ) else {
+      throw BuildError.scratchBufferAllocation(sizes.buildScratchBufferSize)
+    }
+    guard let encoder = commandBuffer.makeAccelerationStructureCommandEncoder()
+    else {
+      throw BuildError.commandEncoderUnavailable
+    }
+    encoder.label = "Experimental retained crow curve-ribbon AS build"
+    encoder.build(
+      accelerationStructure: accelerationStructure,
+      descriptor: descriptor,
+      scratchBuffer: scratchBuffer,
+      scratchBufferOffset: 0
+    )
+    encoder.endEncoding()
+    return Self(
+      accelerationStructure: accelerationStructure,
+      accelerationStructureSize: sizes.accelerationStructureSize,
+      buildScratchBufferSize: sizes.buildScratchBufferSize,
+      scratchBuffer: scratchBuffer
+    )
+  }
+}

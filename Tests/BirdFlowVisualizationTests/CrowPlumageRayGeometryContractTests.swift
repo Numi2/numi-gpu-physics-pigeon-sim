@@ -1,4 +1,5 @@
 import Metal
+import simd
 import Testing
 
 @testable import BirdFlowVisualization
@@ -63,4 +64,99 @@ func crowPlumageRayGeometryContractRejectsInvalidStorage() throws {
   } catch let error as CrowPlumageRayGeometryContract.ContractError {
     #expect(error == .insufficientVertexStorage(requiredBytes: 288, availableBytes: 96))
   }
+}
+
+@Test("Metal builds an experimental retained crow curve-ribbon structure")
+func metalBuildsCrowPlumageRayGeometryWithoutEnablingVisibility() throws {
+  guard let device = MTLCreateSystemDefaultDevice(), device.supportsRaytracing
+  else { return }
+  let vertexCount = 3
+  guard let buffer = device.makeBuffer(
+    length: vertexCount * MemoryLayout<CrowFeatherVertexGPU>.stride,
+    options: .storageModeShared
+  ) else {
+    Issue.record("unable to allocate ray geometry test buffer")
+    return
+  }
+  let vertices = buffer.contents().bindMemory(
+    to: CrowFeatherVertexGPU.self,
+    capacity: vertexCount
+  )
+  vertices[0] = rayVertex(position: SIMD3<Float>(-0.02, -0.02, 0))
+  vertices[1] = rayVertex(position: SIMD3<Float>(0.02, -0.02, 0))
+  vertices[2] = rayVertex(position: SIMD3<Float>(0, 0.02, 0))
+  let queue = try #require(device.makeCommandQueue())
+  let commandBuffer = try #require(queue.makeCommandBuffer())
+  let build = try CrowPlumageRayGeometryBuild.encode(
+    on: device,
+    vertexBuffer: buffer,
+    vertexCount: vertexCount,
+    commandBuffer: commandBuffer
+  )
+  commandBuffer.commit()
+  commandBuffer.waitUntilCompleted()
+
+  #expect(commandBuffer.status == .completed)
+  #expect(build.accelerationStructureSize > 0)
+  #expect(build.buildScratchBufferSize > 0)
+  #expect(build.accelerationStructure.label == nil)
+  #expect(
+    CrowPlumageRayVisibilityCapability.current(on: device)
+      .experimentalRayVisibilityEnabled == false
+  )
+}
+
+@Test("Metal builds from the actual retained crow curve expansion")
+func metalBuildsExpandedCrowCurveRibbonsWithoutRayAuthority() throws {
+  guard let device = MTLCreateSystemDefaultDevice(), device.supportsRaytracing
+  else { return }
+  let backend = try VisualizationBackend(device: device)
+  let record = CrowVentralRachisCurveRecords.records()[0]
+  let deformer = try CrowVentralBarbGeometryDeformer(
+    backend: backend,
+    records: [record]
+  )
+  let expansion = try #require(backend.queue.makeCommandBuffer())
+  let frame = try deformer.encode(
+    currentBodyCenter: SIMD3<Float>(0.014, -0.023, 0.5),
+    previousBodyCenter: SIMD3<Float>(-0.009, 0.018, 0.47),
+    projectedPixelsPerMeter: 10_000,
+    viewProjection: matrix_identity_float4x4,
+    commandBuffer: expansion,
+    auditReadback: true
+  )
+  expansion.commit()
+  expansion.waitUntilCompleted()
+  #expect(expansion.status == .completed)
+  let vertexCount = Int(deformer.drawArguments(for: frame).vertexCount)
+  #expect(vertexCount == frame.vertexCount)
+  #expect(vertexCount.isMultiple(of: 3))
+
+  let buildCommand = try #require(backend.queue.makeCommandBuffer())
+  let build = try CrowPlumageRayGeometryBuild.encode(
+    on: device,
+    vertexBuffer: frame.outputBuffer,
+    vertexCount: vertexCount,
+    commandBuffer: buildCommand
+  )
+  buildCommand.commit()
+  buildCommand.waitUntilCompleted()
+
+  #expect(buildCommand.status == .completed)
+  #expect(build.accelerationStructureSize > 0)
+  #expect(
+    CrowPlumageRayVisibilityCapability.current(on: device)
+      .experimentalRayVisibilityEnabled == false
+  )
+}
+
+private func rayVertex(position: SIMD3<Float>) -> CrowFeatherVertexGPU {
+  CrowFeatherVertexGPU(
+    position: SIMD4<Float>(position, 1),
+    normal: SIMD4<Float>(0, 0, 1, 0),
+    color: SIMD4<Float>(0.01, 0.01, 0.012, 1),
+    previousPosition: SIMD4<Float>(position, 1),
+    identity: .zero,
+    parameters: .zero
+  )
 }
