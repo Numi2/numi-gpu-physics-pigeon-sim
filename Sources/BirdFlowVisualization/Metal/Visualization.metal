@@ -3977,6 +3977,21 @@ inline float3 crowBodyVaneUnwarpedPoint(
     float3 point=center+widthAxis*(signedWidth*localWidth)
         +normal*(localWidth*state.transverseCamber
             *max(0.0f,1.0f-signedWidth*signedWidth));
+    bool bodyTract=(record.identity.x&0xff000000u)==0x02000000u;
+    if(bodyTract){
+        float baseLift=uint(record.morphology.y)==0u?0.00019f:
+            (uint(record.morphology.y)==1u?0.00026f:
+                (uint(record.morphology.y)==2u?0.00030f:0.00034f));
+        float distal=pow(clamp(t,0.0f,1.0f),1.55f);
+        float edgeEnvelope=1.0f-0.26f*signedWidth*signedWidth;
+        float identityPhase=2.0f*M_PI_F
+            *float(record.identity.y&0x0000ffffu)/65535.0f;
+        float phase=identityPhase+0.37f*record.morphology.z
+            +0.19f*record.morphology.w;
+        point+=distal*edgeEnvelope*(normal
+            *(baseLift*(0.72f+0.28f*sin(phase)))
+            +widthAxis*(0.20f*baseLift*cos(phase)*signedWidth));
+    }
     if(!cranial){return point;}
     // Qualitative, bounded contour relaxation. It is identity-stable and is
     // evaluated before shared cranial neck transport so beauty, AOV, motion,
@@ -4126,11 +4141,20 @@ inline float3 crowBodyRachisCenter(
     float retainedTransverse=crowBodyRachisRetainedTransverseCamber(
         record,state
     );
-    return mix(state.root,state.tip,axial)
+    float3 point=mix(state.root,state.tip,axial)
         +widthAxis*(record.sweepAsymmetryAndRipple.x*sine)
         +normal*(state.camber*sine
             +retainedTransverse*crowBodyVaneHalfWidth(record,axial)
             +0.00012f);
+    if((record.identity.x&0xff000000u)!=0x02000000u){return point;}
+    float baseLift=uint(record.morphology.y)==0u?0.00019f:
+        (uint(record.morphology.y)==1u?0.00026f:
+            (uint(record.morphology.y)==2u?0.00030f:0.00034f));
+    float identityPhase=2.0f*M_PI_F
+        *float(record.identity.y&0x0000ffffu)/65535.0f;
+    float phase=identityPhase+0.37f*record.morphology.z+0.19f*record.morphology.w;
+    return point+pow(clamp(axial,0.0f,1.0f),1.55f)
+        *normal*(baseLift*(0.72f+0.28f*sin(phase)));
 }
 
 struct CrowBodyRachisQuad {
@@ -4322,10 +4346,19 @@ inline float crowBodyDetailHalfWidth(
 inline float3 crowBodyDetailCenter(
     CrowBodyVaneMorphologyGPU record,CrowBodyDetailFrame frame,float axial) {
     float sine=sin(M_PI_F*axial);
-    return mix(frame.root,frame.tip,axial)
+    float3 point=mix(frame.root,frame.tip,axial)
         +frame.widthAxis*(record.sweepAsymmetryAndRipple.x*sine)
         +frame.normal*(frame.camber*sine+frame.transverseCamber
             *crowBodyDetailHalfWidth(record,axial,0.0f)+0.00012f);
+    if((record.identity.x&0xff000000u)!=0x02000000u){return point;}
+    float baseLift=uint(record.morphology.y)==0u?0.00019f:
+        (uint(record.morphology.y)==1u?0.00026f:
+            (uint(record.morphology.y)==2u?0.00030f:0.00034f));
+    float identityPhase=2.0f*M_PI_F
+        *float(record.identity.y&0x0000ffffu)/65535.0f;
+    float phase=identityPhase+0.37f*record.morphology.z+0.19f*record.morphology.w;
+    return point+pow(clamp(axial,0.0f,1.0f),1.55f)
+        *frame.normal*(baseLift*(0.72f+0.28f*sin(phase)));
 }
 
 inline float crowBodyDetailPennaceousAxial(

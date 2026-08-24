@@ -157,6 +157,36 @@ func cranialContourRelaxationIsBounded() {
   #expect(simd_length(first) < 0.00045)
 }
 
+@Test("retained body contour set is deterministic, root-locked, and bounded")
+func retainedBodyContourSetIsBounded() throws {
+  let records = CrowBodyVaneRecords.groupedRecords(
+    currentBodyCenter: .zero,
+    previousBodyCenter: .zero,
+    currentNeckPose: nil,
+    previousNeckPose: nil,
+    currentDeployment: 0,
+    previousDeployment: 0,
+    projectedPixelsPerMeter: 1_600
+  ).values.flatMap { $0 }
+  let record = try #require(records.first {
+    ($0.identity.x & 0xFF00_0000) == 0x0200_0000
+  })
+  let normal = SIMD3<Float>(0, 0, 1)
+  let widthAxis = SIMD3<Float>(0, 1, 0)
+  let root = CrowBodyVaneRecords.bodyTractContourSetOffset(
+    record: record, axial: 0, signedWidth: 0, normal: normal, widthAxis: widthAxis
+  )
+  let first = CrowBodyVaneRecords.bodyTractContourSetOffset(
+    record: record, axial: 1, signedWidth: 0.75, normal: normal, widthAxis: widthAxis
+  )
+  let replay = CrowBodyVaneRecords.bodyTractContourSetOffset(
+    record: record, axial: 1, signedWidth: 0.75, normal: normal, widthAxis: widthAxis
+  )
+  #expect(simd_length(root) < 1e-8)
+  #expect(first == replay)
+  #expect(simd_length(first) < 0.00036)
+}
+
 @Test("retained body detail reproduces the CPU mesostructure hierarchy")
 func retainedBodyDetailReproducesCPUMesostructureHierarchy() {
   let samples = CrowBodyFeatherTracts.samples()

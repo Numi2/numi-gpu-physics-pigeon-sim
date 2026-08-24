@@ -232,6 +232,8 @@ enum CrowFeatherMesostructure {
     let edgeRippleCycles: Float
     let identityFirst: Int
     let identitySecond: Int
+    var bodyTractContourSetBaseLift: Float = 0
+    var bodyTractContourSetPhase: Float = 0
 
     init(feather: CrowBodyContourShingle) {
       root = feather.rootOffset
@@ -305,6 +307,11 @@ enum CrowFeatherMesostructure {
       edgeRippleCycles = feather.edgeRippleCycles
       identityFirst = feather.row + 31 * Int(feather.region.rawValue)
       identitySecond = feather.column + (feather.side < 0 ? 97 : 0)
+      let contourSet = CrowFeatherMesostructure.bodyTractContourSetParameters(
+        for: feather
+      )
+      bodyTractContourSetBaseLift = contourSet.baseLift
+      bodyTractContourSetPhase = contourSet.phase
     }
 
     init(
@@ -463,13 +470,17 @@ enum CrowFeatherMesostructure {
       transverseCamberRatio: Float
     ) -> SIMD3<Float> {
       let t = clamp(axial)
-      return root
+      let point = root
         + (tip - root) * t
         + widthAxis * (lateralSweepMeters * sin(Float.pi * t))
         + normal
         * (camberMeters * sin(Float.pi * t)
           + transverseCamberRatio * halfWidth(at: t)
           + 0.00012)
+      guard bodyTractContourSetBaseLift > 0 else { return point }
+      return point + pow(t, 1.55) * normal
+        * (bodyTractContourSetBaseLift
+          * (0.72 + 0.28 * sin(bodyTractContourSetPhase)))
     }
 
     func halfWidth(at axial: Float, signedWidth: Float = 0) -> Float {
@@ -495,6 +506,33 @@ enum CrowFeatherMesostructure {
       pennaceousStartFraction
         + (1 - pennaceousStartFraction) * clamp(localFraction)
     }
+  }
+
+  /// Must stay bitwise-aligned with the retained Metal body-vane contour set.
+  /// This CPU hierarchy remains the independent detail oracle for that path.
+  private static func bodyTractContourSetParameters(
+    for feather: CrowBodyFeatherTractSample
+  ) -> (baseLift: Float, phase: Float) {
+    let baseLift: Float
+    switch feather.region {
+    case .cervical: baseLift = 0.00019
+    case .mantle: baseLift = 0.00026
+    case .humeral: baseLift = 0.00030
+    case .scapular: baseLift = 0.00034
+    }
+    var identity = UInt32(feather.region.rawValue) &* 0xA511_E9B3
+    identity ^= (feather.side < 0 ? UInt32(0) : UInt32(1)) &* 0x63D8_3595
+    identity ^= UInt32(feather.row) &* 0x9E37_79B9
+    identity ^= UInt32(feather.column) &* 0x85EB_CA6B
+    identity ^= identity >> 16
+    identity &*= 0x7FEB_352D
+    identity ^= identity >> 15
+    if identity == 0 { identity = 1 }
+    let phase = 2 * Float.pi * Float(identity & 0x0000_FFFF)
+      / Float(0x0000_FFFF)
+      + 0.37 * Float(feather.row)
+      + 0.19 * Float(feather.column)
+    return (baseLift, phase)
   }
 
   private static func appendRachis(

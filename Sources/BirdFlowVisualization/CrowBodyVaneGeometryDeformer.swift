@@ -2611,8 +2611,46 @@ enum CrowBodyVaneRecords {
       + widthAxis * (record.sweepAsymmetryAndRipple.x * sin(.pi * t))
     let signedWidth = 2 * Float(widthIndex) / Float(topology.widthSections) - 1
     let localWidth = width * (1 + record.sweepAsymmetryAndRipple.y * signedWidth)
-    return center + widthAxis * (signedWidth * localWidth)
+    let point = center + widthAxis * (signedWidth * localWidth)
       + normal * (localWidth * transverse * max(0, 1 - signedWidth * signedWidth))
+    return point + bodyTractContourSetOffset(
+      record: record,
+      axial: t,
+      signedWidth: signedWidth,
+      normal: normal,
+      widthAxis: widthAxis
+    )
+  }
+
+  /// A deterministic, root-locked surface set breaks the uniform body-shell
+  /// highlight at close range. It is an estimated visual relaxation rather
+  /// than a measured stiffness value; the maximum displacement is below
+  /// 0.36 mm and uses the immutable record identity only.
+  static func bodyTractContourSetOffset(
+    record: CrowBodyVaneRecordGPU,
+    axial: Float,
+    signedWidth: Float,
+    normal: SIMD3<Float>,
+    widthAxis: SIMD3<Float>
+  ) -> SIMD3<Float> {
+    guard (record.identity.x & 0xFF00_0000) == 0x0200_0000 else { return .zero }
+    let baseLift: Float
+    switch Int(record.morphology.y) {
+    case Int(CrowBodyFeatherTractRegion.cervical.rawValue): baseLift = 0.00019
+    case Int(CrowBodyFeatherTractRegion.mantle.rawValue): baseLift = 0.00026
+    case Int(CrowBodyFeatherTractRegion.humeral.rawValue): baseLift = 0.00030
+    default: baseLift = 0.00034
+    }
+    let t = min(max(axial, 0), 1)
+    let distal = pow(t, 1.55)
+    let edgeEnvelope = 1 - 0.26 * signedWidth * signedWidth
+    let identityPhase = 2 * Float.pi
+      * Float(record.identity.y & 0x0000_FFFF) / Float(0x0000_FFFF)
+    let phase = identityPhase + 0.37 * record.morphology.z
+      + 0.19 * record.morphology.w
+    let normalLift = baseLift * (0.72 + 0.28 * sin(phase))
+    let lateralSet = 0.20 * baseLift * cos(phase) * signedWidth
+    return distal * edgeEnvelope * (normal * normalLift + widthAxis * lateralSet)
   }
 
   static func normal(
@@ -2790,10 +2828,17 @@ enum CrowBodyVaneRecords {
       ? CrowBodyFeatherTracts.retainedDetailCrownInsetScale * vaneTransverse
       : 0
     let halfWidth = bodyVaneHalfWidth(record: record, axial: axial)
-    return root + (tip - root) * axial
+    let point = root + (tip - root) * axial
       + widthAxis * (record.sweepAsymmetryAndRipple.x * sin(.pi * axial))
       + normal
         * (camber * sin(.pi * axial) + retainedTransverse * halfWidth + 0.00012)
+    return point + bodyTractContourSetOffset(
+      record: record,
+      axial: axial,
+      signedWidth: 0,
+      normal: normal,
+      widthAxis: widthAxis
+    )
   }
 
   private static func bodyVaneHalfWidth(
@@ -3234,7 +3279,7 @@ enum CrowBodyVaneRecords {
     frame: BodyDetailFrame,
     axial: Float
   ) -> SIMD3<Float> {
-    frame.root + (frame.tip - frame.root) * axial
+    let point = frame.root + (frame.tip - frame.root) * axial
       + frame.widthAxis
         * (record.sweepAsymmetryAndRipple.x * sin(.pi * axial))
       + frame.normal
@@ -3242,6 +3287,13 @@ enum CrowBodyVaneRecords {
           + frame.transverseCamber
             * detailHalfWidth(record: record, axial: axial, signedWidth: 0)
           + 0.00012)
+    return point + bodyTractContourSetOffset(
+      record: record,
+      axial: axial,
+      signedWidth: 0,
+      normal: frame.normal,
+      widthAxis: frame.widthAxis
+    )
   }
 
   private static func detailHalfWidth(
