@@ -188,8 +188,14 @@ inventory or view-dependent patch geometry.
    or the ray-visibility authority. A separate sparse audit starts with pixels
    that the raster identity AOV assigns to retained curve triangles, casts
    camera rays through them, and bounds each ray with the exact stored depth
-   from that same identity pass. Geometry-count equality, three structural
-   probes, and up to sixteen sampled pixel correspondences are not full
+   from that same identity pass. The deterministic selector contributes at
+   most one sample per visible retained triangle and disperses the up-to-sixteen
+   samples by triangle ID; each must agree on hit, parent rachis-owner identity,
+   and depth. The report also retains exact primitive-identity agreement:
+   exact triangle indices can differ for intentionally overlapping ribbon
+   triangles belonging to the same parent owner. Geometry-count equality,
+   three structural probes, and those sparse pixel
+   correspondences are not full
    beauty/motion/depth/identity AOV parity; exhaustive comparisons remain the
    next required gate before a ray path can own visibility. The sparse gate is
    currently exercised over standing plus still, transition, and flight

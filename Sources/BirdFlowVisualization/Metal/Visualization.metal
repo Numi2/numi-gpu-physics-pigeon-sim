@@ -2582,7 +2582,6 @@ kernel void probeCrowRayGeometry(
     probe.min_distance=input.originAndMinimumDistance.w;
     probe.max_distance=input.directionAndMaximumDistance.w;
     intersector<triangle_data> triangleIntersector;
-    triangleIntersector.accept_any_intersection(true);
     intersection_result<triangle_data> result=
         triangleIntersector.intersect(probe,accelerationStructure);
     CrowRayProbeResultGPU output;

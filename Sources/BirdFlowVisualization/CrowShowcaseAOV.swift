@@ -43,6 +43,8 @@ struct CrowShowcaseFrame {
   let plumageRayGeometryProbeHitCount: Int
   let plumageRasterRaySampleCount: Int
   let plumageRasterRayHitCount: Int
+  let plumageRasterRayIdentityParityCount: Int
+  let plumageRasterRayRachisOwnerParityCount: Int
   let plumageRasterRayDepthParityCount: Int
   let historyReset: Bool
   let jitter: SIMD2<Float>
@@ -603,6 +605,9 @@ struct CrowShowcaseFrame {
       plumageRayGeometryProbeHitCount: plumageRayGeometryProbeHitCount,
       plumageRasterRaySampleCount: plumageRasterRaySampleCount,
       plumageRasterRayHitCount: plumageRasterRayHitCount,
+      plumageRasterRayIdentityParityCount: plumageRasterRayIdentityParityCount,
+      plumageRasterRayRachisOwnerParityCount:
+        plumageRasterRayRachisOwnerParityCount,
       plumageRasterRayDepthParityCount: plumageRasterRayDepthParityCount,
       historyReset: historyReset,
       jitterOffsetX: jitter.x,
@@ -1627,6 +1632,8 @@ struct CrowShowcaseAOVFrameAudit: Codable, Equatable {
   let plumageRayGeometryProbeHitCount: Int
   let plumageRasterRaySampleCount: Int
   let plumageRasterRayHitCount: Int
+  let plumageRasterRayIdentityParityCount: Int
+  let plumageRasterRayRachisOwnerParityCount: Int
   let plumageRasterRayDepthParityCount: Int
   let historyReset: Bool
   let jitterOffsetX: Float
@@ -1914,7 +1921,7 @@ struct CrowShowcaseAOVAuditReport: Codable, Equatable {
   let frames: [CrowShowcaseAOVFrameAudit]
 
   init(frames: [CrowShowcaseAOVFrameAudit]) {
-    schemaVersion = 34
+    schemaVersion = 36
     colorSpace = "scene-linear extended range; display output is tone mapped separately"
     motionConvention =
       "current pixel to previous pixel in upper-left-origin pixel units; MetalFX scale 1"

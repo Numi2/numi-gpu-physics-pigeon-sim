@@ -30,6 +30,10 @@ private final class CrowDepthReadbackBox {
 
 private struct CrowRayRasterSample {
   let ray: CrowRayProbeInputGPU
+  let rasterIdentity: SIMD4<UInt32>
+  let rasterPrimitiveIndex: UInt32
+  let rasterRachisOwnerIndex: UInt32
+  let rasterInteriorSupport: Int
   let rasterDepthMeters: Float
 }
 
@@ -2122,13 +2126,16 @@ private final class CrowShowcaseRenderer {
     }
     var ventralBarbRasterRaySampleCount = 0
     var ventralBarbRasterRayHitCount = 0
+    var ventralBarbRasterRayIdentityParityCount = 0
+    var ventralBarbRasterRayRachisOwnerParityCount = 0
     var ventralBarbRasterRayDepthParityCount = 0
     if let ventralBarbRayGeometryBuild,
       let ventralBarbFrame,
       let ventralBarbGeometryDeformer
     {
+      let rayVertices = ventralBarbGeometryDeformer.vertices(for: ventralBarbFrame)
       let samples = Self.rasterRaySamples(
-        vertices: ventralBarbGeometryDeformer.vertices(for: ventralBarbFrame),
+        vertices: rayVertices,
         viewProjection: currentViewProjection,
         eye: SIMD3<Float>(
           currentCamera.eyeAndWidth.x,
@@ -2165,6 +2172,24 @@ private final class CrowShowcaseRenderer {
         )
         ventralBarbRasterRaySampleCount = samples.count
         ventralBarbRasterRayHitCount = results.filter { $0.hit == 1 }.count
+        ventralBarbRasterRayIdentityParityCount = zip(results, samples).filter {
+          result, sample in
+          let vertexIndex = Int(result.primitiveIndex) * 3
+          return result.hit == 1
+            && vertexIndex >= 0
+            && vertexIndex < rayVertices.count
+            && rayVertices[vertexIndex].identity == sample.rasterIdentity
+        }.count
+        ventralBarbRasterRayRachisOwnerParityCount = zip(results, samples).filter {
+          result, sample in
+          let vertexIndex = Int(result.primitiveIndex) * 3
+          guard result.hit == 1, vertexIndex >= 0, vertexIndex < rayVertices.count,
+            let owner = Self.ventralBarbRachisOwnerIndex(
+              rayVertices[vertexIndex].identity
+            )
+          else { return false }
+          return owner == sample.rasterRachisOwnerIndex
+        }.count
         ventralBarbRasterRayDepthParityCount = zip(results, samples).filter {
           result, sample in
           result.hit == 1 && abs(result.distance - sample.rasterDepthMeters) < 0.02
@@ -2280,6 +2305,9 @@ private final class CrowShowcaseRenderer {
         ventralBarbRayProbeResults.filter { $0.hit == 1 }.count,
       plumageRasterRaySampleCount: ventralBarbRasterRaySampleCount,
       plumageRasterRayHitCount: ventralBarbRasterRayHitCount,
+      plumageRasterRayIdentityParityCount: ventralBarbRasterRayIdentityParityCount,
+      plumageRasterRayRachisOwnerParityCount:
+        ventralBarbRasterRayRachisOwnerParityCount,
       plumageRasterRayDepthParityCount: ventralBarbRasterRayDepthParityCount,
       historyReset: historyReset,
       jitter: jitter,
@@ -2411,14 +2439,38 @@ private final class CrowShowcaseRenderer {
         mipmapLevel: 0
       )
     }
-    var samples: [CrowRayRasterSample] = []
-    for y in stride(from: 0, to: height, by: 2) where samples.count < 16 {
-      for x in stride(from: 0, to: width, by: 2) where samples.count < 16 {
+    var samplesByPrimitive: [UInt32: CrowRayRasterSample] = [:]
+    samplesByPrimitive.reserveCapacity(16)
+    for y in 0..<height {
+      for x in 0..<width {
         let pixelIndex = y * width + x
         let pixelIdentity = rasterIdentities[pixelIndex]
         guard let start = retainedTriangleStarts[pixelIdentity.y],
           pixelIdentity == vertices[start].identity
         else { continue }
+        let primitiveIndex = UInt32(start / 3)
+        guard let rachisOwnerIndex = ventralBarbRachisOwnerIndex(pixelIdentity)
+        else { continue }
+        let neighboringOffsets = [
+          SIMD2<Int>(-1, 0), SIMD2<Int>(1, 0),
+          SIMD2<Int>(0, -1), SIMD2<Int>(0, 1),
+        ]
+        let interiorSupport = neighboringOffsets.reduce(into: 0) {
+          support, offset in
+          let neighborX = x + offset.x
+          let neighborY = y + offset.y
+          guard neighborX >= 0, neighborX < width,
+            neighborY >= 0, neighborY < height
+          else { return }
+          if rasterIdentities[neighborY * width + neighborX] == pixelIdentity {
+            support += 1
+          }
+        }
+        if let prior = samplesByPrimitive[primitiveIndex],
+          prior.rasterInteriorSupport >= interiorSupport
+        {
+          continue
+        }
         let deviceDepth = rasterDeviceDepths[pixelIndex]
         guard deviceDepth.isFinite, deviceDepth > 0, deviceDepth < 1 else { continue }
         let ndcX = (Float(x) + 0.5) / Float(width) * 2 - 1
@@ -2434,21 +2486,47 @@ private final class CrowShowcaseRenderer {
         let direction = hitPoint - eye
         guard simd_length_squared(direction) > 1e-8 else { continue }
         let depth = simd_length(direction)
-        samples.append(
-          CrowRayRasterSample(
-            ray: CrowRayProbeInputGPU(
-              originAndMinimumDistance: SIMD4<Float>(eye, 0.0001),
-              directionAndMaximumDistance: SIMD4<Float>(
-                simd_normalize(direction),
-                depth + 0.002
-              )
-            ),
-            rasterDepthMeters: depth
+        samplesByPrimitive[primitiveIndex] = CrowRayRasterSample(
+          ray: CrowRayProbeInputGPU(
+            originAndMinimumDistance: SIMD4<Float>(eye, 0.0001),
+            directionAndMaximumDistance: SIMD4<Float>(
+              simd_normalize(direction),
+              depth + 0.01
+            )
           ),
+          rasterIdentity: pixelIdentity,
+          rasterPrimitiveIndex: primitiveIndex,
+          rasterRachisOwnerIndex: rachisOwnerIndex,
+          rasterInteriorSupport: interiorSupport,
+          rasterDepthMeters: depth
         )
       }
     }
-    return samples
+    return samplesByPrimitive.values
+      .sorted {
+        let lhsRank = ($0.rasterPrimitiveIndex &* 0x9e37_79b9)
+          ^ ($0.rasterPrimitiveIndex >> 16)
+        let rhsRank = ($1.rasterPrimitiveIndex &* 0x9e37_79b9)
+          ^ ($1.rasterPrimitiveIndex >> 16)
+        return lhsRank == rhsRank
+          ? $0.rasterPrimitiveIndex < $1.rasterPrimitiveIndex
+          : lhsRank < rhsRank
+      }
+      .prefix(16)
+      .map { $0 }
+  }
+
+  /// The ventral-barb primitive identifier reserves a contiguous 8,192-value
+  /// range for each compact rachis record. The fine primitive can differ at a
+  /// genuine overlap, while this parent owner must agree for visibility parity.
+  private static func ventralBarbRachisOwnerIndex(
+    _ identity: SIMD4<UInt32>
+  ) -> UInt32? {
+    let primitiveBase: UInt32 = 0x0710_0000
+    guard identity.x == .max, identity.z == 3,
+      identity.y >= primitiveBase
+    else { return nil }
+    return (identity.y - primitiveBase) / 8_192
   }
 
   @inline(never)
