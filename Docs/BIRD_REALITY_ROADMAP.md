@@ -191,7 +191,9 @@ inventory or view-dependent patch geometry.
    raster metric depth. Geometry-count equality, three structural probes, and
    sixteen sampled pixel correspondences are not full beauty/motion/depth/identity
    AOV parity; exhaustive comparisons remain the next required gate before a
-   ray path can own visibility.
+   ray path can own visibility. The sparse gate is currently exercised over
+   standing plus still, transition, and flight takeoff phases from an elevated
+   oblique camera; it is not yet a multi-camera or full-image qualification.
    The `711` full-density cranial vanes now retain family-`7` loft-neighbour
    morphology and reconstruct breathing plus the spatially graded head warp on
    Metal. The `225` gular owners now derive their `1,575` rachis/barb tubes
