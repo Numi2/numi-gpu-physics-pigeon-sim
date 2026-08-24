@@ -28,6 +28,11 @@ private final class CrowDepthReadbackBox {
   }
 }
 
+private struct CrowRayRasterSample {
+  let ray: CrowRayProbeInputGPU
+  let rasterDepthMeters: Float
+}
+
 /// Native Metal presentation of an explicitly estimated American-crow model.
 ///
 /// The measured Deetjen dove contributes only a deformation scaffold. Crow
@@ -2113,6 +2118,57 @@ private final class CrowShowcaseRenderer {
         }
       }
     }
+    var ventralBarbRasterRaySampleCount = 0
+    var ventralBarbRasterRayHitCount = 0
+    var ventralBarbRasterRayDepthParityCount = 0
+    if let ventralBarbRayGeometryBuild,
+      let ventralBarbFrame,
+      let ventralBarbGeometryDeformer
+    {
+      let samples = Self.rasterRaySamples(
+        vertices: ventralBarbGeometryDeformer.vertices(for: ventralBarbFrame),
+        viewProjection: currentViewProjection,
+        eye: SIMD3<Float>(
+          currentCamera.eyeAndWidth.x,
+          currentCamera.eyeAndWidth.y,
+          currentCamera.eyeAndWidth.z
+        ),
+        identity: identity,
+        metricDepth: resolvedAOVs[4],
+        width: renderWidth,
+        height: renderHeight
+      )
+      if !samples.isEmpty {
+        guard let rasterProbeCommandBuffer = backend.queue.makeCommandBuffer()
+        else {
+          throw VisualizationError.pipeline("crow raster-ray probe command buffer")
+        }
+        let probe = try CrowPlumageRayGeometryProbe(backend: backend)
+        let resultBuffer = try probe.encode(
+          build: ventralBarbRayGeometryBuild,
+          rays: samples.map(\.ray),
+          commandBuffer: rasterProbeCommandBuffer
+        )
+        rasterProbeCommandBuffer.commit()
+        rasterProbeCommandBuffer.waitUntilCompleted()
+        guard rasterProbeCommandBuffer.status == .completed else {
+          throw VisualizationError.shader(
+            rasterProbeCommandBuffer.error?.localizedDescription
+              ?? "crow raster-ray probe failed"
+          )
+        }
+        let results = CrowPlumageRayGeometryProbe.results(
+          from: resultBuffer,
+          count: samples.count
+        )
+        ventralBarbRasterRaySampleCount = samples.count
+        ventralBarbRasterRayHitCount = results.filter { $0.hit == 1 }.count
+        ventralBarbRasterRayDepthParityCount = zip(results, samples).filter {
+          result, sample in
+          result.hit == 1 && abs(result.distance - sample.rasterDepthMeters) < 0.02
+        }.count
+      }
+    }
     let inputPixels = renderWidth * renderHeight
     let outputPixels = outputWidth * outputHeight
     let resolvedInputBytes =
@@ -2220,6 +2276,9 @@ private final class CrowShowcaseRenderer {
       plumageRayGeometryProbeRayCount: ventralBarbRayProbeResults.count,
       plumageRayGeometryProbeHitCount:
         ventralBarbRayProbeResults.filter { $0.hit == 1 }.count,
+      plumageRasterRaySampleCount: ventralBarbRasterRaySampleCount,
+      plumageRasterRayHitCount: ventralBarbRasterRayHitCount,
+      plumageRasterRayDepthParityCount: ventralBarbRasterRayDepthParityCount,
       historyReset: historyReset,
       jitter: jitter,
       reactiveMaskEnabled: reactiveMask != nil,
@@ -2305,6 +2364,90 @@ private final class CrowShowcaseRenderer {
         ? "gpu-mesh-threadgroup-8-vertex-indexed"
         : "gpu-procedural-vertex-pulling"
     )
+  }
+
+  /// Finds a small set of raster pixels that are owned by exact retained
+  /// curve-ribbon triangles, then creates camera rays through those pixels.
+  /// This is sparse input correspondence only; it does not write a ray AOV.
+  private static func rasterRaySamples(
+    vertices: [CrowFeatherVertexGPU],
+    viewProjection: simd_float4x4,
+    eye: SIMD3<Float>,
+    identity: MTLTexture,
+    metricDepth: MTLTexture,
+    width: Int,
+    height: Int
+  ) -> [CrowRayRasterSample] {
+    let triangleCount = vertices.count / 3
+    guard triangleCount > 0, width > 0, height > 0 else { return [] }
+    let inverseViewProjection = simd_inverse(viewProjection)
+    guard inverseViewProjection.columns.0.x.isFinite else { return [] }
+    var retainedTriangleStarts: [UInt32: Int] = [:]
+    retainedTriangleStarts.reserveCapacity(triangleCount)
+    for triangle in 0..<triangleCount {
+      let start = triangle * 3
+      retainedTriangleStarts[vertices[start].identity.y] = start
+    }
+    var rasterIdentities = Array(
+      repeating: SIMD4<UInt32>.zero,
+      count: width * height
+    )
+    rasterIdentities.withUnsafeMutableBytes { bytes in
+      identity.getBytes(
+        bytes.baseAddress!,
+        bytesPerRow: width * MemoryLayout<SIMD4<UInt32>>.stride,
+        from: MTLRegionMake2D(0, 0, width, height),
+        mipmapLevel: 0
+      )
+    }
+    var rasterDepths = Array(repeating: Float.zero, count: width * height)
+    rasterDepths.withUnsafeMutableBytes { bytes in
+      metricDepth.getBytes(
+        bytes.baseAddress!,
+        bytesPerRow: width * MemoryLayout<Float>.stride,
+        from: MTLRegionMake2D(0, 0, width, height),
+        mipmapLevel: 0
+      )
+    }
+    var samples: [CrowRayRasterSample] = []
+    for y in stride(from: 0, to: height, by: 2) where samples.count < 4 {
+      for x in stride(from: 0, to: width, by: 2) where samples.count < 4 {
+        let pixelIndex = y * width + x
+        let pixelIdentity = rasterIdentities[pixelIndex]
+        guard let start = retainedTriangleStarts[pixelIdentity.y],
+          pixelIdentity == vertices[start].identity
+        else { continue }
+        let depth = rasterDepths[pixelIndex]
+        guard depth.isFinite, depth > 0 else { continue }
+        let ndcX = (Float(x) + 0.5) / Float(width) * 2 - 1
+        let ndcY = 1 - (Float(y) + 0.5) / Float(height) * 2
+        let nearHomogeneous = inverseViewProjection * SIMD4<Float>(ndcX, ndcY, 0, 1)
+        let farHomogeneous = inverseViewProjection * SIMD4<Float>(ndcX, ndcY, 1, 1)
+        guard abs(nearHomogeneous.w) > 1e-6, abs(farHomogeneous.w) > 1e-6
+        else { continue }
+        let nearPoint = SIMD3<Float>(
+          nearHomogeneous.x, nearHomogeneous.y, nearHomogeneous.z
+        ) / nearHomogeneous.w
+        let farPoint = SIMD3<Float>(
+          farHomogeneous.x, farHomogeneous.y, farHomogeneous.z
+        ) / farHomogeneous.w
+        let direction = farPoint - nearPoint
+        guard simd_length_squared(direction) > 1e-8 else { continue }
+        samples.append(
+          CrowRayRasterSample(
+            ray: CrowRayProbeInputGPU(
+              originAndMinimumDistance: SIMD4<Float>(eye, 0.0001),
+              directionAndMaximumDistance: SIMD4<Float>(
+                simd_normalize(direction),
+                depth + 0.02
+              )
+            ),
+            rasterDepthMeters: depth
+          ),
+        )
+      }
+    }
+    return samples
   }
 
   @inline(never)

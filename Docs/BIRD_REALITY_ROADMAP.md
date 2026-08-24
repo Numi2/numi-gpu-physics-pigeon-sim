@@ -185,10 +185,13 @@ inventory or view-dependent patch geometry.
    triangles recovered from that same expansion and records their hit coverage,
    first primitive index, and first distance. The probes never change radiance,
    raster depth, motion, identity,
-   or the ray-visibility authority. Geometry-count equality and a structural
-   probe hit are input correspondence, not beauty/motion/depth/identity AOV
-   parity; those comparisons remain the next required gate before a ray path
-   can own visibility.
+   or the ray-visibility authority. A separate sparse audit starts with pixels
+   that the raster identity AOV assigns to retained curve triangles, casts
+   camera rays through them, and requires their ray-hit distances to match the
+   raster metric depth. Geometry-count equality, three structural probes, and
+   four sampled pixel correspondences are not full beauty/motion/depth/identity
+   AOV parity; exhaustive comparisons remain the next required gate before a
+   ray path can own visibility.
    The `711` full-density cranial vanes now retain family-`7` loft-neighbour
    morphology and reconstruct breathing plus the spatially graded head warp on
    Metal. The `225` gular owners now derive their `1,575` rachis/barb tubes
