@@ -12,11 +12,15 @@
   <img alt="BSD 3-Clause" src="https://img.shields.io/badge/License-BSD--3--Clause-blue">
 </p>
 
-## Visual abstract
+## Current native flight gallery
+
+### Deetjen dove — native Metal viewer
 
 ![Native Metal viewer: reconstructed Deetjen dove during a forward wingbeat](Docs/Media/birdflow-metal-native-viewer.gif)
 
 <p align="center"><em>Native Metal rendering of the reconstructed Deetjen dove through a forward, body-following wingbeat interval. Surface trails are kinematic; they are not CFD streamlines.</em></p>
+
+### Deetjen dove — Numi Lab flight replay
 
 <p align="center">
   <img src="Docs/Media/numi-lab-measured-dove-replay.gif" width="49%" alt="Native Numi Lab replay of the measured Deetjen dove">
@@ -24,6 +28,8 @@
 </p>
 
 <p align="center"><em>Two recorded viewpoints of the provenance-locked Deetjen surface replay. Cyan is the measured left wing; orange is the reflected-right-wing assumption.</em></p>
+
+### American crow — standing to flight
 
 <p align="center">
   <img src="Docs/Media/american-crow-standing-to-flight-v1.gif" width="66%" alt="Native Metal simulated American crow standing, taking off, and flying">
@@ -33,8 +39,12 @@
 
 <p align="center">
   <img src="Docs/Media/deetjen-through-flight-observatory.png" width="49%" alt="Deetjen through-flight field observatory">
-  <img src="Docs/Media/american-crow-hybrid-native-v1.png" width="49%" alt="Native Metal American crow flight render">
+  <a href="Docs/Media/american-crow-hybrid-native-v1.mp4"><img src="Docs/Media/american-crow-hybrid-native-v1.png" width="49%" alt="Native Metal American crow flight render; opens the full flight clip"></a>
 </p>
+
+<p align="center"><em>Left: Deetjen through-flight field observatory. Right: the latest native crow flight still; select it for the full 1280×720 native Metal wingbeat clip.</em></p>
+
+The gallery intentionally includes every current, tracked crow and Numi Lab dove flight capture. The [visual progress archive](Docs/Media/Progress/README.md) holds earlier developmental captures separately, so the landing page stays focused on the latest media.
 
 ## What this repository demonstrates
 
