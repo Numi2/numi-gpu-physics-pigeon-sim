@@ -1,0 +1,32 @@
+#!/bin/sh
+set -eu
+
+if [ "${1:-}" = "--numi-describe" ]; then
+    printf '%s\n' 'Train, evaluate, view, or capture the BirdFlow American-crow hybrids in Numi Lab.'
+    exit 0
+fi
+
+workspace=$(CDPATH= cd -- "$(dirname -- "$0")/../.." && pwd)
+runtime_root=${NUMI_CROW_RUNTIME_ROOT:-/Users/home/Documents/emergentnumilife/MetalRobo-crow-numi-integration}
+profile="$workspace/ValidationInputs/american-crow-hybrid-visual-v1.json"
+expected_profile_hash=563e600ff8da2fb7461b00228d421e05c1826d1fe025840e319e0aef4e719714
+
+[ -x "$runtime_root/numi/commands/crow" ] || {
+    printf '%s\n' "numi crow: crow-enabled Numi Lab source is unavailable: $runtime_root" >&2
+    exit 1
+}
+[ -f "$profile" ] || {
+    printf '%s\n' "numi crow: BirdFlow crow profile is unavailable: $profile" >&2
+    exit 1
+}
+actual_profile_hash=$(shasum -a 256 "$profile" | awk '{print $1}')
+[ "$actual_profile_hash" = "$expected_profile_hash" ] || {
+    printf '%s\n' 'numi crow: BirdFlow crow profile hash differs from the imported hybrid contract.' >&2
+    exit 1
+}
+
+export NUMI_LAB_ROOT="$runtime_root"
+export NUMI_BUILD_DIR=${NUMI_BUILD_DIR:-"$runtime_root/build-crow-journey-ninja"}
+export NUMI_CROW_BUILD_DIR=${NUMI_CROW_BUILD_DIR:-"$NUMI_BUILD_DIR"}
+export NUMI_WORKSPACE_ROOT="$workspace"
+exec "$runtime_root/numi/commands/crow" "$@"
