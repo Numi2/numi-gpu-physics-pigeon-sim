@@ -76,6 +76,12 @@ render_pass() {
   local yaw="$3"
   local pitch="$4"
   local distance="$5"
+  local yaw_orbit="$6"
+  local distance_scale="$7"
+  local distance_args=()
+  if [[ "$distance" != "auto" ]]; then
+    distance_args=(--capture-crow-camera-distance "$distance")
+  fi
   local directory="$TEMP/$name"
   mkdir -p "$directory"
   # This renderer currently needs both ASan's lifetime instrumentation and the
@@ -92,8 +98,10 @@ render_pass() {
     --capture-crow-standing-reference "$STANDING_REFERENCE" \
     --capture-crow-presentation "$presentation" \
     --capture-crow-camera-yaw "$yaw" \
+    --capture-crow-camera-yaw-orbit "$yaw_orbit" \
     --capture-crow-camera-pitch "$pitch" \
-    --capture-crow-camera-distance "$distance" \
+    "${distance_args[@]}" \
+    --capture-crow-camera-distance-scale "$distance_scale" \
     --capture-width 1280 \
     --capture-height 720 \
     --capture-frames 49
@@ -108,11 +116,11 @@ if [[ -z "$REUSE_FRAMES_DIR" ]]; then
   swift build --build-path "$CAPTURE_BUILD" -c release \
     --sanitize=address --product birdflow-capture
   CAPTURE="$CAPTURE_BUILD/release/birdflow-capture"
-  render_pass standing standing 0.62 0.12 0.54
-  render_pass takeoff takeoff 0.18 0.20 0.78
-  render_pass flight-front wingbeat -0.42 0.31 1.16
-  render_pass flight-side wingbeat -1.10 0.24 1.12
-  render_pass flight-rear wingbeat 0.78 0.34 1.14
+  render_pass standing standing 0.62 0.12 0.52 0.025 1
+  render_pass takeoff takeoff 0.18 0.20 auto 0.08 1.35
+  render_pass flight-front wingbeat -0.42 0.29 1.12 0.12 1
+  render_pass flight-side wingbeat -0.88 0.38 1.07 -0.22 1
+  render_pass flight-rear wingbeat 0.82 0.38 1.08 0.20 1
 fi
 if [[ -n "$FRAMES_ONLY_DIR" ]]; then
   echo "Numi crow presentation frames: $TEMP"
@@ -150,9 +158,10 @@ ffmpeg -v error -y \
   -map '[v]' -c:v libx264 -preset slow -crf 17 -pix_fmt yuv420p \
   -movflags +faststart "$OUTPUT"
 
-# Mid-transition retains the complete wing span while keeping the head, feet,
-# and takeoff platform readable; later frames crop the upstroke tips.
-cp "$TEMP/takeoff/frame-026.png" "$POSTER"
+# Use the close three-quarter stance as the poster so the eye, bill, layered
+# body contours, feet, and tail remain readable at README scale. The video
+# carries the complete takeoff and multi-angle flight sequence.
+cp "$TEMP/standing/frame-024.png" "$POSTER"
 ffmpeg -v error -y -i "$OUTPUT" \
   -vf 'fps=12,scale=960:-1:flags=lanczos,split[s0][s1];[s0]palettegen[p];[s1][p]paletteuse' \
   "$GIF"
@@ -188,7 +197,7 @@ jq -n \
     schema: $schema,
     classification: "high-quality phase-keyed presentation replay",
     limitation: "BirdFlow feather pixels are not the Numi native visual sensor and are not a joint-exact state replay.",
-    camera_sequence: ["standing-front-three-quarter", "takeoff-three-quarter", "flight-front", "flight-side", "flight-rear", "landing-reverse-three-quarter"],
+    camera_sequence: ["standing-front-three-quarter", "takeoff-three-quarter", "flight-front-orbit", "flight-high-left-orbit", "flight-rear-orbit", "landing-reverse-three-quarter"],
     output: $output,
     output_sha256: $output_sha256,
     evidence: $evidence,

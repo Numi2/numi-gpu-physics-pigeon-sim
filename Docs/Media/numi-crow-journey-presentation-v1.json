@@ -5,13 +5,13 @@
   "camera_sequence": [
     "standing-front-three-quarter",
     "takeoff-three-quarter",
-    "flight-front",
-    "flight-side",
-    "flight-rear",
+    "flight-front-orbit",
+    "flight-high-left-orbit",
+    "flight-rear-orbit",
     "landing-reverse-three-quarter"
   ],
   "output": "Docs/Media/numi-crow-journey-presentation-v1.mp4",
-  "output_sha256": "682b4c3a67a39f672cbf0c50eb50ca89318fbead98dc06c03ac052ca8e962cdd",
+  "output_sha256": "db6131a93f5e0891c0d9f6e5b92fc027eda6491a3cddf764d57c133ecb65bfbd",
   "evidence": ".numi/runs/crow-journey-assisted-20260826T014635Z/evidence.json",
   "evidence_sha256": "b7e07d4e760d1b607b187c6bc26632ad430e36d24a2488bf6eb713739227419e",
   "state_trace": ".numi/runs/crow-journey-assisted-20260826T014635Z/state.tsv",

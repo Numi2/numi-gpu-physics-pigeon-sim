@@ -729,8 +729,10 @@ func crowCaptureAcceptsBoundedCameraOverrides() throws {
     "--capture-crow-frames", "/tmp/crow-camera-override-test",
     "--capture-frames", "2",
     "--capture-crow-camera-yaw", "-2.35",
+    "--capture-crow-camera-yaw-orbit", "-0.22",
     "--capture-crow-camera-pitch", "-0.31",
     "--capture-crow-camera-distance", "0.035",
+    "--capture-crow-camera-distance-scale", "1.22",
     "--capture-crow-camera-target-x", "0.02",
     "--capture-crow-camera-target-y", "0.055",
     "--capture-crow-camera-target-z", "-0.04",
@@ -738,8 +740,10 @@ func crowCaptureAcceptsBoundedCameraOverrides() throws {
     "--capture-crow-cpu-cranial-vanes",
   ])
   #expect(arguments.cameraYawRadians == -2.35)
+  #expect(arguments.cameraYawOrbitRadians == -0.22)
   #expect(arguments.cameraPitchRadians == -0.31)
   #expect(arguments.cameraDistanceMeters == 0.035)
+  #expect(arguments.cameraDistanceScale == 1.22)
   #expect(arguments.cameraTarget == SIMD3<Float>(0.02, 0.055, -0.04))
   #expect(!arguments.explicitVentralBarbCurvesEnabled)
   #expect(!arguments.retainedCranialVanesEnabled)
@@ -774,7 +778,23 @@ func crowCaptureAcceptsBoundedCameraOverrides() throws {
       "birdflow-viewer",
       "--capture-crow-frames", "/tmp/crow-camera-override-test",
       "--capture-frames", "2",
+      "--capture-crow-camera-yaw-orbit", "0.76",
+    ])
+  }
+  #expect(throws: CrowShowcaseCapture.CaptureError.self) {
+    _ = try CrowShowcaseCapture.Arguments(commandLine: [
+      "birdflow-viewer",
+      "--capture-crow-frames", "/tmp/crow-camera-override-test",
+      "--capture-frames", "2",
       "--capture-crow-camera-distance", "0.019",
+    ])
+  }
+  #expect(throws: CrowShowcaseCapture.CaptureError.self) {
+    _ = try CrowShowcaseCapture.Arguments(commandLine: [
+      "birdflow-viewer",
+      "--capture-crow-frames", "/tmp/crow-camera-override-test",
+      "--capture-frames", "2",
+      "--capture-crow-camera-distance-scale", "2.01",
     ])
   }
   #expect(throws: CrowShowcaseCapture.CaptureError.self) {

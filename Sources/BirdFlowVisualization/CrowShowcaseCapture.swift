@@ -60,8 +60,10 @@ public enum CrowShowcaseCapture {
     let aovAuditURL: URL?
     let temporalScale: Float
     let cameraYawRadians: Float?
+    let cameraYawOrbitRadians: Float
     let cameraPitchRadians: Float?
     let cameraDistanceMeters: Float?
+    let cameraDistanceScale: Float
     let cameraTarget: SIMD3<Float>?
     let explicitVentralBarbCurvesEnabled: Bool
     let retainedFemoralVanesEnabled: Bool
@@ -117,9 +119,15 @@ public enum CrowShowcaseCapture {
         default: 1
       )
       cameraYawRadians = try finiteFloat(after: "--capture-crow-camera-yaw")
+      cameraYawOrbitRadians =
+        try finiteFloat(after: "--capture-crow-camera-yaw-orbit") ?? 0
       cameraPitchRadians = try finiteFloat(after: "--capture-crow-camera-pitch")
       cameraDistanceMeters = try finiteFloat(
         after: "--capture-crow-camera-distance"
+      )
+      cameraDistanceScale = try positiveFloat(
+        after: "--capture-crow-camera-distance-scale",
+        default: 1
       )
       let targetComponents = try [
         finiteFloat(after: "--capture-crow-camera-target-x"),
@@ -184,11 +192,21 @@ public enum CrowShowcaseCapture {
           "--capture-crow-camera-pitch must be between -1.4 and 1.4 radians"
         )
       }
+      guard abs(cameraYawOrbitRadians) <= 0.75 else {
+        throw CaptureError.invalidArguments(
+          "--capture-crow-camera-yaw-orbit must be between -0.75 and 0.75 radians"
+        )
+      }
       guard
         cameraDistanceMeters.map({ $0 >= 0.02 && $0 <= 4 }) ?? true
       else {
         throw CaptureError.invalidArguments(
           "--capture-crow-camera-distance must be between 0.02 and 4 metres"
+        )
+      }
+      guard cameraDistanceScale >= 0.5 && cameraDistanceScale <= 2 else {
+        throw CaptureError.invalidArguments(
+          "--capture-crow-camera-distance-scale must be between 0.5 and 2"
         )
       }
       surfaceManifestURL = URL(
@@ -439,7 +457,9 @@ public enum CrowShowcaseCapture {
         camera.pitch = 0.30 + 0.035 * cos(orbit)
       }
       if let cameraYawRadians = arguments.cameraYawRadians {
-        camera.yaw = cameraYawRadians
+        camera.yaw =
+          cameraYawRadians
+          + arguments.cameraYawOrbitRadians * cos(orbit)
       }
       if let cameraPitchRadians = arguments.cameraPitchRadians {
         camera.pitch = cameraPitchRadians
@@ -450,6 +470,7 @@ public enum CrowShowcaseCapture {
       if let cameraDistanceMeters = arguments.cameraDistanceMeters {
         camera.distance = cameraDistanceMeters
       }
+      camera.distance *= arguments.cameraDistanceScale
       let rendered = try renderer.render(
         phase: phase,
         camera: camera,
@@ -473,19 +494,8 @@ public enum CrowShowcaseCapture {
           graphics,
           width: arguments.width,
           height: arguments.height,
-          profile: profile,
           phase: phase,
-          presentation: arguments.presentation,
-          sourceDescription: {
-            switch arguments.presentation {
-            case .standing:
-              return "Estimated grounded pose / qualitative public-video anatomy reference"
-            case .takeoff:
-              return "Retained simulated topology / geometric stand-to-flight transition"
-            case .wingbeat:
-              return "Estimated-hybrid solver topology / presentation-retargeted wing articulation"
-            }
-          }()
+          presentation: arguments.presentation
         )
       }
       let png: Data
@@ -561,22 +571,18 @@ public enum CrowShowcaseCapture {
     _ graphics: CGContext,
     width: Int,
     height: Int,
-    profile: CrowVisualProfile,
     phase: Float,
-    presentation: CrowShowcasePresentation,
-    sourceDescription: String
+    presentation: CrowShowcasePresentation
   ) {
     graphics.saveGState()
     graphics.textMatrix = .identity
     let scale = CGFloat(height) / 900
     let margin = 42 * scale
     let titleFont = CTFontCreateWithName("AvenirNext-DemiBold" as CFString, 25 * scale, nil)
-    let detailFont = CTFontCreateWithName("AvenirNext-Medium" as CFString, 12.5 * scale, nil)
     let labelFont = CTFontCreateWithName("AvenirNext-DemiBold" as CFString, 10.5 * scale, nil)
     let white = CGColor(red: 0.91, green: 0.95, blue: 1, alpha: 0.94)
-    let cool = CGColor(red: 0.49, green: 0.73, blue: 0.94, alpha: 0.92)
-    let muted = CGColor(red: 0.67, green: 0.74, blue: 0.80, alpha: 0.84)
-    let warning = CGColor(red: 0.96, green: 0.63, blue: 0.26, alpha: 0.96)
+    let muted = CGColor(red: 0.72, green: 0.79, blue: 0.84, alpha: 0.82)
+    let accent = CGColor(red: 0.95, green: 0.69, blue: 0.38, alpha: 0.92)
 
     drawText(
       "AMERICAN CROW",
@@ -587,42 +593,14 @@ public enum CrowShowcaseCapture {
       tracking: 1.4 * scale
     )
     drawText(
-      "CORVUS BRACHYRHYNCHOS  /  ESTIMATED HYBRID V1",
+      presentation == .standing
+        ? "READY"
+        : (presentation == .takeoff ? "TAKEOFF" : "FLIGHT"),
       at: CGPoint(x: margin, y: CGFloat(height) - 84 * scale),
       font: labelFont,
-      color: warning,
+      color: accent,
       graphics: graphics,
-      tracking: 0.9 * scale
-    )
-    let selected = profile.selectedCrowEstimate
-    let dimensions =
-      presentation == .standing
-      ? String(
-        format: "%.2f m length   %.0f g selected mass   %.0f mm tarsus   QUIET STANCE",
-        selected.totalLengthMeters,
-        selected.bodyMassKilograms * 1000,
-        selected.tarsusLengthMeters * 1000
-      )
-      : String(
-        format: "%.2f m wingspan   %.2f m length   %.0f g selected mass   %.1f Hz display",
-        selected.wingspanMeters,
-        selected.totalLengthMeters,
-        selected.bodyMassKilograms * 1000,
-        selected.presentationWingbeatFrequencyHertz
-      )
-    drawText(
-      dimensions,
-      at: CGPoint(x: margin, y: 50 * scale),
-      font: detailFont,
-      color: cool,
-      graphics: graphics
-    )
-    drawText(
-      sourceDescription,
-      at: CGPoint(x: margin, y: 31 * scale),
-      font: labelFont,
-      color: muted,
-      graphics: graphics
+      tracking: 1.1 * scale
     )
     let phaseLabel =
       presentation == .takeoff

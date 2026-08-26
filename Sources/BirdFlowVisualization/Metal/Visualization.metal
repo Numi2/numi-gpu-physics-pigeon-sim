@@ -6623,22 +6623,22 @@ inline float3 showcaseCrowLinearRadiance(
     // Eyes use the upper material band. A tight white catchlight and a warm
     // iris keep the eye readable without lifting the surrounding plumage.
     if(material>0.72f){
-        float specular=pow(saturate(dot(normal,halfVector)),180.0f);
+        float specular=pow(saturate(dot(normal,halfVector)),96.0f);
         float horizon=pow(1.0f-ndv,3.0f);
-        float3 eyeRadiance=albedoAndMaterial.rgb*(0.13f+0.72f*ndk+0.12f*ndf);
-        eyeRadiance+=float3(0.82f,0.76f,0.66f)*specular;
+        float3 eyeRadiance=albedoAndMaterial.rgb*(0.22f+0.78f*ndk+0.18f*ndf);
+        eyeRadiance+=float3(1.00f,0.91f,0.76f)*specular;
         eyeRadiance+=float3(0.055f,0.025f,0.010f)*horizon;
-        return eyeRadiance;
+        return 1.18f*eyeRadiance;
     }
 
     // Keratin in the bill, claws, and legs is dark graphite rather than
     // feather black. It carries a broader, weaker highlight.
     if(material>0.48f){
         float specular=pow(saturate(dot(normal,halfVector)),48.0f);
-        float3 keratin=albedoAndMaterial.rgb*(0.24f+0.66f*ndk+0.18f*ndf);
-        keratin+=specular*float3(0.24f,0.27f,0.31f);
-        keratin+=rim*float3(0.025f,0.035f,0.050f);
-        return 1.12f*keratin;
+        float3 keratin=albedoAndMaterial.rgb*(0.32f+0.70f*ndk+0.24f*ndf);
+        keratin+=specular*float3(0.29f,0.31f,0.34f);
+        keratin+=rim*float3(0.032f,0.040f,0.052f);
+        return 1.20f*keratin;
     }
 
     // Eumelanin makes the body nearly black while the smooth cortex provides
@@ -7028,9 +7028,16 @@ inline float3 showcaseCrowLinearRadiance(
         0.78f*pow(saturate(dot(normal,halfVector)),24.0f)
         +0.14f*pow(saturate(dot(normal,fillHalfVector)),24.0f)
         +0.08f*pow(saturate(dot(normal,sunHalfVector)),24.0f);
-    float diffuse=0.28f+0.62f*ndk+0.16f*ndf+0.10f*nds;
-    float flightDarkening=mix(1.0f,0.58f,flightFeather);
-    float3 color=albedoAndMaterial.rgb*diffuse*flightDarkening;
+    float cameraFill=sqrt(ndv);
+    float diffuse=0.34f+0.58f*ndk+0.22f*ndf+0.12f*nds
+        +0.14f*cameraFill;
+    float flightDarkening=mix(1.0f,0.78f,flightFeather);
+    float baseLuminance=dot(
+        albedoAndMaterial.rgb,float3(0.2126f,0.7152f,0.0722f)
+    );
+    float3 neutralBlack=baseLuminance*float3(0.94f,0.99f,1.06f);
+    float3 featherAlbedo=mix(albedoAndMaterial.rgb,neutralBlack,0.48f);
+    float3 color=featherAlbedo*diffuse*flightDarkening;
     color*=visibilityEnergy;
     color*=mix(1.0f,0.82f,foreheadVane);
     float3 pathSheen=
@@ -7100,12 +7107,12 @@ inline float3 showcaseCrowLinearRadiance(
     // added here; weak film structure stays view-dependent in `sheen`.
     color+=nds*float3(0.004f,0.006f,0.010f);
     color+=rim*mix(1.0f,classSheenScale,max(surfaceVane,explicitCurve))
-        *float3(0.022f,0.040f,0.065f);
+        *float3(0.030f,0.050f,0.074f);
     // This analytic lobe stands in only for shadowed feather volume inside the
     // folded wing-tail junction. Suppress exposed-cortex energy so a grazing
     // rear camera cannot turn the hidden gap fill into a glossy capsule.
     color*=mix(1.0f,0.30f,deepUnderplumageVane);
-    return 1.68f*color;
+    return 1.92f*color;
 }
 
 /// GPU contract for the body-rachis optical LOD. The fragment path supplies a
@@ -7356,7 +7363,7 @@ fragment float4 showcaseCrowToneMapFragment(
     RasterVertex in [[stage_in]],
     texture2d<half> hdrColor [[texture(0)]]) {
     uint2 pixel=uint2(in.position.xy);
-    float3 radiance=float3(hdrColor.read(pixel).rgb);
+    float3 radiance=1.12f*float3(hdrColor.read(pixel).rgb);
     return float4(1.0f-exp(-max(radiance,0.0f)),1.0f);
 }
 
