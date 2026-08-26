@@ -2,8 +2,8 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-OUTPUT="${1:-$ROOT/Docs/Media/numi-crow-journey-presentation-v1.mp4}"
-POSTER="${2:-$ROOT/Docs/Media/numi-crow-journey-presentation-v1.png}"
+OUTPUT="${1:-$ROOT/Docs/Media/numi-crow-takeoff-cruise-v2.mp4}"
+POSTER="${2:-$ROOT/Docs/Media/numi-crow-takeoff-cruise-v2.png}"
 EVIDENCE="${3:?usage: capture-crow-numi-journey.sh OUTPUT POSTER EVIDENCE STATE_TRACE [GIF]}"
 STATE_TRACE="${4:?usage: capture-crow-numi-journey.sh OUTPUT POSTER EVIDENCE STATE_TRACE [GIF]}"
 GIF="${5:-${OUTPUT%.mp4}.gif}"
@@ -34,11 +34,13 @@ fi
   exit 1
 }
 jq -e '
-  .world_source == "birdflow_american_crow_journey_showcase_v1"
+  .world_source == "birdflow_american_crow_journey_v2"
   and .action_count == 14
-  and .actor_observation_count == 82
+  and .actor_observation_count == 83
+  and .action_source == "policy_pack"
+  and .birdflow_journey_teacher == false
 ' "$EVIDENCE" >/dev/null || {
-  echo "evidence is not the fingerprinted 14-action/82-observation crow journey" >&2
+  echo "evidence is not an autonomous fingerprinted 14-action/83-observation crow journey v2 rollout" >&2
   exit 1
 }
 grep -q '^# step nq=20 ' "$STATE_TRACE" || {
@@ -78,10 +80,6 @@ render_pass() {
   local distance="$5"
   local yaw_orbit="$6"
   local distance_scale="$7"
-  local distance_args=()
-  if [[ "$distance" != "auto" ]]; then
-    distance_args=(--capture-crow-camera-distance "$distance")
-  fi
   local directory="$TEMP/$name"
   mkdir -p "$directory"
   # This renderer currently needs both ASan's lifetime instrumentation and the
@@ -89,7 +87,8 @@ render_pass() {
   # that pair, it can fault before the first completed command buffer. Shader
   # validation is intentionally not enabled because it is not required and is
   # much slower.
-  env MTL_DEBUG_LAYER=1 ASAN_OPTIONS=abort_on_error=1 "$CAPTURE" \
+  local command=(
+    env MTL_DEBUG_LAYER=1 ASAN_OPTIONS=abort_on_error=1 "$CAPTURE" \
     --capture-crow-frames "$directory" \
     --capture-crow-surface-manifest "$MANIFEST" \
     --capture-crow-surface-generation-audit "$GENERATION_AUDIT" \
@@ -100,11 +99,14 @@ render_pass() {
     --capture-crow-camera-yaw "$yaw" \
     --capture-crow-camera-yaw-orbit "$yaw_orbit" \
     --capture-crow-camera-pitch "$pitch" \
-    "${distance_args[@]}" \
     --capture-crow-camera-distance-scale "$distance_scale" \
     --capture-width 1280 \
-    --capture-height 720 \
-    --capture-frames 49
+    --capture-height 720 --capture-frames 49
+  )
+  if [[ "$distance" != "auto" ]]; then
+    command+=(--capture-crow-camera-distance "$distance")
+  fi
+  "${command[@]}"
 }
 
 # Each pass owns a deliberate readable angle. Camera cuts happen only at stage
@@ -142,9 +144,6 @@ ffmpeg -v error -y -framerate 24 \
   -i "$TEMP/takeoff/frame-%03d.png" -frames:v 49 \
   -c:v libx264 -preset slow -crf 17 -pix_fmt yuv420p \
   "$TEMP/takeoff.mp4"
-ffmpeg -v error -y -i "$TEMP/takeoff.mp4" \
-  -vf reverse -an -c:v libx264 -preset slow -crf 17 -pix_fmt yuv420p \
-  "$TEMP/landing.mp4"
 
 ffmpeg -v error -y \
   -i "$TEMP/standing.mp4" \
@@ -152,9 +151,8 @@ ffmpeg -v error -y \
   -i "$TEMP/flight-front.mp4" \
   -i "$TEMP/flight-side.mp4" \
   -i "$TEMP/flight-rear.mp4" \
-  -i "$TEMP/landing.mp4" \
   -filter_complex \
-    '[0:v][1:v][2:v][3:v][4:v][5:v]concat=n=6:v=1:a=0[v]' \
+    '[0:v][1:v][2:v][3:v][4:v]concat=n=5:v=1:a=0[v]' \
   -map '[v]' -c:v libx264 -preset slow -crf 17 -pix_fmt yuv420p \
   -movflags +faststart "$OUTPUT"
 
@@ -174,7 +172,7 @@ FRAME_COUNT="$(
   ffprobe -v error -count_frames -select_streams v:0 \
     -show_entries stream=nb_read_frames -of default=nw=1:nk=1 "$OUTPUT"
 )"
-[[ "$DIMENSIONS" == "1280x720" && "$FRAME_COUNT" -ge 280 ]] || {
+[[ "$DIMENSIONS" == "1280x720" && "$FRAME_COUNT" -ge 240 ]] || {
   echo "unexpected presentation contract: $DIMENSIONS, $FRAME_COUNT frames" >&2
   exit 1
 }
@@ -184,7 +182,7 @@ EVIDENCE_HASH="$(shasum -a 256 "$EVIDENCE" | awk '{print $1}')"
 TRACE_HASH="$(shasum -a 256 "$STATE_TRACE" | awk '{print $1}')"
 TRACE_FINAL_STEP="$(awk 'END {print $1}' "$STATE_TRACE")"
 jq -n \
-  --arg schema "birdflow.numi-crow-presentation.v1" \
+  --arg schema "birdflow.numi-crow-presentation.v2" \
   --arg output "$OUTPUT" \
   --arg output_sha256 "$OUTPUT_HASH" \
   --arg evidence "$EVIDENCE" \
@@ -192,12 +190,12 @@ jq -n \
   --arg state_trace "$STATE_TRACE" \
   --arg state_trace_sha256 "$TRACE_HASH" \
   --argjson state_trace_final_step "$TRACE_FINAL_STEP" \
-  --argjson native_evidence "$(jq '{action_source,birdflow_journey_teacher,task_fingerprint,observation_fingerprint,action_fingerprint,mean_root_height,maximum_root_height,mean_tilt,maximum_tilt,mean_final_forward_progress_m,maximum_forward_progress_m,termination_reason_counts}' "$EVIDENCE")" \
+  --argjson native_evidence "$(jq '{action_source,birdflow_journey_teacher,task_fingerprint,observation_fingerprint,action_fingerprint,policy_rollout_fingerprint,policy_sample_count,run_fingerprint,mean_root_height,maximum_root_height,mean_tracking_score,mean_tilt,maximum_tilt,mean_final_forward_progress_m,maximum_forward_progress_m,failed_environment_steps,termination_reason_counts}' "$EVIDENCE")" \
   '{
     schema: $schema,
-    classification: "high-quality phase-keyed presentation replay",
+    classification: "high-quality phase-keyed autonomous takeoff-cruise presentation",
     limitation: "BirdFlow feather pixels are not the Numi native visual sensor and are not a joint-exact state replay.",
-    camera_sequence: ["standing-front-three-quarter", "takeoff-three-quarter", "flight-front-orbit", "flight-high-left-orbit", "flight-rear-orbit", "landing-reverse-three-quarter"],
+    camera_sequence: ["standing-front-three-quarter", "takeoff-three-quarter", "flight-front-orbit", "flight-high-left-orbit", "flight-rear-orbit"],
     output: $output,
     output_sha256: $output_sha256,
     evidence: $evidence,

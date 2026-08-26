@@ -40,10 +40,10 @@
 ### American crow — Numi Lab journey
 
 <p align="center">
-  <a href="Docs/Media/numi-crow-journey-presentation-v1.mp4"><img src="Docs/Media/numi-crow-journey-presentation-v1.gif" width="66%" alt="Five-angle feathered presentation of the Numi Lab American-crow journey"></a>
+  <a href="Docs/Media/numi-crow-takeoff-cruise-v2.mp4"><img src="Docs/Media/numi-crow-takeoff-cruise-v2.gif" width="66%" alt="Five-angle feathered presentation of the qualified Numi Lab American-crow takeoff and cruise policy"></a>
 </p>
 
-<p align="center"><em>Standing, takeoff, front, side, rear, and landing views of the estimated feathered model. This is a phase-keyed presentation companion to an assisted Numi physical trace—not Numi sensor pixels, a joint-exact replay, or an accepted autonomous policy.</em></p>
+<p align="center"><em>Standing, takeoff, front, side, and rear views of the estimated feathered model, keyed to a selected autonomous policy that passed three-seed takeoff/cruise physics gates. These are presentation pixels—not Numi sensor pixels or a joint-exact state replay.</em></p>
 
 <p align="center">
   <img src="Docs/Media/deetjen-through-flight-observatory.png" width="49%" alt="Deetjen through-flight field observatory">

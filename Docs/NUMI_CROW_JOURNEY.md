@@ -2,19 +2,18 @@
 
 BirdFlow's estimated American-crow hybrid now has a separate Numi Lab task for
 standing, walking/hopping, takeoff, flight, turns, approach, and supported
-landing. The task exposes 14 normalized actions, 82 actor observations, and a
+landing. The v2 task exposes 14 normalized actions, 83 actor observations, and a
 20-coordinate articulated state. It is simulation, not measured crow
 biomechanics or hardware-flight evidence.
 
 ## Practical workflow
 
 ```sh
-numi crow journey train --envs 256 --steps 128 --updates 8 --chunk 8
-numi crow journey evaluate --policy-pack PATH
-numi crow journey window --policy-pack PATH
-numi crow journey capture                 # assisted physics-debug capture
-numi crow journey capture --policy-pack PATH
-numi crow journey showcase OUTPUT POSTER EVIDENCE STATE_TRACE GIF
+numi crow journey train --milestone takeoff-cruise --envs 256 --steps 128 --updates 8 --chunk 8
+numi crow journey evaluate --milestone takeoff-cruise --policy-pack PATH
+numi crow journey window --milestone takeoff-cruise --policy-pack PATH
+numi crow journey capture --milestone takeoff-cruise --policy-pack PATH
+Scripts/capture-crow-numi-journey.sh OUTPUT POSTER EVIDENCE STATE_TRACE GIF
 ```
 
 `window` is deliberately policy-only. `capture` without a policy invokes an
@@ -29,30 +28,27 @@ The corrected native visual packs bind the airframe, left/right wings, tail,
 and six leg links to their actual Numi body indices. That view is useful for
 contact and control debugging, but the pack meshes remain low-detail proxies.
 
-## Training result retained on 26 August 2026
+## Takeoff-cruise qualification retained on 26 August 2026
 
-The teacher completed a continuous 1,600-step assisted trace with zero failed
-environment steps, 29.016 m final forward progress, 0.802 m maximum root
-height, and one end-of-horizon timeout. This is assisted simulated-trajectory
-evidence, not autonomous flight.
+The v2 native teacher and stage observation support separate eight-second
+airborne stabilization and ground takeoff-plus-cruise bands. MLX training
+retained the protected actor when later joint checkpoints were slightly worse.
+That selected autonomous actor then passed both bands on three held-out seeds
+with zero failed environment steps and timeout-only terminations.
 
-MLX then distilled 512,000 samples over 20 updates. Teacher-labeled transitions
-comprised 45.2% of the final update and produced a nonzero imagination loss,
-confirming the native teacher stream reached the neural learner.
-
-The autonomous held-out candidate was not qualified: all eight environments
-terminated, five on the physical contact boundary and three on timeout. It
-reached 9.434 m maximum forward progress, but had no clean horizon. The matched
-selector therefore preferred the incumbent and recorded tilt and
-physical-boundary regressions. The candidate artifact is retained for further
-work; it must not be presented as a successful autonomous crow policy.
+Across the three seeds, isolated-cruise tracking was `0.79685...0.79688`, mean
+tilt was about `0.0683 rad`, and maximum tilt stayed below `0.151 rad`. Ground
+takeoff-plus-cruise tracking was `0.71321...0.71322`, maximum root height was
+`0.87749...0.87763 m`, mean tilt was about `0.0867 rad`, and maximum tilt stayed
+below `0.251 rad`. This qualifies the simulated v2 takeoff/cruise milestone; it
+does not qualify turns, approach, landing, measured-crow flight, or hardware.
 
 ## Render boundary
 
-[The multi-camera movie](Media/numi-crow-journey-presentation-v1.mp4) uses the
+[The multi-camera movie](Media/numi-crow-takeoff-cruise-v2.mp4) uses the
 high-detail BirdFlow feather renderer from standing, takeoff, front-flight,
-side-flight, rear-flight, and reversed landing views. It is phase-keyed to the
-Numi journey and locked to the assisted evidence and state-trace hashes in
-[`numi-crow-journey-presentation-v1.json`](Media/numi-crow-journey-presentation-v1.json).
+side-flight, and rear-flight views. It is phase-keyed to the selected autonomous
+Numi rollout and locked to its evidence and state-trace hashes in
+[`numi-crow-takeoff-cruise-v2.json`](Media/numi-crow-takeoff-cruise-v2.json).
 The feathered pixels are not Numi's native visual observation and are not a
 joint-exact rendering of each traced state.

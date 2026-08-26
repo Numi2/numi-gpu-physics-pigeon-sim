@@ -1,0 +1,40 @@
+{
+  "schema": "birdflow.numi-crow-presentation.v2",
+  "classification": "high-quality phase-keyed autonomous takeoff-cruise presentation",
+  "limitation": "BirdFlow feather pixels are not the Numi native visual sensor and are not a joint-exact state replay.",
+  "camera_sequence": [
+    "standing-front-three-quarter",
+    "takeoff-three-quarter",
+    "flight-front-orbit",
+    "flight-high-left-orbit",
+    "flight-rear-orbit"
+  ],
+  "output": "Docs/Media/numi-crow-takeoff-cruise-v2.mp4",
+  "output_sha256": "0a183bd3609dbaa56505c682fc21093fd6a145578416ab9eb010aae912f34733",
+  "evidence": ".numi/runs/crow-journey-v2-selected-presentation-20260826/evidence.json",
+  "evidence_sha256": "eb4db5f2ef2d834bb1c73ec96df5dd354cf332bb569d7eb22f634c2bcbd4137d",
+  "state_trace": ".numi/runs/crow-journey-v2-selected-presentation-20260826/state.tsv",
+  "state_trace_sha256": "9cab255405158e54d00583e474cd978055a7577ee53c9119bf6701e62afeb9e9",
+  "state_trace_final_step": 650,
+  "native_evidence": {
+    "action_source": "policy_pack",
+    "birdflow_journey_teacher": false,
+    "task_fingerprint": "10811686597372520125",
+    "observation_fingerprint": "18077429921557164583",
+    "action_fingerprint": "7501763512417165365",
+    "policy_rollout_fingerprint": "9494412013494231016",
+    "policy_sample_count": 650,
+    "run_fingerprint": "15624853502415711496",
+    "mean_root_height": 0.70838675221571556,
+    "maximum_root_height": 0.87741655111312866,
+    "mean_tracking_score": 0.70159250607857337,
+    "mean_tilt": 0.099887940512831286,
+    "maximum_tilt": 0.25020083785057068,
+    "mean_final_forward_progress_m": 7.2436651922762394,
+    "maximum_forward_progress_m": 7.2436651922762394,
+    "failed_environment_steps": 0,
+    "termination_reason_counts": {
+      "4": 1
+    }
+  }
+}
