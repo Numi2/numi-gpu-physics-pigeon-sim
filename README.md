@@ -40,10 +40,10 @@
 ### American crow — Numi Lab journey
 
 <p align="center">
-  <a href="Docs/Media/numi-crow-takeoff-cruise-v2.mp4"><img src="Docs/Media/numi-crow-takeoff-cruise-v2.gif" width="66%" alt="Five-angle feathered presentation of the qualified Numi Lab American-crow takeoff and cruise policy"></a>
+  <a href="Docs/Media/numi-crow-journey-v7.mp4"><img src="Docs/Media/numi-crow-journey-v7.gif" width="66%" alt="Five-angle 1080p feathered presentation of the all-milestone-qualified Numi Lab American-crow journey policy"></a>
 </p>
 
-<p align="center"><em>Standing, takeoff, front, side, and rear views of the estimated feathered model, keyed to a selected autonomous policy that passed three-seed takeoff/cruise physics gates. These are presentation pixels—not Numi sensor pixels or a joint-exact state replay.</em></p>
+<p align="center"><em>Standing, takeoff, frontal, lateral, and rear/dorsal views of the estimated feathered model, keyed to one hierarchical policy that cleared all 11 simulated milestones across three held-out seeds. Its approach-pitch safety supervisor can override the neural actor; these are presentation pixels—not Numi sensor pixels or a joint-exact state replay.</em></p>
 
 <p align="center">
   <img src="Docs/Media/deetjen-through-flight-observatory.png" width="49%" alt="Deetjen through-flight field observatory">

@@ -2,11 +2,12 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-OUTPUT="${1:-$ROOT/Docs/Media/numi-crow-takeoff-cruise-v2.mp4}"
-POSTER="${2:-$ROOT/Docs/Media/numi-crow-takeoff-cruise-v2.png}"
-EVIDENCE="${3:?usage: capture-crow-numi-journey.sh OUTPUT POSTER EVIDENCE STATE_TRACE [GIF]}"
-STATE_TRACE="${4:?usage: capture-crow-numi-journey.sh OUTPUT POSTER EVIDENCE STATE_TRACE [GIF]}"
-GIF="${5:-${OUTPUT%.mp4}.gif}"
+OUTPUT="${1:-$ROOT/Docs/Media/numi-crow-journey-v7.mp4}"
+POSTER="${2:-$ROOT/Docs/Media/numi-crow-journey-v7.png}"
+EVIDENCE="${3:?usage: capture-crow-numi-journey.sh OUTPUT POSTER EVIDENCE STATE_TRACE QUALIFICATION_DIR [GIF]}"
+STATE_TRACE="${4:?usage: capture-crow-numi-journey.sh OUTPUT POSTER EVIDENCE STATE_TRACE QUALIFICATION_DIR [GIF]}"
+QUALIFICATION_DIR="${5:?usage: capture-crow-numi-journey.sh OUTPUT POSTER EVIDENCE STATE_TRACE QUALIFICATION_DIR [GIF]}"
+GIF="${6:-${OUTPUT%.mp4}.gif}"
 SIDECAR="${OUTPUT%.mp4}.json"
 
 FRAMES_ONLY_DIR="${BIRDFLOW_NUMI_FRAMES_ONLY_DIR:-}"
@@ -29,22 +30,65 @@ if [[ -z "$FRAMES_ONLY_DIR" ]]; then
     }
   done
 fi
-[[ -s "$EVIDENCE" && -s "$STATE_TRACE" ]] || {
-  echo "Numi evidence and state trace must both be nonempty" >&2
+[[ -s "$EVIDENCE" && -s "$STATE_TRACE" && -d "$QUALIFICATION_DIR" ]] || {
+  echo "Numi evidence, state trace, and qualification directory are required" >&2
   exit 1
 }
 jq -e '
-  .world_source == "birdflow_american_crow_journey_v2"
-  and .action_count == 14
-  and .actor_observation_count == 83
+  .world_source == "birdflow_american_crow_journey_v7"
+  and .task == "birdflow_american_crow_journey_v7"
+  and .action_count == 15
+  and .actor_observation_count == 84
   and .action_source == "policy_pack"
   and .birdflow_journey_teacher == false
+  and .action_carrier == "v7_state_triggered_approach_supervisor_pitch_0.16_0.22_full_authority"
+  and .failed_environment_steps == 0
+  and .termination_count == .timeout_count
 ' "$EVIDENCE" >/dev/null || {
-  echo "evidence is not an autonomous fingerprinted 14-action/83-observation crow journey v2 rollout" >&2
+  echo "evidence is not a clean fingerprinted 15-action/84-observation crow journey v7 policy rollout" >&2
   exit 1
 }
 grep -q '^# step nq=20 ' "$STATE_TRACE" || {
   echo "state trace is not the 20-coordinate crow journey trace" >&2
+  exit 1
+}
+QUALIFICATION_EVIDENCE=("$QUALIFICATION_DIR"/*/evidence.json)
+[[ "${#QUALIFICATION_EVIDENCE[@]}" -eq 33 ]] || {
+  echo "qualification must contain exactly 33 milestone/seed evidence files" >&2
+  exit 1
+}
+QUALIFICATION_SUMMARY="$(jq -s -e '
+  def band: .minimum_sampled_difficulty_band;
+  def tracking_floor:
+    if band == 0 or band == 9 then 0.95
+    elif band == 1 then 0.85
+    else 0.65
+    end;
+  . as $runs
+  | (($runs | length) == 33
+    and all($runs[].world_source; . == "birdflow_american_crow_journey_v7")
+    and all($runs[].task; . == "birdflow_american_crow_journey_v7")
+    and all($runs[].action_carrier; . == "v7_state_triggered_approach_supervisor_pitch_0.16_0.22_full_authority")
+    and all($runs[]; .failed_environment_steps == 0)
+    and all($runs[]; .termination_count == .timeout_count)
+    and all($runs[]; .mean_tracking_score >= tracking_floor)
+    and all($runs[]; .mean_tilt <= 0.35 and .maximum_tilt < 0.8)
+    and all($runs[]; . as $run | if ([2,3,4,5,6,7,10] | index($run.minimum_sampled_difficulty_band)) != null then $run.maximum_root_height >= 0.55 else true end)
+    and (($runs | map(.benchmark_seed) | unique | length) == 3)
+    and (($runs | map(band) | unique) == [0,1,2,3,4,5,6,7,8,9,10])) as $valid
+  | if $valid then {
+      run_count: ($runs | length),
+      environment_count: (($runs | length) * 32),
+      benchmark_seeds: ($runs | map(.benchmark_seed) | unique),
+      failed_environment_steps: ($runs | map(.failed_environment_steps) | add),
+      non_timeout_terminations: ($runs | map(.termination_count - .timeout_count) | add),
+      minimum_mean_tracking_score: ($runs | map(.mean_tracking_score) | min),
+      maximum_mean_tilt: ($runs | map(.mean_tilt) | max),
+      maximum_tilt: ($runs | map(.maximum_tilt) | max),
+      maximum_root_height: ($runs | map(.maximum_root_height) | max)
+    } else false end
+' "${QUALIFICATION_EVIDENCE[@]}")" || {
+  echo "the 33-run v7 qualification matrix does not satisfy the render gate" >&2
   exit 1
 }
 
@@ -100,8 +144,8 @@ render_pass() {
     --capture-crow-camera-yaw-orbit "$yaw_orbit" \
     --capture-crow-camera-pitch "$pitch" \
     --capture-crow-camera-distance-scale "$distance_scale" \
-    --capture-width 1280 \
-    --capture-height 720 --capture-frames 49
+    --capture-width 1920 \
+    --capture-height 1080 --capture-frames 49
   )
   if [[ "$distance" != "auto" ]]; then
     command+=(--capture-crow-camera-distance "$distance")
@@ -109,7 +153,7 @@ render_pass() {
   "${command[@]}"
 }
 
-# Each pass owns a deliberate readable angle. Camera cuts happen only at stage
+# Each pass owns a different, deliberate readable angle. Camera cuts happen only at stage
 # boundaries; the crow renderer retains its full feather topology within every
 # pass. The presentation is phase-keyed to Numi's task structure, not a claim
 # that these pixels are the native visual sensor or a joint-exact state replay.
@@ -119,10 +163,10 @@ if [[ -z "$REUSE_FRAMES_DIR" ]]; then
     --sanitize=address --product birdflow-capture
   CAPTURE="$CAPTURE_BUILD/release/birdflow-capture"
   render_pass standing standing 0.62 0.12 0.52 0.025 1
-  render_pass takeoff takeoff 0.18 0.20 auto 0.08 1.35
-  render_pass flight-front wingbeat -0.42 0.29 1.12 0.12 1
-  render_pass flight-side wingbeat -0.88 0.38 1.07 -0.22 1
-  render_pass flight-rear wingbeat 0.82 0.38 1.08 0.20 1
+  render_pass takeoff takeoff -0.28 0.20 auto 0.08 1.35
+  render_pass flight-front wingbeat 0.00 0.26 1.15 0.06 1
+  render_pass flight-side wingbeat -1.42 0.34 1.22 -0.08 1
+  render_pass flight-rear wingbeat 2.20 0.42 1.24 0.08 1
 fi
 if [[ -n "$FRAMES_ONLY_DIR" ]]; then
   echo "Numi crow presentation frames: $TEMP"
@@ -133,7 +177,7 @@ encode_loop() {
   local name="$1"
   ffmpeg -v error -y -framerate 24 \
     -i "$TEMP/$name/frame-%03d.png" -frames:v 48 \
-    -c:v libx264 -preset slow -crf 17 -pix_fmt yuv420p \
+    -c:v libx264 -preset slow -crf 15 -pix_fmt yuv420p \
     "$TEMP/$name.mp4"
 }
 encode_loop standing
@@ -142,7 +186,7 @@ encode_loop flight-side
 encode_loop flight-rear
 ffmpeg -v error -y -framerate 24 \
   -i "$TEMP/takeoff/frame-%03d.png" -frames:v 49 \
-  -c:v libx264 -preset slow -crf 17 -pix_fmt yuv420p \
+  -c:v libx264 -preset slow -crf 15 -pix_fmt yuv420p \
   "$TEMP/takeoff.mp4"
 
 ffmpeg -v error -y \
@@ -153,7 +197,7 @@ ffmpeg -v error -y \
   -i "$TEMP/flight-rear.mp4" \
   -filter_complex \
     '[0:v][1:v][2:v][3:v][4:v]concat=n=5:v=1:a=0[v]' \
-  -map '[v]' -c:v libx264 -preset slow -crf 17 -pix_fmt yuv420p \
+  -map '[v]' -c:v libx264 -preset slow -crf 15 -pix_fmt yuv420p \
   -movflags +faststart "$OUTPUT"
 
 # Use the close three-quarter stance as the poster so the eye, bill, layered
@@ -172,7 +216,7 @@ FRAME_COUNT="$(
   ffprobe -v error -count_frames -select_streams v:0 \
     -show_entries stream=nb_read_frames -of default=nw=1:nk=1 "$OUTPUT"
 )"
-[[ "$DIMENSIONS" == "1280x720" && "$FRAME_COUNT" -ge 240 ]] || {
+[[ "$DIMENSIONS" == "1920x1080" && "$FRAME_COUNT" -ge 240 ]] || {
   echo "unexpected presentation contract: $DIMENSIONS, $FRAME_COUNT frames" >&2
   exit 1
 }
@@ -180,22 +224,28 @@ FRAME_COUNT="$(
 OUTPUT_HASH="$(shasum -a 256 "$OUTPUT" | awk '{print $1}')"
 EVIDENCE_HASH="$(shasum -a 256 "$EVIDENCE" | awk '{print $1}')"
 TRACE_HASH="$(shasum -a 256 "$STATE_TRACE" | awk '{print $1}')"
+QUALIFICATION_EVIDENCE_HASH="$(
+  shasum -a 256 "${QUALIFICATION_EVIDENCE[@]}" | shasum -a 256 | awk '{print $1}'
+)"
 TRACE_FINAL_STEP="$(awk 'END {print $1}' "$STATE_TRACE")"
 jq -n \
-  --arg schema "birdflow.numi-crow-presentation.v2" \
+  --arg schema "birdflow.numi-crow-presentation.v7" \
   --arg output "$OUTPUT" \
   --arg output_sha256 "$OUTPUT_HASH" \
   --arg evidence "$EVIDENCE" \
   --arg evidence_sha256 "$EVIDENCE_HASH" \
   --arg state_trace "$STATE_TRACE" \
   --arg state_trace_sha256 "$TRACE_HASH" \
+  --arg qualification_dir "$QUALIFICATION_DIR" \
+  --arg qualification_evidence_sha256 "$QUALIFICATION_EVIDENCE_HASH" \
+  --argjson qualification_summary "$QUALIFICATION_SUMMARY" \
   --argjson state_trace_final_step "$TRACE_FINAL_STEP" \
-  --argjson native_evidence "$(jq '{action_source,birdflow_journey_teacher,task_fingerprint,observation_fingerprint,action_fingerprint,policy_rollout_fingerprint,policy_sample_count,run_fingerprint,mean_root_height,maximum_root_height,mean_tracking_score,mean_tilt,maximum_tilt,mean_final_forward_progress_m,maximum_forward_progress_m,failed_environment_steps,termination_reason_counts}' "$EVIDENCE")" \
+  --argjson native_evidence "$(jq '{task,world_source,action_carrier,action_source,birdflow_journey_teacher,task_fingerprint,observation_fingerprint,action_fingerprint,policy_rollout_fingerprint,policy_sample_count,run_fingerprint,mean_root_height,maximum_root_height,mean_tracking_score,mean_tilt,maximum_tilt,mean_final_forward_progress_m,maximum_forward_progress_m,failed_environment_steps,termination_reason_counts}' "$EVIDENCE")" \
   '{
     schema: $schema,
-    classification: "high-quality phase-keyed autonomous takeoff-cruise presentation",
-    limitation: "BirdFlow feather pixels are not the Numi native visual sensor and are not a joint-exact state replay.",
-    camera_sequence: ["standing-front-three-quarter", "takeoff-three-quarter", "flight-front-orbit", "flight-high-left-orbit", "flight-rear-orbit"],
+    classification: "high-quality phase-keyed presentation of the all-milestone-qualified hierarchical policy",
+    limitation: "BirdFlow feather pixels are not the Numi native visual sensor and are not a joint-exact state replay. The v7 policy carrier permits a state-triggered approach-pitch supervisor, so this is not a pure end-to-end neural controller.",
+    camera_sequence: ["standing-front-three-quarter", "takeoff-opposite-quarter", "flight-frontal-orbit", "flight-left-lateral-orbit", "flight-rear-dorsal-orbit"],
     output: $output,
     output_sha256: $output_sha256,
     evidence: $evidence,
@@ -203,6 +253,9 @@ jq -n \
     state_trace: $state_trace,
     state_trace_sha256: $state_trace_sha256,
     state_trace_final_step: $state_trace_final_step,
+    qualification_dir: $qualification_dir,
+    qualification_evidence_sha256: $qualification_evidence_sha256,
+    qualification_summary: $qualification_summary,
     native_evidence: $native_evidence
   }' > "$SIDECAR"
 

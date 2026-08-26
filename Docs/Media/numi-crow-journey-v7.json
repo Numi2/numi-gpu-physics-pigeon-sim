@@ -1,0 +1,60 @@
+{
+  "schema": "birdflow.numi-crow-presentation.v7",
+  "classification": "high-quality phase-keyed presentation of the all-milestone-qualified hierarchical policy",
+  "limitation": "BirdFlow feather pixels are not the Numi native visual sensor and are not a joint-exact state replay. The v7 policy carrier permits a state-triggered approach-pitch supervisor, so this is not a pure end-to-end neural controller.",
+  "camera_sequence": [
+    "standing-front-three-quarter",
+    "takeoff-opposite-quarter",
+    "flight-frontal-orbit",
+    "flight-left-lateral-orbit",
+    "flight-rear-dorsal-orbit"
+  ],
+  "output": "Docs/Media/numi-crow-journey-v7.mp4",
+  "output_sha256": "f4a5c6b7137a3fa144752d1fd8b8bb78a447621071aa2f661262b344f5fba278",
+  "evidence": ".numi/runs/crow-journey-v7-selected-presentation-20260826/evidence.json",
+  "evidence_sha256": "99d4f3715f7d8984ec2e024d3e331b46aa33ac004c7a2c2d543948852ae14fe6",
+  "state_trace": ".numi/runs/crow-journey-v7-selected-presentation-20260826/state.tsv",
+  "state_trace_sha256": "f982515f2eaa3c9fd888bc6dfcc5d2481df8034da59ea06d3b2cfbe9d1a1e07d",
+  "state_trace_final_step": 1600,
+  "qualification_dir": ".numi/runs/crow-journey-v7-qualified-matrix-20260826",
+  "qualification_evidence_sha256": "a3636ceffca62ca56dd9f37f704e4e6e7e9abf5fc69fe7c8ea63f45f23356259",
+  "qualification_summary": {
+    "run_count": 33,
+    "environment_count": 1056,
+    "benchmark_seeds": [
+      2660001001,
+      2660001002,
+      2660001003
+    ],
+    "failed_environment_steps": 0,
+    "non_timeout_terminations": 0,
+    "minimum_mean_tracking_score": 0.67482375772669911,
+    "maximum_mean_tilt": 0.0973422515793122,
+    "maximum_tilt": 0.28298404812812805,
+    "maximum_root_height": 1.7136119604110718
+  },
+  "native_evidence": {
+    "task": "birdflow_american_crow_journey_v7",
+    "world_source": "birdflow_american_crow_journey_v7",
+    "action_carrier": "v7_state_triggered_approach_supervisor_pitch_0.16_0.22_full_authority",
+    "action_source": "policy_pack",
+    "birdflow_journey_teacher": false,
+    "task_fingerprint": "11859925714533099252",
+    "observation_fingerprint": "3640623917683050487",
+    "action_fingerprint": "13174269661208935183",
+    "policy_rollout_fingerprint": "13909309228957606910",
+    "policy_sample_count": 1600,
+    "run_fingerprint": "10241457518890078644",
+    "mean_root_height": 0.44960661471821367,
+    "maximum_root_height": 1.3407689332962036,
+    "mean_tracking_score": 0.68333976542577146,
+    "mean_tilt": 0.071161648001925648,
+    "maximum_tilt": 0.17099383473396301,
+    "mean_final_forward_progress_m": 8.1721107997000217,
+    "maximum_forward_progress_m": 8.2326204814016819,
+    "failed_environment_steps": 0,
+    "termination_reason_counts": {
+      "4": 1
+    }
+  }
+}
