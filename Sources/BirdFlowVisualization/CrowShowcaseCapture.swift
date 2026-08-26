@@ -58,6 +58,7 @@ public enum CrowShowcaseCapture {
     let realityAssetURL: URL
     let standingReferenceURL: URL
     let aovAuditURL: URL?
+    let numiReplayPackURL: URL?
     let temporalScale: Float
     let cameraYawRadians: Float?
     let cameraYawOrbitRadians: Float
@@ -239,6 +240,9 @@ public enum CrowShowcaseCapture {
       aovAuditURL = try value(after: "--capture-crow-aov-audit").map {
         URL(fileURLWithPath: $0)
       }
+      numiReplayPackURL = try value(after: "--capture-crow-replay-pack").map {
+        URL(fileURLWithPath: $0)
+      }
       let presentationValue =
         try value(after: "--capture-crow-presentation")
         ?? CrowShowcasePresentation.wingbeat.rawValue
@@ -252,6 +256,11 @@ public enum CrowShowcaseCapture {
         )
       }
       presentation = parsedPresentation
+      if numiReplayPackURL != nil && presentation != .takeoff {
+        throw CaptureError.invalidArguments(
+          "--capture-crow-replay-pack requires --capture-crow-presentation takeoff"
+        )
+      }
     }
   }
 
@@ -271,6 +280,7 @@ public enum CrowShowcaseCapture {
   }
 
   public static func run(_ arguments: Arguments) throws {
+    let numiReplay = try arguments.numiReplayPackURL.map(CrowNumiReplay.load(url:))
     let profileData = try Data(contentsOf: arguments.crowProfileURL)
     let profile = try JSONDecoder().decode(CrowVisualProfile.self, from: profileData)
     try profile.validate()
@@ -414,20 +424,68 @@ public enum CrowShowcaseCapture {
     )
     var aovAudits: [CrowShowcaseAOVFrameAudit] = []
     var firstFramePNG: Data?
+    var replayDeploymentHighWater: Float = 0
+
+    if let numiReplay {
+      let audit: [String: Any] = [
+        "schema": "birdflow.numi-crow-replay-retarget.v1",
+        "classification": "high-detail estimated-crow retarget of simulated accepted state",
+        "claim_boundary": "accepted root and joint state conditions the presentation timeline; feather surface deformation remains the estimated BirdFlow render model",
+        "payload_sha256": numiReplay.payloadSHA256,
+        "task": numiReplay.task,
+        "journey_variant": numiReplay.journeyVariant,
+        "world_fingerprint": numiReplay.worldFingerprint,
+        "task_fingerprint": numiReplay.taskFingerprint,
+        "observation_fingerprint": numiReplay.observationFingerprint,
+        "action_fingerprint": numiReplay.actionFingerprint,
+        "run_fingerprint": numiReplay.runFingerprint,
+        "policy_rollout_fingerprint": numiReplay.policyRolloutFingerprint,
+        "source_frame_count": numiReplay.frames.count,
+        "render_frame_count": arguments.frameCount,
+        "camera_is_independent_of_trajectory": true,
+      ]
+      let data = try JSONSerialization.data(
+        withJSONObject: audit, options: [.prettyPrinted, .sortedKeys]
+      )
+      try data.write(
+        to: arguments.outputDirectory.appendingPathComponent(
+          "numi-crow-replay-audit.json"
+        ),
+        options: .atomic
+      )
+    }
 
     for frameIndex in 0..<arguments.frameCount {
       let isLoopProbe =
         arguments.presentation != .takeoff
         && frameIndex == arguments.frameCount - 1
-      let phase =
+      let timelineFraction =
         isLoopProbe
         ? Float.zero
         : Float(frameIndex) / Float(arguments.frameCount - 1)
+      let replayFrame = numiReplay?.frame(
+        atPresentationFraction: timelineFraction
+      )
+      if let numiReplay, let replayFrame {
+        replayDeploymentHighWater = max(
+          replayDeploymentHighWater,
+          numiReplay.takeoffDeploymentProgress(of: replayFrame)
+        )
+      }
+      let phase = replayFrame == nil
+        ? timelineFraction
+        : replayDeploymentHighWater >= 0.999
+          ? CrowTakeoffSequence.transitionEnd
+            + timelineFraction * (1 - CrowTakeoffSequence.transitionEnd)
+          : CrowTakeoffSequence.standingHoldEnd
+            + replayDeploymentHighWater
+              * (CrowTakeoffSequence.transitionEnd
+                - CrowTakeoffSequence.standingHoldEnd)
       // Keep the loop probe bit-identical to frame zero. Evaluating sin/cos at
       // 2π leaves a small floating-point camera offset that becomes visible at
       // feather edges and also turns a failed Data equality diagnostic into an
       // expensive byte-wise diff in Swift Testing.
-      let orbit = isLoopProbe ? Float.zero : 2 * Float.pi * phase
+      let orbit = isLoopProbe ? Float.zero : 2 * Float.pi * timelineFraction
       var camera = CameraState()
       if arguments.presentation == .standing {
         camera.target = SIMD3<Float>(0.015, 0, -0.055)
@@ -495,7 +553,8 @@ public enum CrowShowcaseCapture {
           width: arguments.width,
           height: arguments.height,
           phase: phase,
-          presentation: arguments.presentation
+          presentation: arguments.presentation,
+          replayStep: replayFrame?.step
         )
       }
       let png: Data
@@ -533,6 +592,7 @@ public enum CrowShowcaseCapture {
       print(
         "captured estimated American crow \(arguments.presentation.rawValue) "
           + "\(frameIndex + 1)/\(arguments.frameCount)"
+          + (replayFrame.map { " / accepted Numi step \($0.step)" } ?? "")
       )
     }
     if let auditURL = arguments.aovAuditURL {
@@ -572,7 +632,8 @@ public enum CrowShowcaseCapture {
     width: Int,
     height: Int,
     phase: Float,
-    presentation: CrowShowcasePresentation
+    presentation: CrowShowcasePresentation,
+    replayStep: Int? = nil
   ) {
     graphics.saveGState()
     graphics.textMatrix = .identity
@@ -603,13 +664,14 @@ public enum CrowShowcaseCapture {
       tracking: 1.1 * scale
     )
     let phaseLabel =
-      presentation == .takeoff
+      replayStep.map { String(format: "NUMI STEP %05d", $0) }
+      ?? (presentation == .takeoff
       ? String(
         format: "%@  /  PHASE %03.0f%%",
         CrowTakeoffSequence.stage(phase: phase).rawValue,
         phase * 100
       )
-      : String(format: "PHASE %03.0f%%", phase * 100)
+      : String(format: "PHASE %03.0f%%", phase * 100))
     drawText(
       phaseLabel,
       at: CGPoint(x: CGFloat(width) - 236 * scale, y: 37 * scale),

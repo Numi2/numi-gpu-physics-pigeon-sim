@@ -4,9 +4,9 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 OUTPUT="${1:-$ROOT/Docs/Media/numi-crow-journey-v7.mp4}"
 POSTER="${2:-$ROOT/Docs/Media/numi-crow-journey-v7.png}"
-EVIDENCE="${3:?usage: capture-crow-numi-journey.sh OUTPUT POSTER EVIDENCE STATE_TRACE QUALIFICATION_DIR [GIF]}"
-STATE_TRACE="${4:?usage: capture-crow-numi-journey.sh OUTPUT POSTER EVIDENCE STATE_TRACE QUALIFICATION_DIR [GIF]}"
-QUALIFICATION_DIR="${5:?usage: capture-crow-numi-journey.sh OUTPUT POSTER EVIDENCE STATE_TRACE QUALIFICATION_DIR [GIF]}"
+EVIDENCE="${3:?usage: capture-crow-numi-journey.sh OUTPUT POSTER EVIDENCE REPLAY_PACK QUALIFICATION_DIR [GIF]}"
+REPLAY_PACK="${4:?usage: capture-crow-numi-journey.sh OUTPUT POSTER EVIDENCE REPLAY_PACK QUALIFICATION_DIR [GIF]}"
+QUALIFICATION_DIR="${5:?usage: capture-crow-numi-journey.sh OUTPUT POSTER EVIDENCE REPLAY_PACK QUALIFICATION_DIR [GIF]}"
 GIF="${6:-${OUTPUT%.mp4}.gif}"
 SIDECAR="${OUTPUT%.mp4}.json"
 
@@ -30,26 +30,53 @@ if [[ -z "$FRAMES_ONLY_DIR" ]]; then
     }
   done
 fi
-[[ -s "$EVIDENCE" && -s "$STATE_TRACE" && -d "$QUALIFICATION_DIR" ]] || {
-  echo "Numi evidence, state trace, and qualification directory are required" >&2
+[[ -s "$EVIDENCE" && -s "$REPLAY_PACK" && -d "$QUALIFICATION_DIR" ]] || {
+  echo "Numi evidence, CrowReplayPack, and qualification directory are required" >&2
   exit 1
 }
-jq -e '
-  .world_source == "birdflow_american_crow_journey_v7"
-  and .task == "birdflow_american_crow_journey_v7"
+TASK="$(jq -r '.task // empty' "$EVIDENCE")"
+ACTION_CARRIER="$(jq -r '.action_carrier // empty' "$EVIDENCE")"
+case "$TASK:$ACTION_CARRIER" in
+  birdflow_american_crow_journey_v7:v7_state_triggered_approach_supervisor_pitch_0.16_0.22_full_authority)
+    ACTOR_OBSERVATIONS=84
+    CONTROLLER_BOUNDARY="The v7 policy carrier retains state-triggered approach-pitch supervisor actuator authority." ;;
+  birdflow_american_crow_journey_v8_neural:v8_neural_only_shadow_approach_envelope)
+    ACTOR_OBSERVATIONS=84
+    CONTROLLER_BOUNDARY="The v8 policy carrier is neural-only; approach envelopes are diagnostic outcomes without actuator authority." ;;
+  birdflow_american_crow_journey_v9_visual_neural:v9_visual_neural_only_masked_depth_history)
+    ACTOR_OBSERVATIONS=684
+    CONTROLLER_BOUNDARY="The v9 policy carrier is neural-only and consumes masked-depth history; approach envelopes are diagnostic outcomes without actuator authority." ;;
+  *)
+    echo "evidence does not identify a supported Crow journey controller" >&2
+    exit 1 ;;
+esac
+jq -e --arg task "$TASK" --arg carrier "$ACTION_CARRIER" \
+  --argjson actor_observations "$ACTOR_OBSERVATIONS" '
+  .world_source == $task
+  and .task == $task
   and .action_count == 15
-  and .actor_observation_count == 84
+  and .actor_observation_count == $actor_observations
   and .action_source == "policy_pack"
   and .birdflow_journey_teacher == false
-  and .action_carrier == "v7_state_triggered_approach_supervisor_pitch_0.16_0.22_full_authority"
+  and .action_carrier == $carrier
   and .failed_environment_steps == 0
   and .termination_count == .timeout_count
 ' "$EVIDENCE" >/dev/null || {
-  echo "evidence is not a clean fingerprinted 15-action/84-observation crow journey v7 policy rollout" >&2
+  echo "evidence is not a clean fingerprinted Crow journey policy rollout" >&2
   exit 1
 }
-grep -q '^# step nq=20 ' "$STATE_TRACE" || {
-  echo "state trace is not the 20-coordinate crow journey trace" >&2
+jq -e --arg task "$TASK" '
+  .schema == "numi.crow-replay.v1"
+  and .payload.classification == "simulated accepted-state replay"
+  and .payload.task == $task
+  and .payload.nq == 20 and .payload.nv == 19
+  and .payload.action_count == 15
+  and .payload.body_state_stride == 13
+  and .payload.frame_count == (.payload.frames | length)
+  and .payload.frame_count >= 2
+  and (.payload_sha256 | length) == 64
+' "$REPLAY_PACK" >/dev/null || {
+  echo "CrowReplayPack is not a complete accepted-state replay for $TASK" >&2
   exit 1
 }
 QUALIFICATION_EVIDENCE=("$QUALIFICATION_DIR"/*/evidence.json)
@@ -57,7 +84,7 @@ QUALIFICATION_EVIDENCE=("$QUALIFICATION_DIR"/*/evidence.json)
   echo "qualification must contain exactly 33 milestone/seed evidence files" >&2
   exit 1
 }
-QUALIFICATION_SUMMARY="$(jq -s -e '
+QUALIFICATION_SUMMARY="$(jq -s -e --arg task "$TASK" --arg carrier "$ACTION_CARRIER" '
   def band: .minimum_sampled_difficulty_band;
   def tracking_floor:
     if band == 0 or band == 9 then 0.95
@@ -66,14 +93,19 @@ QUALIFICATION_SUMMARY="$(jq -s -e '
     end;
   . as $runs
   | (($runs | length) == 33
-    and all($runs[].world_source; . == "birdflow_american_crow_journey_v7")
-    and all($runs[].task; . == "birdflow_american_crow_journey_v7")
-    and all($runs[].action_carrier; . == "v7_state_triggered_approach_supervisor_pitch_0.16_0.22_full_authority")
+    and all($runs[].world_source; . == $task)
+    and all($runs[].task; . == $task)
+    and all($runs[].action_carrier; . == $carrier)
     and all($runs[]; .failed_environment_steps == 0)
     and all($runs[]; .termination_count == .timeout_count)
     and all($runs[]; .mean_tracking_score >= tracking_floor)
     and all($runs[]; .mean_tilt <= 0.35 and .maximum_tilt < 0.8)
     and all($runs[]; . as $run | if ([2,3,4,5,6,7,10] | index($run.minimum_sampled_difficulty_band)) != null then $run.maximum_root_height >= 0.55 else true end)
+    and all($runs[]; . as $run |
+      if ($task != "birdflow_american_crow_journey_v7" and ([7,8,9,10] | index($run.minimum_sampled_difficulty_band)) != null)
+      then ($run.outcomes.approach_pitch_warning_fraction.mean <= 0.05
+        and $run.outcomes.approach_pitch_full_envelope_fraction.mean <= 0.000001)
+      else true end)
     and (($runs | map(.benchmark_seed) | unique | length) == 3)
     and (($runs | map(band) | unique) == [0,1,2,3,4,5,6,7,8,9,10])) as $valid
   | if $valid then {
@@ -88,7 +120,7 @@ QUALIFICATION_SUMMARY="$(jq -s -e '
       maximum_root_height: ($runs | map(.maximum_root_height) | max)
     } else false end
 ' "${QUALIFICATION_EVIDENCE[@]}")" || {
-  echo "the 33-run v7 qualification matrix does not satisfy the render gate" >&2
+  echo "the 33-run $TASK qualification matrix does not satisfy the render gate" >&2
   exit 1
 }
 
@@ -118,12 +150,11 @@ cd "$ROOT"
 
 render_pass() {
   local name="$1"
-  local presentation="$2"
-  local yaw="$3"
-  local pitch="$4"
-  local distance="$5"
-  local yaw_orbit="$6"
-  local distance_scale="$7"
+  local yaw="$2"
+  local pitch="$3"
+  local distance="$4"
+  local yaw_orbit="$5"
+  local distance_scale="$6"
   local directory="$TEMP/$name"
   mkdir -p "$directory"
   # This renderer currently needs both ASan's lifetime instrumentation and the
@@ -139,7 +170,8 @@ render_pass() {
     --capture-crow-profile "$PROFILE" \
     --capture-crow-plumage-optics "$PLUMAGE_OPTICS" \
     --capture-crow-standing-reference "$STANDING_REFERENCE" \
-    --capture-crow-presentation "$presentation" \
+    --capture-crow-presentation takeoff \
+    --capture-crow-replay-pack "$REPLAY_PACK" \
     --capture-crow-camera-yaw "$yaw" \
     --capture-crow-camera-yaw-orbit "$yaw_orbit" \
     --capture-crow-camera-pitch "$pitch" \
@@ -153,20 +185,19 @@ render_pass() {
   "${command[@]}"
 }
 
-# Each pass owns a different, deliberate readable angle. Camera cuts happen only at stage
-# boundaries; the crow renderer retains its full feather topology within every
-# pass. The presentation is phase-keyed to Numi's task structure, not a claim
-# that these pixels are the native visual sensor or a joint-exact state replay.
+# Each pass owns a different readable angle but consumes the same immutable,
+# SHA-locked accepted-state replay. Failed liftoff cannot become visual flight:
+# the retained surface handoff advances from accepted root lift.
 if [[ -z "$REUSE_FRAMES_DIR" ]]; then
   CAPTURE_BUILD="$ROOT/.build/numi-crow-capture"
   swift build --build-path "$CAPTURE_BUILD" -c release \
     --sanitize=address --product birdflow-capture
   CAPTURE="$CAPTURE_BUILD/release/birdflow-capture"
-  render_pass standing standing 0.62 0.12 0.52 0.025 1
-  render_pass takeoff takeoff -0.28 0.20 auto 0.08 1.35
-  render_pass flight-front wingbeat 0.00 0.26 1.15 0.06 1
-  render_pass flight-side wingbeat -1.42 0.34 1.22 -0.08 1
-  render_pass flight-rear wingbeat 2.20 0.42 1.24 0.08 1
+  render_pass standing 0.62 0.12 0.52 0.025 1
+  render_pass takeoff -0.28 0.20 auto 0.08 1.35
+  render_pass flight-front 0.00 0.26 1.15 0.06 1
+  render_pass flight-side -1.42 0.34 1.22 -0.08 1
+  render_pass flight-rear 2.20 0.42 1.24 0.08 1
 fi
 if [[ -n "$FRAMES_ONLY_DIR" ]]; then
   echo "Numi crow presentation frames: $TEMP"
@@ -223,36 +254,39 @@ FRAME_COUNT="$(
 
 OUTPUT_HASH="$(shasum -a 256 "$OUTPUT" | awk '{print $1}')"
 EVIDENCE_HASH="$(shasum -a 256 "$EVIDENCE" | awk '{print $1}')"
-TRACE_HASH="$(shasum -a 256 "$STATE_TRACE" | awk '{print $1}')"
+REPLAY_HASH="$(shasum -a 256 "$REPLAY_PACK" | awk '{print $1}')"
 QUALIFICATION_EVIDENCE_HASH="$(
   shasum -a 256 "${QUALIFICATION_EVIDENCE[@]}" | shasum -a 256 | awk '{print $1}'
 )"
-TRACE_FINAL_STEP="$(awk 'END {print $1}' "$STATE_TRACE")"
+REPLAY_FINAL_STEP="$(jq '.payload.frames[-1].step' "$REPLAY_PACK")"
 jq -n \
-  --arg schema "birdflow.numi-crow-presentation.v7" \
+  --arg schema "birdflow.numi-crow-presentation.v8" \
   --arg output "$OUTPUT" \
   --arg output_sha256 "$OUTPUT_HASH" \
   --arg evidence "$EVIDENCE" \
   --arg evidence_sha256 "$EVIDENCE_HASH" \
-  --arg state_trace "$STATE_TRACE" \
-  --arg state_trace_sha256 "$TRACE_HASH" \
+  --arg replay_pack "$REPLAY_PACK" \
+  --arg replay_pack_sha256 "$REPLAY_HASH" \
+  --arg replay_payload_sha256 "$(jq -r '.payload_sha256' "$REPLAY_PACK")" \
+  --arg controller_boundary "$CONTROLLER_BOUNDARY" \
   --arg qualification_dir "$QUALIFICATION_DIR" \
   --arg qualification_evidence_sha256 "$QUALIFICATION_EVIDENCE_HASH" \
   --argjson qualification_summary "$QUALIFICATION_SUMMARY" \
-  --argjson state_trace_final_step "$TRACE_FINAL_STEP" \
+  --argjson replay_final_step "$REPLAY_FINAL_STEP" \
   --argjson native_evidence "$(jq '{task,world_source,action_carrier,action_source,birdflow_journey_teacher,task_fingerprint,observation_fingerprint,action_fingerprint,policy_rollout_fingerprint,policy_sample_count,run_fingerprint,mean_root_height,maximum_root_height,mean_tracking_score,mean_tilt,maximum_tilt,mean_final_forward_progress_m,maximum_forward_progress_m,failed_environment_steps,termination_reason_counts}' "$EVIDENCE")" \
   '{
     schema: $schema,
-    classification: "high-quality phase-keyed presentation of the all-milestone-qualified hierarchical policy",
-    limitation: "BirdFlow feather pixels are not the Numi native visual sensor and are not a joint-exact state replay. The v7 policy carrier permits a state-triggered approach-pitch supervisor, so this is not a pure end-to-end neural controller.",
+    classification: "high-quality accepted-state-conditioned presentation of an all-milestone-qualified Crow journey policy",
+    limitation: ("Root lift and timeline come from the accepted CrowReplayPack; detailed feather deformation remains the estimated BirdFlow retarget and is not the Numi native visual sensor. " + $controller_boundary),
     camera_sequence: ["standing-front-three-quarter", "takeoff-opposite-quarter", "flight-frontal-orbit", "flight-left-lateral-orbit", "flight-rear-dorsal-orbit"],
     output: $output,
     output_sha256: $output_sha256,
     evidence: $evidence,
     evidence_sha256: $evidence_sha256,
-    state_trace: $state_trace,
-    state_trace_sha256: $state_trace_sha256,
-    state_trace_final_step: $state_trace_final_step,
+    replay_pack: $replay_pack,
+    replay_pack_sha256: $replay_pack_sha256,
+    replay_payload_sha256: $replay_payload_sha256,
+    replay_final_step: $replay_final_step,
     qualification_dir: $qualification_dir,
     qualification_evidence_sha256: $qualification_evidence_sha256,
     qualification_summary: $qualification_summary,
