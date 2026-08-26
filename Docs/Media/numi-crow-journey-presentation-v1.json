@@ -1,0 +1,36 @@
+{
+  "schema": "birdflow.numi-crow-presentation.v1",
+  "classification": "high-quality phase-keyed presentation replay",
+  "limitation": "BirdFlow feather pixels are not the Numi native visual sensor and are not a joint-exact state replay.",
+  "camera_sequence": [
+    "standing-front-three-quarter",
+    "takeoff-three-quarter",
+    "flight-front",
+    "flight-side",
+    "flight-rear",
+    "landing-reverse-three-quarter"
+  ],
+  "output": "Docs/Media/numi-crow-journey-presentation-v1.mp4",
+  "output_sha256": "682b4c3a67a39f672cbf0c50eb50ca89318fbead98dc06c03ac052ca8e962cdd",
+  "evidence": ".numi/runs/crow-journey-assisted-20260826T014635Z/evidence.json",
+  "evidence_sha256": "b7e07d4e760d1b607b187c6bc26632ad430e36d24a2488bf6eb713739227419e",
+  "state_trace": ".numi/runs/crow-journey-assisted-20260826T014635Z/state.tsv",
+  "state_trace_sha256": "2427d31e29d34651c9f9c8aaa7c8510d035997284ece87dac2b04910661bc6bd",
+  "state_trace_final_step": 1600,
+  "native_evidence": {
+    "action_source": "birdflow_assisted_teacher",
+    "birdflow_journey_teacher": true,
+    "task_fingerprint": "2440140948969700055",
+    "observation_fingerprint": "12010432789281790997",
+    "action_fingerprint": "10925820093444215539",
+    "mean_root_height": 0.48595779460854827,
+    "maximum_root_height": 0.8015097975730896,
+    "mean_tilt": 0.26896079823280161,
+    "maximum_tilt": 0.85762608051300049,
+    "mean_final_forward_progress_m": 29.016130417585373,
+    "maximum_forward_progress_m": 29.016130417585373,
+    "termination_reason_counts": {
+      "4": 1
+    }
+  }
+}

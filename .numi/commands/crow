@@ -11,6 +11,11 @@ runtime_root=${NUMI_CROW_RUNTIME_ROOT:-/Users/home/Documents/emergentnumilife/Me
 profile="$workspace/ValidationInputs/american-crow-hybrid-visual-v1.json"
 expected_profile_hash=563e600ff8da2fb7461b00228d421e05c1826d1fe025840e319e0aef4e719714
 
+if [ "${1:-}" = journey ] && [ "${2:-}" = showcase ]; then
+    shift 2
+    exec "$workspace/Scripts/capture-crow-numi-journey.sh" "$@"
+fi
+
 [ -x "$runtime_root/numi/commands/crow" ] || {
     printf '%s\n' "numi crow: crow-enabled Numi Lab source is unavailable: $runtime_root" >&2
     exit 1

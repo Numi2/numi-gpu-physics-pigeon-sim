@@ -37,6 +37,14 @@
 
 <p align="center"><em>Native Metal simulation of an estimated American-crow model moving from standing through takeoff to flapping flight. It is simulated geometry and motion—not camera footage or measured crow aerodynamics.</em></p>
 
+### American crow — Numi Lab journey
+
+<p align="center">
+  <a href="Docs/Media/numi-crow-journey-presentation-v1.mp4"><img src="Docs/Media/numi-crow-journey-presentation-v1.gif" width="66%" alt="Five-angle feathered presentation of the Numi Lab American-crow journey"></a>
+</p>
+
+<p align="center"><em>Standing, takeoff, front, side, rear, and landing views of the estimated feathered model. This is a phase-keyed presentation companion to an assisted Numi physical trace—not Numi sensor pixels, a joint-exact replay, or an accepted autonomous policy.</em></p>
+
 <p align="center">
   <img src="Docs/Media/deetjen-through-flight-observatory.png" width="49%" alt="Deetjen through-flight field observatory">
   <a href="Docs/Media/american-crow-hybrid-native-v1.mp4"><img src="Docs/Media/american-crow-hybrid-native-v1.png" width="49%" alt="Native Metal American crow flight render; opens the full flight clip"></a>
@@ -68,6 +76,7 @@ BirdFlowMetal advances a D3Q19 fluid state on the GPU, evaluates articulated mov
 - [Measured-bird data contract](Docs/MEASURED_BIRD_DATA.md) — input schema, provenance, and missing-data boundaries.
 - [Deetjen through-flight](Docs/DEETJEN_DOVE_THROUGH_FLIGHT.md) — prescribed-motion CFD scope and artifact contract.
 - [American crow model](Docs/AMERICAN_CROW_MODEL.md) — model construction and explicitly simulated constraints.
+- [Numi crow journey](Docs/NUMI_CROW_JOURNEY.md) — locomotion/flight task, teacher distillation, held-out result, and render boundary.
 - [Formation Flight Observatory](Docs/FORMATION_FLIGHT_OBSERVATORY.md) — visual/field observatory provenance.
 - [Visual progress archive](Docs/Media/Progress/README.md) — dated captures and their context.
 
