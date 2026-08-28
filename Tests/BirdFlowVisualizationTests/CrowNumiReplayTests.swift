@@ -61,3 +61,32 @@ func numiCrowReplayValidatesCanonicalPayload() throws {
   #expect(replay.takeoffDeploymentProgress(of: replay.frames[0]) == 0)
   #expect(replay.takeoffDeploymentProgress(of: replay.frames[1]) == 1)
 }
+
+@Test("Published neural Crow replays retain their canonical payload locks")
+func publishedNeuralCrowReplaysRetainCanonicalPayloadLocks() throws {
+  let repository = URL(fileURLWithPath: #filePath)
+    .deletingLastPathComponent()
+    .deletingLastPathComponent()
+    .deletingLastPathComponent()
+  let cases = [
+    (
+      "crow-v8-neural-accepted-full-journey.crowreplay.json",
+      "birdflow_american_crow_journey_v8_neural",
+      "a7ae9a76ae6fc802ff0d831c88a0eecca45443e97a0128654900111adbf7d0b8"
+    ),
+    (
+      "crow-v9-sensor-fast-accepted-full-journey.crowreplay.json",
+      "birdflow_american_crow_journey_v9_visual_neural",
+      "6100dd08e2abecbda833f7a3761cda04c8fb5e36e0ba75ad2bde97b77046a881"
+    ),
+  ]
+  for (filename, task, payloadSHA256) in cases {
+    let replay = try CrowNumiReplay.load(
+      url: repository.appendingPathComponent("ValidationArtifacts/\(filename)")
+    )
+    #expect(replay.task == task)
+    #expect(replay.payloadSHA256 == payloadSHA256)
+    #expect(replay.frames.count == 1_600)
+    #expect(replay.controllerAuthority.hasPrefix("neural-only"))
+  }
+}

@@ -231,10 +231,10 @@ ffmpeg -v error -y \
   -map '[v]' -c:v libx264 -preset slow -crf 15 -pix_fmt yuv420p \
   -movflags +faststart "$OUTPUT"
 
-# Use the close three-quarter stance as the poster so the eye, bill, layered
-# body contours, feet, and tail remain readable at README scale. The video
-# carries the complete takeoff and multi-angle flight sequence.
-cp "$TEMP/standing/frame-024.png" "$POSTER"
+# Use the accepted initial stance as the poster so the eye, bill, layered body
+# contours, feet, and tail remain readable at README scale. Later frames in
+# this close pass are airborne and can crop the raised wings.
+cp "$TEMP/standing/frame-001.png" "$POSTER"
 ffmpeg -v error -y -i "$OUTPUT" \
   -vf 'fps=12,scale=960:-1:flags=lanczos,split[s0][s1];[s0]palettegen[p];[s1][p]paletteuse' \
   "$GIF"

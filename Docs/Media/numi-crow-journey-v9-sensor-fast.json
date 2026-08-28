@@ -1,0 +1,61 @@
+{
+  "schema": "birdflow.numi-crow-presentation.v8",
+  "classification": "high-quality accepted-state-conditioned presentation of an all-milestone-qualified Crow journey policy",
+  "limitation": "Root lift and timeline come from the accepted CrowReplayPack; detailed feather deformation remains the estimated BirdFlow retarget and is not the Numi native visual sensor. The v9 policy carrier is neural-only and consumes masked-depth history; approach envelopes are diagnostic outcomes without actuator authority.",
+  "camera_sequence": [
+    "standing-front-three-quarter",
+    "takeoff-opposite-quarter",
+    "flight-frontal-orbit",
+    "flight-left-lateral-orbit",
+    "flight-rear-dorsal-orbit"
+  ],
+  "output": "Docs/Media/numi-crow-journey-v9-sensor-fast.mp4",
+  "output_sha256": "9e0b13e9aea8d6bc25d3d6354a1e47552d737150ccfd5ae491943e88ebaa3fcb",
+  "evidence": "ValidationArtifacts/crow-v9-sensor-fast-full-journey-seed2650443581.evidence.json",
+  "evidence_sha256": "c6bbb4186ecce9b4c83e65dd110ffb8c974080fd99264107c97fcff25f74ac94",
+  "replay_pack": "ValidationArtifacts/crow-v9-sensor-fast-accepted-full-journey.crowreplay.json",
+  "replay_pack_sha256": "6ffab1a5b04b977c5b3c2876b452dfd4895cbc259d231350ad9738b014182554",
+  "replay_payload_sha256": "6100dd08e2abecbda833f7a3761cda04c8fb5e36e0ba75ad2bde97b77046a881",
+  "replay_final_step": 1600,
+  "qualification_dir": "ValidationArtifacts/crow-v9-sensor-fast-qualification",
+  "qualification_evidence_sha256": "888a842359363339b4a92464992790f9eb0c6d6ee0414dc5d9aeafe03faafa91",
+  "qualification_summary": {
+    "run_count": 33,
+    "environment_count": 1056,
+    "benchmark_seeds": [
+      2650443581,
+      2650443582,
+      2650443583
+    ],
+    "failed_environment_steps": 0,
+    "non_timeout_terminations": 0,
+    "minimum_mean_tracking_score": 0.6708923046005657,
+    "maximum_mean_tilt": 0.086328234858741693,
+    "maximum_tilt": 0.18254995346069336,
+    "maximum_root_height": 1.3927420377731323
+  },
+  "native_evidence": {
+    "task": "birdflow_american_crow_journey_v9_visual_neural",
+    "world_source": "birdflow_american_crow_journey_v9_visual_neural",
+    "action_carrier": "v9_visual_neural_only_masked_depth_history",
+    "action_source": "policy_pack",
+    "birdflow_journey_teacher": false,
+    "task_fingerprint": "15620914106531706796",
+    "observation_fingerprint": "15468144651284949817",
+    "action_fingerprint": "5380906626764135272",
+    "policy_rollout_fingerprint": "13404698645419758109",
+    "policy_sample_count": 51200,
+    "run_fingerprint": "10403301552952206006",
+    "mean_root_height": 0.68789288561791184,
+    "maximum_root_height": 1.1910345554351807,
+    "mean_tracking_score": 0.79331846578512344,
+    "mean_tilt": 0.05689487978217693,
+    "maximum_tilt": 0.15151363611221313,
+    "mean_final_forward_progress_m": 0,
+    "maximum_forward_progress_m": 0,
+    "failed_environment_steps": 0,
+    "termination_reason_counts": {
+      "4": 32
+    }
+  }
+}

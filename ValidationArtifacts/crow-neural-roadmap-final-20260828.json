@@ -1,0 +1,52 @@
+{
+  "schema": "birdflow.crow-neural-roadmap-final.v1",
+  "classification": "simulated neural Crow curriculum, qualification, replay, and presentation evidence",
+  "date": "2026-08-28",
+  "runtime": {
+    "device": "Apple M4 Pro",
+    "operating_system": "macOS 26.6 (25G72)",
+    "architecture": "arm64",
+    "metalrobo_source_revision": "3bbce9049d20c002c6514e6131590808db56618c",
+    "rollout_executable_sha256": "cf3317bbf928ee3b622fe4874c16931473497a76d901680216238815d01edb79",
+    "metallib_sha256": "7923a1330d13bd7d449b4f630f925a012c187ebcd4c5e3c02f9b48217255f285",
+    "locomotion_task_source_sha256": "8ccb0d19f56272426450787945c031855c0b336ffcce98a1081897b6ca19c3fb",
+    "mlx_worker_source_sha256": "9bd3e827574dbbc6adcab3b932f22db6409f415dea2a88e543edf07fba51faa7",
+    "qualification_script_sha256": "fef79a41b5ff9c7e14962e222897fa0047db5dfd541082ff51c15320675dcd12"
+  },
+  "variants": {
+    "v8-neural": {
+      "task": "birdflow_american_crow_journey_v8_neural",
+      "policy_pack_sha256": "072d842d60a9a4291f2c52d0bb07770702e9026ae6e0d068f721486547def58b",
+      "qualification": "ValidationArtifacts/crow-v8-neural-final-qualification.json",
+      "qualification_sha256": "5c8a49cbd17e73cd73b66dbc61e6b9ca514d00705abf0b990e3cd21d04717226",
+      "evidence_directory": "ValidationArtifacts/crow-v8-neural-qualification",
+      "artifact_manifest": "ValidationArtifacts/crow-v8-neural-final-artifacts.sha256",
+      "artifact_manifest_sha256": "c886012eef652f74850035c1485ee2821cfa9e770b6178102b931820bed6aab5",
+      "accepted_replay": "ValidationArtifacts/crow-v8-neural-accepted-full-journey.crowreplay.json",
+      "accepted_replay_sha256": "740c6e801322af25308a524d5a0d60357c60ca03517dbdd59d94e2600a475cc3",
+      "accepted_replay_payload_sha256": "a7ae9a76ae6fc802ff0d831c88a0eecca45443e97a0128654900111adbf7d0b8"
+    },
+    "v9-visual-neural": {
+      "task": "birdflow_american_crow_journey_v9_visual_neural",
+      "parent_boundary": "actor transfer from promoted v8-neural only",
+      "policy_pack_sha256": "e444223ef9867e8b6323cdb7e8e5030106ab8ef6a7e39a3623ee46d34d2e7bcb",
+      "qualification": "ValidationArtifacts/crow-v9-sensor-fast-final-qualification.json",
+      "qualification_sha256": "017eff521c0a1421672e262c2ad569bb71e6f9837cb66e03f382e97c8bd11da9",
+      "evidence_directory": "ValidationArtifacts/crow-v9-sensor-fast-qualification",
+      "artifact_manifest": "ValidationArtifacts/crow-v9-sensor-fast-final-artifacts.sha256",
+      "artifact_manifest_sha256": "0e574bc4ddc4c9e3c877752333369ca3e5a23d5eeb83abe48ce591532e1696ca",
+      "accepted_replay": "ValidationArtifacts/crow-v9-sensor-fast-accepted-full-journey.crowreplay.json",
+      "accepted_replay_sha256": "6ffab1a5b04b977c5b3c2876b452dfd4895cbc259d231350ad9738b014182554",
+      "accepted_replay_payload_sha256": "6100dd08e2abecbda833f7a3761cda04c8fb5e36e0ba75ad2bde97b77046a881",
+      "presentation": "Docs/Media/numi-crow-journey-v9-sensor-fast.mp4",
+      "presentation_sha256": "9e0b13e9aea8d6bc25d3d6354a1e47552d737150ccfd5ae491943e88ebaa3fcb",
+      "presentation_sidecar": "Docs/Media/numi-crow-journey-v9-sensor-fast.json",
+      "presentation_sidecar_sha256": "f0eb25510f92e5667395cce137e1bf4ac67be05110b2239785ae757e53f6a13c"
+    }
+  },
+  "limitations": [
+    "The policies are qualified only in the recorded simulated milestone distributions and seeds.",
+    "The BirdFlow presentation consumes accepted root state and timing, but detailed feather deformation is an estimated retarget rather than the Numi visual sensor or a joint-exact reconstruction.",
+    "No result is measured-crow aerodynamics, biological validation, out-of-distribution navigation evidence, or hardware flight."
+  ]
+}

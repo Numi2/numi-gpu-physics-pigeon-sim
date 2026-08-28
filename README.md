@@ -40,10 +40,10 @@
 ### American crow — Numi Lab journey
 
 <p align="center">
-  <a href="Docs/Media/numi-crow-journey-v7.mp4"><img src="Docs/Media/numi-crow-journey-v7.gif" width="66%" alt="Five-angle 1080p feathered presentation of the all-milestone-qualified Numi Lab American-crow journey policy"></a>
+  <a href="Docs/Media/numi-crow-journey-v9-sensor-fast.mp4"><img src="Docs/Media/numi-crow-journey-v9-sensor-fast.gif" width="66%" alt="Five-angle 1080p feathered presentation of the all-milestone-qualified neural Numi Lab American-crow sensor policy"></a>
 </p>
 
-<p align="center"><em>Standing, takeoff, frontal, lateral, and rear/dorsal views of the estimated feathered model, keyed to one hierarchical policy that cleared all 11 simulated milestones across three held-out seeds. Its approach-pitch safety supervisor can override the neural actor; these are presentation pixels—not Numi sensor pixels or a joint-exact state replay.</em></p>
+<p align="center"><em>Standing, takeoff, frontal, lateral, and rear/dorsal views driven by one SHA-locked accepted-state replay from the neural-only v9 masked-depth policy. It cleared all 11 simulated milestones across three held-out seeds without teacher or supervisor authority. Feather deformation remains an estimated BirdFlow retarget—not Numi sensor pixels, measured-crow evidence, or a joint-exact visual reconstruction.</em></p>
 
 <p align="center">
   <img src="Docs/Media/deetjen-through-flight-observatory.png" width="49%" alt="Deetjen through-flight field observatory">
@@ -52,7 +52,7 @@
 
 <p align="center"><em>Left: Deetjen through-flight field observatory. Right: the latest native crow flight still; select it for the full 1280×720 native Metal wingbeat clip.</em></p>
 
-The gallery intentionally includes every current, tracked crow and Numi Lab dove flight capture. The [visual progress archive](Docs/Media/Progress/README.md) holds earlier developmental captures separately, so the landing page stays focused on the latest media.
+The gallery highlights the latest qualified crow journey and current Numi Lab dove evidence. The [visual progress archive](Docs/Media/Progress/README.md) holds earlier developmental captures separately, so the landing page stays focused on the latest media.
 
 ## What this repository demonstrates
 
