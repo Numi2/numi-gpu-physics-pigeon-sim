@@ -26,6 +26,25 @@ func flightWingRootIsBroadBilateralAndBodySeated() {
   }
 }
 
+@Test("exact Numi articulation replaces the procedural wingbeat phase")
+func exactNumiArticulationReplacesProceduralWingbeatPhase() {
+  for phase: Float in [-0.3, 0, 0.41, 0.9, 1.7] {
+    #expect(
+      CrowFlightWingBodyIntegration.morphologyPhase(
+        proceduralPhase: phase,
+        hasExactArticulation: false
+      ) == phase
+    )
+    #expect(
+      CrowFlightWingBodyIntegration.morphologyPhase(
+        proceduralPhase: phase,
+        hasExactArticulation: true
+      )
+        == CrowFlightWingBodyIntegration.exactArticulationMorphologyPhase
+    )
+  }
+}
+
 @Test("flight wing root remains body pinned throughout the stroke")
 func flightWingRootRemainsBodyPinnedThroughoutStroke() throws {
   let root = URL(fileURLWithPath: #filePath)

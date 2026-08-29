@@ -3526,7 +3526,15 @@ private struct CrowMeshBuilder {
           spanIndex: spanIndex,
           chordIndex: chordIndex,
           left: partIdentifier == 2,
-          phase: motionPhase
+          // A replay articulation already contains the composed Numi sweep,
+          // flap, and terminal-wing rotation. Keep BirdFlow's high-detail
+          // deployed morphology in its neutral link-local plane so that the
+          // exact link delta is applied once, rather than stacking it on the
+          // estimated procedural wingbeat.
+          phase: CrowFlightWingBodyIntegration.morphologyPhase(
+            proceduralPhase: motionPhase,
+            hasExactArticulation: articulation != nil
+          )
         )
         if let takeoff {
           let folded = CrowTakeoffSequence.foldedWingPoint(

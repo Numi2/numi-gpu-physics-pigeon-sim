@@ -13,6 +13,10 @@ enum CrowFlightWingBodyIntegration {
   static let spanCount = 33
   static let attachmentSpanCount = 14
   static let articulationSpanCount = 12
+  /// Neutral link-local wing plane used when accepted Numi articulation owns
+  /// the sweep/flap rotation. The procedural phase remains available for
+  /// BirdFlow-only presentations.
+  static let exactArticulationMorphologyPhase: Float = 0.25
   static let covertCourseOverlapScale: Float = 1.24
   static let covertAttachmentMaximumOverlapScale: Float = 1.68
   static let covertProximalSeatingSpanCount = 12
@@ -648,6 +652,15 @@ enum CrowFlightWingBodyIntegration {
     let normal = CrowBodyAnatomy.surfaceNormal(atX: x, theta: theta)
     let seated = surface + normal * 0.0015
     return SIMD3<Float>(seated.x, left ? abs(seated.y) : -abs(seated.y), seated.z)
+  }
+
+  static func morphologyPhase(
+    proceduralPhase: Float,
+    hasExactArticulation: Bool
+  ) -> Float {
+    hasExactArticulation
+      ? exactArticulationMorphologyPhase
+      : proceduralPhase
   }
 
   static func integratedPoint(

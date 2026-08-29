@@ -163,3 +163,10 @@ on the CPU. These link transforms are exact accepted simulator state; the
 BirdFlow registration pivots, inter-link skinning, feather morphology, and
 surface deformation remain estimated. Historical v9 media is unchanged and
 retains the root-driven boundary described above.
+
+When an accepted articulation frame is present, BirdFlow now constructs the
+deployed high-detail wing in a neutral link-local plane before applying the
+Numi terminal-wing delta. Its procedural showcase wingbeat remains available
+only when no exact replay articulation is supplied. This prevents the Numi
+flap from being stacked on a second estimated flap while retaining BirdFlow's
+topology-bound coverts, remiges, and surface-detail passes.
