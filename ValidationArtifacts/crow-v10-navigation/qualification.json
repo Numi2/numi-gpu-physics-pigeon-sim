@@ -1,0 +1,251 @@
+{
+  "payload": {
+    "accepted_replay": "/Users/n/numi-runs/crow-v10-nav-reward-qualification-r21-selected-replay-20260829/candidate-held-out-a-selected.crowreplay.json",
+    "accepted_replay_environment": 30,
+    "accepted_replay_seed": 2650705001,
+    "accepted_replay_sha256": "b01cbba6f12779ec6410ba1dc3892580c61b20bf1fac41ab39bf994ac253db91",
+    "baseline_policy_pack": "/Users/n/numi-runs/crow-v10-nav-reward-train-20260829/initial.policypack",
+    "baseline_policy_pack_sha256": "a09665b0239724dd5ebc5c4df54db76f26a4e2fd29b4c3c1a638849c223d0681",
+    "candidate_policy_pack": "/Users/n/numi-runs/crow-v10-nav-reward-train-20260829/checkpoints/revision-00000021.candidate.policypack",
+    "candidate_policy_pack_sha256": "4c0711fc26137c09ba631c77f375cf4745abbf7a447be1d0ea58268f921a4c21",
+    "classification": "simulated native held-out controller qualification",
+    "contract_failures": [],
+    "decision": "promote",
+    "environment_count_per_run": 32,
+    "evidence_sha256": {
+      "baseline-held-out-a-seed2650705001.json": "6c5769c395848e03c9ea864b00b1bda9cbbb6d996c9246f60cfeaceb364691f7",
+      "baseline-held-out-a-seed2650705002.json": "6630816f02a466a0a94778fc91757b1b16396e5b32362af72ac01ad0315ec740",
+      "baseline-held-out-a-seed2650705003.json": "7b62c5345b82bf457decc5fb61583ded0727267219a84fa183f109845cff30ce",
+      "baseline-held-out-b-seed2650705001.json": "1c40c4bf8d6ced4e8183055c69989981504343f68ff5f9dfaadd576f7c298ae9",
+      "baseline-held-out-b-seed2650705002.json": "9d0164f5311da26dcca1c3a97904899e3b2c6cd0c6b54bb11c9d8188d99a8875",
+      "baseline-held-out-b-seed2650705003.json": "677a8590f4d19c21ebd54bbb78a33d6da8220a07c9f736517ab756af7c4216c7",
+      "baseline-training-seed2650705001.json": "064beb67fcf97717931dc03707bb699eea00cb3970fbbef9a9b17d1e6961eb20",
+      "baseline-training-seed2650705002.json": "adfe75b672f0c5e1be8d4992653770ae894c44f89aa9531da822e9c9c8856ca2",
+      "baseline-training-seed2650705003.json": "7058822b27548048dd23113b98af047236fea9ad6b0cd25eac07da2bd72c4790",
+      "candidate-held-out-a-seed2650705001.json": "09e8bfd084bedd809c784187610769774cdc61d66a1404e58199609be836dc32",
+      "candidate-held-out-a-seed2650705002.json": "a9b207607cf4b16acaea2b81b4c791e67a79e7f3e21f69248071887136bccd6c",
+      "candidate-held-out-a-seed2650705003.json": "4da3e541ffaccb22334d17b1e0fa4aed16e2def124843ecefe4882285ae68624",
+      "candidate-held-out-b-seed2650705001.json": "48dd7aa305e14ab6c98cfd4f55703834823fd000b32d9235efff2568ee350ef5",
+      "candidate-held-out-b-seed2650705002.json": "4de6ab5eb7360524e7cf716e23f4a6b59f9320c0483604ebad9e252b01eff665",
+      "candidate-held-out-b-seed2650705003.json": "23806ac74a756ef72022f8323d37e18b6270f741fb31b6a84c17c3d606bb6a92",
+      "candidate-training-seed2650705001.json": "b212d905414aa063568e0cedf439c290d0d04080d71091034c837c94d3394d40",
+      "candidate-training-seed2650705002.json": "600fb95aefd01c964f8a5e4243f42a376e9140eb7d18c1d84dc2f2d36446d078",
+      "candidate-training-seed2650705003.json": "bbdfbe442464b69a7b74c47c68af063d38f3cf501a8f4f4a6df959f5fdfc67c1"
+    },
+    "gates": [
+      {
+        "course": "training",
+        "gate": "forbidden contacts non-increasing",
+        "passed": true
+      },
+      {
+        "course": "training",
+        "gate": "terminations non-increasing",
+        "passed": true
+      },
+      {
+        "course": "training",
+        "gate": "mean height retained",
+        "passed": true
+      },
+      {
+        "course": "training",
+        "gate": "tracking retained",
+        "passed": true
+      },
+      {
+        "course": "training",
+        "gate": "tilt safety envelope",
+        "passed": true
+      },
+      {
+        "course": "training",
+        "gate": "course progress improved",
+        "passed": true
+      },
+      {
+        "course": "training",
+        "gate": "waypoint reach improved",
+        "passed": true
+      },
+      {
+        "course": "training",
+        "gate": "completion non-regressing",
+        "passed": true
+      },
+      {
+        "course": "held-out-a",
+        "gate": "forbidden contacts non-increasing",
+        "passed": true
+      },
+      {
+        "course": "held-out-a",
+        "gate": "terminations non-increasing",
+        "passed": true
+      },
+      {
+        "course": "held-out-a",
+        "gate": "mean height retained",
+        "passed": true
+      },
+      {
+        "course": "held-out-a",
+        "gate": "tracking retained",
+        "passed": true
+      },
+      {
+        "course": "held-out-a",
+        "gate": "tilt safety envelope",
+        "passed": true
+      },
+      {
+        "course": "held-out-a",
+        "gate": "course progress improved",
+        "passed": true
+      },
+      {
+        "course": "held-out-a",
+        "gate": "waypoint reach improved",
+        "passed": true
+      },
+      {
+        "course": "held-out-a",
+        "gate": "completion non-regressing",
+        "passed": true
+      },
+      {
+        "course": "held-out-b",
+        "gate": "forbidden contacts non-increasing",
+        "passed": true
+      },
+      {
+        "course": "held-out-b",
+        "gate": "terminations non-increasing",
+        "passed": true
+      },
+      {
+        "course": "held-out-b",
+        "gate": "mean height retained",
+        "passed": true
+      },
+      {
+        "course": "held-out-b",
+        "gate": "tracking retained",
+        "passed": true
+      },
+      {
+        "course": "held-out-b",
+        "gate": "tilt safety envelope",
+        "passed": true
+      },
+      {
+        "course": "held-out-b",
+        "gate": "course progress improved",
+        "passed": true
+      },
+      {
+        "course": "held-out-b",
+        "gate": "waypoint reach improved",
+        "passed": true
+      },
+      {
+        "course": "held-out-b",
+        "gate": "completion non-regressing",
+        "passed": true
+      }
+    ],
+    "metrics": {
+      "baseline": {
+        "held-out-a": {
+          "failed_environment_steps": 0,
+          "forbidden_contact_termination_count": 290,
+          "maximum_tilt": 0.7626506686210632,
+          "mean_navigation_completion": 0.0,
+          "mean_navigation_progress_m": -2.7078542135632593,
+          "mean_navigation_waypoints_reached": 0.0,
+          "mean_root_height_m": 0.26830385651555844,
+          "mean_tracking_score": 0.7305730969725245,
+          "run_count": 3,
+          "termination_count": 290,
+          "timeout_count": 0
+        },
+        "held-out-b": {
+          "failed_environment_steps": 0,
+          "forbidden_contact_termination_count": 289,
+          "maximum_tilt": 0.9138935804367065,
+          "mean_navigation_completion": 0.0,
+          "mean_navigation_progress_m": -2.7453791316769394,
+          "mean_navigation_waypoints_reached": 0.0,
+          "mean_root_height_m": 0.26803638366312954,
+          "mean_tracking_score": 0.7330516094811715,
+          "run_count": 3,
+          "termination_count": 289,
+          "timeout_count": 0
+        },
+        "training": {
+          "failed_environment_steps": 0,
+          "forbidden_contact_termination_count": 291,
+          "maximum_tilt": 0.6943594813346863,
+          "mean_navigation_completion": 0.0,
+          "mean_navigation_progress_m": -2.645453832404843,
+          "mean_navigation_waypoints_reached": 0.0,
+          "mean_root_height_m": 0.2659555630591543,
+          "mean_tracking_score": 0.7340897865565696,
+          "run_count": 3,
+          "termination_count": 291,
+          "timeout_count": 0
+        }
+      },
+      "candidate": {
+        "held-out-a": {
+          "failed_environment_steps": 0,
+          "forbidden_contact_termination_count": 56,
+          "maximum_tilt": 0.7890834808349609,
+          "mean_navigation_completion": 0.0,
+          "mean_navigation_progress_m": -2.364427388278612,
+          "mean_navigation_waypoints_reached": 0.006393229166666667,
+          "mean_root_height_m": 0.5075783350400161,
+          "mean_tracking_score": 0.7266239550819106,
+          "run_count": 3,
+          "termination_count": 97,
+          "timeout_count": 41
+        },
+        "held-out-b": {
+          "failed_environment_steps": 0,
+          "forbidden_contact_termination_count": 97,
+          "maximum_tilt": 0.7986641526222229,
+          "mean_navigation_completion": 0.0,
+          "mean_navigation_progress_m": -1.130574374841138,
+          "mean_navigation_waypoints_reached": 0.10530598958333333,
+          "mean_root_height_m": 0.48272012007413045,
+          "mean_tracking_score": 0.7728791345837575,
+          "run_count": 3,
+          "termination_count": 114,
+          "timeout_count": 17
+        },
+        "training": {
+          "failed_environment_steps": 0,
+          "forbidden_contact_termination_count": 71,
+          "maximum_tilt": 0.7924149036407471,
+          "mean_navigation_completion": 0.0,
+          "mean_navigation_progress_m": -1.8400601002899932,
+          "mean_navigation_waypoints_reached": 0.060084635416666664,
+          "mean_root_height_m": 0.5014616666790487,
+          "mean_tracking_score": 0.7378068602838357,
+          "run_count": 3,
+          "termination_count": 98,
+          "timeout_count": 27
+        }
+      }
+    },
+    "seeds": [
+      2650705001,
+      2650705002,
+      2650705003
+    ],
+    "steps_per_run": 1600,
+    "task": "birdflow_american_crow_navigation_v10_world_model"
+  },
+  "payload_sha256": "f560a9094b45be533fa714c5510491b73aa356495e10fdcd762b718fb0157544",
+  "schema": "numi.crow-world-model-qualification.v1"
+}

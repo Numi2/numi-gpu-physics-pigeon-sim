@@ -12,6 +12,23 @@ enum CrowShowcasePresentation: String {
   case takeoff
 }
 
+enum CrowShowcaseLighting: String {
+  case clear
+  case overcast
+  case rim
+
+  var parameters: SIMD4<Float> {
+    switch self {
+    case .clear:
+      SIMD4<Float>(0, 1, 1, 1)
+    case .overcast:
+      SIMD4<Float>(0.45, 0.88, 1.34, 1.28)
+    case .rim:
+      SIMD4<Float>(-0.80, 1.26, 0.82, 1.24)
+    }
+  }
+}
+
 enum CrowVentralCurveEmissionMode: String {
   case vertex
   case mesh
@@ -75,6 +92,7 @@ public enum CrowShowcaseCapture {
     let ventralBarbRayGeometryAuditEnabled: Bool
     let ventralBarbFullImageRayAuditEnabled: Bool
     let presentation: CrowShowcasePresentation
+    let lighting: CrowShowcaseLighting
 
     public init(commandLine: [String]) throws {
       func value(after flag: String) throws -> String? {
@@ -256,6 +274,17 @@ public enum CrowShowcaseCapture {
         )
       }
       presentation = parsedPresentation
+      let lightingValue =
+        try value(after: "--capture-crow-lighting")
+        ?? CrowShowcaseLighting.clear.rawValue
+      guard
+        let parsedLighting = CrowShowcaseLighting(rawValue: lightingValue)
+      else {
+        throw CaptureError.invalidArguments(
+          "--capture-crow-lighting requires clear, overcast, or rim"
+        )
+      }
+      lighting = parsedLighting
       if numiReplayPackURL != nil && presentation != .takeoff {
         throw CaptureError.invalidArguments(
           "--capture-crow-replay-pack requires --capture-crow-presentation takeoff"
@@ -380,6 +409,7 @@ public enum CrowShowcaseCapture {
       motion: motion,
       realityAsset: realityAsset,
       presentation: arguments.presentation,
+      lighting: arguments.lighting,
       explicitVentralBarbCurvesEnabled:
         arguments.explicitVentralBarbCurvesEnabled,
       retainedFemoralVanesEnabled: arguments.retainedFemoralVanesEnabled,
@@ -404,6 +434,7 @@ public enum CrowShowcaseCapture {
         motion: motion,
         realityAsset: realityAsset,
         presentation: arguments.presentation,
+        lighting: arguments.lighting,
         explicitVentralBarbCurvesEnabled:
           arguments.explicitVentralBarbCurvesEnabled,
         retainedFemoralVanesEnabled: arguments.retainedFemoralVanesEnabled,
@@ -430,7 +461,7 @@ public enum CrowShowcaseCapture {
       let audit: [String: Any] = [
         "schema": "birdflow.numi-crow-replay-retarget.v1",
         "classification": "high-detail estimated-crow retarget of simulated accepted state",
-        "claim_boundary": "accepted root and joint state conditions the presentation timeline; feather surface deformation remains the estimated BirdFlow render model",
+        "claim_boundary": "accepted root height conditions the takeoff timeline and accepted root position places the course relative to the crow; feather articulation and surface deformation remain the estimated BirdFlow render model",
         "payload_sha256": numiReplay.payloadSHA256,
         "task": numiReplay.task,
         "journey_variant": numiReplay.journeyVariant,
@@ -443,6 +474,31 @@ public enum CrowShowcaseCapture {
         "source_frame_count": numiReplay.frames.count,
         "render_frame_count": arguments.frameCount,
         "camera_is_independent_of_trajectory": true,
+        "camera_yaw_radians": arguments.cameraYawRadians.map {
+          NSNumber(value: $0)
+        } ?? NSNull(),
+        "camera_yaw_orbit_radians": arguments.cameraYawOrbitRadians,
+        "camera_pitch_radians": arguments.cameraPitchRadians.map {
+          NSNumber(value: $0)
+        } ?? NSNull(),
+        "camera_distance_meters": arguments.cameraDistanceMeters.map {
+          NSNumber(value: $0)
+        }
+          ?? NSNull(),
+        "camera_distance_scale": arguments.cameraDistanceScale,
+        "render_width": arguments.width,
+        "render_height": arguments.height,
+        "navigation_course": numiReplay.navigationCourse ?? "unspecified",
+        "policy_lighting_contract": numiReplay.policyLightingContract
+          ?? "unspecified",
+        "render_lighting_preset": arguments.lighting.rawValue,
+        "render_lighting_parameters": [
+          arguments.lighting.parameters.x,
+          arguments.lighting.parameters.y,
+          arguments.lighting.parameters.z,
+          arguments.lighting.parameters.w,
+        ],
+        "course_geometry_contract": "accepted replay body states are rendered relative to the accepted crow root; obstacle extents come from the v10 Numi task",
       ]
       let data = try JSONSerialization.data(
         withJSONObject: audit, options: [.prettyPrinted, .sortedKeys]
@@ -532,6 +588,9 @@ public enum CrowShowcaseCapture {
       let rendered = try renderer.render(
         phase: phase,
         camera: camera,
+        navigationCourse: replayFrame.flatMap {
+          numiReplay?.navigationCourseFrame(of: $0)
+        },
         outputWidth: arguments.width,
         outputHeight: arguments.height,
         temporalScale: arguments.temporalScale,
@@ -575,6 +634,9 @@ public enum CrowShowcaseCapture {
         let nativeReference = try nativeReferenceRenderer?.render(
           phase: phase,
           camera: camera,
+          navigationCourse: replayFrame.flatMap {
+            numiReplay?.navigationCourseFrame(of: $0)
+          },
           outputWidth: arguments.width,
           outputHeight: arguments.height,
           temporalScale: 1,
@@ -928,6 +990,8 @@ private final class CrowShowcaseRenderer {
   private let depthState: MTLDepthStencilState
   private let sampleCount: Int
   private let presentation: CrowShowcasePresentation
+  private let lighting: CrowShowcaseLighting
+  private let aovFragmentFunctionName: String
   private let plumageOptics: CrowPlumageOpticsGPUParameters
   private let featherRootDeformer: (any CrowFeatherRootDeforming)?
   private let featherGeometryDeformer: CrowFeatherGeometryDeformer?
@@ -960,6 +1024,7 @@ private final class CrowShowcaseRenderer {
     motion: any CrowShowcaseMotion,
     realityAsset: BirdRealityAsset?,
     presentation: CrowShowcasePresentation,
+    lighting: CrowShowcaseLighting,
     explicitVentralBarbCurvesEnabled: Bool = true,
     retainedFemoralVanesEnabled: Bool = true,
     retainedCruralVanesEnabled: Bool = true,
@@ -970,6 +1035,11 @@ private final class CrowShowcaseRenderer {
     ventralBarbFullImageRayAuditEnabled: Bool = false
   ) throws {
     self.presentation = presentation
+    self.lighting = lighting
+    let createdAOVFragmentFunctionName = lighting == .clear
+      ? "showcaseCrowAOVFragment"
+      : "showcaseCrowLitAOVFragment"
+    aovFragmentFunctionName = createdAOVFragmentFunctionName
     self.ventralBarbRayGeometryAuditEnabled = ventralBarbRayGeometryAuditEnabled
       || ventralBarbFullImageRayAuditEnabled
     self.ventralBarbFullImageRayAuditEnabled = ventralBarbFullImageRayAuditEnabled
@@ -998,7 +1068,7 @@ private final class CrowShowcaseRenderer {
     )
     let candidateBodyVaneAOVPipeline = try? createdBackend.render(
       vertex: "crowBodyVaneAOVVertex",
-      fragment: "showcaseCrowAOVFragment",
+      fragment: createdAOVFragmentFunctionName,
       colorFormats: [.rgba16Float, .rgba16Float, .rgba16Float, .rg16Float, .r32Float],
       sampleCount: device.supportsTextureSampleCount(4) ? 4 : 1
     )
@@ -1009,13 +1079,13 @@ private final class CrowShowcaseRenderer {
     )
     let candidateBodyRachisAOVPipeline = try? createdBackend.render(
       vertex: "crowBodyRachisAOVVertex",
-      fragment: "showcaseCrowAOVFragment",
+      fragment: createdAOVFragmentFunctionName,
       colorFormats: [.rgba16Float, .rgba16Float, .rgba16Float, .rg16Float, .r32Float],
       sampleCount: device.supportsTextureSampleCount(4) ? 4 : 1
     )
     let candidateBodyDetailAOVPipeline = try? createdBackend.render(
       vertex: "crowBodyDetailAOVVertex",
-      fragment: "showcaseCrowAOVFragment",
+      fragment: createdAOVFragmentFunctionName,
       colorFormats: [.rgba16Float, .rgba16Float, .rgba16Float, .rg16Float, .r32Float],
       sampleCount: device.supportsTextureSampleCount(4) ? 4 : 1
     )
@@ -1138,26 +1208,26 @@ private final class CrowShowcaseRenderer {
     ]
     surfaceAOVPipeline = try backend.render(
       vertex: "crowSurfaceAOVVertex",
-      fragment: "showcaseCrowAOVFragment",
+      fragment: createdAOVFragmentFunctionName,
       colorFormats: aovFormats,
       sampleCount: createdSampleCount
     )
     featherAOVPipeline = try createdBackend.render(
       vertex: "crowFeatherAOVVertex",
-      fragment: "showcaseCrowAOVFragment",
+      fragment: createdAOVFragmentFunctionName,
       colorFormats: aovFormats,
       sampleCount: createdSampleCount
     )
     ventralBarbAOVPipeline = try createdBackend.render(
       vertex: "crowVentralBarbAOVVertex",
-      fragment: "showcaseCrowAOVFragment",
+      fragment: createdAOVFragmentFunctionName,
       colorFormats: aovFormats,
       sampleCount: createdSampleCount
     )
     if ventralBarbUsesMeshStage {
       ventralBarbMeshAOVPipeline = try createdBackend.meshRender(
         mesh: "crowVentralBarbAOVMesh",
-        fragment: "showcaseCrowAOVFragment",
+        fragment: createdAOVFragmentFunctionName,
         colorFormats: aovFormats,
         sampleCount: createdSampleCount,
         maximumThreadsPerMeshThreadgroup: crowVentralCurveMeshThreadCount
@@ -1227,6 +1297,7 @@ private final class CrowShowcaseRenderer {
   func render(
     phase: Float,
     camera: CameraState,
+    navigationCourse: CrowNumiReplay.NavigationCourseFrame?,
     outputWidth: Int,
     outputHeight: Int,
     temporalScale: Float,
@@ -1361,12 +1432,33 @@ private final class CrowShowcaseRenderer {
         )
       )
     }
+    let navigationCourseTemporalVertices: [CrowSurfaceTemporalVertexGPU]
+    if let navigationCourse {
+      navigationCourseTemporalVertices = Self.navigationCourseVertices(
+        current: navigationCourse,
+        currentCrowCenter: currentAnatomyBodyCenter
+      )
+    } else {
+      navigationCourseTemporalVertices = []
+    }
     let byteCount =
       MemoryLayout<CrowSurfaceTemporalVertexGPU>.stride
       * temporalVertices.count
     let buffer = try backend.buffer(length: byteCount, shared: true)
     temporalVertices.withUnsafeBytes { bytes in
       _ = memcpy(buffer.contents(), bytes.baseAddress!, bytes.count)
+    }
+    let navigationCourseBuffer: MTLBuffer?
+    if navigationCourseTemporalVertices.isEmpty {
+      navigationCourseBuffer = nil
+    } else {
+      let courseByteCount = MemoryLayout<CrowSurfaceTemporalVertexGPU>.stride
+        * navigationCourseTemporalVertices.count
+      let courseBuffer = try backend.buffer(length: courseByteCount, shared: true)
+      navigationCourseTemporalVertices.withUnsafeBytes { bytes in
+        _ = memcpy(courseBuffer.contents(), bytes.baseAddress!, bytes.count)
+      }
+      navigationCourseBuffer = courseBuffer
     }
 
     let formats: [MTLPixelFormat] = [
@@ -1666,6 +1758,7 @@ private final class CrowShowcaseRenderer {
       plumageVisibilityShape: plumageOptics.visibilityShape,
       plumageVisibilityLayout: plumageOptics.visibilityLayout
     )
+    var presentationLighting = lighting.parameters
     var backgroundOptions = SIMD4<Float>(
       phase,
       Float(renderWidth) / Float(renderHeight),
@@ -1677,6 +1770,13 @@ private final class CrowShowcaseRenderer {
     }
     encoder.label = "Estimated American crow HDR and temporal AOVs"
     encoder.setCullMode(.none)
+    if lighting != .clear {
+      encoder.setFragmentBytes(
+        &presentationLighting,
+        length: MemoryLayout<SIMD4<Float>>.stride,
+        index: 2
+      )
+    }
     encoder.setRenderPipelineState(backgroundAOVPipeline)
     encoder.setFragmentBytes(
       &backgroundOptions,
@@ -1702,6 +1802,14 @@ private final class CrowShowcaseRenderer {
       vertexStart: 0,
       vertexCount: temporalVertices.count
     )
+    if let navigationCourseBuffer {
+      encoder.setVertexBuffer(navigationCourseBuffer, offset: 0, index: 0)
+      encoder.drawPrimitives(
+        type: .line,
+        vertexStart: 0,
+        vertexCount: navigationCourseTemporalVertices.count
+      )
+    }
     if let bodyVaneFrame, let bodyVaneGeometryDeformer,
       let bodyVaneAOVPipeline
     {
@@ -1896,6 +2004,14 @@ private final class CrowShowcaseRenderer {
       vertexStart: 0,
       vertexCount: temporalVertices.count
     )
+    if let navigationCourseBuffer {
+      identityEncoder.setVertexBuffer(navigationCourseBuffer, offset: 0, index: 0)
+      identityEncoder.drawPrimitives(
+        type: .line,
+        vertexStart: 0,
+        vertexCount: navigationCourseTemporalVertices.count
+      )
+    }
     if let bodyVaneFrame, let bodyVaneGeometryDeformer,
       let bodyVaneIdentityPipeline
     {
@@ -2520,6 +2636,75 @@ private final class CrowShowcaseRenderer {
     )
   }
 
+  /// Renders the exact randomized v10 course body centers from the accepted
+  /// replay in a crow-relative frame. The crow presentation remains centered
+  /// for inspection while accepted lateral and vertical progress is visible as
+  /// course motion. Extents mirror the owning Numi task constants.
+  private static func navigationCourseVertices(
+    current: CrowNumiReplay.NavigationCourseFrame,
+    currentCrowCenter: SIMD3<Float>
+  ) -> [CrowSurfaceTemporalVertexGPU] {
+    let halfExtents: [SIMD3<Float>] = [
+      SIMD3<Float>(0.12, 0.12, 0.80),
+      SIMD3<Float>(0.12, 0.12, 0.80),
+      SIMD3<Float>(0.10, 0.10, 0.65),
+      SIMD3<Float>(0.10, 0.10, 0.65),
+      SIMD3<Float>(0.10, 0.72, 0.055),
+    ]
+    let colors: [SIMD3<Float>] = [
+      SIMD3<Float>(0.30, 0.12, 0.025),
+      SIMD3<Float>(0.30, 0.12, 0.025),
+      SIMD3<Float>(0.055, 0.16, 0.24),
+      SIMD3<Float>(0.055, 0.16, 0.24),
+      SIMD3<Float>(0.16, 0.075, 0.028),
+    ]
+    let cornerSigns: [SIMD3<Float>] = [
+      SIMD3<Float>(-1, -1, -1), SIMD3<Float>(1, -1, -1),
+      SIMD3<Float>(1, 1, -1), SIMD3<Float>(-1, 1, -1),
+      SIMD3<Float>(-1, -1, 1), SIMD3<Float>(1, -1, 1),
+      SIMD3<Float>(1, 1, 1), SIMD3<Float>(-1, 1, 1),
+    ]
+    let edges = [
+      (0, 1), (1, 2), (2, 3), (3, 0),
+      (4, 5), (5, 6), (6, 7), (7, 4),
+      (0, 4), (1, 5), (2, 6), (3, 7),
+    ]
+    var output: [CrowSurfaceTemporalVertexGPU] = []
+    output.reserveCapacity(current.bodyPositions.count * edges.count * 2)
+    for bodyIndex in current.bodyPositions.indices {
+      guard bodyIndex < halfExtents.count else { continue }
+      let currentCenter = currentCrowCenter
+        + current.bodyPositions[bodyIndex] - current.rootPosition
+      let half = halfExtents[bodyIndex]
+      let color = SIMD4<Float>(colors[bodyIndex], 0.96)
+      let currentCorners = cornerSigns.map { currentCenter + $0 * half }
+      for (edgeIndex, edge) in edges.enumerated() {
+        for corner in [edge.0, edge.1] {
+          let normal = simd_normalize(cornerSigns[corner])
+          output.append(
+            CrowSurfaceTemporalVertexGPU(
+              position: SIMD4<Float>(currentCorners[corner], 1),
+              // Course cages are native-resolution diagnostic geometry. Keep
+              // their AOV motion finite and camera-only; accepted course
+              // movement remains visible in the current positions themselves.
+              previousPosition: SIMD4<Float>(currentCorners[corner], 1),
+              normal: SIMD4<Float>(normal, 0),
+              albedoAndMaterial: color,
+              parameters: .zero,
+              identity: SIMD4<UInt32>(
+                UInt32.max,
+                0x0700_0000 + UInt32(bodyIndex * edges.count + edgeIndex),
+                0x4e41_5601,
+                0
+              )
+            )
+          )
+        }
+      }
+    }
+    return output
+  }
+
   /// Finds a small set of raster pixels that are owned by exact retained
   /// curve-ribbon triangles, then creates camera rays through those pixels.
   /// This is sparse input correspondence only; it does not write a ray AOV.
@@ -2784,7 +2969,7 @@ private final class CrowShowcaseRenderer {
     else { return }
     let pipeline = try backend.render(
       vertex: "crowGularDetailAOVVertex",
-      fragment: "showcaseCrowAOVFragment",
+      fragment: aovFragmentFunctionName,
       colorFormats: [.rgba16Float, .rgba16Float, .rgba16Float, .rg16Float, .r32Float],
       sampleCount: sampleCount
     )

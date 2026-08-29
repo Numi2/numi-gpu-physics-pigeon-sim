@@ -4,6 +4,16 @@ import Foundation
 /// Accepted Numi Lab simulator state used to retarget the estimated crow
 /// presentation. This is simulation evidence, not measured animal motion.
 public struct CrowNumiReplay: Sendable {
+  public struct NavigationCourseFrame: Sendable {
+    public let rootPosition: SIMD3<Float>
+    public let bodyPositions: [SIMD3<Float>]
+  }
+
+  public static let navigationCourseBodyNames = [
+    "crow_course_gate_left", "crow_course_gate_right",
+    "crow_course_slalom_a", "crow_course_slalom_b", "crow_course_perch",
+  ]
+
   public struct Frame: Codable, Sendable {
     public let step: Int
     public let q: [Float]
@@ -62,6 +72,8 @@ public struct CrowNumiReplay: Sendable {
     let runFingerprint: String
     let policyRolloutFingerprint: String
     let controllerAuthority: String
+    let navigationCourse: String?
+    let policyLightingContract: String?
     let frames: [Frame]
 
     enum CodingKeys: String, CodingKey {
@@ -80,6 +92,8 @@ public struct CrowNumiReplay: Sendable {
       case runFingerprint = "run_fingerprint"
       case policyRolloutFingerprint = "policy_rollout_fingerprint"
       case controllerAuthority = "controller_authority"
+      case navigationCourse = "navigation_course"
+      case policyLightingContract = "policy_lighting_contract"
     }
   }
 
@@ -108,6 +122,8 @@ public struct CrowNumiReplay: Sendable {
   public let runFingerprint: String
   public let policyRolloutFingerprint: String
   public let controllerAuthority: String
+  public let navigationCourse: String?
+  public let policyLightingContract: String?
   public let frames: [Frame]
 
   public static func load(url: URL) throws -> Self {
@@ -136,7 +152,8 @@ public struct CrowNumiReplay: Sendable {
       "crow_left_foot", "crow_right_foot",
     ]
     guard payload.classification == "simulated accepted-state replay",
-      payload.task.hasPrefix("birdflow_american_crow_journey_v"),
+      (payload.task.hasPrefix("birdflow_american_crow_journey_v") ||
+        payload.task == "birdflow_american_crow_navigation_v10_world_model"),
       payload.frameCount == payload.frames.count,
       payload.frames.count >= 2,
       payload.nq >= 20,
@@ -180,6 +197,8 @@ public struct CrowNumiReplay: Sendable {
       runFingerprint: payload.runFingerprint,
       policyRolloutFingerprint: payload.policyRolloutFingerprint,
       controllerAuthority: payload.controllerAuthority,
+      navigationCourse: payload.navigationCourse,
+      policyLightingContract: payload.policyLightingContract,
       frames: payload.frames
     )
   }
@@ -194,6 +213,29 @@ public struct CrowNumiReplay: Sendable {
 
   public func rootPosition(of frame: Frame) -> SIMD3<Float> {
     SIMD3(frame.q[0], frame.q[1], frame.q[2])
+  }
+
+  public func bodyPosition(named name: String, in frame: Frame) -> SIMD3<Float>? {
+    guard let index = bodyNames.firstIndex(of: name) else { return nil }
+    let start = index * 13
+    guard start + 2 < frame.bodyStates.count else { return nil }
+    return SIMD3(
+      frame.bodyStates[start], frame.bodyStates[start + 1],
+      frame.bodyStates[start + 2]
+    )
+  }
+
+  public func navigationCourseFrame(of frame: Frame) -> NavigationCourseFrame? {
+    let positions = Self.navigationCourseBodyNames.compactMap {
+      bodyPosition(named: $0, in: frame)
+    }
+    guard positions.count == Self.navigationCourseBodyNames.count else {
+      return nil
+    }
+    return NavigationCourseFrame(
+      rootPosition: rootPosition(of: frame),
+      bodyPositions: positions
+    )
   }
 
   /// Maps accepted root lift onto the retained standing-to-flight topology

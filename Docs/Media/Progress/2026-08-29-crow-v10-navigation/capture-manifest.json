@@ -1,0 +1,36 @@
+{
+  "schema": "birdflow.crow-navigation-multiview.v1",
+  "classification": "multi-angle estimated BirdFlow presentation of accepted Numi simulator states",
+  "replay": "ValidationArtifacts/crow-v10-navigation/accepted-held-out-a-waypoint.presentation.crowreplay.json",
+  "replay_sha256": "ed38c0f1a6e732f01db3d27bd87d2a830a7bd0342d624379289acf51683b8f40",
+  "source_replay_sha256": "b01cbba6f12779ec6410ba1dc3892580c61b20bf1fac41ab39bf994ac253db91",
+  "qualification": "ValidationArtifacts/crow-v10-navigation/qualification.json",
+  "qualification_sha256": "91a3092774be5c8b37097bf2c1c4d2fc1843de5d356798e98740ff2872c26526",
+  "width": 1920,
+  "height": 1080,
+  "frames_per_angle": 49,
+  "angles": [
+    {
+      "name": "front-three-quarter",
+      "yaw": 0.25,
+      "pitch": 0.18,
+      "distance": 1.15,
+      "lighting": "overcast"
+    },
+    {
+      "name": "course-side",
+      "yaw": -1.25,
+      "pitch": 0.30,
+      "distance": 1.22,
+      "lighting": "clear"
+    },
+    {
+      "name": "elevated-rear",
+      "yaw": 2.20,
+      "pitch": 0.48,
+      "distance": 1.24,
+      "lighting": "rim"
+    }
+  ],
+  "claim_boundary": "accepted root states place the accepted randomized course relative to the crow; BirdFlow feather articulation remains estimated"
+}

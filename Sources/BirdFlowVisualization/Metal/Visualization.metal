@@ -7214,6 +7214,42 @@ fragment CrowAOVOutput showcaseCrowAOVFragment(
     return out;
 }
 
+fragment CrowAOVOutput showcaseCrowLitAOVFragment(
+    CrowRasterVertex in [[stage_in]],
+    constant CrowTemporalCameraUniforms& camera [[buffer(0)]],
+    constant float4& presentationLighting [[buffer(2)]]) {
+    float3 normal=in.normal;
+    float3 radiance=showcaseCrowLinearRadiance(
+        in.world,normal,in.albedoAndMaterial,camera.eyeAndWidth.xyz,
+        in.featherCoordinates,in.resolvedCurveTangent,in.identity,
+        camera.plumageFilm,camera.plumageComplexIndices,
+        camera.plumageMelanin,camera.plumageCortex,
+        camera.plumageVisibilityShape,camera.plumageVisibilityLayout
+    );
+    float azimuth=presentationLighting.x;
+    float3 presentationDirection=normalize(float3(
+        cos(azimuth),sin(azimuth),0.72f
+    ));
+    float directional=0.72f+0.40f*abs(dot(normal,presentationDirection));
+    float keyGain=mix(1.0f,directional,presentationLighting.y);
+    float fillGain=mix(1.0f,1.10f,presentationLighting.z-1.0f);
+    radiance*=keyGain*fillGain*presentationLighting.w;
+    float inversePreviousW=1.0f/in.previousClipPosition.w;
+    float2 previousNDC=in.previousClipPosition.xy*inversePreviousW;
+    float2 previousPixel=(previousNDC*float2(0.5f,-0.5f)+0.5f)
+        *camera.viewportAndInverse.xy;
+    float2 motion=camera.viewportAndInverse.z>0.5f
+        ? float2(0)
+        : previousPixel-in.position.xy;
+    CrowAOVOutput out;
+    out.beauty=half4(half3(radiance),half(1));
+    out.albedoAndMaterial=half4(in.albedoAndMaterial);
+    out.normal=half4(half3(normal),half(1));
+    out.motion=half2(motion);
+    out.metricDepth=length(camera.eyeAndWidth.xyz-in.world);
+    return out;
+}
+
 fragment uint4 showcaseCrowIdentityFragment(
     CrowRasterVertex in [[stage_in]]) {
     return in.identity;

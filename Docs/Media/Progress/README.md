@@ -359,3 +359,22 @@ indistinguishable from a real crow. The current full-image retained-plumage ray
 audit remains diagnostic-only: raster depth and identity retain visibility
 authority while mapped acceleration-structure misses and owner substitutions are
 investigated.
+
+## Simulated American crow branch — V3 accepted navigation waypoint
+
+Containing commit · 2026-08-29 · three `1920 × 1080` native Metal views ·
+Numi step 806
+
+The [V3 multi-angle development capture](2026-08-29-crow-v10-navigation/README.md)
+connects BirdFlow to the promoted v10 held-out-A replay. It renders the exact
+randomized gate, slalom, and perch bounds as sparse course cages around the
+accepted crow-relative root path, preserving feather readability from front,
+side, and elevated-rear cameras. All 147 source frames have finite AOVs in the
+retained raw audits.
+
+This is the first accepted course-progress milestone: the selected environment
+reaches waypoint one, but route completion remains zero and the full source
+episode later terminates on forbidden contact. The archived presentation ends
+before that terminal frame. Feather motion and the three lighting presets are
+estimated BirdFlow presentation, not measured animal motion or policy-lighting
+robustness evidence.

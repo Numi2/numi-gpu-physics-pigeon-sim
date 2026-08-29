@@ -1,0 +1,38 @@
+{
+  "schema": "birdflow.crow-navigation-aov-summary.v1",
+  "classification": "native-resolution render audit summary",
+  "width": 1920,
+  "height": 1080,
+  "frames_per_angle": 49,
+  "raw_audits_retained_on": "macmini:/Users/n/crow-v10-multiview-final4-20260829",
+  "angles": {
+    "front-three-quarter": {
+      "all_frames_finite": true,
+      "maximum_motion_pixels": 530.8397,
+      "maximum_normal_unit_error": 0.00041377544,
+      "maximum_gpu_duration_ms": 73.61849979497492,
+      "mean_gpu_duration_ms": 38.71859779239309,
+      "raw_audit_sha256": "138b4efe4332f5ce0faa01ee89f0b2db3728b8300cbaa47166d9b7b6d093e365",
+      "step806_png_sha256": "b99f68ec1aec97eee095974f4d5923a76ce9202e342e4264dbc2a0458bdee78f"
+    },
+    "course-side": {
+      "all_frames_finite": true,
+      "maximum_motion_pixels": 535.19977,
+      "maximum_normal_unit_error": 0.00040763617,
+      "maximum_gpu_duration_ms": 81.34125010110438,
+      "mean_gpu_duration_ms": 38.59933166840703,
+      "raw_audit_sha256": "728d2af7ee564da824945b3cc5a25478958f323d4d85ff99f720df736e5fa3d1",
+      "step806_png_sha256": "419c0253f6a9a3bc4c849a2cdf386ffac085b72568a17deaee0778d5b352c438"
+    },
+    "elevated-rear": {
+      "all_frames_finite": true,
+      "maximum_motion_pixels": 697.70715,
+      "maximum_normal_unit_error": 0.00041550398,
+      "maximum_gpu_duration_ms": 80.98587486892939,
+      "mean_gpu_duration_ms": 39.826835895299304,
+      "raw_audit_sha256": "814b7e8aaecfbc70a0568534e7512471c2f63fa2835af1bb1823298c23c7b168",
+      "step806_png_sha256": "2112bd152d3e37f1783e61b651c5186b980ddc40c464bfb395e3f0e6306e23c5"
+    }
+  },
+  "claim_boundary": "timings are capture-local macmini GPU measurements and are not a cross-device benchmark"
+}

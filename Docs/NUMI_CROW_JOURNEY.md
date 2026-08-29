@@ -16,6 +16,7 @@ numi crow journey evaluate --milestone takeoff-cruise --policy-pack PATH
 numi crow journey window --milestone takeoff-cruise --policy-pack PATH
 numi crow journey capture --milestone takeoff-cruise --policy-pack PATH
 Scripts/capture-crow-numi-journey.sh OUTPUT POSTER EVIDENCE REPLAY_PACK QUALIFICATION_DIR GIF
+Scripts/capture-crow-numi-navigation-v10.sh OUTPUT_DIR REPLAY_PACK QUALIFICATION
 ```
 
 `window` is deliberately policy-only. `capture` without a policy invokes an
@@ -73,6 +74,49 @@ visual navigation, or hardware.
 The cross-variant runtime, policy, replay, qualification, and presentation
 hashes are collected in the
 [`final roadmap evidence index`](../ValidationArtifacts/crow-neural-roadmap-final-20260828.json).
+
+## V10 explicit navigation breakthrough completed on 29 August 2026
+
+V10 turns the visual-neural flight carrier into an ordered five-waypoint
+course task. Native Metal now computes signed route progress, waypoint reach,
+and completion directly from accepted simulator state. The reward program adds
+a dense clipped progress term and a sparse reach term. Every reset also applies
+deterministic, reset-relative geometry offsets to both gate posts, both slalom
+posts, and the perch: `±(0.12, 0.12, 0.08) m`,
+`±(0.20, 0.18, 0.08) m`, and `±(0.25, 0.20, 0.08) m`, respectively.
+The owning Numi Lab implementation is commit `da118d4` on
+`agent/crow-world-model-navigation`.
+
+Revision 21 of the 409,600-sample training run was compared with its
+ABI-compatible transferred baseline across the training course and two
+held-out layouts. The qualification contains 18 controller/course/seed
+rollouts: 32 environments × 1,600 steps each, or 921,600 accepted native
+environment steps in the comparison matrix. All 24 promotion gates passed.
+
+| Course | Baseline progress | Candidate progress | Baseline reached | Candidate reached | Terminations, baseline → candidate |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Training | -2.645 m | -1.840 m | 0.000 | 0.060 | 291 → 98 |
+| Held-out A | -2.708 m | -2.364 m | 0.000 | 0.006 | 290 → 97 |
+| Held-out B | -2.745 m | -1.131 m | 0.000 | 0.105 | 289 → 114 |
+
+The promoted PolicyPack SHA-256 is
+`4c0711fc26137c09ba631c77f375cf4745abbf7a447be1d0ea58268f921a4c21`.
+The selected held-out-A environment reaches waypoint one and records a maximum
+signed progress of `2.064 m`. It does not complete the route and later ends in
+a forbidden contact. The committed presentation projection therefore stops at
+accepted source index 880, before that terminal frame, and retains the full
+source replay SHA-256
+`b01cbba6f12779ec6410ba1dc3892580c61b20bf1fac41ab39bf994ac253db91`.
+The [qualification](../ValidationArtifacts/crow-v10-navigation/qualification.json),
+[selected rollout evidence](../ValidationArtifacts/crow-v10-navigation/accepted-held-out-a-waypoint-evidence.json),
+and [reset-free presentation replay](../ValidationArtifacts/crow-v10-navigation/accepted-held-out-a-waypoint.presentation.crowreplay.json)
+are committed separately.
+
+V10 policy input remains instance-masked metric depth, so RGB lighting changes
+cannot diversify its observations. BirdFlow instead provides deterministic
+`clear`, `overcast`, and `rim` presentation qualifications. These validate
+readability of one accepted replay under different render lighting; they are
+not a policy-training or robustness claim.
 
 ## Render boundary
 

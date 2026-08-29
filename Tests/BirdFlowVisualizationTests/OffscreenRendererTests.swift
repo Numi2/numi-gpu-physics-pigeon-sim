@@ -736,6 +736,7 @@ func crowCaptureAcceptsBoundedCameraOverrides() throws {
     "--capture-crow-camera-target-x", "0.02",
     "--capture-crow-camera-target-y", "0.055",
     "--capture-crow-camera-target-z", "-0.04",
+    "--capture-crow-lighting", "rim",
     "--capture-crow-disable-ventral-barb-curves",
     "--capture-crow-cpu-cranial-vanes",
   ])
@@ -745,6 +746,7 @@ func crowCaptureAcceptsBoundedCameraOverrides() throws {
   #expect(arguments.cameraDistanceMeters == 0.035)
   #expect(arguments.cameraDistanceScale == 1.22)
   #expect(arguments.cameraTarget == SIMD3<Float>(0.02, 0.055, -0.04))
+  #expect(arguments.lighting == .rim)
   #expect(!arguments.explicitVentralBarbCurvesEnabled)
   #expect(!arguments.retainedCranialVanesEnabled)
   #expect(arguments.ventralCurveEmissionMode == .auto)
@@ -764,6 +766,7 @@ func crowCaptureAcceptsBoundedCameraOverrides() throws {
   ])
   #expect(autoArguments.ventralCurveEmissionMode == .auto)
   #expect(autoArguments.retainedCranialVanesEnabled)
+  #expect(autoArguments.lighting == .clear)
 
   #expect(throws: CrowShowcaseCapture.CaptureError.self) {
     _ = try CrowShowcaseCapture.Arguments(commandLine: [
@@ -811,6 +814,14 @@ func crowCaptureAcceptsBoundedCameraOverrides() throws {
       "--capture-crow-frames", "/tmp/crow-camera-override-test",
       "--capture-frames", "2",
       "--capture-crow-ventral-curve-emission", "automatic",
+    ])
+  }
+  #expect(throws: CrowShowcaseCapture.CaptureError.self) {
+    _ = try CrowShowcaseCapture.Arguments(commandLine: [
+      "birdflow-viewer",
+      "--capture-crow-frames", "/tmp/crow-camera-override-test",
+      "--capture-frames", "2",
+      "--capture-crow-lighting", "studio",
     ])
   }
 }
