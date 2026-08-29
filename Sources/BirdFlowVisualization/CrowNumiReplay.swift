@@ -1,9 +1,121 @@
 import CryptoKit
 import Foundation
+import simd
 
 /// Accepted Numi Lab simulator state used to retarget the estimated crow
 /// presentation. This is simulation evidence, not measured animal motion.
 public struct CrowNumiReplay: Sendable {
+  public enum ArticulatedLink: String, CaseIterable, Sendable {
+    case body = "crow_body"
+    case leftWingSweep = "crow_left_wing_sweep"
+    case rightWingSweep = "crow_right_wing_sweep"
+    case leftWingFlap = "crow_left_wing_flap_link"
+    case rightWingFlap = "crow_right_wing_flap_link"
+    case leftWing = "crow_left_wing"
+    case rightWing = "crow_right_wing"
+    case tail = "crow_tail"
+    case leftThigh = "crow_left_thigh"
+    case leftShank = "crow_left_shank"
+    case leftFoot = "crow_left_foot"
+    case rightThigh = "crow_right_thigh"
+    case rightShank = "crow_right_shank"
+    case rightFoot = "crow_right_foot"
+  }
+
+  /// Exact accepted link-pose change relative to the accepted crow body.
+  /// Registration pivots remain part of the estimated BirdFlow anatomy; the
+  /// rotation and translation themselves come directly from Numi body state.
+  public struct LinkDelta: Sendable, Equatable {
+    public let rotationXYZW: SIMD4<Float>
+    public let translation: SIMD3<Float>
+
+    public func transform(
+      point: SIMD3<Float>,
+      around registrationPivot: SIMD3<Float>
+    ) -> SIMD3<Float> {
+      registrationPivot
+        + Self.rotate(rotationXYZW, point - registrationPivot)
+        + translation
+    }
+
+    public func rotate(direction: SIMD3<Float>) -> SIMD3<Float> {
+      Self.rotate(rotationXYZW, direction)
+    }
+
+    private static func rotate(
+      _ quaternion: SIMD4<Float>, _ vector: SIMD3<Float>
+    ) -> SIMD3<Float> {
+      let imaginary = SIMD3(quaternion.x, quaternion.y, quaternion.z)
+      let tangent = 2 * simd_cross(imaginary, vector)
+      return vector + quaternion.w * tangent
+        + simd_cross(imaginary, tangent)
+    }
+  }
+
+  public struct ArticulationFrame: Sendable {
+    public let replayStep: Int
+    public let deltas: [ArticulatedLink: LinkDelta]
+
+    public func delta(for link: ArticulatedLink) -> LinkDelta? {
+      deltas[link]
+    }
+  }
+
+  private struct RigidPose {
+    let position: SIMD3<Float>
+    let orientationXYZW: SIMD4<Float>
+
+    func relative(to parent: RigidPose) -> RigidPose {
+      let inverseParent = Self.conjugate(parent.orientationXYZW)
+      return RigidPose(
+        position: Self.rotate(inverseParent, position - parent.position),
+        orientationXYZW: Self.normalized(
+          Self.multiply(inverseParent, orientationXYZW)
+        )
+      )
+    }
+
+    static func delta(from reference: RigidPose, to current: RigidPose)
+      -> LinkDelta
+    {
+      LinkDelta(
+        rotationXYZW: normalized(
+          multiply(current.orientationXYZW, conjugate(reference.orientationXYZW))
+        ),
+        translation: current.position - reference.position
+      )
+    }
+
+    static func normalized(_ quaternion: SIMD4<Float>) -> SIMD4<Float> {
+      quaternion / simd_length(quaternion)
+    }
+
+    static func conjugate(_ quaternion: SIMD4<Float>) -> SIMD4<Float> {
+      SIMD4(-quaternion.x, -quaternion.y, -quaternion.z, quaternion.w)
+    }
+
+    static func multiply(
+      _ lhs: SIMD4<Float>, _ rhs: SIMD4<Float>
+    ) -> SIMD4<Float> {
+      SIMD4(
+        lhs.w * rhs.x + lhs.x * rhs.w + lhs.y * rhs.z - lhs.z * rhs.y,
+        lhs.w * rhs.y - lhs.x * rhs.z + lhs.y * rhs.w + lhs.z * rhs.x,
+        lhs.w * rhs.z + lhs.x * rhs.y - lhs.y * rhs.x + lhs.z * rhs.w,
+        lhs.w * rhs.w - simd_dot(
+          SIMD3(lhs.x, lhs.y, lhs.z), SIMD3(rhs.x, rhs.y, rhs.z)
+        )
+      )
+    }
+
+    static func rotate(
+      _ quaternion: SIMD4<Float>, _ vector: SIMD3<Float>
+    ) -> SIMD3<Float> {
+      let imaginary = SIMD3(quaternion.x, quaternion.y, quaternion.z)
+      let tangent = 2 * simd_cross(imaginary, vector)
+      return vector + quaternion.w * tangent
+        + simd_cross(imaginary, tangent)
+    }
+  }
   public struct NavigationCourseFrame: Sendable {
     public let rootPosition: SIMD3<Float>
     public let bodyPositions: [SIMD3<Float>]
@@ -223,6 +335,56 @@ public struct CrowNumiReplay: Sendable {
       frame.bodyStates[start], frame.bodyStates[start + 1],
       frame.bodyStates[start + 2]
     )
+  }
+
+  private func bodyPose(
+    named name: String, in frame: Frame
+  ) -> RigidPose? {
+    guard let index = bodyNames.firstIndex(of: name) else { return nil }
+    let start = index * 13
+    guard start + 6 < frame.bodyStates.count else { return nil }
+    let orientation = SIMD4<Float>(
+      frame.bodyStates[start + 3], frame.bodyStates[start + 4],
+      frame.bodyStates[start + 5], frame.bodyStates[start + 6]
+    )
+    let length = simd_length(orientation)
+    guard length.isFinite, length > 1e-6 else { return nil }
+    return RigidPose(
+      position: SIMD3(
+        frame.bodyStates[start], frame.bodyStates[start + 1],
+        frame.bodyStates[start + 2]
+      ),
+      orientationXYZW: orientation / length
+    )
+  }
+
+  /// Composes every accepted Numi link against `crow_body` and removes the
+  /// root trajectory. BirdFlow can therefore use an independent camera while
+  /// retaining exact sweep, flap, pronation, tail, and leg-link articulation.
+  public func articulationFrame(of frame: Frame) -> ArticulationFrame? {
+    guard
+      let referenceBody = bodyPose(
+        named: ArticulatedLink.body.rawValue, in: frames[0]
+      ),
+      let currentBody = bodyPose(
+        named: ArticulatedLink.body.rawValue, in: frame
+      )
+    else { return nil }
+    var deltas: [ArticulatedLink: LinkDelta] = [:]
+    for link in ArticulatedLink.allCases where link != .body {
+      guard
+        let reference = bodyPose(named: link.rawValue, in: frames[0]),
+        let current = bodyPose(named: link.rawValue, in: frame)
+      else { return nil }
+      deltas[link] = RigidPose.delta(
+        from: reference.relative(to: referenceBody),
+        to: current.relative(to: currentBody)
+      )
+    }
+    deltas[.body] = LinkDelta(
+      rotationXYZW: SIMD4(0, 0, 0, 1), translation: .zero
+    )
+    return ArticulationFrame(replayStep: frame.step, deltas: deltas)
   }
 
   public func navigationCourseFrame(of frame: Frame) -> NavigationCourseFrame? {

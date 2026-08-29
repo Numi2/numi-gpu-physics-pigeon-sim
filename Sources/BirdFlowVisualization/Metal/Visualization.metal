@@ -56,6 +56,12 @@ struct CrowTakeoffFeatherBlendUniforms {
     float4 previousBodyTranslation;
 };
 
+struct CrowFeatherLinkTransformGPU {
+    float4 rotationXYZW;
+    float4 translationAndPartIdentifier;
+    float4 registrationPivot;
+};
+
 struct CrowFeatherTemplateVertexGPU { float4 parameters; };
 
 struct CrowFeatherVertexGPU {
@@ -897,6 +903,57 @@ kernel void blendCrowTakeoffFeatherRoots(
     state.previousNormalAndPadding=grounded.previousNormalAndPadding;
     state.previousMorphology=grounded.previousMorphology*previousFoldedVisibility;
     state.identity=grounded.identity;
+    output[featherIndex]=state;
+}
+
+inline float3 rotateCrowLink(float4 q,float3 value){
+    float3 tangent=2.0f*cross(q.xyz,value);
+    return value+q.w*tangent+cross(q.xyz,tangent);
+}
+
+inline float3 transformCrowLinkPoint(
+    CrowFeatherLinkTransformGPU transform,
+    float3 point) {
+    return transform.registrationPivot.xyz
+        +rotateCrowLink(
+            transform.rotationXYZW,
+            point-transform.registrationPivot.xyz
+        )
+        +transform.translationAndPartIdentifier.xyz;
+}
+
+kernel void articulateCrowFeatherRoots(
+    device const CrowFeatherRootStateGPU* input [[buffer(0)]],
+    device CrowFeatherRootStateGPU* output [[buffer(1)]],
+    device const CrowFeatherLinkTransformGPU* transforms [[buffer(2)]],
+    constant uint& featherCount [[buffer(3)]],
+    uint featherIndex [[thread_position_in_grid]]) {
+    if(featherIndex>=featherCount){return;}
+    CrowFeatherRootStateGPU state=input[featherIndex];
+    uint partIdentifier=state.identity.z;
+    uint transformIndex=partIdentifier==2u?0u:
+        (partIdentifier==3u?1u:(partIdentifier==4u?2u:3u));
+    if(transformIndex>=3u){output[featherIndex]=state;return;}
+    CrowFeatherLinkTransformGPU current=transforms[transformIndex];
+    CrowFeatherLinkTransformGPU previous=transforms[transformIndex+3u];
+    state.currentPositionAndLength.xyz=transformCrowLinkPoint(
+        current,state.currentPositionAndLength.xyz
+    );
+    state.previousPositionAndWidth.xyz=transformCrowLinkPoint(
+        previous,state.previousPositionAndWidth.xyz
+    );
+    state.currentDirectionAndRachis.xyz=rotateCrowLink(
+        current.rotationXYZW,state.currentDirectionAndRachis.xyz
+    );
+    state.previousDirectionAndCamber.xyz=rotateCrowLink(
+        previous.rotationXYZW,state.previousDirectionAndCamber.xyz
+    );
+    state.currentNormalAndPadding.xyz=rotateCrowLink(
+        current.rotationXYZW,state.currentNormalAndPadding.xyz
+    );
+    state.previousNormalAndPadding.xyz=rotateCrowLink(
+        previous.rotationXYZW,state.previousNormalAndPadding.xyz
+    );
     output[featherIndex]=state;
 }
 

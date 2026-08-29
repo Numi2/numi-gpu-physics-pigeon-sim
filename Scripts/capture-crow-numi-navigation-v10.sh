@@ -99,7 +99,7 @@ jq -n \
   --argjson frames "$FRAMES" '
   {
     schema: "birdflow.crow-navigation-multiview.v1",
-    classification: "multi-angle estimated BirdFlow presentation of accepted Numi simulator states",
+    classification: "multi-angle joint-exact Numi articulation of an estimated BirdFlow crow",
     replay: $replay,
     replay_sha256: $replay_sha256,
     source_replay_sha256: $source_replay_sha256,
@@ -113,7 +113,7 @@ jq -n \
       {name: "course-side", yaw: -1.25, pitch: 0.30, distance: 1.22, lighting: "clear"},
       {name: "elevated-rear", yaw: 2.20, pitch: 0.48, distance: 1.24, lighting: "rim"}
     ],
-    claim_boundary: "accepted root states place the accepted randomized course relative to the crow; BirdFlow feather articulation remains estimated"
+    claim_boundary: "accepted Numi rigid-link transforms drive body-relative wing, tail, thigh, shank, foot, and retained feather-root articulation; BirdFlow registration pivots, inter-link skinning, feather morphology, and surface deformation remain estimated"
   }
 ' > "$OUTPUT_DIR/capture-manifest.json"
 

@@ -310,6 +310,13 @@ public enum CrowShowcaseCapture {
 
   public static func run(_ arguments: Arguments) throws {
     let numiReplay = try arguments.numiReplayPackURL.map(CrowNumiReplay.load(url:))
+    if let numiReplay,
+      numiReplay.articulationFrame(of: numiReplay.frames[0]) == nil
+    {
+      throw CaptureError.invalidProfile(
+        "Numi crow replay lacks the complete accepted 14-link articulation"
+      )
+    }
     let profileData = try Data(contentsOf: arguments.crowProfileURL)
     let profile = try JSONDecoder().decode(CrowVisualProfile.self, from: profileData)
     try profile.validate()
@@ -408,12 +415,15 @@ public enum CrowShowcaseCapture {
       plumageOptics: plumageOptics,
       motion: motion,
       realityAsset: realityAsset,
+      numiArticulationEnabled: numiReplay != nil,
       presentation: arguments.presentation,
       lighting: arguments.lighting,
       explicitVentralBarbCurvesEnabled:
         arguments.explicitVentralBarbCurvesEnabled,
-      retainedFemoralVanesEnabled: arguments.retainedFemoralVanesEnabled,
-      retainedCruralVanesEnabled: arguments.retainedCruralVanesEnabled,
+      retainedFemoralVanesEnabled:
+        arguments.retainedFemoralVanesEnabled && numiReplay == nil,
+      retainedCruralVanesEnabled:
+        arguments.retainedCruralVanesEnabled && numiReplay == nil,
       retainedThroatBridgeVanesEnabled:
         arguments.retainedThroatBridgeVanesEnabled,
       retainedCranialVanesEnabled: arguments.retainedCranialVanesEnabled,
@@ -433,12 +443,15 @@ public enum CrowShowcaseCapture {
         plumageOptics: plumageOptics,
         motion: motion,
         realityAsset: realityAsset,
+        numiArticulationEnabled: numiReplay != nil,
         presentation: arguments.presentation,
         lighting: arguments.lighting,
         explicitVentralBarbCurvesEnabled:
           arguments.explicitVentralBarbCurvesEnabled,
-        retainedFemoralVanesEnabled: arguments.retainedFemoralVanesEnabled,
-        retainedCruralVanesEnabled: arguments.retainedCruralVanesEnabled,
+        retainedFemoralVanesEnabled:
+          arguments.retainedFemoralVanesEnabled && numiReplay == nil,
+        retainedCruralVanesEnabled:
+          arguments.retainedCruralVanesEnabled && numiReplay == nil,
         retainedThroatBridgeVanesEnabled:
           arguments.retainedThroatBridgeVanesEnabled,
         retainedCranialVanesEnabled: arguments.retainedCranialVanesEnabled,
@@ -459,9 +472,9 @@ public enum CrowShowcaseCapture {
 
     if let numiReplay {
       let audit: [String: Any] = [
-        "schema": "birdflow.numi-crow-replay-retarget.v1",
-        "classification": "high-detail estimated-crow retarget of simulated accepted state",
-        "claim_boundary": "accepted root height conditions the takeoff timeline and accepted root position places the course relative to the crow; feather articulation and surface deformation remain the estimated BirdFlow render model",
+        "schema": "birdflow.numi-crow-articulation.v1",
+        "classification": "joint-exact accepted-state articulation of a high-detail estimated crow",
+        "claim_boundary": "Numi owns accepted rigid-link relative transforms for body, sweep, flap, terminal wings, tail, thighs, shanks, and feet. BirdFlow registration pivots, skinning between rigid links, feather shapes, and surface deformation remain estimated presentation geometry.",
         "payload_sha256": numiReplay.payloadSHA256,
         "task": numiReplay.task,
         "journey_variant": numiReplay.journeyVariant,
@@ -472,6 +485,9 @@ public enum CrowShowcaseCapture {
         "run_fingerprint": numiReplay.runFingerprint,
         "policy_rollout_fingerprint": numiReplay.policyRolloutFingerprint,
         "source_frame_count": numiReplay.frames.count,
+        "accepted_articulated_link_count":
+          CrowNumiReplay.ArticulatedLink.allCases.count,
+        "root_trajectory_removed_for_independent_camera": true,
         "render_frame_count": arguments.frameCount,
         "camera_is_independent_of_trajectory": true,
         "camera_yaw_radians": arguments.cameraYawRadians.map {
@@ -522,6 +538,9 @@ public enum CrowShowcaseCapture {
       let replayFrame = numiReplay?.frame(
         atPresentationFraction: timelineFraction
       )
+      let articulationFrame = replayFrame.flatMap {
+        numiReplay?.articulationFrame(of: $0)
+      }
       if let numiReplay, let replayFrame {
         replayDeploymentHighWater = max(
           replayDeploymentHighWater,
@@ -588,6 +607,7 @@ public enum CrowShowcaseCapture {
       let rendered = try renderer.render(
         phase: phase,
         camera: camera,
+        articulation: articulationFrame,
         navigationCourse: replayFrame.flatMap {
           numiReplay?.navigationCourseFrame(of: $0)
         },
@@ -634,6 +654,7 @@ public enum CrowShowcaseCapture {
         let nativeReference = try nativeReferenceRenderer?.render(
           phase: phase,
           camera: camera,
+          articulation: articulationFrame,
           navigationCourse: replayFrame.flatMap {
             numiReplay?.navigationCourseFrame(of: $0)
           },
@@ -994,6 +1015,7 @@ private final class CrowShowcaseRenderer {
   private let aovFragmentFunctionName: String
   private let plumageOptics: CrowPlumageOpticsGPUParameters
   private let featherRootDeformer: (any CrowFeatherRootDeforming)?
+  private let featherArticulationDeformer: CrowFeatherArticulationDeformer?
   private let featherGeometryDeformer: CrowFeatherGeometryDeformer?
   private let liveCovertRootBuffer: CrowLiveWingCovertRootBuffer?
   private let liveCovertGeometryDeformer: CrowFeatherGeometryDeformer?
@@ -1010,6 +1032,7 @@ private final class CrowShowcaseRenderer {
   private let ventralBarbFullImageRayAuditEnabled: Bool
   private let featherRenderOffset: SIMD3<Float>
   private var previousPhase: Float?
+  private var previousArticulation: CrowNumiReplay.ArticulationFrame?
   private var previousCamera: CameraState?
   private var previousJitter: SIMD2<Float>?
   private var temporalUpscaler: CrowTemporalUpscaler?
@@ -1023,6 +1046,7 @@ private final class CrowShowcaseRenderer {
     plumageOptics: CrowPlumageOpticsProfile,
     motion: any CrowShowcaseMotion,
     realityAsset: BirdRealityAsset?,
+    numiArticulationEnabled: Bool = false,
     presentation: CrowShowcasePresentation,
     lighting: CrowShowcaseLighting,
     explicitVentralBarbCurvesEnabled: Bool = true,
@@ -1158,6 +1182,13 @@ private final class CrowShowcaseRenderer {
       }
     } else {
       featherRootDeformer = nil
+    }
+    featherArticulationDeformer = try (numiArticulationEnabled ? realityAsset : nil).map {
+      try CrowFeatherArticulationDeformer(
+        backend: createdBackend,
+        featherCount: $0.feathers.count,
+        pivots: createdMeshBuilder.featherArticulationPivots
+      )
     }
     // The standing presentation renders the persistent asset inventory.  In
     // flight, the same long rest vanes can cross when the inherited dove
@@ -1297,6 +1328,7 @@ private final class CrowShowcaseRenderer {
   func render(
     phase: Float,
     camera: CameraState,
+    articulation: CrowNumiReplay.ArticulationFrame?,
     navigationCourse: CrowNumiReplay.NavigationCourseFrame?,
     outputWidth: Int,
     outputHeight: Int,
@@ -1338,6 +1370,9 @@ private final class CrowShowcaseRenderer {
       upscaler = nil
     }
     let priorPhase = historyReset ? phase : (previousPhase ?? phase)
+    let priorArticulation = historyReset
+      ? articulation
+      : (previousArticulation ?? articulation)
     let projectedPixelsPerMeter = CrowFeatherCoverageLOD.projectedPixelsPerMeter(
       viewportHeight: outputHeight,
       cameraDistanceMeters: presentation == .takeoff
@@ -1389,8 +1424,12 @@ private final class CrowShowcaseRenderer {
         currentCamera.viewProjection,
         priorCamera.viewProjection
       ) <= Self.occlusionCameraMatrixDeltaLimit
-    let surfaceStates = meshBuilder.surfaceStates(phase: phase)
-    let previousSurfaceStates = meshBuilder.surfaceStates(phase: priorPhase)
+    let surfaceStates = meshBuilder.surfaceStates(
+      phase: phase, articulation: articulation
+    )
+    let previousSurfaceStates = meshBuilder.surfaceStates(
+      phase: priorPhase, articulation: priorArticulation
+    )
     let currentAnatomyBodyCenter = meshBuilder.anatomyBodyCenter(
       states: surfaceStates,
       phase: phase
@@ -1402,11 +1441,13 @@ private final class CrowShowcaseRenderer {
     let vertices = meshBuilder.vertices(
       states: surfaceStates,
       phase: phase,
+      articulation: articulation,
       projectedPixelsPerMeter: projectedPixelsPerMeter
     )
     let previousVertices = meshBuilder.vertices(
       states: previousSurfaceStates,
       phase: priorPhase,
+      articulation: priorArticulation,
       projectedPixelsPerMeter: projectedPixelsPerMeter
     )
     guard vertices.count == previousVertices.count else {
@@ -1637,8 +1678,22 @@ private final class CrowShowcaseRenderer {
       commandBuffer: commandBuffer,
       auditReadback: false
     )
+    let articulatedRootFrame: CrowFeatherRootFrame?
+    if let rootFrame, let articulation,
+      let priorArticulation,
+      let featherArticulationDeformer
+    {
+      articulatedRootFrame = try featherArticulationDeformer.encode(
+        rootFrame: rootFrame,
+        current: articulation,
+        previous: priorArticulation,
+        commandBuffer: commandBuffer
+      )
+    } else {
+      articulatedRootFrame = rootFrame
+    }
     var featherFrames: [CrowFeatherGeometryFrame] = []
-    if let rootFrame, let featherGeometryDeformer {
+    if let rootFrame = articulatedRootFrame, let featherGeometryDeformer {
       featherFrames.append(
         try featherGeometryDeformer.encode(
           rootFrame: rootFrame,
@@ -2199,6 +2254,7 @@ private final class CrowShowcaseRenderer {
     }
     if depthPyramid != nil { occlusionDepthValid = true }
     previousPhase = phase
+    previousArticulation = articulation
     previousCamera = camera
     previousJitter = jitter
     var ventralBarbRayGeometryBuild: CrowPlumageRayGeometryBuild?
@@ -3186,6 +3242,7 @@ private struct CrowMeshBuilder {
   private let surfaceIsEstimatedCrow: Bool
   private let referenceBodyCenter: SIMD3<Float>
   private let vertexPartIdentifiers: [UInt8]
+  private let articulationPivots: [UInt8: SIMD3<Float>]
   private let persistentFeathers: [BirdRealityFeather]
   private let presentation: CrowShowcasePresentation
   private let explicitVentralBarbCurvesEnabled: Bool
@@ -3200,6 +3257,10 @@ private struct CrowMeshBuilder {
   private let rightWingAnchor: CrowWingAttachmentAnchor?
 
   var referenceSurfaceBodyCenter: SIMD3<Float> { referenceBodyCenter }
+
+  var featherArticulationPivots: [UInt8: SIMD3<Float>] {
+    articulationPivots.mapValues { $0 + referenceBodyCenter }
+  }
 
   var featherRenderOffset: SIMD3<Float> {
     surfaceIsEstimatedCrow ? -referenceBodyCenter : .zero
@@ -3240,7 +3301,21 @@ private struct CrowMeshBuilder {
     for index in body.vertexOffset..<(body.vertexOffset + body.vertexCount) {
       center += motion.point(phase: 0, vertexIndex: index).position
     }
-    referenceBodyCenter = center / Float(body.vertexCount)
+    let referenceCenter = center / Float(body.vertexCount)
+    referenceBodyCenter = referenceCenter
+    var linkPivots: [UInt8: SIMD3<Float>] = [:]
+    for component in dataset.components
+      where [UInt8(2), UInt8(3), UInt8(4)].contains(component.partIdentifier)
+    {
+      let referencePhase: Float = component.partIdentifier == 4 ? 0 : 0.25
+      var pivot = SIMD3<Float>.zero
+      for index in component.vertexOffset..<(component.vertexOffset + component.vertexCount) {
+        pivot += motion.point(phase: referencePhase, vertexIndex: index).position
+          - referenceCenter
+      }
+      linkPivots[component.partIdentifier] = pivot / Float(component.vertexCount)
+    }
+    articulationPivots = linkPivots
     var parts = [UInt8](repeating: 0, count: dataset.vertexCount)
     for component in dataset.components {
       let end = component.vertexOffset + component.vertexCount
@@ -3261,18 +3336,25 @@ private struct CrowMeshBuilder {
 
   func vertices(
     phase: Float,
+    articulation: CrowNumiReplay.ArticulationFrame? = nil,
     projectedPixelsPerMeter: Float
   ) -> [ColoredVertex] {
     vertices(
-      states: surfaceStates(phase: phase),
+      states: surfaceStates(phase: phase, articulation: articulation),
       phase: phase,
+      articulation: articulation,
       projectedPixelsPerMeter: projectedPixelsPerMeter
     )
   }
 
-  func surfaceStates(phase: Float) -> [SIMD3<Float>] {
+  func surfaceStates(
+    phase: Float,
+    articulation: CrowNumiReplay.ArticulationFrame? = nil
+  ) -> [SIMD3<Float>] {
     (0..<dataset.vertexCount).map {
-      transformedPoint(phase: phase, vertexIndex: $0)
+      transformedPoint(
+        phase: phase, vertexIndex: $0, articulation: articulation
+      )
     }
   }
 
@@ -3334,6 +3416,7 @@ private struct CrowMeshBuilder {
   func vertices(
     states: [SIMD3<Float>],
     phase: Float,
+    articulation: CrowNumiReplay.ArticulationFrame? = nil,
     projectedPixelsPerMeter: Float
   ) -> [ColoredVertex] {
     var vertices: [ColoredVertex] = []
@@ -3355,6 +3438,7 @@ private struct CrowMeshBuilder {
       bodyCenter: bodyCenter,
       bodyBounds: bodyBounds,
       phase: phase,
+      articulation: articulation,
       projectedPixelsPerMeter: projectedPixelsPerMeter,
       to: &vertices
     )
@@ -3394,7 +3478,11 @@ private struct CrowMeshBuilder {
     return vertices
   }
 
-  private func transformedPoint(phase: Float, vertexIndex: Int) -> SIMD3<Float> {
+  private func transformedPoint(
+    phase: Float,
+    vertexIndex: Int,
+    articulation: CrowNumiReplay.ArticulationFrame?
+  ) -> SIMD3<Float> {
     let takeoff =
       presentation == .takeoff
       ? CrowTakeoffSequence.sample(phase: phase)
@@ -3456,7 +3544,9 @@ private struct CrowMeshBuilder {
       } else if let takeoff {
         point += takeoff.bodyTranslation
       }
-      return point
+      return articulatedSurfacePoint(
+        point, partIdentifier: partIdentifier, articulation: articulation
+      )
     }
     let transform = profile.visualTransform
     let rawScale: [Float]
@@ -3466,7 +3556,29 @@ private struct CrowMeshBuilder {
     default: rawScale = transform.bodyScaleXYZ
     }
     let scale = SIMD3<Float>(rawScale[0], rawScale[1], rawScale[2])
-    return point * scale
+    return articulatedSurfacePoint(
+      point * scale,
+      partIdentifier: vertexPartIdentifiers[vertexIndex],
+      articulation: articulation
+    )
+  }
+
+  private func articulatedSurfacePoint(
+    _ point: SIMD3<Float>,
+    partIdentifier: UInt8,
+    articulation: CrowNumiReplay.ArticulationFrame?
+  ) -> SIMD3<Float> {
+    let link: CrowNumiReplay.ArticulatedLink
+    switch partIdentifier {
+    case 2: link = .leftWing
+    case 3: link = .rightWing
+    case 4: link = .tail
+    default: return point
+    }
+    guard let pivot = articulationPivots[partIdentifier],
+      let delta = articulation?.delta(for: link)
+    else { return point }
+    return delta.transform(point: point, around: pivot)
   }
 
   private func appendMeasuredScaffold(
@@ -3552,6 +3664,7 @@ private struct CrowMeshBuilder {
     bodyCenter: SIMD3<Float>,
     bodyBounds: (minimum: SIMD3<Float>, maximum: SIMD3<Float>),
     phase: Float,
+    articulation: CrowNumiReplay.ArticulationFrame?,
     projectedPixelsPerMeter: Float,
     to vertices: inout [ColoredVertex]
   ) {
@@ -3709,6 +3822,7 @@ private struct CrowMeshBuilder {
       appendStandingLegsAndFeet(
         standingPose,
         takeoffSequence: presentation == .takeoff,
+        articulation: articulation,
         projectedPixelsPerMeter: projectedPixelsPerMeter,
         to: &vertices
       )
@@ -5025,13 +5139,24 @@ private struct CrowMeshBuilder {
   private func appendStandingLegsAndFeet(
     _ pose: CrowStandingPoseSample,
     takeoffSequence: Bool = false,
+    articulation: CrowNumiReplay.ArticulationFrame? = nil,
     projectedPixelsPerMeter: Float,
     to vertices: inout [ColoredVertex]
   ) {
     let featheredLeg = SIMD4<Float>(0.010, 0.014, 0.022, 0.16)
     let keratin = SIMD4<Float>(0.048, 0.053, 0.061, 0.58)
     let claw = SIMD4<Float>(0.010, 0.012, 0.016, 0.64)
-    for foot in [pose.leftFoot, pose.rightFoot] {
+    let legs: [(
+      CrowStandingFootPose,
+      CrowNumiReplay.ArticulatedLink,
+      CrowNumiReplay.ArticulatedLink,
+      CrowNumiReplay.ArticulatedLink
+    )] = [
+      (pose.leftFoot, .leftThigh, .leftShank, .leftFoot),
+      (pose.rightFoot, .rightThigh, .rightShank, .rightFoot),
+    ]
+    for (foot, thighLink, shankLink, footLink) in legs {
+      let thighStart = vertices.count
       appendTaperedTube(
         from: foot.hip,
         to: foot.hock,
@@ -5090,6 +5215,13 @@ private struct CrowMeshBuilder {
           )
         }
       }
+      articulateVertices(
+        thighStart..<vertices.count,
+        delta: articulation?.delta(for: thighLink),
+        pivot: 0.5 * (foot.hip + foot.hock),
+        vertices: &vertices
+      )
+      let shankStart = vertices.count
       for feather in CrowLegPlumage.visibleSamples(
         hip: foot.hip,
         hock: foot.hock,
@@ -5144,6 +5276,13 @@ private struct CrowMeshBuilder {
           scuteColor: SIMD4<Float>(0.052, 0.057, 0.064, 0.62)
         )
       )
+      articulateVertices(
+        shankStart..<vertices.count,
+        delta: articulation?.delta(for: shankLink),
+        pivot: 0.5 * (foot.hock + foot.ankle),
+        vertices: &vertices
+      )
+      let footStart = vertices.count
       for digit in foot.digits {
         vertices.append(
           contentsOf: CrowFootAnatomy.vertices(
@@ -5155,6 +5294,40 @@ private struct CrowMeshBuilder {
           )
         )
       }
+      articulateVertices(
+        footStart..<vertices.count,
+        delta: articulation?.delta(for: footLink),
+        pivot: foot.ankle,
+        vertices: &vertices
+      )
+    }
+  }
+
+  private func articulateVertices(
+    _ range: Range<Int>,
+    delta: CrowNumiReplay.LinkDelta?,
+    pivot: SIMD3<Float>,
+    vertices: inout [ColoredVertex]
+  ) {
+    guard let delta else { return }
+    for index in range {
+      let position = delta.transform(
+        point: SIMD3(
+          vertices[index].position.x,
+          vertices[index].position.y,
+          vertices[index].position.z
+        ),
+        around: pivot
+      )
+      let normal = simd_normalize(
+        delta.rotate(direction: SIMD3(
+          vertices[index].normal.x,
+          vertices[index].normal.y,
+          vertices[index].normal.z
+        ))
+      )
+      vertices[index].position = SIMD4(position, vertices[index].position.w)
+      vertices[index].normal = SIMD4(normal, vertices[index].normal.w)
     }
   }
 

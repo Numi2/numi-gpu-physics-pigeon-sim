@@ -1,5 +1,6 @@
 import CryptoKit
 import Foundation
+import simd
 import Testing
 @testable import BirdFlowVisualization
 
@@ -154,4 +155,40 @@ func v10NavigationReplayExposesAcceptedCourseGeometry() throws {
   #expect(replay.navigationCourse == "held-out-a")
   #expect(course.bodyPositions.count == 5)
   #expect(course.bodyPositions[4].x == 5)
+}
+
+@Test("V10 replay exposes complete root-relative accepted articulation")
+func v10ReplayExposesCompleteRootRelativeAcceptedArticulation() throws {
+  let repository = URL(fileURLWithPath: #filePath)
+    .deletingLastPathComponent()
+    .deletingLastPathComponent()
+    .deletingLastPathComponent()
+  let replay = try CrowNumiReplay.load(
+    url: repository.appendingPathComponent(
+      "ValidationArtifacts/crow-v10-navigation/accepted-held-out-a-waypoint.presentation.crowreplay.json"
+    )
+  )
+  let reference = try #require(
+    replay.articulationFrame(of: replay.frames[0])
+  )
+  let final = try #require(
+    replay.articulationFrame(of: replay.frames.last!)
+  )
+  #expect(reference.deltas.count == CrowNumiReplay.ArticulatedLink.allCases.count)
+  #expect(final.deltas.count == CrowNumiReplay.ArticulatedLink.allCases.count)
+  let referenceWing = try #require(reference.delta(for: .leftWing))
+  #expect(referenceWing.rotationXYZW == SIMD4<Float>(0, 0, 0, 1))
+  #expect(referenceWing.translation == .zero)
+  let finalWing = try #require(final.delta(for: .leftWing))
+  #expect(simd_distance(finalWing.rotationXYZW, referenceWing.rotationXYZW) > 0.02)
+  #expect(simd_length(finalWing.translation) > 0.0005)
+
+  let quarterTurn = CrowNumiReplay.LinkDelta(
+    rotationXYZW: SIMD4(0, 0, sqrt(0.5), sqrt(0.5)),
+    translation: SIMD3(0, 0.2, 0)
+  )
+  let transformed = quarterTurn.transform(
+    point: SIMD3(1, 0, 0), around: .zero
+  )
+  #expect(simd_distance(transformed, SIMD3(0, 1.2, 0)) < 1e-5)
 }

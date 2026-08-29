@@ -118,6 +118,28 @@ cannot diversify its observations. BirdFlow instead provides deterministic
 readability of one accepted replay under different render lighting; they are
 not a policy-training or robustness claim.
 
+## Five-waypoint reliability development on 29 August 2026
+
+The next training iteration is implemented in Numi Lab commit `c5318a5` on
+`agent/crow-world-model-navigation`. The V10 actor now consumes 692 values and
+the critic 92: current and next root-local route vectors, route fraction, and
+completion state are explicit instead of being inferred only from masked
+depth. An opt-in autonomous navigation curriculum can reset from accepted
+in-flight states after waypoints one through four. The training tools can also
+extract accepted demonstrations, phase-align their route observations, add
+bounded observation noise and route-heading residual targets, and blend a
+retention teacher against the reference policy during PPO.
+
+This substantially advances route completion but does not yet clear the
+reliability gate. Independent autonomous five-waypoint completions were
+captured and replayed, and the best single-seed policy ensemble completed
+24/32 lanes in its screening run. Its independent three-seed result was
+21/32, 11/32, and 24/32, so it was rejected rather than promoted. Fixed-course
+and widened-reach-radius experiments were also rejected and removed; the
+owning task retains its randomized geometry and `0.08 m` waypoint radius. No
+new PolicyPack or qualification artifact in this repository should therefore
+be interpreted as a reliable five-waypoint controller.
+
 ## Render boundary
 
 [The 1920×1080 multi-camera movie](Media/numi-crow-journey-v9-sensor-fast.mp4)
@@ -131,3 +153,13 @@ are in
 [`numi-crow-journey-v9-sensor-fast.json`](Media/numi-crow-journey-v9-sensor-fast.json).
 These pixels are not the v9 masked-depth sensor images and are not a joint-exact
 visual reconstruction of the Numi state.
+
+New complete V10 replay captures use a stricter articulation path. BirdFlow
+requires all 14 accepted Numi rigid links, removes the body trajectory for an
+independent presentation camera, and applies body-relative terminal-wing and
+tail deltas to the estimated surface and retained remex/rectrix roots on Metal.
+Thigh, shank, and foot geometry receives its corresponding accepted link delta
+on the CPU. These link transforms are exact accepted simulator state; the
+BirdFlow registration pivots, inter-link skinning, feather morphology, and
+surface deformation remain estimated. Historical v9 media is unchanged and
+retains the root-driven boundary described above.
