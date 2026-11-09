@@ -1,0 +1,24 @@
+diff --git a/Sources/BirdFlowVisualization/Metal/Visualization.metal b/Sources/BirdFlowVisualization/Metal/Visualization.metal
+index 34913de..5579728 100644
+--- a/Sources/BirdFlowVisualization/Metal/Visualization.metal
++++ b/Sources/BirdFlowVisualization/Metal/Visualization.metal
+@@ -1715,8 +1715,8 @@ kernel void deformCrowFeatherTemplates(
+     float shade=isUnderwingCovert
+         ?0.0066f+0.00022f*float(root.identity.x%9u)
+         :0.0075f+0.00045f*float(root.identity.x%11u);
+-    float greenScale=isUnderwingCovert?1.45f:1.28f;
+-    float blueScale=isUnderwingCovert?2.55f:1.72f;
++    float greenScale=isUnderwingCovert?1.28f:1.28f;
++    float blueScale=isUnderwingCovert?1.72f:1.72f;
+     float detailShadeScale=geometryDetailKind>0.5f
+         ?(geometryDetailKind<1.5f?1.18f:1.08f):1.0f;
+     CrowFeatherVertexGPU result;
+@@ -6807,7 +6807,7 @@ inline float3 showcaseCrowLinearRadiance(
+     classSheenScale=mix(classSheenScale,0.72f,secondaryVane);
+     classSheenScale=mix(classSheenScale,0.72f,rectrixVane);
+     classSheenScale=mix(classSheenScale,0.72f,greaterCovertVane);
+-    classSheenScale=mix(classSheenScale,0.66f,underwingCovertVane);
++    classSheenScale=mix(classSheenScale,0.35f,underwingCovertVane);
+     classSheenScale=mix(classSheenScale,0.72f,dorsalBodyVane);
+     classSheenScale=mix(classSheenScale,0.60f,flankBodyVane);
+     classSheenScale=mix(
