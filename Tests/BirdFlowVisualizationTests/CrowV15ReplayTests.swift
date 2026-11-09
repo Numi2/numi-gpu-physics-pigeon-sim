@@ -16,6 +16,9 @@ func crowV15ReplayAdmission() throws {
   let head = names.firstIndex(of: "crow_head")! * 13
   moved[head + 4] = sin(Float(0.1))
   moved[head + 6] = cos(Float(0.1))
+  let beak = names.firstIndex(of: "crow_lower_beak")! * 13
+  moved[beak + 4] = sin(Float(0.15))
+  moved[beak + 6] = cos(Float(0.15))
   func frame(_ step: Int, _ values: [Float]) -> [String: Any] {
     ["step": step, "q": [Float](repeating: 0, count: 23),
      "v": [Float](repeating: 0, count: 22), "body_states": values,
@@ -54,6 +57,9 @@ func crowV15ReplayAdmission() throws {
   let articulation = try #require(replay.articulationFrame(of: replay.frames[1]))
   let wing = try #require(articulation.delta(for: .leftWing))
   #expect(abs(wing.translation.x - 0.025) < 1e-6)
+  let jaw = try #require(articulation.lowerBeakDelta)
+  #expect(abs(jaw.rotationXYZW.y - sin(Float(0.05))) < 1e-5)
+  #expect(abs(jaw.rotationXYZW.w - cos(Float(0.05))) < 1e-5)
   let neck = try #require(CrowStandingNeckPose.accepted(articulation))
   #expect(abs(neck.pitchRadians - 0.2) < 1e-5)
   #expect(simd_length(neck.transform(offset: .zero, coupling: 1)) < 1e-5)

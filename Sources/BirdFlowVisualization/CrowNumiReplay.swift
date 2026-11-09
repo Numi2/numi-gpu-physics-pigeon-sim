@@ -58,6 +58,8 @@ public struct CrowNumiReplay: Sendable {
     /// Optional in older 15-action models; present in the v15 active-head body.
     public let headDelta: LinkDelta?
     public let headReferencePosition: SIMD3<Float>?
+    /// Recorded mandible motion relative to the head, when present.
+    public let lowerBeakDelta: LinkDelta?
 
     public func delta(for link: ArticulatedLink) -> LinkDelta? {
       deltas[link]
@@ -466,9 +468,23 @@ public struct CrowNumiReplay: Sendable {
     } else {
       headDelta = nil
     }
+    let lowerBeakDelta: LinkDelta?
+    if let referenceHeadWorld = bodyPose(named: "crow_head", in: frames[0]),
+      let currentHeadWorld = bodyPose(named: "crow_head", in: frame),
+      let referenceBeak = bodyPose(named: "crow_lower_beak", in: frames[0]),
+      let currentBeak = bodyPose(named: "crow_lower_beak", in: frame)
+    {
+      lowerBeakDelta = RigidPose.delta(
+        from: referenceBeak.relative(to: referenceHeadWorld),
+        to: currentBeak.relative(to: currentHeadWorld)
+      )
+    } else {
+      lowerBeakDelta = nil
+    }
     return ArticulationFrame(
       replayStep: frame.step, deltas: deltas,
-      headDelta: headDelta, headReferencePosition: referenceHead?.position
+      headDelta: headDelta, headReferencePosition: referenceHead?.position,
+      lowerBeakDelta: lowerBeakDelta
     )
   }
 

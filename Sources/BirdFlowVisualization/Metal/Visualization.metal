@@ -6670,10 +6670,26 @@ inline float3 showcaseCrowLinearRadiance(
     // The standing presentation support is deliberately neutral and separate
     // from the bird material bands.
     if(material>0.90f){
-        float diffuse=0.32f+0.58f*ndk+0.18f*ndf;
-        float roughSpecular=pow(saturate(dot(normal,halfVector)),18.0f);
+        float diffuse=0.48f+0.42f*saturate(dot(normal,key))
+            +0.12f*saturate(dot(normal,fill));
         float3 support=albedoAndMaterial.rgb*diffuse;
-        support+=roughSpecular*float3(0.055f,0.060f,0.068f);
+        if(identity.z==0x4e415601u){
+            // Spatially anchored, subtle surface variation: presentation only;
+            // the underlying collision boxes and ground are unchanged.
+            float3 p=featherCoordinates;
+            float broad=sin(11.0f*p.x+3.0f*sin(5.0f*p.y))
+                *sin(8.0f*p.y+2.0f*p.z);
+            float fine=sin(109.0f*p.x+57.0f*p.y+37.0f*p.z)
+                *sin(43.0f*p.x-97.0f*p.y+61.0f*p.z);
+            // Suppress unresolved frequencies at grazing angles instead of
+            // turning fine surface detail into shimmering moire bands.
+            float footprint=max(length(dfdx(p)),length(dfdy(p)));
+            broad*=1.0f-smoothstep(0.025f,0.10f,footprint);
+            fine*=1.0f-smoothstep(0.003f,0.012f,footprint);
+            support*=0.97f+0.035f*broad+0.012f*fine;
+        }
+        float roughSpecular=pow(saturate(dot(normal,halfVector)),18.0f);
+        support+=roughSpecular*float3(0.018f,0.020f,0.021f);
         return 1.18f*support;
     }
 
@@ -7352,6 +7368,17 @@ inline float3 showcaseCrowBackgroundRadiance(
     float2 uv,
     float4 options) {
     float aspect=max(options.y,0.1f);
+    if(options.z>0.5f){
+        // Neutral daylight for the navigation presentation, replacing the
+        // unrelated orange studio halo. This is an estimated environment.
+        float skyGradient=smoothstep(0.08f,0.95f,uv.y);
+        float3 sky=mix(float3(0.40f,0.48f,0.54f),
+                       float3(0.20f,0.31f,0.42f),skyGradient);
+        float cloud=sin(7.1f*uv.x+0.6f*sin(8.0f*uv.y))
+            *sin(4.4f*uv.x-6.3f*uv.y);
+        sky+=0.018f*cloud;
+        return sky;
+    }
     float2 p=uv-0.5f;
     p.x*=aspect;
     float horizon=smoothstep(0.18f,0.68f,uv.y);

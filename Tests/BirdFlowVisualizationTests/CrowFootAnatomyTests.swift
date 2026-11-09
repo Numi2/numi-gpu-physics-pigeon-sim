@@ -15,7 +15,8 @@ func crowDigitalPadsMeetSupportUnderArticulatedPhalanges() {
       #expect(pads.count == digit.phalangealSegmentCount)
       #expect(
         pads.allSatisfy {
-          abs(($0.center.z - $0.heightRadiusMeters) - pose.supportHeight) < 1e-7
+          abs(($0.center.z - $0.heightRadiusMeters)
+            - max(pose.supportHeight, digit.nodes[$0.jointIndex].z)) < 1e-7
             && $0.longitudinalRadiusMeters > $0.heightRadiusMeters
             && $0.lateralRadiusMeters > $0.heightRadiusMeters
         }
@@ -67,5 +68,17 @@ func crowLiftedDigitRetainsPadsAndClaws() {
         $0.position.z > pose.supportHeight + lift - 0.005
       })
     }
+  }
+}
+
+@Test("lifted toe pads follow each individual phalanx")
+func crowArchedDigitPadsFollowTheirJoints() {
+  let digit = CrowStandingDigitPose(digitNumber: 1, nodes: [
+    SIMD3(0, 0, 0), SIMD3(0.01, 0, 0.02),
+    SIMD3(0.02, 0, 0.04), SIMD3(0.03, 0, 0.01),
+  ])
+  let pads = CrowFootAnatomy.plantarPads(digit: digit, supportHeight: 0)
+  for pad in pads {
+    #expect(abs(pad.center.z - pad.heightRadiusMeters - digit.nodes[pad.jointIndex].z) < 1e-6)
   }
 }

@@ -1901,7 +1901,7 @@ private final class CrowShowcaseRenderer {
     var backgroundOptions = SIMD4<Float>(
       phase,
       Float(renderWidth) / Float(renderHeight),
-      0,
+      navigationCourse == nil ? 0 : 1,
       0
     )
     guard let encoder = commandBuffer.makeRenderCommandEncoder(descriptor: pass) else {
@@ -2838,7 +2838,7 @@ private final class CrowShowcaseRenderer {
               position: SIMD4<Float>(currentCorners[corner], 1),
               previousPosition: SIMD4<Float>(currentCorners[corner], 1),
               normal: SIMD4<Float>(normal, 0), albedoAndMaterial: earth,
-              parameters: .zero,
+              parameters: SIMD4<Float>(cornerSigns[corner] * half, 0),
               identity: SIMD4<UInt32>(UInt32.max,
                 0x0700_0000 + UInt32(bodyIndex * faces.count + faceIndex),
                 0x4e41_5601, 0)
@@ -2896,7 +2896,8 @@ private final class CrowShowcaseRenderer {
         output.append(CrowSurfaceTemporalVertexGPU(
           position: SIMD4<Float>(point, 1), previousPosition: SIMD4<Float>(point, 1),
           normal: SIMD4<Float>(normal, 0), albedoAndMaterial: SIMD4<Float>(0.13, 0.15, 0.12, 0.95),
-          parameters: .zero, identity: SIMD4<UInt32>(UInt32.max, 0x0700_00ff, 0x4e41_5601, 0)
+          parameters: SIMD4<Float>(points[corner] - position, 0),
+          identity: SIMD4<UInt32>(UInt32.max, 0x0700_00ff, 0x4e41_5601, 0)
         ))
       }
     }
@@ -3893,7 +3894,7 @@ private struct CrowMeshBuilder {
         color: SIMD4<Float>(0.006, 0.008, 0.013, 0.10)
       )
     )
-    appendBill(center: headCenter, to: &vertices)
+    appendBill(center: headCenter, lowerBeakDelta: articulation?.lowerBeakDelta, to: &vertices)
     appendEyes(center: headCenter, headRadii: radii, to: &vertices)
     appendFacialBristles(
       center: headCenter,
@@ -4932,6 +4933,7 @@ private struct CrowMeshBuilder {
 
   private func appendBill(
     center: SIMD3<Float>,
+    lowerBeakDelta: CrowNumiReplay.LinkDelta?,
     to vertices: inout [ColoredVertex]
   ) {
     let length = profile.visualTransform.billLengthMeters
@@ -4949,7 +4951,7 @@ private struct CrowMeshBuilder {
         + SIMD3<Float>(
           length * t,
           0,
-          0.002 * (1 - t) - 0.016 * t * t
+          0.002 * (1 - t) - 0.006 * t * t
         )
       let halfWidth = 0.0135 * taper + 0.0007
       let halfHeight = 0.0110 * taper + 0.0006
@@ -4972,8 +4974,16 @@ private struct CrowMeshBuilder {
         let b = (station + 1) * radialCount + radial
         let c = (station + 1) * radialCount + next
         let d = station * radialCount + next
+        // The lower half follows the accepted mandible relative to the head.
+        // The hinge registration is an estimated visual landmark.
+        let hinge = base + SIMD3<Float>(-0.004, 0, -0.003)
+        let lower = radial >= radialCount / 2
+        func placed(_ index: Int) -> SIMD3<Float> {
+          guard lower, let lowerBeakDelta else { return positions[index] }
+          return lowerBeakDelta.transform(point: positions[index], around: hinge)
+        }
         appendQuad(
-          positions[a], positions[b], positions[c], positions[d],
+          placed(a), placed(b), placed(c), placed(d),
           color: color,
           to: &vertices
         )

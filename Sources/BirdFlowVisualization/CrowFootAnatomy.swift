@@ -37,7 +37,7 @@ enum CrowFootAnatomy {
       return CrowPlantarPad(
         digitNumber: digit.digitNumber,
         jointIndex: jointIndex,
-        center: SIMD3<Float>(node.x, node.y, supportHeight + height),
+        center: SIMD3<Float>(node.x, node.y, max(supportHeight, node.z) + height),
         longitudinalRadiusMeters: 0.0036 - 0.0006 * distalFraction,
         lateralRadiusMeters: 0.0030 - 0.0005 * distalFraction,
         heightRadiusMeters: height
@@ -81,7 +81,7 @@ enum CrowFootAnatomy {
     // plantar pads and claw attached to its moving tip rather than leaving
     // them behind at the original platform height.
     let digitSupportHeight = max(supportHeight, digit.tip.z)
-    let pads = plantarPads(digit: digit, supportHeight: digitSupportHeight)
+    let pads = plantarPads(digit: digit, supportHeight: supportHeight)
     let planarDirection = distalPlanarDirection(digit)
     for pad in pads {
       appendEllipsoid(
