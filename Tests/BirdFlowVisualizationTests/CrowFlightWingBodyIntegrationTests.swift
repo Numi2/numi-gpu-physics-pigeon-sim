@@ -1157,3 +1157,50 @@ func acceptedWingArticulationKeepsShoulderSeated() {
   #expect(simd_distance(middle, (point + moved) * 0.5) < 1e-6)
   #expect(simd_distance(tip, moved) < 1e-6)
 }
+
+
+@Test("wing scaffold aligns bilaterally to recorded reference elevation")
+func crowWingReferenceAlignmentCorrectsRaisedScaffold() {
+  let sourceElevation: Float = .pi / 4
+  let desiredElevation: Float = 0.35
+  for (left, side): (Bool, Float) in [(true, 1), (false, -1)] {
+    let source = SIMD3<Float>(0, side * 0.3, 0.3)
+    let tip = CrowFlightWingBodyIntegration.integratedPoint(
+      referencePoint: source, sourceRoot: .zero, sourceLeadingRoot: .zero,
+      spanIndex: CrowFlightWingBodyIntegration.spanCount - 1,
+      chordIndex: 0, left: left, phase: 0.25,
+      referenceAlignmentRadians: side * (desiredElevation - sourceElevation)
+    )
+    let shoulder = CrowFlightWingBodyIntegration.bodyRoot(chordIndex: 0, left: left)
+    let vector = tip - shoulder
+    let actual = atan2(vector.z, abs(vector.y))
+    #expect(abs(actual - desiredElevation) < 1e-5)
+    #expect(abs(simd_length(vector) - simd_length(source)) < 1e-5)
+  }
+}
+
+
+@Test("recorded wing motion crosses the body plane from its registered reference")
+func crowRegisteredWingReachesDownstroke() {
+  let referenceElevation: Float = 0.35
+  let downstrokeElevation: Float = -0.15
+  for (left, side): (Bool, Float) in [(true, 1), (false, -1)] {
+    let shoulder = CrowFlightWingBodyIntegration.bodyRoot(chordIndex: 0, left: left)
+    let referenceTip = CrowFlightWingBodyIntegration.integratedPoint(
+      referencePoint: SIMD3<Float>(0, side * 0.3, 0.3),
+      sourceRoot: .zero, sourceLeadingRoot: .zero,
+      spanIndex: CrowFlightWingBodyIntegration.spanCount - 1,
+      chordIndex: 0, left: left, phase: 0.25,
+      referenceAlignmentRadians: side * (referenceElevation - .pi / 4)
+    )
+    let halfAngle = side * (downstrokeElevation - referenceElevation) / 2
+    let delta = CrowNumiReplay.LinkDelta(
+      rotationXYZW: SIMD4(sin(halfAngle), 0, 0, cos(halfAngle)),
+      translation: .zero
+    )
+    let tip = delta.transform(point: referenceTip, around: shoulder)
+    #expect(abs(atan2((tip - shoulder).z, abs((tip - shoulder).y))
+      - downstrokeElevation) < 1e-5)
+    #expect(simd_length(delta.transform(point: shoulder, around: shoulder) - shoulder) < 1e-6)
+  }
+}

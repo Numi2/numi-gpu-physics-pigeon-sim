@@ -15,6 +15,9 @@ fps=${CROW_VIDEO_FPS:-50}
 section_frames=${CROW_SECTION_FRAMES:-600}
 width=${CROW_VIDEO_WIDTH:-1600}
 height=${CROW_VIDEO_HEIGHT:-900}
+yaw=${CROW_CAMERA_YAW:--1.25}
+pitch=${CROW_CAMERA_PITCH:-0.20}
+distance=${CROW_CAMERA_DISTANCE:-1.05}
 for path in "$input_i" "$input_j" "$renderer"; do
   if [ ! -f "$path" ]; then printf "missing input: %s\n" "$path" >&2; exit 2; fi
 done
@@ -42,7 +45,7 @@ for course in i j; do
       --capture-frames "$frames" --capture-frame-start "$start" --capture-frame-end "$end" \
       --capture-width "$width" --capture-height "$height" --capture-crow-solid-course \
       --capture-crow-presentation takeoff --capture-crow-replay-pack "$input" \
-      --capture-crow-lighting overcast --capture-crow-camera-yaw -1.25 \
-      --capture-crow-camera-pitch 0.20 --capture-crow-camera-distance 1.05
+      --capture-crow-lighting overcast --capture-crow-camera-yaw "$yaw" \
+      --capture-crow-camera-pitch "$pitch" --capture-crow-camera-distance "$distance"
   done
 done

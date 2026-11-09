@@ -3419,6 +3419,7 @@ private struct CrowMeshBuilder {
   private let referenceBodyCenter: SIMD3<Float>
   private let vertexPartIdentifiers: [UInt8]
   private let articulationPivots: [UInt8: SIMD3<Float>]
+  private let scaffoldWingElevations: [UInt8: Float]
   private let persistentFeathers: [BirdRealityFeather]
   private let presentation: CrowShowcasePresentation
   private let explicitVentralBarbCurvesEnabled: Bool
@@ -3480,10 +3481,32 @@ private struct CrowMeshBuilder {
     let referenceCenter = center / Float(body.vertexCount)
     referenceBodyCenter = referenceCenter
     var linkPivots: [UInt8: SIMD3<Float>] = [:]
+    var scaffoldElevations: [UInt8: Float] = [:]
     for component in dataset.components
       where [UInt8(2), UInt8(3), UInt8(4)].contains(component.partIdentifier)
     {
       let referencePhase: Float = component.partIdentifier == 4 ? 0 : 0.25
+      if dataset.scientificTier == "estimated-hybrid-complete-surface"
+        && [UInt8(2), UInt8(3)].contains(component.partIdentifier) {
+        let left = component.partIdentifier == 2
+        // The simulator's sweep, flap and terminal-link frames share a
+        // shoulder origin, not the center of the inherited wing surface.
+        linkPivots[component.partIdentifier] =
+          CrowFlightWingBodyIntegration.bodyRoot(chordIndex: 0, left: left)
+        var root = SIMD3<Float>.zero
+        var tip = SIMD3<Float>.zero
+        for chord in 0..<CrowFlightWingBodyIntegration.chordCount {
+          root += motion.point(phase: referencePhase,
+            vertexIndex: component.vertexOffset + chord).position
+          tip += motion.point(phase: referencePhase,
+            vertexIndex: component.vertexOffset
+              + (CrowFlightWingBodyIntegration.spanCount - 1)
+                * CrowFlightWingBodyIntegration.chordCount + chord).position
+        }
+        let span = tip - root
+        scaffoldElevations[component.partIdentifier] = atan2(span.z, abs(span.y))
+        continue
+      }
       var pivot = SIMD3<Float>.zero
       for index in component.vertexOffset..<(component.vertexOffset + component.vertexCount) {
         pivot += motion.point(phase: referencePhase, vertexIndex: index).position
@@ -3492,6 +3515,7 @@ private struct CrowMeshBuilder {
       linkPivots[component.partIdentifier] = pivot / Float(component.vertexCount)
     }
     articulationPivots = linkPivots
+    scaffoldWingElevations = scaffoldElevations
     var parts = [UInt8](repeating: 0, count: dataset.vertexCount)
     for component in dataset.components {
       let end = component.vertexOffset + component.vertexCount
@@ -3698,6 +3722,16 @@ private struct CrowMeshBuilder {
         let sourceLeadingRoot =
           motion.point(phase: 0.25, vertexIndex: wing.vertexOffset).position
           - referenceBodyCenter
+        let wingLink: CrowNumiReplay.ArticulatedLink =
+          partIdentifier == 2 ? .leftWing : .rightWing
+        let referenceAlignment: Float
+        if let target = articulation?.wingReferenceElevations[wingLink],
+          let scaffold = scaffoldWingElevations[partIdentifier]
+        {
+          referenceAlignment = (partIdentifier == 2 ? 1 : -1) * (target - scaffold)
+        } else {
+          referenceAlignment = 0
+        }
         point = CrowFlightWingBodyIntegration.integratedPoint(
           referencePoint: referencePoint,
           sourceRoot: sourceRoot,
@@ -3713,7 +3747,8 @@ private struct CrowMeshBuilder {
           phase: CrowFlightWingBodyIntegration.morphologyPhase(
             proceduralPhase: motionPhase,
             hasExactArticulation: articulation != nil
-          )
+          ),
+          referenceAlignmentRadians: referenceAlignment
         )
         if let takeoff {
           let folded = CrowTakeoffSequence.foldedWingPoint(

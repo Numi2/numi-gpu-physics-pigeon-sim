@@ -681,15 +681,24 @@ enum CrowFlightWingBodyIntegration {
     spanIndex: Int,
     chordIndex: Int,
     left: Bool,
-    phase: Float
+    phase: Float,
+    referenceAlignmentRadians: Float = 0
   ) -> SIMD3<Float> {
     precondition((0..<spanCount).contains(spanIndex))
     precondition((0..<chordCount).contains(chordIndex))
 
     let shoulder = bodyRoot(chordIndex: 0, left: left)
+    // The inherited scaffold was sampled mid-stroke, not in the simulator's
+    // reference pose. Register it about the leading root before skinning.
+    let alignedPoint = sourceLeadingRoot + rotateX(
+      referencePoint - sourceLeadingRoot, angle: referenceAlignmentRadians
+    )
+    let alignedRoot = sourceLeadingRoot + rotateX(
+      sourceRoot - sourceLeadingRoot, angle: referenceAlignmentRadians
+    )
     let commonShift = shoulder - sourceLeadingRoot
-    let translated = referencePoint + commonShift
-    let translatedSourceRoot = sourceRoot + commonShift
+    let translated = alignedPoint + commonShift
+    let translatedSourceRoot = alignedRoot + commonShift
 
     let attachmentProgress = clamp(
       Float(spanIndex) / Float(attachmentSpanCount)

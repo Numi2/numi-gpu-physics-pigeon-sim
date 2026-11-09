@@ -60,6 +60,10 @@ public struct CrowNumiReplay: Sendable {
     public let headReferencePosition: SIMD3<Float>?
     /// Recorded mandible motion relative to the head, when present.
     public let lowerBeakDelta: LinkDelta?
+    /// Reference terminal-wing elevation in the body frame, in radians.
+    /// The renderer uses it to register the visual scaffold to the actual
+    /// recorded reference pose before applying subsequent link deltas.
+    public let wingReferenceElevations: [ArticulatedLink: Float]
 
     public func delta(for link: ArticulatedLink) -> LinkDelta? {
       deltas[link]
@@ -481,10 +485,19 @@ public struct CrowNumiReplay: Sendable {
     } else {
       lowerBeakDelta = nil
     }
+    var wingReferenceElevations: [ArticulatedLink: Float] = [:]
+    for (link, side): (ArticulatedLink, Float) in [(.leftWing, 1), (.rightWing, -1)] {
+      if let wing = bodyPose(named: link.rawValue, in: frames[0]) {
+        let relative = wing.relative(to: referenceBody)
+        let span = RigidPose.rotate(relative.orientationXYZW, SIMD3(0, side, 0))
+        wingReferenceElevations[link] = atan2(span.z, abs(span.y))
+      }
+    }
     return ArticulationFrame(
       replayStep: frame.step, deltas: deltas,
       headDelta: headDelta, headReferencePosition: referenceHead?.position,
-      lowerBeakDelta: lowerBeakDelta
+      lowerBeakDelta: lowerBeakDelta,
+      wingReferenceElevations: wingReferenceElevations
     )
   }
 
