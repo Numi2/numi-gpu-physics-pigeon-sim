@@ -11,7 +11,8 @@
     "optimized-course-audits.json": "a6501d3a5e3849a3c9bdfc56af0e5011e030317280a0c4d4fb3243a4ad455a13",
     "optimized-layout-i-50-frame-check.mp4": "fc38ae63a939043af474b2665b226b9c6c87b902f0c5f7728ae89505024aabdb",
     "optimized-layout-j-50-frame-check.mp4": "3631032e7797fb9b69cdf71d44ab2ca5303571ba6839cdd64cc1e0c4a66747ef",
-    "optimized-versus-capture-step-1500.png": "cd27da66f988660f60d0b2486dbaa11374446ba5d36b90e7df8a69aa492da3a4"
+    "optimized-versus-capture-step-1500.png": "cd27da66f988660f60d0b2486dbaa11374446ba5d36b90e7df8a69aa492da3a4",
+    "visual-and-landing-checks.tar.gz": "1f18e85c9e795039795f1e07200a8a556cdbe1371de636a14ab0032d6365c87c"
   },
   "build_command": "swift build --scratch-path .build/stable -c release -Xswiftc -no-whole-module-optimization --product birdflow-capture",
   "capture_binary_sha256": "60d7d1df8a6ab9f0f07f01d8fb0b13ac5ec1f02446d9afaee15e5aa8a803fe82",
