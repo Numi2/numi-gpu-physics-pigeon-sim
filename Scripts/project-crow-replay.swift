@@ -9,18 +9,28 @@ func fail(_ message: String) -> Never {
 }
 
 let arguments = CommandLine.arguments
-guard (arguments.count == 7 || (arguments.count == 8 && arguments[7] == "--include-final-timeout")),
+guard (arguments.count == 9 || arguments.count == 10),
   arguments[3] == "--stride", let stride = Int(arguments[4]), stride > 0,
-  arguments[5] == "--stop-index", let stopIndex = Int(arguments[6]), stopIndex >= 1
+  arguments[5] == "--stop-index", let stopIndex = Int(arguments[6]), stopIndex >= 1,
+  arguments[7] == "--source-sha256", arguments[8].count == 64,
+  arguments.count == 9 || arguments[9] == "--include-final-timeout"
 else {
-  fail("usage: INPUT OUTPUT --stride N --stop-index N [--include-final-timeout]")
+  fail("usage: INPUT OUTPUT --stride N --stop-index N --source-sha256 HEX [--include-final-timeout]")
 }
 
 let inputURL = URL(fileURLWithPath: arguments[1])
 let outputURL = URL(fileURLWithPath: arguments[2])
 let samplingStride = stride
 let inputData = try Data(contentsOf: inputURL)
+// Bind the projection to independently archived source bytes. The native
+// export's embedded payload digest is not stable under JSON reserialization.
+let sourceSHA256 = SHA256.hash(data: inputData)
+  .map { String(format: "%02x", $0) }.joined()
+guard sourceSHA256 == arguments[8].lowercased() else {
+  fail("source replay SHA-256 does not match the independently supplied digest")
+}
 guard var envelope = try JSONSerialization.jsonObject(with: inputData) as? [String: Any],
+  envelope["schema"] as? String == "numi.crow-replay.v1",
   var payload = envelope["payload"] as? [String: Any],
   let frames = payload["frames"] as? [[String: Any]],
   stopIndex < frames.count
@@ -33,7 +43,7 @@ var selectedIndices = Array(
 )
 if selectedIndices.last != stopIndex { selectedIndices.append(stopIndex) }
 let selected = selectedIndices.map { frames[$0] }
-let includeFinalTimeout = arguments.count == 8
+let includeFinalTimeout = arguments.count == 10
 let terminalIndices = selected.indices.filter { (selected[$0]["done"] as? Bool) == true }
 if !terminalIndices.isEmpty {
   guard includeFinalTimeout, terminalIndices == [selected.count - 1],
@@ -56,8 +66,7 @@ payload["frames"] = selected
 payload["frame_count"] = selected.count
 payload["presentation_projection"] = [
   "classification": "deterministic reset-free subsample of accepted simulator states",
-  "source_replay_sha256": SHA256.hash(data: inputData)
-    .map { String(format: "%02x", $0) }.joined(),
+  "source_replay_sha256": sourceSHA256,
   "source_frame_count": frames.count,
   "source_start_index": 0,
   "source_stop_index_inclusive": stopIndex,

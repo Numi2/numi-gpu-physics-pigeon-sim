@@ -10,7 +10,10 @@ accepted-state replays and verification are archived in Numi Lab under
 
 * The native BirdFlow crow renderer accepts the v15 23-coordinate, 18-action
   replay only when the required named crow and course bodies are present. Its
-  original canonical payload digest is checked; v15 is not relabeled as v10.
+  projected envelope payload digest is checked; v15 is not relabeled as v10.
+  The native source bytes are checked separately against independently archived
+  SHA-256 hashes before projection; its embedded payload digest does not match
+  a parse-and-reserialize check and is not claimed as validated.
 * Body-relative wing, tail and leg transformations use the accepted replay as
   in the v10 renderer. Recorded v15 head-link motion drives the cranial/neck
   presentation, including the CPU and Metal feather paths. BirdFlow's head
@@ -42,6 +45,30 @@ accepted-state replays and verification are archived in Numi Lab under
   storing thousands of PNGs. The original video sampled the 50 Hz trace at
   25 fps; the updated capture uses every retained state at 50 fps.
 
+## Follow-up: recorded mandible and presentation lighting
+
+The lower bill surface now follows the recorded v15 lower-beak link relative
+to the head. The visual hinge registration and bill shape remain estimated;
+the replay shows only its recorded, generally small jaw excursions. The bill
+profile was made straighter in line with the [Cornell Lab American Crow
+identification description](https://www.allaboutbirds.org/guide/american_crow/id).
+Toe pads now follow their own phalangeal nodes instead of all inheriting the
+height of the toe tip. The toes remain visual anatomy, not simulated grasp.
+Navigation lighting now uses a neutral daylight background and mild,
+spatially anchored procedural course material variation, with distance filtering
+of unresolved detail. This is an estimated presentation, not measured sky,
+texture, cast shadow, or ecology. The controller, physical scene and accepted
+trajectory remain unchanged.
+
+The updated complete-state projection can include the final episode timeout
+only through an explicit option, only at the final source state, and only when
+navigation completion is recorded. It still rejects intervening terminal
+states. The final timeout is not a reset. Projection requires a separately
+supplied source-byte SHA-256: the embedded native payload digest cannot be
+revalidated by the renderer after JSON parsing and reserialization. The two
+input files match their independently archived byte hashes, and projections
+created with that independent check match the captured inputs byte for byte.
+
 ## Known gaps, including limitations that remain
 
 ### Anatomy and surface
@@ -57,10 +84,10 @@ accepted-state replays and verification are archived in Numi Lab under
    articulated avian shoulder, elbow, wrist and each feather. BirdFlow uses
    estimated registration, interpolation and feather deformations between
    those links; it is not a feather-exact physical reconstruction.
-4. The lower beak has a simulated link, but the high-detail presentation
-   still renders a unified bill and does not independently animate the lower
-   mandible. Toe shapes are visual anatomy: the physical model has rigid
-   sole proxies rather than individually articulated grasping toes or claws.
+4. The lower mandible follows the recorded link, but the visual hinge, bill
+   proportions and internal mouth geometry are estimates. Toe shapes are visual
+   anatomy: the physical model has rigid sole proxies rather than individually
+   articulated grasping toes or claws.
 5. The head is retargeted through an estimated neck pivot; there are no
    independently measured vertebral joints, tongue, eyelids, breathing or
    soft-tissue deformation.
@@ -71,11 +98,12 @@ accepted-state replays and verification are archived in Numi Lab under
    multispectral plumage, measured reflectance or specimen texture scans.
    Feather microstructure, wetness, weathering and individual variation are
    incomplete; this renderer is not photorealistically validated.
-7. The optional solid course and ground are untextured, flat-shaded estimates
-   with a studio background, not a reconstructed ecological environment.
-   They lack calibrated materials, indirect illumination and perch shadows.
-   Box dimensions and poses match the simulated collision scene.
-8. The updated replay displays the retained 50 Hz accepted states at 50 fps. It does not
+7. The optional solid course and ground use procedural presentation materials
+   and a neutral sky, not a reconstructed ecological environment. They lack
+   calibrated materials, indirect illumination and cast perch shadows. Box
+   dimensions and poses match the simulated collision scene.
+8. The updated complete replay displays all 3,000 retained 50 Hz accepted states
+   at 50 fps, including the final timeout. It does not
    establish continuous contact, accurate wingbeat shape, motion blur or
    absence of visual interpenetration between the accepted samples.
 9. The presentation uses estimated deployment and settling transitions.
