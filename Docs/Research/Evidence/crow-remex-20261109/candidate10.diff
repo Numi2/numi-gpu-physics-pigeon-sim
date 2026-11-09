@@ -1,0 +1,33 @@
+diff --git a/Sources/BirdFlowVisualization/CrowShowcaseCapture.swift b/Sources/BirdFlowVisualization/CrowShowcaseCapture.swift
+index f012bcc..15450fd 100644
+--- a/Sources/BirdFlowVisualization/CrowShowcaseCapture.swift
++++ b/Sources/BirdFlowVisualization/CrowShowcaseCapture.swift
+@@ -6265,6 +6265,10 @@ private struct CrowMeshBuilder {
+       }), wing.vertexCount == 9 * 33
+     else { return }
+     let chordCount = 9
++    // Separate qualitative trial: shorten individual dorsal covert projections
++    // while retaining the underlying wing surface and fixed feather topology.
++    let softerCoverts = experimentalFlightRemexEnabled
++      && ProcessInfo.processInfo.environment["CROW_EXPERIMENTAL_SOFT_COVERTS"] == "1"
+     let proximalDeploymentProgress: Float = {
+       switch presentation {
+       case .standing: 0
+@@ -6402,7 +6406,7 @@ private struct CrowMeshBuilder {
+             chordIndex: chord,
+             spanIndex: span
+           )
+-        let surfaceTip =
++        let unshortenedSurfaceTip =
+           root
+           + CrowFlightWingBodyIntegration.covertDistalTrailingChordScale(
+             chordIndex: chord,
+@@ -6417,6 +6421,8 @@ private struct CrowMeshBuilder {
+             : 1.16 + anteriorChordExtension)
+           * chordVector
+           + tipSpanFraction * spanVector
++        let surfaceTip = softerCoverts && !isTrailingCourse
++          ? root + 0.78 * (unshortenedSurfaceTip - root) : unshortenedSurfaceTip
+         let spacing = max(simd_length(spanVector), 0.012)
+         let abdominalHandoffNormalLift =
+           CrowFlightWingBodyIntegration.covertAbdominalHandoffNormalLift(
