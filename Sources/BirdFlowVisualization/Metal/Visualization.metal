@@ -7290,7 +7290,8 @@ fragment CrowAOVOutput showcaseCrowAOVFragment(
 fragment CrowAOVOutput showcaseCrowLitAOVFragment(
     CrowRasterVertex in [[stage_in]],
     constant CrowTemporalCameraUniforms& camera [[buffer(0)]],
-    constant float4& presentationLighting [[buffer(2)]]) {
+    constant float4& presentationLighting [[buffer(2)]],
+    constant float4* contactCenters [[buffer(3)]]) {
     float3 normal=in.normal;
     float3 radiance=showcaseCrowLinearRadiance(
         in.world,normal,in.albedoAndMaterial,camera.eyeAndWidth.xyz,
@@ -7307,6 +7308,15 @@ fragment CrowAOVOutput showcaseCrowLitAOVFragment(
     float keyGain=mix(1.0f,directional,presentationLighting.y);
     float fillGain=mix(1.0f,1.10f,presentationLighting.z-1.0f);
     radiance*=keyGain*fillGain*presentationLighting.w;
+    if(in.identity.z==0x4e415601u){
+        // Local contact occlusion from the posed pedal vertices; the small
+        // 3-D radius makes it vanish when a foot is away from the surface.
+        float3 d0=in.world-contactCenters[0].xyz;
+        float3 d1=in.world-contactCenters[1].xyz;
+        float occlusion=max(contactCenters[0].w*exp(-1100.0f*dot(d0,d0)),
+                            contactCenters[1].w*exp(-1100.0f*dot(d1,d1)));
+        radiance*=1.0f-0.38f*occlusion;
+    }
     float inversePreviousW=1.0f/in.previousClipPosition.w;
     float2 previousNDC=in.previousClipPosition.xy*inversePreviousW;
     float2 previousPixel=(previousNDC*float2(0.5f,-0.5f)+0.5f)

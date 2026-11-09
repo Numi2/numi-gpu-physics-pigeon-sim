@@ -10,7 +10,7 @@ output=$1
 input_i=$2
 input_j=$3
 renderer=${CROW_CAPTURE_BINARY:-.build/release/birdflow-capture}
-frames=${CROW_FRAME_COUNT:-2999}
+frames=${CROW_FRAME_COUNT:-3000}
 fps=${CROW_VIDEO_FPS:-50}
 section_frames=${CROW_SECTION_FRAMES:-600}
 width=${CROW_VIDEO_WIDTH:-1600}
@@ -18,6 +18,18 @@ height=${CROW_VIDEO_HEIGHT:-900}
 for path in "$input_i" "$input_j" "$renderer"; do
   if [ ! -f "$path" ]; then printf "missing input: %s\n" "$path" >&2; exit 2; fi
 done
+# Prevent a 50 Hz video from silently skipping or duplicating replay states.
+python3 - "$input_i" "$input_j" "$frames" <<CHECK_REPLAY_COUNTS
+import json
+import sys
+expected = int(sys.argv[3])
+for name in sys.argv[1:3]:
+    with open(name) as stream:
+        payload = json.load(stream)["payload"]
+    count = len(payload["frames"])
+    if count != expected or payload["frame_count"] != count:
+        raise SystemExit(f"{name}: expected {expected} replay frames, found {count}")
+CHECK_REPLAY_COUNTS
 mkdir -p "$output"
 for course in i j; do
   if [ "$course" = i ]; then input=$input_i; else input=$input_j; fi

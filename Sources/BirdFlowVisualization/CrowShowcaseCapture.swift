@@ -1898,6 +1898,27 @@ private final class CrowShowcaseRenderer {
       plumageVisibilityLayout: plumageOptics.visibilityLayout
     )
     var presentationLighting = lighting.parameters
+    // Presentation-only local occlusion under the rendered pedal geometry.
+    // Use the actual posed vertices so the effect fades with separation from
+    // a course surface; it does not infer or modify physical contact.
+    var contactCenters = [SIMD4<Float>](repeating: .zero, count: 2)
+    if navigationCourse != nil {
+      for side in 0..<2 {
+        let candidates = vertices.filter { vertex in
+          Int(vertex.parameters.w.rounded()) == Int(CrowFootAnatomy.surfaceIdentityClassCode)
+            && ((vertex.position.y >= currentAnatomyBodyCenter.y) == (side == 0))
+        }
+        if let minZ = candidates.map({ $0.position.z }).min() {
+          let nearest = candidates.filter { $0.position.z <= minZ + 0.002 }
+          if !nearest.isEmpty {
+            let sum = nearest.reduce(SIMD3<Float>.zero) { result, vertex in
+              result + SIMD3<Float>(vertex.position.x, vertex.position.y, vertex.position.z)
+            }
+            contactCenters[side] = SIMD4<Float>(sum / Float(nearest.count), 1)
+          }
+        }
+      }
+    }
     var backgroundOptions = SIMD4<Float>(
       phase,
       Float(renderWidth) / Float(renderHeight),
@@ -1915,6 +1936,11 @@ private final class CrowShowcaseRenderer {
         length: MemoryLayout<SIMD4<Float>>.stride,
         index: 2
       )
+    }
+    contactCenters.withUnsafeBytes { bytes in
+      if let base = bytes.baseAddress {
+        encoder.setFragmentBytes(base, length: bytes.count, index: 3)
+      }
     }
     encoder.setRenderPipelineState(backgroundAOVPipeline)
     encoder.setFragmentBytes(

@@ -57,8 +57,10 @@ height of the toe tip. The toes remain visual anatomy, not simulated grasp.
 Navigation lighting now uses a neutral daylight background and mild,
 spatially anchored procedural course material variation, with distance filtering
 of unresolved detail. This is an estimated presentation, not measured sky,
-texture, cast shadow, or ecology. The controller, physical scene and accepted
-trajectory remain unchanged.
+texture, cast shadow, or ecology. A small local occlusion effect uses the
+posed pedal vertices and fades with distance from a course surface; it is an
+estimated visual effect, not a contact measurement or a cast shadow. The
+controller, physical scene and accepted trajectory remain unchanged.
 
 The updated complete-state projection can include the final episode timeout
 only through an explicit option, only at the final source state, and only when
