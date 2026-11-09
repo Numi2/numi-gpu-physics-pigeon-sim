@@ -120,7 +120,8 @@ accepted-state replays and verification are archived in Numi Lab under
     issue, not evidence of physics failure. Two pointer-copy paths were
     subsequently isolated from throwing render/upload paths. A fresh default
     optimized build then passed standing, diagnostic AOV and retained I/J
-    course captures, including 50 consecutive video frames per layout. The
+    course captures, including 50 consecutive video frames per layout and a
+    900-frame uninterrupted video capture on I. The
     exact compiler/runtime mechanism remains unproven; the regression smoke
     test is `Scripts/smoke-crow-release.sh` (supply replay projections to
     exercise live-wing uploads).

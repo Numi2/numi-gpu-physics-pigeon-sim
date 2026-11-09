@@ -1,0 +1,100 @@
+{
+  "artifacts_sha256": {
+    "README.md": "199477688a45f458baf26c6f395e4c9f9d9431c19fb4991fc4af4c4f92b0ad60",
+    "capture-audits.json": "d905f9d3fafd00a19e0feb2ecf37d11678cfd34aec0f5a504fbfcd357ce978b2",
+    "capture.log.gz": "c08dab0a5edf5f2651ce9333d7ab870c77d456aca9442ab8934b9629d05b71da",
+    "crow-navigation-both-layouts-50fps.mp4": "d5a1e1d301a4953056a809e02dfcadefae337f34f5f58090a44a51d09e0d6e18",
+    "optimized-900-frame-check.log.gz": "c313150b468889099b8c0c55c352f194f85f010cb4790c2fa8134bb61e020841",
+    "optimized-900-frame-check.mp4": "3e228c7d2e2b505ff8eb495f22205055919c842c0008e12e50ebdc011e1ec6ab",
+    "optimized-layout-i-50-frame-check.mp4": "fc38ae63a939043af474b2665b226b9c6c87b902f0c5f7728ae89505024aabdb",
+    "optimized-layout-j-50-frame-check.mp4": "3631032e7797fb9b69cdf71d44ab2ca5303571ba6839cdd64cc1e0c4a66747ef",
+    "optimized-versus-capture-step-1500.png": "cd27da66f988660f60d0b2486dbaa11374446ba5d36b90e7df8a69aa492da3a4"
+  },
+  "build_command": "swift build --scratch-path .build/stable -c release -Xswiftc -no-whole-module-optimization --product birdflow-capture",
+  "capture_binary_sha256": "60d7d1df8a6ab9f0f07f01d8fb0b13ac5ec1f02446d9afaee15e5aa8a803fe82",
+  "classification": "recorded simulation replay; estimated visual presentation, not real footage or biological validation",
+  "frozen_simulation_archive": "Numi2/numi-lab@7d32ee3722a1f26c58ad111b46e9edb9ce3b401c:artifacts/crow-final-video-replay-20261109",
+  "optimized_build_command": "swift build --scratch-path .build/wmo -c release --product birdflow-capture",
+  "optimized_fix_binary_sha256": "51dfa9400177a38d07b2e6c79d3c9062f0568474b7ddfb073e5a2a162a848fdd",
+  "optimized_renderer_fix_commit": "3162421",
+  "optimized_validation": {
+    "aov": true,
+    "both_course_smoke": true,
+    "consecutive_encoded_frames_per_layout": 50,
+    "continuous_encoded_frames_i": 900,
+    "standing": true,
+    "step_1500_wmo_and_capture_png_sha256": "cd27da66f988660f60d0b2486dbaa11374446ba5d36b90e7df8a69aa492da3a4"
+  },
+  "sections": [
+    {
+      "first_frame": 0,
+      "last_frame": 599,
+      "layout": "i",
+      "section_sha256": "f0daa113370f2eaa9d25a92478b2b68c0462d59341af8e6f6d68aa22e2822df4"
+    },
+    {
+      "first_frame": 600,
+      "last_frame": 1199,
+      "layout": "i",
+      "section_sha256": "aa77faff89de2adb2a3a836fe740b23f5b0157654e981ca3881266179e8fc605"
+    },
+    {
+      "first_frame": 1200,
+      "last_frame": 1799,
+      "layout": "i",
+      "section_sha256": "6e71988a7a3bd5c2ae2a0c9bde537a5794af0a1858c4bff0a0d7363b833cc58a"
+    },
+    {
+      "first_frame": 1800,
+      "last_frame": 2399,
+      "layout": "i",
+      "section_sha256": "f0c274254159db9b25f4804a51d0c70b1946bbb1f61c4ce75311f5b06f2be313"
+    },
+    {
+      "first_frame": 2400,
+      "last_frame": 2998,
+      "layout": "i",
+      "section_sha256": "f3797f7d3b7330d5974d8465988e2311832f432f1441b84b0e72a09d0902d807"
+    },
+    {
+      "first_frame": 0,
+      "last_frame": 599,
+      "layout": "j",
+      "section_sha256": "3611ffba55a71f5a9617e860e090a6d0d9d740639884698cd4bf79efe71cf5d8"
+    },
+    {
+      "first_frame": 600,
+      "last_frame": 1199,
+      "layout": "j",
+      "section_sha256": "07fbc3aee3bc9dada26bbd9b5429cb635e59c98b2562d61290bf3edf33459880"
+    },
+    {
+      "first_frame": 1200,
+      "last_frame": 1799,
+      "layout": "j",
+      "section_sha256": "361a848d55567984f5b658e4c6f1b9f44da8ef3e18c096dd3cf26aba30a89e91"
+    },
+    {
+      "first_frame": 1800,
+      "last_frame": 2399,
+      "layout": "j",
+      "section_sha256": "a7dba10733a65f8e06448510da45fa5d0f555139cb0daa7cf9ff90e3877aeb8b"
+    },
+    {
+      "first_frame": 2400,
+      "last_frame": 2998,
+      "layout": "j",
+      "section_sha256": "f9277fcc87524025ceb147b9ff7828b90b3ce5697d9dce7048a9b967978d81f2"
+    }
+  ],
+  "video": {
+    "codec": "h264",
+    "duration_seconds": 119.96,
+    "fps": 50,
+    "frame_count": 5998,
+    "full_decode_verified": true,
+    "height": 900,
+    "width": 1600
+  },
+  "video_source_commit": "5e198dd"
+}
