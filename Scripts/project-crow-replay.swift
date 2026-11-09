@@ -9,11 +9,11 @@ func fail(_ message: String) -> Never {
 }
 
 let arguments = CommandLine.arguments
-guard arguments.count == 7,
+guard (arguments.count == 7 || (arguments.count == 8 && arguments[7] == "--include-final-timeout")),
   arguments[3] == "--stride", let stride = Int(arguments[4]), stride > 0,
   arguments[5] == "--stop-index", let stopIndex = Int(arguments[6]), stopIndex >= 1
 else {
-  fail("usage: INPUT OUTPUT --stride N --stop-index N")
+  fail("usage: INPUT OUTPUT --stride N --stop-index N [--include-final-timeout]")
 }
 
 let inputURL = URL(fileURLWithPath: arguments[1])
@@ -33,8 +33,15 @@ var selectedIndices = Array(
 )
 if selectedIndices.last != stopIndex { selectedIndices.append(stopIndex) }
 let selected = selectedIndices.map { frames[$0] }
-guard !selected.contains(where: { ($0["done"] as? Bool) == true }) else {
-  fail("projection contains a terminal frame")
+let includeFinalTimeout = arguments.count == 8
+let terminalIndices = selected.indices.filter { (selected[$0]["done"] as? Bool) == true }
+if !terminalIndices.isEmpty {
+  guard includeFinalTimeout, terminalIndices == [selected.count - 1],
+    stopIndex == frames.count - 1,
+    (selected.last?["timeout"] as? Bool) == true,
+    let outcomes = selected.last?["outcomes"] as? [String: Any],
+    ((outcomes["navigation_completion"] as? NSNumber)?.doubleValue ?? 0) >= 1
+  else { fail("projection contains an unqualified terminal frame") }
 }
 let maximumWaypoints = selected.reduce(0.0) { maximum, frame in
   let outcomes = frame["outcomes"] as? [String: Any]
@@ -55,7 +62,7 @@ payload["presentation_projection"] = [
   "source_start_index": 0,
   "source_stop_index_inclusive": stopIndex,
   "source_stride": samplingStride,
-  "terminal_frame_excluded": true,
+  "terminal_frame_excluded": terminalIndices.isEmpty,
 ]
 let payloadData = try JSONSerialization.data(
   withJSONObject: payload, options: [.sortedKeys]
