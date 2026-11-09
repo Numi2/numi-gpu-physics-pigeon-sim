@@ -1,0 +1,1 @@
+6ec6a64235d85caee07e359beeeb3e0b4383bbfcfd16a97ed3bffe5848a8c950  .build/contact-test/release/birdflow-capture
