@@ -67,6 +67,8 @@ public struct CrowNumiReplay: Sendable {
     /// Estimated visual flexion drive from recorded wing elevation velocity.
     /// This is not a recorded wrist joint or feather motion.
     public let wingUpstrokeStrength: [ArticulatedLink: Float]
+    /// Presentation cue from the retained support outcome; not measured toes.
+    public let confirmedSupportWeight: Float
 
     public func delta(for link: ArticulatedLink) -> LinkDelta? {
       deltas[link]
@@ -539,7 +541,8 @@ public struct CrowNumiReplay: Sendable {
       headDelta: headDelta, headReferencePosition: referenceHead?.position,
       lowerBeakDelta: lowerBeakDelta,
       wingReferenceElevations: wingReferenceElevations,
-      wingUpstrokeStrength: wingUpstrokeStrength
+      wingUpstrokeStrength: wingUpstrokeStrength,
+      confirmedSupportWeight: landingWeights[frame.step] ?? 0
     )
   }
 

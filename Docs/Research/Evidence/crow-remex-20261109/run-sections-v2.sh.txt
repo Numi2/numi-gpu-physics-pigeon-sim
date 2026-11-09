@@ -1,0 +1,12 @@
+#!/bin/bash
+set -uo pipefail
+cd /Users/n/Developer/numi-crow-render-20261109 || exit 99
+b=/Users/n/Developer/numi-crow-rl-20261107/build/crow-remex-rig-20261109
+export MTL_DEBUG_LAYER=1 CROW_EXPERIMENTAL_FLIGHT_REMEX=1 CROW_EXPERIMENTAL_LANDING=1 CROW_EXPERIMENTAL_FLIGHT_DIGITS=1 CROW_EXPERIMENTAL_SUPPORT_PLANT=1
+export CROW_CAPTURE_BINARY=.build/remex-pivot-test/release/birdflow-capture-trial9
+export CROW_FRAME_COUNT=3000 CROW_VIDEO_FPS=50 CROW_SECTION_FRAMES=600
+export CROW_VIDEO_WIDTH=1280 CROW_VIDEO_HEIGHT=720
+bash Scripts/render-crow-v15-video-sections.sh "$b/sections-v2" "$b/i-complete.json" "$b/j-complete.json"
+status=$?
+printf "%s\n" "$status" > "$b/sections-v2.exit"
+exit "$status"

@@ -29,3 +29,19 @@ chains through retraction. It must retain the planted pose, preserve bilateral
 shape and avoid a new collision or floating appearance. This still cannot
 prove toe contact: the simulation supplies support-group rewards, not tracked
 avian toe surfaces.
+
+The distinct-digit trial preserves the four chains in the unit test, but the
+course view still hides the toes below the support while the bird folds. The
+visual perch is registered relative to the translated body center, while the
+planted foot target is registered to the untranslated standing center. The
+next trial will offset the planted target by the presentation body translation
+after confirmed recorded support. The physical root, colliders and support
+signal remain untouched. Compare course and side views before accepting it.
+
+Candidate 8 preserved toe-chain separation, but its landing inspection showed
+the foot target below the platform. Candidate 9 also offsets the presentation
+support target by the current body reference when recorded support is present.
+On the retained I and J landing sequences the rendered feet appear above the
+platform at the inspected camera angles. The new support-target test passes.
+This changes presentation geometry only: it is not a physical toe contact or
+force measurement. The candidate remains experimental and off by default.

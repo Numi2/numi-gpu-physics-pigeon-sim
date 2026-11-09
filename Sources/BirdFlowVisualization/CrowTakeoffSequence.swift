@@ -126,6 +126,30 @@ enum CrowTakeoffSequence {
     )
   }
 
+  /// Maps confirmed support into a smoother visual fold while preserving the
+  /// current pose at onset. This is a presentation estimate, not contact data.
+  static func experimentalLandingPhase(flightPhase: Float, supportWeight: Float) -> Float {
+    let phase = min(max(flightPhase, standingHoldEnd), 1)
+    let weight = min(max(supportWeight, 0), 1)
+    guard weight > 0 else { return phase }
+    guard weight < 1 else { return standingHoldEnd }
+    guard phase > transitionEnd else {
+      return phase + (standingHoldEnd - phase) * weight
+    }
+    // Invert smootherstep so the visible wing deployment tracks the support
+    // easing instead of remaining fully open for most of the landing window.
+    var low: Float = 0
+    var high: Float = 1
+    let target = 1 - weight
+    for _ in 0..<24 {
+      let mid = (low + high) * 0.5
+      if smootherstep(mid) < target { low = mid } else { high = mid }
+    }
+    let foldedPhase = standingHoldEnd + (transitionEnd - standingHoldEnd) * (low + high) * 0.5
+    let flightResidual = (phase - transitionEnd) * pow(1 - weight, 16)
+    return foldedPhase + flightResidual
+  }
+
   /// Collapses the body-seated folded-wing shell as the live wing deploys.
   ///
   /// Geometry records are retained at zero area after the handoff so current
@@ -360,28 +384,34 @@ enum CrowTakeoffSequence {
     return normal
   }
 
-  static func standingPose(phase: Float) -> CrowStandingPoseSample {
+  static func standingPose(phase: Float, preserveFlightDigits: Bool = false,
+    plantOnMovingSupport: Bool = false) -> CrowStandingPoseSample {
     let sequence = sample(phase: phase)
     let planted = CrowStandingPose.sample(phase: sequence.standingPhase)
     let bodyCenter = planted.bodyCenter + sequence.bodyTranslation
+    let plantedOffset = plantOnMovingSupport ? sequence.bodyTranslation : SIMD3<Float>.zero
     let retraction = smootherstep(
       min(max((sequence.transitionProgress - 0.28) / 0.72, 0), 1)
     )
     return CrowStandingPoseSample(
       bodyCenter: bodyCenter,
       neckPose: planted.neckPose,
-      supportHeight: planted.supportHeight,
+      supportHeight: planted.supportHeight + plantedOffset.z,
       leftFoot: retract(
         planted.leftFoot,
         bodyCenter: bodyCenter,
         side: 1,
-        progress: retraction
+        progress: retraction,
+        preserveDigits: preserveFlightDigits,
+        plantedOffset: plantedOffset
       ),
       rightFoot: retract(
         planted.rightFoot,
         bodyCenter: bodyCenter,
         side: -1,
-        progress: retraction
+        progress: retraction,
+        preserveDigits: preserveFlightDigits,
+        plantedOffset: plantedOffset
       )
     )
   }
@@ -434,26 +464,32 @@ enum CrowTakeoffSequence {
     _ foot: CrowStandingFootPose,
     bodyCenter: SIMD3<Float>,
     side: Float,
-    progress: Float
+    progress: Float,
+    preserveDigits: Bool,
+    plantedOffset: SIMD3<Float>
   ) -> CrowStandingFootPose {
     let tuckedHip = bodyCenter + SIMD3<Float>(-0.025, side * 0.035, -0.060)
     let tuckedHock = bodyCenter + SIMD3<Float>(-0.055, side * 0.032, -0.052)
     let tuckedAnkle = bodyCenter + SIMD3<Float>(-0.078, side * 0.029, -0.072)
-    let hock = mix(foot.hock, tuckedHock, progress)
-    let ankle = mix(foot.ankle, tuckedAnkle, progress)
+    let hock = mix(foot.hock + plantedOffset, tuckedHock, progress)
+    let ankle = mix(foot.ankle + plantedOffset, tuckedAnkle, progress)
     let digits = foot.digits.map { digit in
       let targetTip = tuckedAnkle + SIMD3<Float>(-0.020, side * 0.004, 0.008)
       return CrowStandingDigitPose(
         digitNumber: digit.digitNumber,
         nodes: digit.nodes.enumerated().map { index, node in
           let fraction = Float(index) / Float(max(digit.nodes.count - 1, 1))
-          let target = tuckedAnkle + fraction * (targetTip - tuckedAnkle)
-          return mix(node, target, progress)
+          let relative = node - foot.ankle
+          let curled = tuckedAnkle + SIMD3<Float>(
+            -0.65 * relative.x, 0.80 * relative.y,
+            0.35 * relative.z - 0.008 * sin(Float.pi * fraction))
+          let collapsed = tuckedAnkle + fraction * (targetTip - tuckedAnkle)
+          return mix(node + plantedOffset, preserveDigits ? curled : collapsed, progress)
         }
       )
     }
     return CrowStandingFootPose(
-      hip: mix(foot.hip, tuckedHip, min(progress * 1.35, 1)),
+      hip: mix(foot.hip + plantedOffset, tuckedHip, min(progress * 1.35, 1)),
       hock: hock,
       ankle: ankle,
       digits: digits

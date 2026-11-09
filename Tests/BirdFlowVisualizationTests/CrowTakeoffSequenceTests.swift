@@ -308,3 +308,64 @@ func retainedRectricesUnfoldContinuouslyFromClosedStack() {
     #expect(abs(right.tipOffset.y + left.tipOffset.y) < 1e-7)
   }
 }
+
+
+@Test("experimental supported landing spreads the visual fold continuously")
+func crowExperimentalLandingPhase() {
+  let flight: Float = 0.86
+  var old: [Float] = []
+  var revised: [Float] = []
+  for index in 0...25 {
+    let p = Float(index) / 25
+    let w = p * p * (3 - 2 * p)
+    old.append(CrowTakeoffSequence.sample(phase: flight * (1 - w)).transitionProgress)
+    let phase = CrowTakeoffSequence.experimentalLandingPhase(
+      flightPhase: flight, supportWeight: w)
+    revised.append(CrowTakeoffSequence.sample(phase: phase).transitionProgress)
+  }
+  let oldMax = zip(old, old.dropFirst()).map { abs($0 - $1) }.max() ?? 0
+  let newMax = zip(revised, revised.dropFirst()).map { abs($0 - $1) }.max() ?? 0
+  #expect(oldMax > 0.20)
+  #expect(newMax < 0.11)
+  #expect(newMax < oldMax * 0.5)
+  #expect(CrowTakeoffSequence.experimentalLandingPhase(
+    flightPhase: flight, supportWeight: 0) == flight)
+  #expect(CrowTakeoffSequence.experimentalLandingPhase(
+    flightPhase: flight, supportWeight: 1) == CrowTakeoffSequence.standingHoldEnd)
+  for (a, b) in zip(revised, revised.dropFirst()) { #expect(a >= b) }
+}
+
+
+@Test("experimental flight feet keep separate digit chains")
+func crowExperimentalFlightDigits() {
+  let planted = CrowTakeoffSequence.standingPose(phase: 0, preserveFlightDigits: true)
+  let original = CrowTakeoffSequence.standingPose(phase: 0)
+  #expect(planted == original)
+  let flight = CrowTakeoffSequence.standingPose(phase: 1, preserveFlightDigits: true)
+  for foot in [flight.leftFoot, flight.rightFoot] {
+    #expect(foot.digits.count == 4)
+    for digit in foot.digits {
+      #expect(simd_distance(digit.nodes[0], foot.ankle) < 1e-6)
+      #expect(simd_distance(digit.tip, foot.ankle) > 0.005)
+    }
+    for i in foot.digits.indices {
+      for j in (i + 1)..<foot.digits.count {
+        #expect(simd_distance(foot.digits[i].tip, foot.digits[j].tip) > 0.002)
+      }
+    }
+  }
+}
+
+
+@Test("experimental support pose moves the plantar target with the body reference")
+func crowExperimentalSupportPlant() {
+  let phase: Float = 0.39
+  let original = CrowTakeoffSequence.standingPose(phase: phase, preserveFlightDigits: true)
+  let planted = CrowTakeoffSequence.standingPose(
+    phase: phase, preserveFlightDigits: true, plantOnMovingSupport: true)
+  let offset = CrowTakeoffSequence.sample(phase: phase).bodyTranslation
+  #expect(abs(planted.supportHeight - original.supportHeight - offset.z) < 1e-6)
+  #expect(planted.leftFoot.digits[0].tip.z > original.leftFoot.digits[0].tip.z)
+  #expect(planted.rightFoot.digits[0].tip.z > original.rightFoot.digits[0].tip.z)
+  #expect(simd_distance(planted.bodyCenter, original.bodyCenter) < 1e-6)
+}

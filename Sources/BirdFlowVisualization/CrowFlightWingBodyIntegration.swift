@@ -702,6 +702,27 @@ enum CrowFlightWingBodyIntegration {
     return shoulder + rotateX(swept, angle: -side * 0.16 * bend)
   }
 
+  /// Presentation-only elbow/wrist pivots sampled from the live reference
+  /// surface. Neither pivot nor its upstroke deflection is a measured joint.
+  static func flexArticulatedWing(
+    point: SIMD3<Float>, elbow: SIMD3<Float>, wrist: SIMD3<Float>,
+    spanIndex: Int, left: Bool, strength: Float
+  ) -> SIMD3<Float> {
+    let drive = clamp(strength)
+    let elbowWeight = smootherstep(clamp((Float(spanIndex) - 12) / 8))
+    let wristWeight = smootherstep(clamp((Float(spanIndex) - 20) / 8))
+    let side: Float = left ? 1 : -1
+    func rotate(_ p: SIMD3<Float>, pivot: SIMD3<Float>, amount: Float)
+      -> SIMD3<Float>
+    {
+      let swept = rotateZ(p - pivot, angle: side * amount)
+      return pivot + rotateX(swept, angle: -side * amount * 0.5)
+    }
+    let movedWrist = rotate(wrist, pivot: elbow, amount: 0.14 * drive)
+    let arm = rotate(point, pivot: elbow, amount: 0.14 * drive * elbowWeight)
+    return rotate(arm, pivot: movedWrist, amount: 0.22 * drive * wristWeight)
+  }
+
   static func integratedPoint(
     referencePoint: SIMD3<Float>,
     sourceRoot: SIMD3<Float>,

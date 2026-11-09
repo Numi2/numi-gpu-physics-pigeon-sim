@@ -1245,3 +1245,26 @@ func crowEstimatedDistalFlexIsBilateralAndUpstrokeOnly() {
     strength: downstroke)
   #expect(simd_distance(extended, leftTip) < 1e-6)
 }
+
+
+@Test("experimental joint flex preserves root, identity and bilateral symmetry")
+func crowExperimentalJointFlex() {
+  let elbow = SIMD3<Float>(0.04, 0.20, 0.05)
+  let wrist = SIMD3<Float>(0.02, 0.31, 0.08)
+  let tip = SIMD3<Float>(0.00, 0.46, 0.10)
+  func mirror(_ p: SIMD3<Float>) -> SIMD3<Float> { SIMD3(p.x, -p.y, p.z) }
+  let noFlex = CrowFlightWingBodyIntegration.flexArticulatedWing(
+    point: tip, elbow: elbow, wrist: wrist, spanIndex: 32, left: true, strength: 0)
+  let root = CrowFlightWingBodyIntegration.flexArticulatedWing(
+    point: elbow, elbow: elbow, wrist: wrist, spanIndex: 0, left: true, strength: 1)
+  let left = CrowFlightWingBodyIntegration.flexArticulatedWing(
+    point: tip, elbow: elbow, wrist: wrist, spanIndex: 32, left: true, strength: 1)
+  let right = CrowFlightWingBodyIntegration.flexArticulatedWing(
+    point: mirror(tip), elbow: mirror(elbow), wrist: mirror(wrist),
+    spanIndex: 32, left: false, strength: 1)
+  #expect(simd_distance(noFlex, tip) < 1e-6)
+  #expect(simd_distance(root, elbow) < 1e-6)
+  #expect(simd_distance(left, mirror(right)) < 1e-6)
+  #expect(simd_distance(left, tip) > 0.005)
+  #expect(simd_distance(left, tip) < 0.15)
+}

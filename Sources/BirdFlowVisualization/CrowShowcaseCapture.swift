@@ -494,9 +494,14 @@ public enum CrowShowcaseCapture {
     )
     var aovAudits: [CrowShowcaseAOVFrameAudit] = []
     var firstFramePNG: Data?
+    let requestedWarmup = max(0, min(32, Int(ProcessInfo.processInfo.environment[
+      "CROW_CAPTURE_WARMUP_FRAMES"] ?? "0") ?? 0))
+    let warmupFrames = numiReplay != nil && arguments.aovAuditURL == nil
+      ? min(arguments.frameStart, requestedWarmup) : 0
+    let renderStart = arguments.frameStart - warmupFrames
     var replayDeploymentHighWater: Float = 0
-    if arguments.frameStart > 0, let numiReplay {
-      for index in 0..<arguments.frameStart {
+    if renderStart > 0, let numiReplay {
+      for index in 0..<renderStart {
         let fraction = Float(index) / Float(arguments.frameCount - 1)
         let earlier = numiReplay.frame(atPresentationFraction: fraction)
         replayDeploymentHighWater = max(
@@ -549,6 +554,16 @@ public enum CrowShowcaseCapture {
         "inspection_course_hidden": arguments.inspectionHideCourse,
         "experimental_flight_remex": ProcessInfo.processInfo.environment[
           "CROW_EXPERIMENTAL_FLIGHT_REMEX"] == "1",
+        "experimental_wing_joints": ProcessInfo.processInfo.environment[
+          "CROW_EXPERIMENTAL_FLIGHT_REMEX"] == "1"
+          && ProcessInfo.processInfo.environment["CROW_EXPERIMENTAL_WING_JOINTS"] == "1",
+        "experimental_landing_phase": ProcessInfo.processInfo.environment[
+          "CROW_EXPERIMENTAL_LANDING"] == "1",
+        "experimental_flight_digits": ProcessInfo.processInfo.environment[
+          "CROW_EXPERIMENTAL_FLIGHT_DIGITS"] == "1",
+        "experimental_support_plant": ProcessInfo.processInfo.environment[
+          "CROW_EXPERIMENTAL_SUPPORT_PLANT"] == "1",
+        "temporal_warmup_frames": warmupFrames,
         "policy_lighting_contract": numiReplay.policyLightingContract
           ?? "unspecified",
         "render_lighting_preset": arguments.lighting.rawValue,
@@ -571,7 +586,7 @@ public enum CrowShowcaseCapture {
       )
     }
 
-    for frameIndex in arguments.frameStart...arguments.frameEnd {
+    for frameIndex in renderStart...arguments.frameEnd {
       let isLoopProbe =
         arguments.presentation != .takeoff
         && frameIndex == arguments.frameCount - 1
@@ -603,7 +618,10 @@ public enum CrowShowcaseCapture {
             + replayDeploymentHighWater
               * (CrowTakeoffSequence.transitionEnd
                 - CrowTakeoffSequence.standingHoldEnd)
-      let phase = flightPhase * (1 - landingWeight)
+      let phase = ProcessInfo.processInfo.environment["CROW_EXPERIMENTAL_LANDING"] == "1"
+        ? CrowTakeoffSequence.experimentalLandingPhase(
+          flightPhase: flightPhase, supportWeight: landingWeight)
+        : flightPhase * (1 - landingWeight)
       // Keep the loop probe bit-identical to frame zero. Evaluating sin/cos at
       // 2π leaves a small floating-point camera offset that becomes visible at
       // feather edges and also turns a failed Data equality diagnostic into an
@@ -668,9 +686,12 @@ public enum CrowShowcaseCapture {
             frameIndex: isLoopProbe ? 0 : frameIndex
           )
           : .zero,
-        historyReset: frameIndex == arguments.frameStart || isLoopProbe,
+        historyReset: frameIndex == renderStart || isLoopProbe,
         auditReadback: arguments.aovAuditURL != nil
       )
+      // Advance temporal history on retained earlier states without emitting
+      // duplicate output frames or changing the recorded simulation.
+      if frameIndex < arguments.frameStart { continue }
       let renderedPNG = try ReadmeShowcaseCapture.pngData(
         texture: rendered.displayTexture,
         width: arguments.width,
@@ -3558,13 +3579,57 @@ private struct CrowMeshBuilder {
     )
   }
 
+  private typealias WingFlexPivots = (elbow: SIMD3<Float>, wrist: SIMD3<Float>)
+
+  /// Two estimated pivots in the same registered pre-articulation frame as
+  /// the live wing. Computing them once per surface avoids per-vertex lookups.
+  private func estimatedWingFlexPivots(
+    phase: Float, articulation: CrowNumiReplay.ArticulationFrame?, left: Bool
+  ) -> WingFlexPivots? {
+    let part: UInt8 = left ? 2 : 3
+    guard let wing = dataset.components.first(where: { $0.partIdentifier == part }),
+      wing.vertexCount == 33 * 9 else { return nil }
+    let chord = 1
+    let sourceRoot = motion.point(phase: 0.25,
+      vertexIndex: wing.vertexOffset + chord).position - referenceBodyCenter
+    let sourceLeadingRoot = motion.point(phase: 0.25,
+      vertexIndex: wing.vertexOffset).position - referenceBodyCenter
+    let link: CrowNumiReplay.ArticulatedLink = left ? .leftWing : .rightWing
+    let alignment: Float
+    if let target = articulation?.wingReferenceElevations[link],
+      let scaffold = scaffoldWingElevations[part] {
+      alignment = (left ? 1 : -1) * (target - scaffold)
+    } else { alignment = 0 }
+    let motionPhase = presentation == .takeoff
+      ? CrowTakeoffSequence.sample(phase: phase).flightPhase : phase
+    func pivot(_ span: Int) -> SIMD3<Float> {
+      let reference = motion.point(phase: 0.25,
+        vertexIndex: wing.vertexOffset + span * 9 + chord).position - referenceBodyCenter
+      return CrowFlightWingBodyIntegration.integratedPoint(
+        referencePoint: reference, sourceRoot: sourceRoot,
+        sourceLeadingRoot: sourceLeadingRoot, spanIndex: span,
+        chordIndex: chord, left: left,
+        phase: CrowFlightWingBodyIntegration.morphologyPhase(
+          proceduralPhase: motionPhase, hasExactArticulation: articulation != nil),
+        referenceAlignmentRadians: alignment)
+    }
+    return (elbow: pivot(16), wrist: pivot(23))
+  }
+
   func surfaceStates(
     phase: Float,
     articulation: CrowNumiReplay.ArticulationFrame? = nil
   ) -> [SIMD3<Float>] {
-    (0..<dataset.vertexCount).map {
+    var pivots: [UInt8: WingFlexPivots] = [:]
+    if experimentalFlightRemexEnabled
+      && ProcessInfo.processInfo.environment["CROW_EXPERIMENTAL_WING_JOINTS"] == "1"
+      && (presentation == .takeoff || presentation == .wingbeat) {
+      pivots[2] = estimatedWingFlexPivots(phase: phase, articulation: articulation, left: true)
+      pivots[3] = estimatedWingFlexPivots(phase: phase, articulation: articulation, left: false)
+    }
+    return (0..<dataset.vertexCount).map {
       transformedPoint(
-        phase: phase, vertexIndex: $0, articulation: articulation
+        phase: phase, vertexIndex: $0, articulation: articulation, flexPivots: pivots
       )
     }
   }
@@ -3592,7 +3657,8 @@ private struct CrowMeshBuilder {
         referenceBodyCenter: base
       ).bodyCenter
     case .takeoff:
-      return CrowTakeoffSequence.standingPose(phase: phase).bodyCenter
+      return CrowTakeoffSequence.standingPose(phase: phase, preserveFlightDigits:
+        ProcessInfo.processInfo.environment["CROW_EXPERIMENTAL_FLIGHT_DIGITS"] == "1").bodyCenter
     case .wingbeat:
       return base
     }
@@ -3616,7 +3682,10 @@ private struct CrowMeshBuilder {
         CrowFemoralVanePoseSample(pose), 0
       )
     case .takeoff:
-      let pose = CrowTakeoffSequence.standingPose(phase: phase)
+      let pose = CrowTakeoffSequence.standingPose(phase: phase, preserveFlightDigits:
+        ProcessInfo.processInfo.environment["CROW_EXPERIMENTAL_FLIGHT_DIGITS"] == "1",
+        plantOnMovingSupport: ProcessInfo.processInfo.environment["CROW_EXPERIMENTAL_SUPPORT_PLANT"] == "1"
+          && (articulation?.confirmedSupportWeight ?? 0) > 0)
       return (
         CrowStandingNeckPose.accepted(articulation) ?? pose.neckPose,
         CrowFemoralVanePoseSample(pose),
@@ -3695,7 +3764,8 @@ private struct CrowMeshBuilder {
   private func transformedPoint(
     phase: Float,
     vertexIndex: Int,
-    articulation: CrowNumiReplay.ArticulationFrame?
+    articulation: CrowNumiReplay.ArticulationFrame?,
+    flexPivots: [UInt8: WingFlexPivots]
   ) -> SIMD3<Float> {
     let takeoff =
       presentation == .takeoff
@@ -3762,12 +3832,18 @@ private struct CrowMeshBuilder {
           referenceAlignmentRadians: referenceAlignment
         )
         if let strength = articulation?.wingUpstrokeStrength[wingLink] {
-          point = CrowFlightWingBodyIntegration.flexDistalWing(
-            point: point,
-            shoulder: CrowFlightWingBodyIntegration.bodyRoot(
-              chordIndex: 0, left: partIdentifier == 2),
-            spanIndex: spanIndex, left: partIdentifier == 2,
-            strength: strength)
+          if let pivots = flexPivots[partIdentifier] {
+            point = CrowFlightWingBodyIntegration.flexArticulatedWing(
+              point: point, elbow: pivots.elbow, wrist: pivots.wrist,
+              spanIndex: spanIndex, left: partIdentifier == 2, strength: strength)
+          } else {
+            point = CrowFlightWingBodyIntegration.flexDistalWing(
+              point: point,
+              shoulder: CrowFlightWingBodyIntegration.bodyRoot(
+                chordIndex: 0, left: partIdentifier == 2),
+              spanIndex: spanIndex, left: partIdentifier == 2,
+              strength: strength)
+          }
         }
         if let takeoff {
           let folded = CrowTakeoffSequence.foldedWingPoint(
@@ -3938,7 +4014,10 @@ private struct CrowMeshBuilder {
         referenceBodyCenter: bodyCenter
       )
     case .takeoff:
-      standingPose = CrowTakeoffSequence.standingPose(phase: phase)
+      standingPose = CrowTakeoffSequence.standingPose(phase: phase, preserveFlightDigits:
+        ProcessInfo.processInfo.environment["CROW_EXPERIMENTAL_FLIGHT_DIGITS"] == "1",
+        plantOnMovingSupport: ProcessInfo.processInfo.environment["CROW_EXPERIMENTAL_SUPPORT_PLANT"] == "1"
+          && (articulation?.confirmedSupportWeight ?? 0) > 0)
     case .wingbeat:
       standingPose = nil
     }
