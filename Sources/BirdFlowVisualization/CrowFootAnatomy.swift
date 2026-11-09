@@ -77,7 +77,11 @@ enum CrowFootAnatomy {
       )
     }
 
-    let pads = plantarPads(digit: digit, supportHeight: supportHeight)
+    // Takeoff retracts each digit away from the standing support. Keep the
+    // plantar pads and claw attached to its moving tip rather than leaving
+    // them behind at the original platform height.
+    let digitSupportHeight = max(supportHeight, digit.tip.z)
+    let pads = plantarPads(digit: digit, supportHeight: digitSupportHeight)
     let planarDirection = distalPlanarDirection(digit)
     for pad in pads {
       appendEllipsoid(
@@ -95,7 +99,7 @@ enum CrowFootAnatomy {
     let clawBase = SIMD3<Float>(
       contactTip.x,
       contactTip.y,
-      supportHeight + 0.00125
+      digitSupportHeight + 0.00125
     )
     let clawKnee = clawBase + 0.0034 * planarDirection + SIMD3<Float>(0, 0, 0.00055)
     let clawTip = clawBase + 0.0072 * planarDirection + SIMD3<Float>(0, 0, -0.00105)

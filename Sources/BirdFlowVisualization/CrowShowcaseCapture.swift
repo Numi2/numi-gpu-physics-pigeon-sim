@@ -473,8 +473,8 @@ public enum CrowShowcaseCapture {
     if let numiReplay {
       let audit: [String: Any] = [
         "schema": "birdflow.numi-crow-articulation.v1",
-        "classification": "joint-exact accepted-state articulation of a high-detail estimated crow",
-        "claim_boundary": "Numi owns accepted rigid-link relative transforms for body, sweep, flap, terminal wings, tail, thighs, shanks, and feet. BirdFlow registration pivots, skinning between rigid links, feather shapes, and surface deformation remain estimated presentation geometry.",
+        "classification": "accepted-state driven presentation of an estimated crow",
+        "claim_boundary": "Numi provides accepted body-relative rigid-link transforms for sweep, flap, terminal wings, tail, thighs, shanks, feet, and v15 head. BirdFlow registration pivots, skinning, feather shapes, support presentation, and surface deformation remain estimated; the rendered mesh is not an exact reconstruction.",
         "payload_sha256": numiReplay.payloadSHA256,
         "task": numiReplay.task,
         "journey_variant": numiReplay.journeyVariant,
@@ -547,7 +547,12 @@ public enum CrowShowcaseCapture {
           numiReplay.takeoffDeploymentProgress(of: replayFrame)
         )
       }
-      let phase = replayFrame == nil
+      let supportedPresentation =
+        replayFrame.map { numiReplay?.usesSupportedNavigationPresentation(of: $0) ?? false }
+        ?? false
+      let phase = supportedPresentation
+        ? Float.zero
+        : replayFrame == nil
         ? timelineFraction
         : replayDeploymentHighWater >= 0.999
           ? CrowTakeoffSequence.transitionEnd
@@ -737,9 +742,11 @@ public enum CrowShowcaseCapture {
       tracking: 1.4 * scale
     )
     drawText(
-      presentation == .standing
-        ? "READY"
-        : (presentation == .takeoff ? "TAKEOFF" : "FLIGHT"),
+      replayStep != nil
+        ? "SIMULATED REPLAY"
+        : (presentation == .standing
+          ? "READY"
+          : (presentation == .takeoff ? "TAKEOFF" : "FLIGHT")),
       at: CGPoint(x: margin, y: CGFloat(height) - 84 * scale),
       font: labelFont,
       color: accent,
@@ -1632,8 +1639,12 @@ private final class CrowShowcaseRenderer {
     guard let commandBuffer = backend.queue.makeCommandBuffer() else {
       throw VisualizationError.pipeline("crow command buffer")
     }
-    let currentBodyVanePose = meshBuilder.bodyVanePose(phase: phase)
-    let previousBodyVanePose = meshBuilder.bodyVanePose(phase: priorPhase)
+    let currentBodyVanePose = meshBuilder.bodyVanePose(
+      phase: phase, articulation: articulation
+    )
+    let previousBodyVanePose = meshBuilder.bodyVanePose(
+      phase: priorPhase, articulation: priorArticulation
+    )
     let currentCranialBreathing = 1 + 0.012 * sin(2 * Float.pi * phase)
     let previousCranialBreathing = 1 + 0.012 * sin(2 * Float.pi * priorPhase)
     let bodyVaneFrame = try bodyVaneGeometryDeformer?.encode(
@@ -2729,14 +2740,19 @@ private final class CrowShowcaseRenderer {
     output.reserveCapacity(current.bodyPositions.count * edges.count * 2)
     for bodyIndex in current.bodyPositions.indices {
       guard bodyIndex < halfExtents.count else { continue }
-      let currentCenter = currentCrowCenter
-        + current.bodyPositions[bodyIndex] - current.rootPosition
       let half = halfExtents[bodyIndex]
       let color = SIMD4<Float>(colors[bodyIndex], 0.96)
-      let currentCorners = cornerSigns.map { currentCenter + $0 * half }
+      let currentCorners = cornerSigns.map {
+        currentCrowCenter + current.pointInCrowFrame(
+          bodyIndex: bodyIndex, localPoint: $0 * half
+        )
+      }
       for (edgeIndex, edge) in edges.enumerated() {
         for corner in [edge.0, edge.1] {
-          let normal = simd_normalize(cornerSigns[corner])
+          let normal = simd_normalize(
+            current.pointInCrowFrame(bodyIndex: bodyIndex, localPoint: cornerSigns[corner])
+              - current.pointInCrowFrame(bodyIndex: bodyIndex, localPoint: .zero)
+          )
           output.append(
             CrowSurfaceTemporalVertexGPU(
               position: SIMD4<Float>(currentCorners[corner], 1),
@@ -3388,7 +3404,7 @@ private struct CrowMeshBuilder {
   }
 
   func bodyVanePose(
-    phase: Float
+    phase: Float, articulation: CrowNumiReplay.ArticulationFrame? = nil
   ) -> (
     neckPose: CrowStandingNeckPose?,
     femoralPose: CrowFemoralVanePoseSample?,
@@ -3400,11 +3416,14 @@ private struct CrowMeshBuilder {
         phase: phase,
         referenceBodyCenter: .zero
       )
-      return (pose.neckPose, CrowFemoralVanePoseSample(pose), 0)
+      return (
+        CrowStandingNeckPose.accepted(articulation) ?? pose.neckPose,
+        CrowFemoralVanePoseSample(pose), 0
+      )
     case .takeoff:
       let pose = CrowTakeoffSequence.standingPose(phase: phase)
       return (
-        pose.neckPose,
+        CrowStandingNeckPose.accepted(articulation) ?? pose.neckPose,
         CrowFemoralVanePoseSample(pose),
         CrowTakeoffSequence.sample(phase: phase).transitionProgress
       )
@@ -3689,6 +3708,7 @@ private struct CrowMeshBuilder {
       standingPose = nil
     }
     let posedBodyCenter = standingPose?.bodyCenter ?? bodyCenter
+    let neckPose = CrowStandingNeckPose.accepted(articulation) ?? standingPose?.neckPose
     let bodyPlumageDeploymentProgress: Float = {
       switch presentation {
       case .standing: 0
@@ -3699,7 +3719,7 @@ private struct CrowMeshBuilder {
     }()
     appendCrowBodyLoft(
       center: posedBodyCenter,
-      neckPose: standingPose?.neckPose,
+      neckPose: neckPose,
       to: &vertices
     )
     appendRumpTailUnderlayer(
@@ -3742,7 +3762,7 @@ private struct CrowMeshBuilder {
       projectedPixelsPerMeter: projectedPixelsPerMeter,
       to: &vertices
     )
-    if let neckPose = standingPose?.neckPose {
+    if let neckPose {
       transformHeadVertices(
         in: headVertexStart..<vertices.count,
         bodyCenter: posedBodyCenter,
@@ -3759,7 +3779,7 @@ private struct CrowMeshBuilder {
     )
     appendBodyFeatherTracts(
       bodyCenter: posedBodyCenter,
-      neckPose: standingPose?.neckPose,
+      neckPose: neckPose,
       deploymentProgress: bodyPlumageDeploymentProgress,
       projectedPixelsPerMeter: projectedPixelsPerMeter,
       to: &vertices
@@ -3771,7 +3791,7 @@ private struct CrowMeshBuilder {
     )
     appendThroatBridgeFeathers(
       bodyCenter: posedBodyCenter,
-      neckPose: standingPose?.neckPose,
+      neckPose: neckPose,
       projectedPixelsPerMeter: projectedPixelsPerMeter,
       to: &vertices
     )
@@ -3834,7 +3854,9 @@ private struct CrowMeshBuilder {
         projectedPixelsPerMeter: projectedPixelsPerMeter,
         to: &vertices
       )
-      if presentation == .standing || presentation == .takeoff {
+      if (presentation == .standing || presentation == .takeoff)
+        && articulation == nil
+      {
         // The support remains fixed in world space while the body lifts. This
         // makes held toe contact and subsequent geometric separation explicit
         // without compositing a photographed or image-space perch.

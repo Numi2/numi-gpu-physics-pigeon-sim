@@ -55,6 +55,9 @@ public struct CrowNumiReplay: Sendable {
   public struct ArticulationFrame: Sendable {
     public let replayStep: Int
     public let deltas: [ArticulatedLink: LinkDelta]
+    /// Optional in older 15-action models; present in the v15 active-head body.
+    public let headDelta: LinkDelta?
+    public let headReferencePosition: SIMD3<Float>?
 
     public func delta(for link: ArticulatedLink) -> LinkDelta? {
       deltas[link]
@@ -118,7 +121,24 @@ public struct CrowNumiReplay: Sendable {
   }
   public struct NavigationCourseFrame: Sendable {
     public let rootPosition: SIMD3<Float>
+    public let rootOrientationXYZW: SIMD4<Float>
     public let bodyPositions: [SIMD3<Float>]
+    public let bodyOrientationsXYZW: [SIMD4<Float>]
+
+    /// Convert an obstacle-local point to the current crow-body frame.
+    /// Both accepted obstacle and crow orientations matter when the crow
+    /// turns or banks; simply subtracting their positions is incorrect.
+    public func pointInCrowFrame(bodyIndex: Int, localPoint: SIMD3<Float>)
+      -> SIMD3<Float>
+    {
+      let body = bodyOrientationsXYZW[bodyIndex]
+      let root = rootOrientationXYZW
+      let bodyRotation = simd_quatf(ix: body.x, iy: body.y, iz: body.z, r: body.w)
+      let rootRotation = simd_quatf(ix: root.x, iy: root.y, iz: root.z, r: root.w)
+      return rootRotation.inverse.act(
+        bodyPositions[bodyIndex] + bodyRotation.act(localPoint) - rootPosition
+      )
+    }
   }
 
   public static let navigationCourseBodyNames = [
@@ -263,14 +283,25 @@ public struct CrowNumiReplay: Sendable {
       "crow_body", "crow_left_wing", "crow_right_wing", "crow_tail",
       "crow_left_foot", "crow_right_foot",
     ]
+    let isV15Navigation =
+      payload.task == "american_crow_v15_conditional_landing_navigation_development_v1"
+    let isPriorCrow =
+      payload.task.hasPrefix("birdflow_american_crow_journey_v") ||
+      payload.task == "birdflow_american_crow_navigation_v10_world_model"
+    let v15Bodies = Set(ArticulatedLink.allCases.map(\.rawValue))
+      .union(["crow_neck_yaw_link", "crow_head", "crow_lower_beak"])
+      .union(navigationCourseBodyNames)
     guard payload.classification == "simulated accepted-state replay",
-      (payload.task.hasPrefix("birdflow_american_crow_journey_v") ||
-        payload.task == "birdflow_american_crow_navigation_v10_world_model"),
+      isPriorCrow || isV15Navigation,
       payload.frameCount == payload.frames.count,
       payload.frames.count >= 2,
-      payload.nq >= 20,
-      payload.nv >= 19,
-      payload.actionCount == 15,
+      payload.nq >= (isV15Navigation ? 23 : 20),
+      payload.nv >= (isV15Navigation ? 22 : 19),
+      payload.actionCount == (isV15Navigation ? 18 : 15),
+      !isV15Navigation || (
+        v15Bodies.isSubset(of: Set(payload.bodyNames))
+        && Set(payload.bodyNames).count == payload.bodyNames.count
+      ),
       payload.bodyCount == payload.bodyNames.count,
       payload.bodyStateStride == 13,
       requiredBodies.isSubset(of: Set(payload.bodyNames)),
@@ -384,20 +415,44 @@ public struct CrowNumiReplay: Sendable {
     deltas[.body] = LinkDelta(
       rotationXYZW: SIMD4(0, 0, 0, 1), translation: .zero
     )
-    return ArticulationFrame(replayStep: frame.step, deltas: deltas)
+    let referenceHead = bodyPose(named: "crow_head", in: frames[0])?
+      .relative(to: referenceBody)
+    let currentHead = bodyPose(named: "crow_head", in: frame)?
+      .relative(to: currentBody)
+    let headDelta: LinkDelta?
+    if let referenceHead, let currentHead {
+      headDelta = RigidPose.delta(from: referenceHead, to: currentHead)
+    } else {
+      headDelta = nil
+    }
+    return ArticulationFrame(
+      replayStep: frame.step, deltas: deltas,
+      headDelta: headDelta, headReferencePosition: referenceHead?.position
+    )
   }
 
   public func navigationCourseFrame(of frame: Frame) -> NavigationCourseFrame? {
-    let positions = Self.navigationCourseBodyNames.compactMap {
-      bodyPosition(named: $0, in: frame)
+    let bodies = Self.navigationCourseBodyNames.compactMap {
+      bodyPose(named: $0, in: frame)
     }
-    guard positions.count == Self.navigationCourseBodyNames.count else {
-      return nil
-    }
+    guard let root = bodyPose(named: ArticulatedLink.body.rawValue, in: frame),
+      bodies.count == Self.navigationCourseBodyNames.count
+    else { return nil }
     return NavigationCourseFrame(
-      rootPosition: rootPosition(of: frame),
-      bodyPositions: positions
+      rootPosition: root.position,
+      rootOrientationXYZW: root.orientationXYZW,
+      bodyPositions: bodies.map(\.position),
+      bodyOrientationsXYZW: bodies.map(\.orientationXYZW)
     )
+  }
+
+  /// Presentation-only switch grounded in recorded completion and support
+  /// reward. It is not itself a foot-contact qualification or a biomechanical
+  /// inference; the outcome is emitted by the owning task.
+  public func usesSupportedNavigationPresentation(of frame: Frame) -> Bool {
+    task == "american_crow_v15_conditional_landing_navigation_development_v1"
+      && (frame.outcomes["navigation_completion"] ?? 0) >= 1
+      && (frame.outcomes["ground_support"] ?? 0) > 0
   }
 
   /// Maps accepted root lift onto the retained standing-to-flight topology

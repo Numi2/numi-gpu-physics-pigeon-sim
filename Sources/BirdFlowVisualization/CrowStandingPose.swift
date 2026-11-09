@@ -26,6 +26,25 @@ struct CrowStandingNeckPose: Equatable {
   let pitchRadians: Float
   let rollRadians: Float
 
+  /// Retarget accepted head motion to the estimated BirdFlow neck pivot.
+  /// The pivot compensation keeps the recorded head-link transform intact
+  /// at the reference head center; blending onto the neck remains estimated.
+  static func accepted(
+    _ articulation: CrowNumiReplay.ArticulationFrame?
+  ) -> CrowStandingNeckPose? {
+    guard let delta = articulation?.headDelta,
+      let reference = articulation?.headReferencePosition else { return nil }
+    let q = delta.rotationXYZW
+    let roll = atan2(2 * (q.w*q.x + q.y*q.z), 1 - 2 * (q.x*q.x + q.y*q.y))
+    let pitch = asin(min(max(2 * (q.w*q.y - q.z*q.x), -1), 1))
+    let yaw = atan2(2 * (q.w*q.z + q.x*q.y), 1 - 2 * (q.y*q.y + q.z*q.z))
+    let offset = pivotOffset - reference
+    let translation = delta.translation + delta.rotate(direction: offset) - offset
+    return CrowStandingNeckPose(
+      translation: translation, yawRadians: yaw, pitchRadians: pitch, rollRadians: roll
+    )
+  }
+
   func transform(
     offset: SIMD3<Float>,
     coupling: Float

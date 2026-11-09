@@ -1,0 +1,50 @@
+{
+  "artifacts_sha256": {
+    "i-audit.json": "26664bfc20e70239e61dcf965c758f3a0583f8b4701d76c0753a5247b9fe0745",
+    "i-flight-before-foot-fix.png": "bcee29906db4bb2cd592a94b9eecf1399e9f794b3b2aca2c25bb693dd4c6e9c7",
+    "i-flight.png": "27ddb781318878166c65ed2db434cd9cbe11196a2d81f9eab72364fcc7186136",
+    "i-landing.png": "2b3a3050c4840cd12dac6631453a53ca8d4c6a675333a56c1ed81902ef522d95",
+    "i-projection.json": "3d4da328362b22b3bbdc49b289d969ec0d35e8b6668a377c1a484706f9ef8930",
+    "j-audit.json": "1a7d39a9057601e7e0d611c1b8efa4142349dfb545217aa9b8b06b31ce52824f",
+    "j-flight.png": "41bf8cf2a8df56a2fed8b4d93f8d71a56d429425cf5a6fe8daf01e8d5b0f0c8a",
+    "j-landing.png": "16df810d41345332be0897ac2ae012f9d2e8a0eb2a4fdda3faa120eb39998e39",
+    "j-projection.json": "0bb4d8716b5d538644f07477ec4f56a1f913d56abda98846233d1ebf9d24fd94"
+  },
+  "binary_sha256": "3e8e9b75d9e07579b7622580ef27618f771576ef25db2683ecfed97e63284f8a",
+  "build_command": "swift build --scratch-path .build/release-no-wmo -c release -Xswiftc -no-whole-module-optimization --product birdflow-capture",
+  "capture_settings": {
+    "camera_distance_m": 1.15,
+    "camera_pitch": 0.25,
+    "camera_yaw": -1.25,
+    "height": 1080,
+    "lighting": "overcast",
+    "width": 1920
+  },
+  "classification": "Sparse accepted-state renders for visual investigation; not continuous video or biological validation",
+  "full_replay_archive": "Numi Lab artifacts/crow-final-video-replay-20261109, commit 7d32ee3722a1f26c58ad111b46e9edb9ce3b401c",
+  "replays": {
+    "i": {
+      "full_json_sha256": "5efa5a89a028ca5ef039191778bced33c00d20decc874284edfc53e2b165f1de",
+      "full_payload_sha256": "4816c0ffeb44faffecc9cc7d4e1612c95447aa2f41ac7e465db91f38760f4083"
+    },
+    "j": {
+      "full_json_sha256": "d3d396fc3e41d7f2d56c799c18bf7b96db96de51205a69319fd920a714ac6f4f",
+      "full_payload_sha256": "710606203b7c7632ac20cdfd6c090fdb87c0d1f568ee6ef2171107822c606138"
+    }
+  },
+  "selected_steps": [
+    1,
+    1500,
+    2999
+  ],
+  "source_base_commit": "c469a639e071f46c30aa38790444adb1082331ba",
+  "source_file_sha256": {
+    "Sources/BirdFlowVisualization/CrowFootAnatomy.swift": "dd4adc5e89e6adea2992b3ba9beaf6a9c768e942116d1be867df3262f7875802",
+    "Sources/BirdFlowVisualization/CrowNumiReplay.swift": "ec93cc8d922b94b8d51b23ea99c2ae5b1897eb8da7c93adb7535ef0a3275acbf",
+    "Sources/BirdFlowVisualization/CrowShowcaseCapture.swift": "e8e622a4b8d0a7fffa557e83f824757e15cfe50e0db41fb75a226060aba253b0",
+    "Sources/BirdFlowVisualization/CrowStandingPose.swift": "4941d73c9c4bbfafc24b4e7f43e697118e2084a0c79548a88b7615298a77329f",
+    "Tests/BirdFlowVisualizationTests/CrowFootAnatomyTests.swift": "269f2c743a52379613943fa59de162689137522fefbce4c12a929c8e1f44bbce",
+    "Tests/BirdFlowVisualizationTests/CrowNumiReplayTests.swift": "f8cd20c9197ccc00c84bcaf5a0d613028f78af11f5c3cbefcfcb18a7c0c60119",
+    "Tests/BirdFlowVisualizationTests/CrowV15ReplayTests.swift": "ef79f5a40eb9096e816f72cfe27000855042e802d968d8a423cb4e6c7dac5059"
+  }
+}

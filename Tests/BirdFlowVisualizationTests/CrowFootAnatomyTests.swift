@@ -46,3 +46,26 @@ func crowDigitalPadsMeetSupportUnderArticulatedPhalanges() {
     }
   }
 }
+
+
+@Test("crow lifted digit retains pads and claws")
+func crowLiftedDigitRetainsPadsAndClaws() {
+  let pose = CrowStandingPose.sample(phase: 0.37)
+  for foot in [pose.leftFoot, pose.rightFoot] {
+    for digit in foot.digits {
+      let lift: Float = 0.15
+      let lifted = CrowStandingDigitPose(
+        digitNumber: digit.digitNumber,
+        nodes: digit.nodes.map { $0 + SIMD3<Float>(0, 0, lift) }
+      )
+      let vertices = CrowFootAnatomy.vertices(
+        digit: lifted, supportHeight: pose.supportHeight,
+        keratinColor: .zero, padColor: .zero, clawColor: .zero
+      )
+      #expect(!vertices.isEmpty)
+      #expect(vertices.allSatisfy {
+        $0.position.z > pose.supportHeight + lift - 0.005
+      })
+    }
+  }
+}

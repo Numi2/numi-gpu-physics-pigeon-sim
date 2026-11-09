@@ -107,6 +107,7 @@ func v10NavigationReplayExposesAcceptedCourseGeometry() throws {
     "crow_left_foot", "crow_right_foot",
   ] + CrowNumiReplay.navigationCourseBodyNames
   var bodyStates = [Float](repeating: 0, count: bodyNames.count * 13)
+  for index in bodyNames.indices { bodyStates[index * 13 + 6] = 1 }
   for (index, name) in CrowNumiReplay.navigationCourseBodyNames.enumerated() {
     let body = bodyNames.firstIndex(of: name)!
     bodyStates[body * 13] = Float(index + 1)
