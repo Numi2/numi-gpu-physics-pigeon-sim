@@ -1,0 +1,74 @@
+{
+  "classification": "simulated replay visual evidence; not biological qualification",
+  "dimensions": [
+    1600,
+    900
+  ],
+  "duration_seconds": 120,
+  "files": {
+    "README.md": {
+      "bytes": 5043,
+      "sha256": "7a6f5894dcddc45578c5963db4d0522ece3ac41408f2d6933e20994f502d69af"
+    },
+    "anatomy-regression-tests.log": {
+      "bytes": 1301,
+      "sha256": "fe59cb5d190aa905e8cd754c4abb26f2c5f26f5798dcec3eb2613edaff627813"
+    },
+    "capture-audits.json": {
+      "bytes": 21758,
+      "sha256": "b25ac8eface32b0aff48f0acdf7867bec17e0f7ac10a065c29a668707eb775b7"
+    },
+    "contact-before-after.png": {
+      "bytes": 51265,
+      "sha256": "3d5d10e06b00d303f4272a5bde7663413cbb448fb8a7438e8d2c1cd6968b0500"
+    },
+    "contact-comparison.json": {
+      "bytes": 547,
+      "sha256": "b94cbde945c2f1a0e5d71a8e9142ac809e210505d602359463cdae7f24335301"
+    },
+    "crow-both-layouts.mp4": {
+      "bytes": 39582362,
+      "sha256": "7fb164266555024b10123a3ee3f113eafa81e249d3dc0be04b270b47c7788b81"
+    },
+    "exploratory-render-failed.log.gz": {
+      "bytes": 31638,
+      "sha256": "28e044c7d6caa683d7aed79e70a9ccdeccb1e6be41f63a3012f6a81f368e8eb2"
+    },
+    "final-render.log.gz": {
+      "bytes": 31508,
+      "sha256": "99562063422c9cc83fb0c0b1879a3a81d28c91751d628ca61fc1abadd6833101"
+    },
+    "landing-timeline-i.png": {
+      "bytes": 292076,
+      "sha256": "1e264eeb5d1619f9f56fefc17e8ae8a557671fe72cc286a56068e7f36ff1c7c9"
+    },
+    "landing-timeline-j.png": {
+      "bytes": 214079,
+      "sha256": "8d79f153bdf315479f24d5a76c16a9b4c494a596fcaaeb6c4cc66129f3ec2f78"
+    },
+    "projection-checks.json": {
+      "bytes": 814,
+      "sha256": "c992b418fa7b7a21ec574a76f82b498935688bc343e52359d1a0e1685025109d"
+    },
+    "projection-regression-tests.log": {
+      "bytes": 104,
+      "sha256": "74a175a1506229f3d6c5ed718bb7572b0467e3eac526d30c7975e8095aca381a"
+    },
+    "renderer-smoke-flight-i.mp4": {
+      "bytes": 256489,
+      "sha256": "38587a1fda11526bf01d85649f343713d5c7455928037dcb08b6d506df521e44"
+    },
+    "renderer-smoke-landing-j.mp4": {
+      "bytes": 22565,
+      "sha256": "b6c731bb70c614c1fa5fae8e00142035ada9dcd2c391a3abf16ded3e326b1c46"
+    },
+    "timeline-checks.json": {
+      "bytes": 1153,
+      "sha256": "76697421f855e4a0770ffe878d9e520700aa9e467d1c9e9806e63e72a4f5cb99"
+    }
+  },
+  "fps": 50,
+  "frame_count": 6000,
+  "renderer_binary_sha256": "71b8f7b93beaee867bbab303011d66d093e110ea72a9d5df46e3836633d73b28",
+  "renderer_source_commit": "747c5652775dcbb43a7f896a43edfbe97f3f0a6d"
+}

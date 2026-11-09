@@ -1,0 +1,32 @@
+[
+  {
+    "case": "final_timeout_requires_opt_in",
+    "passed": true,
+    "exit": 2,
+    "stderr": "project-crow-replay: projection contains an unqualified terminal frame"
+  },
+  {
+    "case": "complete_final_timeout_allowed",
+    "passed": true,
+    "exit": 0,
+    "stderr": ""
+  },
+  {
+    "case": "intermediate_terminal_rejected",
+    "passed": true,
+    "exit": 2,
+    "stderr": "project-crow-replay: projection contains an unqualified terminal frame"
+  },
+  {
+    "case": "non_timeout_terminal_rejected",
+    "passed": true,
+    "exit": 2,
+    "stderr": "project-crow-replay: projection contains an unqualified terminal frame"
+  },
+  {
+    "case": "incomplete_terminal_rejected",
+    "passed": true,
+    "exit": 2,
+    "stderr": "project-crow-replay: projection contains an unqualified terminal frame"
+  }
+]

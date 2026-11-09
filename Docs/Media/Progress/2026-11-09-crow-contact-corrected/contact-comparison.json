@@ -1,0 +1,11 @@
+{
+  "classification": "matched rendered presentation comparison; not contact validation",
+  "layout": "reserved-final-i",
+  "source_step": 2101,
+  "resolution": [1600, 900],
+  "difference_bounds_xy_exclusive": [717, 536, 899, 635],
+  "changed_pixels": 5932,
+  "maximum_8bit_channel_difference": 24,
+  "airborne_layout_i_source_step_1251": "pixel-identical with and without contact shading at 800 x 450",
+  "note": "Both frames use the same replay state, camera, frame dimensions and lighting. Contact shading is an estimated appearance effect."
+}

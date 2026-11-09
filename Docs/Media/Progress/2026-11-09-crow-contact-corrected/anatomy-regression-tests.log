@@ -1,0 +1,19 @@
+[0/1] Planning build
+Test Suite 'Selected tests' started at 2026-11-09 15:49:38.432.
+Test Suite 'BirdFlowMetalPackageTests.xctest' started at 2026-11-09 15:49:38.437.
+Test Suite 'BirdFlowMetalPackageTests.xctest' passed at 2026-11-09 15:49:38.437.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'Selected tests' passed at 2026-11-09 15:49:38.437.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.006) seconds
+◇ Test run started.
+↳ Testing Library Version: 1902
+↳ Target Platform: arm64e-apple-macos14.0
+◇ Test "lifted toe pads follow each individual phalanx" started.
+◇ Test "crow digital pads meet support under articulated phalanges" started.
+◇ Test "crow lifted digit retains pads and claws" started.
+◇ Test "V15 accepted crow replay preserves 18-action identity and articulation" started.
+✔ Test "lifted toe pads follow each individual phalanx" passed after 0.001 seconds.
+✔ Test "crow lifted digit retains pads and claws" passed after 0.001 seconds.
+✔ Test "crow digital pads meet support under articulated phalanges" passed after 0.001 seconds.
+✔ Test "V15 accepted crow replay preserves 18-action identity and articulation" passed after 0.003 seconds.
+✔ Test run with 4 tests in 0 suites passed after 0.003 seconds.

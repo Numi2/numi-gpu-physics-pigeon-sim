@@ -1,0 +1,40 @@
+{
+  "i": {
+    "frames": 3000,
+    "first_step": 1,
+    "final_step": 3000,
+    "final_timeout": true,
+    "intermediate_terminals": 0,
+    "first_waypoint_steps": [
+      859,
+      1113,
+      1371,
+      1578,
+      1728
+    ],
+    "first_completion_support_step": 1942,
+    "ten_consecutive_support_samples_confirmed_step": 2037,
+    "terminal_support": 0.012000000104308128,
+    "projected_json_sha256": "4fc70edeb1d94d48b7df1d12d96ea6590c572d72866bb073b0fb9cee22d9571f",
+    "original_gzip_sha256": "2a527cd7df483ec58aab840a732f07244f63a10dd876d742993d1a09b4269fc0"
+  },
+  "j": {
+    "frames": 3000,
+    "first_step": 1,
+    "final_step": 3000,
+    "final_timeout": true,
+    "intermediate_terminals": 0,
+    "first_waypoint_steps": [
+      802,
+      1046,
+      1300,
+      1484,
+      1553
+    ],
+    "first_completion_support_step": 1676,
+    "ten_consecutive_support_samples_confirmed_step": 1689,
+    "terminal_support": 0.012000000104308128,
+    "projected_json_sha256": "e1d606693a4bd699f9d597dfdc704c7c216177df366ebd04ac51634fe4017fd0",
+    "original_gzip_sha256": "4b4676cd95a259a9590504e9d8d8c33dce6f9049c3bbdb8ad23f073ed23aa070"
+  }
+}
