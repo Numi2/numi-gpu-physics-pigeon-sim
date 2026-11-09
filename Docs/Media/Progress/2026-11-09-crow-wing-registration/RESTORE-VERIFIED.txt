@@ -1,0 +1,7 @@
+Independent GitHub restore verification, 2026-11-09
+
+A fresh shallow, blob-filtered clone was fetched from the GitHub origin at
+commit 90cd810051548c6a891311e53e615c5717eb52c5 and the evidence directory
+was restored into a separate temporary checkout. All 35 entries in
+SHA256SUMS.json matched their recorded SHA-256 and byte counts, totaling
+41,905,234 bytes. The temporary checkout was removed after verification.
