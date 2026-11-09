@@ -1,0 +1,22 @@
+[0/1] Planning build
+Building for production...
+[0/6] Write swift-version-3CD7052B146186F2.txt
+Build complete! (0.19s)
+Test Suite 'Selected tests' started at 2026-11-09 20:07:45.151.
+Test Suite 'BirdFlowMetalPackageTests.xctest' started at 2026-11-09 20:07:45.157.
+Test Suite 'BirdFlowMetalPackageTests.xctest' passed at 2026-11-09 20:07:45.157.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'Selected tests' passed at 2026-11-09 20:07:45.157.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.006) seconds
+◇ Test run started.
+↳ Testing Library Version: 1902
+↳ Target Platform: arm64e-apple-macos14.0
+◇ Test "experimental support pose moves the plantar target with the body reference" started.
+◇ Test "experimental joint flex preserves root, identity and bilateral symmetry" started.
+◇ Test "experimental flight feet keep separate digit chains" started.
+◇ Test "experimental supported landing spreads the visual fold continuously" started.
+✔ Test "experimental joint flex preserves root, identity and bilateral symmetry" passed after 0.001 seconds.
+✔ Test "experimental supported landing spreads the visual fold continuously" passed after 0.001 seconds.
+✔ Test "experimental support pose moves the plantar target with the body reference" passed after 0.001 seconds.
+✔ Test "experimental flight feet keep separate digit chains" passed after 0.001 seconds.
+✔ Test run with 4 tests in 0 suites passed after 0.001 seconds.
