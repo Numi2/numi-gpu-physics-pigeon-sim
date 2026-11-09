@@ -1204,3 +1204,44 @@ func crowRegisteredWingReachesDownstroke() {
     #expect(simd_length(delta.transform(point: shoulder, around: shoulder) - shoulder) < 1e-6)
   }
 }
+
+@Test("estimated distal flex is bilateral, bounded and upstroke only")
+func crowEstimatedDistalFlexIsBilateralAndUpstrokeOnly() {
+  let noMovement = CrowFlightWingBodyIntegration.estimatedUpstrokeStrength(
+    previousElevation: 0.2, nextElevation: 0.2, elapsedSeconds: 0.04)
+  let downstroke = CrowFlightWingBodyIntegration.estimatedUpstrokeStrength(
+    previousElevation: 0.4, nextElevation: 0.1, elapsedSeconds: 0.04)
+  let upstroke = CrowFlightWingBodyIntegration.estimatedUpstrokeStrength(
+    previousElevation: 0.1, nextElevation: 0.4, elapsedSeconds: 0.04)
+  #expect(noMovement == 0)
+  #expect(downstroke == 0)
+  #expect(upstroke > 0.95 && upstroke <= 1)
+  #expect(CrowFlightWingBodyIntegration.estimatedUpstrokeStrength(
+    previousElevation: 0, nextElevation: 1, elapsedSeconds: 0) == 0)
+
+  let leftShoulder = SIMD3<Float>(0.08, 0.05, 0.02)
+  let rightShoulder = SIMD3<Float>(0.08, -0.05, 0.02)
+  let leftTip = leftShoulder + SIMD3<Float>(0, 0.4, 0.05)
+  let rightTip = rightShoulder + SIMD3<Float>(0, -0.4, 0.05)
+  let left = CrowFlightWingBodyIntegration.flexDistalWing(
+    point: leftTip, shoulder: leftShoulder, spanIndex: 32, left: true,
+    strength: upstroke)
+  let right = CrowFlightWingBodyIntegration.flexDistalWing(
+    point: rightTip, shoulder: rightShoulder, spanIndex: 32, left: false,
+    strength: upstroke)
+  #expect(abs(left.x - right.x) < 1e-6)
+  #expect(abs(left.y + right.y) < 1e-6)
+  #expect(abs(left.z - right.z) < 1e-6)
+  #expect(left.x < leftTip.x)
+  #expect(left.z < leftTip.z)
+  #expect(abs(simd_distance(left, leftShoulder)
+    - simd_distance(leftTip, leftShoulder)) < 1e-6)
+  let root = CrowFlightWingBodyIntegration.flexDistalWing(
+    point: leftTip, shoulder: leftShoulder, spanIndex: 0, left: true,
+    strength: upstroke)
+  #expect(simd_distance(root, leftTip) < 1e-6)
+  let extended = CrowFlightWingBodyIntegration.flexDistalWing(
+    point: leftTip, shoulder: leftShoulder, spanIndex: 32, left: true,
+    strength: downstroke)
+  #expect(simd_distance(extended, leftTip) < 1e-6)
+}

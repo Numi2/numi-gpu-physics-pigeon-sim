@@ -64,6 +64,9 @@ public struct CrowNumiReplay: Sendable {
     /// The renderer uses it to register the visual scaffold to the actual
     /// recorded reference pose before applying subsequent link deltas.
     public let wingReferenceElevations: [ArticulatedLink: Float]
+    /// Estimated visual flexion drive from recorded wing elevation velocity.
+    /// This is not a recorded wrist joint or feather motion.
+    public let wingUpstrokeStrength: [ArticulatedLink: Float]
 
     public func delta(for link: ArticulatedLink) -> LinkDelta? {
       deltas[link]
@@ -493,11 +496,50 @@ public struct CrowNumiReplay: Sendable {
         wingReferenceElevations[link] = atan2(span.z, abs(span.y))
       }
     }
+    // Derive a bounded visual upstroke cue from neighboring recorded poses.
+    // The replay does not record a crow wrist; this drives presentation only.
+    var wingUpstrokeStrength: [ArticulatedLink: Float] = [:]
+    let candidate = frame.step - frames[0].step
+    let frameIndex: Int?
+    if candidate >= 0, candidate < frames.count, frames[candidate].step == frame.step {
+      frameIndex = candidate
+    } else {
+      frameIndex = frames.firstIndex { $0.step == frame.step }
+    }
+    if let frameIndex {
+      // Use a short central window to avoid frame-to-frame chatter at the
+      // rapidly reversing wingbeat extrema.
+      let before = frames[max(0, frameIndex - 2)]
+      let after = frames[min(frames.count - 1, frameIndex + 2)]
+      let elapsed = Float(after.step - before.step) * timestepSeconds
+      if elapsed > 0,
+        let beforeBody = bodyPose(named: ArticulatedLink.body.rawValue, in: before),
+        let afterBody = bodyPose(named: ArticulatedLink.body.rawValue, in: after)
+      {
+        for (link, side): (ArticulatedLink, Float) in [(.leftWing, 1), (.rightWing, -1)] {
+          if let beforeWing = bodyPose(named: link.rawValue, in: before),
+            let afterWing = bodyPose(named: link.rawValue, in: after)
+          {
+            let a = RigidPose.rotate(
+              beforeWing.relative(to: beforeBody).orientationXYZW, SIMD3(0, side, 0))
+            let b = RigidPose.rotate(
+              afterWing.relative(to: afterBody).orientationXYZW, SIMD3(0, side, 0))
+            let aElevation = atan2(a.z, abs(a.y))
+            let bElevation = atan2(b.z, abs(b.y))
+            wingUpstrokeStrength[link] = CrowFlightWingBodyIntegration
+              .estimatedUpstrokeStrength(
+                previousElevation: aElevation, nextElevation: bElevation,
+                elapsedSeconds: elapsed)
+          }
+        }
+      }
+    }
     return ArticulationFrame(
       replayStep: frame.step, deltas: deltas,
       headDelta: headDelta, headReferencePosition: referenceHead?.position,
       lowerBeakDelta: lowerBeakDelta,
-      wingReferenceElevations: wingReferenceElevations
+      wingReferenceElevations: wingReferenceElevations,
+      wingUpstrokeStrength: wingUpstrokeStrength
     )
   }
 

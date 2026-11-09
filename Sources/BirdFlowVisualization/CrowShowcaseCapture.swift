@@ -81,6 +81,7 @@ public enum CrowShowcaseCapture {
     let videoURL: URL?
     let videoFPS: Int
     let solidCourse: Bool
+    let inspectionHideCourse: Bool
     let temporalScale: Float
     let cameraYawRadians: Float?
     let cameraYawOrbitRadians: Float
@@ -154,6 +155,7 @@ public enum CrowShowcaseCapture {
       guard videoFPS <= 120 else { throw CaptureError.invalidArguments("video fps must not exceed 120") }
       videoURL = try value(after: "--capture-crow-video").map { URL(fileURLWithPath: $0) }
       solidCourse = commandLine.contains("--capture-crow-solid-course")
+      inspectionHideCourse = commandLine.contains("--capture-crow-inspection-hide-course")
       temporalScale = try positiveFloat(
         after: "--capture-crow-temporal-scale",
         default: 1
@@ -544,6 +546,7 @@ public enum CrowShowcaseCapture {
         "render_width": arguments.width,
         "render_height": arguments.height,
         "navigation_course": numiReplay.navigationCourse ?? "unspecified",
+        "inspection_course_hidden": arguments.inspectionHideCourse,
         "policy_lighting_contract": numiReplay.policyLightingContract
           ?? "unspecified",
         "render_lighting_preset": arguments.lighting.rawValue,
@@ -651,7 +654,7 @@ public enum CrowShowcaseCapture {
         phase: phase,
         camera: camera,
         articulation: articulationFrame,
-        navigationCourse: replayFrame.flatMap {
+        navigationCourse: arguments.inspectionHideCourse ? nil : replayFrame.flatMap {
           numiReplay?.navigationCourseFrame(of: $0)
         },
         outputWidth: arguments.width,
@@ -681,7 +684,7 @@ public enum CrowShowcaseCapture {
           courseName: numiReplay?.navigationCourse,
           waypoints: replayFrame?.outcomes["navigation_waypoints_reached"].map { Int($0) },
           recordedSupport: landingWeight > 0,
-          cutawayEnabled: arguments.solidCourse
+          cutawayEnabled: arguments.solidCourse && !arguments.inspectionHideCourse
         )
       }
       let png: Data
@@ -704,7 +707,7 @@ public enum CrowShowcaseCapture {
           phase: phase,
           camera: camera,
           articulation: articulationFrame,
-          navigationCourse: replayFrame.flatMap {
+          navigationCourse: arguments.inspectionHideCourse ? nil : replayFrame.flatMap {
             numiReplay?.navigationCourseFrame(of: $0)
           },
           outputWidth: arguments.width,
@@ -3750,6 +3753,14 @@ private struct CrowMeshBuilder {
           ),
           referenceAlignmentRadians: referenceAlignment
         )
+        if let strength = articulation?.wingUpstrokeStrength[wingLink] {
+          point = CrowFlightWingBodyIntegration.flexDistalWing(
+            point: point,
+            shoulder: CrowFlightWingBodyIntegration.bodyRoot(
+              chordIndex: 0, left: partIdentifier == 2),
+            spanIndex: spanIndex, left: partIdentifier == 2,
+            strength: strength)
+        }
         if let takeoff {
           let folded = CrowTakeoffSequence.foldedWingPoint(
             spanIndex: spanIndex,

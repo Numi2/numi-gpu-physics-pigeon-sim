@@ -674,6 +674,34 @@ enum CrowFlightWingBodyIntegration {
       : proceduralPhase
   }
 
+  /// A smooth, bounded presentation cue, derived from measured simulation
+  /// link elevation changes. It is not an inferred physical wrist angle.
+  static func estimatedUpstrokeStrength(
+    previousElevation: Float, nextElevation: Float, elapsedSeconds: Float
+  ) -> Float {
+    guard elapsedSeconds > 0 else { return 0 }
+    let difference = atan2(
+      sin(nextElevation - previousElevation),
+      cos(nextElevation - previousElevation)
+    )
+    return smootherstep(clamp(difference / elapsedSeconds / 8))
+  }
+
+  /// Estimated distal wrist flex: sweep the distal surface back and let its
+  /// tip lag below the inner wing during upstroke. Rooted topology is retained,
+  /// and downstroke / stationary poses receive no fabricated flex.
+  static func flexDistalWing(
+    point: SIMD3<Float>, shoulder: SIMD3<Float>, spanIndex: Int,
+    left: Bool, strength: Float
+  ) -> SIMD3<Float> {
+    let progress = clamp((Float(spanIndex) - 13) / 19)
+    let bend = smootherstep(progress) * clamp(strength)
+    let side: Float = left ? 1 : -1
+    let offset = point - shoulder
+    let swept = rotateZ(offset, angle: side * 0.32 * bend)
+    return shoulder + rotateX(swept, angle: -side * 0.16 * bend)
+  }
+
   static func integratedPoint(
     referencePoint: SIMD3<Float>,
     sourceRoot: SIMD3<Float>,
@@ -717,6 +745,16 @@ enum CrowFlightWingBodyIntegration {
     let flapAngle = side * 0.54 * cos(2 * Float.pi * wrappedPhase)
       * articulationWeight
     return shoulder + rotateX(rooted - shoulder, angle: flapAngle)
+  }
+
+  private static func rotateZ(_ point: SIMD3<Float>, angle: Float) -> SIMD3<Float> {
+    let cosine = cos(angle)
+    let sine = sin(angle)
+    return SIMD3<Float>(
+      cosine * point.x - sine * point.y,
+      sine * point.x + cosine * point.y,
+      point.z
+    )
   }
 
   private static func rotateX(_ point: SIMD3<Float>, angle: Float) -> SIMD3<Float> {

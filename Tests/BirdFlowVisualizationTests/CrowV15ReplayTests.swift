@@ -17,6 +17,11 @@ func crowV15ReplayAdmission() throws {
     states[index + 6] = cos(Float(0.35 / 2))
   }
   var moved = states
+  for (name, sign): (String, Float) in [("crow_left_wing", 1), ("crow_right_wing", -1)] {
+    let index = names.firstIndex(of: name)! * 13
+    moved[index + 3] = sign * sin(Float(0.50 / 2))
+    moved[index + 6] = cos(Float(0.50 / 2))
+  }
   moved[names.firstIndex(of: "crow_left_wing")! * 13] = 0.025
   let head = names.firstIndex(of: "crow_head")! * 13
   moved[head + 4] = sin(Float(0.1))
@@ -62,6 +67,8 @@ func crowV15ReplayAdmission() throws {
   let articulation = try #require(replay.articulationFrame(of: replay.frames[1]))
   #expect(abs((articulation.wingReferenceElevations[.leftWing] ?? 0) - 0.35) < 1e-5)
   #expect(abs((articulation.wingReferenceElevations[.rightWing] ?? 0) - 0.35) < 1e-5)
+  #expect((articulation.wingUpstrokeStrength[.leftWing] ?? 0) > 0.9)
+  #expect((articulation.wingUpstrokeStrength[.rightWing] ?? 0) > 0.9)
   let wing = try #require(articulation.delta(for: .leftWing))
   #expect(abs(wing.translation.x - 0.025) < 1e-6)
   let jaw = try #require(articulation.lowerBeakDelta)
