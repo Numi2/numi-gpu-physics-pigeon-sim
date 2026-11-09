@@ -9,6 +9,26 @@ enum CrowCourseCamera {
     SIMD3(0.10, 0.72, 0.055),
   ]
 
+  /// Keep world vertical upright while following the accepted heading.
+  /// Scene geometry remains in the exact recorded body-relative frame.
+  static func worldUpright(_ camera: CameraState, orientation q: SIMD4<Float>) -> CameraState {
+    let norm = simd_length(q)
+    guard norm.isFinite, norm > 1e-6 else { return camera }
+    let n = q / norm
+    let rotation = simd_quatf(ix: n.x, iy: n.y, iz: n.z, r: n.w)
+    let forward = rotation.act(SIMD3<Float>(1, 0, 0))
+    let heading = atan2(forward.y, forward.x)
+    let yaw = heading + camera.yaw
+    let cp = cos(camera.pitch)
+    let worldDirection = SIMD3<Float>(cp * cos(yaw), cp * sin(yaw), sin(camera.pitch))
+    let localDirection = rotation.inverse.act(worldDirection)
+    var result = camera
+    result.yaw = atan2(localDirection.y, localDirection.x)
+    result.pitch = asin(min(max(localDirection.z, -1), 1))
+    result.upDirection = rotation.inverse.act(SIMD3<Float>(0, 0, 1))
+    return result
+  }
+
   static func occludingBodies(
     course: CrowNumiReplay.NavigationCourseFrame,
     bodyCenter: SIMD3<Float>, camera: SIMD3<Float>

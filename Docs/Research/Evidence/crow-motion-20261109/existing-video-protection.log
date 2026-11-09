@@ -1,0 +1,2 @@
+2026-11-09 21:07:37.893 birdflow-capture-pinned[48587:3794062] Metal API Validation Enabled
+birdflow-capture failed: Error Domain=CrowReplayVideo Code=1 "Video output already exists: /Users/n/Developer/numi-crow-rl-20261107/build/crow-walking-20261109/full-motion/i-0000.mp4" UserInfo={NSLocalizedDescription=Video output already exists: /Users/n/Developer/numi-crow-rl-20261107/build/crow-walking-20261109/full-motion/i-0000.mp4}

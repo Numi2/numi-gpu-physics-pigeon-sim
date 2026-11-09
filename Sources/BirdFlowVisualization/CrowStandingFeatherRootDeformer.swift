@@ -17,6 +17,7 @@ final class CrowStandingFeatherRootDeformer: CrowFeatherRootDeforming {
   private let outputBuffers: [MTLBuffer]
   private let readbackBuffers: [MTLBuffer]
   private let referenceBodyCenter: SIMD3<Float>
+  private let walking: Bool
   private var nextSlot = 0
 
   let featherCount: Int
@@ -24,10 +25,12 @@ final class CrowStandingFeatherRootDeformer: CrowFeatherRootDeforming {
   init(
     backend: VisualizationBackend,
     asset: BirdRealityAsset,
-    referenceBodyCenter: SIMD3<Float>
+    referenceBodyCenter: SIMD3<Float>,
+    walking: Bool = false
   ) throws {
     self.backend = backend
     self.referenceBodyCenter = referenceBodyCenter
+    self.walking = walking
     pipeline = try backend.compute("poseStandingCrowFeatherRoots")
 
     let hashes = asset.stableFeatherIdentifierHashes
@@ -101,7 +104,7 @@ final class CrowStandingFeatherRootDeformer: CrowFeatherRootDeforming {
         Self.wrapped(currentPhase),
         Self.wrapped(previousPhase),
         Float(featherCount),
-        0
+        walking ? 1 : 0
       ),
       referenceBodyCenter: SIMD4<Float>(referenceBodyCenter, 0)
     )
@@ -159,12 +162,12 @@ final class CrowStandingFeatherRootDeformer: CrowFeatherRootDeforming {
       let current = Self.pose(
         binding: binding,
         phase: Self.wrapped(currentPhase),
-        bodyCenter: referenceBodyCenter
+        bodyCenter: referenceBodyCenter, walking: walking
       )
       let previous = Self.pose(
         binding: binding,
         phase: Self.wrapped(previousPhase),
-        bodyCenter: referenceBodyCenter
+        bodyCenter: referenceBodyCenter, walking: walking
       )
       let featherClass = binding.orderCountClassSide.z
       let count = max(Int(binding.orderCountClassSide.y), 1)
@@ -208,7 +211,8 @@ final class CrowStandingFeatherRootDeformer: CrowFeatherRootDeforming {
   private static func pose(
     binding: CrowStandingFeatherBindingGPU,
     phase: Float,
-    bodyCenter: SIMD3<Float>
+    bodyCenter: SIMD3<Float>,
+    walking: Bool
   ) -> (root: SIMD3<Float>, direction: SIMD3<Float>, normal: SIMD3<Float>) {
     let angle = 2 * Float.pi * phase
     let motion = SIMD3<Float>(
@@ -216,7 +220,7 @@ final class CrowStandingFeatherRootDeformer: CrowFeatherRootDeforming {
       0.0018 * sin(angle),
       0.0011 * sin(2 * angle - 0.45)
     )
-    let center = bodyCenter + motion
+    let center = bodyCenter + motion + (walking ? CrowWalkingPose.bodyOffset(phase: phase) : .zero)
     let count = max(Int(binding.orderCountClassSide.y), 1)
     let fraction = Float(binding.orderCountClassSide.x) / Float(max(count - 1, 1))
     let featherClass = binding.orderCountClassSide.z

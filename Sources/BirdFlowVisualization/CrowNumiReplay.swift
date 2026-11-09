@@ -69,6 +69,8 @@ public struct CrowNumiReplay: Sendable {
     public let wingUpstrokeStrength: [ArticulatedLink: Float]
     /// Presentation cue from the retained support outcome; not measured toes.
     public let confirmedSupportWeight: Float
+    /// Estimated visual preparation, not measured foot contact.
+    public let preLandingLegExtension: Float
 
     public func delta(for link: ArticulatedLink) -> LinkDelta? {
       deltas[link]
@@ -536,13 +538,22 @@ public struct CrowNumiReplay: Sendable {
         }
       }
     }
+    let perchRelative = bodyPose(named: "crow_course_perch", in: frame).map {
+      currentBody.relative(to: $0).position
+    }
+    let legPreparation = perchRelative.map {
+      CrowLandingLegPreparation.weight(
+        completed: (frame.outcomes["navigation_completion"] ?? 0) >= 1,
+        rootInPerch: $0)
+    } ?? 0
     return ArticulationFrame(
       replayStep: frame.step, deltas: deltas,
       headDelta: headDelta, headReferencePosition: referenceHead?.position,
       lowerBeakDelta: lowerBeakDelta,
       wingReferenceElevations: wingReferenceElevations,
       wingUpstrokeStrength: wingUpstrokeStrength,
-      confirmedSupportWeight: landingWeights[frame.step] ?? 0
+      confirmedSupportWeight: landingWeights[frame.step] ?? 0,
+      preLandingLegExtension: legPreparation
     )
   }
 

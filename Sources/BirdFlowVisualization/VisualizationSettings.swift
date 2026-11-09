@@ -80,6 +80,8 @@ public struct CameraState: Codable, Sendable, Equatable {
   public var distance: Float = 1.65
   public var yaw: Float = -0.72
   public var pitch: Float = 0.28
+  /// Optional up vector for a world-stabilized view in a moving body frame.
+  public var upDirection: SIMD3<Float>? = nil
 
   public init() {}
 }
@@ -105,7 +107,7 @@ extension CameraState {
     let view = simd_float4x4.lookAt(
       eye: eye,
       center: target,
-      up: SIMD3<Float>(0, 0, 1)
+      up: upDirection ?? SIMD3<Float>(0, 0, 1)
     )
     let projection = simd_float4x4.perspective(
       verticalFOV: 48 * .pi / 180,

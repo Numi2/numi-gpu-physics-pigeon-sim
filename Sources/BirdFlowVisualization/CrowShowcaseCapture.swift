@@ -311,6 +311,10 @@ public enum CrowShowcaseCapture {
       if (frameStart != 0 || frameEnd != frameCount - 1) && numiReplayPackURL == nil {
         throw CaptureError.invalidArguments("frame windows require a navigation replay")
       }
+      if ProcessInfo.processInfo.environment["CROW_EXPERIMENTAL_WALK"] == "1"
+        && presentation != .standing {
+        throw CaptureError.invalidArguments("estimated walking requires the standalone standing presentation")
+      }
       if numiReplayPackURL != nil && presentation != .takeoff {
         throw CaptureError.invalidArguments(
           "--capture-crow-replay-pack requires --capture-crow-presentation takeoff"
@@ -563,6 +567,10 @@ public enum CrowShowcaseCapture {
           "CROW_EXPERIMENTAL_FLIGHT_DIGITS"] == "1",
         "experimental_support_plant": ProcessInfo.processInfo.environment[
           "CROW_EXPERIMENTAL_SUPPORT_PLANT"] == "1",
+        "experimental_prelanding_legs": ProcessInfo.processInfo.environment[
+          "CROW_EXPERIMENTAL_PRELANDING_LEGS"] == "1",
+        "world_upright_camera": ProcessInfo.processInfo.environment[
+          "CROW_WORLD_UP_CAMERA"] == "1",
         "temporal_warmup_frames": warmupFrames,
         "policy_lighting_contract": numiReplay.policyLightingContract
           ?? "unspecified",
@@ -670,6 +678,10 @@ public enum CrowShowcaseCapture {
         camera.distance = cameraDistanceMeters
       }
       camera.distance *= arguments.cameraDistanceScale
+      if ProcessInfo.processInfo.environment["CROW_WORLD_UP_CAMERA"] == "1",
+        let replayFrame, let course = numiReplay?.navigationCourseFrame(of: replayFrame) {
+        camera = CrowCourseCamera.worldUpright(camera, orientation: course.rootOrientationXYZW)
+      }
       let rendered = try renderer.render(
         phase: phase,
         camera: camera,
@@ -817,11 +829,20 @@ public enum CrowShowcaseCapture {
       graphics: graphics,
       tracking: 1.4 * scale
     )
+    // The original replay identifiers contain `reserved-final`, but both
+    // layouts have since been used in development. Do not label them held out.
+    let displayCourse: String? = courseName.map {
+      switch $0.lowercased() {
+      case "reserved-final-i": return "DEVELOPMENT LAYOUT I"
+      case "reserved-final-j": return "DEVELOPMENT LAYOUT J"
+      default: return $0.uppercased()
+      }
+    }
     drawText(
       replayStep != nil
-        ? (courseName.map { "SIMULATED REPLAY  •  " + $0.uppercased() } ?? "SIMULATED REPLAY")
+        ? (displayCourse.map { "SIMULATED REPLAY  •  " + $0 } ?? "SIMULATED REPLAY")
         : (presentation == .standing
-          ? "READY"
+          ? (ProcessInfo.processInfo.environment["CROW_EXPERIMENTAL_WALK"] == "1" ? "ESTIMATED WALK" : "READY")
           : (presentation == .takeoff ? "TAKEOFF" : "FLIGHT")),
       at: CGPoint(x: margin, y: CGFloat(height) - 84 * scale),
       font: labelFont,
@@ -1268,7 +1289,8 @@ private final class CrowShowcaseRenderer {
         featherRootDeformer = try CrowStandingFeatherRootDeformer(
           backend: createdBackend,
           asset: realityAsset,
-          referenceBodyCenter: createdMeshBuilder.referenceSurfaceBodyCenter
+          referenceBodyCenter: createdMeshBuilder.referenceSurfaceBodyCenter,
+          walking: ProcessInfo.processInfo.environment["CROW_EXPERIMENTAL_WALK"] == "1"
         )
       case .takeoff:
         featherRootDeformer = try CrowTakeoffFeatherRootDeformer(
@@ -3654,7 +3676,8 @@ private struct CrowMeshBuilder {
     case .standing:
       return CrowStandingPose.sample(
         phase: phase,
-        referenceBodyCenter: base
+        referenceBodyCenter: base,
+        walking: ProcessInfo.processInfo.environment["CROW_EXPERIMENTAL_WALK"] == "1"
       ).bodyCenter
     case .takeoff:
       return CrowTakeoffSequence.standingPose(phase: phase, preserveFlightDigits:
@@ -3675,7 +3698,8 @@ private struct CrowMeshBuilder {
     case .standing:
       let pose = CrowStandingPose.sample(
         phase: phase,
-        referenceBodyCenter: .zero
+        referenceBodyCenter: .zero,
+        walking: ProcessInfo.processInfo.environment["CROW_EXPERIMENTAL_WALK"] == "1"
       )
       return (
         CrowStandingNeckPose.accepted(articulation) ?? pose.neckPose,
@@ -3685,7 +3709,9 @@ private struct CrowMeshBuilder {
       let pose = CrowTakeoffSequence.standingPose(phase: phase, preserveFlightDigits:
         ProcessInfo.processInfo.environment["CROW_EXPERIMENTAL_FLIGHT_DIGITS"] == "1",
         plantOnMovingSupport: ProcessInfo.processInfo.environment["CROW_EXPERIMENTAL_SUPPORT_PLANT"] == "1"
-          && (articulation?.confirmedSupportWeight ?? 0) > 0)
+          && (articulation?.confirmedSupportWeight ?? 0) > 0,
+        preLandingLegExtension: ProcessInfo.processInfo.environment["CROW_EXPERIMENTAL_PRELANDING_LEGS"] == "1"
+          ? (articulation?.preLandingLegExtension ?? 0) : 0)
       return (
         CrowStandingNeckPose.accepted(articulation) ?? pose.neckPose,
         CrowFemoralVanePoseSample(pose),
@@ -4011,13 +4037,16 @@ private struct CrowMeshBuilder {
     case .standing:
       standingPose = CrowStandingPose.sample(
         phase: phase,
-        referenceBodyCenter: bodyCenter
+        referenceBodyCenter: bodyCenter,
+        walking: ProcessInfo.processInfo.environment["CROW_EXPERIMENTAL_WALK"] == "1"
       )
     case .takeoff:
       standingPose = CrowTakeoffSequence.standingPose(phase: phase, preserveFlightDigits:
         ProcessInfo.processInfo.environment["CROW_EXPERIMENTAL_FLIGHT_DIGITS"] == "1",
         plantOnMovingSupport: ProcessInfo.processInfo.environment["CROW_EXPERIMENTAL_SUPPORT_PLANT"] == "1"
-          && (articulation?.confirmedSupportWeight ?? 0) > 0)
+          && (articulation?.confirmedSupportWeight ?? 0) > 0,
+        preLandingLegExtension: ProcessInfo.processInfo.environment["CROW_EXPERIMENTAL_PRELANDING_LEGS"] == "1"
+          ? (articulation?.preLandingLegExtension ?? 0) : 0)
     case .wingbeat:
       standingPose = nil
     }
@@ -4174,7 +4203,7 @@ private struct CrowMeshBuilder {
         // The support remains fixed in world space while the body lifts. This
         // makes held toe contact and subsequent geometric separation explicit
         // without compositing a photographed or image-space perch.
-        appendStandingSupport(height: standingPose.supportHeight, to: &vertices)
+        appendStandingSupport(height: standingPose.supportHeight, phase: phase, to: &vertices)
       }
     }
     _ = bodyBounds
@@ -5702,10 +5731,13 @@ private struct CrowMeshBuilder {
 
   private func appendStandingSupport(
     height: Float,
+    phase: Float,
     to vertices: inout [ColoredVertex]
   ) {
-    let x0: Float = -0.065
-    let x1: Float = 0.070
+    let walking = presentation == .standing
+      && ProcessInfo.processInfo.environment["CROW_EXPERIMENTAL_WALK"] == "1"
+    let x0: Float = walking ? -0.30 : -0.065
+    let x1: Float = walking ? 0.30 : 0.070
     let y0: Float = -0.215
     let y1: Float = 0.215
     let z0 = height - 0.018
@@ -5716,6 +5748,25 @@ private struct CrowMeshBuilder {
       SIMD3<Float>(x1, y1, z1), SIMD3<Float>(x0, y1, z1),
       color: color, to: &vertices
     )
+    if walking {
+      // A following camera keeps the body centered. Ground marks move at the
+      // same implied speed as stance feet, making the planted interval visible.
+      let spacing = CrowWalkingPose.stanceTravelMeters / CrowWalkingPose.stanceFraction
+      let offset = CrowWalkingPose.impliedBodyTravel(phase: phase)
+        .truncatingRemainder(dividingBy: spacing)
+      for index in -3...3 {
+        // Fixed vertex count is required by the temporal renderer.
+        let x = (Float(index) + 0.5) * spacing - offset
+        let mark = SIMD4<Float>(0.095, 0.104, 0.112, 0.94)
+        appendQuad(
+          SIMD3<Float>(x - 0.001, y0 + 0.006, z1 + 0.0002),
+          SIMD3<Float>(x + 0.001, y0 + 0.006, z1 + 0.0002),
+          SIMD3<Float>(x + 0.001, y1 - 0.006, z1 + 0.0002),
+          SIMD3<Float>(x - 0.001, y1 - 0.006, z1 + 0.0002),
+          color: mark, to: &vertices
+        )
+      }
+    }
     appendQuad(
       SIMD3<Float>(x1, y0, z0), SIMD3<Float>(x0, y0, z0),
       SIMD3<Float>(x0, y1, z0), SIMD3<Float>(x1, y1, z0),

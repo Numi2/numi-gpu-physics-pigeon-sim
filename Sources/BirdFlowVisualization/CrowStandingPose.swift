@@ -103,7 +103,8 @@ enum CrowStandingPose {
 
   static func sample(
     phase: Float,
-    referenceBodyCenter: SIMD3<Float> = .zero
+    referenceBodyCenter: SIMD3<Float> = .zero,
+    walking: Bool = false
   ) -> CrowStandingPoseSample {
     let wrapped = phase - floor(phase)
     let slow = 2 * Float.pi * wrapped
@@ -125,7 +126,7 @@ enum CrowStandingPose {
       pitchRadians: 0.017 * sin(breath + 0.30),
       rollRadians: 0.007 * sin(slow - 0.18)
     )
-    return CrowStandingPoseSample(
+    let quiet = CrowStandingPoseSample(
       bodyCenter: bodyCenter,
       neckPose: neckPose,
       supportHeight: supportHeight,
@@ -144,6 +145,7 @@ enum CrowStandingPose {
         supportHeight: supportHeight
       )
     )
+    return walking ? CrowWalkingPose.sample(base: quiet, phase: phase) : quiet
   }
 
   private static func foot(

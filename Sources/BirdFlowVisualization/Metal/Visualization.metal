@@ -611,6 +611,12 @@ kernel void poseStandingCrowFeatherRoots(
     CrowStandingRootPose previous=crowStandingRootPose(
         binding,uniforms.phaseAndCount.y,uniforms.referenceBodyCenter.xyz
     );
+    if (uniforms.phaseAndCount.w > 0.5f) {
+        float a=2.0f*M_PI_F*fract(uniforms.phaseAndCount.x*4.0f);
+        float b=2.0f*M_PI_F*fract(uniforms.phaseAndCount.y*4.0f);
+        current.root+=float3(0.0015f*sin(2.0f*a),0.0035f*sin(a),-0.014f+0.0025f*cos(2.0f*a));
+        previous.root+=float3(0.0015f*sin(2.0f*b),0.0035f*sin(b),-0.014f+0.0025f*cos(2.0f*b));
+    }
     CrowFeatherRootStateGPU state;
     uint featherClass=binding.orderCountClassSide.z;
     uint count=max(binding.orderCountClassSide.y,1u);

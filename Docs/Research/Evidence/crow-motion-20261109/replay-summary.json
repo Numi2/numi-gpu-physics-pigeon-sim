@@ -1,0 +1,18 @@
+{
+  "i": {
+    "classification": "simulated accepted-state replay",
+    "controller_authority": "neural-only; approach envelope is diagnostic-only",
+    "frames": 3000,
+    "final_waypoints": 5,
+    "final_support_proxy": 0.012000000104308128,
+    "first_support_step": 1942
+  },
+  "j": {
+    "classification": "simulated accepted-state replay",
+    "controller_authority": "neural-only; approach envelope is diagnostic-only",
+    "frames": 3000,
+    "final_waypoints": 5,
+    "final_support_proxy": 0.012000000104308128,
+    "first_support_step": 1676
+  }
+}

@@ -385,12 +385,14 @@ enum CrowTakeoffSequence {
   }
 
   static func standingPose(phase: Float, preserveFlightDigits: Bool = false,
-    plantOnMovingSupport: Bool = false) -> CrowStandingPoseSample {
+    plantOnMovingSupport: Bool = false,
+    preLandingLegExtension: Float = 0) -> CrowStandingPoseSample {
     let sequence = sample(phase: phase)
     let planted = CrowStandingPose.sample(phase: sequence.standingPhase)
     let bodyCenter = planted.bodyCenter + sequence.bodyTranslation
-    let plantedOffset = plantOnMovingSupport ? sequence.bodyTranslation : SIMD3<Float>.zero
-    let retraction = smootherstep(
+    let extensionWeight = min(max(preLandingLegExtension, 0), 1)
+    let plantedOffset = sequence.bodyTranslation * (plantOnMovingSupport ? 1 : extensionWeight)
+    let retraction = (1 - extensionWeight) * smootherstep(
       min(max((sequence.transitionProgress - 0.28) / 0.72, 0), 1)
     )
     return CrowStandingPoseSample(
