@@ -15,6 +15,10 @@ accepted-state replays and verification are archived in Numi Lab under
   in the v10 renderer. Recorded v15 head-link motion drives the cranial/neck
   presentation, including the CPU and Metal feather paths. BirdFlow's head
   registration and skinning remain estimates.
+* The proximal wing surface now blends the accepted terminal-link movement
+  into a body-seated shoulder; the distal surface retains the full link delta.
+  CPU tail and GPU feather registration pivots move with the presentation body
+  translation. These are visual estimates, not changes to the flight policy.
 * Course cage corners now transform both the recorded obstacle orientation
   and the inverse recorded crow orientation; subtracting centers alone was
   wrong whenever the bird banked or turned.
@@ -35,8 +39,8 @@ accepted-state replays and verification are archived in Numi Lab under
   Replay overlays identify the simulation, layout, recorded waypoint count and
   sustained-support presentation.
 * Native H.264 encoding streams frames directly into a video file instead of
-  storing thousands of PNGs. The example videos use accepted states at 25 fps
-  from the original 50 Hz trace, at normal simulation speed.
+  storing thousands of PNGs. The original video sampled the 50 Hz trace at
+  25 fps; the updated capture uses every retained state at 50 fps.
 
 ## Known gaps, including limitations that remain
 
@@ -71,7 +75,7 @@ accepted-state replays and verification are archived in Numi Lab under
    with a studio background, not a reconstructed ecological environment.
    They lack calibrated materials, indirect illumination and perch shadows.
    Box dimensions and poses match the simulated collision scene.
-8. The complete replay samples 50 Hz accepted states at 25 fps. It does not
+8. The updated replay displays the retained 50 Hz accepted states at 50 fps. It does not
    establish continuous contact, accurate wingbeat shape, motion blur or
    absence of visual interpenetration between the accepted samples.
 9. The presentation uses estimated deployment and settling transitions.
@@ -113,7 +117,13 @@ accepted-state replays and verification are archived in Numi Lab under
     release, and an optimized non-whole-module build rendered successfully.
     Disabling whole-module optimization on the visualization target alone
     also allowed a release capture to run. This is a renderer reliability
-    issue, not evidence of physics failure; the root cause remains unproven.
+    issue, not evidence of physics failure. Two pointer-copy paths were
+    subsequently isolated from throwing render/upload paths. A fresh default
+    optimized build then passed standing, diagnostic AOV and retained I/J
+    course captures, including 50 consecutive video frames per layout. The
+    exact compiler/runtime mechanism remains unproven; the regression smoke
+    test is `Scripts/smoke-crow-release.sh` (supply replay projections to
+    exercise live-wing uploads).
 
 ## Evidence needed for stronger realism
 

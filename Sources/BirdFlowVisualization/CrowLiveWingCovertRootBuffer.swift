@@ -94,10 +94,7 @@ final class CrowLiveWingCovertRootBuffer {
     let slot = nextSlot
     nextSlot = (nextSlot + 1) % Self.bufferedFrameCount
     let buffer = buffers[slot]
-    states.withUnsafeBytes { bytes in
-      guard let baseAddress = bytes.baseAddress else { return }
-      memcpy(buffer.contents(), baseAddress, bytes.count)
-    }
+    Self.copy(states, to: buffer)
     return CrowFeatherRootFrame(
       slot: slot,
       readbackReady: true,
@@ -105,6 +102,15 @@ final class CrowLiveWingCovertRootBuffer {
       currentPhase: currentDeployment,
       previousPhase: previousDeployment
     )
+  }
+
+  // Isolate the mapped-buffer copy from the throwing upload path.
+  @inline(never)
+  private static func copy(_ states: [CrowFeatherRootStateGPU], to buffer: MTLBuffer) {
+    states.withUnsafeBytes { bytes in
+      guard let baseAddress = bytes.baseAddress else { return }
+      buffer.contents().copyMemory(from: baseAddress, byteCount: bytes.count)
+    }
   }
 
   func states(for frame: CrowFeatherRootFrame) -> [CrowFeatherRootStateGPU] {

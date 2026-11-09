@@ -1565,20 +1565,14 @@ private final class CrowShowcaseRenderer {
         solid: false, includedBodies: cutaway
       )
     }
-    let byteCount =
-      MemoryLayout<CrowSurfaceTemporalVertexGPU>.stride
-      * temporalVertices.count
-    let buffer = try backend.buffer(length: byteCount, shared: true)
-    temporalVertices.withUnsafeBytes { bytes in
-      _ = memcpy(buffer.contents(), bytes.baseAddress!, bytes.count)
-    }
+    let buffer = try makeSurfaceVertexBuffer(temporalVertices)
     var navigationSolidBuffer: MTLBuffer?
     if !navigationSolidVertices.isEmpty {
-      navigationSolidBuffer = try makeCourseBuffer(navigationSolidVertices)
+      navigationSolidBuffer = try makeSurfaceVertexBuffer(navigationSolidVertices)
     }
     var navigationWireBuffer: MTLBuffer?
     if !navigationWireVertices.isEmpty {
-      navigationWireBuffer = try makeCourseBuffer(navigationWireVertices)
+      navigationWireBuffer = try makeSurfaceVertexBuffer(navigationWireVertices)
     }
 
     let formats: [MTLPixelFormat] = [
@@ -3363,16 +3357,21 @@ private final class CrowShowcaseRenderer {
     return texture
   }
 
+  // Keep raw upload pointers out of the throwing render routine. Under
+  // whole-module optimization they otherwise escaped as a bogus error object.
   @inline(never)
-  private func makeCourseBuffer(_ vertices: [CrowSurfaceTemporalVertexGPU]) throws -> MTLBuffer {
-    let buffer = try backend.buffer(
-      length: MemoryLayout<CrowSurfaceTemporalVertexGPU>.stride * vertices.count,
-      shared: true
-    )
-    vertices.withUnsafeBytes { bytes in
-      _ = memcpy(buffer.contents(), bytes.baseAddress!, bytes.count)
+  private func makeSurfaceVertexBuffer(_ vertices: [CrowSurfaceTemporalVertexGPU]) throws -> MTLBuffer {
+    try vertices.withUnsafeBytes { bytes in
+      guard let baseAddress = bytes.baseAddress, !bytes.isEmpty else {
+        return try backend.buffer(length: 16, shared: true)
+      }
+      guard let buffer = backend.device.makeBuffer(
+        bytes: baseAddress, length: bytes.count, options: .storageModeShared
+      ) else {
+        throw VisualizationError.allocation(bytes.count)
+      }
+      return buffer
     }
-    return buffer
   }
 
   private static func surfaceMaterialCode(_ material: Float) -> UInt32 {
