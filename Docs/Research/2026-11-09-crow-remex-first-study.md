@@ -56,3 +56,22 @@ Upstroke flex was informed by [Tobalske et al. (2003), wing kinematics across
 speeds](https://umimpact.umt.edu/en/publications/wing-kinematics-of-avian-flight-across-speeds/),
 which does not provide American-crow calibration. No reference image was
 redistributed here.
+
+A first 1280x720 single-process full-I render ended after the last fully logged
+frame 767 when its SSH command returned 255. The log ends mid-line, the MP4 is
+unfinalized (no `moov` atom), and no local `birdflow-capture` diagnostic crash
+report was found. This does not identify whether the renderer, OS, or SSH
+connection caused the interruption. The incomplete bytes, log, and audit are
+retained. Subsequent captures use bounded segments and preserve the original
+replay state sequence; rendering segments do not reset the simulated flight.
+
+Both 3000-frame historical replays were subsequently rendered as five bounded
+sections per layout and joined without discarding or duplicating frames. The
+video uses experimental rig commit `91211cd`, with the experimental remex
+flag enabled and joint/landing follow-ups disabled. Both outputs decode at
+1280x720, 50 frames/s, 3000 frames. The segment boundary from frame 600 to
+601 was compared to its adjacent frames: mean absolute RGB differences were
+3.15, 3.09, **2.79 at the join**, 2.05 and 1.21. This is one boundary check,
+not a guarantee of zero visual changes at all joins. The exact retained state
+summaries and each section audit are in the evidence directory. These scenes
+were used during development and are not newly held-out layouts.

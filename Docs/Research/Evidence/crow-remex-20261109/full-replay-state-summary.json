@@ -1,0 +1,43 @@
+{
+  "classification": "historical accepted-state replays, not fresh held-out evaluations",
+  "layouts": {
+    "i": {
+      "controller_authority": "neural-only; approach envelope is diagnostic-only",
+      "course": "reserved-final-i",
+      "first_waypoint_steps": {
+        "1": 859,
+        "2": 1113,
+        "3": 1371,
+        "4": 1578,
+        "5": 1728
+      },
+      "frames": 3000,
+      "physics_error_samples": 0,
+      "pre_final_done_samples": 0,
+      "scheduled_resets": false,
+      "ten_consecutive_support_samples_at_step": 2037,
+      "timestep_seconds": 0.02
+    },
+    "j": {
+      "controller_authority": "neural-only; approach envelope is diagnostic-only",
+      "course": "reserved-final-j",
+      "first_waypoint_steps": {
+        "1": 802,
+        "2": 1046,
+        "3": 1300,
+        "4": 1484,
+        "5": 1553
+      },
+      "frames": 3000,
+      "physics_error_samples": 0,
+      "pre_final_done_samples": 0,
+      "scheduled_resets": false,
+      "ten_consecutive_support_samples_at_step": 1689,
+      "timestep_seconds": 0.02
+    }
+  },
+  "source_sha256": {
+    "i": "5efa5a89a028ca5ef039191778bced33c00d20decc874284edfc53e2b165f1de",
+    "j": "d3d396fc3e41d7f2d56c799c18bf7b96db96de51205a69319fd920a714ac6f4f"
+  }
+}

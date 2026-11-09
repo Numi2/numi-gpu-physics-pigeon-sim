@@ -1,0 +1,271 @@
+diff --git a/Docs/Research/2026-11-09-crow-remex-first-study.md b/Docs/Research/2026-11-09-crow-remex-first-study.md
+index 77cf4bc..29586ae 100644
+--- a/Docs/Research/2026-11-09-crow-remex-first-study.md
++++ b/Docs/Research/2026-11-09-crow-remex-first-study.md
+@@ -56,3 +56,11 @@ Upstroke flex was informed by [Tobalske et al. (2003), wing kinematics across
+ speeds](https://umimpact.umt.edu/en/publications/wing-kinematics-of-avian-flight-across-speeds/),
+ which does not provide American-crow calibration. No reference image was
+ redistributed here.
++
++A first 1280x720 single-process full-I render ended after the last fully logged
++frame 767 when its SSH command returned 255. The log ends mid-line, the MP4 is
++unfinalized (no `moov` atom), and no local `birdflow-capture` diagnostic crash
++report was found. This does not identify whether the renderer, OS, or SSH
++connection caused the interruption. The incomplete bytes, log, and audit are
++retained. Subsequent captures use bounded segments and preserve the original
++replay state sequence; rendering segments do not reset the simulated flight.
+diff --git a/Sources/BirdFlowVisualization/CrowFlightWingBodyIntegration.swift b/Sources/BirdFlowVisualization/CrowFlightWingBodyIntegration.swift
+index afb72b4..f399d1d 100644
+--- a/Sources/BirdFlowVisualization/CrowFlightWingBodyIntegration.swift
++++ b/Sources/BirdFlowVisualization/CrowFlightWingBodyIntegration.swift
+@@ -702,6 +702,27 @@ enum CrowFlightWingBodyIntegration {
+     return shoulder + rotateX(swept, angle: -side * 0.16 * bend)
+   }
+ 
++  /// Presentation-only elbow/wrist pivots sampled from the live reference
++  /// surface. Neither pivot nor its upstroke deflection is a measured joint.
++  static func flexArticulatedWing(
++    point: SIMD3<Float>, elbow: SIMD3<Float>, wrist: SIMD3<Float>,
++    spanIndex: Int, left: Bool, strength: Float
++  ) -> SIMD3<Float> {
++    let drive = clamp(strength)
++    let elbowWeight = smootherstep(clamp((Float(spanIndex) - 12) / 8))
++    let wristWeight = smootherstep(clamp((Float(spanIndex) - 20) / 8))
++    let side: Float = left ? 1 : -1
++    func rotate(_ p: SIMD3<Float>, pivot: SIMD3<Float>, amount: Float)
++      -> SIMD3<Float>
++    {
++      let swept = rotateZ(p - pivot, angle: side * amount)
++      return pivot + rotateX(swept, angle: -side * amount * 0.5)
++    }
++    let movedWrist = rotate(wrist, pivot: elbow, amount: 0.14 * drive)
++    let arm = rotate(point, pivot: elbow, amount: 0.14 * drive * elbowWeight)
++    return rotate(arm, pivot: movedWrist, amount: 0.22 * drive * wristWeight)
++  }
++
+   static func integratedPoint(
+     referencePoint: SIMD3<Float>,
+     sourceRoot: SIMD3<Float>,
+diff --git a/Sources/BirdFlowVisualization/CrowShowcaseCapture.swift b/Sources/BirdFlowVisualization/CrowShowcaseCapture.swift
+index 680f7b3..696380c 100644
+--- a/Sources/BirdFlowVisualization/CrowShowcaseCapture.swift
++++ b/Sources/BirdFlowVisualization/CrowShowcaseCapture.swift
+@@ -549,6 +549,11 @@ public enum CrowShowcaseCapture {
+         "inspection_course_hidden": arguments.inspectionHideCourse,
+         "experimental_flight_remex": ProcessInfo.processInfo.environment[
+           "CROW_EXPERIMENTAL_FLIGHT_REMEX"] == "1",
++        "experimental_wing_joints": ProcessInfo.processInfo.environment[
++          "CROW_EXPERIMENTAL_FLIGHT_REMEX"] == "1"
++          && ProcessInfo.processInfo.environment["CROW_EXPERIMENTAL_WING_JOINTS"] == "1",
++        "experimental_landing_phase": ProcessInfo.processInfo.environment[
++          "CROW_EXPERIMENTAL_LANDING"] == "1",
+         "policy_lighting_contract": numiReplay.policyLightingContract
+           ?? "unspecified",
+         "render_lighting_preset": arguments.lighting.rawValue,
+@@ -603,7 +608,10 @@ public enum CrowShowcaseCapture {
+             + replayDeploymentHighWater
+               * (CrowTakeoffSequence.transitionEnd
+                 - CrowTakeoffSequence.standingHoldEnd)
+-      let phase = flightPhase * (1 - landingWeight)
++      let phase = ProcessInfo.processInfo.environment["CROW_EXPERIMENTAL_LANDING"] == "1"
++        ? CrowTakeoffSequence.experimentalLandingPhase(
++          flightPhase: flightPhase, supportWeight: landingWeight)
++        : flightPhase * (1 - landingWeight)
+       // Keep the loop probe bit-identical to frame zero. Evaluating sin/cos at
+       // 2π leaves a small floating-point camera offset that becomes visible at
+       // feather edges and also turns a failed Data equality diagnostic into an
+@@ -3558,13 +3566,57 @@ private struct CrowMeshBuilder {
+     )
+   }
+ 
++  private typealias WingFlexPivots = (elbow: SIMD3<Float>, wrist: SIMD3<Float>)
++
++  /// Two estimated pivots in the same registered pre-articulation frame as
++  /// the live wing. Computing them once per surface avoids per-vertex lookups.
++  private func estimatedWingFlexPivots(
++    phase: Float, articulation: CrowNumiReplay.ArticulationFrame?, left: Bool
++  ) -> WingFlexPivots? {
++    let part: UInt8 = left ? 2 : 3
++    guard let wing = dataset.components.first(where: { $0.partIdentifier == part }),
++      wing.vertexCount == 33 * 9 else { return nil }
++    let chord = 1
++    let sourceRoot = motion.point(phase: 0.25,
++      vertexIndex: wing.vertexOffset + chord).position - referenceBodyCenter
++    let sourceLeadingRoot = motion.point(phase: 0.25,
++      vertexIndex: wing.vertexOffset).position - referenceBodyCenter
++    let link: CrowNumiReplay.ArticulatedLink = left ? .leftWing : .rightWing
++    let alignment: Float
++    if let target = articulation?.wingReferenceElevations[link],
++      let scaffold = scaffoldWingElevations[part] {
++      alignment = (left ? 1 : -1) * (target - scaffold)
++    } else { alignment = 0 }
++    let motionPhase = presentation == .takeoff
++      ? CrowTakeoffSequence.sample(phase: phase).flightPhase : phase
++    func pivot(_ span: Int) -> SIMD3<Float> {
++      let reference = motion.point(phase: 0.25,
++        vertexIndex: wing.vertexOffset + span * 9 + chord).position - referenceBodyCenter
++      return CrowFlightWingBodyIntegration.integratedPoint(
++        referencePoint: reference, sourceRoot: sourceRoot,
++        sourceLeadingRoot: sourceLeadingRoot, spanIndex: span,
++        chordIndex: chord, left: left,
++        phase: CrowFlightWingBodyIntegration.morphologyPhase(
++          proceduralPhase: motionPhase, hasExactArticulation: articulation != nil),
++        referenceAlignmentRadians: alignment)
++    }
++    return (elbow: pivot(16), wrist: pivot(23))
++  }
++
+   func surfaceStates(
+     phase: Float,
+     articulation: CrowNumiReplay.ArticulationFrame? = nil
+   ) -> [SIMD3<Float>] {
+-    (0..<dataset.vertexCount).map {
++    var pivots: [UInt8: WingFlexPivots] = [:]
++    if experimentalFlightRemexEnabled
++      && ProcessInfo.processInfo.environment["CROW_EXPERIMENTAL_WING_JOINTS"] == "1"
++      && (presentation == .takeoff || presentation == .wingbeat) {
++      pivots[2] = estimatedWingFlexPivots(phase: phase, articulation: articulation, left: true)
++      pivots[3] = estimatedWingFlexPivots(phase: phase, articulation: articulation, left: false)
++    }
++    return (0..<dataset.vertexCount).map {
+       transformedPoint(
+-        phase: phase, vertexIndex: $0, articulation: articulation
++        phase: phase, vertexIndex: $0, articulation: articulation, flexPivots: pivots
+       )
+     }
+   }
+@@ -3695,7 +3747,8 @@ private struct CrowMeshBuilder {
+   private func transformedPoint(
+     phase: Float,
+     vertexIndex: Int,
+-    articulation: CrowNumiReplay.ArticulationFrame?
++    articulation: CrowNumiReplay.ArticulationFrame?,
++    flexPivots: [UInt8: WingFlexPivots]
+   ) -> SIMD3<Float> {
+     let takeoff =
+       presentation == .takeoff
+@@ -3762,12 +3815,18 @@ private struct CrowMeshBuilder {
+           referenceAlignmentRadians: referenceAlignment
+         )
+         if let strength = articulation?.wingUpstrokeStrength[wingLink] {
+-          point = CrowFlightWingBodyIntegration.flexDistalWing(
+-            point: point,
+-            shoulder: CrowFlightWingBodyIntegration.bodyRoot(
+-              chordIndex: 0, left: partIdentifier == 2),
+-            spanIndex: spanIndex, left: partIdentifier == 2,
+-            strength: strength)
++          if let pivots = flexPivots[partIdentifier] {
++            point = CrowFlightWingBodyIntegration.flexArticulatedWing(
++              point: point, elbow: pivots.elbow, wrist: pivots.wrist,
++              spanIndex: spanIndex, left: partIdentifier == 2, strength: strength)
++          } else {
++            point = CrowFlightWingBodyIntegration.flexDistalWing(
++              point: point,
++              shoulder: CrowFlightWingBodyIntegration.bodyRoot(
++                chordIndex: 0, left: partIdentifier == 2),
++              spanIndex: spanIndex, left: partIdentifier == 2,
++              strength: strength)
++          }
+         }
+         if let takeoff {
+           let folded = CrowTakeoffSequence.foldedWingPoint(
+diff --git a/Sources/BirdFlowVisualization/CrowTakeoffSequence.swift b/Sources/BirdFlowVisualization/CrowTakeoffSequence.swift
+index d7ade64..9135fcd 100644
+--- a/Sources/BirdFlowVisualization/CrowTakeoffSequence.swift
++++ b/Sources/BirdFlowVisualization/CrowTakeoffSequence.swift
+@@ -126,6 +126,30 @@ enum CrowTakeoffSequence {
+     )
+   }
+ 
++  /// Maps confirmed support into a smoother visual fold while preserving the
++  /// current pose at onset. This is a presentation estimate, not contact data.
++  static func experimentalLandingPhase(flightPhase: Float, supportWeight: Float) -> Float {
++    let phase = min(max(flightPhase, standingHoldEnd), 1)
++    let weight = min(max(supportWeight, 0), 1)
++    guard weight > 0 else { return phase }
++    guard weight < 1 else { return standingHoldEnd }
++    guard phase > transitionEnd else {
++      return phase + (standingHoldEnd - phase) * weight
++    }
++    // Invert smootherstep so the visible wing deployment tracks the support
++    // easing instead of remaining fully open for most of the landing window.
++    var low: Float = 0
++    var high: Float = 1
++    let target = 1 - weight
++    for _ in 0..<24 {
++      let mid = (low + high) * 0.5
++      if smootherstep(mid) < target { low = mid } else { high = mid }
++    }
++    let foldedPhase = standingHoldEnd + (transitionEnd - standingHoldEnd) * (low + high) * 0.5
++    let flightResidual = (phase - transitionEnd) * pow(1 - weight, 16)
++    return foldedPhase + flightResidual
++  }
++
+   /// Collapses the body-seated folded-wing shell as the live wing deploys.
+   ///
+   /// Geometry records are retained at zero area after the handoff so current
+diff --git a/Tests/BirdFlowVisualizationTests/CrowFlightWingBodyIntegrationTests.swift b/Tests/BirdFlowVisualizationTests/CrowFlightWingBodyIntegrationTests.swift
+index 1b428cb..1a1e3b8 100644
+--- a/Tests/BirdFlowVisualizationTests/CrowFlightWingBodyIntegrationTests.swift
++++ b/Tests/BirdFlowVisualizationTests/CrowFlightWingBodyIntegrationTests.swift
+@@ -1245,3 +1245,26 @@ func crowEstimatedDistalFlexIsBilateralAndUpstrokeOnly() {
+     strength: downstroke)
+   #expect(simd_distance(extended, leftTip) < 1e-6)
+ }
++
++
++@Test("experimental joint flex preserves root, identity and bilateral symmetry")
++func crowExperimentalJointFlex() {
++  let elbow = SIMD3<Float>(0.04, 0.20, 0.05)
++  let wrist = SIMD3<Float>(0.02, 0.31, 0.08)
++  let tip = SIMD3<Float>(0.00, 0.46, 0.10)
++  func mirror(_ p: SIMD3<Float>) -> SIMD3<Float> { SIMD3(p.x, -p.y, p.z) }
++  let noFlex = CrowFlightWingBodyIntegration.flexArticulatedWing(
++    point: tip, elbow: elbow, wrist: wrist, spanIndex: 32, left: true, strength: 0)
++  let root = CrowFlightWingBodyIntegration.flexArticulatedWing(
++    point: elbow, elbow: elbow, wrist: wrist, spanIndex: 0, left: true, strength: 1)
++  let left = CrowFlightWingBodyIntegration.flexArticulatedWing(
++    point: tip, elbow: elbow, wrist: wrist, spanIndex: 32, left: true, strength: 1)
++  let right = CrowFlightWingBodyIntegration.flexArticulatedWing(
++    point: mirror(tip), elbow: mirror(elbow), wrist: mirror(wrist),
++    spanIndex: 32, left: false, strength: 1)
++  #expect(simd_distance(noFlex, tip) < 1e-6)
++  #expect(simd_distance(root, elbow) < 1e-6)
++  #expect(simd_distance(left, mirror(right)) < 1e-6)
++  #expect(simd_distance(left, tip) > 0.005)
++  #expect(simd_distance(left, tip) < 0.15)
++}
+diff --git a/Tests/BirdFlowVisualizationTests/CrowTakeoffSequenceTests.swift b/Tests/BirdFlowVisualizationTests/CrowTakeoffSequenceTests.swift
+index 3fcb2e6..04de499 100644
+--- a/Tests/BirdFlowVisualizationTests/CrowTakeoffSequenceTests.swift
++++ b/Tests/BirdFlowVisualizationTests/CrowTakeoffSequenceTests.swift
+@@ -308,3 +308,29 @@ func retainedRectricesUnfoldContinuouslyFromClosedStack() {
+     #expect(abs(right.tipOffset.y + left.tipOffset.y) < 1e-7)
+   }
+ }
++
++
++@Test("experimental supported landing spreads the visual fold continuously")
++func crowExperimentalLandingPhase() {
++  let flight: Float = 0.86
++  var old: [Float] = []
++  var revised: [Float] = []
++  for index in 0...25 {
++    let p = Float(index) / 25
++    let w = p * p * (3 - 2 * p)
++    old.append(CrowTakeoffSequence.sample(phase: flight * (1 - w)).transitionProgress)
++    let phase = CrowTakeoffSequence.experimentalLandingPhase(
++      flightPhase: flight, supportWeight: w)
++    revised.append(CrowTakeoffSequence.sample(phase: phase).transitionProgress)
++  }
++  let oldMax = zip(old, old.dropFirst()).map { abs($0 - $1) }.max() ?? 0
++  let newMax = zip(revised, revised.dropFirst()).map { abs($0 - $1) }.max() ?? 0
++  #expect(oldMax > 0.20)
++  #expect(newMax < 0.11)
++  #expect(newMax < oldMax * 0.5)
++  #expect(CrowTakeoffSequence.experimentalLandingPhase(
++    flightPhase: flight, supportWeight: 0) == flight)
++  #expect(CrowTakeoffSequence.experimentalLandingPhase(
++    flightPhase: flight, supportWeight: 1) == CrowTakeoffSequence.standingHoldEnd)
++  for (a, b) in zip(revised, revised.dropFirst()) { #expect(a >= b) }
++}

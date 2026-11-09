@@ -1,0 +1,40 @@
+[0/1] Planning build
+Building for production...
+[0/17] Write sources
+[0/17] /Users/n/Developer/numi-crow-render-20261109/.build/remex-pivot-test/arm64-apple-macosx/release/BirdFlowMetalPackageTests.derived/runner.swift
+[0/17] Write sources
+[8/18] Write swift-version-3CD7052B146186F2.txt
+[10/19] Compiling BirdFlowCore BirdModel.swift
+[11/21] Compiling BirdFlowCoreTests BirdDynamicsTests.swift
+[12/21] Compiling BirdFlowMetal AerodynamicPartLoads.swift
+[13/25] Compiling FormationGeometryBridgeCLI main.swift
+[13/25] Write Objects.LinkFileList
+[14/25] Linking birdflow-formation-geometry
+[16/25] Compiling BirdFlowCLI main.swift
+[16/25] Write Objects.LinkFileList
+[17/25] Linking birdflow
+[19/25] Compiling BirdFlowMetalTests BirdRealityAssetTests.swift
+[20/25] Compiling BirdFlowVisualization BirdAnalyticSurface.swift
+[21/28] Compiling BirdFlowCaptureCLI main.swift
+[21/29] Write Objects.LinkFileList
+[22/29] Linking birdflow-capture
+[24/29] Compiling BirdFlowViewerApp main.swift
+[24/29] Write Objects.LinkFileList
+[25/29] Linking birdflow-viewer
+[27/29] Compiling BirdFlowVisualizationTests CrowAxillaryFeatherTractTests.swift
+[28/30] Compiling BirdFlowMetalPackageTests runner.swift
+[28/30] Write Objects.LinkFileList
+[29/30] Linking BirdFlowMetalPackageTests
+Build complete! (144.60s)
+Test Suite 'Selected tests' started at 2026-11-09 19:46:47.508.
+Test Suite 'BirdFlowMetalPackageTests.xctest' started at 2026-11-09 19:46:47.515.
+Test Suite 'BirdFlowMetalPackageTests.xctest' passed at 2026-11-09 19:46:47.515.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'Selected tests' passed at 2026-11-09 19:46:47.515.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.006) seconds
+◇ Test run started.
+↳ Testing Library Version: 1902
+↳ Target Platform: arm64e-apple-macos14.0
+◇ Test "experimental joint flex preserves root, identity and bilateral symmetry" started.
+✔ Test "experimental joint flex preserves root, identity and bilateral symmetry" passed after 0.001 seconds.
+✔ Test run with 1 test in 0 suites passed after 0.001 seconds.
