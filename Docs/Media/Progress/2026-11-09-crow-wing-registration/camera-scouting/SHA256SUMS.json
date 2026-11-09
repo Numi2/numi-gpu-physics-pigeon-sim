@@ -1,0 +1,22 @@
+{
+  "README.md": {
+    "bytes": 302,
+    "sha256": "ce6c121d5c7c5c5b7f495a4992984b93d5735c56d1bd117e7ca5d1be4ea27e1a"
+  },
+  "crow-corrected-stroke.png": {
+    "bytes": 511252,
+    "sha256": "187e8dcca6cad47fff959508b4609970461e267c8047f7ea875c5a98b0e6a6cf"
+  },
+  "crow-wing-cameras.jpg": {
+    "bytes": 53239,
+    "sha256": "4157144854f55324fd5d81b8f0a1af717ae3c57ae1c3ecce0ae1dccc27824ccb"
+  },
+  "crow-wing-poses.jpg": {
+    "bytes": 45766,
+    "sha256": "29e5057bd13d0c3a1102d3c85d362f6d818432c2cb53171af40c02fef8310374"
+  },
+  "crow-wing-spacing.jpg": {
+    "bytes": 22138,
+    "sha256": "62db888f29b3d12e80cb0917e68ceb2ecaca6144117004d4b5146e5b69b44276"
+  }
+}
