@@ -3,6 +3,7 @@
     "i-audit.json": "26664bfc20e70239e61dcf965c758f3a0583f8b4701d76c0753a5247b9fe0745",
     "i-flight-before-foot-fix.png": "bcee29906db4bb2cd592a94b9eecf1399e9f794b3b2aca2c25bb693dd4c6e9c7",
     "i-flight.png": "27ddb781318878166c65ed2db434cd9cbe11196a2d81f9eab72364fcc7186136",
+    "i-landing-close.png": "8ca1bde8963902b5766bacf54805e814e5b71482877d909f2e2bb39d84a5a97f",
     "i-landing.png": "2b3a3050c4840cd12dac6631453a53ca8d4c6a675333a56c1ed81902ef522d95",
     "i-projection.json": "3d4da328362b22b3bbdc49b289d969ec0d35e8b6668a377c1a484706f9ef8930",
     "j-audit.json": "1a7d39a9057601e7e0d611c1b8efa4142349dfb545217aa9b8b06b31ce52824f",
@@ -16,6 +17,7 @@
     "camera_distance_m": 1.15,
     "camera_pitch": 0.25,
     "camera_yaw": -1.25,
+    "close_landing_camera_distance_m": 0.75,
     "height": 1080,
     "lighting": "overcast",
     "width": 1920
