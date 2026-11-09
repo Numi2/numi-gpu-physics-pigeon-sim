@@ -1,0 +1,24 @@
+diff --git a/Sources/BirdFlowVisualization/CrowLiveWingCovertRootBuffer.swift b/Sources/BirdFlowVisualization/CrowLiveWingCovertRootBuffer.swift
+index 54f401f..8dccb6b 100644
+--- a/Sources/BirdFlowVisualization/CrowLiveWingCovertRootBuffer.swift
++++ b/Sources/BirdFlowVisualization/CrowLiveWingCovertRootBuffer.swift
+@@ -13,6 +13,8 @@ import simd
+ /// current and previous temporal samples.
+ final class CrowLiveWingCovertRootBuffer {
+   private static let bufferedFrameCount = 3
++  private static let experimentalShorterUnderwingCoverts =
++    ProcessInfo.processInfo.environment["CROW_EXPERIMENTAL_SHORT_UNDERWING_COVERTS"] == "1"
+   /// The canonical template lacks the retired blade's edge-wave excursions.
+   /// Preserve its measured overlap envelope with a small, class-local width
+   /// allowance rather than retaining a second CPU tessellation path.
+@@ -351,8 +353,9 @@ final class CrowLiveWingCovertRootBuffer {
+       + normal
+       * CrowFlightWingBodyIntegration.underwingCovertRootClearanceMeters
+       * weight
++    let spanScale: Float = Self.experimentalShorterUnderwingCoverts ? 0.68 : 1
+     let tip =
+-      surfaceRoot + weight * (surfaceTip - surfaceRoot)
++      surfaceRoot + weight * spanScale * (surfaceTip - surfaceRoot)
+       + normal
+       * CrowFlightWingBodyIntegration.underwingCovertTipClearanceMeters
+       * weight
