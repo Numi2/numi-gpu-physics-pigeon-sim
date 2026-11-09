@@ -1,0 +1,135 @@
+diff --git a/Sources/BirdFlowVisualization/CrowShowcaseCapture.swift b/Sources/BirdFlowVisualization/CrowShowcaseCapture.swift
+index 048407a..becc29e 100644
+--- a/Sources/BirdFlowVisualization/CrowShowcaseCapture.swift
++++ b/Sources/BirdFlowVisualization/CrowShowcaseCapture.swift
+@@ -547,6 +547,8 @@ public enum CrowShowcaseCapture {
+         "render_height": arguments.height,
+         "navigation_course": numiReplay.navigationCourse ?? "unspecified",
+         "inspection_course_hidden": arguments.inspectionHideCourse,
++        "experimental_flight_remex": ProcessInfo.processInfo.environment[
++          "CROW_EXPERIMENTAL_FLIGHT_REMEX"] == "1",
+         "policy_lighting_contract": numiReplay.policyLightingContract
+           ?? "unspecified",
+         "render_lighting_preset": arguments.lighting.rawValue,
+@@ -1821,8 +1823,10 @@ private final class CrowShowcaseRenderer {
+         previousStates: previousSurfaceStates,
+         currentDeployment: underwingDeployment.0,
+         previousDeployment: underwingDeployment.1,
+-        currentTrailingDeployment: trailingDeployment.0,
+-        previousTrailingDeployment: trailingDeployment.1,
++        currentTrailingDeployment: meshBuilder.experimentalFlightRemexEnabled
++          ? 0 : trailingDeployment.0,
++        previousTrailingDeployment: meshBuilder.experimentalFlightRemexEnabled
++          ? 0 : trailingDeployment.1,
+         currentPresentationPhase: phase,
+         previousPresentationPhase: priorPhase,
+         useTakeoffBodyHandoff: presentation == .takeoff
+@@ -3419,6 +3423,7 @@ private struct CrowMeshBuilder {
+   private let profile: CrowVisualProfile
+   private let motion: any CrowShowcaseMotion
+   private let surfaceIsEstimatedCrow: Bool
++  let experimentalFlightRemexEnabled: Bool
+   private let referenceBodyCenter: SIMD3<Float>
+   private let vertexPartIdentifiers: [UInt8]
+   private let articulationPivots: [UInt8: SIMD3<Float>]
+@@ -3465,6 +3470,9 @@ private struct CrowMeshBuilder {
+     self.profile = profile
+     self.motion = motion
+     self.presentation = presentation
++    self.experimentalFlightRemexEnabled =
++      dataset.scientificTier == "estimated-hybrid-complete-surface"
++      && ProcessInfo.processInfo.environment["CROW_EXPERIMENTAL_FLIGHT_REMEX"] == "1"
+     self.explicitVentralBarbCurvesEnabled = explicitVentralBarbCurvesEnabled
+     self.bodyVanesOwnedByMetal = bodyVanesOwnedByMetal
+     self.bodyContoursOwnedByMetal = bodyContoursOwnedByMetal
+@@ -3849,6 +3857,15 @@ private struct CrowMeshBuilder {
+       guard includedPartIdentifiers.contains(part) else { continue }
+       let triangle = dataset.triangle(triangleIndex)
+       let indices = [Int(triangle.x), Int(triangle.y), Int(triangle.z)]
++      if experimentalFlightRemexEnabled, (part == 2 || part == 3),
++        let wing = dataset.components.first(where: { $0.partIdentifier == part })
++      {
++        let local = indices.map { $0 - wing.vertexOffset }
++        let span = local.map { $0 / 9 }.min() ?? 0
++        let chord = local.map { $0 % 9 }.min() ?? 0
++        // Replace the distal trailing grid with individually posed remiges.
++        if (span >= 20 && chord >= 6) || (span >= 24 && chord >= 2) { continue }
++      }
+       let points = indices.map { states[$0] }
+       let semanticIdentity: UInt32 = {
+         guard part == 2 || part == 3,
+@@ -5837,6 +5854,11 @@ private struct CrowMeshBuilder {
+         )
+       }
+     }
++    if experimentalFlightRemexEnabled {
++      appendExperimentalFlightRemiges(
++        states: states, left: left, projectedPixelsPerMeter: projectedPixelsPerMeter,
++        to: &vertices)
++    }
+     appendSurfaceBoundWingCoverts(
+       states: states,
+       left: left,
+@@ -6031,6 +6053,33 @@ private struct CrowMeshBuilder {
+     }
+   }
+ 
++  private func appendExperimentalFlightRemiges(
++    states: [SIMD3<Float>], left: Bool, projectedPixelsPerMeter: Float,
++    to vertices: inout [ColoredVertex]
++  ) {
++    guard let wing = dataset.components.first(where: {
++      $0.partIdentifier == (left ? 2 : 3)
++    }), wing.vertexCount == 297 else { return }
++    let feathers = CrowFlightRemexRig.feathers(
++      states: states, offset: wing.vertexOffset, left: left)
++    for feather in feathers {
++      // Retained geometry count must not depend on instantaneous feather length.
++      let shade: Float = feather.kind == .primary ? 0.007 : 0.008
++      appendFeatherBlade(
++        root: feather.root - feather.normal * 0.0006,
++        tip: feather.tip - feather.normal * 0.0006,
++        planeNormal: feather.normal, rootWidth: feather.halfWidth * 0.55,
++        maximumWidth: feather.halfWidth,
++        color: SIMD4<Float>(shade, shade * 1.18, shade * 1.40, 0.17),
++        sections: 16, camber: 0.0015, transverseCamberRatio: 0.10,
++        vaneAsymmetry: feather.kind == .primary ? 0.12 : 0.04,
++        rootEnvelopeRatio: 0.52, terminalWidthRatio: 0.20,
++        tipTaperExponent: 3, roundedFlightTip: true, surfaceFeatherClass: 4,
++        lodLengthMeters: 0.17, projectedPixelsPerMeter: projectedPixelsPerMeter,
++        to: &vertices)
++    }
++  }
++
+   /// A continuous axillary covert bed sits beneath the exposed dorsal vanes.
+   /// The surface is hidden by their feather geometry in normal views, but
+   /// closes projection slots without broadening the visible course.
+@@ -6153,6 +6202,8 @@ private struct CrowMeshBuilder {
+     for chord in CrowFlightWingBodyIntegration.covertChordIndices {
+       let rowFraction = Float(chord) / 8
+       for span in CrowFlightWingBodyIntegration.covertSpanIndices {
++        if experimentalFlightRemexEnabled
++          && ((chord == 6 && span >= 20) || span >= 24) { continue }
+         let surfaceIdentity = CrowWingCovertIdentity.pack(
+           left: left,
+           chordIndex: chord,
+@@ -6796,6 +6847,7 @@ private struct CrowMeshBuilder {
+     terminalWidthRatio: Float = 0.015,
+     tipTaperExponent: Float = 3.2,
+     axialStartFraction: Float = 0,
++    roundedFlightTip: Bool = false,
+     surfaceFeatherClass: UInt32 = 0,
+     lodLengthMeters: Float? = nil,
+     minimumWidthSections: Int = 0,
+@@ -6828,7 +6880,10 @@ private struct CrowMeshBuilder {
+       let tipTaper =
+         1
+         - (1 - boundedTerminalWidthRatio) * pow(t, boundedTipTaperExponent)
+-      let envelope = bodyEnvelope * tipTaper
++      let roundedTip = min(max((t - 0.72) / 0.28, 0), 1)
++      let envelope = roundedFlightTip
++        ? sqrt(max(0, 1 - roundedTip * roundedTip))
++        : bodyEnvelope * tipTaper
+       let rippleEnvelope = pow(max(sin(Float.pi * t), 0), 2)
+       let edgeRipple =
+         1

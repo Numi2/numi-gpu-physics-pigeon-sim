@@ -32,3 +32,27 @@ and five views, plus the landing window, to all three retained trials. Reject
 it if the wing gains holes or a worse silhouette. Any animation of the
 estimated wrist remains a presentation approximation; no measured crow
 kinematics are available in this dataset.
+
+The first outer-sheet-occlusion trial (candidate 4) exposes a plausible number
+of distinct distal vanes, but it opens long slots through the hand in the
+overhead view. It fails the hole criterion. The next prediction is that a
+smaller cutout and covert reduction will retain a continuous hand while
+exposing some individual primary tips. Evaluate the same views and landing.
+
+Candidate 5 narrows the distal cutout. Its 100-frame five-view and 121-frame
+landing clips rendered successfully; the large candidate-4 slots are reduced
+but a visibly artificial fan and implausible layered coverts remain. The
+static reference test passes for the unchanged rig geometry. This is the best
+current exploratory candidate, not a photorealism or biological qualification.
+Its code is opt-in with `CROW_EXPERIMENTAL_FLIGHT_REMEX=1` and is not the
+production default. The wing remains bound to an estimated dove-derived sheet,
+with heuristic wrist flex and no measured American-crow feather dynamics.
+The landing display derives its fold from recorded support rewards, with no
+measured toe contact or animal landing kinematics.
+
+Qualitative reference for species appearance: [American crow in flight,
+underside photograph](https://docellensjourney.com/2014/07/16/from-the-underside/).
+Upstroke flex was informed by [Tobalske et al. (2003), wing kinematics across
+speeds](https://umimpact.umt.edu/en/publications/wing-kinematics-of-avian-flight-across-speeds/),
+which does not provide American-crow calibration. No reference image was
+redistributed here.

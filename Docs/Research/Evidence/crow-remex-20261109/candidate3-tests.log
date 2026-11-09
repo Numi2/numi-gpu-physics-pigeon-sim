@@ -1,0 +1,36 @@
+[0/1] Planning build
+Building for production...
+[0/6] Write swift-version-3CD7052B146186F2.txt
+[2/7] Compiling BirdFlowCore BirdModel.swift
+[3/12] Compiling BirdFlowCoreTests BirdDynamicsTests.swift
+[4/12] Compiling BirdFlowMetal AerodynamicPartLoads.swift
+[5/16] Compiling FormationGeometryBridgeCLI main.swift
+[5/16] Write Objects.LinkFileList
+[6/16] Linking birdflow-formation-geometry
+[8/16] Compiling BirdFlowCLI main.swift
+[8/17] Write Objects.LinkFileList
+[9/17] Linking birdflow
+[11/17] Compiling BirdFlowMetalTests BirdRealityAssetTests.swift
+[12/17] Compiling BirdFlowVisualization BirdAnalyticSurface.swift
+[13/21] Compiling BirdFlowCaptureCLI main.swift
+[13/21] Write Objects.LinkFileList
+[14/21] Linking birdflow-capture
+[16/21] Compiling BirdFlowViewerApp main.swift
+[16/21] Write Objects.LinkFileList
+[17/21] Linking birdflow-viewer
+[19/21] Compiling BirdFlowVisualizationTests CrowAxillaryFeatherTractTests.swift
+[19/21] Write Objects.LinkFileList
+[20/21] Linking BirdFlowMetalPackageTests
+Build complete! (127.39s)
+Test Suite 'Selected tests' started at 2026-11-09 19:29:03.689.
+Test Suite 'BirdFlowMetalPackageTests.xctest' started at 2026-11-09 19:29:03.695.
+Test Suite 'BirdFlowMetalPackageTests.xctest' passed at 2026-11-09 19:29:03.695.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'Selected tests' passed at 2026-11-09 19:29:03.695.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.005) seconds
+◇ Test run started.
+↳ Testing Library Version: 1902
+↳ Target Platform: arm64e-apple-macos14.0
+◇ Test "crow remiges preserve bilateral identities and noncrossing reference shafts" started.
+✔ Test "crow remiges preserve bilateral identities and noncrossing reference shafts" passed after 0.002 seconds.
+✔ Test run with 1 test in 0 suites passed after 0.002 seconds.
