@@ -14,16 +14,19 @@ final class CrowFeatherArticulationDeformer {
   private let transformBuffers: [MTLBuffer]
   private let featherCount: Int
   private let pivots: [UInt8: SIMD3<Float>]
+  private let usesTakeoffTranslation: Bool
   private var nextSlot = 0
 
   init(
     backend: VisualizationBackend,
     featherCount: Int,
-    pivots: [UInt8: SIMD3<Float>]
+    pivots: [UInt8: SIMD3<Float>],
+    usesTakeoffTranslation: Bool = false
   ) throws {
     self.backend = backend
     self.featherCount = featherCount
     self.pivots = pivots
+    self.usesTakeoffTranslation = usesTakeoffTranslation
     pipeline = try backend.compute("articulateCrowFeatherRoots")
     outputBuffers = try (0..<Self.bufferedFrameCount).map { _ in
       try backend.buffer(
@@ -53,9 +56,14 @@ final class CrowFeatherArticulationDeformer {
       (previous, CrowNumiReplay.ArticulatedLink.leftWing, UInt8(2)),
       (previous, CrowNumiReplay.ArticulatedLink.rightWing, UInt8(3)),
       (previous, CrowNumiReplay.ArticulatedLink.tail, UInt8(4)),
-    ].map { frame, link, partIdentifier in
-      try transform(
-        frame: frame, link: link, partIdentifier: partIdentifier
+    ].enumerated().map { index, entry in
+      let (frame, link, partIdentifier) = entry
+      let phase = index < 3 ? rootFrame.currentPhase : rootFrame.previousPhase
+      let bodyTranslation = usesTakeoffTranslation
+        ? CrowTakeoffSequence.sample(phase: phase).bodyTranslation : .zero
+      return try transform(
+        frame: frame, link: link, partIdentifier: partIdentifier,
+        bodyTranslation: bodyTranslation
       )
     }
     let destination = transformBuffers[slot].contents().bindMemory(
@@ -88,7 +96,8 @@ final class CrowFeatherArticulationDeformer {
   private func transform(
     frame: CrowNumiReplay.ArticulationFrame,
     link: CrowNumiReplay.ArticulatedLink,
-    partIdentifier: UInt8
+    partIdentifier: UInt8,
+    bodyTranslation: SIMD3<Float>
   ) throws -> CrowFeatherLinkTransformGPU {
     guard let delta = frame.delta(for: link),
       let registrationPivot = pivots[partIdentifier]
@@ -102,7 +111,7 @@ final class CrowFeatherArticulationDeformer {
       translationAndPartIdentifier: SIMD4(
         delta.translation, Float(partIdentifier)
       ),
-      registrationPivot: SIMD4(registrationPivot, 0)
+      registrationPivot: SIMD4(registrationPivot + bodyTranslation, 0)
     )
   }
 }

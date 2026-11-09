@@ -1139,3 +1139,21 @@ func distalTrailingCovertTipsConvergeWithoutChangingOtherCourses() {
   #expect(abs(chordScale(6, 30) - 0.64) < 1e-7)
   #expect(chordScale(5, 30) == 1)
 }
+
+@Test("accepted wing articulation keeps the shoulder seated and the tip state-driven")
+func acceptedWingArticulationKeepsShoulderSeated() {
+  let point = SIMD3<Float>(0.01, 0.03, 0.02)
+  let moved = SIMD3<Float>(0.08, 0.15, -0.07)
+  let root = CrowFlightWingBodyIntegration.blendAcceptedArticulation(
+    point: point, movedPoint: moved, spanIndex: 0
+  )
+  let middle = CrowFlightWingBodyIntegration.blendAcceptedArticulation(
+    point: point, movedPoint: moved, spanIndex: 6
+  )
+  let tip = CrowFlightWingBodyIntegration.blendAcceptedArticulation(
+    point: point, movedPoint: moved, spanIndex: 12
+  )
+  #expect(simd_distance(root, point) < 1e-6)
+  #expect(simd_distance(middle, (point + moved) * 0.5) < 1e-6)
+  #expect(simd_distance(tip, moved) < 1e-6)
+}

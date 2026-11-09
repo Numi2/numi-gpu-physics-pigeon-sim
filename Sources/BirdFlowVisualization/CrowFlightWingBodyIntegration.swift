@@ -654,6 +654,17 @@ enum CrowFlightWingBodyIntegration {
     return SIMD3<Float>(seated.x, left ? abs(seated.y) : -abs(seated.y), seated.z)
   }
 
+  /// Estimated skinning of the accepted terminal-link transform: the fixed
+  /// shoulder remains seated on the torso and the free distal wing receives
+  /// the complete simulated delta. This changes presentation, not physics.
+  static func blendAcceptedArticulation(
+    point: SIMD3<Float>, movedPoint: SIMD3<Float>, spanIndex: Int
+  ) -> SIMD3<Float> {
+    precondition((0..<spanCount).contains(spanIndex))
+    let weight = smootherstep(clamp(Float(spanIndex) / Float(articulationSpanCount)))
+    return point + (movedPoint - point) * weight
+  }
+
   static func morphologyPhase(
     proceduralPhase: Float,
     hasExactArticulation: Bool

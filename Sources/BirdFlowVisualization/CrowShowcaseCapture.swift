@@ -1258,7 +1258,8 @@ private final class CrowShowcaseRenderer {
       try CrowFeatherArticulationDeformer(
         backend: createdBackend,
         featherCount: $0.feathers.count,
-        pivots: createdMeshBuilder.featherArticulationPivots
+        pivots: createdMeshBuilder.featherArticulationPivots,
+        usesTakeoffTranslation: presentation == .takeoff
       )
     }
     // The standing presentation renders the persistent asset inventory.  In
@@ -1571,19 +1572,14 @@ private final class CrowShowcaseRenderer {
     temporalVertices.withUnsafeBytes { bytes in
       _ = memcpy(buffer.contents(), bytes.baseAddress!, bytes.count)
     }
-    func courseBuffer(_ vertices: [CrowSurfaceTemporalVertexGPU]) throws -> MTLBuffer? {
-      guard !vertices.isEmpty else { return nil }
-      let buffer = try backend.buffer(
-        length: MemoryLayout<CrowSurfaceTemporalVertexGPU>.stride * vertices.count,
-        shared: true
-      )
-      vertices.withUnsafeBytes { bytes in
-        _ = memcpy(buffer.contents(), bytes.baseAddress!, bytes.count)
-      }
-      return buffer
+    var navigationSolidBuffer: MTLBuffer?
+    if !navigationSolidVertices.isEmpty {
+      navigationSolidBuffer = try makeCourseBuffer(navigationSolidVertices)
     }
-    let navigationSolidBuffer = try courseBuffer(navigationSolidVertices)
-    let navigationWireBuffer = try courseBuffer(navigationWireVertices)
+    var navigationWireBuffer: MTLBuffer?
+    if !navigationWireVertices.isEmpty {
+      navigationWireBuffer = try makeCourseBuffer(navigationWireVertices)
+    }
 
     let formats: [MTLPixelFormat] = [
       .rgba16Float,
@@ -1593,8 +1589,9 @@ private final class CrowShowcaseRenderer {
       .r32Float,
     ]
     let bytesPerPixel = [8, 8, 8, 4, 4]
-    let resolvedAOVs = try formats.enumerated().map { index, format in
-      try makeTexture(
+    var resolvedAOVs: [MTLTexture] = []
+    for (index, format) in formats.enumerated() {
+      resolvedAOVs.append(try makeTexture(
         format: format,
         width: renderWidth,
         height: renderHeight,
@@ -1602,14 +1599,15 @@ private final class CrowShowcaseRenderer {
         storageMode: .shared,
         usage: [.renderTarget, .shaderRead],
         estimatedBytes: renderWidth * renderHeight * bytesPerPixel[index]
-      )
+      ))
     }
     let renderAOVs: [MTLTexture]
     if sampleCount == 1 {
       renderAOVs = resolvedAOVs
     } else {
-      renderAOVs = try formats.enumerated().map { index, format in
-        try makeTexture(
+      var multisampleAOVs: [MTLTexture] = []
+      for (index, format) in formats.enumerated() {
+        multisampleAOVs.append(try makeTexture(
           format: format,
           width: renderWidth,
           height: renderHeight,
@@ -1617,8 +1615,9 @@ private final class CrowShowcaseRenderer {
           storageMode: .private,
           usage: .renderTarget,
           estimatedBytes: renderWidth * renderHeight * bytesPerPixel[index] * sampleCount
-        )
+        ))
       }
+      renderAOVs = multisampleAOVs
     }
 
     let resolvedDeviceDepth = try makeTexture(
@@ -1630,10 +1629,14 @@ private final class CrowShowcaseRenderer {
       usage: [.renderTarget, .shaderRead],
       estimatedBytes: renderWidth * renderHeight * 4
     )
-    let deviceDepthReadback = try makeDepthReadback(
-      enabled: auditReadback,
-      byteCount: renderWidth * renderHeight * 4
-    )
+    let deviceDepthReadback: CrowDepthReadbackBox
+    if auditReadback {
+      deviceDepthReadback = CrowDepthReadbackBox(
+        buffer: try backend.buffer(length: renderWidth * renderHeight * 4, shared: true)
+      )
+    } else {
+      deviceDepthReadback = CrowDepthReadbackBox(buffer: nil)
+    }
     let renderDepth: MTLTexture
     if sampleCount == 1 {
       renderDepth = resolvedDeviceDepth
@@ -3337,16 +3340,6 @@ private final class CrowShowcaseRenderer {
   }
 
   @inline(never)
-  private func makeDepthReadback(
-    enabled: Bool,
-    byteCount: Int
-  ) throws -> CrowDepthReadbackBox {
-    guard enabled else { return CrowDepthReadbackBox(buffer: nil) }
-    return CrowDepthReadbackBox(
-      buffer: try backend.buffer(length: byteCount, shared: true)
-    )
-  }
-
   private func makeTexture(
     format: MTLPixelFormat,
     width: Int,
@@ -3368,6 +3361,18 @@ private final class CrowShowcaseRenderer {
       throw VisualizationError.allocation(estimatedBytes)
     }
     return texture
+  }
+
+  @inline(never)
+  private func makeCourseBuffer(_ vertices: [CrowSurfaceTemporalVertexGPU]) throws -> MTLBuffer {
+    let buffer = try backend.buffer(
+      length: MemoryLayout<CrowSurfaceTemporalVertexGPU>.stride * vertices.count,
+      shared: true
+    )
+    vertices.withUnsafeBytes { bytes in
+      _ = memcpy(buffer.contents(), bytes.baseAddress!, bytes.count)
+    }
+    return buffer
   }
 
   private static func surfaceMaterialCode(_ material: Float) -> UInt32 {
@@ -3697,11 +3702,22 @@ private struct CrowMeshBuilder {
               takeoff.transitionProgress
             ) + takeoff.bodyTranslation
         }
+        if let pivot = articulationPivots[partIdentifier],
+          let delta = articulation?.delta(for: partIdentifier == 2 ? .leftWing : .rightWing)
+        {
+          let bodyTranslation = takeoff?.bodyTranslation ?? .zero
+          let moved = delta.transform(point: point - bodyTranslation, around: pivot)
+            + bodyTranslation
+          return CrowFlightWingBodyIntegration.blendAcceptedArticulation(
+            point: point, movedPoint: moved, spanIndex: spanIndex
+          )
+        }
       } else if let takeoff {
         point += takeoff.bodyTranslation
       }
       return articulatedSurfacePoint(
-        point, partIdentifier: partIdentifier, articulation: articulation
+        point, partIdentifier: partIdentifier, articulation: articulation,
+        bodyTranslation: takeoff?.bodyTranslation ?? .zero
       )
     }
     let transform = profile.visualTransform
@@ -3722,7 +3738,8 @@ private struct CrowMeshBuilder {
   private func articulatedSurfacePoint(
     _ point: SIMD3<Float>,
     partIdentifier: UInt8,
-    articulation: CrowNumiReplay.ArticulationFrame?
+    articulation: CrowNumiReplay.ArticulationFrame?,
+    bodyTranslation: SIMD3<Float> = .zero
   ) -> SIMD3<Float> {
     let link: CrowNumiReplay.ArticulatedLink
     switch partIdentifier {
@@ -3734,7 +3751,7 @@ private struct CrowMeshBuilder {
     guard let pivot = articulationPivots[partIdentifier],
       let delta = articulation?.delta(for: link)
     else { return point }
-    return delta.transform(point: point, around: pivot)
+    return delta.transform(point: point, around: pivot + bodyTranslation)
   }
 
   private func appendMeasuredScaffold(

@@ -9,22 +9,28 @@ fi
 output=$1
 input_i=$2
 input_j=$3
-renderer=${CROW_CAPTURE_BINARY:-.build/nowmo/release/birdflow-capture}
+renderer=${CROW_CAPTURE_BINARY:-.build/release/birdflow-capture}
+frames=${CROW_FRAME_COUNT:-2999}
+fps=${CROW_VIDEO_FPS:-50}
+section_frames=${CROW_SECTION_FRAMES:-600}
+width=${CROW_VIDEO_WIDTH:-1600}
+height=${CROW_VIDEO_HEIGHT:-900}
 for path in "$input_i" "$input_j" "$renderer"; do
   if [ ! -f "$path" ]; then printf "missing input: %s\n" "$path" >&2; exit 2; fi
 done
 mkdir -p "$output"
 for course in i j; do
   if [ "$course" = i ]; then input=$input_i; else input=$input_j; fi
-  for start in 0 300 600 900 1200; do
-    end=$((start + 299))
+  for ((start=0; start<frames; start+=section_frames)); do
+    end=$((start + section_frames - 1))
+    if ((end >= frames)); then end=$((frames - 1)); fi
     label=$(printf "%s-%04d" "$course" "$start")
     "$renderer" --capture-crow-frames "$output/$label-audit" \
-      --capture-crow-video "$output/$label.mp4" --capture-crow-video-fps 25 \
-      --capture-frames 1500 --capture-frame-start "$start" --capture-frame-end "$end" \
-      --capture-width 1280 --capture-height 720 --capture-crow-solid-course \
+      --capture-crow-video "$output/$label.mp4" --capture-crow-video-fps "$fps" \
+      --capture-frames "$frames" --capture-frame-start "$start" --capture-frame-end "$end" \
+      --capture-width "$width" --capture-height "$height" --capture-crow-solid-course \
       --capture-crow-presentation takeoff --capture-crow-replay-pack "$input" \
       --capture-crow-lighting overcast --capture-crow-camera-yaw -1.25 \
-      --capture-crow-camera-pitch 0.25 --capture-crow-camera-distance 1.15
+      --capture-crow-camera-pitch 0.20 --capture-crow-camera-distance 1.05
   done
 done
