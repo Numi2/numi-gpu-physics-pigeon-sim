@@ -18,16 +18,25 @@ accepted-state replays and verification are archived in Numi Lab under
 * Course cage corners now transform both the recorded obstacle orientation
   and the inverse recorded crow orientation; subtracting centers alone was
   wrong whenever the bird banked or turned.
-* A v15 frame with completed waypoints and positive recorded support reward
-  uses the folded supported presentation instead of leaving the takeoff
-  animation permanently airborne. This is a visual switch, not a contact or
-  landing verifier; the independent Numi assessment supplies that verdict.
+* The v15 presentation requires 0.2 seconds of uninterrupted recorded
+  support after all waypoints, then eases into the folded pose over 0.5
+  seconds. Missing or nonconsecutive accepted states break support continuity.
+  This is a visual estimate, not a contact verifier; the independent Numi
+  assessment supplies the simulated landing verdict.
 * Plantar pads and claws now follow a raised digit instead of remaining at
   the standing support height during takeoff; a geometric regression test
   checks that the lifted foot surface remains together.
-* A replay no longer draws the presentation-only standing platform, which was
-  unrelated to the recorded collision scene. Replay overlays say simulated
-  replay instead of labeling the landing as takeoff.
+* A replay no longer draws the unrelated presentation-only standing platform.
+  Optional solid course boxes use the simulated collision dimensions and
+  accepted poses; a finite visual patch represents the recorded ground plane.
+  Their color and lighting are presentation choices, not recorded ecology.
+  When a box blocks the camera-to-body sightline, it is shown as a labeled
+  wireframe cutaway; the physical obstacle and trajectory are unchanged.
+  Replay overlays identify the simulation, layout, recorded waypoint count and
+  sustained-support presentation.
+* Native H.264 encoding streams frames directly into a video file instead of
+  storing thousands of PNGs. The example videos use accepted states at 25 fps
+  from the original 50 Hz trace, at normal simulation speed.
 
 ## Known gaps, including limitations that remain
 
@@ -58,18 +67,18 @@ accepted-state replays and verification are archived in Numi Lab under
    multispectral plumage, measured reflectance or specimen texture scans.
    Feather microstructure, wetness, weathering and individual variation are
    incomplete; this renderer is not photorealistically validated.
-7. The review renderer shows diagnostic wire cages for the course and a
-   studio background, not the real appearance or contact surface of an
-   ecological environment. Cages have no texture, indirect illumination or
-   perch shadows. Their poses are accepted simulation poses.
-8. A replay is sampled from 50 Hz accepted states. Sparse screenshots and
-   accelerated playback cannot establish continuous contact, accurate
-   wingbeat shape, motion blur or absence of visual interpenetration.
-9. The presentation uses an estimated deployment transition and may switch
-   abruptly if the support reward alternates near touchdown. Takeoff timing,
-   feather settling and the supported landing pose need temporal and
-   all-angle validation. The current terminal frames do not validate an
-   uninterrupted full-duration realistic animation.
+7. The optional solid course and ground are untextured, flat-shaded estimates
+   with a studio background, not a reconstructed ecological environment.
+   They lack calibrated materials, indirect illumination and perch shadows.
+   Box dimensions and poses match the simulated collision scene.
+8. The complete replay samples 50 Hz accepted states at 25 fps. It does not
+   establish continuous contact, accurate wingbeat shape, motion blur or
+   absence of visual interpenetration between the accepted samples.
+9. The presentation uses estimated deployment and settling transitions.
+   Sustained support is now checked before settling, but loss of support can
+   still switch the estimate back to flight. The transitions, feather settling
+   and supported pose need temporal and all-angle validation; replaying the
+   full trajectory does not by itself establish realistic motion.
 10. Retargeting removes global root motion to frame the crow. Course cages are
     transformed into the crow frame, but the camera and inferred feather
     topology are presentation choices. RGB imagery is not the actor's sensor.

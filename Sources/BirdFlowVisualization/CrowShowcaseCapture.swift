@@ -68,6 +68,8 @@ public enum CrowShowcaseCapture {
     let width: Int
     let height: Int
     let frameCount: Int
+    let frameStart: Int
+    let frameEnd: Int
     let surfaceManifestURL: URL
     let surfaceGenerationAuditURL: URL
     let crowProfileURL: URL
@@ -76,6 +78,9 @@ public enum CrowShowcaseCapture {
     let standingReferenceURL: URL
     let aovAuditURL: URL?
     let numiReplayPackURL: URL?
+    let videoURL: URL?
+    let videoFPS: Int
+    let solidCourse: Bool
     let temporalScale: Float
     let cameraYawRadians: Float?
     let cameraYawOrbitRadians: Float
@@ -133,6 +138,22 @@ public enum CrowShowcaseCapture {
       width = try positiveInteger(after: "--capture-width", default: 1600)
       height = try positiveInteger(after: "--capture-height", default: 900)
       frameCount = try positiveInteger(after: "--capture-frames", default: 48)
+      guard frameCount >= 2 else { throw CaptureError.invalidArguments("capture requires at least two timeline frames") }
+      if let raw = try value(after: "--capture-frame-start") {
+        guard let start = Int(raw), start >= 0 else { throw CaptureError.invalidArguments("invalid capture frame start") }
+        frameStart = start
+      } else { frameStart = 0 }
+      if let raw = try value(after: "--capture-frame-end") {
+        guard let end = Int(raw), end >= 0 else { throw CaptureError.invalidArguments("invalid capture frame end") }
+        frameEnd = end
+      } else { frameEnd = frameCount - 1 }
+      guard frameStart <= frameEnd, frameEnd < frameCount else {
+        throw CaptureError.invalidArguments("capture frame range must fit the timeline")
+      }
+      videoFPS = try positiveInteger(after: "--capture-crow-video-fps", default: 25)
+      guard videoFPS <= 120 else { throw CaptureError.invalidArguments("video fps must not exceed 120") }
+      videoURL = try value(after: "--capture-crow-video").map { URL(fileURLWithPath: $0) }
+      solidCourse = commandLine.contains("--capture-crow-solid-course")
       temporalScale = try positiveFloat(
         after: "--capture-crow-temporal-scale",
         default: 1
@@ -285,6 +306,9 @@ public enum CrowShowcaseCapture {
         )
       }
       lighting = parsedLighting
+      if (frameStart != 0 || frameEnd != frameCount - 1) && numiReplayPackURL == nil {
+        throw CaptureError.invalidArguments("frame windows require a navigation replay")
+      }
       if numiReplayPackURL != nil && presentation != .takeoff {
         throw CaptureError.invalidArguments(
           "--capture-crow-replay-pack requires --capture-crow-presentation takeoff"
@@ -469,6 +493,18 @@ public enum CrowShowcaseCapture {
     var aovAudits: [CrowShowcaseAOVFrameAudit] = []
     var firstFramePNG: Data?
     var replayDeploymentHighWater: Float = 0
+    if arguments.frameStart > 0, let numiReplay {
+      for index in 0..<arguments.frameStart {
+        let fraction = Float(index) / Float(arguments.frameCount - 1)
+        let earlier = numiReplay.frame(atPresentationFraction: fraction)
+        replayDeploymentHighWater = max(
+          replayDeploymentHighWater, numiReplay.takeoffDeploymentProgress(of: earlier)
+        )
+      }
+    }
+    let videoWriter = try arguments.videoURL.map {
+      try CrowReplayVideoWriter(url: $0, width: arguments.width, height: arguments.height, fps: arguments.videoFPS)
+    }
 
     if let numiReplay {
       let audit: [String: Any] = [
@@ -488,7 +524,10 @@ public enum CrowShowcaseCapture {
         "accepted_articulated_link_count":
           CrowNumiReplay.ArticulatedLink.allCases.count,
         "root_trajectory_removed_for_independent_camera": true,
-        "render_frame_count": arguments.frameCount,
+        "render_frame_count": arguments.frameEnd - arguments.frameStart + 1,
+        "timeline_frame_count": arguments.frameCount,
+        "timeline_start_frame": arguments.frameStart,
+        "timeline_end_frame": arguments.frameEnd,
         "camera_is_independent_of_trajectory": true,
         "camera_yaw_radians": arguments.cameraYawRadians.map {
           NSNumber(value: $0)
@@ -514,7 +553,7 @@ public enum CrowShowcaseCapture {
           arguments.lighting.parameters.z,
           arguments.lighting.parameters.w,
         ],
-        "course_geometry_contract": "accepted replay body states are rendered relative to the accepted crow root; obstacle extents come from the v10 Numi task",
+        "course_geometry_contract": "accepted body poses and collider dimensions; camera-occluding boxes are drawn as wireframes for visibility, without changing the simulation",
       ]
       let data = try JSONSerialization.data(
         withJSONObject: audit, options: [.prettyPrinted, .sortedKeys]
@@ -527,7 +566,7 @@ public enum CrowShowcaseCapture {
       )
     }
 
-    for frameIndex in 0..<arguments.frameCount {
+    for frameIndex in arguments.frameStart...arguments.frameEnd {
       let isLoopProbe =
         arguments.presentation != .takeoff
         && frameIndex == arguments.frameCount - 1
@@ -547,12 +586,10 @@ public enum CrowShowcaseCapture {
           numiReplay.takeoffDeploymentProgress(of: replayFrame)
         )
       }
-      let supportedPresentation =
-        replayFrame.map { numiReplay?.usesSupportedNavigationPresentation(of: $0) ?? false }
-        ?? false
-      let phase = supportedPresentation
-        ? Float.zero
-        : replayFrame == nil
+      let landingWeight = replayFrame.map {
+        numiReplay?.supportedLandingPresentationWeight(of: $0) ?? 0
+      } ?? 0
+      let flightPhase = replayFrame == nil
         ? timelineFraction
         : replayDeploymentHighWater >= 0.999
           ? CrowTakeoffSequence.transitionEnd
@@ -561,6 +598,7 @@ public enum CrowShowcaseCapture {
             + replayDeploymentHighWater
               * (CrowTakeoffSequence.transitionEnd
                 - CrowTakeoffSequence.standingHoldEnd)
+      let phase = flightPhase * (1 - landingWeight)
       // Keep the loop probe bit-identical to frame zero. Evaluating sin/cos at
       // 2π leaves a small floating-point camera offset that becomes visible at
       // feather edges and also turns a failed Data equality diagnostic into an
@@ -618,13 +656,14 @@ public enum CrowShowcaseCapture {
         },
         outputWidth: arguments.width,
         outputHeight: arguments.height,
+        solidCourse: arguments.solidCourse,
         temporalScale: arguments.temporalScale,
         jitter: arguments.temporalScale > 1
           ? temporalJitter(
             frameIndex: isLoopProbe ? 0 : frameIndex
           )
           : .zero,
-        historyReset: frameIndex == 0 || isLoopProbe,
+        historyReset: frameIndex == arguments.frameStart || isLoopProbe,
         auditReadback: arguments.aovAuditURL != nil
       )
       let renderedPNG = try ReadmeShowcaseCapture.pngData(
@@ -638,7 +677,11 @@ public enum CrowShowcaseCapture {
           height: arguments.height,
           phase: phase,
           presentation: arguments.presentation,
-          replayStep: replayFrame?.step
+          replayStep: replayFrame?.step,
+          courseName: numiReplay?.navigationCourse,
+          waypoints: replayFrame?.outcomes["navigation_waypoints_reached"].map { Int($0) },
+          recordedSupport: landingWeight > 0,
+          cutawayEnabled: arguments.solidCourse
         )
       }
       let png: Data
@@ -654,7 +697,8 @@ public enum CrowShowcaseCapture {
       let output = arguments.outputDirectory.appendingPathComponent(
         String(format: "frame-%03d.png", frameIndex)
       )
-      try png.write(to: output, options: .atomic)
+      if let videoWriter { try videoWriter.append(png: png) }
+      else { try png.write(to: output, options: .atomic) }
       if arguments.aovAuditURL != nil {
         let nativeReference = try nativeReferenceRenderer?.render(
           phase: phase,
@@ -665,9 +709,10 @@ public enum CrowShowcaseCapture {
           },
           outputWidth: arguments.width,
           outputHeight: arguments.height,
+          solidCourse: arguments.solidCourse,
           temporalScale: 1,
           jitter: .zero,
-          historyReset: frameIndex == 0 || isLoopProbe,
+          historyReset: frameIndex == arguments.frameStart || isLoopProbe,
           auditReadback: false
         )
         aovAudits.append(
@@ -683,6 +728,7 @@ public enum CrowShowcaseCapture {
           + (replayFrame.map { " / accepted Numi step \($0.step)" } ?? "")
       )
     }
+    try videoWriter?.finish()
     if let auditURL = arguments.aovAuditURL {
       let report = CrowShowcaseAOVAuditReport(frames: aovAudits)
       let encoder = JSONEncoder()
@@ -721,7 +767,11 @@ public enum CrowShowcaseCapture {
     height: Int,
     phase: Float,
     presentation: CrowShowcasePresentation,
-    replayStep: Int? = nil
+    replayStep: Int? = nil,
+    courseName: String? = nil,
+    waypoints: Int? = nil,
+    recordedSupport: Bool = false,
+    cutawayEnabled: Bool = false
   ) {
     graphics.saveGState()
     graphics.textMatrix = .identity
@@ -743,7 +793,7 @@ public enum CrowShowcaseCapture {
     )
     drawText(
       replayStep != nil
-        ? "SIMULATED REPLAY"
+        ? (courseName.map { "SIMULATED REPLAY  •  " + $0.uppercased() } ?? "SIMULATED REPLAY")
         : (presentation == .standing
           ? "READY"
           : (presentation == .takeoff ? "TAKEOFF" : "FLIGHT")),
@@ -753,6 +803,20 @@ public enum CrowShowcaseCapture {
       graphics: graphics,
       tracking: 1.1 * scale
     )
+    if let waypoints {
+      let label = "WAYPOINTS \(waypoints) / 5" + (recordedSupport ? "  •  RECORDED SUPPORT" : "")
+      drawText(
+        label, at: CGPoint(x: margin, y: CGFloat(height) - 103 * scale),
+        font: labelFont, color: white, graphics: graphics, tracking: 0.6 * scale
+      )
+    }
+    if replayStep != nil && cutawayEnabled {
+      drawText(
+        "CAMERA OCCLUDERS SHOWN AS WIREFRAME",
+        at: CGPoint(x: margin, y: CGFloat(height) - 120 * scale),
+        font: labelFont, color: muted, graphics: graphics, tracking: 0.5 * scale
+      )
+    }
     let phaseLabel =
       replayStep.map { String(format: "NUMI STEP %05d", $0) }
       ?? (presentation == .takeoff
@@ -1339,6 +1403,7 @@ private final class CrowShowcaseRenderer {
     navigationCourse: CrowNumiReplay.NavigationCourseFrame?,
     outputWidth: Int,
     outputHeight: Int,
+    solidCourse: Bool = false,
     temporalScale: Float,
     jitter: SIMD2<Float>,
     historyReset: Bool,
@@ -1480,14 +1545,24 @@ private final class CrowShowcaseRenderer {
         )
       )
     }
-    let navigationCourseTemporalVertices: [CrowSurfaceTemporalVertexGPU]
+    var navigationSolidVertices: [CrowSurfaceTemporalVertexGPU] = []
+    var navigationWireVertices: [CrowSurfaceTemporalVertexGPU] = []
     if let navigationCourse {
-      navigationCourseTemporalVertices = Self.navigationCourseVertices(
-        current: navigationCourse,
-        currentCrowCenter: currentAnatomyBodyCenter
+      let all = Set(navigationCourse.bodyPositions.indices)
+      let cutaway = solidCourse ? CrowCourseCamera.occludingBodies(
+        course: navigationCourse, bodyCenter: currentAnatomyBodyCenter,
+        camera: camera.eye
+      ) : all
+      if solidCourse {
+        navigationSolidVertices = Self.navigationCourseVertices(
+          current: navigationCourse, currentCrowCenter: currentAnatomyBodyCenter,
+          solid: true, includedBodies: all.subtracting(cutaway)
+        )
+      }
+      navigationWireVertices = Self.navigationCourseVertices(
+        current: navigationCourse, currentCrowCenter: currentAnatomyBodyCenter,
+        solid: false, includedBodies: cutaway
       )
-    } else {
-      navigationCourseTemporalVertices = []
     }
     let byteCount =
       MemoryLayout<CrowSurfaceTemporalVertexGPU>.stride
@@ -1496,18 +1571,19 @@ private final class CrowShowcaseRenderer {
     temporalVertices.withUnsafeBytes { bytes in
       _ = memcpy(buffer.contents(), bytes.baseAddress!, bytes.count)
     }
-    let navigationCourseBuffer: MTLBuffer?
-    if navigationCourseTemporalVertices.isEmpty {
-      navigationCourseBuffer = nil
-    } else {
-      let courseByteCount = MemoryLayout<CrowSurfaceTemporalVertexGPU>.stride
-        * navigationCourseTemporalVertices.count
-      let courseBuffer = try backend.buffer(length: courseByteCount, shared: true)
-      navigationCourseTemporalVertices.withUnsafeBytes { bytes in
-        _ = memcpy(courseBuffer.contents(), bytes.baseAddress!, bytes.count)
+    func courseBuffer(_ vertices: [CrowSurfaceTemporalVertexGPU]) throws -> MTLBuffer? {
+      guard !vertices.isEmpty else { return nil }
+      let buffer = try backend.buffer(
+        length: MemoryLayout<CrowSurfaceTemporalVertexGPU>.stride * vertices.count,
+        shared: true
+      )
+      vertices.withUnsafeBytes { bytes in
+        _ = memcpy(buffer.contents(), bytes.baseAddress!, bytes.count)
       }
-      navigationCourseBuffer = courseBuffer
+      return buffer
     }
+    let navigationSolidBuffer = try courseBuffer(navigationSolidVertices)
+    let navigationWireBuffer = try courseBuffer(navigationWireVertices)
 
     let formats: [MTLPixelFormat] = [
       .rgba16Float,
@@ -1868,13 +1944,13 @@ private final class CrowShowcaseRenderer {
       vertexStart: 0,
       vertexCount: temporalVertices.count
     )
-    if let navigationCourseBuffer {
-      encoder.setVertexBuffer(navigationCourseBuffer, offset: 0, index: 0)
-      encoder.drawPrimitives(
-        type: .line,
-        vertexStart: 0,
-        vertexCount: navigationCourseTemporalVertices.count
-      )
+    if let navigationSolidBuffer {
+      encoder.setVertexBuffer(navigationSolidBuffer, offset: 0, index: 0)
+      encoder.drawPrimitives(type: .triangle, vertexStart: 0, vertexCount: navigationSolidVertices.count)
+    }
+    if let navigationWireBuffer {
+      encoder.setVertexBuffer(navigationWireBuffer, offset: 0, index: 0)
+      encoder.drawPrimitives(type: .line, vertexStart: 0, vertexCount: navigationWireVertices.count)
     }
     if let bodyVaneFrame, let bodyVaneGeometryDeformer,
       let bodyVaneAOVPipeline
@@ -2070,13 +2146,13 @@ private final class CrowShowcaseRenderer {
       vertexStart: 0,
       vertexCount: temporalVertices.count
     )
-    if let navigationCourseBuffer {
-      identityEncoder.setVertexBuffer(navigationCourseBuffer, offset: 0, index: 0)
-      identityEncoder.drawPrimitives(
-        type: .line,
-        vertexStart: 0,
-        vertexCount: navigationCourseTemporalVertices.count
-      )
+    if let navigationSolidBuffer {
+      identityEncoder.setVertexBuffer(navigationSolidBuffer, offset: 0, index: 0)
+      identityEncoder.drawPrimitives(type: .triangle, vertexStart: 0, vertexCount: navigationSolidVertices.count)
+    }
+    if let navigationWireBuffer {
+      identityEncoder.setVertexBuffer(navigationWireBuffer, offset: 0, index: 0)
+      identityEncoder.drawPrimitives(type: .line, vertexStart: 0, vertexCount: navigationWireVertices.count)
     }
     if let bodyVaneFrame, let bodyVaneGeometryDeformer,
       let bodyVaneIdentityPipeline
@@ -2709,15 +2785,11 @@ private final class CrowShowcaseRenderer {
   /// course motion. Extents mirror the owning Numi task constants.
   private static func navigationCourseVertices(
     current: CrowNumiReplay.NavigationCourseFrame,
-    currentCrowCenter: SIMD3<Float>
+    currentCrowCenter: SIMD3<Float>,
+    solid: Bool,
+    includedBodies: Set<Int>
   ) -> [CrowSurfaceTemporalVertexGPU] {
-    let halfExtents: [SIMD3<Float>] = [
-      SIMD3<Float>(0.12, 0.12, 0.80),
-      SIMD3<Float>(0.12, 0.12, 0.80),
-      SIMD3<Float>(0.10, 0.10, 0.65),
-      SIMD3<Float>(0.10, 0.10, 0.65),
-      SIMD3<Float>(0.10, 0.72, 0.055),
-    ]
+    let halfExtents = CrowCourseCamera.halfExtents
     let colors: [SIMD3<Float>] = [
       SIMD3<Float>(0.30, 0.12, 0.025),
       SIMD3<Float>(0.30, 0.12, 0.025),
@@ -2739,13 +2811,44 @@ private final class CrowShowcaseRenderer {
     var output: [CrowSurfaceTemporalVertexGPU] = []
     output.reserveCapacity(current.bodyPositions.count * edges.count * 2)
     for bodyIndex in current.bodyPositions.indices {
-      guard bodyIndex < halfExtents.count else { continue }
+      guard bodyIndex < halfExtents.count, includedBodies.contains(bodyIndex) else { continue }
       let half = halfExtents[bodyIndex]
       let color = SIMD4<Float>(colors[bodyIndex], 0.96)
       let currentCorners = cornerSigns.map {
         currentCrowCenter + current.pointInCrowFrame(
           bodyIndex: bodyIndex, localPoint: $0 * half
         )
+      }
+      if solid {
+        // The colors are presentation materials; box dimensions and poses are
+        // the simulated colliders. No ecological texture is implied.
+        let faces: [(SIMD3<Float>, [Int])] = [
+          (SIMD3(0, 0, -1), [0, 2, 1, 0, 3, 2]),
+          (SIMD3(0, 0, 1), [4, 5, 6, 4, 6, 7]),
+          (SIMD3(0, -1, 0), [0, 1, 5, 0, 5, 4]),
+          (SIMD3(1, 0, 0), [1, 2, 6, 1, 6, 5]),
+          (SIMD3(0, 1, 0), [2, 3, 7, 2, 7, 6]),
+          (SIMD3(-1, 0, 0), [3, 0, 4, 3, 4, 7]),
+        ]
+        let earth = SIMD4<Float>(0.22, 0.17, 0.12, 0.95)
+        for (faceIndex, face) in faces.enumerated() {
+          let normal = simd_normalize(
+            current.pointInCrowFrame(bodyIndex: bodyIndex, localPoint: face.0)
+              - current.pointInCrowFrame(bodyIndex: bodyIndex, localPoint: .zero)
+          )
+          for corner in face.1 {
+            output.append(CrowSurfaceTemporalVertexGPU(
+              position: SIMD4<Float>(currentCorners[corner], 1),
+              previousPosition: SIMD4<Float>(currentCorners[corner], 1),
+              normal: SIMD4<Float>(normal, 0), albedoAndMaterial: earth,
+              parameters: .zero,
+              identity: SIMD4<UInt32>(UInt32.max,
+                0x0700_0000 + UInt32(bodyIndex * faces.count + faceIndex),
+                0x4e41_5601, 0)
+            ))
+          }
+        }
+        continue
       }
       for (edgeIndex, edge) in edges.enumerated() {
         for corner in [edge.0, edge.1] {
@@ -2772,6 +2875,32 @@ private final class CrowShowcaseRenderer {
             )
           )
         }
+      }
+    }
+    if solid, let position = current.groundPosition,
+      let q = current.groundOrientationXYZW
+    {
+      // The source scene uses an infinite ground plane. Draw a large finite
+      // patch centered beneath the bird, in its recorded ground frame.
+      let orientation = simd_quatf(ix: q.x, iy: q.y, iz: q.z, r: q.w)
+      let x = orientation.act(SIMD3<Float>(1, 0, 0))
+      let y = orientation.act(SIMD3<Float>(0, 1, 0))
+      let n = orientation.act(SIMD3<Float>(0, 0, 1))
+      let center = current.rootPosition - simd_dot(current.rootPosition - position, n) * n
+      let dx: SIMD3<Float> = 12 * x
+      let dy: SIMD3<Float> = 12 * y
+      let points: [SIMD3<Float>] = [center - dx - dy, center + dx - dy,
+                                    center + dx + dy, center - dx + dy]
+      let normal = simd_normalize(
+        current.worldPointInCrowFrame(center + n) - current.worldPointInCrowFrame(center)
+      )
+      for corner in [0, 1, 2, 0, 2, 3] {
+        let point = currentCrowCenter + current.worldPointInCrowFrame(points[corner])
+        output.append(CrowSurfaceTemporalVertexGPU(
+          position: SIMD4<Float>(point, 1), previousPosition: SIMD4<Float>(point, 1),
+          normal: SIMD4<Float>(normal, 0), albedoAndMaterial: SIMD4<Float>(0.13, 0.15, 0.12, 0.95),
+          parameters: .zero, identity: SIMD4<UInt32>(UInt32.max, 0x0700_00ff, 0x4e41_5601, 0)
+        ))
       }
     }
     return output

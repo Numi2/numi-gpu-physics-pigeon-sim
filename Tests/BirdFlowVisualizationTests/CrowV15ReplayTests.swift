@@ -66,10 +66,70 @@ func crowCourseTransformsAcceptedOrientation() {
     rootPosition: SIMD3(1, 0, 0),
     rootOrientationXYZW: SIMD4(0, 0, s, s),
     bodyPositions: [SIMD3(2, 0, 0)],
-    bodyOrientationsXYZW: [SIMD4(0, 0, s, s)]
+    bodyOrientationsXYZW: [SIMD4(0, 0, s, s)],
+    groundPosition: nil, groundOrientationXYZW: nil
   )
   let p = course.pointInCrowFrame(bodyIndex: 0, localPoint: SIMD3(1, 0, 0))
   #expect(abs(p.x - 1) < 1e-5)
   #expect(abs(p.y + 1) < 1e-5)
   #expect(abs(p.z) < 1e-5)
+  let world = course.worldPointInCrowFrame(SIMD3(2, 0, 0))
+  #expect(abs(world.x) < 1e-5 && abs(world.y + 1) < 1e-5)
+}
+
+
+@Test("landing presentation rejects transient and discontinuous support")
+func crowLandingPresentationRequiresSustainedSupport() {
+  let samples: [(Int, Bool)] = [(1, true), (2, false), (20, true)]
+    + (40...80).map { ($0, true) } + [(81, false), (100, true)]
+  let weights = CrowNumiReplay.supportedLandingWeights(
+    samples: samples, timestepSeconds: 0.02
+  )
+  #expect(weights[1] == 0)
+  #expect(weights[20] == 0)
+  #expect(weights[49] == 0)
+  #expect((weights[50] ?? 0) > 0)
+  #expect((weights[60] ?? 0) < (weights[70] ?? 0))
+  #expect(weights[74] == 1)
+  #expect(weights[81] == 0)
+  #expect(weights[100] == 0)
+}
+
+@Test("replay capture windows preserve timeline bounds")
+func crowReplayCaptureWindowsValidateBounds() throws {
+  let base = ["capture", "--capture-crow-frames", "/tmp/crow-test",
+    "--capture-frames", "30", "--capture-crow-presentation", "takeoff",
+    "--capture-crow-replay-pack", "/tmp/replay.json"]
+  let args = try CrowShowcaseCapture.Arguments(commandLine:
+    base + ["--capture-frame-start", "10", "--capture-frame-end", "14"])
+  #expect(args.frameCount == 30 && args.frameStart == 10 && args.frameEnd == 14)
+  #expect(throws: (any Error).self) {
+    try CrowShowcaseCapture.Arguments(commandLine:
+      base + ["--capture-frame-start", "20", "--capture-frame-end", "14"])
+  }
+  #expect(throws: (any Error).self) {
+    try CrowShowcaseCapture.Arguments(commandLine:
+      base + ["--capture-frame-start", "0", "--capture-frame-end", "30"])
+  }
+  #expect(throws: (any Error).self) {
+    try CrowShowcaseCapture.Arguments(commandLine:
+      ["capture", "--capture-crow-frames", "/tmp/crow-test",
+       "--capture-frames", "30", "--capture-frame-start", "1"])
+  }
+}
+
+@Test("camera cutaway identifies only obstacles between camera and crow")
+func crowCameraCutawayDetectsObstruction() {
+  let course = CrowNumiReplay.NavigationCourseFrame(
+    rootPosition: .zero, rootOrientationXYZW: SIMD4(0, 0, 0, 1),
+    bodyPositions: [SIMD3(0.5, 0, 0), SIMD3(-0.5, 0, 0)],
+    bodyOrientationsXYZW: [SIMD4(0, 0, 0, 1), SIMD4(0, 0, 0, 1)],
+    groundPosition: nil, groundOrientationXYZW: nil
+  )
+  #expect(CrowCourseCamera.occludingBodies(course: course, bodyCenter: .zero,
+    camera: SIMD3(1, 0, 0)) == [0])
+  #expect(CrowCourseCamera.occludingBodies(course: course, bodyCenter: .zero,
+    camera: SIMD3(1, 1, 0)).isEmpty)
+  #expect(!CrowCourseCamera.segmentIntersectsBox(start: SIMD3(1, 1, 0),
+    end: SIMD3(1, -1, 0), half: SIMD3(0.1, 0.1, 0.1)))
 }

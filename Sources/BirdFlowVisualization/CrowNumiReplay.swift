@@ -124,6 +124,14 @@ public struct CrowNumiReplay: Sendable {
     public let rootOrientationXYZW: SIMD4<Float>
     public let bodyPositions: [SIMD3<Float>]
     public let bodyOrientationsXYZW: [SIMD4<Float>]
+    public let groundPosition: SIMD3<Float>?
+    public let groundOrientationXYZW: SIMD4<Float>?
+
+    public func worldPointInCrowFrame(_ point: SIMD3<Float>) -> SIMD3<Float> {
+      let root = rootOrientationXYZW
+      return simd_quatf(ix: root.x, iy: root.y, iz: root.z, r: root.w)
+        .inverse.act(point - rootPosition)
+    }
 
     /// Convert an obstacle-local point to the current crow-body frame.
     /// Both accepted obstacle and crow orientations matter when the crow
@@ -257,6 +265,7 @@ public struct CrowNumiReplay: Sendable {
   public let navigationCourse: String?
   public let policyLightingContract: String?
   public let frames: [Frame]
+  private let landingWeights: [Int: Float]
 
   public static func load(url: URL) throws -> Self {
     let data = try Data(contentsOf: url)
@@ -342,8 +351,40 @@ public struct CrowNumiReplay: Sendable {
       controllerAuthority: payload.controllerAuthority,
       navigationCourse: payload.navigationCourse,
       policyLightingContract: payload.policyLightingContract,
-      frames: payload.frames
+      frames: payload.frames,
+      landingWeights: isV15Navigation ? supportedLandingWeights(
+        samples: payload.frames.map {
+          ($0.step, ($0.outcomes["navigation_completion"] ?? 0) >= 1
+            && ($0.outcomes["ground_support"] ?? 0) > 0)
+        }, timestepSeconds: payload.timestepSeconds
+      ) : [:]
     )
+  }
+
+  /// Presentation only: require 0.2 seconds of uninterrupted recorded support,
+  /// then ease into the folded pose over 0.5 seconds. Gaps in retained steps
+  /// break the run, so sparse screenshots cannot falsely establish continuity.
+  static func supportedLandingWeights(
+    samples: [(Int, Bool)], timestepSeconds: Float
+  ) -> [Int: Float] {
+    let confirmation = max(1, Int(ceil(0.2 / timestepSeconds)))
+    let transition = max(1, Int(ceil(0.5 / timestepSeconds)))
+    var result: [Int: Float] = [:]
+    var previous: Int?
+    var run = 0
+    for (step, supported) in samples {
+      if !supported { run = 0 }
+      else if previous.map({ step == $0 + 1 }) ?? false { run += 1 }
+      else { run = 1 }
+      let progress = min(max(Float(run - confirmation) / Float(transition), 0), 1)
+      result[step] = progress * progress * (3 - 2 * progress)
+      previous = step
+    }
+    return result
+  }
+
+  public func supportedLandingPresentationWeight(of frame: Frame) -> Float {
+    landingWeights[frame.step] ?? 0
   }
 
   public func frame(atPresentationFraction fraction: Float) -> Frame {
@@ -438,11 +479,13 @@ public struct CrowNumiReplay: Sendable {
     guard let root = bodyPose(named: ArticulatedLink.body.rawValue, in: frame),
       bodies.count == Self.navigationCourseBodyNames.count
     else { return nil }
+    let ground = bodyPose(named: "locomotion_ground", in: frame)
     return NavigationCourseFrame(
       rootPosition: root.position,
       rootOrientationXYZW: root.orientationXYZW,
       bodyPositions: bodies.map(\.position),
-      bodyOrientationsXYZW: bodies.map(\.orientationXYZW)
+      bodyOrientationsXYZW: bodies.map(\.orientationXYZW),
+      groundPosition: ground?.position, groundOrientationXYZW: ground?.orientationXYZW
     )
   }
 

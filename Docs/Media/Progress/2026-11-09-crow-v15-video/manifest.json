@@ -1,0 +1,142 @@
+{
+  "artifacts_sha256": {
+    "README.md": "02775d00afb9396eedc96f1fcb968f877816dd34b1caf0421e01c100a97a4ddb",
+    "crow-v15-navigation-i-j.mp4": "1da3910d85994d7d45ac4b88152f5c5b85bf8df0c9c12f25e72eaaae447250e6",
+    "step-877-after-cutaway.png": "97f35aa86b883558ad852e0f20d3d5a4517dbab740e111ea343cff3b74be7809",
+    "step-877-before-cutaway.png": "41333224c805d5794fa3c5e80cc6217344a8ba4032c3628c2733ee0cd3defafc"
+  },
+  "boundary_overlap_mean_absolute_rgb_error_of_255": {
+    "i": [
+      0.637,
+      0.342
+    ],
+    "j": [
+      0.542,
+      0.318
+    ]
+  },
+  "build_command": "swift build --scratch-path .build/nowmo -c release -Xswiftc -no-whole-module-optimization --product birdflow-capture",
+  "capture_binary_sha256": "016a5259283a46a18e82652544488266a805573035484e8e332ea8c2cd29f47d",
+  "checks": "six focused Swift tests passed; full movie decoded with ffmpeg -xerror; two nonterminal first-episode sources have monotonically increasing waypoint outcomes and final recorded support",
+  "classification": "accepted-state simulation replay, estimated visual model; no biological or photorealistic validation",
+  "original_replay_archive": "Numi2/numi-lab at 7d32ee3722a1f26c58ad111b46e9edb9ce3b401c, artifacts/crow-final-video-replay-20261109",
+  "original_replays": {
+    "i": {
+      "json_sha256": "5efa5a89a028ca5ef039191778bced33c00d20decc874284edfc53e2b165f1de",
+      "payload_sha256": "4816c0ffeb44faffecc9cc7d4e1612c95447aa2f41ac7e465db91f38760f4083",
+      "seed": 4038889268,
+      "sustained_support_confirmed_step": 2037,
+      "waypoint_steps": [
+        859,
+        1113,
+        1371,
+        1578,
+        1728
+      ]
+    },
+    "j": {
+      "json_sha256": "d3d396fc3e41d7f2d56c799c18bf7b96db96de51205a69319fd920a714ac6f4f",
+      "payload_sha256": "710606203b7c7632ac20cdfd6c090fdb87c0d1f568ee6ef2171107822c606138",
+      "seed": 3193706597,
+      "sustained_support_confirmed_step": 1689,
+      "waypoint_steps": [
+        802,
+        1046,
+        1300,
+        1484,
+        1553
+      ]
+    }
+  },
+  "sections": [
+    {
+      "accepted_payload_sha256": "541935ce658029524ab582fe9c7d3634cab920979ecc44bda5bfc5adcbf123b8",
+      "first_timeline_frame": 0,
+      "last_timeline_frame": 299,
+      "layout": "i",
+      "video_section_sha256": "9b212de807aa45613e19f2e98f8f86e25c632e223adc328da5072348905dedb9"
+    },
+    {
+      "accepted_payload_sha256": "541935ce658029524ab582fe9c7d3634cab920979ecc44bda5bfc5adcbf123b8",
+      "first_timeline_frame": 300,
+      "last_timeline_frame": 599,
+      "layout": "i",
+      "video_section_sha256": "da4b8500cc35d1a36c3e72168ae5504067ce15a25a3caccb7daec4352a6506d7"
+    },
+    {
+      "accepted_payload_sha256": "541935ce658029524ab582fe9c7d3634cab920979ecc44bda5bfc5adcbf123b8",
+      "first_timeline_frame": 600,
+      "last_timeline_frame": 899,
+      "layout": "i",
+      "video_section_sha256": "305dee1f27e7275309ccd62307055cfda35635c04f6207cca28a46366428072b"
+    },
+    {
+      "accepted_payload_sha256": "541935ce658029524ab582fe9c7d3634cab920979ecc44bda5bfc5adcbf123b8",
+      "first_timeline_frame": 900,
+      "last_timeline_frame": 1199,
+      "layout": "i",
+      "video_section_sha256": "c8d9a19a15dcd2927f3b86c2ff8dcb797e426f5b23d26ad1887ccc6524b36504"
+    },
+    {
+      "accepted_payload_sha256": "541935ce658029524ab582fe9c7d3634cab920979ecc44bda5bfc5adcbf123b8",
+      "first_timeline_frame": 1200,
+      "last_timeline_frame": 1499,
+      "layout": "i",
+      "video_section_sha256": "e907e27f076bd16c51d389b1f1f322c469639c2de12368ec716e854ac0689b14"
+    },
+    {
+      "accepted_payload_sha256": "5b284170d13ad72eda31b1cc6205ab101e615270310d32aa3569e02664c92ee2",
+      "first_timeline_frame": 0,
+      "last_timeline_frame": 299,
+      "layout": "j",
+      "video_section_sha256": "55ae353a04105c2e7c183c97b19e8c4bfa8cff0e3a96aabbcc14e916d448d7cb"
+    },
+    {
+      "accepted_payload_sha256": "5b284170d13ad72eda31b1cc6205ab101e615270310d32aa3569e02664c92ee2",
+      "first_timeline_frame": 300,
+      "last_timeline_frame": 599,
+      "layout": "j",
+      "video_section_sha256": "00c78b96bb117d345d34cfdde8eb3d90b8464d56597a5081dd468ee09ed777b4"
+    },
+    {
+      "accepted_payload_sha256": "5b284170d13ad72eda31b1cc6205ab101e615270310d32aa3569e02664c92ee2",
+      "first_timeline_frame": 600,
+      "last_timeline_frame": 899,
+      "layout": "j",
+      "video_section_sha256": "4ce7b48daacfeb7187490004c892965b99c0dba676ba7ced09d387dcb3c41a13"
+    },
+    {
+      "accepted_payload_sha256": "5b284170d13ad72eda31b1cc6205ab101e615270310d32aa3569e02664c92ee2",
+      "first_timeline_frame": 900,
+      "last_timeline_frame": 1199,
+      "layout": "j",
+      "video_section_sha256": "4cd8a6bee10ba69506d92297ab0e7481b28136289d0c1204c73b72f141bb7631"
+    },
+    {
+      "accepted_payload_sha256": "5b284170d13ad72eda31b1cc6205ab101e615270310d32aa3569e02664c92ee2",
+      "first_timeline_frame": 1200,
+      "last_timeline_frame": 1499,
+      "layout": "j",
+      "video_section_sha256": "0f14f1c9399ed2f6379afad641a139a3df897c7e8b89b89629a4901e7060e5aa"
+    }
+  ],
+  "source_base_commit": "940ce2d452092783a63444108b48b7d724571897",
+  "source_file_sha256": {
+    "Scripts/project-crow-replay.swift": "4aa0d93f2868f9938ecb2ea9176abe9097bdeee0b9bf6aa0e2febdba6696ddbd",
+    "Scripts/render-crow-v15-video-sections.sh": "5804590c2d5916416e024cd8a0954812bf13379d9761595992cd176f204a7006",
+    "Sources/BirdFlowVisualization/CrowCourseCamera.swift": "8d578d346b567c5463541ffa84db8a4bac482d50c6576371df3050fa4318f23c",
+    "Sources/BirdFlowVisualization/CrowNumiReplay.swift": "147caef407018a273cd85cb5227b5a817a01fd7e26c6b477bbde8dadbb9151f9",
+    "Sources/BirdFlowVisualization/CrowReplayVideoWriter.swift": "6bd90c7fb72e9be7798f146d8bb09fb837d02eb7b672bc6e62fc945b02640f85",
+    "Sources/BirdFlowVisualization/CrowShowcaseCapture.swift": "56db7e8aab6c1fd66a0f7597aaf6d1882b70aab5fb10bc6094141546762c5f23",
+    "Tests/BirdFlowVisualizationTests/CrowV15ReplayTests.swift": "98d635a1a12e94d2e675a7972c8a2405c52a0572dba28a168e7fea3cbf69416b"
+  },
+  "video": {
+    "camera_cutaway": "obstacles crossing camera-to-body line become wire cages; simulation unchanged",
+    "codec": "h264",
+    "duration_seconds": 120,
+    "fps": 25,
+    "frame_count": 3000,
+    "height": 720,
+    "width": 1280
+  }
+}
