@@ -1,0 +1,37 @@
+diff --git a/Sources/BirdFlowVisualization/CrowShowcaseCapture.swift b/Sources/BirdFlowVisualization/CrowShowcaseCapture.swift
+index f012bcc..2045a8e 100644
+--- a/Sources/BirdFlowVisualization/CrowShowcaseCapture.swift
++++ b/Sources/BirdFlowVisualization/CrowShowcaseCapture.swift
+@@ -1813,7 +1813,8 @@ private final class CrowShowcaseRenderer {
+         )
+       )
+     }
+-    if let liveCovertRootBuffer, let liveCovertGeometryDeformer {
++    if let liveCovertRootBuffer, let liveCovertGeometryDeformer,
++      ProcessInfo.processInfo.environment["CROW_DIAGNOSTIC_HIDE_UNDERWING_COVERTS"] != "1" {
+       let underwingDeployment: (Float, Float)
+       let trailingDeployment: (Float, Float)
+       if presentation == .takeoff {
+@@ -5938,13 +5939,15 @@ private struct CrowMeshBuilder {
+         states: states, left: left, projectedPixelsPerMeter: projectedPixelsPerMeter,
+         to: &vertices)
+     }
+-    appendSurfaceBoundWingCoverts(
+-      states: states,
+-      left: left,
+-      phase: phase,
+-      projectedPixelsPerMeter: projectedPixelsPerMeter,
+-      to: &vertices
+-    )
++    if ProcessInfo.processInfo.environment["CROW_DIAGNOSTIC_HIDE_DORSAL_COVERTS"] != "1" {
++      appendSurfaceBoundWingCoverts(
++        states: states,
++        left: left,
++        phase: phase,
++        projectedPixelsPerMeter: projectedPixelsPerMeter,
++        to: &vertices
++      )
++    }
+     appendSurfaceBoundAxillaryUnderlayer(
+       states: states,
+       left: left,
