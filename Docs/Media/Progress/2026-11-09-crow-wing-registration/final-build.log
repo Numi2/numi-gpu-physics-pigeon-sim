@@ -1,0 +1,10 @@
+[0/1] Planning build
+Building for production...
+[0/2] Write swift-version-3CD7052B146186F2.txt
+[2/3] Compiling BirdFlowCore BirdModel.swift
+[3/4] Compiling BirdFlowMetal AerodynamicPartLoads.swift
+[4/5] Compiling BirdFlowVisualization BirdAnalyticSurface.swift
+[5/6] Compiling BirdFlowCaptureCLI main.swift
+[5/7] Write Objects.LinkFileList
+[6/7] Linking birdflow-capture
+Build of product 'birdflow-capture' complete! (82.98s)
