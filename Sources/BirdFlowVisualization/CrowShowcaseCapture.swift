@@ -521,7 +521,7 @@ public enum CrowShowcaseCapture {
       let audit: [String: Any] = [
         "schema": "birdflow.numi-crow-articulation.v1",
         "classification": "accepted-state driven presentation of an estimated crow",
-        "claim_boundary": "Numi provides accepted body-relative rigid-link transforms for sweep, flap, terminal wings, tail, thighs, shanks, feet, and v15 head. BirdFlow registration pivots, skinning, feather shapes, support presentation, and surface deformation remain estimated; the rendered mesh is not an exact reconstruction.",
+        "claim_boundary": "Numi provides accepted body-relative rigid-link transforms for wings, tail, limbs and head, with optional foot-relative v15 toe-body rotations. BirdFlow registration pivots, multi-segment toe anatomy, skinning, feather shapes, support presentation and surface deformation remain estimated; the rendered mesh is not an exact reconstruction.",
         "payload_sha256": numiReplay.payloadSHA256,
         "task": numiReplay.task,
         "journey_variant": numiReplay.journeyVariant,
@@ -534,6 +534,8 @@ public enum CrowShowcaseCapture {
         "source_frame_count": numiReplay.frames.count,
         "accepted_articulated_link_count":
           CrowNumiReplay.ArticulatedLink.allCases.count,
+        "accepted_toe_body_count":
+          numiReplay.articulationFrame(of: numiReplay.frames[0])?.toeDeltas.count ?? 0,
         "root_trajectory_removed_for_independent_camera": true,
         "render_frame_count": arguments.frameEnd - arguments.frameStart + 1,
         "timeline_frame_count": arguments.frameCount,
@@ -4190,8 +4192,13 @@ private struct CrowMeshBuilder {
         projectedPixelsPerMeter: projectedPixelsPerMeter,
         to: &vertices
       )
+      // Recorded v15 limb deltas act on a fixed scaffold, rather than on the
+      // takeoff presentation's estimated leg retraction or planted toes.
+      let legPose = articulation?.toeDeltas.count == 8
+        ? CrowStandingPose.sample(phase: 0, referenceBodyCenter: standingPose.bodyCenter)
+        : standingPose
       appendStandingLegsAndFeet(
-        standingPose,
+        legPose,
         takeoffSequence: presentation == .takeoff,
         articulation: articulation,
         projectedPixelsPerMeter: projectedPixelsPerMeter,
@@ -5665,7 +5672,20 @@ private struct CrowMeshBuilder {
         vertices: &vertices
       )
       let footStart = vertices.count
-      for digit in foot.digits {
+      // For recorded toe bodies, use a fixed reference digit scaffold: the
+      // presentation's estimated toe curling must not fabricate contact.
+      let reference = CrowStandingPose.sample(phase: 0, referenceBodyCenter: pose.bodyCenter)
+      let neutral = footLink == .leftFoot ? reference.leftFoot : reference.rightFoot
+      let hasToeBodies = articulation?.toeDeltas.count == 8
+      for posedDigit in foot.digits {
+        let digit: CrowStandingDigitPose
+        if hasToeBodies, let source = neutral.digits.first(where: { $0.digitNumber == posedDigit.digitNumber }) {
+          digit = CrowStandingDigitPose(digitNumber: source.digitNumber,
+            nodes: source.nodes.map { $0 - neutral.ankle + foot.ankle })
+        } else {
+          digit = posedDigit
+        }
+        let digitStart = vertices.count
         vertices.append(
           contentsOf: CrowFootAnatomy.vertices(
             digit: digit,
@@ -5675,6 +5695,10 @@ private struct CrowMeshBuilder {
             clawColor: claw
           )
         )
+        let key: CrowNumiReplay.Toe = footLink == .leftFoot
+          ? .left(digit.digitNumber) : .right(digit.digitNumber)
+        articulateVertices(digitStart..<vertices.count,
+          delta: articulation?.toeDeltas[key], pivot: digit.nodes[0], vertices: &vertices)
       }
       articulateVertices(
         footStart..<vertices.count,

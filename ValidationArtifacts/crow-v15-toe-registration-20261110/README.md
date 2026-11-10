@@ -1,0 +1,7 @@
+# Experimental v15 toe replay registration
+
+The toe-aware replay maps eight optional accepted v15 toe body rotations relative to their parent feet onto estimated visual digits. It preserves the prior path for older replays without toe bodies. Each simulated toe is a single driven rigid segment; the visual multi-phalange anatomy, registration pivots, skin, and feathers are estimates. Rotations are not measurements of real crow anatomy.
+
+`development-j-frame5000.png` is a preliminary 640x360 frame from the guided, previously used development-J bounded-rebound replay at accepted step 5000. The feet and perch still require visual registration and multiview qualification; this image is not a finished rendering or a proof of contact. Its `initial-audit.json` came from the preliminary capture before the audit text was amended to mention optional toe rotations. The capture used no support-plant, prelanding-leg, or experimental flight-digit options. Source replay and physical limitations are archived in Numi Lab artifact `crow-v15-bounded-rebound-20261110`.
+
+The focused replay test exercises a rotated parent foot, checks the foot-frame-to-body-frame toe rotation, and verifies that old replays without toe bodies remain accepted. The historical V10 replay test was not run successfully because that external historical fixture is absent in this checkout; the generated legacy fixture passes.

@@ -8,6 +8,9 @@ import Testing
 func crowV15ReplayAdmission() throws {
   let names = CrowNumiReplay.ArticulatedLink.allCases.map(\.rawValue)
     + ["crow_neck_yaw_link", "crow_head", "crow_lower_beak"]
+    + ["left", "right"].flatMap { side in
+      (1...3).map { "crow_\(side)_front_toe_\($0)" } + ["crow_\(side)_rear_toe"]
+    }
     + CrowNumiReplay.navigationCourseBodyNames
   var states = [Float](repeating: 0, count: names.count * 13)
   for i in names.indices { states[i * 13 + 6] = 1 }
@@ -16,7 +19,19 @@ func crowV15ReplayAdmission() throws {
     states[index + 3] = sign * sin(Float(0.35 / 2))
     states[index + 6] = cos(Float(0.35 / 2))
   }
+  // The foot and reference toe share a quarter turn around the body z axis.
+  // The subsequent local x flexion must be conjugated into body coordinates.
+  let foot = names.firstIndex(of: "crow_left_foot")! * 13
+  let toe = names.firstIndex(of: "crow_left_front_toe_1")! * 13
+  let half = Float.pi / 4
+  states[foot + 5] = sin(half); states[foot + 6] = cos(half)
+  states[toe + 5] = sin(half); states[toe + 6] = cos(half)
   var moved = states
+  let toeFlex = Float(0.2)
+  moved[toe + 3] = cos(half) * sin(toeFlex)
+  moved[toe + 4] = sin(half) * sin(toeFlex)
+  moved[toe + 5] = sin(half) * cos(toeFlex)
+  moved[toe + 6] = cos(half) * cos(toeFlex)
   for (name, sign): (String, Float) in [("crow_left_wing", 1), ("crow_right_wing", -1)] {
     let index = names.firstIndex(of: name)! * 13
     moved[index + 3] = sign * sin(Float(0.50 / 2))
@@ -71,12 +86,40 @@ func crowV15ReplayAdmission() throws {
   #expect((articulation.wingUpstrokeStrength[.rightWing] ?? 0) > 0.9)
   let wing = try #require(articulation.delta(for: .leftWing))
   #expect(abs(wing.translation.x - 0.025) < 1e-6)
+  let digit = try #require(articulation.toeDeltas[.left(2)])
+  #expect(abs(digit.rotationXYZW.x) < 1e-5)
+  #expect(abs(digit.rotationXYZW.y - sin(toeFlex)) < 1e-5)
+  #expect(abs(digit.rotationXYZW.w - cos(toeFlex)) < 1e-5)
+  #expect(digit.translation == .zero)
+  #expect(articulation.toeDeltas.count == 8)
+  let other = try #require(articulation.toeDeltas[.right(2)])
+  #expect(simd_distance(other.rotationXYZW, SIMD4<Float>(0, 0, 0, 1)) < 1e-5)
   let jaw = try #require(articulation.lowerBeakDelta)
   #expect(abs(jaw.rotationXYZW.y - sin(Float(0.05))) < 1e-5)
   #expect(abs(jaw.rotationXYZW.w - cos(Float(0.05))) < 1e-5)
   let neck = try #require(CrowStandingNeckPose.accepted(articulation))
   #expect(abs(neck.pitchRadians - 0.2) < 1e-5)
   #expect(simd_length(neck.transform(offset: .zero, coupling: 1)) < 1e-5)
+
+  // Replay files predating the toe-body model must still load unchanged.
+  let retained = names.indices.filter { !names[$0].contains("_toe") }
+  let legacyNames = retained.map { names[$0] }
+  func retainedStates(_ all: [Float]) -> [Float] {
+    retained.flatMap { Array(all[($0 * 13)..<($0 * 13 + 13)]) }
+  }
+  var legacy = payload
+  legacy["body_names"] = legacyNames
+  legacy["body_count"] = legacyNames.count
+  legacy["frames"] = [frame(1, retainedStates(states)), frame(2, retainedStates(moved))]
+  let legacyData = try JSONSerialization.data(withJSONObject: legacy, options: [.sortedKeys])
+  let legacyDigest = SHA256.hash(data: legacyData).map { String(format: "%02x", $0) }.joined()
+  let legacyEnvelope = try JSONSerialization.data(withJSONObject: [
+    "schema": "numi.crow-replay.v1", "payload_sha256": legacyDigest, "payload": legacy,
+  ], options: [.sortedKeys])
+  try legacyEnvelope.write(to: url)
+  let oldReplay = try CrowNumiReplay.load(url: url)
+  let oldFrame = try #require(oldReplay.articulationFrame(of: oldReplay.frames[1]))
+  #expect(oldFrame.toeDeltas.isEmpty)
 }
 
 @Test("Navigation geometry uses both accepted body and obstacle orientation")

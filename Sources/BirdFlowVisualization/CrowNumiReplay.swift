@@ -52,9 +52,17 @@ public struct CrowNumiReplay: Sendable {
     }
   }
 
+  /// Optional v15 toe bodies, expressed as rotations in the reference body
+  /// frame. Each simulated body is a single flexing segment; the visual
+  /// phalanges remain anatomical estimates and are not measured joints.
+  public enum Toe: Hashable, Sendable {
+    case left(Int), right(Int)
+  }
+
   public struct ArticulationFrame: Sendable {
     public let replayStep: Int
     public let deltas: [ArticulatedLink: LinkDelta]
+    public let toeDeltas: [Toe: LinkDelta]
     /// Optional in older 15-action models; present in the v15 active-head body.
     public let headDelta: LinkDelta?
     public let headReferencePosition: SIMD3<Float>?
@@ -469,6 +477,27 @@ public struct CrowNumiReplay: Sendable {
     deltas[.body] = LinkDelta(
       rotationXYZW: SIMD4(0, 0, 0, 1), translation: .zero
     )
+    var toeDeltas: [Toe: LinkDelta] = [:]
+    for (side, footLink) in [("left", ArticulatedLink.leftFoot), ("right", .rightFoot)] {
+      guard let refFoot = bodyPose(named: footLink.rawValue, in: frames[0]),
+        let curFoot = bodyPose(named: footLink.rawValue, in: frame) else { continue }
+      let registration = refFoot.relative(to: referenceBody).orientationXYZW
+      for number in 1...4 {
+        let suffix = number == 1 ? "rear_toe" : "front_toe_\(number - 1)"
+        let name = "crow_\(side)_\(suffix)"
+        guard let refToe = bodyPose(named: name, in: frames[0]),
+          let curToe = bodyPose(named: name, in: frame) else { continue }
+        let relative = RigidPose.delta(
+          from: refToe.relative(to: refFoot), to: curToe.relative(to: curFoot))
+        let q = RigidPose.normalized(RigidPose.multiply(
+          RigidPose.multiply(registration, relative.rotationXYZW),
+          RigidPose.conjugate(registration)))
+        // Rotate about the visual digit root; toe COM translation is not a
+        // second foot translation and must not be applied to the mesh.
+        let key: Toe = side == "left" ? .left(number) : .right(number)
+        toeDeltas[key] = LinkDelta(rotationXYZW: q, translation: .zero)
+      }
+    }
     let referenceHead = bodyPose(named: "crow_head", in: frames[0])?
       .relative(to: referenceBody)
     let currentHead = bodyPose(named: "crow_head", in: frame)?
@@ -547,7 +576,7 @@ public struct CrowNumiReplay: Sendable {
         rootInPerch: $0)
     } ?? 0
     return ArticulationFrame(
-      replayStep: frame.step, deltas: deltas,
+      replayStep: frame.step, deltas: deltas, toeDeltas: toeDeltas,
       headDelta: headDelta, headReferencePosition: referenceHead?.position,
       lowerBeakDelta: lowerBeakDelta,
       wingReferenceElevations: wingReferenceElevations,
