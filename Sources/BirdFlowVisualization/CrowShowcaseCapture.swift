@@ -81,6 +81,7 @@ public enum CrowShowcaseCapture {
     let videoURL: URL?
     let videoFPS: Int
     let solidCourse: Bool
+    let researchNarrowPerch: Bool
     let inspectionHideCourse: Bool
     let temporalScale: Float
     let cameraYawRadians: Float?
@@ -155,6 +156,7 @@ public enum CrowShowcaseCapture {
       guard videoFPS <= 120 else { throw CaptureError.invalidArguments("video fps must not exceed 120") }
       videoURL = try value(after: "--capture-crow-video").map { URL(fileURLWithPath: $0) }
       solidCourse = commandLine.contains("--capture-crow-solid-course")
+      researchNarrowPerch = commandLine.contains("--capture-crow-research-narrow-perch")
       inspectionHideCourse = commandLine.contains("--capture-crow-inspection-hide-course")
       temporalScale = try positiveFloat(
         after: "--capture-crow-temporal-scale",
@@ -558,6 +560,8 @@ public enum CrowShowcaseCapture {
         "render_height": arguments.height,
         "navigation_course": numiReplay.navigationCourse ?? "unspecified",
         "inspection_course_hidden": arguments.inspectionHideCourse,
+        "perch_half_width_meters": arguments.researchNarrowPerch ? 0.025 : 0.10,
+        "perch_geometry_source": arguments.researchNarrowPerch ? "explicit research host override" : "legacy scene default",
         "experimental_flight_remex": ProcessInfo.processInfo.environment[
           "CROW_EXPERIMENTAL_FLIGHT_REMEX"] == "1",
         "experimental_wing_joints": ProcessInfo.processInfo.environment[
@@ -583,7 +587,7 @@ public enum CrowShowcaseCapture {
           arguments.lighting.parameters.z,
           arguments.lighting.parameters.w,
         ],
-        "course_geometry_contract": "accepted body poses and collider dimensions; camera-occluding boxes are drawn as wireframes for visibility, without changing the simulation",
+        "course_geometry_contract": "accepted body poses with legacy dimensions or explicit research-host override; camera-occluding boxes are drawn as wireframes without changing the simulation",
       ]
       let data = try JSONSerialization.data(
         withJSONObject: audit, options: [.prettyPrinted, .sortedKeys]
@@ -689,7 +693,7 @@ public enum CrowShowcaseCapture {
         camera: camera,
         articulation: articulationFrame,
         navigationCourse: arguments.inspectionHideCourse ? nil : replayFrame.flatMap {
-          numiReplay?.navigationCourseFrame(of: $0)
+          numiReplay?.navigationCourseFrame(of: $0, perchHalfWidth: arguments.researchNarrowPerch ? 0.025 : 0.10)
         },
         outputWidth: arguments.width,
         outputHeight: arguments.height,
@@ -745,7 +749,7 @@ public enum CrowShowcaseCapture {
           camera: camera,
           articulation: articulationFrame,
           navigationCourse: arguments.inspectionHideCourse ? nil : replayFrame.flatMap {
-            numiReplay?.navigationCourseFrame(of: $0)
+            numiReplay?.navigationCourseFrame(of: $0, perchHalfWidth: arguments.researchNarrowPerch ? 0.025 : 0.10)
           },
           outputWidth: arguments.width,
           outputHeight: arguments.height,
@@ -2864,7 +2868,7 @@ private final class CrowShowcaseRenderer {
     solid: Bool,
     includedBodies: Set<Int>
   ) -> [CrowSurfaceTemporalVertexGPU] {
-    let halfExtents = CrowCourseCamera.halfExtents
+    let halfExtents = CrowCourseCamera.halfExtents(for: current)
     let colors: [SIMD3<Float>] = [
       SIMD3<Float>(0.30, 0.12, 0.025),
       SIMD3<Float>(0.30, 0.12, 0.025),

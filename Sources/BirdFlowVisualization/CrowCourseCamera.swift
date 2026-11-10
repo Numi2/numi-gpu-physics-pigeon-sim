@@ -9,6 +9,12 @@ enum CrowCourseCamera {
     SIMD3(0.10, 0.72, 0.055),
   ]
 
+  static func halfExtents(for course: CrowNumiReplay.NavigationCourseFrame) -> [SIMD3<Float>] {
+    var result = halfExtents
+    result[4].x = course.perchHalfWidth
+    return result
+  }
+
   /// Keep world vertical upright while following the accepted heading.
   /// Scene geometry remains in the exact recorded body-relative frame.
   static func worldUpright(_ camera: CameraState, orientation q: SIMD4<Float>) -> CameraState {
@@ -34,6 +40,7 @@ enum CrowCourseCamera {
     bodyCenter: SIMD3<Float>, camera: SIMD3<Float>
   ) -> Set<Int> {
     var result: Set<Int> = []
+    let halfExtents = halfExtents(for: course)
     for i in course.bodyPositions.indices where i < halfExtents.count {
       let origin = course.pointInCrowFrame(bodyIndex: i, localPoint: .zero)
       let axes = [SIMD3<Float>(1, 0, 0), SIMD3<Float>(0, 1, 0), SIMD3<Float>(0, 0, 1)]

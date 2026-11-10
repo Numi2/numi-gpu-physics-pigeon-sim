@@ -18,6 +18,11 @@ height=${CROW_VIDEO_HEIGHT:-900}
 yaw=${CROW_CAMERA_YAW:--1.25}
 pitch=${CROW_CAMERA_PITCH:-0.20}
 distance=${CROW_CAMERA_DISTANCE:-1.05}
+# Opt in only for replays from the research host with 0.025 m perch half-width.
+course_geometry=()
+if [[ ${CROW_RESEARCH_NARROW_PERCH:-0} == 1 ]]; then
+  course_geometry+=(--capture-crow-research-narrow-perch)
+fi
 for path in "$input_i" "$input_j" "$renderer"; do
   if [ ! -f "$path" ]; then printf "missing input: %s\n" "$path" >&2; exit 2; fi
 done
@@ -43,7 +48,7 @@ for course in i j; do
     "$renderer" --capture-crow-frames "$output/$label-audit" \
       --capture-crow-video "$output/$label.mp4" --capture-crow-video-fps "$fps" \
       --capture-frames "$frames" --capture-frame-start "$start" --capture-frame-end "$end" \
-      --capture-width "$width" --capture-height "$height" --capture-crow-solid-course \
+      --capture-width "$width" --capture-height "$height" --capture-crow-solid-course "${course_geometry[@]}" \
       --capture-crow-presentation takeoff --capture-crow-replay-pack "$input" \
       --capture-crow-lighting overcast --capture-crow-camera-yaw "$yaw" \
       --capture-crow-camera-pitch "$pitch" --capture-crow-camera-distance "$distance"

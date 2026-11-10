@@ -147,6 +147,8 @@ public struct CrowNumiReplay: Sendable {
     public let bodyOrientationsXYZW: [SIMD4<Float>]
     public let groundPosition: SIMD3<Float>?
     public let groundOrientationXYZW: SIMD4<Float>?
+    /// Explicitly supplied research geometry; older replays retain the original width.
+    public var perchHalfWidth: Float = 0.10
 
     public func worldPointInCrowFrame(_ point: SIMD3<Float>) -> SIMD3<Float> {
       let root = rootOrientationXYZW
@@ -586,7 +588,7 @@ public struct CrowNumiReplay: Sendable {
     )
   }
 
-  public func navigationCourseFrame(of frame: Frame) -> NavigationCourseFrame? {
+  public func navigationCourseFrame(of frame: Frame, perchHalfWidth: Float = 0.10) -> NavigationCourseFrame? {
     let bodies = Self.navigationCourseBodyNames.compactMap {
       bodyPose(named: $0, in: frame)
     }
@@ -594,13 +596,15 @@ public struct CrowNumiReplay: Sendable {
       bodies.count == Self.navigationCourseBodyNames.count
     else { return nil }
     let ground = bodyPose(named: "locomotion_ground", in: frame)
-    return NavigationCourseFrame(
+    var result = NavigationCourseFrame(
       rootPosition: root.position,
       rootOrientationXYZW: root.orientationXYZW,
       bodyPositions: bodies.map(\.position),
       bodyOrientationsXYZW: bodies.map(\.orientationXYZW),
       groundPosition: ground?.position, groundOrientationXYZW: ground?.orientationXYZW
     )
+    result.perchHalfWidth = perchHalfWidth
+    return result
   }
 
   /// Presentation-only switch grounded in recorded completion and support

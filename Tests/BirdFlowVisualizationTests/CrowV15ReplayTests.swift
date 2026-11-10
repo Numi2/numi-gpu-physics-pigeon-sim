@@ -196,3 +196,20 @@ func crowCameraCutawayDetectsObstruction() {
   #expect(!CrowCourseCamera.segmentIntersectsBox(start: SIMD3(1, 1, 0),
     end: SIMD3(1, -1, 0), half: SIMD3(0.1, 0.1, 0.1)))
 }
+
+@Test("research perch override matches collider without changing legacy geometry")
+func crowResearchPerchGeometryIsExplicit() throws {
+  var course = CrowNumiReplay.NavigationCourseFrame(
+    rootPosition: .zero, rootOrientationXYZW: SIMD4(0, 0, 0, 1),
+    bodyPositions: Array(repeating: .zero, count: 5),
+    bodyOrientationsXYZW: Array(repeating: SIMD4(0, 0, 0, 1), count: 5),
+    groundPosition: nil, groundOrientationXYZW: nil
+  )
+  #expect(CrowCourseCamera.halfExtents(for: course)[4] == SIMD3<Float>(0.10, 0.72, 0.055))
+  course.perchHalfWidth = 0.025
+  #expect(CrowCourseCamera.halfExtents(for: course)[4] == SIMD3<Float>(0.025, 0.72, 0.055))
+  let base = ["capture", "--capture-crow-frames", "/tmp/crow-test", "--capture-frames", "2",
+    "--capture-crow-presentation", "takeoff", "--capture-crow-replay-pack", "/tmp/replay.json"]
+  #expect(try CrowShowcaseCapture.Arguments(commandLine: base).researchNarrowPerch == false)
+  #expect(try CrowShowcaseCapture.Arguments(commandLine: base + ["--capture-crow-research-narrow-perch"]).researchNarrowPerch == true)
+}
