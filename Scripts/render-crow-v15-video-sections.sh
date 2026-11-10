@@ -23,6 +23,10 @@ course_geometry=()
 if [[ ${CROW_RESEARCH_NARROW_PERCH:-0} == 1 ]]; then
   course_geometry+=(--capture-crow-research-narrow-perch)
 fi
+# Opt in only for the research host with 0.018 m toe collider half-length.
+if [[ ${CROW_RESEARCH_TOE_HINGES:-0} == 1 ]]; then
+  course_geometry+=(--capture-crow-research-toe-hinges)
+fi
 for path in "$input_i" "$input_j" "$renderer"; do
   if [ ! -f "$path" ]; then printf "missing input: %s\n" "$path" >&2; exit 2; fi
 done

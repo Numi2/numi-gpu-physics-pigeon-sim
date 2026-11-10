@@ -92,6 +92,12 @@ func crowV15ReplayAdmission() throws {
   #expect(abs(digit.rotationXYZW.w - cos(toeFlex)) < 1e-5)
   #expect(digit.translation == .zero)
   #expect(articulation.toeDeltas.count == 8)
+  #expect(articulation.toeReferenceRoots.isEmpty)
+  let registered = try #require(replay.articulationFrame(of: replay.frames[1], researchToeHalfLength: 0.018))
+  let frontRoot = try #require(registered.toeReferenceRoots[.left(2)])
+  #expect(simd_distance(frontRoot, SIMD3<Float>(0, -0.018, 0)) < 1e-5)
+  #expect(registered.toeReferenceRoots.count == 8)
+  #expect(registered.footReferencePositions[.leftFoot] == .zero)
   let other = try #require(articulation.toeDeltas[.right(2)])
   #expect(simd_distance(other.rotationXYZW, SIMD4<Float>(0, 0, 0, 1)) < 1e-5)
   let jaw = try #require(articulation.lowerBeakDelta)
@@ -212,4 +218,5 @@ func crowResearchPerchGeometryIsExplicit() throws {
     "--capture-crow-presentation", "takeoff", "--capture-crow-replay-pack", "/tmp/replay.json"]
   #expect(try CrowShowcaseCapture.Arguments(commandLine: base).researchNarrowPerch == false)
   #expect(try CrowShowcaseCapture.Arguments(commandLine: base + ["--capture-crow-research-narrow-perch"]).researchNarrowPerch == true)
+  #expect(try CrowShowcaseCapture.Arguments(commandLine: base + ["--capture-crow-research-toe-hinges"]).researchToeHinges == true)
 }

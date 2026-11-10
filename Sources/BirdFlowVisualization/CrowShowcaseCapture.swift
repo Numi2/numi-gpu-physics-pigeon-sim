@@ -82,6 +82,7 @@ public enum CrowShowcaseCapture {
     let videoFPS: Int
     let solidCourse: Bool
     let researchNarrowPerch: Bool
+    let researchToeHinges: Bool
     let inspectionHideCourse: Bool
     let temporalScale: Float
     let cameraYawRadians: Float?
@@ -157,6 +158,7 @@ public enum CrowShowcaseCapture {
       videoURL = try value(after: "--capture-crow-video").map { URL(fileURLWithPath: $0) }
       solidCourse = commandLine.contains("--capture-crow-solid-course")
       researchNarrowPerch = commandLine.contains("--capture-crow-research-narrow-perch")
+      researchToeHinges = commandLine.contains("--capture-crow-research-toe-hinges")
       inspectionHideCourse = commandLine.contains("--capture-crow-inspection-hide-course")
       temporalScale = try positiveFloat(
         after: "--capture-crow-temporal-scale",
@@ -561,6 +563,8 @@ public enum CrowShowcaseCapture {
         "navigation_course": numiReplay.navigationCourse ?? "unspecified",
         "inspection_course_hidden": arguments.inspectionHideCourse,
         "perch_half_width_meters": arguments.researchNarrowPerch ? 0.025 : 0.10,
+        "research_toe_hinge_half_length_meters": arguments.researchToeHinges ? 0.018 : NSNull(),
+        "research_toe_bridge": arguments.researchToeHinges ? "estimated visual geometry; no simulated contact" : "not used",
         "perch_geometry_source": arguments.researchNarrowPerch ? "explicit research host override" : "legacy scene default",
         "experimental_flight_remex": ProcessInfo.processInfo.environment[
           "CROW_EXPERIMENTAL_FLIGHT_REMEX"] == "1",
@@ -612,7 +616,7 @@ public enum CrowShowcaseCapture {
         atPresentationFraction: timelineFraction
       )
       let articulationFrame = replayFrame.flatMap {
-        numiReplay?.articulationFrame(of: $0)
+        numiReplay?.articulationFrame(of: $0, researchToeHalfLength: arguments.researchToeHinges ? 0.018 : nil)
       }
       if let numiReplay, let replayFrame {
         replayDeploymentHighWater = max(
@@ -5676,6 +5680,17 @@ private struct CrowMeshBuilder {
         vertices: &vertices
       )
       let footStart = vertices.count
+      // The modeled toe hinges span a foot-length gap. This estimated bridge
+      // joins the registered roots visually; it adds no physical contact.
+      let rearKey: CrowNumiReplay.Toe = footLink == .leftFoot ? .left(1) : .right(1)
+      let middleKey: CrowNumiReplay.Toe = footLink == .leftFoot ? .left(3) : .right(3)
+      if let rear = articulation?.toeReferenceRoots[rearKey],
+        let front = articulation?.toeReferenceRoots[middleKey] {
+        appendTaperedTube(from: pose.bodyCenter + rear, to: pose.bodyCenter + front,
+          startRadius: 0.0045, endRadius: 0.0055, color: keratin,
+          radialSegments: 10, surfaceFeatherClass: CrowLegPlumage.surfaceFeatherClass,
+          to: &vertices)
+      }
       // For recorded toe bodies, use a fixed reference digit scaffold: the
       // presentation's estimated toe curling must not fabricate contact.
       let reference = CrowStandingPose.sample(phase: 0, referenceBodyCenter: pose.bodyCenter)
@@ -5683,9 +5698,13 @@ private struct CrowMeshBuilder {
       let hasToeBodies = articulation?.toeDeltas.count == 8
       for posedDigit in foot.digits {
         let digit: CrowStandingDigitPose
+        let key: CrowNumiReplay.Toe = footLink == .leftFoot
+          ? .left(posedDigit.digitNumber) : .right(posedDigit.digitNumber)
         if hasToeBodies, let source = neutral.digits.first(where: { $0.digitNumber == posedDigit.digitNumber }) {
+          let root = articulation?.toeReferenceRoots[key].map { pose.bodyCenter + $0 }
+            ?? foot.ankle
           digit = CrowStandingDigitPose(digitNumber: source.digitNumber,
-            nodes: source.nodes.map { $0 - neutral.ankle + foot.ankle })
+            nodes: source.nodes.map { $0 - source.nodes[0] + root })
         } else {
           digit = posedDigit
         }
@@ -5699,15 +5718,13 @@ private struct CrowMeshBuilder {
             clawColor: claw
           )
         )
-        let key: CrowNumiReplay.Toe = footLink == .leftFoot
-          ? .left(digit.digitNumber) : .right(digit.digitNumber)
         articulateVertices(digitStart..<vertices.count,
           delta: articulation?.toeDeltas[key], pivot: digit.nodes[0], vertices: &vertices)
       }
       articulateVertices(
         footStart..<vertices.count,
         delta: articulation?.delta(for: footLink),
-        pivot: foot.ankle,
+        pivot: articulation?.footReferencePositions[footLink].map { pose.bodyCenter + $0 } ?? foot.ankle,
         vertices: &vertices
       )
     }

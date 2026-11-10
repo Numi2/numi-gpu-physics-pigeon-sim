@@ -63,6 +63,9 @@ public struct CrowNumiReplay: Sendable {
     public let replayStep: Int
     public let deltas: [ArticulatedLink: LinkDelta]
     public let toeDeltas: [Toe: LinkDelta]
+    /// Optional collider-derived reference hinges and foot centers for the research toe host.
+    public let toeReferenceRoots: [Toe: SIMD3<Float>]
+    public let footReferencePositions: [ArticulatedLink: SIMD3<Float>]
     /// Optional in older 15-action models; present in the v15 active-head body.
     public let headDelta: LinkDelta?
     public let headReferencePosition: SIMD3<Float>?
@@ -456,7 +459,7 @@ public struct CrowNumiReplay: Sendable {
   /// Composes every accepted Numi link against `crow_body` and removes the
   /// root trajectory. BirdFlow can therefore use an independent camera while
   /// retaining exact sweep, flap, pronation, tail, and leg-link articulation.
-  public func articulationFrame(of frame: Frame) -> ArticulationFrame? {
+  public func articulationFrame(of frame: Frame, researchToeHalfLength: Float? = nil) -> ArticulationFrame? {
     guard
       let referenceBody = bodyPose(
         named: ArticulatedLink.body.rawValue, in: frames[0]
@@ -480,10 +483,14 @@ public struct CrowNumiReplay: Sendable {
       rotationXYZW: SIMD4(0, 0, 0, 1), translation: .zero
     )
     var toeDeltas: [Toe: LinkDelta] = [:]
+    var toeReferenceRoots: [Toe: SIMD3<Float>] = [:]
+    var footReferencePositions: [ArticulatedLink: SIMD3<Float>] = [:]
     for (side, footLink) in [("left", ArticulatedLink.leftFoot), ("right", .rightFoot)] {
       guard let refFoot = bodyPose(named: footLink.rawValue, in: frames[0]),
         let curFoot = bodyPose(named: footLink.rawValue, in: frame) else { continue }
-      let registration = refFoot.relative(to: referenceBody).orientationXYZW
+      let footReference = refFoot.relative(to: referenceBody)
+      let registration = footReference.orientationXYZW
+      if researchToeHalfLength != nil { footReferencePositions[footLink] = footReference.position }
       for number in 1...4 {
         let suffix = number == 1 ? "rear_toe" : "front_toe_\(number - 1)"
         let name = "crow_\(side)_\(suffix)"
@@ -498,6 +505,12 @@ public struct CrowNumiReplay: Sendable {
         // second foot translation and must not be applied to the mesh.
         let key: Toe = side == "left" ? .left(number) : .right(number)
         toeDeltas[key] = LinkDelta(rotationXYZW: q, translation: .zero)
+        if let halfLength = researchToeHalfLength {
+          let toeReference = refToe.relative(to: referenceBody)
+          let anchor = SIMD3<Float>(number == 1 ? halfLength : -halfLength, 0, 0)
+          toeReferenceRoots[key] = toeReference.position
+            + RigidPose.rotate(toeReference.orientationXYZW, anchor)
+        }
       }
     }
     let referenceHead = bodyPose(named: "crow_head", in: frames[0])?
@@ -579,6 +592,7 @@ public struct CrowNumiReplay: Sendable {
     } ?? 0
     return ArticulationFrame(
       replayStep: frame.step, deltas: deltas, toeDeltas: toeDeltas,
+      toeReferenceRoots: toeReferenceRoots, footReferencePositions: footReferencePositions,
       headDelta: headDelta, headReferencePosition: referenceHead?.position,
       lowerBeakDelta: lowerBeakDelta,
       wingReferenceElevations: wingReferenceElevations,
