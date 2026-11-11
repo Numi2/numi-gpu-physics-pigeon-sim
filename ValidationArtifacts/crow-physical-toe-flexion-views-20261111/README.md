@@ -1,0 +1,3 @@
+# Flight toe-flexion inspection
+
+These four accepted-state diagnostic frames show the stronger contact-triggered physical toe-flexion candidate from front and side at frames 450 and 800. The toes are somewhat more curved, but both legs still hang too straight and the posture is not realistic. This candidate has only an obstacle-free bounded-command flight screen; it has not been demonstrated in navigation, approach opening, landing, grip or release. The visible course geometry was disabled in the physical screen, and waypoint overlays do not demonstrate route success. Cameras include wings at the sampled instants only. Physics inputs, hashes and screen results are archived in NumiLab artifact crow-v15-flight-toe-flexion-control-20261111.
