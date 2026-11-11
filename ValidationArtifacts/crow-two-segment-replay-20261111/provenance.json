@@ -1,0 +1,10 @@
+{
+  "scope": "Development replay parser and mesh-deformation tests; no rendered visual inspection, biological or full-route claim.",
+  "native_replay_file_sha256": "1ffb86815711cb494dc45e2180db79a84265eec018f7c58f6f874ca6ff8b2d9d",
+  "native_payload_sha256": "759d909a238f4091779b53c197930f5fff5d45c7c495013d036abd851feb7d35",
+  "native_frames": 50,
+  "loader_test": "CROW_NATIVE_TWO_TOE_REPLAY=<native-replay> swift test --filter crowNativeTwoSegmentReplay",
+  "other_tests": "swift test --filter crowV15ReplayAdmission|crowDigitalPadsMeetSupportUnderArticulatedPhalanges|crowLiftedDigitRetainsPadsAndClaws|crowArchedDigitPadsFollowTheirJoints|crowDistalToeMeshFollowsRecordedJoint",
+  "simulation_evidence_commit": "01d070cea",
+  "limits": "Research toe dimensions and mesh are approximations; sample is not a full autonomous course."
+}

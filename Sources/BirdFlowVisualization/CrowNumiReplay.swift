@@ -53,8 +53,7 @@ public struct CrowNumiReplay: Sendable {
   }
 
   /// Optional v15 toe bodies, expressed as rotations in the reference body
-  /// frame. Each simulated body is a single flexing segment; the visual
-  /// phalanges remain anatomical estimates and are not measured joints.
+  /// frame. The visual phalanges remain estimates of the recorded rigid links.
   public enum Toe: Hashable, Sendable {
     case left(Int), right(Int)
   }
@@ -63,6 +62,9 @@ public struct CrowNumiReplay: Sendable {
     public let replayStep: Int
     public let deltas: [ArticulatedLink: LinkDelta]
     public let toeDeltas: [Toe: LinkDelta]
+    /// Distal rotation relative to the proximal link, in the reference body frame.
+    public let distalToeDeltas: [Toe: LinkDelta]
+    public let distalToeReferencePivots: [Toe: SIMD3<Float>]
     /// Optional collider-derived reference hinges and foot centers for the research toe host.
     public let toeReferenceRoots: [Toe: SIMD3<Float>]
     public let footReferencePositions: [ArticulatedLink: SIMD3<Float>]
@@ -483,6 +485,8 @@ public struct CrowNumiReplay: Sendable {
       rotationXYZW: SIMD4(0, 0, 0, 1), translation: .zero
     )
     var toeDeltas: [Toe: LinkDelta] = [:]
+    var distalToeDeltas: [Toe: LinkDelta] = [:]
+    var distalToeReferencePivots: [Toe: SIMD3<Float>] = [:]
     var toeReferenceRoots: [Toe: SIMD3<Float>] = [:]
     var footReferencePositions: [ArticulatedLink: SIMD3<Float>] = [:]
     for (side, footLink) in [("left", ArticulatedLink.leftFoot), ("right", .rightFoot)] {
@@ -494,8 +498,11 @@ public struct CrowNumiReplay: Sendable {
       for number in 1...4 {
         let suffix = number == 1 ? "rear_toe" : "front_toe_\(number - 1)"
         let name = "crow_\(side)_\(suffix)"
-        guard let refToe = bodyPose(named: name, in: frames[0]),
-          let curToe = bodyPose(named: name, in: frame) else { continue }
+        let hasTwoSegments = bodyPose(named: name + "_proximal", in: frames[0]) != nil
+          && bodyPose(named: name + "_distal", in: frames[0]) != nil
+        let proximalName = hasTwoSegments ? name + "_proximal" : name
+        guard let refToe = bodyPose(named: proximalName, in: frames[0]),
+          let curToe = bodyPose(named: proximalName, in: frame) else { continue }
         let relative = RigidPose.delta(
           from: refToe.relative(to: refFoot), to: curToe.relative(to: curFoot))
         let q = RigidPose.normalized(RigidPose.multiply(
@@ -507,9 +514,26 @@ public struct CrowNumiReplay: Sendable {
         toeDeltas[key] = LinkDelta(rotationXYZW: q, translation: .zero)
         if let halfLength = researchToeHalfLength {
           let toeReference = refToe.relative(to: referenceBody)
-          let anchor = SIMD3<Float>(number == 1 ? halfLength : -halfLength, 0, 0)
+          // Two-segment experimental bodies use 9 mm half-length links.
+          let segmentHalfLength: Float = hasTwoSegments ? 0.009 : halfLength
+          let sign: Float = number == 1 ? -1 : 1
+          let anchor = SIMD3<Float>(-sign * segmentHalfLength, 0, 0)
           toeReferenceRoots[key] = toeReference.position
             + RigidPose.rotate(toeReference.orientationXYZW, anchor)
+          if hasTwoSegments,
+            let refDistal = bodyPose(named: name + "_distal", in: frames[0]),
+            let curDistal = bodyPose(named: name + "_distal", in: frame) {
+            let distalRelative = RigidPose.delta(
+              from: refDistal.relative(to: refToe), to: curDistal.relative(to: curToe))
+            let distalRegistration = toeReference.orientationXYZW
+            let distalRotation = RigidPose.normalized(RigidPose.multiply(
+              RigidPose.multiply(distalRegistration, distalRelative.rotationXYZW),
+              RigidPose.conjugate(distalRegistration)))
+            distalToeDeltas[key] = LinkDelta(rotationXYZW: distalRotation, translation: .zero)
+            distalToeReferencePivots[key] = toeReference.position
+              + RigidPose.rotate(toeReference.orientationXYZW,
+                SIMD3<Float>(sign * segmentHalfLength, 0, 0))
+          }
         }
       }
     }
@@ -592,6 +616,7 @@ public struct CrowNumiReplay: Sendable {
     } ?? 0
     return ArticulationFrame(
       replayStep: frame.step, deltas: deltas, toeDeltas: toeDeltas,
+      distalToeDeltas: distalToeDeltas, distalToeReferencePivots: distalToeReferencePivots,
       toeReferenceRoots: toeReferenceRoots, footReferencePositions: footReferencePositions,
       headDelta: headDelta, headReferencePosition: referenceHead?.position,
       lowerBeakDelta: lowerBeakDelta,

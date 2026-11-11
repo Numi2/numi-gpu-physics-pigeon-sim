@@ -539,7 +539,7 @@ public enum CrowShowcaseCapture {
         "accepted_articulated_link_count":
           CrowNumiReplay.ArticulatedLink.allCases.count,
         "accepted_toe_body_count":
-          numiReplay.articulationFrame(of: numiReplay.frames[0])?.toeDeltas.count ?? 0,
+          numiReplay.articulationFrame(of: numiReplay.frames[0], researchToeHalfLength: arguments.researchToeHinges ? 0.018 : nil).map { $0.toeDeltas.count + $0.distalToeDeltas.count } ?? 0,
         "root_trajectory_removed_for_independent_camera": true,
         "render_frame_count": arguments.frameEnd - arguments.frameStart + 1,
         "timeline_frame_count": arguments.frameCount,
@@ -563,7 +563,7 @@ public enum CrowShowcaseCapture {
         "navigation_course": numiReplay.navigationCourse ?? "unspecified",
         "inspection_course_hidden": arguments.inspectionHideCourse,
         "perch_half_width_meters": arguments.researchNarrowPerch ? 0.025 : 0.10,
-        "research_toe_hinge_half_length_meters": arguments.researchToeHinges ? 0.018 : NSNull(),
+        "research_toe_hinge_half_length_meters": arguments.researchToeHinges ? (numiReplay.bodyNames.contains("crow_left_front_toe_1_proximal") ? 0.009 : 0.018) : NSNull(),
         "research_toe_bridge": arguments.researchToeHinges ? "estimated visual geometry; no simulated contact" : "not used",
         "perch_geometry_source": arguments.researchNarrowPerch ? "explicit research host override" : "legacy scene default",
         "experimental_flight_remex": ProcessInfo.processInfo.environment[
@@ -5708,14 +5708,31 @@ private struct CrowMeshBuilder {
         } else {
           digit = posedDigit
         }
+        // Register one estimated visual joint to the recorded second hinge.
+        // The surface is still a retargeted anatomical approximation.
+        var registeredDigit = digit
+        var distalJointIndex: Int?
+        let distalPivot = articulation?.distalToeReferencePivots[key].map { pose.bodyCenter + $0 }
+        if let pivot = distalPivot, digit.nodes.count > 2 {
+          let index = (1..<(digit.nodes.count - 1)).min {
+            simd_distance_squared(digit.nodes[$0], pivot) < simd_distance_squared(digit.nodes[$1], pivot)
+          }!
+          var nodes = digit.nodes
+          nodes[index] = pivot
+          registeredDigit = CrowStandingDigitPose(digitNumber: digit.digitNumber, nodes: nodes)
+          distalJointIndex = index
+        }
         let digitStart = vertices.count
         vertices.append(
           contentsOf: CrowFootAnatomy.vertices(
-            digit: digit,
+            digit: registeredDigit,
             supportHeight: pose.supportHeight,
             keratinColor: keratin,
             padColor: SIMD4<Float>(0.036, 0.040, 0.047, 0.62),
-            clawColor: claw
+            clawColor: claw,
+            distalJointIndex: distalJointIndex,
+            distalDelta: articulation?.distalToeDeltas[key],
+            distalPivot: distalPivot ?? .zero
           )
         )
         articulateVertices(digitStart..<vertices.count,

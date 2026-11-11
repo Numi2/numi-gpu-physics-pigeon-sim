@@ -50,10 +50,23 @@ enum CrowFootAnatomy {
     supportHeight: Float,
     keratinColor: SIMD4<Float>,
     padColor: SIMD4<Float>,
-    clawColor: SIMD4<Float>
+    clawColor: SIMD4<Float>,
+    distalJointIndex: Int? = nil,
+    distalDelta: CrowNumiReplay.LinkDelta? = nil,
+    distalPivot: SIMD3<Float> = .zero
   ) -> [ColoredVertex] {
     guard digit.nodes.count > 1 else { return [] }
     var result: [ColoredVertex] = []
+    func deformDistal(from start: Int) {
+      guard let delta = distalDelta else { return }
+      for index in start..<result.count {
+        let vertex = result[index]
+        let point = SIMD3(vertex.position.x, vertex.position.y, vertex.position.z)
+        let normal = SIMD3(vertex.normal.x, vertex.normal.y, vertex.normal.z)
+        result[index].position = SIMD4(delta.transform(point: point, around: distalPivot), vertex.position.w)
+        result[index].normal = SIMD4(simd_normalize(delta.rotate(direction: normal)), vertex.normal.w)
+      }
+    }
     for segmentIndex in 0..<(digit.nodes.count - 1) {
       let baseRadius = digitBaseRadius(digit.digitNumber)
       let proximalRadius = max(
@@ -65,6 +78,7 @@ enum CrowFootAnatomy {
       var end = digit.nodes[segmentIndex + 1]
       start.z = max(start.z, supportHeight + 0.68 * proximalRadius)
       end.z = max(end.z, supportHeight + 0.68 * distalRadius)
+      let vertexStart = result.count
       appendEllipticalSegment(
         from: start,
         to: end,
@@ -75,6 +89,7 @@ enum CrowFootAnatomy {
         radialSegments: phalanxRadialSegments,
         to: &result
       )
+      if let joint = distalJointIndex, segmentIndex >= joint { deformDistal(from: vertexStart) }
     }
 
     // Takeoff retracts each digit away from the standing support. Keep the
@@ -84,6 +99,7 @@ enum CrowFootAnatomy {
     let pads = plantarPads(digit: digit, supportHeight: supportHeight)
     let planarDirection = distalPlanarDirection(digit)
     for pad in pads {
+      let vertexStart = result.count
       appendEllipsoid(
         center: pad.center,
         longitudinalDirection: planarDirection,
@@ -93,8 +109,10 @@ enum CrowFootAnatomy {
         color: padColor,
         to: &result
       )
+      if let joint = distalJointIndex, pad.jointIndex >= joint { deformDistal(from: vertexStart) }
     }
 
+    let clawVertexStart = result.count
     let contactTip = digit.tip
     let clawBase = SIMD3<Float>(
       contactTip.x,
@@ -123,6 +141,7 @@ enum CrowFootAnatomy {
       radialSegments: 8,
       to: &result
     )
+    if distalJointIndex != nil { deformDistal(from: clawVertexStart) }
     for index in result.indices {
       result[index].parameters.w = Float(surfaceIdentityClassCode)
     }

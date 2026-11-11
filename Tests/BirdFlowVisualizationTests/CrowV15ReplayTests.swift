@@ -126,6 +126,41 @@ func crowV15ReplayAdmission() throws {
   let oldReplay = try CrowNumiReplay.load(url: url)
   let oldFrame = try #require(oldReplay.articulationFrame(of: oldReplay.frames[1]))
   #expect(oldFrame.toeDeltas.isEmpty)
+
+  // The experimental body has two rigid links for each of eight digits.
+  let twoNames = names.flatMap { name in
+    name.contains("_toe") ? [name + "_proximal", name + "_distal"] : [name]
+  }
+  var neutral = [Float](repeating: 0, count: twoNames.count * 13)
+  for index in twoNames.indices { neutral[index * 13 + 6] = 1 }
+  let prox = twoNames.firstIndex(of: "crow_left_front_toe_1_proximal")! * 13
+  let distal = twoNames.firstIndex(of: "crow_left_front_toe_1_distal")! * 13
+  neutral[prox] = 0.009; neutral[distal] = 0.027
+  var flexed = neutral
+  let proximalAngle: Float = 0.3, distalAngle: Float = 0.4
+  flexed[prox + 4] = sin(proximalAngle / 2); flexed[prox + 6] = cos(proximalAngle / 2)
+  flexed[distal + 4] = sin((proximalAngle + distalAngle) / 2)
+  flexed[distal + 6] = cos((proximalAngle + distalAngle) / 2)
+  var twoPayload = payload
+  twoPayload["body_names"] = twoNames; twoPayload["body_count"] = twoNames.count
+  twoPayload["frames"] = [frame(1, neutral), frame(2, flexed)]
+  let twoData = try JSONSerialization.data(withJSONObject: twoPayload, options: [.sortedKeys])
+  let twoDigest = SHA256.hash(data: twoData).map { String(format: "%02x", $0) }.joined()
+  let twoEnvelope = try JSONSerialization.data(withJSONObject: [
+    "schema": "numi.crow-replay.v1", "payload_sha256": twoDigest, "payload": twoPayload,
+  ], options: [.sortedKeys])
+  try twoEnvelope.write(to: url)
+  let twoReplay = try CrowNumiReplay.load(url: url)
+  let twoFrame = try #require(twoReplay.articulationFrame(of: twoReplay.frames[1], researchToeHalfLength: 0.018))
+  #expect(twoFrame.toeDeltas.count == 8 && twoFrame.distalToeDeltas.count == 8)
+  let proximal = try #require(twoFrame.toeDeltas[.left(2)])
+  let second = try #require(twoFrame.distalToeDeltas[.left(2)])
+  #expect(abs(proximal.rotationXYZW.y - sin(proximalAngle / 2)) < 1e-5)
+  #expect(abs(second.rotationXYZW.y - sin(distalAngle / 2)) < 1e-5)
+  let toeRoot = try #require(twoFrame.toeReferenceRoots[.left(2)])
+  let toePivot = try #require(twoFrame.distalToeReferencePivots[.left(2)])
+  #expect(simd_distance(toeRoot, .zero) < 1e-5)
+  #expect(simd_distance(toePivot, SIMD3<Float>(0.018, 0, 0)) < 1e-5)
 }
 
 @Test("Navigation geometry uses both accepted body and obstacle orientation")
@@ -219,4 +254,24 @@ func crowResearchPerchGeometryIsExplicit() throws {
   #expect(try CrowShowcaseCapture.Arguments(commandLine: base).researchNarrowPerch == false)
   #expect(try CrowShowcaseCapture.Arguments(commandLine: base + ["--capture-crow-research-narrow-perch"]).researchNarrowPerch == true)
   #expect(try CrowShowcaseCapture.Arguments(commandLine: base + ["--capture-crow-research-toe-hinges"]).researchToeHinges == true)
+}
+
+@Test("two-segment native replay exposes both hinges")
+func crowNativeTwoSegmentReplay() throws {
+  guard let path = ProcessInfo.processInfo.environment["CROW_NATIVE_TWO_TOE_REPLAY"] else { return }
+  let replay = try CrowNumiReplay.load(url: URL(fileURLWithPath: path))
+  #expect(replay.frames.count > 1)
+  var observed = false
+  for frame in replay.frames {
+    let articulation = try #require(replay.articulationFrame(of: frame, researchToeHalfLength: 0.018))
+    #expect(articulation.toeDeltas.count == 8)
+    #expect(articulation.distalToeDeltas.count == 8)
+    #expect(articulation.distalToeReferencePivots.count == 8)
+    for delta in articulation.distalToeDeltas.values {
+      let q = delta.rotationXYZW
+      #expect(q.x.isFinite && q.y.isFinite && q.z.isFinite && q.w.isFinite)
+      if abs(q.x) + abs(q.y) + abs(q.z) > 0.01 { observed = true }
+    }
+  }
+  #expect(observed)
 }
