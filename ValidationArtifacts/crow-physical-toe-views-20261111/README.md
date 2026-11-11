@@ -1,0 +1,3 @@
+# Development replay views
+
+These are individual renderer diagnostic frames, not evidence of a completed route or landing. The input is the bounded-command obstacle-free development flight from the NumiLab artifact crow-v15-journey-bounded-flight-screen-20261111; it is a native simulation replay, not teacher-off autonomous routing. Frames are 250 and 450, presented from side and front views with the two-segment toe renderer. At the selected flight instant the feet hang and the side camera clips a wing. These observations motivate physical toe-joint control and wider final-video framing; neither issue is declared fixed by the frames.
