@@ -5618,6 +5618,11 @@ private struct CrowMeshBuilder {
         pivot: 0.5 * (foot.hip + foot.hock),
         vertices: &vertices
       )
+      if let joints = articulation?.shankJointPositions[shankLink], joints.count == 2 {
+        alignLegPlumage(thighStart..<vertices.count, hip: foot.hip, hock: foot.hock,
+          delta: articulation?.delta(for: thighLink), targetHock: pose.bodyCenter + joints[0],
+          vertices: &vertices)
+      }
       let shankStart = vertices.count
       for feather in CrowLegPlumage.visibleSamples(
         hip: foot.hip,
@@ -5665,20 +5670,29 @@ private struct CrowMeshBuilder {
           )
         }
       }
-      vertices.append(
-        contentsOf: CrowTarsometatarsusAnatomy.vertices(
-          hock: foot.hock,
-          ankle: foot.ankle,
-          shaftColor: keratin,
-          scuteColor: SIMD4<Float>(0.052, 0.057, 0.064, 0.62)
-        )
-      )
       articulateVertices(
         shankStart..<vertices.count,
         delta: articulation?.delta(for: shankLink),
         pivot: 0.5 * (foot.hock + foot.ankle),
         vertices: &vertices
       )
+      if let joints = articulation?.shankJointPositions[shankLink], joints.count == 2 {
+        alignLegPlumage(shankStart..<vertices.count, hip: foot.hip, hock: foot.hock,
+          delta: articulation?.delta(for: shankLink), targetHock: pose.bodyCenter + joints[0],
+          vertices: &vertices)
+        // Use the two recorded joint anchors, rather than translating an
+        // independently registered decorative shaft away from the foot.
+        vertices.append(contentsOf: CrowTarsometatarsusAnatomy.vertices(
+          hock: pose.bodyCenter + joints[0], ankle: pose.bodyCenter + joints[1],
+          shaftColor: keratin, scuteColor: SIMD4<Float>(0.052, 0.057, 0.064, 0.62)))
+      } else {
+        let shaftStart = vertices.count
+        vertices.append(contentsOf: CrowTarsometatarsusAnatomy.vertices(
+          hock: foot.hock, ankle: foot.ankle, shaftColor: keratin,
+          scuteColor: SIMD4<Float>(0.052, 0.057, 0.064, 0.62)))
+        articulateVertices(shaftStart..<vertices.count, delta: articulation?.delta(for: shankLink),
+          pivot: 0.5 * (foot.hock + foot.ankle), vertices: &vertices)
+      }
       let footStart = vertices.count
       // The modeled toe hinges span a foot-length gap. This estimated bridge
       // joins the registered roots visually; it adds no physical contact.
@@ -5744,6 +5758,39 @@ private struct CrowMeshBuilder {
         pivot: articulation?.footReferencePositions[footLink].map { pose.bodyCenter + $0 } ?? foot.ankle,
         vertices: &vertices
       )
+      if let joints = articulation?.shankJointPositions[shankLink], joints.count == 2,
+        let rear = articulation?.toeReferenceRoots[rearKey],
+        let front = articulation?.toeReferenceRoots[middleKey],
+        let footPivot = articulation?.footReferencePositions[footLink],
+        let footDelta = articulation?.delta(for: footLink) {
+        // Estimated skin bridge only: connect the recorded ankle to the
+        // midpoint of the already registered digit roots, without changing contact.
+        let center = pose.bodyCenter + 0.5 * (rear + front)
+        let end = footDelta.transform(point: center, around: pose.bodyCenter + footPivot)
+        appendTaperedTube(from: pose.bodyCenter + joints[1], to: end,
+          startRadius: 0.0038, endRadius: 0.0045, color: keratin,
+          radialSegments: 10, surfaceFeatherClass: CrowLegPlumage.surfaceFeatherClass,
+          to: &vertices)
+      }
+    }
+  }
+
+  // Register decorative leg plumage to the recorded knee while retaining its
+  // proximal attachment; this is display interpolation, not a physics joint.
+  private func alignLegPlumage(_ range: Range<Int>, hip: SIMD3<Float>, hock: SIMD3<Float>,
+    delta: CrowNumiReplay.LinkDelta?, targetHock: SIMD3<Float>, vertices: inout [ColoredVertex]) {
+    let pivot = 0.5 * (hip + hock)
+    let start = delta?.transform(point: hip, around: pivot) ?? hip
+    let end = delta?.transform(point: hock, around: pivot) ?? hock
+    let axis = end - start
+    let lengthSquared = simd_length_squared(axis)
+    guard lengthSquared > 1e-10 else { return }
+    let displacement = targetHock - end
+    for index in range {
+      let point = SIMD3(vertices[index].position.x, vertices[index].position.y, vertices[index].position.z)
+      let u = min(1, max(0, simd_dot(point - start, axis) / lengthSquared))
+      let weight = u * u * (3 - 2 * u)
+      vertices[index].position = SIMD4(point + weight * displacement, vertices[index].position.w)
     }
   }
 

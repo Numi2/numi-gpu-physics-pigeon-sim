@@ -68,6 +68,9 @@ public struct CrowNumiReplay: Sendable {
     /// Optional collider-derived reference hinges and foot centers for the research toe host.
     public let toeReferenceRoots: [Toe: SIMD3<Float>]
     public let footReferencePositions: [ArticulatedLink: SIMD3<Float>]
+    /// Recorded knee and ankle positions in the current body frame for the
+    /// specialized two-segment v15 research body, in meters.
+    public let shankJointPositions: [ArticulatedLink: [SIMD3<Float>]]
     /// Optional in older 15-action models; present in the v15 active-head body.
     public let headDelta: LinkDelta?
     public let headReferencePosition: SIMD3<Float>?
@@ -489,6 +492,19 @@ public struct CrowNumiReplay: Sendable {
     var distalToeReferencePivots: [Toe: SIMD3<Float>] = [:]
     var toeReferenceRoots: [Toe: SIMD3<Float>] = [:]
     var footReferencePositions: [ArticulatedLink: SIMD3<Float>] = [:]
+    var shankJointPositions: [ArticulatedLink: [SIMD3<Float>]] = [:]
+    // These anchor dimensions belong to the recorded 41-q, 40-v two-segment
+    // research body. Older replay models retain their existing retargeting.
+    if researchToeHalfLength != nil && configurationCount == 41 && velocityCount == 40
+      && bodyNames.contains("crow_left_front_toe_1_proximal") {
+      for link in [ArticulatedLink.leftShank, .rightShank] {
+        if let shank = bodyPose(named: link.rawValue, in: frame)?.relative(to: currentBody) {
+          shankJointPositions[link] = [Float(0.031625), Float(-0.031625)].map {
+            shank.position + RigidPose.rotate(shank.orientationXYZW, SIMD3<Float>(0, 0, $0))
+          }
+        }
+      }
+    }
     for (side, footLink) in [("left", ArticulatedLink.leftFoot), ("right", .rightFoot)] {
       guard let refFoot = bodyPose(named: footLink.rawValue, in: frames[0]),
         let curFoot = bodyPose(named: footLink.rawValue, in: frame) else { continue }
@@ -618,6 +634,7 @@ public struct CrowNumiReplay: Sendable {
       replayStep: frame.step, deltas: deltas, toeDeltas: toeDeltas,
       distalToeDeltas: distalToeDeltas, distalToeReferencePivots: distalToeReferencePivots,
       toeReferenceRoots: toeReferenceRoots, footReferencePositions: footReferencePositions,
+      shankJointPositions: shankJointPositions,
       headDelta: headDelta, headReferencePosition: referenceHead?.position,
       lowerBeakDelta: lowerBeakDelta,
       wingReferenceElevations: wingReferenceElevations,

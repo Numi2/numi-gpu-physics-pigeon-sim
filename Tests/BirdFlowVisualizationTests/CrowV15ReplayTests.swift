@@ -141,9 +141,20 @@ func crowV15ReplayAdmission() throws {
   flexed[prox + 4] = sin(proximalAngle / 2); flexed[prox + 6] = cos(proximalAngle / 2)
   flexed[distal + 4] = sin((proximalAngle + distalAngle) / 2)
   flexed[distal + 6] = cos((proximalAngle + distalAngle) / 2)
+  let shank = twoNames.firstIndex(of: "crow_left_shank")! * 13
+  flexed[shank] = 0.1
+  flexed[shank + 4] = sin(Float.pi / 4)
+  flexed[shank + 6] = cos(Float.pi / 4)
   var twoPayload = payload
   twoPayload["body_names"] = twoNames; twoPayload["body_count"] = twoNames.count
-  twoPayload["frames"] = [frame(1, neutral), frame(2, flexed)]
+  twoPayload["nq"] = 41; twoPayload["nv"] = 40
+  var firstTwo = frame(1, neutral), secondTwo = frame(2, flexed)
+  for key in ["q", "v"] {
+    let count = key == "q" ? 41 : 40
+    firstTwo[key] = [Float](repeating: 0, count: count)
+    secondTwo[key] = [Float](repeating: 0, count: count)
+  }
+  twoPayload["frames"] = [firstTwo, secondTwo]
   let twoData = try JSONSerialization.data(withJSONObject: twoPayload, options: [.sortedKeys])
   let twoDigest = SHA256.hash(data: twoData).map { String(format: "%02x", $0) }.joined()
   let twoEnvelope = try JSONSerialization.data(withJSONObject: [
@@ -161,6 +172,11 @@ func crowV15ReplayAdmission() throws {
   let toePivot = try #require(twoFrame.distalToeReferencePivots[.left(2)])
   #expect(simd_distance(toeRoot, .zero) < 1e-5)
   #expect(simd_distance(toePivot, SIMD3<Float>(0.018, 0, 0)) < 1e-5)
+  let joints = try #require(twoFrame.shankJointPositions[.leftShank])
+  #expect(joints.count == 2)
+  #expect(simd_distance(joints[0], SIMD3<Float>(0.131625, 0, 0)) < 1e-5)
+  #expect(simd_distance(joints[1], SIMD3<Float>(0.068375, 0, 0)) < 1e-5)
+  #expect(oldFrame.shankJointPositions.isEmpty)
 }
 
 @Test("Navigation geometry uses both accepted body and obstacle orientation")
