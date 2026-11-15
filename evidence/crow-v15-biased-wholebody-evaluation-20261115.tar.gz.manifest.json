@@ -1,0 +1,31 @@
+{
+  "archive_sha256": "b0a85e544a7b7f0d24f86e2fe24ab8dff340c0a426f607e8a8340edd547f8d71",
+  "archive_size": 28856320,
+  "parts": [
+    {
+      "name": "crow-v15-biased-wholebody-evaluation-20261115.tar.gz",
+      "sha256": "b0a85e544a7b7f0d24f86e2fe24ab8dff340c0a426f607e8a8340edd547f8d71"
+    }
+  ],
+  "remote_root": "/Users/n/Developer/numi-crow-rl-20261107",
+  "files": {
+    "artifacts/crow-v15-recorded-restart-20261114/v15-biased-wholebody-evaluation-20261115/20370127-trained-400.inputs.json": "cea43d68a6e0bb7e39d59753776fddabaf1ec54528faffc5940b7df2a08ebcb7",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-biased-wholebody-evaluation-20261115/summary.json": "9acef58b647ffeca52f721d0014ba75568cbaef81ce6da9adf99bf1b139a8bd5",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-biased-wholebody-evaluation-20261115/contact_summary.py": "f1f7a4d6bdf8d9ec0e19cf6818092415ca3b7a88038e9aa4dcbcba4f5f3c0cfe",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-biased-wholebody-evaluation-20261115/20370127-trained-400.stderr": "8b2713e5bd393cba4d71ee9d76b8acaaad872030d8f459d3cea2d2d6a3e09e45",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-biased-wholebody-evaluation-20261115/20370127-trained-400.json": "88ac2629ee240ea8318bbfc2fc786d48b5023c2c64b4955004451ba103bd6c46",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-biased-wholebody-evaluation-20261115/20370127-trained-400.command.json": "9a60b196d9054a12a6fb8e08d23f6cdd60c34360ee1ea705fb56354b957ef8bf",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-biased-wholebody-evaluation-20261115/20370127-trained-400.stdout": "296743b62a50845a72e8b513394455b615605ba7efdf06ca25ad50006d460ce0",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-biased-wholebody-evaluation-20261115/20370113-trained-500.inputs.json": "fab5be7c4138f8cfc36e095cad050e1851b8fd1765bd47b182746461018e3e6c",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-biased-wholebody-evaluation-20261115/20370127-trained-400.tsv": "8cebf1eda71f0899f9ed6fbcb1a4c7fe28e10b69e11db7ad25be316828dedbdc",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-biased-wholebody-evaluation-20261115/20370113-trained-500.tsv": "8fd1698f70231f1cbb4e7974cb7fa1a379fecb10a9ee3f5fe881b68ade4e22e0",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-biased-wholebody-evaluation-20261115/contact-summary.json": "a2e555ee71a260f44888ce25f5440be5517e10e833446c73d9fb2571ea593cc2",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-biased-wholebody-evaluation-20261115/20370113-trained-500.stderr": "b09baf371b78937b79072061b832a2d82fe62f37ac9afec6ffb2552cd6e6daf5",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-biased-wholebody-evaluation-20261115/evaluate.py": "38c0b18f360b7e232b3b0f2368334d24b472606fb6e73567f072f06629a72bdd",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-biased-wholebody-evaluation-20261115/20370113-trained-500.json": "856a6253619f354cc43822b80791b93199eafb50ba6a4472a1efc34c3f32ad50",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-biased-wholebody-evaluation-20261115/20370113-trained-500.stdout": "802f6e31e93ae8c7733f11cb0ef8c548e0c9f80d3a516658f0473dccedd88367",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-biased-wholebody-evaluation-20261115/20370113-trained-500.command.json": "ca49202d75ede2cb1fd117d81d9e215ba9cd6d542edfa0c7a5007d0aead195f8",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-biased-wholebody-evaluation-20261115/parity-action-analysis.json": "c30a57a8c2ce509bdd7d98e6bdf7a61a31ab06e3b9dae1536169f030db4aca7f",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-biased-wholebody-evaluation-20261115/runs.json": "61e80bdfc5d94e302d170966b1682e5e7522f30f09195b9e1e12e12d975b3f5b"
+  }
+}
