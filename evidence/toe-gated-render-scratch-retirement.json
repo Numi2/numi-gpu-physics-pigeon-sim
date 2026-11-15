@@ -1,0 +1,19 @@
+{
+  "source": "independently restored matching archive manifests from Git; renderer output scratch only",
+  "removed": [
+    {
+      "seed": "20360117",
+      "files_verified": 17,
+      "logical_bytes": 10228117,
+      "free_before": 9414537216,
+      "free_after": 9424842752
+    },
+    {
+      "seed": "20360206",
+      "files_verified": 17,
+      "logical_bytes": 31485638,
+      "free_before": 9424850944,
+      "free_after": 9456443392
+    }
+  ]
+}
