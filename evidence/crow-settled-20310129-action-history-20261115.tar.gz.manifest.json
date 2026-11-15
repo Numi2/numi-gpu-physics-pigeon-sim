@@ -1,0 +1,19 @@
+{
+  "archive_sha256": "b1cb7beadc567d5e9b73e746495e51446d2551d3ce7befe8f7772f4d38818d42",
+  "archive_size": 17090560,
+  "parts": [
+    {
+      "name": "crow-settled-20310129-action-history-20261115.tar.gz",
+      "sha256": "b1cb7beadc567d5e9b73e746495e51446d2551d3ce7befe8f7772f4d38818d42"
+    }
+  ],
+  "remote_files": {
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-v3-settled-reset-20310129-action-history-500/command.json": "736e556df666a2d53f63301b9ef2ec654abf377fbdc5e91e248f11aa2df448dc",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-v3-settled-reset-20310129-action-history-500/inputs.json": "06228892d6573810487116bd8e64976ff4f19722cb7b06af32a723d17201e657",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-v3-settled-reset-20310129-action-history-500/result.json": "81868a6e94ffc0178bf833deb1c9013d9fab4ee95ddb876a5e8ec4f1d26376d2",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-v3-settled-reset-20310129-action-history-500/stdout": "7afb20ac2b7cd4d274895ec7e451cdec2ce6beeecdde244df563022750792bcc",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-v3-settled-reset-20310129-action-history-500/stderr.gz": "97b3c4a1907f505541c6b8e2828ff38f03fe9fb3f11fb528b93ba9f3ef31fa41",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-v3-settled-reset-20310129-action-history-500/replay.json": "b296c1ac328b757e47a5bb3b0c728a0e58b58e5f0f2655e380e8d723842de9dd",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-v3-settled-reset-20310129-action-history-500/trace.tsv": "7f87ed4224f45fb1c6cee84677c1cc23d2eac523661277d8d1405e198bcd3360"
+  }
+}
