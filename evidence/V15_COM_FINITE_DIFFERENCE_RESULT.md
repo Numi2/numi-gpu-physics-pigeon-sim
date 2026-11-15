@@ -1,0 +1,5 @@
+# Accepted-position finite-difference diagnostic
+
+The 620-step diagnostic reproduced the pulse control's q/v, actor observations, actions, body states and termination exactly. Seventy reward values were intentionally replaced with telemetry, and the episode tracking accumulator was repurposed for the previous COM position; neither reward nor episode-tracking evidence is valid for training or performance claims.
+
+For the sampled controls, the live source-mass-weighted COM position and saved prior COM position differed from their independently reconstructed replay values by at most 0.000384 m. Their 20 ms finite difference differed by at most 0.0103 m/s, and vertical-impulse-weighted contact x by 0.000004 m. All pass the preregistered 0.001 m, 0.05 m/s and 0.0001 m thresholds. The outcome qualifies this narrow diagnostic signal, not a balance controller or a biological sensor. It remains delayed one control interval and uses instantaneous last-substep contact data. Complete inputs, shader, commands, control-aligned telemetry and failed/control evidence are archived.

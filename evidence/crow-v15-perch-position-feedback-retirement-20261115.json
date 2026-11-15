@@ -1,0 +1,15 @@
+{
+  "files": [
+    {
+      "path": "artifacts/crow-v15-recorded-restart-20261114/v15-perch-position-feedback-eval-20261115/20370113-position_feedback_pos-1000.stderr",
+      "sha256": "3e6f1478e087284c626b0eb3876675328edbb89002b6a7eb3614bae187937f75",
+      "bytes": 97037418
+    },
+    {
+      "path": "artifacts/crow-v15-recorded-restart-20261114/v15-perch-position-feedback-eval-20261115/20370113-position_feedback_neg-1000.stderr",
+      "sha256": "e900c54d14b98144b39e420f0f5b4301892a21c4a1cc66849c2273f1d663ca06",
+      "bytes": 97875965
+    }
+  ],
+  "bytes_retired": 194913383
+}
