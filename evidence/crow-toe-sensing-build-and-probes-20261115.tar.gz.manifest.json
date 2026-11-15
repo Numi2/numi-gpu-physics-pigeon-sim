@@ -1,0 +1,21 @@
+{
+  "archive_sha256": "7230e63ef1a0271a6b5c7acc978f21c4b58248363e165455ff17006e5d2163cf",
+  "remote_files": {
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/toe-sensing-experiment-host/libmetalrobo.dylib": "dc34708eac4fbc334d91eeb1e9b943aefc20d35a6ec10c07ddee7ca93d05f1f8",
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-toe-sensing-zero-stochastic.policypack": "0e353409eef286ceedae288bb08513391c9c91d05fc2985a77142837e695cbad",
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-toe-sensing-zero-deterministic.policypack": "90943b6ca7aa03a458c51d6899888b0418e54595146dc58ff8597e1a86cac3e5",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-sensing-zero-packs.json": "305df8ac66dae00bad67119c5560ef728b5f1c3ca36bc3efe6d21a9f2027e179",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/toe-sensing-host-build.json": "e157f49506e7d74ed260ac90caab777b85aa0740d8f6e864aa36370288bcd204",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/c_api-toe-sensing-experiment.cpp": "9e750aae3b34d256a20817611c3fe279fd5b4718c8fec1bd566429b30da248bb",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/toe-sensing-contract-probe/command.json": "037af6ed4c547eb57a4794973f16045ad5f8d2e728eda701fc9261e35bcde7b7",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/toe-sensing-contract-probe/inputs.json": "3b11f106e5db453602a6807758dc23935db09b6b5476bfe960a6200ed99e0092",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/toe-sensing-contract-probe/stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/toe-sensing-contract-probe/stderr": "d4b2bee96a3201176f45e366399e6200c64046b9a476bc51e87480b5698b9b5c",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/toe-sensing-contract-probe/result.json": "56296949d3a02e635b050fd6b4762f0f0b52c23d05b925203095f7daf8e19027",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/toe-sensing-contract-old-policy-probe/command.json": "c5ce56779ef5acecc2bd2b87515f013461976a20b2dfafe03ce092ffeee745e6",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/toe-sensing-contract-old-policy-probe/inputs.json": "5a03f7867f667579099725dceb459be33b95bf0840b2084a651366d5f64e74d9",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/toe-sensing-contract-old-policy-probe/stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/toe-sensing-contract-old-policy-probe/stderr": "a9be0e1e369a3c26bd0ca3241d4c24a6b933ffa7e42552d4e55d1d95613c0c81",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/toe-sensing-contract-old-policy-probe/result.json": "56296949d3a02e635b050fd6b4762f0f0b52c23d05b925203095f7daf8e19027"
+  }
+}
