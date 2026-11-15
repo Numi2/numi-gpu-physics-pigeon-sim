@@ -1,0 +1,9 @@
+{
+  "source_sha256": "0e353409eef286ceedae288bb08513391c9c91d05fc2985a77142837e695cbad",
+  "scaled_pack_sha256": "7951114824facfd8b94d59939f368b453283ae91dd77079da917b2c6e0bad6a9",
+  "worker_sha256": "4f119bd2e548b20807e8465e052dd60d69ef6301f84ac826c44961cf94ca18b7",
+  "normalization_offset": 216,
+  "count": 12,
+  "inverse_scale": 100,
+  "same_random_input_actions_exact": true
+}
