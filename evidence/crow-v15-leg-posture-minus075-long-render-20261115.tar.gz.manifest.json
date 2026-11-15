@@ -1,0 +1,34 @@
+{
+  "archive_sha256": "2e6b40f9e67d22a9cad19e16bbc0f604d07fd680563bce566be7d75a583a94d3",
+  "archive_size": 21411840,
+  "parts": [
+    {
+      "name": "crow-v15-leg-posture-minus075-long-render-20261115.tar.gz",
+      "sha256": "2e6b40f9e67d22a9cad19e16bbc0f604d07fd680563bce566be7d75a583a94d3"
+    }
+  ],
+  "remote_root": "/Users/n/Developer/numi-crow-rl-20261107",
+  "files": {
+    "artifacts/crow-v15-recorded-restart-20261114/v15-leg-posture-minus075-long-render-20370113/frames-front/numi-crow-replay-audit.json": "f79a05b549ec9fb05aa735be60add112497851b5ac010e10ff7e88d8989a3668",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-leg-posture-minus075-long-render-20370113/frames-above/numi-crow-replay-audit.json": "b709d6993c7c415dcb97226689aa50b78f07f5bc8e0c1c7a481de856685c2a4a",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-leg-posture-minus075-long-render-20370113/front.mp4": "2e338113e8d0a9b4f0ccea3b9f519cf50f63ecac8dc238a27bcf16b143b721a0",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-leg-posture-minus075-long-render-20370113/frames-feet/numi-crow-replay-audit.json": "39197617765d862e05d0c4f2021c34025db4846fcc56d95aa0ee2a51a079d0f4",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-leg-posture-minus075-long-render-20370113/below.mp4": "85eb3527d932833a13b80a8bdd3a16abf38591b5d29a7a604a720da7114f6b01",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-leg-posture-minus075-long-render-20370113/back.log": "54be8a792a11a6e50dd7122469e32140d3ba1ec7c1223440d995af0180e8c774",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-leg-posture-minus075-long-render-20370113/front.log": "54be8a792a11a6e50dd7122469e32140d3ba1ec7c1223440d995af0180e8c774",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-leg-posture-minus075-long-render-20370113/back.mp4": "63237cbf8d318ffce5f04d592f3c625ec18694db9d4a33685b39c18f4051b7a4",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-leg-posture-minus075-long-render-20370113/below.log": "54be8a792a11a6e50dd7122469e32140d3ba1ec7c1223440d995af0180e8c774",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-leg-posture-minus075-long-render-20370113/frames-back/numi-crow-replay-audit.json": "8d8f1423e1efd1db88e904e33bc1650bd6284d05e1ccd463b5f43d268d4bec59",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-leg-posture-minus075-long-render-20370113/video-sha256.txt": "d44aef03333eb05800eeec9f0ec49445db1fd921b9fe72a3ccb782d46ea41564",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-leg-posture-minus075-long-render-20370113/frames-below/numi-crow-replay-audit.json": "06c07fc975feb1f0caf322b74a72e3ab060cf1eca4f18b9033e1d879a7541324",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-leg-posture-minus075-long-render-20370113/presentation-splice.json": "2293a4a16d80cd74dcaf04b42ff909883e2a9e182f19cd2ae7eee6acd04b9e92",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-leg-posture-minus075-long-render-20370113/render.sh": "59f0839172186d3a5eb874370e8c0ed87c7deaa7095c4fac85beab04d298426e",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-leg-posture-minus075-long-render-20370113/splice.swift": "b91954d15d7a9d36313f129738108cf947b81e45bbf6beddee20b10cef68d823",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-leg-posture-minus075-long-render-20370113/above.log": "54be8a792a11a6e50dd7122469e32140d3ba1ec7c1223440d995af0180e8c774",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-leg-posture-minus075-long-render-20370113/window.txt": "dc6c27b73c4fc9f5190283ad9f2fb6fc20a9f498fd6b220b406bce9800408e68",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-leg-posture-minus075-long-render-20370113/splice.log": "0c788bc22c4a5f4cb0a966e26a9f225c1841c59c3d4222e5f874f7ca97b5117f",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-leg-posture-minus075-long-render-20370113/above.mp4": "1239ae722431015953ab94a81607725a6d45caf348139d58202170e8aae01a60",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-leg-posture-minus075-long-render-20370113/feet.log": "54be8a792a11a6e50dd7122469e32140d3ba1ec7c1223440d995af0180e8c774",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-leg-posture-minus075-long-render-20370113/feet.mp4": "79c6209df25a31d1b340d7a6bfe17eada87889d95febe09db43e8cd01ea3079d"
+  }
+}
