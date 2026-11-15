@@ -1,0 +1,29 @@
+{
+  "archive_sha256": "6d94ab82dce857ec6c97d0d0ac68700f356d472e40cd26291316465b7dec6f4c",
+  "archive_size": 32522240,
+  "parts": [
+    {
+      "name": "crow-update01-renderer-bundle-20310201.tar.gz",
+      "sha256": "6d94ab82dce857ec6c97d0d0ac68700f356d472e40cd26291316465b7dec6f4c"
+    }
+  ],
+  "remote_files": {
+    "/tmp/crow-48s-multiview-20261114/render-phase-comparison-neural-v5-slow-update01-long-development-20310201-v5-slow-update01-1000/frames-front/numi-crow-replay-audit.json": "b3c291dcec14437c91c03e2fd34cfddc9179efe726bc8c139d6b8dca2dda9c20",
+    "/tmp/crow-48s-multiview-20261114/render-phase-comparison-neural-v5-slow-update01-long-development-20310201-v5-slow-update01-1000/frames-above/numi-crow-replay-audit.json": "0138a11c31d6b3a3644f79b82f28c5d46eed8d11a9f85cd1d7adc70c7e595e6c",
+    "/tmp/crow-48s-multiview-20261114/render-phase-comparison-neural-v5-slow-update01-long-development-20310201-v5-slow-update01-1000/front.mp4": "4bbea0421158d9c448aebd7fa965be2bd03f0a563ce7ab281fd1dad453ac51e8",
+    "/tmp/crow-48s-multiview-20261114/render-phase-comparison-neural-v5-slow-update01-long-development-20310201-v5-slow-update01-1000/frames-feet/numi-crow-replay-audit.json": "5463ed0e53b1767e851eac74f449035c42aa4efa9ad5639fbb87f12bb2463971",
+    "/tmp/crow-48s-multiview-20261114/render-phase-comparison-neural-v5-slow-update01-long-development-20310201-v5-slow-update01-1000/below.mp4": "a2cedc2b0d70b101901fefdfd320760d2509b5e73b88f1e9ffecfae907e97020",
+    "/tmp/crow-48s-multiview-20261114/render-phase-comparison-neural-v5-slow-update01-long-development-20310201-v5-slow-update01-1000/back.log": "d16403981c1905a654dd6c2abced9be293fdd859f77931624c169b0b994aa044",
+    "/tmp/crow-48s-multiview-20261114/render-phase-comparison-neural-v5-slow-update01-long-development-20310201-v5-slow-update01-1000/front.log": "d16403981c1905a654dd6c2abced9be293fdd859f77931624c169b0b994aa044",
+    "/tmp/crow-48s-multiview-20261114/render-phase-comparison-neural-v5-slow-update01-long-development-20310201-v5-slow-update01-1000/back.mp4": "11f6ed815e19afeecff9a7702223afda713eb715199db90691bb89dcebb1918e",
+    "/tmp/crow-48s-multiview-20261114/render-phase-comparison-neural-v5-slow-update01-long-development-20310201-v5-slow-update01-1000/below.log": "d16403981c1905a654dd6c2abced9be293fdd859f77931624c169b0b994aa044",
+    "/tmp/crow-48s-multiview-20261114/render-phase-comparison-neural-v5-slow-update01-long-development-20310201-v5-slow-update01-1000/frames-back/numi-crow-replay-audit.json": "cf331e8bd27dc32001d2516b4d576bde4c46a171641529a449ce34467b42410e",
+    "/tmp/crow-48s-multiview-20261114/render-phase-comparison-neural-v5-slow-update01-long-development-20310201-v5-slow-update01-1000/frames-below/numi-crow-replay-audit.json": "4c0d1285caebd19a0a2c94a6fca4281d5acc229d6278bfa3f5057b94ee73f7e8",
+    "/tmp/crow-48s-multiview-20261114/render-phase-comparison-neural-v5-slow-update01-long-development-20310201-v5-slow-update01-1000/presentation-splice.json": "15d27b2bdc85d1be5770a5cd01c3d9ac50434103ae1be84b7dcefe53f4e148dc",
+    "/tmp/crow-48s-multiview-20261114/render-phase-comparison-neural-v5-slow-update01-long-development-20310201-v5-slow-update01-1000/above.log": "d16403981c1905a654dd6c2abced9be293fdd859f77931624c169b0b994aa044",
+    "/tmp/crow-48s-multiview-20261114/render-phase-comparison-neural-v5-slow-update01-long-development-20310201-v5-slow-update01-1000/splice.log": "12d78ec87addce91bb1eabd59eae3908c0b2de3ad63d65a43c138492be6b733c",
+    "/tmp/crow-48s-multiview-20261114/render-phase-comparison-neural-v5-slow-update01-long-development-20310201-v5-slow-update01-1000/above.mp4": "84f91464ebb65a6763b368b7701aa5cde746f54fe381c819ec54b8ba130e9fa6",
+    "/tmp/crow-48s-multiview-20261114/render-phase-comparison-neural-v5-slow-update01-long-development-20310201-v5-slow-update01-1000/feet.log": "d16403981c1905a654dd6c2abced9be293fdd859f77931624c169b0b994aa044",
+    "/tmp/crow-48s-multiview-20261114/render-phase-comparison-neural-v5-slow-update01-long-development-20310201-v5-slow-update01-1000/feet.mp4": "751a0ccb47d2fe74ee8789507014c8b759eb2466ab9ff2421e0a04a1ef659dbd"
+  }
+}
