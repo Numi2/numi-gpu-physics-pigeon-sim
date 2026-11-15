@@ -1,0 +1,19 @@
+{
+  "archive_sha256": "b00a6b6303d9b0aa80b0ab5380a0c02b80021d7ac1dafbf69322761f7fff1078",
+  "size": 17623040,
+  "remote_files": {
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-action-eval.metal": "e4b55f4b079a33b33fbaa9c12f2f467f5e4cc6e42fff1da1977a6075c5bfde36",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-action-train.metal": "392b2476fb9331a54b28d4c2bdab6376b89bcc75e794fb004d7b683df4ad07dd",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-action-build.json": "6c29cdfdb25e2140f05f05d21040505b4e96a5439f6f9ef337005878d74871b9",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-action-zero-packs.json": "d9a6c5bc1d934f2a46a375f4c849b671923cc86c9c302efc38141b0b521f5a5c",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-action-probe-pack.json": "993b48c35ce4e535935f20a79a9c56dd97aa7e05dc269f883eed79ef46a01883",
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-toe-action-eval.metallib": "440253fb160339eb1a5939d32faeaaf0be75173f1633d5a633a6c0fe628b85b4",
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-toe-action-train.metallib": "f435f1cff2495b99c09b0b65849da10eaedaa1563fd718615dc0e18a4f69c5a6",
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-toe-action-zero-stochastic.policypack": "26140cf488cc40b37672df98479e9721d8967a15fafef69d60bd987bf7ef5d31",
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-toe-action-zero-deterministic.policypack": "53f534cc0b36c2013a4e676919fe3f3e4c30591211bd0fec8084c4df56f15453",
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-toe-action-zero-stochastic-failedcheck.policypack": "26140cf488cc40b37672df98479e9721d8967a15fafef69d60bd987bf7ef5d31",
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-toe-action-zero-deterministic-failedcheck.policypack": "53f534cc0b36c2013a4e676919fe3f3e4c30591211bd0fec8084c4df56f15453",
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-toe-action-fixed-negative-probe.policypack": "4075fb084c04c62af8af9a970d6f9f2f33a3560dd03a9f05ba683f72878c8597",
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-toe-python/metalrobo/mlx_policy_learning.py": "d6262f1210334fe8b43e2d5255177ca667e9a96f36cf1403e5ffc53c1670624c"
+  }
+}
