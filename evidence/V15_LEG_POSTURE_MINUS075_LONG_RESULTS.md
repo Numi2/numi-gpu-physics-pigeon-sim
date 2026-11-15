@@ -1,0 +1,5 @@
+# Extended hard-start hold: failure after 12.5 seconds
+
+The fixed -0.75 hip candidate first terminated at resumed interval 625 (12.50 s; absolute interval 674), so it failed the preregistered 30-second hold. Tilt first exceeded the 0.35-rad limit at interval 541 (10.82 s). Both feet retained net upward branch impulse over all 625 first-episode intervals, while the opposed front/rear normal-x contact proxy held for 578 consecutive intervals before being lost. This supports investigating postural control and toe contact together; it does not prove grasp stability.
+
+The first 500 states, velocities, accepted actions, actor observations, tilt values and done flags exactly match the earlier shorter run. The complete 1,500-step native output, including first failure and later invalid post-termination frames, and all contact and input hashes are preserved in the evidence archive. This was a reused development checkpoint with a forced perch phase, a scripted carrier and a relocated reconstructed branch. No claim of autonomous landing or qualified balance follows.

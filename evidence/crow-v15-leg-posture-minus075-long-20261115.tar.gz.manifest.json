@@ -1,0 +1,29 @@
+{
+  "archive_sha256": "e80a29a0419a38c8607f13994f9d8ce455af186b8c23110dce37b7ea62a5008f",
+  "archive_size": 49448960,
+  "parts": [
+    {
+      "name": "crow-v15-leg-posture-minus075-long-20261115.tar.gz.part00",
+      "sha256": "0c81ab8830c6bfd091dc929708244a6191123588c872152dc960ccc5d5f2eae9"
+    },
+    {
+      "name": "crow-v15-leg-posture-minus075-long-20261115.tar.gz.part01",
+      "sha256": "f0d60fc6a60a6898c7921345c264d07a47da0e523e7950bd6254dfb5935a5bda"
+    }
+  ],
+  "remote_root": "/Users/n/Developer/numi-crow-rl-20261107",
+  "files": {
+    "artifacts/crow-v15-recorded-restart-20261114/v15-leg-posture-minus075-long-20261115/summary.json": "8221bd08478a4eb3a5e527017367aa51e334bad550f42dab0f77c7ffae9d1d2c",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-leg-posture-minus075-long-20261115/contact_summary.py": "3c61f70c297cc84f28aef0d126b00eadb5ee84a66eb39cd1061f6549edb5f782",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-leg-posture-minus075-long-20261115/prefix-parity.json": "5bb2a652bdf9ed03d1746ce478db48756e1e8c4875aceaf54774f7337b4b1f3d",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-leg-posture-minus075-long-20261115/20370113-hip_negative-1500.stdout": "f0478e28f003d9145eb45fa283d149d79e6c4c464b0fb8d5974f76dcf86cc6b3",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-leg-posture-minus075-long-20261115/20370113-hip_negative-1500.command.json": "62bf618ebedb7b1ecd31855d1aa8f07e73172c8a5e606dfb506251d554c24599",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-leg-posture-minus075-long-20261115/20370113-hip_negative-1500.stderr": "9dcf2937b943cfab5aaa8ad78a812433c19a4f2bf36b0b26d548f9f546e2f6e4",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-leg-posture-minus075-long-20261115/20370113-hip_negative-1500.json": "ee57fa61c8990f06943c659b5ccb4058ec533ded1ee09137eba0f8425f0d74ea",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-leg-posture-minus075-long-20261115/contact-summary.json": "d7480c8d19879609b48608a81ec9ed3e9f0fdb6992652433ab63c0c70692d225",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-leg-posture-minus075-long-20261115/evaluate.py": "27c476551adf06eb1ad5b8d739e954b04cec67c5a321153a29fe15a75141ae6a",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-leg-posture-minus075-long-20261115/20370113-hip_negative-1500.inputs.json": "87c3ef6e1bc71960b51116f530a0edbc6d16257c285f27d905679583225d718d",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-leg-posture-minus075-long-20261115/20370113-hip_negative-1500.tsv": "8ed19943e08605f6ac04066e25f9b4aa67814f7bdcb0a992f02fe5397d177884",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-leg-posture-minus075-long-20261115/runs.json": "12368d8fdc0157520cc7856614fa2c9c83810802a2043cde1be630553607f8d3"
+  }
+}
