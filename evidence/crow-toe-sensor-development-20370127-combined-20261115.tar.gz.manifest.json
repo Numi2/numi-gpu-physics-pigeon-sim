@@ -1,0 +1,19 @@
+{
+  "archive_sha256": "79609b247981310948baf849a3edd1a9e1a0aec434d3e4cb3b91441dbdd775a7",
+  "archive_size": 35153920,
+  "parts": [
+    {
+      "name": "crow-toe-sensor-development-20370127-combined-20261115.tar.gz",
+      "sha256": "79609b247981310948baf849a3edd1a9e1a0aec434d3e4cb3b91441dbdd775a7"
+    }
+  ],
+  "remote_files": {
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-sensor-development-20370127-combined-1000/command.json": "c27958e85fe831ab53e742e878917b7b1911b4498c7cee836b76dcbc9829501b",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-sensor-development-20370127-combined-1000/inputs.json": "3b6eb47a3e8dcfd719f03f77874ed7b82f3bd2c12639e1d13e56471130bc94ff",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-sensor-development-20370127-combined-1000/result.json": "81868a6e94ffc0178bf833deb1c9013d9fab4ee95ddb876a5e8ec4f1d26376d2",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-sensor-development-20370127-combined-1000/stdout": "372282f2d87ce8b82fc0b90ba7b8931f93d812750b787fd58114f1521709ef65",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-sensor-development-20370127-combined-1000/stderr.gz": "3353fafc53ba99e4abd0aea48c803e6ec6f6c56cf3269fa5cee7b6fbc5b8ae80",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-sensor-development-20370127-combined-1000/replay.json": "4b3840a7becab9d23781276e854470dfe8ea007860bf925c3729dcedfa5929e4",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-sensor-development-20370127-combined-1000/trace.tsv": "e4f8b8e3731c4dc77bc26d6939aea9af0cee4003dca4d3c99cbabbeb550bbfda"
+  }
+}
