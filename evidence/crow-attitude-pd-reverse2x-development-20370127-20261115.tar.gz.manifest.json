@@ -1,0 +1,20 @@
+{
+  "archive_sha256": "8aced3beef9eceb3a1cc79ddf116dc73bc90d5cd560ea0647866c8d590d1d920",
+  "archive_size": 35624960,
+  "parts": [
+    {
+      "name": "crow-attitude-pd-reverse2x-development-20370127-20261115.tar.gz",
+      "sha256": "8aced3beef9eceb3a1cc79ddf116dc73bc90d5cd560ea0647866c8d590d1d920"
+    }
+  ],
+  "remote_files": {
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-attitude-pd-reverse2x-development-20370127-1000/command.json": "4e6bbd55802d3e856db9b0f7ae30927492bcedec62cc3a0c493da502c59bd652",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-attitude-pd-reverse2x-development-20370127-1000/inputs.json": "7ec0706bed89b8fdaa7fa95ca626d59c20c14eef15ab19a95e92f6c3c1e7fd93",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-attitude-pd-reverse2x-development-20370127-1000/result.json": "81868a6e94ffc0178bf833deb1c9013d9fab4ee95ddb876a5e8ec4f1d26376d2",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-attitude-pd-reverse2x-development-20370127-1000/stdout": "c6a1e4ae8b72911d3e60e168a897119c6a9410085da37ecf48631f7048528817",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-attitude-pd-reverse2x-development-20370127-1000/stderr.gz": "0974dd98a901351e31178558f6f909d26ce86c8462230b9a3cc5612d29746223",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-attitude-pd-reverse2x-development-20370127-1000/replay.json": "8f5c7da16c35234a8967e1f0e61df02fa8af8860e753f06ec5adc8c3d79b2f0e",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-attitude-pd-reverse2x-development-20370127-1000/trace.tsv": "6d914ec399e4dda5c0827e7d773438e81c0cbe5ec172b3ef3a62256a5d50728c",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-attitude-pd-reverse2x-development-20370127-1000/first-episode-analysis.json": "0221ff459963626076bc56532b1e9913a61a5e95c5ac2a70b2b20eb5b29b593d"
+  }
+}
