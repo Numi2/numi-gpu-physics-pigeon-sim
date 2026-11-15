@@ -1,0 +1,14 @@
+{
+  "archive_sha256": "c2e8061ea9b6a508b5cecdd1ada4d5901b618b39447dce5febbafde2363d0483",
+  "remote_files": {
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-perch-attitude-continuation-update-02.policypack": "171d8355ef8984dc699a1a3f2341bdb1f1d35e257fa7d86c621737c02218677a",
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-perch-attitude-continuation-update-02.policypack.deployment.policypack": "e8d9714af467cb99f15150440dd78878510ea90aa07f580fe550ef43b05399ac",
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-perch-attitude-continuation-update-02.rollout": "aff13bdf5a13bb38bdc11d4c589f18f29137dcf8685f4193c659c3f3d7561c0a",
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-perch-attitude-continuation-update-02.safetensors": "d836db941ab3332adc10ef0d8951c2f40989702ce6ad8449de6695eb5b62f7d8",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-perch-attitude-continuation/update-02/command.json": "c044635fabea397445d07aeaed80e610934b468aee42ffd319d89e320cf17930",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-perch-attitude-continuation/update-02/inputs.json": "a959444c534de5de8cd56e32d778dd5848ae520e7460055443645514b3298cae",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-perch-attitude-continuation/update-02/stdout": "1d4ae84cb3d4c1c9872f7120703d4f79819576c116949726c1830fc58cd8224c",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-perch-attitude-continuation/update-02/stderr": "ad07a85aecde90e735cdb7782e1aefc0772ccb0c9733441aada9dc8f4c57377c",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-perch-attitude-continuation/update-02/result.json": "81a4e9ebf3d65b2bca14d3b3b81ef6715504f44b779707c529f70dd804ffe9e7"
+  }
+}
