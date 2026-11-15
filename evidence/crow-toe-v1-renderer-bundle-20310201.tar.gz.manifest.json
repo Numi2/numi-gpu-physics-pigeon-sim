@@ -1,0 +1,29 @@
+{
+  "archive_sha256": "35aaa055196b8776657797b528edec67b6aad0d6c0cf64c748869d3ea3d5cab8",
+  "archive_size": 19148800,
+  "parts": [
+    {
+      "name": "crow-toe-v1-renderer-bundle-20310201.tar.gz",
+      "sha256": "35aaa055196b8776657797b528edec67b6aad0d6c0cf64c748869d3ea3d5cab8"
+    }
+  ],
+  "remote_files": {
+    "/tmp/crow-48s-multiview-20261114/render-phase-comparison-neural-toe-action-v1-development-20310201-1000/frames-front/numi-crow-replay-audit.json": "e2b4b437f72cd11d576de8eef507b0e9c0d4f82a22eb165b55f98d2316c2c305",
+    "/tmp/crow-48s-multiview-20261114/render-phase-comparison-neural-toe-action-v1-development-20310201-1000/frames-above/numi-crow-replay-audit.json": "c50e7259f7d88556f75a431bf38059ba2ebf859cf804ff3acc64c1fc6efbbdac",
+    "/tmp/crow-48s-multiview-20261114/render-phase-comparison-neural-toe-action-v1-development-20310201-1000/front.mp4": "98824e053e59f6502945c189308afd9a31180e33d756d1daff86a48521bd595d",
+    "/tmp/crow-48s-multiview-20261114/render-phase-comparison-neural-toe-action-v1-development-20310201-1000/frames-feet/numi-crow-replay-audit.json": "0240f3af92f50caf58e07ac7442b3bebee8c394a660ffb35d5f9c25158483935",
+    "/tmp/crow-48s-multiview-20261114/render-phase-comparison-neural-toe-action-v1-development-20310201-1000/below.mp4": "8b7acda99c1b7d311a838a2f3ed1da1df10af4f63bfec4d0684e33994332a645",
+    "/tmp/crow-48s-multiview-20261114/render-phase-comparison-neural-toe-action-v1-development-20310201-1000/back.log": "07fc9a263d52a35fa9ce6f832500dbc444af7264f1dd1426a596f383c7ce2d93",
+    "/tmp/crow-48s-multiview-20261114/render-phase-comparison-neural-toe-action-v1-development-20310201-1000/front.log": "07fc9a263d52a35fa9ce6f832500dbc444af7264f1dd1426a596f383c7ce2d93",
+    "/tmp/crow-48s-multiview-20261114/render-phase-comparison-neural-toe-action-v1-development-20310201-1000/back.mp4": "87823c626c5243e1b0d21d4e81fee290226dceb02d778cbcc5f9f3b3c4db5754",
+    "/tmp/crow-48s-multiview-20261114/render-phase-comparison-neural-toe-action-v1-development-20310201-1000/below.log": "07fc9a263d52a35fa9ce6f832500dbc444af7264f1dd1426a596f383c7ce2d93",
+    "/tmp/crow-48s-multiview-20261114/render-phase-comparison-neural-toe-action-v1-development-20310201-1000/frames-back/numi-crow-replay-audit.json": "71beebdb1f90cf551c5576964a93deb65a1a4e09d3d95dc4c97b04d200c1fbaf",
+    "/tmp/crow-48s-multiview-20261114/render-phase-comparison-neural-toe-action-v1-development-20310201-1000/frames-below/numi-crow-replay-audit.json": "42790dd91aa69178a81f18442fab5c67fd43098c04071e62de5be67114687d13",
+    "/tmp/crow-48s-multiview-20261114/render-phase-comparison-neural-toe-action-v1-development-20310201-1000/presentation-splice.json": "15420c48ad5917fbd50f4051e6bd86590331b83c0e3a36f7d67e9657746c072b",
+    "/tmp/crow-48s-multiview-20261114/render-phase-comparison-neural-toe-action-v1-development-20310201-1000/above.log": "07fc9a263d52a35fa9ce6f832500dbc444af7264f1dd1426a596f383c7ce2d93",
+    "/tmp/crow-48s-multiview-20261114/render-phase-comparison-neural-toe-action-v1-development-20310201-1000/splice.log": "98c1bfe41a9901ebbcaa1149032d7cf1262a4b910e38e325dec645eeee6ee964",
+    "/tmp/crow-48s-multiview-20261114/render-phase-comparison-neural-toe-action-v1-development-20310201-1000/above.mp4": "05c4c3bec0eb45040b208d47658cd2479050899598376cc996d079db0a555a89",
+    "/tmp/crow-48s-multiview-20261114/render-phase-comparison-neural-toe-action-v1-development-20310201-1000/feet.log": "07fc9a263d52a35fa9ce6f832500dbc444af7264f1dd1426a596f383c7ce2d93",
+    "/tmp/crow-48s-multiview-20261114/render-phase-comparison-neural-toe-action-v1-development-20310201-1000/feet.mp4": "996365817df5ea4876a934ef58caa7e01804bfe32731969417de558474676ae9"
+  }
+}
