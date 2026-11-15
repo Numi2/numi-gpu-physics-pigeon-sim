@@ -1,0 +1,36 @@
+{
+  "seed": 20310201,
+  "matched_intervals_before_first_done": 1000,
+  "full_first_done": null,
+  "zero_first_done": null,
+  "first_q_difference": 1,
+  "first_tilt_difference_gt_001_rad": 992,
+  "full_toe_action_range": [
+    [
+      -0.0012380714761093259,
+      -0.0009336284711025655
+    ],
+    [
+      0.0007863236824050546,
+      0.0014399938518181443
+    ],
+    [
+      0.00022057672322262079,
+      0.0007981767412275076
+    ],
+    [
+      -0.0005032724002376199,
+      -0.00018113554688170552
+    ]
+  ],
+  "first_gate_disagreements": {
+    "all_16_substeps": null,
+    "both_up": 39,
+    "left_opposed": null,
+    "right_opposed": null,
+    "no_nonfoot": null,
+    "no_ground": null,
+    "tilt": null,
+    "speed": null
+  }
+}
