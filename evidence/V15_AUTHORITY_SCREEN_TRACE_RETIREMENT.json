@@ -1,0 +1,116 @@
+{
+  "files": [
+    {
+      "path": "artifacts/crow-v15-recorded-restart-20261114/v15-pitch-authority-20261115/zero.tsv",
+      "sha256": "e0f5b2490a9066e88183c1e2483f98f13bd7b41e6570d1ff3ecd5ba43105d449",
+      "size": 252780
+    },
+    {
+      "path": "artifacts/crow-v15-recorded-restart-20261114/v15-pitch-authority-20261115/zero.json",
+      "sha256": "5190e83d30f0b38d4ce02c7eb32bf4625131c54c041ac5e22192cd89a7cc93de",
+      "size": 10783441
+    },
+    {
+      "path": "artifacts/crow-v15-recorded-restart-20261114/v15-pitch-authority-20261115/tail_negative.stderr",
+      "sha256": "76720ea401c89c8430c64402987443468b41ec994900758cb3c7c135f529438f",
+      "size": 24482020
+    },
+    {
+      "path": "artifacts/crow-v15-recorded-restart-20261114/v15-pitch-authority-20261115/flap_negative.stderr",
+      "sha256": "14b284bc07ac1f629a5771306179eefabe4e7982b1a099d8a4670b0b82441708",
+      "size": 24436337
+    },
+    {
+      "path": "artifacts/crow-v15-recorded-restart-20261114/v15-pitch-authority-20261115/tail_positive.stderr",
+      "sha256": "dc72b7b8ea91289a9a8611052e7d6f5b57939fe3adef2701fd8cbb422132b32c",
+      "size": 23443644
+    },
+    {
+      "path": "artifacts/crow-v15-recorded-restart-20261114/v15-pitch-authority-20261115/flap_positive.stderr",
+      "sha256": "7e5bea2cc784a354cfaae8f22fc301e7918d1f83ea2d9e7a88651b4660b76032",
+      "size": 25182255
+    },
+    {
+      "path": "artifacts/crow-v15-recorded-restart-20261114/v15-pitch-authority-20261115/flap_positive.tsv",
+      "sha256": "ab849a9ef0735d908b8ef1e84969bc44ae17d11a8efb491fc5454c0ade5a9b7d",
+      "size": 252612
+    },
+    {
+      "path": "artifacts/crow-v15-recorded-restart-20261114/v15-pitch-authority-20261115/zero.stderr",
+      "sha256": "3b12c95ace0ac16993aa85552bf4e9240fa220094642e397156fab77f868850b",
+      "size": 23473361
+    },
+    {
+      "path": "artifacts/crow-v15-recorded-restart-20261114/v15-pitch-authority-20261115/tail_positive.tsv",
+      "sha256": "8d34bfe947d163a8c7cc8da437834d53257ad5f919cd70f469c60e30f6b9f734",
+      "size": 252802
+    },
+    {
+      "path": "artifacts/crow-v15-recorded-restart-20261114/v15-pitch-authority-20261115/tail_negative.tsv",
+      "sha256": "744f3a3c06692786ce2aa53c9e5f4f209b2a469d55ed12eb3512eb7bfafb1e09",
+      "size": 252864
+    },
+    {
+      "path": "artifacts/crow-v15-recorded-restart-20261114/v15-pitch-authority-20261115/flap_negative.json",
+      "sha256": "52aaf78542b023032a4d60cb9cc58dbc73c42afa3e2d0f3c6b574e27862d9b42",
+      "size": 10780939
+    },
+    {
+      "path": "artifacts/crow-v15-recorded-restart-20261114/v15-pitch-authority-20261115/tail_positive.json",
+      "sha256": "bc8311b4397469c82c3fb05c7841067056e6df0ef4392a05bde854d59067cf83",
+      "size": 10780163
+    },
+    {
+      "path": "artifacts/crow-v15-recorded-restart-20261114/v15-pitch-authority-20261115/flap_negative.tsv",
+      "sha256": "ade324a253b2eb13a70efc5a3a5c3736daaf608413f2ede9dcf5abc7ad181657",
+      "size": 252543
+    },
+    {
+      "path": "artifacts/crow-v15-recorded-restart-20261114/v15-pitch-authority-20261115/tail_negative.json",
+      "sha256": "90c394c29a7cab902b840c16a98e59ec7d17cc00eedcc28a65f89650a27d006c",
+      "size": 10785623
+    },
+    {
+      "path": "artifacts/crow-v15-recorded-restart-20261114/v15-pitch-authority-20261115/flap_positive.json",
+      "sha256": "bbd9ec64fa6fb6937e2d61699580962a492bffa5b07f5450a5de260bf248b0da",
+      "size": 10781592
+    },
+    {
+      "path": "artifacts/crow-v15-recorded-restart-20261114/v15-rear-toe-authority-20261115/rear_positive.tsv",
+      "sha256": "3263c5ac7559c1d0354a45631c2e36a376afae927a0e1ebef10adeda8a6e5681",
+      "size": 252764
+    },
+    {
+      "path": "artifacts/crow-v15-recorded-restart-20261114/v15-rear-toe-authority-20261115/rear_negative.json",
+      "sha256": "8c1a18bcd2d1a96c87473c6b551e611ad250f7376993f2773ce21112aa78453d",
+      "size": 10751077
+    },
+    {
+      "path": "artifacts/crow-v15-recorded-restart-20261114/v15-rear-toe-authority-20261115/rear_negative.tsv",
+      "sha256": "5480bcfc24f0c6e1489f40cffc21c473f894c81bd3e4e7a6578793360f3458b3",
+      "size": 252738
+    },
+    {
+      "path": "artifacts/crow-v15-recorded-restart-20261114/v15-rear-toe-authority-20261115/rear_positive.json",
+      "sha256": "b54dffad1ebb39a0106bd4792e43e48a7bd053de2ee48b72533d3853b11e5dc2",
+      "size": 10775980
+    },
+    {
+      "path": "artifacts/crow-v15-recorded-restart-20261114/v15-rear-toe-authority-20261115/rear_negative.stderr",
+      "sha256": "bda1a258f8ed61925e3b4b5a610fdc1aaf1781ee051944686cf5bd57ca0badba",
+      "size": 22475184
+    },
+    {
+      "path": "artifacts/crow-v15-recorded-restart-20261114/v15-rear-toe-authority-20261115/rear_positive.stderr",
+      "sha256": "03ad772b0dc9b8d13ae32b12dc72ee58fad371ecea87a2d7f60740626d37fd84",
+      "size": 24617264
+    }
+  ],
+  "bytes_retired": 245317983,
+  "archives": [
+    "crow-v15-pitch-authority-screen-20261115.tar.gz",
+    "crow-v15-rear-toe-authority-20261115.tar.gz"
+  ],
+  "independent_git_commit": "12c881b",
+  "restore": "Concatenate archive parts in manifest order if needed, verify archive SHA-256, extract under remote_root, and verify each file SHA-256."
+}

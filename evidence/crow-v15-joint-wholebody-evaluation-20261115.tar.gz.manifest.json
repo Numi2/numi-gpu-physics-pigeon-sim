@@ -1,0 +1,29 @@
+{
+  "archive_sha256": "6e9a1c9580ceefbed1cfdb1108a0cb8223d9784060becd66615eda71e03e4307",
+  "archive_size": 25006080,
+  "parts": [
+    {
+      "name": "crow-v15-joint-wholebody-evaluation-20261115.tar.gz",
+      "sha256": "6e9a1c9580ceefbed1cfdb1108a0cb8223d9784060becd66615eda71e03e4307"
+    }
+  ],
+  "remote_root": "/Users/n/Developer/numi-crow-rl-20261107",
+  "files": {
+    "artifacts/crow-v15-recorded-restart-20261114/v15-joint-wholebody-evaluation-20261115/20370127-joint-400.inputs.json": "1e231fb88820ec71b471192fb7e7224aa262688abd766baf5942e08cc8a3a96d",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-joint-wholebody-evaluation-20261115/summary.json": "c33aa1aeef9cd75937d995eab91dcb97179dc8c71561b236102d38b63df5ab65",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-joint-wholebody-evaluation-20261115/20370127-joint-400.stdout": "19f409e9cbb361bf57235b737969a55f5fb98902a88f85634dbfcfe20ca8aa13",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-joint-wholebody-evaluation-20261115/initial-observation-parity.json": "50a368682a4193ebc3bae74f24ee28df181ef836fc313294ef42febeb5c68d05",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-joint-wholebody-evaluation-20261115/20370113-joint-400.stderr": "b11d5fe0d28b5067fd04cfa04b0208b33e2a84bbb3557d1e74b5d3372a53c1d2",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-joint-wholebody-evaluation-20261115/20370127-joint-400.json": "7debe110e1ad7a938e93e3c213341a176dfd895e5c098142024ec53f11c7535e",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-joint-wholebody-evaluation-20261115/20370113-joint-400.stdout": "5e57bbe242dbbc12c45034ed9125a0fd37f1645e7ad1df926cc3989df08bb0d7",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-joint-wholebody-evaluation-20261115/20370127-joint-400.stderr": "761769471fc315e9295131e444de70a04302b0a63767068369336f2de8fd352a",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-joint-wholebody-evaluation-20261115/20370113-joint-400.inputs.json": "53c1175d552cdf3121665cd8ca86ba455afa63a8084a0ee8d6bf06ef7459a19d",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-joint-wholebody-evaluation-20261115/20370127-joint-400.command.json": "5eaf7218b5f792ac3f8ac1951928b7deea9362971d6af271b9770fffec504ffe",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-joint-wholebody-evaluation-20261115/contact-summary.json": "2c9ea80d6ffaaccda1c5d2329a157cee5db36349d9d98d1eed9b8b456f99b391",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-joint-wholebody-evaluation-20261115/20370113-joint-400.tsv": "d1f41e70b7427ec416722622b3e049b728750ee40ef1cc04847dc4d5c050edec",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-joint-wholebody-evaluation-20261115/20370113-joint-400.json": "df8affe9808e6b20e60cb39ff9e90ba6fc80c4c61e5bf8b0c6ed4e1a2d3a2422",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-joint-wholebody-evaluation-20261115/20370113-joint-400.command.json": "ba643a28f01b6a8da631dda476841327ed323b415d5488149e9b88640e98f793",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-joint-wholebody-evaluation-20261115/20370127-joint-400.tsv": "ef2f867436a853739436c0a6f28db7c8b1d97766ef1e068c57da495d41c801da",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-joint-wholebody-evaluation-20261115/runs.json": "4f7a46c7a6ccecd14da55f22e5879efad55e83085568a6e984ed29c9b08aea36"
+  }
+}
