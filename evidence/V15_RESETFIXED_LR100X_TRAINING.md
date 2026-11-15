@@ -1,0 +1,5 @@
+# Larger fixed-rate branch diagnostic
+
+A fresh-optimizer PPO update at fixed learning rate 0.003 used the same retained 256-step stochastic rollout, initial policy and checkpoint as the 0.0009 diagnostic; rollout SHA-256 was identical (`a0f612e2cfac6e7d183829d2203613dbf245ce45c9efe2d24d0588cbc9c47d49`). Protected actor weights, biases, normalizer, log standard deviation and contract remained unchanged. The maximum target change on identical retained observations was 0.00280 rad RMS; these are target differences and gated toe values are upper bounds, not measured applied corrections.
+
+On the hard development seed 20370113, the candidate fell at absolute step 259 versus baseline 257: a two-step (0.04 s) delay. On seed 20370127 both stayed up for the 250-step comparison, but maximum tilt rose from 0.129 to 0.223 rad. The candidate is not promoted. A subsequent 0.03 trial was rejected before simulation because the CLI's configured maximum learning rate default was 0.01; this rejected command, error and script are included in the archive. The simulated starts remain reconstructed, phase-forced and use a relocated branch and scripted carrier.
