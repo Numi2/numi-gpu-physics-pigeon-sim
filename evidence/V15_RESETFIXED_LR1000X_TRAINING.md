@@ -1,0 +1,5 @@
+# High-rate control experiment
+
+A fresh-optimizer fixed-rate update used learning rate 0.03 with the CLI maximum rate explicitly set to 0.03; all other parameters matched the 0.003 fresh-optimizer trial, including the byte-identical stochastic rollout (`a0f612e2cfac6e7d183829d2203613dbf245ce45c9efe2d24d0588cbc9c47d49`). Protected actor parameters, biases, normalization, log standard deviation and contract stayed unchanged. On the same retained observations the maximum joint-target change was 0.0433 rad RMS; gated toe targets are upper bounds, not measured applied corrections.
+
+This update caused large physical regressions. On seed 20370113 the candidate fell at absolute step 200 (4.00 s), versus step 257 (5.14 s) baseline. On seed 20370127 the candidate fell at step 221 (4.42 s), while the baseline had no fall through the 250 resumed intervals. The policy is rejected. Both are consumed development cases on a relocated reconstructed branch with a forced phase and scripted carrier. The bounded controls use the existing joint targets and actuator limits. The archive retains source, every input and hash, policy packs, optimizer, rollout and full evaluations.

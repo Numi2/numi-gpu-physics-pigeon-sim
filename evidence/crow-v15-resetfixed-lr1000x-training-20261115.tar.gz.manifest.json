@@ -1,0 +1,50 @@
+{
+  "archive_sha256": "1745cd41ce1420400e0bba45da349a38119ba5c0f0740447c0944d3aa3f227b0",
+  "archive_size": 21053440,
+  "parts": [
+    {
+      "name": "crow-v15-resetfixed-lr1000x-training-20261115.tar.gz",
+      "sha256": "1745cd41ce1420400e0bba45da349a38119ba5c0f0740447c0944d3aa3f227b0"
+    }
+  ],
+  "remote_root": "/Users/n/Developer/numi-crow-rl-20261107",
+  "files": {
+    "artifacts/crow-v15-recorded-restart-20261114/crow_v15_resetfixed_training_256_lr1000x_fresh_v2.py": "84e99e6c3dfa1df78492d4e48a6e78f5187a1e13ce39ff0a52d5bbf43ea15e68",
+    "artifacts/crow-v15-recorded-restart-20261114/crow_v15_resetfixed_training_evaluate_lr1000x_fresh_v2.py": "46f0c05b6e7d8ab3306bc455b34cdca71cf8a9e1fd41dd484790060c4a111145",
+    "artifacts/crow-v15-recorded-restart-20261114/crow_v15_resetfixed_training_verify_lr1000x_fresh_v2.py": "982082fa31ebac7a5349cba6bc4d37e278c2e6740d42fa9c6b1894163be6c7f2",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-resetfixed-training-20370113-horizon256-lr1000x-fresh-v2/result.json": "01937e6e7b4e4999cafe943bd8dd6e190c87c46435a47ea51ed33e04765cdd54",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-resetfixed-training-20370113-horizon256-lr1000x-fresh-v2/stdout": "2b812e8009e2f51d25391c956c596369afd3402a7cb666aace58855d8e28be3b",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-resetfixed-training-20370113-horizon256-lr1000x-fresh-v2/stderr": "868c70ecda6b42eacf487fdb231f60be7d2589395ea57664968f6d6c902d97cb",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-resetfixed-training-20370113-horizon256-lr1000x-fresh-v2/command.json": "b475327fb039a818a7c4edecc56c37768348282ef68f6d74ad2588c7c84e34f1",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-resetfixed-training-20370113-horizon256-lr1000x-fresh-v2/inputs.json": "6cf5332ccf9e61bd369eb77ee819d30ef9be1542046117d1025ebf2626bb0b9c",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-resetfixed-training-20370113-horizon256-lr1000x-fresh-v2/verification.json": "92aff94f63d3d09466d2a5b9eae596385c0f23a0878e443763536686644c8900",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-resetfixed-training-20370113-horizon256-lr1000x-fresh-v2/environment.json": "c3730e0a83ea4f95adee8e02a69cd157dc20e73831190f3ae7bea05a6339a3a0",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-resetfixed-lr1000x-fresh-v2-evaluation-20370113-250/baseline.command.json": "b757ce8c87e4acea8b2ba17775c4cfc3acb5269db9415926deb5a9913202a6c3",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-resetfixed-lr1000x-fresh-v2-evaluation-20370113-250/candidate.json": "3b544c6587b9287781504c32a30328e35a9fc793a5662525b4af16e5c0ade06e",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-resetfixed-lr1000x-fresh-v2-evaluation-20370113-250/baseline.tsv": "f1773dd0295763f2a20f2730bb80bb54b7e322b2107c9f693e78a180acbae8ab",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-resetfixed-lr1000x-fresh-v2-evaluation-20370113-250/comparison.json": "ea5a0a8fa74f6d49eb6611de6dd026084c48276bd763f04fe8962e8c0880cad0",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-resetfixed-lr1000x-fresh-v2-evaluation-20370113-250/candidate.stderr": "338c63285721e26777c215eeefe3a7d0984663095787dfceabe4988282b6b7af",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-resetfixed-lr1000x-fresh-v2-evaluation-20370113-250/baseline.json": "53002fea8d5dc4069dff2abb5930b2a84e56a872ec15c04aefd53eacab90fb8d",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-resetfixed-lr1000x-fresh-v2-evaluation-20370113-250/candidate.tsv": "5a7a7523d1bb3bd3bc9e6889519ca06e684b3ed18288c7ed07112ea303518722",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-resetfixed-lr1000x-fresh-v2-evaluation-20370113-250/baseline.stdout": "b68c2eeba78fade5c965858227c876347510977b4108e2b4a6c1c210557aaf1b",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-resetfixed-lr1000x-fresh-v2-evaluation-20370113-250/baseline.stderr": "338c63285721e26777c215eeefe3a7d0984663095787dfceabe4988282b6b7af",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-resetfixed-lr1000x-fresh-v2-evaluation-20370113-250/candidate.command.json": "075576ffcfe2f292b81c4c79a15b6bd145a6c4a7bfda6447a97c9f0ddc223274",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-resetfixed-lr1000x-fresh-v2-evaluation-20370113-250/candidate.stdout": "6665040e2d0f019d2012e48968ec99ca3519f055fea91002a5845a34483ecdff",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-resetfixed-lr1000x-fresh-v2-evaluation-20370127-250/baseline.command.json": "e31f4b013e38a64e5191b37a47f845f81f4bb28f7acd7a90e2b78f588ac0fba2",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-resetfixed-lr1000x-fresh-v2-evaluation-20370127-250/candidate.json": "292c629cec8c8567713e9715e796f114b5d6838c4c1fbdad8845cdddd2dfbaa5",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-resetfixed-lr1000x-fresh-v2-evaluation-20370127-250/baseline.tsv": "da2fffa8e3df6b3b150b354b462c34788f3c78c1d566c826f76db77b40cb2c4a",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-resetfixed-lr1000x-fresh-v2-evaluation-20370127-250/comparison.json": "1737e59fd1e3e59bceaa6690f403afdc82c8f13ac49da613f198b09b30272924",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-resetfixed-lr1000x-fresh-v2-evaluation-20370127-250/candidate.stderr": "338c63285721e26777c215eeefe3a7d0984663095787dfceabe4988282b6b7af",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-resetfixed-lr1000x-fresh-v2-evaluation-20370127-250/baseline.json": "6741ed07f95f65acdbd22b6ec7365a95b1747e0e45fdcd25016af1d9e276978c",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-resetfixed-lr1000x-fresh-v2-evaluation-20370127-250/candidate.tsv": "72a04c131ed698ce91c017a38882c4b255f15ca942de6b780dc52d7ce1a6f6b9",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-resetfixed-lr1000x-fresh-v2-evaluation-20370127-250/baseline.stdout": "fa68c2cd6512d10cb84c20ba99155ec7cdbd35c0d243e2d39846b270837a34ce",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-resetfixed-lr1000x-fresh-v2-evaluation-20370127-250/baseline.stderr": "338c63285721e26777c215eeefe3a7d0984663095787dfceabe4988282b6b7af",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-resetfixed-lr1000x-fresh-v2-evaluation-20370127-250/candidate.command.json": "ca4d2647a1bbeacc092919c355ca661471cfe5ed0a505837f23a12dd1167df3d",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-resetfixed-lr1000x-fresh-v2-evaluation-20370127-250/candidate.stdout": "d3d41804f0d11fe5761259677d9944ed2c536a97897e031d816cba896b4662cd",
+    "build/crow-v15-recorded-restart-20261114/v15-resetfixed-training-20370113-horizon256-lr1000x-fresh-v2.policypack": "6a8fb94402db52198b8999b524ece3a30cb3af099051f8b8ea7dabae0152b25d",
+    "build/crow-v15-recorded-restart-20261114/v15-resetfixed-training-20370113-horizon256-lr1000x-fresh-v2.policypack.deployment.policypack": "8506f538f085e3c33fb44c963ef514e4d730e2ecef4bcfcc1ed41c4e0ae2df4e",
+    "build/crow-v15-recorded-restart-20261114/v15-resetfixed-training-20370113-horizon256-lr1000x-fresh-v2.policypack.incumbent.policypack": "b72065c5e5f231575c61519336c7ecc462d9ba79fb9b7492798ffd831a827b6f",
+    "build/crow-v15-recorded-restart-20261114/v15-resetfixed-training-20370113-horizon256-lr1000x-fresh-v2.rollout": "a0f612e2cfac6e7d183829d2203613dbf245ce45c9efe2d24d0588cbc9c47d49",
+    "build/crow-v15-recorded-restart-20261114/v15-resetfixed-training-20370113-horizon256-lr1000x-fresh-v2.safetensors": "782805928641a116fd612ec0e6abc3d937b2124b041c396ec5400dfdb319c6c3"
+  }
+}
