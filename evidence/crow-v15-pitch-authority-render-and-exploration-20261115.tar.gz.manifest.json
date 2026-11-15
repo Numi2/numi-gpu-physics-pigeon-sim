@@ -1,0 +1,36 @@
+{
+  "archive_sha256": "fd3090ec263cb7b71be644d2d6043550ec37aef8733bf6de9d5d24f0b98349d3",
+  "archive_size": 11345920,
+  "parts": [
+    {
+      "name": "crow-v15-pitch-authority-render-and-exploration-20261115.tar.gz",
+      "sha256": "fd3090ec263cb7b71be644d2d6043550ec37aef8733bf6de9d5d24f0b98349d3"
+    }
+  ],
+  "remote_root": "/Users/n/Developer/numi-crow-rl-20261107",
+  "files": {
+    "artifacts/crow-v15-recorded-restart-20261114/v15-pitch-authority-tail-negative-render-20370113/frames-front/numi-crow-replay-audit.json": "8a8740821c0cb270698d415f98032f339ba43bef067712ba3a7651a6f9b3705e",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-pitch-authority-tail-negative-render-20370113/frames-above/numi-crow-replay-audit.json": "c015e4b1cab0a8195c349f750a3b2552534763a3124f956c77d2f7e2dd0c8709",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-pitch-authority-tail-negative-render-20370113/front.mp4": "941fc6867147e22a2a2bf63be828aa0306e52f52a1a7f3a23fa4d519aa4ec4c2",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-pitch-authority-tail-negative-render-20370113/frames-feet/numi-crow-replay-audit.json": "b4a903d0c74cca41fd765762e9d59a24c5d3f85d1fbfc0fab0b8a3bc52bbbc0f",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-pitch-authority-tail-negative-render-20370113/below.mp4": "44763cc89365053e2a190f4d99bb6eb4101eda85a07509e8b3006805ae1b8c0e",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-pitch-authority-tail-negative-render-20370113/back.log": "6642d51425409b4bae2f73b7da85e459de941f9df58047d68e4cf1520bf18cf3",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-pitch-authority-tail-negative-render-20370113/front.log": "6642d51425409b4bae2f73b7da85e459de941f9df58047d68e4cf1520bf18cf3",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-pitch-authority-tail-negative-render-20370113/back.mp4": "6387aecce5eaa1da2d1ac31b88332399fba5850ec55a7b6c3751c4365efb87ff",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-pitch-authority-tail-negative-render-20370113/below.log": "6642d51425409b4bae2f73b7da85e459de941f9df58047d68e4cf1520bf18cf3",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-pitch-authority-tail-negative-render-20370113/frames-back/numi-crow-replay-audit.json": "aa06a8e19894681ddf5df793970a757053b664db6d1f403c7e6981f859be6125",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-pitch-authority-tail-negative-render-20370113/video-sha256.txt": "987d1889e4491c60a17b9812bf4eb25adb89732898854bdc10fdbf581675ca21",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-pitch-authority-tail-negative-render-20370113/frames-below/numi-crow-replay-audit.json": "b2f24eba016aaf6f112634c79c251eb4c94fccf8eb94910f25f70f79eec2c7dd",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-pitch-authority-tail-negative-render-20370113/presentation-splice.json": "44e0f9ac40e7533acb8c8317ae2d7e52f82f3cdb79b5346888622503b3ef40ee",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-pitch-authority-tail-negative-render-20370113/above.log": "6642d51425409b4bae2f73b7da85e459de941f9df58047d68e4cf1520bf18cf3",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-pitch-authority-tail-negative-render-20370113/splice.log": "23e736f954e5a87cec9027bf0ed4bf0f054a4a550d7c6261b761e24258be4d8b",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-pitch-authority-tail-negative-render-20370113/above.mp4": "90f449aa63532cb19ceaca4b2b8c16353a76f1e4f6ae51e723aff3767ae6fff9",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-pitch-authority-tail-negative-render-20370113/feet.log": "6642d51425409b4bae2f73b7da85e459de941f9df58047d68e4cf1520bf18cf3",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-pitch-authority-tail-negative-render-20370113/feet.mp4": "8d3159d0dba5ead6842ca39d879788d09222808c67bf5d8daece21d1daf99cb0",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-pitch-authority-20261115/torque_inspect.py": "da2be27c1486ca56aabed7ff8497b476564de1a2ea930f067cade8331ab3f233",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-pitch-authority-20261115/torque_inspect_invalid.py": "a4df7aea9ff9c1f0a4e62c696961822616c48d83b159a7ba19688b7e45a6414e",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-pitch-authority-20261115/torque-inspection.txt": "475d75a302eecbd74384228c939be8495632ac8de74d71819ce4f263c867cc1d",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-pitch-authority-20261115/torque-inspection-invalid.txt": "cc37ae6263417fbf06ad054fe64ed1ad8984ec856baecb952654709a52df8824",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-pitch-authority-20261115/torque-inspection-notes.txt": "5f9f23ea0304116708e6d0f605200294c302e6f1f0b0249743722662259d11db"
+  }
+}
