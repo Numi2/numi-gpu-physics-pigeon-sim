@@ -1,0 +1,450 @@
+{
+  "unperturbed": {
+    "first_done": null,
+    "samples": [
+      {
+        "step": 500,
+        "tilt": 0.18631596863269806,
+        "root_position": [
+          17.776866912841797,
+          0.4653618633747101,
+          0.4276774823665619
+        ],
+        "vertical_impulse_application_point": [
+          17.77069038940219,
+          0.4621274160395023,
+          0.24335462626684565
+        ],
+        "root_minus_impulse_point_x": 0.006176523439606285,
+        "total_vertical_impulse": 0.08837393698956225
+      },
+      {
+        "step": 550,
+        "tilt": 0.18707942962646484,
+        "root_position": [
+          17.776987075805664,
+          0.46539655327796936,
+          0.42768722772598267
+        ],
+        "vertical_impulse_application_point": [
+          17.770647286893833,
+          0.4619956880248333,
+          0.24316042730299137
+        ],
+        "root_minus_impulse_point_x": 0.006339788911830624,
+        "total_vertical_impulse": 0.08798594048605429
+      },
+      {
+        "step": 560,
+        "tilt": 0.18720507621765137,
+        "root_position": [
+          17.777048110961914,
+          0.4654028117656708,
+          0.42768266797065735
+        ],
+        "vertical_impulse_application_point": [
+          17.770520095820075,
+          0.46255449841446633,
+          0.24344267967069189
+        ],
+        "root_minus_impulse_point_x": 0.006528015141839205,
+        "total_vertical_impulse": 0.08835216532155693
+      },
+      {
+        "step": 570,
+        "tilt": 0.18732920289039612,
+        "root_position": [
+          17.777048110961914,
+          0.46540799736976624,
+          0.42768386006355286
+        ],
+        "vertical_impulse_application_point": [
+          17.770551504490726,
+          0.46259982127129506,
+          0.24335944540777696
+        ],
+        "root_minus_impulse_point_x": 0.0064966064711882154,
+        "total_vertical_impulse": 0.08825560518065076
+      },
+      {
+        "step": 580,
+        "tilt": 0.18729577958583832,
+        "root_position": [
+          17.777050018310547,
+          0.46541211009025574,
+          0.42767980694770813
+        ],
+        "vertical_impulse_application_point": [
+          17.77061945881775,
+          0.4622930097066611,
+          0.24328379286822843
+        ],
+        "root_minus_impulse_point_x": 0.00643055949279514,
+        "total_vertical_impulse": 0.08821300645667825
+      },
+      {
+        "step": 600,
+        "tilt": 0.1873871088027954,
+        "root_position": [
+          17.777067184448242,
+          0.46541455388069153,
+          0.4276816248893738
+        ],
+        "vertical_impulse_application_point": [
+          17.770847376075643,
+          0.46230932395861707,
+          0.24314583791435485
+        ],
+        "root_minus_impulse_point_x": 0.006219808372598834,
+        "total_vertical_impulse": 0.08808949327252137
+      },
+      {
+        "step": 620,
+        "tilt": 0.1878058761358261,
+        "root_position": [
+          17.777122497558594,
+          0.4654233455657959,
+          0.42768752574920654
+        ],
+        "vertical_impulse_application_point": [
+          17.76945356667655,
+          0.4624556565227487,
+          0.2439395593364019
+        ],
+        "root_minus_impulse_point_x": 0.007668930882044123,
+        "total_vertical_impulse": 0.08838939026553154
+      },
+      {
+        "step": 650,
+        "tilt": 0.18805928528308868,
+        "root_position": [
+          17.777217864990234,
+          0.465451180934906,
+          0.4276779890060425
+        ],
+        "vertical_impulse_application_point": [
+          17.77011020285131,
+          0.4635622241331821,
+          0.24348547191089187
+        ],
+        "root_minus_impulse_point_x": 0.007107662138924553,
+        "total_vertical_impulse": 0.08835640786538881
+      },
+      {
+        "step": 680,
+        "tilt": 0.18819062411785126,
+        "root_position": [
+          17.777217864990234,
+          0.46545448899269104,
+          0.42767930030822754
+        ],
+        "vertical_impulse_application_point": [
+          17.77050498668969,
+          0.46284769689653393,
+          0.24336624146836702
+        ],
+        "root_minus_impulse_point_x": 0.006712878300543679,
+        "total_vertical_impulse": 0.08836443398444473
+      }
+    ]
+  },
+  "pulse": {
+    "first_done": 693,
+    "samples": [
+      {
+        "step": 500,
+        "tilt": 0.18631596863269806,
+        "root_position": [
+          17.776866912841797,
+          0.4653618633747101,
+          0.4276774823665619
+        ],
+        "vertical_impulse_application_point": [
+          17.77069038940219,
+          0.4621274160395023,
+          0.24335462626684565
+        ],
+        "root_minus_impulse_point_x": 0.006176523439606285,
+        "total_vertical_impulse": 0.08837393698956225
+      },
+      {
+        "step": 550,
+        "tilt": 0.18707942962646484,
+        "root_position": [
+          17.776987075805664,
+          0.46539655327796936,
+          0.42768722772598267
+        ],
+        "vertical_impulse_application_point": [
+          17.770647286893833,
+          0.4619956880248333,
+          0.24316042730299137
+        ],
+        "root_minus_impulse_point_x": 0.006339788911830624,
+        "total_vertical_impulse": 0.08798594048605429
+      },
+      {
+        "step": 560,
+        "tilt": 0.20341114699840546,
+        "root_position": [
+          17.80414390563965,
+          0.47090527415275574,
+          0.4240250289440155
+        ],
+        "vertical_impulse_application_point": [
+          17.758938781853516,
+          0.4687404812715839,
+          0.2594481131236429
+        ],
+        "root_minus_impulse_point_x": 0.04520512378613262,
+        "total_vertical_impulse": 0.09673858610656885
+      },
+      {
+        "step": 570,
+        "tilt": 0.2492079734802246,
+        "root_position": [
+          17.79237174987793,
+          0.4682224690914154,
+          0.42781469225883484
+        ],
+        "vertical_impulse_application_point": [
+          17.770156919718506,
+          0.46254776191608316,
+          0.24662074647754323
+        ],
+        "root_minus_impulse_point_x": 0.022214830159423826,
+        "total_vertical_impulse": 0.08829902892142977
+      },
+      {
+        "step": 580,
+        "tilt": 0.2736299932003021,
+        "root_position": [
+          17.796621322631836,
+          0.46914464235305786,
+          0.4270164966583252
+        ],
+        "vertical_impulse_application_point": [
+          17.77115417050435,
+          0.4630942101513675,
+          0.24571258913376307
+        ],
+        "root_minus_impulse_point_x": 0.025467152127486514,
+        "total_vertical_impulse": 0.08850654021712658
+      },
+      {
+        "step": 600,
+        "tilt": 0.3315359652042389,
+        "root_position": [
+          17.807449340820312,
+          0.4713980257511139,
+          0.42493829131126404
+        ],
+        "vertical_impulse_application_point": [
+          17.77196724564838,
+          0.4626334590874618,
+          0.2456007884549379
+        ],
+        "root_minus_impulse_point_x": 0.03548209517193257,
+        "total_vertical_impulse": 0.0880823637725081
+      },
+      {
+        "step": 620,
+        "tilt": 0.41380974650382996,
+        "root_position": [
+          17.82343101501465,
+          0.4745531380176544,
+          0.4211060106754303
+        ],
+        "vertical_impulse_application_point": [
+          17.77083101528833,
+          0.4625584813017345,
+          0.24845855032385078
+        ],
+        "root_minus_impulse_point_x": 0.05259999972631846,
+        "total_vertical_impulse": 0.08866945344328651
+      },
+      {
+        "step": 650,
+        "tilt": 0.6234338879585266,
+        "root_position": [
+          17.86325454711914,
+          0.48255786299705505,
+          0.40487170219421387
+        ],
+        "vertical_impulse_application_point": [
+          17.771507307939267,
+          0.46604769288395675,
+          0.2528105853208703
+        ],
+        "root_minus_impulse_point_x": 0.09174723917987393,
+        "total_vertical_impulse": 0.08725149723758541
+      },
+      {
+        "step": 680,
+        "tilt": 0.998646080493927,
+        "root_position": [
+          17.92095947265625,
+          0.4942185580730438,
+          0.35645046830177307
+        ],
+        "vertical_impulse_application_point": [
+          17.779244000373293,
+          0.46577435790563104,
+          0.25334270976605855
+        ],
+        "root_minus_impulse_point_x": 0.14171547228295722,
+        "total_vertical_impulse": 0.08628101544466232
+      }
+    ]
+  },
+  "pulse_wings_lowered": {
+    "first_done": 696,
+    "samples": [
+      {
+        "step": 500,
+        "tilt": 0.18631596863269806,
+        "root_position": [
+          17.776866912841797,
+          0.4653618633747101,
+          0.4276774823665619
+        ],
+        "vertical_impulse_application_point": [
+          17.77069038940219,
+          0.4621274160395023,
+          0.24335462626684565
+        ],
+        "root_minus_impulse_point_x": 0.006176523439606285,
+        "total_vertical_impulse": 0.08837393698956225
+      },
+      {
+        "step": 550,
+        "tilt": 0.18707942962646484,
+        "root_position": [
+          17.776987075805664,
+          0.46539655327796936,
+          0.42768722772598267
+        ],
+        "vertical_impulse_application_point": [
+          17.770647286893833,
+          0.4619956880248333,
+          0.24316042730299137
+        ],
+        "root_minus_impulse_point_x": 0.006339788911830624,
+        "total_vertical_impulse": 0.08798594048605429
+      },
+      {
+        "step": 560,
+        "tilt": 0.20341114699840546,
+        "root_position": [
+          17.80414390563965,
+          0.47090527415275574,
+          0.4240250289440155
+        ],
+        "vertical_impulse_application_point": [
+          17.758938781853516,
+          0.4687404812715839,
+          0.2594481131236429
+        ],
+        "root_minus_impulse_point_x": 0.04520512378613262,
+        "total_vertical_impulse": 0.09673858610656885
+      },
+      {
+        "step": 570,
+        "tilt": 0.2497224509716034,
+        "root_position": [
+          17.792404174804688,
+          0.46838125586509705,
+          0.4277799725532532
+        ],
+        "vertical_impulse_application_point": [
+          17.76899289784476,
+          0.463466397387695,
+          0.24711012607388264
+        ],
+        "root_minus_impulse_point_x": 0.023411276959926397,
+        "total_vertical_impulse": 0.08853220602601969
+      },
+      {
+        "step": 580,
+        "tilt": 0.2746225893497467,
+        "root_position": [
+          17.796920776367188,
+          0.4691689908504486,
+          0.42701685428619385
+        ],
+        "vertical_impulse_application_point": [
+          17.77135133986963,
+          0.4638090693060518,
+          0.24554607687688304
+        ],
+        "root_minus_impulse_point_x": 0.02556943649755894,
+        "total_vertical_impulse": 0.08816075393677276
+      },
+      {
+        "step": 600,
+        "tilt": 0.3337910771369934,
+        "root_position": [
+          17.807340621948242,
+          0.471381813287735,
+          0.42475196719169617
+        ],
+        "vertical_impulse_application_point": [
+          17.769010592995553,
+          0.4620971320470718,
+          0.2478773113120993
+        ],
+        "root_minus_impulse_point_x": 0.03833002895268933,
+        "total_vertical_impulse": 0.08811390443616433
+      },
+      {
+        "step": 620,
+        "tilt": 0.41052961349487305,
+        "root_position": [
+          17.822933197021484,
+          0.4745309352874756,
+          0.42130807042121887
+        ],
+        "vertical_impulse_application_point": [
+          17.7709961340436,
+          0.4645881463707826,
+          0.24794086900195259
+        ],
+        "root_minus_impulse_point_x": 0.05193706297788481,
+        "total_vertical_impulse": 0.08837098789629179
+      },
+      {
+        "step": 650,
+        "tilt": 0.604803204536438,
+        "root_position": [
+          17.85979652404785,
+          0.4819051921367645,
+          0.406676709651947
+        ],
+        "vertical_impulse_application_point": [
+          17.771263901988664,
+          0.46444885638279193,
+          0.25289209830911213
+        ],
+        "root_minus_impulse_point_x": 0.0885326220591871,
+        "total_vertical_impulse": 0.08774765057114689
+      },
+      {
+        "step": 680,
+        "tilt": 0.9547364711761475,
+        "root_position": [
+          17.91524887084961,
+          0.4931511878967285,
+          0.3632076382637024
+        ],
+        "vertical_impulse_application_point": [
+          17.77860962061476,
+          0.46414980721068155,
+          0.2539212444020996
+        ],
+        "root_minus_impulse_point_x": 0.13663925023485035,
+        "total_vertical_impulse": 0.08645843493401237
+      }
+    ]
+  },
+  "method": "Sum 16 substeps of foot and toe contacts with body 40. The x/y/z point is weighted by each contact impulse vertical component, including signed components, divided by summed vertical impulse. This is not the body center of mass, a full wrench center, a validated grasp, or by itself evidence of slipping. Positions use world axes."
+}

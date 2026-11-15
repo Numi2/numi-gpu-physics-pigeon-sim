@@ -1,0 +1,56 @@
+{
+  "archive_sha256": "ccfb12158c6f0e9469fc4b18e4113cbde0a9d21daf372ee4343a681769d69c66",
+  "archive_size": 75878400,
+  "parts": [
+    {
+      "name": "crow-v15-wing-release-ablation-20261115.tar.gz.part00",
+      "sha256": "3d58a1ef74b30b9c6002667cacef63971b6abcfa5f1e32b11b4c6747f468330c"
+    },
+    {
+      "name": "crow-v15-wing-release-ablation-20261115.tar.gz.part01",
+      "sha256": "aca9a23dbf9c4bf47a70554a8847ba200e940a85f02c0ffcb3261855634d8253"
+    }
+  ],
+  "remote_root": "/Users/n/Developer/numi-crow-rl-20261107",
+  "files": {
+    "artifacts/crow-v15-recorded-restart-20261114/v15-wing-release-ablation-20261115/build.py": "584e6b8839fa54c26ef5596ab020e41f5d5fc1e4d2cfa58da1bda8369b2e32f9",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-wing-release-ablation-20261115/release_hold_pos.metal": "b759b1525c3aef59ed6d008be876db778e4b68b2bffbf8f0a994f9854ca70201",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-wing-release-ablation-20261115/release_hold_pos-prefix-result.json": "2cb77fa116a6820a9ecb1e55a71444f7a6580779d30d279aec7963fe8e94a978",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-wing-release-ablation-20261115/release_hold_neg-prefix.tsv": "95e37996efd9c9bb93de5da3a43654a348422f255c2c3c5158e4f025f2a573ea",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-wing-release-ablation-20261115/release_hold_pos-prefix.command.json": "1bf5028ac89aa997a0df8e8afa481fecf7d5f7d7125345bc13f78f199d52bcae",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-wing-release-ablation-20261115/release_hold_pos.chk": "6b96ed0d06e5fbfc8ae8c6c18a3c4dbb9c426c02c3a357d956210f6bdffff301",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-wing-release-ablation-20261115/release_hold_neg.chk": "f399241ea96d70f2349060e2a505ba31dd4d52f9ab8d69641e4f838a024dca3a",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-wing-release-ablation-20261115/release_hold_neg-prefix-result.json": "e427963e9acd655f37708d47d2e18c1131c306ec756844547c8c1b51aecb60a3",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-wing-release-ablation-20261115/release_hold_pos-prefix.tsv": "95e37996efd9c9bb93de5da3a43654a348422f255c2c3c5158e4f025f2a573ea",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-wing-release-ablation-20261115/release_hold_neg.metal": "16c80a7a24e328d5a9ba4355a869e1d1d388327dcb3dafd4cb8b492bf9b2e1c0",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-wing-release-ablation-20261115/release_hold_neg-prefix.command.json": "7b5653b597fc879367dcd52130bb055b2cc2acb05907408ae34ec755d40d012b",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-wing-release-ablation-20261115/release_hold_pos-prefix.stdout": "20a23ca322b3179398d6024a43035972d10b84359500887f0cf250e7a3487818",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-wing-release-ablation-20261115/release_hold_neg-prefix.stdout": "f73f46fb1e2949f006f92f0fc658b5e39613d107d6196b6efc4b23860dc800ab",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-wing-release-ablation-20261115/evaluate.py": "7ea3b7a0bf1ee3f98f3c4afb5fabd97db88840011d154fb5040eb2470e97b0de",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-wing-release-ablation-20261115/release_hold_pos-prefix.stderr": "338c63285721e26777c215eeefe3a7d0984663095787dfceabe4988282b6b7af",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-wing-release-ablation-20261115/release_hold_neg-prefix.stderr": "338c63285721e26777c215eeefe3a7d0984663095787dfceabe4988282b6b7af",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-wing-release-ablation-20261115/release_hold_neg-prefix.json": "436e5120105ccb33a00b8c3198133a4579940c866d80323ee55db7b32952160b",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-wing-release-ablation-20261115/release_hold_pos-prefix.json": "436e5120105ccb33a00b8c3198133a4579940c866d80323ee55db7b32952160b",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-wing-release-ablation-20261115/prepare.py": "97ffd3b0aab92ac3f7700788893ea2938439d69b273c60c73eff39c32b66db98",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-wing-release-ablation-20261115/analyze.py": "1c11a61f0f7ca170b0c7817e33d79f063d4b5af71b875855c70b1865af5cbd0c",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-wing-release-ablation-20261115/build.json": "00bdeae7026f728da8059038bb51b86cdc6030acdebebd2889dd8c582d170127",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-wing-release-ablation-eval-20261115/20370113-release_hold_pos-1000.inputs.json": "141c230e7120894677302722e825b057eb6afb3866be5ca39d16664d3278bb84",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-wing-release-ablation-eval-20261115/20370113-release_hold_neg-1000.inputs.json": "9405d4a6f83135fb146cc3cdaa0381152211b382ea2c4c76c3b82d051b6dd1fd",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-wing-release-ablation-eval-20261115/20370113-release_hold_pos-1000.command.json": "c793763ba2906586240be9cc9b90279f89db868e3fb54d675e87ad0cce526014",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-wing-release-ablation-eval-20261115/20370113-release_hold_neg-1000.command.json": "2faf05aa88e6bc9d4d82b2de03dc2679a9cf0731908613bc2873cdfa467b99e2",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-wing-release-ablation-eval-20261115/analysis-both.json": "bec7673b56ad259ca6113239e65c5eab306e1a6f2256a34b6d989c07cbad89fb",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-wing-release-ablation-eval-20261115/20370113-release_hold_neg-1000.json": "ee2da5bed50b83b557d4f9e2535fcf837b610e2e38752a57265629f69b2fda10",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-wing-release-ablation-eval-20261115/20370113-release_hold_neg-1000.tsv": "1f343070da1d0e2dce8b79c2a6e7f2fda58a7cb7c2aa7dc9114c9ae34e27959c",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-wing-release-ablation-eval-20261115/20370113-release_hold_neg-1000.stdout": "56cf59d8ec368a513178752d635bc5d5262bc19932b5c658a1d56824d4f1bec7",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-wing-release-ablation-eval-20261115/20370113-release_hold_pos-1000.stdout": "cbeb239d5d12d2ae135a020543cdb4f67428a642d73d1f20c0262a8af399e0eb",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-wing-release-ablation-eval-20261115/20370113-release_hold_pos-1000.stderr": "7af7c9f478232e50e3f542e46fcdac3f0b5b0b8ae2a7e426abaf761b23af43b8",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-wing-release-ablation-eval-20261115/20370113-release_hold_pos-1000.tsv": "2f84cfeb605a65916d96dd68a60ded0fac5281e282dec39e0029e433a0f9cdd4",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-wing-release-ablation-eval-20261115/20370113-release_hold_neg-1000.stderr": "e955255de66484c45646b50279757ecd9d954f3599123999328ba2e671a0e8a9",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-wing-release-ablation-eval-20261115/runs.json": "67b868122b32582d1d18929bda5c8c3771f0fcd0170ab2d7d07ed73decfe57f3",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-wing-release-ablation-eval-20261115/20370113-release_hold_pos-1000.json": "651920e8912d393418a310fcf7529963dd34c16b4edeac73eb800e77d7e96d6f",
+    "build/crow-v15-recorded-restart-20261114/v15-wing-release-ablation-20261115/release_hold_pos.metallib": "7b6a1aea3f58d7e985d026d6340877a0390e20729846a11d18b289a162c44182",
+    "build/crow-v15-recorded-restart-20261114/v15-wing-release-ablation-20261115/release_hold_neg.metallib": "d8c7eb3847bd2f5d6837a695dbb52e70dc57f9012809ac4a2f7f322ce9e49188",
+    "build/crow-v15-recorded-restart-20261114/v15-wing-release-ablation-20261115/release_hold_neg.air": "3d7ec8c08caaf3ea9d43a415a963ac87427b9dbe81b80347eaac982db41ca90c",
+    "build/crow-v15-recorded-restart-20261114/v15-wing-release-ablation-20261115/release_hold_pos.air": "c73e78b1f0c309c001757214651ac8bb0aa0492d4f7f1a656f569ad84f008f80"
+  }
+}
