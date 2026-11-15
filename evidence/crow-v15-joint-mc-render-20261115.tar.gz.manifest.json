@@ -1,0 +1,31 @@
+{
+  "archive_sha256": "db16658c3db65c2146e4303a5f6990af7567a43ddeabfe59c737ccb4722f2b09",
+  "archive_size": 11479040,
+  "parts": [
+    {
+      "name": "crow-v15-joint-mc-render-20261115.tar.gz",
+      "sha256": "db16658c3db65c2146e4303a5f6990af7567a43ddeabfe59c737ccb4722f2b09"
+    }
+  ],
+  "remote_root": "/Users/n/Developer/numi-crow-rl-20261107",
+  "files": {
+    "artifacts/crow-v15-recorded-restart-20261114/v15-joint-mc-render-20370113/frames-front/numi-crow-replay-audit.json": "1327b062bd94940c6cd506d05e77c240b1e9cb02c4c72a1f0bb05e1cd11074e7",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-joint-mc-render-20370113/frames-above/numi-crow-replay-audit.json": "0fbacc90fb23176584fbef60b8b16eb3ba47133ab64ade15e76f56a98ac7c489",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-joint-mc-render-20370113/front.mp4": "b37edefeabd701adec7a701e033cab4e215a1a935e99b6e3962e3b037c1161ab",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-joint-mc-render-20370113/frames-feet/numi-crow-replay-audit.json": "8a875f28f7cbe0266328430a6590fded6fdc462df4cc655e885433a11ff5f046",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-joint-mc-render-20370113/below.mp4": "ff1e114434284a484a668572f1072acdf8040d5d78f5a5eb993371f47e024ae6",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-joint-mc-render-20370113/back.log": "287002983c25128735032761096e6be9d9ea606bf459e5aa3386af9809e68303",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-joint-mc-render-20370113/front.log": "287002983c25128735032761096e6be9d9ea606bf459e5aa3386af9809e68303",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-joint-mc-render-20370113/back.mp4": "06b065c4a74eb14c18aeb52104ad9c9474ac5e7f9f10038de261c153cfc2eacd",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-joint-mc-render-20370113/below.log": "287002983c25128735032761096e6be9d9ea606bf459e5aa3386af9809e68303",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-joint-mc-render-20370113/frames-back/numi-crow-replay-audit.json": "b14c55017da03b64058fe8607fe29c449fb3e073cbc794d89af7a8281afd3a94",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-joint-mc-render-20370113/video-sha256.txt": "6bd18d798a36c2a242fccdaf930b7c208506796f6124da86ee4f04423b221012",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-joint-mc-render-20370113/frames-below/numi-crow-replay-audit.json": "859c84f62b266780568df1bd0d5a2b85b72ad91d9a6fee6751ba22c38847381e",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-joint-mc-render-20370113/presentation-splice.json": "e91194a64006b632dd1437ddb7ee3c5169c47b5330a062537698cd13cd099902",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-joint-mc-render-20370113/above.log": "287002983c25128735032761096e6be9d9ea606bf459e5aa3386af9809e68303",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-joint-mc-render-20370113/splice.log": "c6838868337e2ff669a80c04d719aad9a01c6746547b3dd0a2c25440cdfd9240",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-joint-mc-render-20370113/above.mp4": "afd016f9bd9cfe10c8521fc5f66b8bd260dec3018493c67329b333701a7cccc6",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-joint-mc-render-20370113/feet.log": "287002983c25128735032761096e6be9d9ea606bf459e5aa3386af9809e68303",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-joint-mc-render-20370113/feet.mp4": "a084d9501d9b5c0fe11908a30b2efef48bfae4ad5d0b901252c80b5c586ce018"
+  }
+}
