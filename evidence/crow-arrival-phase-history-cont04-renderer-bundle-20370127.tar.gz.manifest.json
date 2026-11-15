@@ -1,0 +1,29 @@
+{
+  "archive_sha256": "a00c8927d58bd8349b427379ad93d813513ce7937de17229033573b9292db11d",
+  "archive_size": 17889280,
+  "parts": [
+    {
+      "name": "crow-arrival-phase-history-cont04-renderer-bundle-20370127.tar.gz",
+      "sha256": "a00c8927d58bd8349b427379ad93d813513ce7937de17229033573b9292db11d"
+    }
+  ],
+  "remote_files": {
+    "/tmp/crow-48s-multiview-20261114/render-phase-comparison-neural-arrival-phase-history-cont04-development-20370127-1000/frames-front/numi-crow-replay-audit.json": "357e71c6b14ccb37e1e0a10524da3583b6f33685805d552cc705a2eddb5d35c3",
+    "/tmp/crow-48s-multiview-20261114/render-phase-comparison-neural-arrival-phase-history-cont04-development-20370127-1000/frames-above/numi-crow-replay-audit.json": "a53c8c39bffa41545a2be01d8e74f432c804180a33935a6cdfb0eb047512f051",
+    "/tmp/crow-48s-multiview-20261114/render-phase-comparison-neural-arrival-phase-history-cont04-development-20370127-1000/front.mp4": "6a106eaae81fa664c7c82d6ead1c89801816a3d464deb99d5533d345eb5524d5",
+    "/tmp/crow-48s-multiview-20261114/render-phase-comparison-neural-arrival-phase-history-cont04-development-20370127-1000/frames-feet/numi-crow-replay-audit.json": "acc38608fc4ca865b6fb834ecc35c0dad060a666ab5e40d5ee6475d7c70df263",
+    "/tmp/crow-48s-multiview-20261114/render-phase-comparison-neural-arrival-phase-history-cont04-development-20370127-1000/below.mp4": "ca9f9d63649f5c347b3f2350037b1d6bc19db8d7c78669f4f27027f0d2efcc40",
+    "/tmp/crow-48s-multiview-20261114/render-phase-comparison-neural-arrival-phase-history-cont04-development-20370127-1000/back.log": "07fc9a263d52a35fa9ce6f832500dbc444af7264f1dd1426a596f383c7ce2d93",
+    "/tmp/crow-48s-multiview-20261114/render-phase-comparison-neural-arrival-phase-history-cont04-development-20370127-1000/front.log": "07fc9a263d52a35fa9ce6f832500dbc444af7264f1dd1426a596f383c7ce2d93",
+    "/tmp/crow-48s-multiview-20261114/render-phase-comparison-neural-arrival-phase-history-cont04-development-20370127-1000/back.mp4": "1db48b2df68e7968228bfc6f56c0071f5f0b276a8cbf50121ddfc3d8d9dc45b8",
+    "/tmp/crow-48s-multiview-20261114/render-phase-comparison-neural-arrival-phase-history-cont04-development-20370127-1000/below.log": "07fc9a263d52a35fa9ce6f832500dbc444af7264f1dd1426a596f383c7ce2d93",
+    "/tmp/crow-48s-multiview-20261114/render-phase-comparison-neural-arrival-phase-history-cont04-development-20370127-1000/frames-back/numi-crow-replay-audit.json": "6c5422ce7b9a1ac12c17da83ebf2bb0adbc70a20cedfd29ab80d57123596eb80",
+    "/tmp/crow-48s-multiview-20261114/render-phase-comparison-neural-arrival-phase-history-cont04-development-20370127-1000/frames-below/numi-crow-replay-audit.json": "da78fa360078ece22a4451785e4c9d791df11796232abbb3da8de3c56319bf9d",
+    "/tmp/crow-48s-multiview-20261114/render-phase-comparison-neural-arrival-phase-history-cont04-development-20370127-1000/presentation-splice.json": "63ff679ca4f9c6c044609eaec133c278deeed0088a1570d7b91ffc41163d6221",
+    "/tmp/crow-48s-multiview-20261114/render-phase-comparison-neural-arrival-phase-history-cont04-development-20370127-1000/above.log": "07fc9a263d52a35fa9ce6f832500dbc444af7264f1dd1426a596f383c7ce2d93",
+    "/tmp/crow-48s-multiview-20261114/render-phase-comparison-neural-arrival-phase-history-cont04-development-20370127-1000/splice.log": "b1f34a5a081c08f46b7b0f26f25df508dd62d81de4426850a74cad33ea065049",
+    "/tmp/crow-48s-multiview-20261114/render-phase-comparison-neural-arrival-phase-history-cont04-development-20370127-1000/above.mp4": "6e0d81d209a6404e5a4c8ae1a7229d08350224b61e70ede4feae73fbdcf65920",
+    "/tmp/crow-48s-multiview-20261114/render-phase-comparison-neural-arrival-phase-history-cont04-development-20370127-1000/feet.log": "07fc9a263d52a35fa9ce6f832500dbc444af7264f1dd1426a596f383c7ce2d93",
+    "/tmp/crow-48s-multiview-20261114/render-phase-comparison-neural-arrival-phase-history-cont04-development-20370127-1000/feet.mp4": "65da9c73b9ffd5ec565686616e3b98ab72ff17f1483d47cb7a0e239b6a6e0440"
+  }
+}

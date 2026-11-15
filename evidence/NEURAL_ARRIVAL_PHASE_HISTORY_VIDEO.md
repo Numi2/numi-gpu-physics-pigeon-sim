@@ -1,0 +1,5 @@
+# Five-angle replay: fall and hold
+
+The 73.14-second video combines the first 48 seconds of the old recorded flight, the update-01 seed-20370113 first episode ending in a fall at 5.14 seconds, and the continuation-04 seed-20370127 first episode holding for 20 seconds. The latter had 959 consecutive 20 ms intervals satisfying the strict support, opposing toe-contact, tilt and speed checks. No post-failure reset is displayed. Both branch trials use reconstructed states, a relocated branch, forced terminal phase, later recorded action history and a scripted carrier. The old flight had collisions disabled; the montage is not a continuous autonomous landing. The below camera hides the ground for visibility only.
+
+The five source videos, splice, renderer logs, per-file manifests, renderer binary hash, composition script, delivered video and hash are preserved. The seeds are consumed development cases; one fall rules out a robust-balance claim. Labels in the video describe which policy and seed produced each segment.
