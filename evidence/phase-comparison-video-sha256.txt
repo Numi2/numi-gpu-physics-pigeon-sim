@@ -1,0 +1,2 @@
+4cf9121bb0af00502951114f5179bfcde380d16113f72066e40cbe768364a5d4  evidence/crow-phase-balance-comparison-five-angles.mp4
+d2bbf604637798e21a3eb078833fdbd87916490bd635e26e7f8414a96d3c3b16  evidence/crow-phase-comparison-camera-sources.tar.gz
