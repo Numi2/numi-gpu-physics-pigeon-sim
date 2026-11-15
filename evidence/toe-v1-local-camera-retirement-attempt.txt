@@ -1,0 +1,1 @@
+Local redundant camera cleanup aborted during pre-deletion hash verification when one file read returned TimeoutError [Errno 60]. The deletion loop had not started, so no local cameras were removed. Their independently restored Git archive members matched; keep the local copies until an entire fresh verification and open-file check succeeds.
