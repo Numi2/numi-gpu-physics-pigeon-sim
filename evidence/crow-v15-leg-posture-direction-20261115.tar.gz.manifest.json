@@ -1,0 +1,57 @@
+{
+  "archive_sha256": "758d42531ba9bcb6b52dc46a3c436897222e5b74f8544fbd3ba7b17cc2ce9085",
+  "archive_size": 46714880,
+  "parts": [
+    {
+      "name": "crow-v15-leg-posture-direction-20261115.tar.gz.part00",
+      "sha256": "287549019c4ddcb90cf4e11e2000f907c7e5dd83b40188f469887d617b9da7e7"
+    },
+    {
+      "name": "crow-v15-leg-posture-direction-20261115.tar.gz.part01",
+      "sha256": "239eb9efa3671b49a06e555ed1a31cb5a1f4b6bd52836af9067faa1508ab2763"
+    }
+  ],
+  "remote_root": "/Users/n/Developer/numi-crow-rl-20261107",
+  "files": {
+    "artifacts/crow-v15-recorded-restart-20261114/v15-leg-posture-direction-20261115/hip_negative.stdout": "c78222a80b38093bf4535f56506ed3e7c4cc2c80414430de62f20ede4ac27d27",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-leg-posture-direction-20261115/screen.py": "e61781f8139d2ee26b7cb3c5af47e5c819356e4f64ac80ba41b246a5262efe8e",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-leg-posture-direction-20261115/summary.json": "8f394dd43edc7dee9148fd1417a1ea14c243239e4456aeae633733c74191ffdd",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-leg-posture-direction-20261115/hip_positive.stdout": "a4863a967a9a4473c39334993b6a552bb33f971d9515ed815b105541e7523557",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-leg-posture-direction-20261115/contact_summary.py": "5ed3d4048f02bf712ea6cac56e57d6a1874a864c56fc47ff5fbb676ea7210aea",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-leg-posture-direction-20261115/ankle_positive.policypack": "943f3d401b390bd1e3a7b257bd312959d524404026597da910d6989517441428",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-leg-posture-direction-20261115/hip_negative.json": "5ddccbfa1538bda43a9f9ce32e8a03639727656700b0dd9a09fbe85f626f2c4e",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-leg-posture-direction-20261115/hip-contact-early.json": "4e0ad4f6c86d2959a228458db1b838a7f8ea50ed7ce304e405db5742e2dbf542",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-leg-posture-direction-20261115/hip_positive.json": "3e4f2e425f0f1497765e9f96a75199fdc16f3d75f155cd26f1e4acc37b44a144",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-leg-posture-direction-20261115/hip_negative.tsv": "2461f0a42537e0751bfccbc68ce0f9d46070fb4bb0ca30cb115feb2df12fdd72",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-leg-posture-direction-20261115/ankle_negative.policypack": "8bb382f5b198b799bf58ce0c03e3c3d899e53236b4d718e648bd4f81e5416c89",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-leg-posture-direction-20261115/ankle_positive.tsv": "06510213847f15c22714620c1cf673b8d0b507827e8fc53ba2109404096c5a6e",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-leg-posture-direction-20261115/ankle_negative.stderr": "81adf89195f31a59fb39aca0b99a10a9f24430c800083813c655926ab3dbf393",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-leg-posture-direction-20261115/ankle_positive.stderr": "19adbb7ef265306298f928c412f4a92b7ffcfc07b3b434c9f5079cfd84310427",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-leg-posture-direction-20261115/ankle_positive.command.json": "a9fc29e3db3398afeb1422c106a781238596a8f91d04de001c90a39e1f4b8c2d",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-leg-posture-direction-20261115/hip_positive.command.json": "447c6825515bd497352be25b3c339f14fbda7bdff2b27417aa46219ccfa13849",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-leg-posture-direction-20261115/ankle_negative.stdout": "3e214788d866ffb3be7d6555cf72ab3a1e9fa5d5b25ba7a2250251d968f87781",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-leg-posture-direction-20261115/hip_positive.policypack": "0cbee2571b01924f32200fdacdf801ca239d2501e6ef30fb03ca450f0c2fce93",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-leg-posture-direction-20261115/ankle_negative.tsv": "b163960486ec612d4f8a1c6e2b41da273436eca58115a3f4a29ddd9fd26b7ec4",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-leg-posture-direction-20261115/hip_positive.tsv": "5a568034cb6ac41301bb035455c312b582a62d3b43af479df4ee6644f8413262",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-leg-posture-direction-20261115/ankle_positive.stdout": "7fa6e77bc611345f98138499050fcb4f3a556cba68aebd464c448716c9f8d829",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-leg-posture-direction-20261115/hip_negative.policypack": "6d793f422dea03e8b501b7c538908f802df56097d825564c2454d88df60d3cf8",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-leg-posture-direction-20261115/zero-targets.json": "c5dc2d6e29dacee6fcd60505c1c0c451a62e98769ee5cb64faa6d034e9279e13",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-leg-posture-direction-20261115/hip_negative.stderr": "670306dfffcde349e6f7a71223bcea95bdbcd4cad7698c19c389a65f664bd822",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-leg-posture-direction-20261115/hip_positive.stderr": "a267bf43ae10ae397c2e0f52508db392fa4d4a722ea26d6565caf1f93b958f7e",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-leg-posture-direction-20261115/easy_evaluate.py": "af11b435d90be263bb2b6ea5c9c1935ee2a4de5ad0a6fc975544e705ff49963c",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-leg-posture-direction-20261115/hip_positive.environment.json": "f0b1e95afa26e6211e3f2d77a296ff3c7ac4378f12866d31dcc6ca1c2159fe4e",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-leg-posture-direction-20261115/ankle_negative.command.json": "805da326339ca3aa4954d2ff7844ee198db48c3c09ff7f0b9a105919d9062ef6",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-leg-posture-direction-20261115/ankle_positive.environment.json": "131879321c6afb0c8e34b843e66ffe0b2775d10b3be11818b924254e89cce89d",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-leg-posture-direction-20261115/ankle_positive.json": "3b548dde818436d6599f4c7899f24c27534cd401a88a01e20566ec43cb98c78a",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-leg-posture-direction-20261115/inputs.json": "1617fa37f4833b77eebb40ba9443a3256a8f9b49687d1d0a2229a13c2a7d7634",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-leg-posture-direction-20261115/contact-summary.json": "ec20128c5a0efff3f14cf7db157e3a2d89d7248960692a2e1947460f1188ce31",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-leg-posture-direction-20261115/ankle_negative.json": "fe16e2e966b3869c23f549246ae5670c64606665781d26bdc57728584774f5bd",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-leg-posture-direction-20261115/analysis.json": "f9b6aec801859371c1b8aabbbdcda439a03cb3aaac7d891d71d40897ecbe2b9e",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-leg-posture-direction-20261115/easy_contact_summary.py": "43a4896cad0026022cf549ef950864c6004278d9047882446aea8db2377a519d",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-leg-posture-direction-20261115/hip_negative.environment.json": "ad9fe0a2ff136e2dd15153d04f893ddfb8cfe454638542e627b44e981253d0aa",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-leg-posture-direction-20261115/hip_negative.command.json": "5b441a407f158bf5ea99b417bf48324318d06b09e743ef3d55282f9267291219",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-leg-posture-direction-20261115/analyze.py": "f2a65bdc4e1416f3e774d73b13e063ddc9db79a70ccc6b4eeb38f0e14eec6c81",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-leg-posture-direction-20261115/ankle_negative.environment.json": "1c8666942d49ef52fc9d0645b08f5a296b9b177836385e96a67e0a9fc004d240",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-leg-posture-direction-20261115/hip_contact_early.py": "47bbf7cfa4c35743dd84318d58327c79ae0b08030aefa99fd0a8091189808448"
+  }
+}
