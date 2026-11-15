@@ -1,0 +1,8 @@
+{
+  "archive_sha256": "421b870959d0f2332dcacd8a94ec9e544fc39b90600362972c2a4f4de54e623f",
+  "remote_files": {
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-toe-residual-zero-stochastic.policypack": "92f793a41b40e8437d0830c0c358171e3c6c88a669468a82705345ae6afb015e",
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-toe-residual-zero-deterministic.policypack": "08cf7ea385ca6eccf58a7f22ab4e8ac2674353e1a938dd8fb8f3cd23f0340f13",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-residual-zero-build.json": "7551727ea1ce46a626c067137087b723291d95cde113914b5ab90bf8051fe62d"
+  }
+}
