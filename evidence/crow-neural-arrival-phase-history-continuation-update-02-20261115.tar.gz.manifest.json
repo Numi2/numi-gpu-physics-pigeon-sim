@@ -1,0 +1,14 @@
+{
+  "archive_sha256": "5adc856198b421c0330e09dfdd4052df75daaaa9b83b4cccd8aa007caf630784",
+  "remote_files": {
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-arrival-phase-history-continuation-update-02.policypack": "d381f5c379ae631d944264153cf8873a05149401028e08d5e79d07bf76f11564",
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-arrival-phase-history-continuation-update-02.policypack.deployment.policypack": "5953339fa2e1be6f61d1dfd0a12448276465432910e156bccbf01693ee8e5402",
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-arrival-phase-history-continuation-update-02.rollout": "1c12a3ea7b8bdce8c8138b3d8f5559faec279d667aa297a3e03a5a3634618934",
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-arrival-phase-history-continuation-update-02.safetensors": "c7510fbea5200f8ada46acb44c2ad253907e0797a1d9e0a9ce14baf5ce814a2c",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-arrival-phase-history-continuation/update-02/command.json": "982ef0fb4015893b1636d3030a45e6d18e1c18e1bc2c8a46089bd5d3d5944c50",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-arrival-phase-history-continuation/update-02/inputs.json": "2dfd9a8988b6cfbb2a3fdfdf296f72b5ac7de7b9e548413a6485f305f129f569",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-arrival-phase-history-continuation/update-02/stdout": "a6004d43caf8367dc1899f416136ec4d2fa81f24905b211e97fac71294635a3e",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-arrival-phase-history-continuation/update-02/stderr": "51911f18628764f65fb0bcf06438b999974ccbf54d8be37c845abcda32f8bf03",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-arrival-phase-history-continuation/update-02/result.json": "4830adf18536424401a8dc5f94021ea38042a1da317a9c3bba4fd49759edd296"
+  }
+}
