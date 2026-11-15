@@ -1,0 +1,19 @@
+{
+  "archive_sha256": "8470595b9676dccb5e7c44292028919417676ac6900fa14edc5894f69d4a8832",
+  "archive_size": 36167680,
+  "parts": [
+    {
+      "name": "crow-toe-action-20310129-toe-blend-v3-development-20261115.tar.gz",
+      "sha256": "8470595b9676dccb5e7c44292028919417676ac6900fa14edc5894f69d4a8832"
+    }
+  ],
+  "remote_files": {
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-blend-v3-development-20310129-1000/command.json": "21bbd1dd43f43f93f1c0c6130a79132fb33dd06f935dd4157f9825a9aa40e37d",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-blend-v3-development-20310129-1000/inputs.json": "565341afe19ecd983b51bb00e68f7e09788980ad1412aff8786773fa7900b953",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-blend-v3-development-20310129-1000/result.json": "81868a6e94ffc0178bf833deb1c9013d9fab4ee95ddb876a5e8ec4f1d26376d2",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-blend-v3-development-20310129-1000/stdout": "bc060693f3ab222e2a8a5611635d07175fc8ed1a9cd9684eb2d5224e8dec68a5",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-blend-v3-development-20310129-1000/stderr.gz": "e2fafa3faa4dea1d566ad15ea36fe7c1791550be93d86712328ad4b33015cb51",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-blend-v3-development-20310129-1000/replay.json": "955cfa4db60d21c3d0789c449bdecad48fe1e3062dff5670e9c6fe61e7dddb8a",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-blend-v3-development-20310129-1000/trace.tsv": "cb4045af7ac30f53d453400ae72794aa87c6f073fe73feff4e23268e9ff76ed7"
+  }
+}
