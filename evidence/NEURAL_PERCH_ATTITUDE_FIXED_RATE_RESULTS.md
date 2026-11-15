@@ -1,0 +1,5 @@
+# Matched fixed-rate attitude residual update
+
+The fixed 0.0003 and 0.00003 learning-rate updates consumed byte-identical rollouts with identical decoded fields and fingerprints (SHA-256 `05c339a78b40af1bd77fe6e1f035b11be785a842c9374e251de3a40b27f94710`). The higher-rate update preserved all protected actor parameters and contract values. On the same retained observations, its maximum per-action RMS target change was 0.000153 rad for the leg outputs and 0.000295 rad for the toe outputs; toe targets are gated and those values are not a direct measure of applied motion.
+
+The post-final-step balance KL summed across eight outputs was 0.006934; separate per-output values are in the native training log. Actor and critic gradient norms were each separately clipped. The training rollout recorded eight done events including resets. These diagnostics establish a larger update under the matched conditions, not that it improves balance. Physical development evaluation is underway; survival and strict branch contact determine the result.

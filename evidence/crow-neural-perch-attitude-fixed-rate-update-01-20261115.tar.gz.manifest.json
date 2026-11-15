@@ -1,0 +1,14 @@
+{
+  "archive_sha256": "20a2b4b1de81114a961a9fda4ff0564f94c96a574c007a615f6941f237a5c82f",
+  "remote_files": {
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-perch-attitude-fixed-rate-update-01.policypack": "7b9b7341b9916c2027e5aec541d35d87d990f99605f5fb4a2a8d75545fc42860",
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-perch-attitude-fixed-rate-update-01.policypack.deployment.policypack": "e05aaacd7e9d12e78a4e21d22a1d3c158e32dd47b8a77d9a82397a5fdfcfcc9e",
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-perch-attitude-fixed-rate-update-01.rollout": "05c339a78b40af1bd77fe6e1f035b11be785a842c9374e251de3a40b27f94710",
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-perch-attitude-fixed-rate-update-01.safetensors": "765a33a321e8261d356488af9129bafd54f1ebaf703683741708aa43a0006ad0",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-perch-attitude-fixed-rate-update-01/command.json": "9f174c5ff81121aba0d7367b74822cb978c8e74eaf9ec3917fc4e0d64cad132b",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-perch-attitude-fixed-rate-update-01/inputs.json": "aa752b4c5b0cf42df578cd39bb62205563aa4cab8861a39cdf7f2b31fa0e4671",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-perch-attitude-fixed-rate-update-01/stdout": "b4d0743a04bb2607613f1f5328f98b8e9615b3c9a833096f5f9e9a003dd2e2cc",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-perch-attitude-fixed-rate-update-01/stderr": "8bceb58bc0a8553e28e02001b9ef665307846ab52a5307d4e2c565d1c2679475",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-perch-attitude-fixed-rate-update-01/result.json": "2177dfcf9e52b871eefb8190c7a1f9a1a3f9cd214714745c0ae168594fbecab2"
+  }
+}
