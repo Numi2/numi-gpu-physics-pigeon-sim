@@ -1,0 +1,53 @@
+{
+  "archive_sha256": "1f9886e210ea6f48d12b3410593df21ee39e08ef6adb7692d7c444815c731388",
+  "archive_size": 38973440,
+  "parts": [
+    {
+      "name": "crow-v15-supported-wing-posture-20261115.tar.gz",
+      "sha256": "1f9886e210ea6f48d12b3410593df21ee39e08ef6adb7692d7c444815c731388"
+    }
+  ],
+  "remote_root": "/Users/n/Developer/numi-crow-rl-20261107",
+  "files": {
+    "artifacts/crow-v15-recorded-restart-20261114/v15-supported-wing-posture-20261115/build.py": "3652c6504865f36e52e12f5f841a3a5e578605f30e6e51d5da7d1b886f4b1667",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-supported-wing-posture-20261115/lower08-prefix.command.json": "6633dfbfa926b053797f03a32e309db038f9933fa5fb799a72b834ff6790902a",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-supported-wing-posture-20261115/lower04-prefix.stderr": "338c63285721e26777c215eeefe3a7d0984663095787dfceabe4988282b6b7af",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-supported-wing-posture-20261115/lower08-prefix.tsv": "95e37996efd9c9bb93de5da3a43654a348422f255c2c3c5158e4f025f2a573ea",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-supported-wing-posture-20261115/lower04-prefix.stdout": "4817f7ac784013e1f5fea2cb53bc939d0ef67d598be52fc52de263f614775c48",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-supported-wing-posture-20261115/lower04.chk": "9961eba0a3dd0c29762beb24cdfd1f33feac2d3db54f91f6109fe28ce98197df",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-supported-wing-posture-20261115/lower04-prefix.command.json": "8d7be71513578b5fffd6698b6ae86a8839457b84c454372f1816e7d09dcd5c36",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-supported-wing-posture-20261115/lower08-prefix-result.json": "a1dc936d14b247d3f2408603748f4d4e95bf01b1546a814f3646660a732f8e9b",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-supported-wing-posture-20261115/lower08.metal": "6c23e4483df7c855133562e90787550f3a6e7d51c179a4784b73b745d1e2d804",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-supported-wing-posture-20261115/lower04-prefix-result.json": "9611bd3d9a50d1dfaf7e9f1de0118a28cf77df429cf76df4edaf95bf19418bcd",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-supported-wing-posture-20261115/lower08-prefix.json": "436e5120105ccb33a00b8c3198133a4579940c866d80323ee55db7b32952160b",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-supported-wing-posture-20261115/lower04-prefix.tsv": "95e37996efd9c9bb93de5da3a43654a348422f255c2c3c5158e4f025f2a573ea",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-supported-wing-posture-20261115/lower04.metal": "ae8cc3513cbfe2aba1a8fc05510b1bb3754ba213c59b26f7fce5c293517cbdd5",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-supported-wing-posture-20261115/lower08-prefix.stderr": "338c63285721e26777c215eeefe3a7d0984663095787dfceabe4988282b6b7af",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-supported-wing-posture-20261115/lower08.chk": "d6622122c2190f6bd0639c058764e405c608cf81c94c5d962ae807216d7da877",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-supported-wing-posture-20261115/lower04-prefix.json": "436e5120105ccb33a00b8c3198133a4579940c866d80323ee55db7b32952160b",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-supported-wing-posture-20261115/evaluate.py": "f8735afa0cf8a15e94f22ec42e37f2928dfa4101b59a9bc118337e4ad0b0788f",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-supported-wing-posture-20261115/lower08-prefix.stdout": "fa00936f376265344dd56ed8f2340e121e7f3f0e25457b591a2e09c66bfcaf9e",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-supported-wing-posture-20261115/prepare.py": "0ba0baebf1e856f22084c499a29f43197779464e71672d7babd0598a896e9770",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-supported-wing-posture-20261115/analyze.py": "88978395081ba6569d0277c567529bfd2aa287ea073ad913782b61a27e7ee321",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-supported-wing-posture-20261115/build.json": "e2510dd6d8ca9d091410e9bdea679c9bfc912a705ed955ff690c765b8fbf71af",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-supported-wing-posture-eval-20261115/20370113-lower08-500.inputs.json": "337e14eed90ccc6c76bfe654cfe6f9d91ba97b03781f925aa460799d0e56412d",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-supported-wing-posture-eval-20261115/20370113-lower08-500.json": "930f5c7f1861153a45d08043a7df8a002989107c21feb8c6dd6c5271731d2d41",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-supported-wing-posture-eval-20261115/20370113-lower04-500.tsv": "443e07d62c63ba22f0bf506fac2f4c4a54fd8067da792c8b7805bd2b683e2db2",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-supported-wing-posture-eval-20261115/20370113-lower08-500.stdout": "c71f55af654f5816fb417fd36e21e1e686fc8358c87a932851faf966e43fe2ef",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-supported-wing-posture-eval-20261115/20370113-lower08-500.stderr": "2876e0c7ebd62e80dad629c559f28f9726caf9633c28fcc131e3892f8faebee1",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-supported-wing-posture-eval-20261115/20370113-lower08-500.command.json": "5fc8a6ae34b8fe880e6db918154e69b4f22c823495f5a6c662ffbe8ec31a5844",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-supported-wing-posture-eval-20261115/20370113-lower04-500.json": "c95648c72838adbd24cdd6ea6237f2229e3385296a200da52a7566b4f263b38e",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-supported-wing-posture-eval-20261115/20370113-lower04-500.stdout": "17099ba2a95d1093cd9723a7ba259b35c5451f444a9595cba55accd3a4519306",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-supported-wing-posture-eval-20261115/20370113-lower04-500.command.json": "68c895c39e4ad245d6da3a7b294cdcc531f96d739f5638f87e23a938a0e7a487",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-supported-wing-posture-eval-20261115/20370113-lower04-500.inputs.json": "383cd4a085be239337ea60b87c9df6436a62b67de37c55077120e6d1869c3ed9",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-supported-wing-posture-eval-20261115/20370113-lower08-500.tsv": "7fd2c351dac16d551747c54c1fc8522fbb6fa7cbbb19b9929180957cb2ce9549",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-supported-wing-posture-eval-20261115/20370113-lower04-500.stderr": "66fd6044e138a4a10e05b7787dd3da98c0b84b63f05acc2bfb89315568117a92",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-supported-wing-posture-eval-20261115/runs.json": "f3f1f88f8c7c9fbff2a606a747ac54f761923c560a51bf721f147937dd93a48f",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-supported-wing-posture-eval-20261115/analysis-lower04.json": "bb5a0bb43a8643091dec44b79ff2f2d72ccbd4c8c073118a028eb25a09174973",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-supported-wing-posture-eval-20261115/analysis-lower04-lower08.json": "31419e91313bb7fb538e70e2dd249a5472deaffbb44acdd16779e087d5bc071b",
+    "build/crow-v15-recorded-restart-20261114/v15-supported-wing-posture-20261115/lower04.metallib": "aa6f7704c058fa187f14562f1f22a05bee2fd30b96024b723bde19be6cee46dd",
+    "build/crow-v15-recorded-restart-20261114/v15-supported-wing-posture-20261115/lower08.air": "652a30334006ea693c77921b1321c0ec188df277924e497848d8b068cde7d7c5",
+    "build/crow-v15-recorded-restart-20261114/v15-supported-wing-posture-20261115/lower08.metallib": "2a3109cf0e33545f1d243d8861ef94f997d22e34a3dc6cbece93e598edb39b79",
+    "build/crow-v15-recorded-restart-20261114/v15-supported-wing-posture-20261115/lower04.air": "0a2e840a522b45ce038e2735acec6144b23984e85edc210084c42862a71618e0"
+  }
+}
