@@ -1,0 +1,20 @@
+{
+  "archive_sha256": "bb82d93e23245fd8f39e789a653023c8070f36894ac681fbd8b693eebb7c93e0",
+  "archive_size": 36208640,
+  "parts": [
+    {
+      "name": "crow-attitude-pd-reverse-development-20370113-20261115.tar.gz",
+      "sha256": "bb82d93e23245fd8f39e789a653023c8070f36894ac681fbd8b693eebb7c93e0"
+    }
+  ],
+  "remote_files": {
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-attitude-pd-reverse-development-20370113-1000/command.json": "c46f8c7707c26ae8d6c581147168b6c6e11499a6cb30606caedccba99d1812f2",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-attitude-pd-reverse-development-20370113-1000/inputs.json": "d9d5bbcb74843d3715e8c63f3f40a996ec36ea3a44d71ec85bf05dbe7f402dbb",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-attitude-pd-reverse-development-20370113-1000/result.json": "81868a6e94ffc0178bf833deb1c9013d9fab4ee95ddb876a5e8ec4f1d26376d2",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-attitude-pd-reverse-development-20370113-1000/stdout": "2bde382c307729e0dc833f472e7e4d58a6a7631a2bae6fb5f42f810a826e7160",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-attitude-pd-reverse-development-20370113-1000/stderr.gz": "67ebde4fcd9a2071b7294758b93ee6c064a3725639c62be971b111cebf850221",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-attitude-pd-reverse-development-20370113-1000/replay.json": "55642a906cb0d09219f53e3405e6ed4c5b848ff60f2faf2f2abd4ab2cd98140c",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-attitude-pd-reverse-development-20370113-1000/trace.tsv": "51f12df77e2965c8ddcd1a61d7578ebc089e3a20deafc2e69ec1eb37d6f509cc",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-attitude-pd-reverse-development-20370113-1000/first-episode-analysis.json": "b609523449660c85995db3c46fb80374e64aa05dd93a9200a597ade09ba3dfb4"
+  }
+}
