@@ -1,0 +1,10 @@
+{
+  "files": [
+    {
+      "path": "artifacts/crow-v15-recorded-restart-20261114/v15-com-signal-diagnostic-eval-20261115/20370113-com_signal_diagnostic-620.stderr",
+      "sha256": "a07072bbaf91367929f13a38d8dc1e4e2486dd839ee2082978acab561423cdb6",
+      "bytes": 63156311
+    }
+  ],
+  "bytes_retired": 63156311
+}

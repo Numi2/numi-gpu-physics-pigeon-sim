@@ -1,0 +1,5 @@
+# Model-mass COM observer: signal path active, validation failed
+
+The corrected 620-step diagnostic had exact q/v, body, actor-observation and action parity with the positive-pulse control; 70 reward values were intentionally changed to emit telemetry. The 35 source-identified v15 masses summed on GPU to 0.45006019 kg, within 2e-7 kg of the independently built model. The branch ID was 40, and recorded last-substep vertical impulse matched independent contact parsing within 6e-10 N s. The action-path snapshot exactly matched the preceding GPU signal, so the zero-signal fault is corrected.
+
+The GPU signal nevertheless differed from reconstruction using the matching replay frame and final contact substep by up to 0.02659 m, far beyond the preregistered 0.0001 m tolerance. An exploratory screen of integer body/contact frame offsets from -2 to +2 found no exact match (best RMS about 0.0052 m). This observer **failed validation** and must not yet be used to infer feedback performance. A follow-up diagnostic disaggregates GPU COM position, velocity and the contact impulse point. Neither diagnostic trains a neural policy or proves recovery or landing.

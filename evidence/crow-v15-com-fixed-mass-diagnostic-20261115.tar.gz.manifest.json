@@ -1,0 +1,38 @@
+{
+  "archive_sha256": "23aa57fead70e7796abbd18677ccbcae1f619f0e018aac504278fdd882656236",
+  "archive_size": 24268800,
+  "parts": [
+    {
+      "name": "crow-v15-com-fixed-mass-diagnostic-20261115.tar.gz",
+      "sha256": "23aa57fead70e7796abbd18677ccbcae1f619f0e018aac504278fdd882656236"
+    }
+  ],
+  "remote_root": "/Users/n/Developer/numi-crow-rl-20261107",
+  "files": {
+    "artifacts/crow-v15-recorded-restart-20261114/v15-com-fixed-mass-diagnostic-20261115/build.py": "823367eee476b61c7c64e343f96322ac029a8d6bb65e9c923d266232b3111c4f",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-com-fixed-mass-diagnostic-20261115/com_fixed_mass_diagnostic-prefix.stdout": "857373619355bfc184e6911a0186a2cefd1dc0bae80375a3397d77a1f9e7a765",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-com-fixed-mass-diagnostic-20261115/com_fixed_mass_diagnostic-prefix.command.json": "d1dc86c87277b7c4b3369e0fd33926fb13a17c3be4369c376f1ab222df800f03",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-com-fixed-mass-diagnostic-20261115/com_fixed_mass_diagnostic.metal": "bf4aa90cc13b8221dd83bf8e85e34df7d2d687ae5470f8bf535f59fee4416565",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-com-fixed-mass-diagnostic-20261115/com_fixed_mass_diagnostic-prefix.stderr": "338c63285721e26777c215eeefe3a7d0984663095787dfceabe4988282b6b7af",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-com-fixed-mass-diagnostic-20261115/com_fixed_mass_diagnostic-prefix.tsv": "95e37996efd9c9bb93de5da3a43654a348422f255c2c3c5158e4f025f2a573ea",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-com-fixed-mass-diagnostic-20261115/com_fixed_mass_diagnostic-prefix.json": "436e5120105ccb33a00b8c3198133a4579940c866d80323ee55db7b32952160b",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-com-fixed-mass-diagnostic-20261115/evaluate.py": "5b2decad881073db535274f1821d8ca3642b1af481aaee65d13d1dc3c62bba54",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-com-fixed-mass-diagnostic-20261115/alignment_check.py": "60e6257735db1f3be80eddf8b75cb53342e94d3b36f3dbab27a9f0be880a9933",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-com-fixed-mass-diagnostic-20261115/com_fixed_mass_diagnostic-prefix-result.json": "7def823ed9baae0c6917367bf25015fb148ee344ef4f6ab6d90a8944222a3f33",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-com-fixed-mass-diagnostic-20261115/prepare.py": "b98d21b4649c69a26e8ec22902043e8c0f96110fa38cad558932415628fd9350",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-com-fixed-mass-diagnostic-20261115/analyze.py": "2227c047bdeac15ed6e5736718c5a12e9ec5d3d083d7b0e54b095e6fcda67382",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-com-fixed-mass-diagnostic-20261115/build.json": "2e6a6b6566ecde70e63b5b7b5614388792ce59d18e6f23645d1acbbcdf53daae",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-com-fixed-mass-diagnostic-20261115/com_fixed_mass_diagnostic.chk": "32ae05edf6d453bb7149868fefeb5b6469edc7adcb7cb2641d71909b748bfa16",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-com-fixed-mass-diagnostic-eval-20261115/20370113-com_fixed_mass_diagnostic-620.json": "ada417064ab355e00a74a25c73b85362ffa596853003d99b7f54aefa09ed80cd",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-com-fixed-mass-diagnostic-eval-20261115/independent-telemetry-check.json": "65c03af85089da389e662ee4ba81fcad85c8a3724329d5de2d2943b76b6ce1d4",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-com-fixed-mass-diagnostic-eval-20261115/20370113-com_fixed_mass_diagnostic-620.stderr": "a07072bbaf91367929f13a38d8dc1e4e2486dd839ee2082978acab561423cdb6",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-com-fixed-mass-diagnostic-eval-20261115/20370113-com_fixed_mass_diagnostic-620.command.json": "4c42793b6b678963b3ec7d70f5af2fe5559fdf6475aa8fc78780576a316f1def",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-com-fixed-mass-diagnostic-eval-20261115/runs.json": "8af3200d4aab3028fd9f23cea5fa77e45d9a1b31208525b4ace90801c5ad2813",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-com-fixed-mass-diagnostic-eval-20261115/20370113-com_fixed_mass_diagnostic-620.tsv": "29d4a934324e10e7485ac632412a9a479acdaf5fa1432b5e1c3a58b198c41a23",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-com-fixed-mass-diagnostic-eval-20261115/20370113-com_fixed_mass_diagnostic-620.stdout": "6cbedc263a59dd614e32b9a60c2eb19817a23ff977af0a2a088575fa8d1ce591",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-com-fixed-mass-diagnostic-eval-20261115/20370113-com_fixed_mass_diagnostic-620.inputs.json": "05d25385c4b79a623a1205bda33eef347ddddc1c4fb7992f3246bda928984ecd",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-com-fixed-mass-diagnostic-eval-20261115/alignment-offset-screen.json": "389d93b0da4817ae59e21b414063adbaf3f8448501096086b650a332edcd4157",
+    "build/crow-v15-recorded-restart-20261114/v15-com-fixed-mass-diagnostic-20261115/com_fixed_mass_diagnostic.air": "ac7877bcb71dfbd7d967cdac2c6215e8b6905d10d5bf1ba844b63442fec0bc69",
+    "build/crow-v15-recorded-restart-20261114/v15-com-fixed-mass-diagnostic-20261115/com_fixed_mass_diagnostic.metallib": "184ff9a00fb2c3f50c420538e44df4658c7cb53e913ee533d385c83c6c55d4db"
+  }
+}
