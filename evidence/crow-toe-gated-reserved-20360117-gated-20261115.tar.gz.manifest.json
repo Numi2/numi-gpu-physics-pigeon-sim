@@ -1,0 +1,19 @@
+{
+  "archive_sha256": "24d6d5d650bc67757b80c33698b82baa94aefb95c5ba30b62386f4eb74d46b1d",
+  "archive_size": 33495040,
+  "parts": [
+    {
+      "name": "crow-toe-gated-reserved-20360117-gated-20261115.tar.gz",
+      "sha256": "24d6d5d650bc67757b80c33698b82baa94aefb95c5ba30b62386f4eb74d46b1d"
+    }
+  ],
+  "remote_files": {
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-gated-reserved-20360117-gated-1000/command.json": "54611689bec26c1c49da8359479f261323a3bf3a6f256c9a4eadb6243fce4a7a",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-gated-reserved-20360117-gated-1000/inputs.json": "40dfae14703210519a9f5e4c2a03a46b75cbfa2db689ed2e16d887cb2cf798df",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-gated-reserved-20360117-gated-1000/result.json": "81868a6e94ffc0178bf833deb1c9013d9fab4ee95ddb876a5e8ec4f1d26376d2",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-gated-reserved-20360117-gated-1000/stdout": "948d9c216979141cba177a24ff41ed084a926bac4564b0f2ad8268afe141364e",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-gated-reserved-20360117-gated-1000/stderr.gz": "0e25d6b47578f12dfed0043fef7b92f6b486b2ff8fa0ca994bb499f7f10a3ac7",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-gated-reserved-20360117-gated-1000/replay.json": "ccceb57e72f5fde234c64ee1587e6774c77155f52e0492a72a4b48bc9ab15f48",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-gated-reserved-20360117-gated-1000/trace.tsv": "21f477534501ae52bd30c5f1cf31b7761c64bfc280b7f0ba1c1d7c07c94a23e2"
+  }
+}
