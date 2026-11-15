@@ -1,0 +1,19 @@
+{
+  "archive_sha256": "9461ee273a249dfa3e75c82907659d59751d4e878f089b60d1271bddba187b8c",
+  "archive_size": 9185280,
+  "parts": [
+    {
+      "name": "crow-toe-sensing-zero-parity-20370127-20261115.tar.gz",
+      "sha256": "9461ee273a249dfa3e75c82907659d59751d4e878f089b60d1271bddba187b8c"
+    }
+  ],
+  "remote_files": {
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-sensing-zero-parity-20370127-300/command.json": "07c4c7710e95295d5c01e4f676a05e9de368c07844819d3e60ef09eed0f9cf21",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-sensing-zero-parity-20370127-300/inputs.json": "8d666dd379a859923bb8bc0061a3e0ddbdc3d24e2a53676399e18603b6d50ead",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-sensing-zero-parity-20370127-300/result.json": "81868a6e94ffc0178bf833deb1c9013d9fab4ee95ddb876a5e8ec4f1d26376d2",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-sensing-zero-parity-20370127-300/stdout": "4db467b2beb97b352a7bc673fd28f9ca503bbb1593280b88d11c8a101ec1d564",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-sensing-zero-parity-20370127-300/stderr.gz": "3e46301389f52b244ed7c261f276e49ac333d5e06b18ff5ee3e4f8b442e8d45b",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-sensing-zero-parity-20370127-300/replay.json": "0b1450045c653adb8cbd2926a97c6b70c081435b103a2b7ac54a682ac302e8d6",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-sensing-zero-parity-20370127-300/trace.tsv": "17a6d41552f4865b1ab8f2f314c4d36bc08d9bdb355744826989614dde90b6eb"
+  }
+}

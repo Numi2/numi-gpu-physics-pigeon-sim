@@ -1,0 +1,77 @@
+{
+  "replay_sha256": {
+    "old": "0a0c5da8ad0e4e5ad3b73bd54b98d86128c3456bb8b7ccaccfb53d78f16bf307",
+    "new": "0b1450045c653adb8cbd2926a97c6b70c081435b103a2b7ac54a682ac302e8d6"
+  },
+  "fields": {
+    "q": {
+      "exact": true,
+      "first_different_step": null,
+      "maximum_absolute_difference": 0.0
+    },
+    "v": {
+      "exact": true,
+      "first_different_step": null,
+      "maximum_absolute_difference": 0.0
+    },
+    "actor_observation": {
+      "exact": true,
+      "first_different_step": null,
+      "maximum_absolute_difference": 0.0
+    },
+    "accepted_actions": {
+      "exact": true,
+      "first_different_step": null,
+      "maximum_absolute_difference": 0.0
+    }
+  },
+  "sensors": {
+    "min": [
+      -0.008855816908180714,
+      -0.00017757377645466477,
+      0.0,
+      -0.002603140426799655,
+      -0.0006281602545641363,
+      0.0,
+      -0.011663347482681274,
+      -0.00023241102462634444,
+      0.0,
+      -0.002802523085847497,
+      -0.000431932567153126,
+      0.0
+    ],
+    "max": [
+      0.004479200579226017,
+      0.0015861049760133028,
+      0.016734221950173378,
+      0.0017719084862619638,
+      9.006707841763273e-05,
+      0.005337903741747141,
+      0.0033088293857872486,
+      0.0017904884880408645,
+      0.018527280539274216,
+      0.008393817581236362,
+      0.0005712597048841417,
+      0.014013589359819889
+    ],
+    "nonzero_counts": [
+      290,
+      290,
+      290,
+      265,
+      265,
+      265,
+      291,
+      291,
+      291,
+      265,
+      265,
+      265
+    ]
+  },
+  "first_done": {
+    "old": null,
+    "new": null
+  },
+  "result": "pass"
+}
