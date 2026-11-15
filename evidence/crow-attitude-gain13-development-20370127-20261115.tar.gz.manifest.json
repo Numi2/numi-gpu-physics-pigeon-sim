@@ -1,0 +1,20 @@
+{
+  "archive_sha256": "4a87e7c4aa97797ef5487a86d6bb170c485a1adc19fcd1723cc13c3d6668a41d",
+  "archive_size": 33126400,
+  "parts": [
+    {
+      "name": "crow-attitude-gain13-development-20370127-20261115.tar.gz",
+      "sha256": "4a87e7c4aa97797ef5487a86d6bb170c485a1adc19fcd1723cc13c3d6668a41d"
+    }
+  ],
+  "remote_files": {
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-attitude-gain13-development-20370127-1000/command.json": "3515120b98a35effac143a226cbcb4b5c589d4628959135dd82fc207ec14ce94",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-attitude-gain13-development-20370127-1000/inputs.json": "50cf072bd5c25738ed988be22eaa62a13bd1b7fab7a13bb0905db0d930b53169",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-attitude-gain13-development-20370127-1000/result.json": "81868a6e94ffc0178bf833deb1c9013d9fab4ee95ddb876a5e8ec4f1d26376d2",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-attitude-gain13-development-20370127-1000/stdout": "bc79dd8efeafdcccbd04101a178e11abfed335025629e05454aa8de2802fa733",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-attitude-gain13-development-20370127-1000/stderr.gz": "e6f12044b56e34e9dcfad1fb005ef6a8b1c0718dc6002eddcd8ccb0bb0cba226",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-attitude-gain13-development-20370127-1000/replay.json": "96643acff0a839ce50e6ca619f02ffa71a234ab20b4357790184f40b171c1c68",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-attitude-gain13-development-20370127-1000/trace.tsv": "e9785980b4f98d80d63ee5cc3019f2d2b4849770a60164a5cdd9cb04270d0e6c",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-attitude-gain13-development-20370127-1000/first-episode-analysis.json": "acec52ee38319de2177a02d97553bc6bdf8525e937081d2cc5b1c5831af6a8e4"
+  }
+}
