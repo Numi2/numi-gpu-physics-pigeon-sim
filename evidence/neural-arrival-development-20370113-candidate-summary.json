@@ -1,0 +1,63 @@
+{
+  "first_done": [
+    266,
+    2
+  ],
+  "all_done": [
+    [
+      266,
+      2
+    ],
+    [
+      457,
+      2
+    ],
+    [
+      643,
+      2
+    ],
+    [
+      850,
+      2
+    ]
+  ],
+  "root_jumps": [
+    {
+      "before": 267,
+      "after": 268,
+      "distance_m": 0.39416419374394557
+    },
+    {
+      "before": 458,
+      "after": 459,
+      "distance_m": 0.39665958696637493
+    },
+    {
+      "before": 644,
+      "after": 645,
+      "distance_m": 0.39088728589996996
+    },
+    {
+      "before": 851,
+      "after": 852,
+      "distance_m": 0.39272331240637803
+    }
+  ],
+  "audited_first_episode_intervals": 265,
+  "streaks": [
+    [
+      45,
+      188,
+      144
+    ]
+  ],
+  "failed_gates": {
+    "both_up": 14,
+    "left_opposed": 95,
+    "right_opposed": 83,
+    "speed": 53,
+    "tilt": 77
+  },
+  "continuous_all_steps": false,
+  "note": "Only intervals strictly before the first replay done are analyzed; sample state index is interval+1."
+}
