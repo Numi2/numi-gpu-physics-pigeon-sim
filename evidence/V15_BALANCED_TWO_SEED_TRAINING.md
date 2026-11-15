@@ -1,0 +1,7 @@
+# Alternating two checkpointed branch starts
+
+Four PPO updates alternated the already-used development seeds 20370113 and 20370127 from their physically reached reconstructed step-49 and step-50 checkpoints. Each rollout used one lane, 256 steps, two epochs, gamma 0.999, lambda 0.995, a fixed 0.0003 learning rate, and a fresh optimizer followed by continuation. Each exploratory rollout included a done event at step 147, 152, 138, or 149; post-done reset samples are not counted as continued balance. The seed-27 training shader reproduced the evaluation shader's prefix state, action and observations exactly. The final policy retained all protected actor weights, biases, normalizer and log standard deviation.
+
+Deterministic matched checkpoint evaluation on seed 20370113 fell at absolute step 257 for both baseline and candidate. On seed 20370127 neither fell in the 250-step continuation; baseline maximum tilt was 0.1295 rad and candidate 0.1282 rad. The candidate therefore has not improved the failing start and is not promoted. No independent layouts or unused seeds were consumed. Results remain limited to a reconstructed arrival, relocated branch, forced terminal phase and scripted carrier.
+
+All policy packs, optimizer states, sampled rollouts, source, per-file hashes, command/environment records, checkpoint and full evaluation traces are in the split `crow-v15-balanced-two-seed-training-20261115.tar.gz` archive. Reassemble the numbered parts and verify against the manifest.
