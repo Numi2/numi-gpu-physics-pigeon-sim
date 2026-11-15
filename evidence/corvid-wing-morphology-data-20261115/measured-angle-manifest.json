@@ -1,0 +1,60 @@
+{
+  "method": "3D arccos of vertex-to-neighbor vectors, same as author xyzangles in 01_CommonFunctions.R; landmark labels defined by author Config-ind scripts.",
+  "limitations": "Two cadaver specimens; linkage is manually manipulated. Other trials sample range of motion, not animal-chosen movement or independent joint limits. Taxon path Corvus_caurinus; first file name Cor_bra, second Cor_cau.",
+  "datasets": [
+    {
+      "label": "crow_17_1L_linkage",
+      "source": "baliga-crow-source/02_Range-of-Motion/MiroM120_digitization/2017-11-09_Cor_bra_17-1L/Cor_bra_17-1L_ROM-pooled/2017-11-09_Cor_bra_17-1L_6BarDors__xyzpts.csv",
+      "source_sha256": "0c93c7166b3b50bee32b1b955d186ab6319b86c2234c5af5aac74c4871633616",
+      "derived": "crow_17_1L_linkage-angles.csv",
+      "derived_sha256": "093d1118aa127ee916ee04274f2d8367fb31d45307f1c4e5242fdaf7fad4e30e",
+      "frames_total": 502,
+      "valid": 406,
+      "invalid": 96,
+      "elbow_deg_range": [
+        17.979722831705253,
+        120.29632942052932
+      ],
+      "manus_deg_range": [
+        56.60953167072647,
+        178.29173678348292
+      ]
+    },
+    {
+      "label": "crow_17_1L_rom",
+      "source": "baliga-crow-source/02_Range-of-Motion/MiroM120_digitization/2017-11-09_Cor_bra_17-1L/Cor_bra_17-1L_ROM-pooled/2017-11-09_Cor_bra_17-1L_DorsRom1__xyzpts.csv",
+      "source_sha256": "19d85c2fb63de7fb8f81a889bcb1f4758492c0815b6f1597f8175361b1c83817",
+      "derived": "crow_17_1L_rom-angles.csv",
+      "derived_sha256": "557cb709675214fd4b69b29e5255b3937cd5152b8e08505733d399fa3a243df4",
+      "frames_total": 1927,
+      "valid": 1784,
+      "invalid": 143,
+      "elbow_deg_range": [
+        20.679262817825123,
+        150.34679520407084
+      ],
+      "manus_deg_range": [
+        45.552495935618616,
+        179.7045204838744
+      ]
+    },
+    {
+      "label": "crow_18_2_rom",
+      "source": "baliga-crow-source/02_Range-of-Motion/MiroM120_digitization/2018-06-14_CH-VB_LLT_partII/2018-06-14_Cor_cau_18-2_Sweep/2018-06-14_Cor_cau_18-2_VentSweepSprinkler1__xyzpts.csv",
+      "source_sha256": "3afd799c86e781392d7f0e5347311e317c7950cb0da7f8b9ad87fba1c285c638",
+      "derived": "crow_18_2_rom-angles.csv",
+      "derived_sha256": "8a5961018c8a9a7747a18146968c9ec3f7a4608e9997d3d34b5e59c5cda92b5d",
+      "frames_total": 856,
+      "valid": 856,
+      "invalid": 0,
+      "elbow_deg_range": [
+        26.40270378943392,
+        147.38945033093594
+      ],
+      "manus_deg_range": [
+        42.84844886890969,
+        179.89666045765065
+      ]
+    }
+  ]
+}

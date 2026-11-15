@@ -1,0 +1,111 @@
+{
+  "upstream_article": "https://doi.org/10.1126/sciadv.aaw6670",
+  "upstream_dataset": "https://doi.org/10.6084/m9.figshare.8856161.v3",
+  "source_archive_file_id": 16224704,
+  "source_archive_md5": "de95b4c4fe6a290086aaa0afc37eae10",
+  "source_archive_sha256": "cf45880b27e6a6f71e4360bb27760c2e4747a9167e3e8ee6414e4710ce77b953",
+  "license": "CC BY 4.0",
+  "note": "Selected crow observations, author import code, shared angle functions and specimen metadata extracted byte-for-byte from original archive. Original dataset also has other species; specimen filenames have inconsistent cor_bra and cor_cau labels, so taxonomy is recorded as in author metadata and requires verification.",
+  "extracted_files": [
+    {
+      "path": "02_Range-of-Motion/01_CommonFunctions.R",
+      "size": 11183,
+      "sha256": "82e678e61b0091c1fa76557a4bafaa717cb1f9ea56e6d6ee0bd88d426350dd26"
+    },
+    {
+      "path": "02_Range-of-Motion/02_ExtensionDataImport.R",
+      "size": 8543,
+      "sha256": "175780b19f5b11fa44e46b0248ca6cd5a4697b15c6cc70c5df41da74d77b6277"
+    },
+    {
+      "path": "02_Range-of-Motion/avian_metadata/2018-07-20_AvianMorphology.xlsx",
+      "size": 21219,
+      "sha256": "c07333b477148ed6bfd5bced6c85c2820518979923a855c01133fd6dce912e5e"
+    },
+    {
+      "path": "02_Range-of-Motion/data/Corvus_caurinus/Bend_Twist/2018-05-15_Cor_bra_17-1L_pdsv/2017-11-09_Cor_bra_17-1L_6BarDors__xyzpts.csv",
+      "size": 53050,
+      "sha256": "0c93c7166b3b50bee32b1b955d186ab6319b86c2234c5af5aac74c4871633616"
+    },
+    {
+      "path": "02_Range-of-Motion/data/Corvus_caurinus/Bend_Twist/2018-05-15_Cor_bra_17-1L_pdsv/2017-11-09_Cor_bra_17-1L_DorsRom1__xyzpts.csv",
+      "size": 206414,
+      "sha256": "19d85c2fb63de7fb8f81a889bcb1f4758492c0815b6f1597f8175361b1c83817"
+    },
+    {
+      "path": "02_Range-of-Motion/data/Corvus_caurinus/Bend_Twist/2018-05-15_Cor_bra_17-1L_pdsv/2018-05-15_Cor_bra_17-1L_pdsv1__xyzpts.csv",
+      "size": 116881,
+      "sha256": "203e8e44529efe445ee0c6460bc9ae99bb24a20d38b96235367f11eb929efc40"
+    },
+    {
+      "path": "02_Range-of-Motion/data/Corvus_caurinus/Bend_Twist/2018-05-15_Cor_bra_17-1L_pdsv/2018-06-14_Cor_cau_18-2_VentSweepSprinkler1__xyzpts.csv",
+      "size": 98529,
+      "sha256": "3afd799c86e781392d7f0e5347311e317c7950cb0da7f8b9ad87fba1c285c638"
+    },
+    {
+      "path": "02_Range-of-Motion/data/Corvus_caurinus/Bend_Twist/2018-05-15_Cor_bra_17-1L_pdsv/proSup/2018-05-15_Cor_bra_17-1L_pdsv1__xyzpts.csv",
+      "size": 116881,
+      "sha256": "203e8e44529efe445ee0c6460bc9ae99bb24a20d38b96235367f11eb929efc40"
+    },
+    {
+      "path": "02_Range-of-Motion/data/Corvus_caurinus/Linkage_Trajectory/6BarDors_allFramesDigitized/2017-11-09_Cor_bra_17-1L_6BarDors__xyzpts.csv",
+      "size": 53050,
+      "sha256": "0c93c7166b3b50bee32b1b955d186ab6319b86c2234c5af5aac74c4871633616"
+    },
+    {
+      "path": "02_Range-of-Motion/data/Corvus_caurinus/Linkage_Trajectory/6BarDors_allFramesDigitized/6bar-ind_Cor_cau_17-1L.R",
+      "size": 3412,
+      "sha256": "110efd2284c369f75ae78cdb80fc70ed3cd7ed43f0b78b3f55cd6ad2724065a5"
+    },
+    {
+      "path": "02_Range-of-Motion/data_import_scripts/Bend_twist/Cor_cau_17-1L_dorsVen.R",
+      "size": 9831,
+      "sha256": "87d820c921be59a9e24429885fdfaf38009eda9009e2fcd02e7039f9dc28f3ec"
+    },
+    {
+      "path": "02_Range-of-Motion/data_import_scripts/Bend_twist/Cor_cau_17-1L_proSup.R",
+      "size": 8492,
+      "sha256": "a33041ebd7e52a2190b806015a3dbf183627c4164e098f3ee73845da563f8da0"
+    },
+    {
+      "path": "02_Range-of-Motion/data_import_scripts/Config_space/Config-ind_Cor_cau_17_1L.R",
+      "size": 2834,
+      "sha256": "3ac01af3f4b61d8f4eaa842e781860f431b1300473ce86f4fd02aa22631e0531"
+    },
+    {
+      "path": "02_Range-of-Motion/data_import_scripts/Config_space/Config-ind_Cor_cau_18_2.R",
+      "size": 2839,
+      "sha256": "2ce9967469e3ae652f4ebaf2ce5f254061a76a0705e23c3b194a7491bc2b4e19"
+    },
+    {
+      "path": "02_Range-of-Motion/MiroM120_digitization/2017-11-09_Cor_bra_17-1L/6bar_only/2017-11-09_Cor_bra_17-1L_6BarDors_extensionOnly_xyzpts.csv",
+      "size": 49780,
+      "sha256": "905d0ad985de71ce3af6614088523fe15a620574930db0131bbad23450b5525c"
+    },
+    {
+      "path": "02_Range-of-Motion/MiroM120_digitization/2017-11-09_Cor_bra_17-1L/Cor_bra_17-1L_ROM-pooled/2017-11-09_Cor_bra_17-1L_6BarDors__xyzpts.csv",
+      "size": 53050,
+      "sha256": "0c93c7166b3b50bee32b1b955d186ab6319b86c2234c5af5aac74c4871633616"
+    },
+    {
+      "path": "02_Range-of-Motion/MiroM120_digitization/2017-11-09_Cor_bra_17-1L/Cor_bra_17-1L_ROM-pooled/2017-11-09_Cor_bra_17-1L_DorsRom1__xyzpts.csv",
+      "size": 206414,
+      "sha256": "19d85c2fb63de7fb8f81a889bcb1f4758492c0815b6f1597f8175361b1c83817"
+    },
+    {
+      "path": "02_Range-of-Motion/MiroM120_digitization/2017-11-09_Cor_bra_17-1L/geomorph_wingShape/2017-11-09_Cor_bra_17-1L_6BarDors_extension_wingShape_xyzpts.csv",
+      "size": 81942,
+      "sha256": "fae4ab0f55d28f201510346c6a42d0df5df4d3d72a2d29ac35f38c3274793391"
+    },
+    {
+      "path": "02_Range-of-Motion/MiroM120_digitization/2017-11-09_Cor_bra_17-1L/ROM_Dorsal/2017-11-09_Cor_bra_17-1L_DorsRom1__xyzpts.csv",
+      "size": 206414,
+      "sha256": "19d85c2fb63de7fb8f81a889bcb1f4758492c0815b6f1597f8175361b1c83817"
+    },
+    {
+      "path": "02_Range-of-Motion/MiroM120_digitization/2018-06-14_CH-VB_LLT_partII/2018-06-14_Cor_cau_18-2_Sweep/2018-06-14_Cor_cau_18-2_VentSweepSprinkler1__xyzpts.csv",
+      "size": 98529,
+      "sha256": "3afd799c86e781392d7f0e5347311e317c7950cb0da7f8b9ad87fba1c285c638"
+    }
+  ]
+}
