@@ -1,0 +1,20 @@
+{
+  "archive_sha256": "0f32108373068d1eb9524f4322fb518401fee1088884c13ef43786eeff2bfce3",
+  "archive_size": 36167680,
+  "parts": [
+    {
+      "name": "crow-toe-perfoot-update01-development-20370113-20261115.tar.gz",
+      "sha256": "0f32108373068d1eb9524f4322fb518401fee1088884c13ef43786eeff2bfce3"
+    }
+  ],
+  "remote_files": {
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-perfoot-update01-development-20370113-1000/command.json": "da7b9b6cc024cbc9b1a0e7e89bd3a0afbd30e2bddc8a23c5aa52cdecbf8a9af1",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-perfoot-update01-development-20370113-1000/inputs.json": "cd8a52b2af0d5f29a61384a36aa8b99f4ee6d0416c6ce007331a1f63d6a3e554",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-perfoot-update01-development-20370113-1000/result.json": "81868a6e94ffc0178bf833deb1c9013d9fab4ee95ddb876a5e8ec4f1d26376d2",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-perfoot-update01-development-20370113-1000/stdout": "16aa49152247f1d93ffa02476b94503ba8e095f3bb098434c4224fb6fdc85cf5",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-perfoot-update01-development-20370113-1000/stderr.gz": "db405fe5ee7820659ca89bef7b5e9bb2f2a96e90aded3f6b0cbed8ca56f5cbf5",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-perfoot-update01-development-20370113-1000/replay.json": "486101332ebd1f6a59ecfe554f8e7bf0ffc80dcf99bbbca602409870a70af15b",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-perfoot-update01-development-20370113-1000/trace.tsv": "757ac0e53bb3b244078e045c08ce69f6dacde0a2e32172b362f9cf12151c9875",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-perfoot-update01-development-20370113-1000/first-episode-analysis.json": "dfec364c71f9e92ef7c21b51c3d2d8d724a00ae0bd585a057ff8e8208956d50f"
+  }
+}
