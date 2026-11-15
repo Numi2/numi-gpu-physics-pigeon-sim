@@ -1,0 +1,20 @@
+{
+  "archive_sha256": "0dcbc1392846b690561227b70af760cd6388fbad1cee884f6e1188fe8d10dac0",
+  "archive_size": 35840000,
+  "parts": [
+    {
+      "name": "crow-attitude-knee9-development-20370113-20261115.tar.gz",
+      "sha256": "0dcbc1392846b690561227b70af760cd6388fbad1cee884f6e1188fe8d10dac0"
+    }
+  ],
+  "remote_files": {
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-attitude-knee9-development-20370113-1000/command.json": "69f64d6eb305b273fa09bda600b56638e3fe1e0aa58a1ca15896fb3a492b1841",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-attitude-knee9-development-20370113-1000/inputs.json": "40bd85d56b1e765d7b7751de3dd2b4afd58b9d230055486b8d665da2378ac05e",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-attitude-knee9-development-20370113-1000/result.json": "81868a6e94ffc0178bf833deb1c9013d9fab4ee95ddb876a5e8ec4f1d26376d2",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-attitude-knee9-development-20370113-1000/stdout": "00ab195f393c8a5db4954a30ea81d263ea89302ba16318ab1bf5b877398006af",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-attitude-knee9-development-20370113-1000/stderr.gz": "e9148bfd4c599631177626355822b7a4c16d6dfe2f79a0415e13a597615e82e7",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-attitude-knee9-development-20370113-1000/replay.json": "34ad473ca1754632fccdb1864b4b96f4bd217ddf73e6d2634946fdc08901de35",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-attitude-knee9-development-20370113-1000/trace.tsv": "d166853374a07cf9ffc8a062d4a99bf79067cbc19ae60bf8dd794f115bf0b73c",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-attitude-knee9-development-20370113-1000/first-episode-analysis.json": "ab797551a23085e804aaf72d54da1675f0d6371b9f1226e8d2da9cd77e85b204"
+  }
+}
