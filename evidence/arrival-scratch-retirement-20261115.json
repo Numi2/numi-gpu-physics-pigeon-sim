@@ -1,0 +1,47 @@
+{
+  "verified_git_commit": "c1e9630e2d1ef9ce71e8d396457539c844f4c560",
+  "free_before": 5963866112,
+  "free_after": 6472359936,
+  "removed": [
+    {
+      "directory": "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-arrival-phase-control-development-20370113-1000",
+      "file_count": 8,
+      "logical_bytes": 63949553
+    },
+    {
+      "directory": "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-arrival-phase-control-development-20370127-1000",
+      "file_count": 8,
+      "logical_bytes": 64212695
+    },
+    {
+      "directory": "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-arrival-phase-history-control-development-20370113-1000",
+      "file_count": 8,
+      "logical_bytes": 64257518
+    },
+    {
+      "directory": "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-arrival-phase-history-control-development-20370127-1000",
+      "file_count": 8,
+      "logical_bytes": 63709826
+    },
+    {
+      "directory": "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-arrival-phase-history-update01-development-20370113-1000",
+      "file_count": 8,
+      "logical_bytes": 64342801
+    },
+    {
+      "directory": "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-arrival-phase-history-update01-development-20370127-1000",
+      "file_count": 8,
+      "logical_bytes": 61595089
+    },
+    {
+      "directory": "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-arrival-phase-history-cont04-development-20370113-1000",
+      "file_count": 8,
+      "logical_bytes": 64291626
+    },
+    {
+      "directory": "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-arrival-phase-history-cont04-development-20370127-1000",
+      "file_count": 8,
+      "logical_bytes": 61839525
+    }
+  ]
+}
