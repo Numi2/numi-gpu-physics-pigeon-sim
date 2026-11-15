@@ -1,0 +1,146 @@
+{
+  "neural-balance-v1-update-01.policypack": {
+    "row_max_abs": 0.0,
+    "bias_max_abs": 0.0,
+    "logstd": [
+      -2.0,
+      -2.0,
+      -2.0
+    ]
+  },
+  "neural-balance-v1-update-02.policypack": {
+    "row_max_abs": 0.0,
+    "bias_max_abs": 0.0,
+    "logstd": [
+      -2.0,
+      -2.0,
+      -2.0
+    ]
+  },
+  "neural-balance-v1-update-03.policypack": {
+    "row_max_abs": 0.0,
+    "bias_max_abs": 0.0,
+    "logstd": [
+      -2.0,
+      -2.0,
+      -2.0
+    ]
+  },
+  "neural-balance-v1-update-04.policypack": {
+    "row_max_abs": 0.0,
+    "bias_max_abs": 0.0,
+    "logstd": [
+      -2.0,
+      -2.0,
+      -2.0
+    ]
+  },
+  "neural-balance-v2-update-01.policypack": {
+    "row_max_abs": 0.0,
+    "bias_max_abs": 0.0,
+    "logstd": [
+      -2.0,
+      -2.0,
+      -2.0
+    ]
+  },
+  "neural-balance-v2-update-02.policypack": {
+    "row_max_abs": 0.0,
+    "bias_max_abs": 0.0,
+    "logstd": [
+      -2.0,
+      -2.0,
+      -2.0
+    ]
+  },
+  "neural-balance-v2-update-03.policypack": {
+    "row_max_abs": 0.0,
+    "bias_max_abs": 0.0,
+    "logstd": [
+      -2.0,
+      -2.0,
+      -2.0
+    ]
+  },
+  "neural-balance-v2-update-04.policypack": {
+    "row_max_abs": 0.0,
+    "bias_max_abs": 0.0,
+    "logstd": [
+      -2.0,
+      -2.0,
+      -2.0
+    ]
+  },
+  "neural-balance-v3-restart-update-01.policypack": {
+    "row_max_abs": 0.0,
+    "bias_max_abs": 0.0,
+    "logstd": [
+      -2.0,
+      -2.0,
+      -2.0
+    ]
+  },
+  "neural-balance-v3-restart-update-02.policypack": {
+    "row_max_abs": 0.0,
+    "bias_max_abs": 0.0,
+    "logstd": [
+      -2.0,
+      -2.0,
+      -2.0
+    ]
+  },
+  "neural-balance-v3-restart-update-03.policypack": {
+    "row_max_abs": 0.0,
+    "bias_max_abs": 0.0,
+    "logstd": [
+      -2.0,
+      -2.0,
+      -2.0
+    ]
+  },
+  "neural-balance-v3-restart-update-04.policypack": {
+    "row_max_abs": 0.0,
+    "bias_max_abs": 0.0,
+    "logstd": [
+      -2.0,
+      -2.0,
+      -2.0
+    ]
+  },
+  "neural-balance-v3-restart-update-05.policypack": {
+    "row_max_abs": 0.0,
+    "bias_max_abs": 0.0,
+    "logstd": [
+      -2.0,
+      -2.0,
+      -2.0
+    ]
+  },
+  "neural-balance-v3-restart-update-06.policypack": {
+    "row_max_abs": 0.0,
+    "bias_max_abs": 0.0,
+    "logstd": [
+      -2.0,
+      -2.0,
+      -2.0
+    ]
+  },
+  "neural-balance-v3-restart-update-07.policypack": {
+    "row_max_abs": 0.0,
+    "bias_max_abs": 0.0,
+    "logstd": [
+      -2.0,
+      -2.0,
+      -2.0
+    ]
+  },
+  "neural-balance-v3-restart-update-08.policypack": {
+    "row_max_abs": 0.0,
+    "bias_max_abs": 0.0,
+    "logstd": [
+      -2.0,
+      -2.0,
+      -2.0
+    ]
+  }
+}

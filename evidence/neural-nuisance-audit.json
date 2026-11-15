@@ -1,0 +1,126 @@
+{
+  "neural-diagnostics-smoke-updated.policypack.incumbent.policypack": {
+    "nuisance_final_row_max_abs": 0.0,
+    "nuisance_bias": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "nuisance_logstd": [],
+    "nuisance_scale": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "nuisance_action_bias": [
+      0.0,
+      0.0,
+      0.0
+    ]
+  },
+  "neural-balance-v1-update-04.policypack": {
+    "nuisance_final_row_max_abs": 0.0,
+    "nuisance_bias": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "nuisance_logstd": [
+      -2.0,
+      -2.0,
+      -2.0
+    ],
+    "nuisance_scale": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "nuisance_action_bias": [
+      0.0,
+      0.0,
+      0.0
+    ]
+  },
+  "neural-balance-v2-update-04.policypack": {
+    "nuisance_final_row_max_abs": 0.0,
+    "nuisance_bias": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "nuisance_logstd": [
+      -2.0,
+      -2.0,
+      -2.0
+    ],
+    "nuisance_scale": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "nuisance_action_bias": [
+      0.0,
+      0.0,
+      0.0
+    ]
+  },
+  "neural-balance-v3-restart-update-01.policypack": {
+    "nuisance_final_row_max_abs": 0.0,
+    "nuisance_bias": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "nuisance_logstd": [
+      -2.0,
+      -2.0,
+      -2.0
+    ],
+    "nuisance_scale": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "nuisance_action_bias": [
+      0.0,
+      0.0,
+      0.0
+    ]
+  },
+  "neural-balance-v3-restart-update-08.policypack": {
+    "nuisance_final_row_max_abs": 0.0,
+    "nuisance_bias": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "nuisance_logstd": [
+      -2.0,
+      -2.0,
+      -2.0
+    ],
+    "nuisance_scale": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "nuisance_action_bias": [
+      0.0,
+      0.0,
+      0.0
+    ]
+  },
+  "rollout_nuisance": {
+    "max_abs": 0.47733378410339355,
+    "std": [
+      0.13522501289844513,
+      0.13595731556415558,
+      0.13669990003108978
+    ],
+    "mean": [
+      0.0038028177805244923,
+      -0.0034136511385440826,
+      0.0053834374994039536
+    ]
+  }
+}
