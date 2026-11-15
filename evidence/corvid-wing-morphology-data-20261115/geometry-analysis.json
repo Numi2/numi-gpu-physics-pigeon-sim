@@ -1,0 +1,146 @@
+{
+  "method": "Euclidean distances between the four author-defined landmarks, within-frame ratios, and the smaller angular deviation between the two segment-plane normals, excluding frames whose adjacent segment angle has |sin| < 0.1. Quantiles describe hand-manipulated sampled frames, not natural frequencies or independent joint ranges.",
+  "datasets": [
+    {
+      "case": "crow_17_1L_linkage",
+      "input_sha256": "0c93c7166b3b50bee32b1b955d186ab6319b86c2234c5af5aac74c4871633616",
+      "valid_frames": 406,
+      "invalid_frames": 96,
+      "degenerate_planes": 35,
+      "segment_lengths_coordinate_units": [
+        {
+          "count": 406,
+          "p05": 0.05045243789976029,
+          "median": 0.05091844546913002,
+          "p95": 0.051589927646943964
+        },
+        {
+          "count": 406,
+          "p05": 0.06375364903645175,
+          "median": 0.06678076529755661,
+          "p95": 0.06776437487193256
+        },
+        {
+          "count": 406,
+          "p05": 0.03925486306609526,
+          "median": 0.04268715707024748,
+          "p95": 0.044319131859091504
+        }
+      ],
+      "segment_length_ratios_to_proximal": [
+        {
+          "count": 406,
+          "p05": 1.2375692711904107,
+          "median": 1.3139403759299233,
+          "p95": 1.3359768993605678
+        },
+        {
+          "count": 406,
+          "p05": 0.7646666859499753,
+          "median": 0.8377302407297361,
+          "p95": 0.8752609715442494
+        }
+      ],
+      "absolute_deviation_from_coplanarity_degrees": {
+        "count": 371,
+        "p05": 2.6996755763582314,
+        "median": 21.68297587421074,
+        "p95": 80.02472690523425
+      }
+    },
+    {
+      "case": "crow_17_1L_rom",
+      "input_sha256": "19d85c2fb63de7fb8f81a889bcb1f4758492c0815b6f1597f8175361b1c83817",
+      "valid_frames": 1784,
+      "invalid_frames": 143,
+      "degenerate_planes": 129,
+      "segment_lengths_coordinate_units": [
+        {
+          "count": 1784,
+          "p05": 0.04934737878858284,
+          "median": 0.052004297229799816,
+          "p95": 0.05372647285134427
+        },
+        {
+          "count": 1784,
+          "p05": 0.06487795126490997,
+          "median": 0.06677555466235842,
+          "p95": 0.06812923927528948
+        },
+        {
+          "count": 1784,
+          "p05": 0.03856399291198849,
+          "median": 0.04159297104818236,
+          "p95": 0.04357622592833409
+        }
+      ],
+      "segment_length_ratios_to_proximal": [
+        {
+          "count": 1784,
+          "p05": 1.2256525717443865,
+          "median": 1.2869188065882984,
+          "p95": 1.3548247988963413
+        },
+        {
+          "count": 1784,
+          "p05": 0.728348748397591,
+          "median": 0.8009066341589701,
+          "p95": 0.8641089993591465
+        }
+      ],
+      "absolute_deviation_from_coplanarity_degrees": {
+        "count": 1655,
+        "p05": 14.722847376327115,
+        "median": 34.486622227044904,
+        "p95": 52.61305374466061
+      }
+    },
+    {
+      "case": "crow_18_2_rom",
+      "input_sha256": "3afd799c86e781392d7f0e5347311e317c7950cb0da7f8b9ad87fba1c285c638",
+      "valid_frames": 856,
+      "invalid_frames": 0,
+      "degenerate_planes": 86,
+      "segment_lengths_coordinate_units": [
+        {
+          "count": 856,
+          "p05": 0.04184202667079786,
+          "median": 0.04353634298436862,
+          "p95": 0.0449423974237721
+        },
+        {
+          "count": 856,
+          "p05": 0.06314675238574818,
+          "median": 0.06844804045383204,
+          "p95": 0.07218184340343037
+        },
+        {
+          "count": 856,
+          "p05": 0.034779492764935555,
+          "median": 0.036499197881577655,
+          "p95": 0.038282755839523015
+        }
+      ],
+      "segment_length_ratios_to_proximal": [
+        {
+          "count": 856,
+          "p05": 1.454457908216767,
+          "median": 1.5603900006278715,
+          "p95": 1.6927061042928995
+        },
+        {
+          "count": 856,
+          "p05": 0.7804894498943512,
+          "median": 0.8394431176702897,
+          "p95": 0.8909367334993288
+        }
+      ],
+      "absolute_deviation_from_coplanarity_degrees": {
+        "count": 770,
+        "p05": 7.038901026733173,
+        "median": 26.15275501558976,
+        "p95": 52.643352131647326
+      }
+    }
+  ]
+}
