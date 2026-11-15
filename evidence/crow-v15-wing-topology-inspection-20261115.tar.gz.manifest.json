@@ -1,0 +1,19 @@
+{
+  "archive_sha256": "e0620e6f63fd0db3a482532a4146250cebe3b9cb77069855d3a07d0ac812f637",
+  "archive_size": 30720,
+  "parts": [
+    {
+      "name": "crow-v15-wing-topology-inspection-20261115.tar.gz",
+      "sha256": "e0620e6f63fd0db3a482532a4146250cebe3b9cb77069855d3a07d0ac812f637"
+    }
+  ],
+  "remote_root": "/Users/n/Developer/numi-crow-rl-20261107",
+  "files": {
+    "artifacts/crow-v15-recorded-restart-20261114/v15-wing-topology-inspection-20261115/build.py": "1e7a654d422e534994450edd6a96643e34fd8ff045f41d0231bb9c4b2a0ed433",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-wing-topology-inspection-20261115/inspect": "58a80f71a8792416b29be96829133d4c5c441db15c3546bccdec68f7a3c5dbe6",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-wing-topology-inspection-20261115/topology.txt": "57a46e5493b0f65fbfb6d9d2b155d817347c320eed07461633a3938c9d96b844",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-wing-topology-inspection-20261115/topology.stderr": "c30279825a993d65048d5a897ae3448e14c93d27af7f630af91a57177f11718a",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-wing-topology-inspection-20261115/inspect.cpp": "1516dadd1722ab72b4a6534d3611a796409acae1dc106835da0c8e01fbde67ad",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-wing-topology-inspection-20261115/build.json": "a4f00ad4ec8e4a02e24432a3bd0409b9aa414370609ccf8007a35aa6b8451979"
+  }
+}
