@@ -1,0 +1,18 @@
+{
+  "archive_sha256": "5174b87b1046004225cbb8f736d2a7356da0a9aaf2c43d9bc6056c6203ad2e75",
+  "archive_size": 21729280,
+  "parts": [
+    {
+      "name": "crow-neural-attitude-gain-screen-20271701.tar.gz",
+      "sha256": "5174b87b1046004225cbb8f736d2a7356da0a9aaf2c43d9bc6056c6203ad2e75"
+    }
+  ],
+  "remote_files": {
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-attitude-gain-screen-20271701/command.json": "e7bc45e4266eaa1b671cb7bc2301f833ee37958777d4bb3001be96e901e7c20a",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-attitude-gain-screen-20271701/inputs.json": "5960609595c363f7f957728103af91daac2a330c3f5380000699c362871cdd73",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-attitude-gain-screen-20271701/result.json": "f1e357983a353b4955c8d07ba0968c0a9f460e11bb356641833b0650e7c29faa",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-attitude-gain-screen-20271701/stdout": "673500a3f5599b57cf96bf532d7b32712058f56662187783f1c2c372f6467b3d",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-attitude-gain-screen-20271701/stderr": "338c63285721e26777c215eeefe3a7d0984663095787dfceabe4988282b6b7af",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-attitude-gain-screen-20271701/screen.rollout": "cb28c1cb0468982aa9e41d5cd5ca1d4b50f915367415bb580be3ee4362ba0293"
+  }
+}

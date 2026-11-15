@@ -1,0 +1,5 @@
+# Parallel hip-feedback discovery screen
+
+The original direct-residual policy and toe gate were evaluated over 1000 intervals in 16 simultaneous development lanes. Lane 0 had no added feedback. The remaining lanes applied bounded privileged hip-position feedback using three pitch gains (-0.06, -0.12, -0.18) crossed with five pitch-rate gains (-0.12, -0.06, 0, 0.06, 0.12), with a 0.04-radian bound. This is a diagnostic control screen, not a neural policy.
+
+Fifteen lanes had first-episode physical terminations within the 20-second horizon. Lane 13, with pitch gain -0.18 and rate gain zero, did not terminate during that horizon. The control lane terminated after 202 intervals. This is not a matched comparison: each lane has its own randomized initial state, and other lane-dependent behavior may differ. The screen did not collect the independent all-substep strict toe-grip metric, so a nonterminating lane is not proof of supported grip. Its sole use is to select a candidate for matched physical testing. The source, complete first-episode summaries and all-lane rollout pack are archived; the fixture is a reconstructed forced perch with a scripted carrier.
