@@ -1,0 +1,19 @@
+{
+  "source": "independently fetched and hash-verified Git archives; exact renderer scratch directories only",
+  "removed": [
+    {
+      "seed": "20370113",
+      "files_verified": 17,
+      "logical_bytes": 15109315,
+      "free_before": 8317587456,
+      "free_after": 8332734464
+    },
+    {
+      "seed": "20370127",
+      "files_verified": 17,
+      "logical_bytes": 30584985,
+      "free_before": 8332734464,
+      "free_after": 8363409408
+    }
+  ]
+}

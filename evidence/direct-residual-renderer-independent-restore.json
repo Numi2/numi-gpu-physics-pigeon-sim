@@ -1,0 +1,12 @@
+{
+  "20370113": {
+    "archive_sha256": "79837d3e3ed4a055cbb9d02b435cb307ff1d68ec9c061292a6470b4a2d5b9c4e",
+    "members": 17,
+    "all_hashes_match": true
+  },
+  "20370127": {
+    "archive_sha256": "d0d905bbdfaf24714d98d8307a794fad32d6271ea99f8c0acf2c897aafd275f0",
+    "members": 17,
+    "all_hashes_match": true
+  }
+}
