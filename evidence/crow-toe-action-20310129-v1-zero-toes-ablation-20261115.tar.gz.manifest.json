@@ -1,0 +1,19 @@
+{
+  "archive_sha256": "a0dcaaddd03dd173427aa714feae6f5f7bce7de5bac8d2f036f1731886b8c8d1",
+  "archive_size": 35624960,
+  "parts": [
+    {
+      "name": "crow-toe-action-20310129-v1-zero-toes-ablation-20261115.tar.gz",
+      "sha256": "a0dcaaddd03dd173427aa714feae6f5f7bce7de5bac8d2f036f1731886b8c8d1"
+    }
+  ],
+  "remote_files": {
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-action-v1-zero-toes-20310129-1000/command.json": "1dd1e8653a6f126708e0dfc306d2a3bf1d38f6d414efddecfb2c71cffbd6261b",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-action-v1-zero-toes-20310129-1000/inputs.json": "d74d6e7bead177cd78280555b755a2b0fa0a96adac4dec4bddaaeda219111281",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-action-v1-zero-toes-20310129-1000/result.json": "81868a6e94ffc0178bf833deb1c9013d9fab4ee95ddb876a5e8ec4f1d26376d2",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-action-v1-zero-toes-20310129-1000/stdout": "fa658d175eb8bf04a4107d2b724f8a97a515502c1a2352fe036e6e6c55ff9c12",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-action-v1-zero-toes-20310129-1000/stderr.gz": "7c8f0516246580b547cb7a4fa3fa5b5c78716f3117d940533527f5e5dced7a5e",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-action-v1-zero-toes-20310129-1000/replay.json": "106d35bf18da5d6dd1fa366e09861aef75b635238a1346f08507289a1eb469d8",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-action-v1-zero-toes-20310129-1000/trace.tsv": "c3bc39c1f50c7c1eb2a339aef7b9fd603fae68972b2523b146d8f18241e227de"
+  }
+}
