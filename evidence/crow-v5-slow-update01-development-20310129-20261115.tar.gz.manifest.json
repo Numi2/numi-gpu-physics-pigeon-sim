@@ -1,0 +1,19 @@
+{
+  "archive_sha256": "2cd974abed2c5fab80fb9cbf5ee5de8a79333ea4f65f72fcfb62da52d7a37e42",
+  "archive_size": 35891200,
+  "parts": [
+    {
+      "name": "crow-v5-slow-update01-development-20310129-20261115.tar.gz",
+      "sha256": "2cd974abed2c5fab80fb9cbf5ee5de8a79333ea4f65f72fcfb62da52d7a37e42"
+    }
+  ],
+  "remote_files": {
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-v5-slow-update01-long-development-20310129-v5-slow-update01-1000/command.json": "8739db9d796c1617f0201d6d55ca76456db37b6d777eb243e1a082effdeafcaf",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-v5-slow-update01-long-development-20310129-v5-slow-update01-1000/inputs.json": "f7d04ac101963633a171cc83783074b3a3a47652cf9a1ebf5e2f02f3acb014f0",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-v5-slow-update01-long-development-20310129-v5-slow-update01-1000/result.json": "81868a6e94ffc0178bf833deb1c9013d9fab4ee95ddb876a5e8ec4f1d26376d2",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-v5-slow-update01-long-development-20310129-v5-slow-update01-1000/stdout": "6f8941cd675cfaf1c9ced2b4122fc61c1d3b3840d030c6d452fa956ddf9b2b07",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-v5-slow-update01-long-development-20310129-v5-slow-update01-1000/stderr.gz": "4a36ef84755b0007d44a77d9a2eff7214f9a5f37dbefd4a53ce426c44c00f6e1",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-v5-slow-update01-long-development-20310129-v5-slow-update01-1000/replay.json": "12a056074b1533a2dabbdf05bbefb99ff7b2278f4e04ff5077b46489c4df85c1",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-v5-slow-update01-long-development-20310129-v5-slow-update01-1000/trace.tsv": "b3f7658c0f3d36d2124b79a9adb212d4315dd75d4924b43b76f09062996367bd"
+  }
+}

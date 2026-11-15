@@ -1,0 +1,19 @@
+{
+  "archive_sha256": "38fb50240d097ed005420c2e827fb02f10e7f8aa62ab765c6c64debf76b8e148",
+  "archive_size": 36935680,
+  "parts": [
+    {
+      "name": "crow-v5-slow-update01-development-20310111-20261115.tar.gz",
+      "sha256": "38fb50240d097ed005420c2e827fb02f10e7f8aa62ab765c6c64debf76b8e148"
+    }
+  ],
+  "remote_files": {
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-v5-slow-update01-long-development-20310111-v5-slow-update01-1000/command.json": "979bf692ceaf9d140564619a98378d75623bee704ca01a5a701ef88b8eb7abdd",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-v5-slow-update01-long-development-20310111-v5-slow-update01-1000/inputs.json": "f7d04ac101963633a171cc83783074b3a3a47652cf9a1ebf5e2f02f3acb014f0",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-v5-slow-update01-long-development-20310111-v5-slow-update01-1000/result.json": "81868a6e94ffc0178bf833deb1c9013d9fab4ee95ddb876a5e8ec4f1d26376d2",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-v5-slow-update01-long-development-20310111-v5-slow-update01-1000/stdout": "32ba700738c902c2b728842b663c6f4021a296bd4a6b50c6616c2e2140a0e5c1",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-v5-slow-update01-long-development-20310111-v5-slow-update01-1000/stderr.gz": "cd528a46509b7acc266aabbc04753b7b35240fc6a405bd0fcd1bd042173214fb",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-v5-slow-update01-long-development-20310111-v5-slow-update01-1000/replay.json": "089d8e4ab27e45d9d1761de75be36a81da25651f0ce6855fa9147ec7f1fa09d7",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-v5-slow-update01-long-development-20310111-v5-slow-update01-1000/trace.tsv": "e2925e320eb960e677a10db64f70ca3f8e287be042788f201589945a68d5d9f0"
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "archive_sha256": "f451a3588b81fcb2661c66f1d2fcc9750091e5c9815f9226adfce5ce37af567a",
+  "archive_size": 36915200,
+  "parts": [
+    {
+      "name": "crow-v5-slow-update01-development-20310201-20261115.tar.gz",
+      "sha256": "f451a3588b81fcb2661c66f1d2fcc9750091e5c9815f9226adfce5ce37af567a"
+    }
+  ],
+  "remote_files": {
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-v5-slow-update01-long-development-20310201-v5-slow-update01-1000/command.json": "03a049d8892c42f940bb26a34d656f6fa88ceafba9e28c8856bff4ae8873014b",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-v5-slow-update01-long-development-20310201-v5-slow-update01-1000/inputs.json": "f7d04ac101963633a171cc83783074b3a3a47652cf9a1ebf5e2f02f3acb014f0",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-v5-slow-update01-long-development-20310201-v5-slow-update01-1000/result.json": "81868a6e94ffc0178bf833deb1c9013d9fab4ee95ddb876a5e8ec4f1d26376d2",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-v5-slow-update01-long-development-20310201-v5-slow-update01-1000/stdout": "d98193398aa8e8ea99e7700c41758326d735e28b5dbe7bb8d0e2216c371e3808",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-v5-slow-update01-long-development-20310201-v5-slow-update01-1000/stderr.gz": "c6a63c90ff7fd6767fba12f056777d68230521fb01680f67fcd380f69c5a4c95",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-v5-slow-update01-long-development-20310201-v5-slow-update01-1000/replay.json": "f1cee0369c9068bc7649f9db9e5acfb95236a76a5900d999916d2f3a0d9a8a80",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-v5-slow-update01-long-development-20310201-v5-slow-update01-1000/trace.tsv": "b3446ab3299a42b6e3d25ada7216492c5c691993c538d31c04d14eb36c744afa"
+  }
+}
