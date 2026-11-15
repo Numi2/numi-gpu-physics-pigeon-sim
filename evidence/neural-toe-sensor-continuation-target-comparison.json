@@ -1,0 +1,59 @@
+{
+  "rollout_sha256": "40cf459e4897d0c4dd8493a6aedcfaeb7cbfe1a69b59e6ceaf079c8ee4b8a9f8",
+  "policy_sha256": {
+    "start": "7951114824facfd8b94d59939f368b453283ae91dd77079da917b2c6e0bad6a9",
+    "before": "e7ee08b56684d9d2bc6b222ed7c53cec402e0de32da9a7eb902d09f44d9f6464",
+    "after": "bcc927dd959e038188158ed46f872ee10afeffdc33e82a551888f41be1e89909"
+  },
+  "comparisons": {
+    "before": {
+      "extension_delta_l2": 0.007891670800745487,
+      "extension_max_abs": 0.00023308534582611173,
+      "action_joint_target_delta_rms_rad": [
+        1.5577518670777783e-06,
+        2.4087264072602366e-07,
+        3.8242966243874264e-07,
+        6.504588283352217e-07,
+        1.1837305645902394e-07,
+        1.5061360373332033e-07,
+        2.8287905775056138e-08,
+        1.035547568382859e-07
+      ],
+      "action_joint_target_delta_max_abs_rad": [
+        4.696249961853028e-06,
+        2.703964710235596e-06,
+        1.904517412185669e-06,
+        2.0697712898254395e-06,
+        3.6424899008125067e-07,
+        4.250396159477532e-07,
+        7.031485438346863e-08,
+        3.958339220844209e-07
+      ]
+    },
+    "after": {
+      "extension_delta_l2": 0.017650406807661057,
+      "extension_max_abs": 0.0008746213861741126,
+      "action_joint_target_delta_rms_rad": [
+        2.1089961769415264e-06,
+        2.4924691377493557e-06,
+        9.574288317730692e-07,
+        3.187701803750303e-07,
+        1.1585894268912616e-07,
+        8.51451019350752e-08,
+        2.2560622695590297e-08,
+        1.8833188176294448e-07
+      ],
+      "action_joint_target_delta_max_abs_rad": [
+        1.016184687614441e-05,
+        8.784979581832887e-06,
+        4.14431095123291e-06,
+        3.612041473388672e-06,
+        6.377085810527205e-07,
+        5.93063305132091e-07,
+        9.639188647270203e-08,
+        1.0592848411761224e-06
+      ]
+    }
+  },
+  "scope": "deterministic targets on identical retained observations; toe target scale is an upper bound when gate is closed; not physical success"
+}

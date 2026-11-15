@@ -1,0 +1,7 @@
+from pathlib import Path
+import hashlib,json,numpy as np
+from metalrobo.mlx_policy_learning import read_policy_pack,read_policy_rollout_pack
+b=Path('/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114');lib=b/'toe-sensing-experiment-host/libmetalrobo.dylib';paths={'start':b/'neural-toe-sensing-scaled-v2-stochastic.policypack','before':b/'neural-toe-sensor-separate-clip-update-01.policypack','after':b/'neural-toe-sensor-continuation-update-04.policypack'};p={k:read_policy_pack(v,library_path=lib) for k,v in paths.items()};roll=b/'neural-toe-sensor-update-01.rollout';r=read_policy_rollout_pack(roll,library_path=lib);obs=r.actor_observations.reshape(-1,828);acts={k:v.actions(obs)[:,:8] for k,v in p.items()};scale=np.array([.08]*4+[.25]*4);out={}
+for k in ('before','after'):
+ delta=p[k].layers[0].weights[:,216:228]-p['start'].layers[0].weights[:,216:228];a=(acts[k]-acts['start'])*scale;out[k]={'extension_delta_l2':float(np.linalg.norm(delta)),'extension_max_abs':float(np.max(np.abs(delta))),'action_joint_target_delta_rms_rad':np.sqrt(np.mean(a*a,axis=0)).tolist(),'action_joint_target_delta_max_abs_rad':np.max(np.abs(a),axis=0).tolist()}
+print(json.dumps({'rollout_sha256':hashlib.sha256(roll.read_bytes()).hexdigest(),'policy_sha256':{k:hashlib.sha256(v.read_bytes()).hexdigest() for k,v in paths.items()},'comparisons':out,'scope':'deterministic targets on identical retained observations; toe target scale is an upper bound when gate is closed; not physical success'},indent=2))
