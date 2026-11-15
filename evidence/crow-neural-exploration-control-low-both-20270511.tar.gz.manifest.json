@@ -1,0 +1,14 @@
+{
+  "archive_sha256": "8ff4aca68b2c72a530b4c68c8017ce8d83913f151945ea9827d3f883cbaf2134",
+  "remote_files": {
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-exploration-control-low-both.policypack": "1f7e08031a9c655e0ab2530a8a9d0e0a06c321d196ee618af712385f3d9fc516",
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-exploration-result-low-both.policypack": "4972a85fe139747856865d9656d54ab2b02f8b429518b0028d18f6ce32e1263c",
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-exploration-result-low-both.policypack.deployment.policypack": "44b2ce15b5fdbadb642e1ac2715ed72f77441662315c452a230981dddf889667",
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-exploration-result-low-both.rollout": "e35ee5e8c280bbbcfb5fcac00488167dcbcbaf0ed5e43c987095aeba47498fef",
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-exploration-result-low-both.safetensors": "7f56c2f83daae1e3d7c4a233967247a861315e7402c2fface2f2c9b71572635d",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-exploration-control-low-both-20270511/command.json": "5b7b8af8bba07bed9f2f95e9fbc4dc06917aa5f2c13ade2f5a01d7e30ac80bd4",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-exploration-control-low-both-20270511/stdout": "0ac6e43d882f7a4f24ec45f69c09d358fe408992bb56f4f8b141646c87137a44",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-exploration-control-low-both-20270511/stderr": "8c82943a464cd7ac1130dc7e25bf637b92447e0abfd2cb20fdcbec05c21d2849",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-exploration-control-low-both-20270511/result.json": "5e1edea9440dc487663b822488c9b1d9ad0e40b05cfc39cd9f82b44c91df4837"
+  }
+}

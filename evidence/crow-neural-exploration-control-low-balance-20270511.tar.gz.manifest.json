@@ -1,0 +1,14 @@
+{
+  "archive_sha256": "86579d6c9aef69de28f16ab2e4f97b462474c61b6308c57c5d63a70d17c94cde",
+  "remote_files": {
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-exploration-control-low-balance.policypack": "3755edf97cf4d7be27cacb08c8f70f3693a95e2a1ea96f98e7a5d71952932cd1",
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-exploration-result-low-balance.policypack": "1b249fa5cfe3f847c7e9d3f97c8acd02fee77fb1dbe0fdfdbfa340aff83fdc67",
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-exploration-result-low-balance.policypack.deployment.policypack": "cc7b91326ed24d8968db5004beee997f5f55bbc2f01e6de6dc03fe8da5e784be",
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-exploration-result-low-balance.rollout": "8e83b09e6e4bc4dc209d8fc7266194c2a9b9efc90b35ba43d3b9a4fd8cd8a99e",
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-exploration-result-low-balance.safetensors": "a40da02024a3e62520544754de7551ead2db8369818ed09ec829690e03ed1337",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-exploration-control-low-balance-20270511/command.json": "08bba37c2809f12eea4fbfb7f464a6bbcd0c653d99d2165a82e6aeb7d6b24707",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-exploration-control-low-balance-20270511/stdout": "0dfce41fe6d0ad1572f7cdcaefd9483901f3f240d7948a8ac603fb38ca364909",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-exploration-control-low-balance-20270511/stderr": "e76b6ac9206779b8559f9009647b498034cd6c34a3113a12a66632d58c9a1fa6",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-exploration-control-low-balance-20270511/result.json": "ecde5a5f784108685a5f102b79fc35b607db6ef0dca8466c0f0b1dc264f3f78b"
+  }
+}
