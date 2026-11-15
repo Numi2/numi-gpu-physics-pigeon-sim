@@ -1,0 +1,14 @@
+{
+  "archive_sha256": "a3b36fd0ede6108815989706d415ff5622bb13cff647f24ba250563edf66d8e0",
+  "remote_files": {
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-perch-fixed-continuation-update-07.policypack": "f735efe369d6b75d524192bce21d0d0ebaa6b5a2f183f831ea956c626981eb9d",
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-perch-fixed-continuation-update-07.policypack.deployment.policypack": "306c0c7d0b2b80aff497d72c00dd904f4a8272ab297c662a9375a5b20af44aec",
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-perch-fixed-continuation-update-07.rollout": "b8154a06bc15b437e6571390564a1305590de0d3dc2cdb8f17fbc608e42b34cc",
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-perch-fixed-continuation-update-07.safetensors": "eddc6298b3c43bceff1d65ab20a8a9171965bbc63ed1ef27b02d8502aa128144",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-perch-fixed-continuation/update-07/command.json": "af2bf57957d8b551e583fb1b5ba9118c95a2119bbab3a432c7fe77211f6a685f",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-perch-fixed-continuation/update-07/inputs.json": "98df6d61b9e916f0749c814c37fadadb8244050ed57b7c54b4c2de6214a4ee65",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-perch-fixed-continuation/update-07/stdout": "3e053506e1d7b4b47e35675a6e418b33db5a7bc75c398459e8d9ea60e23d3cd5",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-perch-fixed-continuation/update-07/stderr": "1ba6e9e3377c9a5e37a0ea3f707bb0f3d60ca55e3e53b12cd56315f353c3955f",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-perch-fixed-continuation/update-07/result.json": "164a17f056224b8ab968e062bf14913f2a40be90adc54f10d514dfcacbbed2f0"
+  }
+}
