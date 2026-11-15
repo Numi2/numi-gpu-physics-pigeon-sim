@@ -1,0 +1,7 @@
+# Toe residual gate: matched trajectory telemetry
+
+The balance shader gates all four neural toe residuals on both compact foot loads and both toe-contact ramps reaching at least 24. This restriction could affect recovery after contact is lost, but its effect must be measured rather than assumed.
+
+An isolated diagnostic shader wrote the existing post-step load and ramp bits into an outcome channel only; it did not alter task state, action, reward, or physics. Both the baseline and update-04 policy produced bit-identical q, v, observation, accepted action, body states, reward, done and termination reason across all 250 recorded frames compared with their uninstrumented runs. On the consumed development seed 20370113, both policies fell at relative step 208; in each, all 208 post-step readings through that point had bilateral load bits set and both ramps at least 24. These post-step bits supply the next control step, and the restored checkpoint supplies the first. Thus loss of the gate is not the immediate explanation of this particular fall. It may still matter elsewhere.
+
+An initial telemetry variant wrote to the navigation field, which the replay did not expose as intended; it is retained alongside the corrected warning-channel instrument, its build and checkpoint round trips, all traces and the analysis. These are reconstructed phase-forced, relocated-branch, scripted-carrier diagnostics, not autonomous landing evidence. The corrected channel no longer reports its normal approach-warning meaning in this diagnostic variant.
