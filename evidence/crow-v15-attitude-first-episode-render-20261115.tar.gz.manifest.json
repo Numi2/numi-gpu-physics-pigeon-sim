@@ -1,0 +1,33 @@
+{
+  "archive_sha256": "5eb549e41d215172c075bb8b3577b033026509444023f01ff2c7653053b19d23",
+  "archive_size": 11427840,
+  "parts": [
+    {
+      "name": "crow-v15-attitude-first-episode-render-20261115.tar.gz",
+      "sha256": "5eb549e41d215172c075bb8b3577b033026509444023f01ff2c7653053b19d23"
+    }
+  ],
+  "remote_root": "/Users/n/Developer/numi-crow-rl-20261107",
+  "files": {
+    "artifacts/crow-v15-recorded-restart-20261114/v15-attitude-balanced-first-episode-update08-render-20370113/frames-front/numi-crow-replay-audit.json": "2c6571aed4d18a58360fd5590dac8cff8207d0ae6d826856867310947c5281b8",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-attitude-balanced-first-episode-update08-render-20370113/frames-above/numi-crow-replay-audit.json": "827e11a40834ed9292f27d98d89e3739fd09bff45e3a317fac23b9a2e0d9a8d1",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-attitude-balanced-first-episode-update08-render-20370113/front.mp4": "c43f0eda0f4e796cff6d769993b25d16c237b12d8f78cf437508f0cc9706f9a0",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-attitude-balanced-first-episode-update08-render-20370113/frames-feet/numi-crow-replay-audit.json": "8648abfebc743b99c0938aa451494853988db8f866a056bd994d535ec3821ed3",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-attitude-balanced-first-episode-update08-render-20370113/below.mp4": "e30eddff33013d0e3260ce8a8155c2e7d3e81751d49e58da1f294520ab4a79d8",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-attitude-balanced-first-episode-update08-render-20370113/back.log": "bbec45798cbaa3f483e681628f2ecdc934e4c81fb943e40b3281bfd70b7a3eac",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-attitude-balanced-first-episode-update08-render-20370113/front.log": "bbec45798cbaa3f483e681628f2ecdc934e4c81fb943e40b3281bfd70b7a3eac",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-attitude-balanced-first-episode-update08-render-20370113/back.mp4": "c18cc5d70865c56f87193ccfec1cd7888c33c29a4cedcee5be6b07d64cdc0082",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-attitude-balanced-first-episode-update08-render-20370113/below.log": "bbec45798cbaa3f483e681628f2ecdc934e4c81fb943e40b3281bfd70b7a3eac",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-attitude-balanced-first-episode-update08-render-20370113/frames-back/numi-crow-replay-audit.json": "42adf02aca826824f54d86a5796cf903175fc9716986051bdff284236d0a76a6",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-attitude-balanced-first-episode-update08-render-20370113/video-sha256.txt": "3a6e040040adf36beff43b4677ba6a33af383f08c8fca97fcd13d9d1b03815d3",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-attitude-balanced-first-episode-update08-render-20370113/frames-below/numi-crow-replay-audit.json": "fc38a674e0a7786c881ad7e78303d1ace59444845c8a153904f1eaa39fc04317",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-attitude-balanced-first-episode-update08-render-20370113/presentation-splice.json": "d9b07bc4ce3bba6a62e41fd514987e83cbdf0426d9712fb39971e3999b57874e",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-attitude-balanced-first-episode-update08-render-20370113/above.log": "bbec45798cbaa3f483e681628f2ecdc934e4c81fb943e40b3281bfd70b7a3eac",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-attitude-balanced-first-episode-update08-render-20370113/splice.log": "14f9a2c3b4a85fb3dca34f32448e06b67f0c6341349adf085baf6593ec92b479",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-attitude-balanced-first-episode-update08-render-20370113/above.mp4": "3b0a6e5afe588c3d1d22d32332c0f2c1c5011b7a147eac34bf1ab36f8e086131",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-attitude-balanced-first-episode-update08-render-20370113/feet.log": "bbec45798cbaa3f483e681628f2ecdc934e4c81fb943e40b3281bfd70b7a3eac",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-attitude-balanced-first-episode-update08-render-20370113/feet.mp4": "ce6d7f5e837c52912e984a8ccb7e81bfe4ddb8869700f6554371a1b1458ee112",
+    "artifacts/crow-v15-recorded-restart-20261114/render_v15_attitude_first_episode_five_views.sh": "26e353a73875d8a51b00096b9f8437cfc43a35775527daf74b54d05cb2034376",
+    "artifacts/crow-v15-recorded-restart-20261114/crow_v15_checkpoint_prefix_render_splice.swift": "d9680c3442715af10e1519b086301923d9407479e93fed95fcb145bb517e3555"
+  }
+}

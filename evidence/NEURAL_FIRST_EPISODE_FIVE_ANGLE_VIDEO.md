@@ -1,0 +1,5 @@
+# Five-angle first-episode balance comparison video
+
+The 73.12-second montage contains the separate older 48-second flight replay, the latest first-episode-trained controller falling in the reconstructed contact fixture (seed 20370113, absolute step 256, 5.12 s), and an earlier different-controller development hold (seed 20370127, 20 seconds). The original flight had collisions disabled. The branch test uses a relocated reconstructed scene, forced terminal phase and scripted carrier; it is not a continuous autonomous landing. The earlier hold alone does not demonstrate learned toe control, as its learned-toe ablation produced the same outcome. The labels and five synchronized views are presented as rendered, with the below-view ground hidden only for visibility.
+
+Final video SHA-256 23fc42f8563db5159c65bde796111761a26cc02b9726e2471bfb0742dc749668. The earlier replay and hold source views are archived in earlier evidence commits; this archive includes the new source views, splice, render and composition scripts, labels, logs and checksums. The latest policy and complete physical evaluation are preserved in the first-episode training archive.
