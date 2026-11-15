@@ -1,0 +1,14 @@
+{
+  "archive_sha256": "1c366a111cd0e397f0a790c166d1fd1c53503b66f63c54704337247f13e039f5",
+  "archive_size": 9492480,
+  "remote_files": {
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-knee-sequential-screen-20370113/variant-05/command.json": "050c3b52c636c2b001ee91e17fd7bf4991ab483201fd0ee55fde36de276f2fba",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-knee-sequential-screen-20370113/variant-05/inputs.json": "ccf302d430bf0bdb03a6ccd2783e70b4c12c56b34ecad55fd96a01684afe361f",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-knee-sequential-screen-20370113/variant-05/result.json": "cf70bce9dbb34e8733dae5395ecf27d29b389b77903b2edc303e3290c5a69d3a",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-knee-sequential-screen-20370113/variant-05/stdout": "21c2505369f2f2f96633ae4424a2143c789d7d6531504b3c3981cb86bc650a8d",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-knee-sequential-screen-20370113/variant-05/stderr.gz": "4750222b07c7eb8bcc27257550ddedfe275eb8cd4b3bfb7314eb122e84f660a3",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-knee-sequential-screen-20370113/variant-05/replay.json": "5f0e5777a526020088f28fad79d5fe9a2a6c1dab06adc86908f1ea44aab32635",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-knee-sequential-screen-20370113/variant-05/trace.tsv": "71c9fd9b0b68c81b4a129ca69fdeef81b2d3f3f0e1f34883bc8fc5154059e9d9",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-knee-sequential-screen-20370113/variant-05/first-episode-analysis.json": "19113e0570b2245123c3fd1cdc342fdc152d7b505f8ece6deaf8ab248681efd6"
+  }
+}
