@@ -1,0 +1,17 @@
+{
+  "archive_sha256": "b36f5460b8bb4be9a334057e820f44bf04fb8117e027cb4feb5d174e9840b910",
+  "remote_files": {
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-exploration-control-low-balance.policypack": "3755edf97cf4d7be27cacb08c8f70f3693a95e2a1ea96f98e7a5d71952932cd1",
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-settled-carrier-aligned.metallib": "6bfdf1dff3442184b85e75ff4c01fae0aa5b87184ea99a789b995ae5d75bad77",
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-settled-training-carrier-aligned.policypack": "cb4757244e9564e7103c9c0b3c8ed8663037dca912517917b1210f1534b18265",
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-settled-training-carrier-aligned.policypack.deployment.policypack": "613ebcdbfb1d6c7afc00d7c309b150ca571881853a4373bdb9554ce2c314fe36",
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-settled-training-carrier-aligned.rollout": "8f6534eb4736118622b820e1e96561bb37d043c5d4b60bc36da7292e8d56b462",
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-settled-training-carrier-aligned.safetensors": "35bf44e4ae006e28da9f0359708b2c739abe5c716482c095f1ab8b1a3f3c4047",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-settled-training-carrier-aligned-20270511/command.json": "dbe4df03af3f7fda327318b10f84e5646d30898c5677ed61b30cf9ecb41b44a7",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-settled-training-carrier-aligned-20270511/stdout": "eb1a924da463e81b36cc03388ab011e7d18715853d2ee3ac9e06df4761a53414",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-settled-training-carrier-aligned-20270511/stderr": "220a68f2c90d323133748140e4a8733c60bc964b3c3889cabc225fc92c5041b6",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-settled-training-carrier-aligned-20270511/result.json": "54df292f9b505d0f5409a63bee2052c951317d6d34608b5d2744e26ee4a67379",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-settled-carrier-aligned.metal": "60d5d7e252420d1b2d750732fae76a32921f386967b5f1136743d7425e272e98",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-settled-carrier-aligned-build.json": "5f6be9d39cc66b7c66fa5ce2fd5574e0abf02b068b4d4f06dd95a21dc69fb8e1"
+  }
+}

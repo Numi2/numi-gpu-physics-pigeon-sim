@@ -1,0 +1,17 @@
+{
+  "archive_sha256": "9ced5d9a138c9d8a6f511440180901c89ec347c300ecb2cb71c060d02a0516e0",
+  "remote_files": {
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-exploration-control-minimum-balance.policypack": "c13ded4c888c742b7e5597b0d7667696fd209cece76ba6ed8ecccdfb7222e1a2",
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-settled-training-diagnostic.metallib": "72e801e811ebb797f6a20c53d49a3f49f0bf6064aa3879c35fe56c3ddce28186",
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-settled-training-minimum-noise.policypack": "5d66431ed18c798970fc2afa0d79c059804242dd90d57b211f7b2c86176017e6",
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-settled-training-minimum-noise.policypack.deployment.policypack": "e4cbe9ae5eaa6173eded316e612418d948ee49fd03897a9ff775be3ec9174b4f",
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-settled-training-minimum-noise.rollout": "4ac64d434c84c91bdc89d3fc04747d442c28f7612492c62caf616b9558b5b8da",
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-settled-training-minimum-noise.safetensors": "9abd91e6d7ad9590b308c7b6ff07d78e3dda8d699972265c74c4b535ad4d260b",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-settled-training-minimum-noise-20270511/command.json": "1469f7ff5b24e773dbc663be15644df25abe8cceaa584005e09d2289a09eb5bf",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-settled-training-minimum-noise-20270511/stdout": "fc1afe1fc719b2615ad7ec849120e657ae6cefdbc49d47816e15efd2039231f8",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-settled-training-minimum-noise-20270511/stderr": "ede6ff19bc6a094c72905613f814493e304b8ebc76cecb93bcda83943710fa99",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-settled-training-minimum-noise-20270511/result.json": "4c3368086871abdd15ab9587ce0946a973eddd5585329e74026996c2aee95190",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-settled-training-diagnostic.metal": "f071471b0940f367ad306bb6cfbfd6ac006579157149adae695407c5778b6c5e",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-settled-training-diagnostic-build.json": "35baf18525073bdbb5ab2b65c677a3037f371850ce9da7c3908127764fd8bad8"
+  }
+}
