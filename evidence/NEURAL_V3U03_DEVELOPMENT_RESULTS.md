@@ -1,0 +1,3 @@
+# Longer-credit v3 update 3: interim development check
+
+This is an interim snapshot, not the final predeclared eight-update result. Against the previously consumed v1 comparison starts, update 3 failed both terminal-hold gates: on seed 20310111 it had 306 consecutive qualifying intervals (38–343) but did not hold through step 400; on seed 20310129 it had 233 consecutive intervals (42–274) and first terminated for tilt at step 352. Later automatic resets are excluded. The final training series continued unchanged after this check. The fixture, carrier, source and simulation limits documented in the previous reports apply.
