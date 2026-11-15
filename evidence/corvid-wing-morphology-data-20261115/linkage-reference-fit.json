@@ -1,0 +1,30 @@
+{
+  "input": "crow_17_1L_linkage-angles.csv",
+  "input_sha256": "093d1118aa127ee916ee04274f2d8367fb31d45307f1c4e5242fdaf7fad4e30e",
+  "fit": "manus_deg = c2 * elbow_deg^2 + c1 * elbow_deg + c0",
+  "coefficients_c2_c1_c0": [
+    -0.0013075647692513178,
+    1.3273689239592144,
+    35.35069544638068
+  ],
+  "train_source_frames": "1-350",
+  "held_out_source_frames": "351-502",
+  "train_valid_count": 309,
+  "held_out_valid_count": 97,
+  "train_elbow_deg_range": [
+    17.979722832,
+    120.296329421
+  ],
+  "held_out_elbow_deg_range": [
+    20.674399912,
+    112.976116809
+  ],
+  "held_out_outside_training_count": 0,
+  "held_out_rms_deg": 3.2695600427499087,
+  "held_out_median_absolute_deg": 1.919477143018895,
+  "held_out_max_absolute_deg": 8.158024856195752,
+  "held_out_constant_baseline_rms_deg": 47.19252099825559,
+  "rms_reduction_fraction": 0.9307186822490207,
+  "pre_registered_exploratory_pass": true,
+  "limitations": "One hand-manipulated specimen; time-contiguous held-out portion of same trial is not an independent animal. Raw anatomical measured-angle convention, no physics axes or hard joint limits."
+}

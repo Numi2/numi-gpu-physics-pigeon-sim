@@ -1,0 +1,6 @@
+Traceback (most recent call last):
+  File "/private/tmp/crow-balance-evidence-20261115/evidence/corvid-wing-morphology-data-20261115/fit_linkage_reference.py", line 7, in <module>
+    import numpy as np
+ModuleNotFoundError: No module named 'numpy'
+
+The project-directory shell selected /opt/homebrew/bin/python3 (Python 3.14), which lacks NumPy. No fit ran. Retry uses the already installed /Users/home/.pyenv/versions/3.10.12/bin/python3 with NumPy 2.2.5; no package installation or machine configuration changed.
