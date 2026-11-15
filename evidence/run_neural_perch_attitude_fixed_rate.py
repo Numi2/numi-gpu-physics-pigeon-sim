@@ -1,0 +1,11 @@
+from pathlib import Path
+import os,json,subprocess,hashlib,time
+r=Path('/Users/n/Developer/numi-crow-rl-20261107');a=r/'artifacts/crow-v15-recorded-restart-20261114';b=r/'build/crow-v15-recorded-restart-20261114';run=a/'neural-perch-attitude-fixed-rate-update-01';run.mkdir(exist_ok=False)
+cmd=json.loads((a/'neural-perch-attitude-residual-update-01/command.json').read_text());stem=b/'neural-perch-attitude-fixed-rate-update-01';out=Path(str(stem)+'.policypack');roll=Path(str(stem)+'.rollout');state=Path(str(stem)+'.safetensors')
+for k,v in [('--learning-rate','0.0003'),('--updated-policy-pack',str(out)),('--rollout-pack',str(roll)),('--output-learner-state',str(state))]:cmd[cmd.index(k)+1]=v
+assert '--fixed-learning-rate' in cmd and '--learner-state' not in cmd and not any(p.exists() for p in (out,roll,state));lib=b/'toe-sensing-experiment-host/libmetalrobo.dylib';pythonroot=b/'neural-perch-attitude-residual-python';env=dict(os.environ,DYLD_LIBRARY_PATH=str(lib.parent),CROW_EXPERIMENT_GAIT_SMOOTH='1');env.pop('CROW_RECORDED_STATE_RESTART',None)
+def sha(p):return hashlib.sha256(p.read_bytes()).hexdigest()
+inputs=[Path(cmd[0]),Path(cmd[cmd.index('--policy-pack')+1]),lib,Path(cmd[cmd.index('--metallib')+1]),pythonroot/'metalrobo/mlx_policy_learning.py',pythonroot/'metalrobo/mlx_policy_worker.py'];(run/'command.json').write_text(json.dumps(cmd,indent=2)+'\n');(run/'inputs.json').write_text(json.dumps({'sha256':{str(p):sha(p) for p in inputs},'env':{'DYLD_LIBRARY_PATH':env['DYLD_LIBRARY_PATH'],'CROW_EXPERIMENT_GAIT_SMOOTH':'1','CROW_RECORDED_STATE_RESTART':'unset'},'scope':'fixed-rate comparison; reconstructed branch fixture; scripted carrier'},indent=2)+'\n');started=time.time()
+with (run/'stdout').open('wb') as so,(run/'stderr').open('wb') as se:p=subprocess.run(cmd,cwd=r,env=env,stdout=so,stderr=se)
+files=[out,Path(str(out)+'.deployment.policypack'),roll,state];(run/'result.json').write_text(json.dumps({'exit_code':p.returncode,'elapsed_seconds':time.time()-started,'files':{str(x):{'size':x.stat().st_size,'sha256':sha(x)} for x in files if x.exists()}},indent=2)+'\n');print('perch attitude fixed rate update exit',p.returncode,flush=True)
+if p.returncode:raise SystemExit(p.returncode)
