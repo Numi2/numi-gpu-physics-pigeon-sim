@@ -1,0 +1,57 @@
+{
+  "archive_sha256": "15b6261a86565b3ac981ab00fc011f16250b5c3fdfe3db604c7f0eb5b4837c49",
+  "archive_size": 75765760,
+  "parts": [
+    {
+      "name": "crow-v15-coupled-wing-disturbance-20261115.tar.gz.part00",
+      "sha256": "128dc69eec2d0189f9a0633db7650b021deab9c53033b7a5b14dd8429c67ba33"
+    },
+    {
+      "name": "crow-v15-coupled-wing-disturbance-20261115.tar.gz.part01",
+      "sha256": "d0d1156a6959a016b8770c6cf867527c62d03a438675c78cfc583bfb7deb338c"
+    }
+  ],
+  "remote_root": "/Users/n/Developer/numi-crow-rl-20261107",
+  "files": {
+    "artifacts/crow-v15-recorded-restart-20261114/v15-coupled-wing-hip-disturbance-20261115/hip_pulse_neg.chk": "3e8a711fa89866c09bcebc4a3e77048ef94ad3add09406aab36508f69d34abe8",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-coupled-wing-hip-disturbance-20261115/build.py": "7af41de47ded08daccf08744690898a5d75a71098990a110d5c7528e83bbde29",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-coupled-wing-hip-disturbance-20261115/hip_pulse_pos.metal": "e012433f3cb66fe470d78f571ff05e6da73d2369729d2ec8b2bd2700d2afc27c",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-coupled-wing-hip-disturbance-20261115/hip_pulse_pos.chk": "f49dbdf62f9fcb852b0e112d042445bf6b529c0406030100884a351bdfa37915",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-coupled-wing-hip-disturbance-20261115/hip_pulse_pos-prefix.json": "436e5120105ccb33a00b8c3198133a4579940c866d80323ee55db7b32952160b",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-coupled-wing-hip-disturbance-20261115/hip_pulse_pos-prefix.tsv": "95e37996efd9c9bb93de5da3a43654a348422f255c2c3c5158e4f025f2a573ea",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-coupled-wing-hip-disturbance-20261115/hip_pulse_neg-prefix.command.json": "23c5e13022918b9b893b89820d288b037109e16a27ffabcd0e176a61227f1815",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-coupled-wing-hip-disturbance-20261115/hip_pulse_neg-prefix.tsv": "95e37996efd9c9bb93de5da3a43654a348422f255c2c3c5158e4f025f2a573ea",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-coupled-wing-hip-disturbance-20261115/hip_pulse_neg-prefix.json": "436e5120105ccb33a00b8c3198133a4579940c866d80323ee55db7b32952160b",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-coupled-wing-hip-disturbance-20261115/hip_pulse_neg-prefix.stderr": "338c63285721e26777c215eeefe3a7d0984663095787dfceabe4988282b6b7af",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-coupled-wing-hip-disturbance-20261115/hip_pulse_pos-prefix.stderr": "338c63285721e26777c215eeefe3a7d0984663095787dfceabe4988282b6b7af",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-coupled-wing-hip-disturbance-20261115/hip_pulse_pos-prefix.command.json": "213a2f76e4f89cc735c4a26e30b1189461020990f429e4b7aabf05cf81c1d07e",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-coupled-wing-hip-disturbance-20261115/hip_pulse_neg-prefix-result.json": "6b4c8514bb1316e7dbd2df0af30bbdc7d50e73fa885c9c09d15732bbf47efc46",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-coupled-wing-hip-disturbance-20261115/hip_pulse_neg.metal": "fd08998b2a8208b94d643cf5c9e83a159354ae7bf19c125d5c20a57f1aa72c9a",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-coupled-wing-hip-disturbance-20261115/evaluate.py": "5eb4bf70133d7007b35f34c0e191d1d7d6631398ddfaae9489eb7fbf7b4c4e77",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-coupled-wing-hip-disturbance-20261115/hip_pulse_pos-prefix-result.json": "f060562b9903eb8d0090b83ffb21f3f398c350fd295125ad40c0df7c99b89a7a",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-coupled-wing-hip-disturbance-20261115/prepare.py": "6370d224d6ee068dd33277a66c51a8c14c5576f4391ee5331009c95918943f68",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-coupled-wing-hip-disturbance-20261115/analyze.py": "e16780b35d78bbef864cf454fb3ad96d0d4f710035ed13efe26e8a36dd3f219e",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-coupled-wing-hip-disturbance-20261115/build.json": "11485b78824ac95403876fa53db05424d9325d31c4ca25b7daedc9cdaf001cca",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-coupled-wing-hip-disturbance-20261115/hip_pulse_neg-prefix.stdout": "0267316e6825bfd13a9dd80bb63054f59a042da3b082305f90f943b37805ce5a",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-coupled-wing-hip-disturbance-20261115/hip_pulse_pos-prefix.stdout": "68cb919329f0fd9d16c333c87a3dc576d161624836973f6d3a3732f0cfd12b9c",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-coupled-wing-hip-disturbance-eval-20261115/20370113-hip_pulse_neg-1000.tsv": "f801aeb8985abb71057c765c6e41b16b4aba20e4650c63002e39c2f6dea5693e",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-coupled-wing-hip-disturbance-eval-20261115/20370113-hip_pulse_pos-1000.json": "4055f499182036a2b00a408328afb3cb113b505157eba8c6eeba827d15330c56",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-coupled-wing-hip-disturbance-eval-20261115/20370113-hip_pulse_neg-1000.command.json": "dbdd15272ae863a498408fec75e5ec77d5d0fae7d773f8671d20bc430188145b",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-coupled-wing-hip-disturbance-eval-20261115/analysis-hip_pulse_pos.json": "914f2c43d795d24ace7e48ff9f1356e436ca569e785bf70c1bf29c3bc7b15265",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-coupled-wing-hip-disturbance-eval-20261115/20370113-hip_pulse_pos-1000.command.json": "2153f6745da30d990608f1b7320176f6fc543f59cfdeddc4fd2347a8d04a10f8",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-coupled-wing-hip-disturbance-eval-20261115/20370113-hip_pulse_pos-1000.tsv": "3137de9338fcd7670617b9d352f290c7b775aae005d6300d767d7901a2a215f5",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-coupled-wing-hip-disturbance-eval-20261115/analysis-both.json": "bab601f89f940cac2e93de9f038ee9a01b24565fe60ffe0ccf0a7b76e8bd4ae4",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-coupled-wing-hip-disturbance-eval-20261115/20370113-hip_pulse_neg-1000.json": "8c70aa2d39c11b7598ed9c3f09cec86cd19a48f1206915fa15c61b83a04cc5c9",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-coupled-wing-hip-disturbance-eval-20261115/20370113-hip_pulse_neg-1000.stdout": "1e10ca0edfdc8350e6de6d73a9c424951a11f1029b109f669ef30ecd052b5d27",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-coupled-wing-hip-disturbance-eval-20261115/20370113-hip_pulse_pos-1000.stdout": "827f443696795a5f1de7d7e37a5a881713e57e55166700d325bfd0d14be1dad4",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-coupled-wing-hip-disturbance-eval-20261115/20370113-hip_pulse_pos-1000.inputs.json": "adadd584b606f5a8fcbe16e2f752bdf32bdaeb36a6258be90a5c7a324a22d58f",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-coupled-wing-hip-disturbance-eval-20261115/20370113-hip_pulse_pos-1000.stderr": "e6b1dc2e9a29f31406fdd9d9baf61831ece0e941936fa49f82f7177d610ecc03",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-coupled-wing-hip-disturbance-eval-20261115/runs.json": "c56d8bfe667a0ef4b5c43616db31c40ad7ade94e4cd2a47163f5c35ea78e97ff",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-coupled-wing-hip-disturbance-eval-20261115/20370113-hip_pulse_neg-1000.stderr": "36b1ede5776ddb13ac9d04f75bc92181e3c97d2dc9dd090fcb53b0f99af401a8",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-coupled-wing-hip-disturbance-eval-20261115/20370113-hip_pulse_neg-1000.inputs.json": "7b5f256c5ee2be5174ba1ea8ed9c457b0e20bb866051d96e069761aada699a0b",
+    "build/crow-v15-recorded-restart-20261114/v15-coupled-wing-hip-disturbance-20261115/hip_pulse_pos.metallib": "736377779dd88c234c433e7afcd276ecb32fad536de65cd1c7b25f26b892126f",
+    "build/crow-v15-recorded-restart-20261114/v15-coupled-wing-hip-disturbance-20261115/hip_pulse_neg.metallib": "d5be3c586c347b64c9cb93ca6646e2e3571ed34485c495faec590cd3a9e6791b",
+    "build/crow-v15-recorded-restart-20261114/v15-coupled-wing-hip-disturbance-20261115/hip_pulse_pos.air": "3c22374652a29285b27055811aaeb79cda625f6cbc81ef0747eb90f1cc6e4377",
+    "build/crow-v15-recorded-restart-20261114/v15-coupled-wing-hip-disturbance-20261115/hip_pulse_neg.air": "04162baf3e097c853084639a1abcfc607514150e79ab5e40e155c869df4c86b4"
+  }
+}
