@@ -1,0 +1,14 @@
+{
+  "archive_sha256": "ca98a098ad066e829b59b930028e98b4cb4fddc6fc353af659848dc5f08b1292",
+  "remote_files": {
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-perch-fixed-continuation-update-08.policypack": "ea4e08285fe65476f4e248592881d38d6f5f71cba26e908656aef297165152df",
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-perch-fixed-continuation-update-08.policypack.deployment.policypack": "bf790f91bf5e20bc2fc43bff5f2e5d9ba8ae69f74575f48743adedb8db18d227",
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-perch-fixed-continuation-update-08.rollout": "f89314a01da1634bf37af8a612a2fd1ded9b7fd2fb7e23c67e932207145c1307",
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-perch-fixed-continuation-update-08.safetensors": "fa2ef77be80070a27f6c8e022cf6f5a38832341e900eb6de7f5cfe2d17ed3b18",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-perch-fixed-continuation/update-08/command.json": "ba78100099b2dda5f41390d956d22193d8fb537c27fcd60b15379d4f63481a9c",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-perch-fixed-continuation/update-08/inputs.json": "201c66aeef4f5398fba68c5977a79fae553bf40bf42b58fcff9708c7ce0e26d7",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-perch-fixed-continuation/update-08/stdout": "595ccd65a2c855b2a73a63dac50088ac8e9dde0941d9ab1e519fba6093ce8219",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-perch-fixed-continuation/update-08/stderr": "8c7d83d1af4ee489272ad1a734acfccd99c17eb168ea1dd44c802a6b31d8c274",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-perch-fixed-continuation/update-08/result.json": "cf67e55391b500b7ba7bc43bdd628873cea6600bc2cedf81d03cb472bc98a5db"
+  }
+}

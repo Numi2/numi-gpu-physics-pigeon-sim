@@ -1,0 +1,7 @@
+{
+  "archive_sha256": "3bec79bc5487dd97a20e8edc30597ed0ae6c8b86c4366103ca9a42b50312851c",
+  "remote_files": {
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-toe-residual-update-01-no-toe-residual.policypack": "75e5ebca1339465dbcfa40b33002508481a9b8ab2249a549dd8d52f555f0891f",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-direct-toe-ablation-pack.json": "a7f7026554edf3a2a8cd6ec1544e1b621f1da08456c95653f9389c90982862cb"
+  }
+}
