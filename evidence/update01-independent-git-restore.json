@@ -1,0 +1,17 @@
+{
+  "20310201": {
+    "archive_sha256": "6d94ab82dce857ec6c97d0d0ac68700f356d472e40cd26291316465b7dec6f4c",
+    "restored_file_count": 17,
+    "all_file_hashes_match": true
+  },
+  "20310221": {
+    "archive_sha256": "e4ad4fd66eca316d86f6519bd60be532dae4dbd2cde659d544e251df6aa0472c",
+    "restored_file_count": 17,
+    "all_file_hashes_match": true
+  },
+  "video": {
+    "sha256": "7165cd100c39f9d21a439bbd51739ade29939a1f7b013f7f2143b911335c862f",
+    "bytes": 15700038,
+    "matches_delivered_video": true
+  }
+}

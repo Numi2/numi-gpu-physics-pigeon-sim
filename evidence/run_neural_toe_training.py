@@ -1,0 +1,10 @@
+from pathlib import Path
+import os,json,subprocess,hashlib,time
+r=Path('/Users/n/Developer/numi-crow-rl-20261107');a=r/'artifacts/crow-v15-recorded-restart-20261114';b=r/'build/crow-v15-recorded-restart-20261114';run=a/'neural-toe-action-v1-update-01';run.mkdir(exist_ok=False)
+cmd=json.loads((a/'neural-balance-v5-slow/update-01/command.json').read_text());out=b/'neural-toe-action-v1-update-01.policypack';roll=b/'neural-toe-action-v1-update-01.rollout';state=b/'neural-toe-action-v1-update-01.safetensors';source=b/'neural-toe-action-zero-stochastic.policypack';lib=b/'round-neural-host/libmetalrobo.dylib';shader=b/'neural-toe-action-train.metallib'
+for k,v in [('--seed','20270711'),('--learner-seed','20270711'),('--policy-pack',str(source)),('--updated-policy-pack',str(out)),('--rollout-pack',str(roll)),('--output-learner-state',str(state)),('--metallib',str(shader)),('--python-root',str(b/'neural-toe-python'))]:cmd[cmd.index(k)+1]=v
+assert not any(p.exists() for p in (out,roll,state));env=dict(os.environ,DYLD_LIBRARY_PATH=str(b/'round-neural-host'),CROW_EXPERIMENT_GAIT_SMOOTH='1');env.pop('CROW_RECORDED_STATE_RESTART',None)
+def sha(p):return hashlib.sha256(p.read_bytes()).hexdigest()
+inputs=[Path(cmd[0]),source,lib,shader,b/'neural-toe-python/metalrobo/mlx_policy_learning.py'];(run/'command.json').write_text(json.dumps(cmd,indent=2)+'\n');(run/'inputs.json').write_text(json.dumps({'sha256':{str(p):sha(p) for p in inputs},'env':{'DYLD_LIBRARY_PATH':env['DYLD_LIBRARY_PATH'],'CROW_EXPERIMENT_GAIT_SMOOTH':'1','CROW_RECORDED_STATE_RESTART':'unset'},'scope':'exploratory consumed fixture with scripted carrier and physical residual toe actuators'},indent=2)+'\n');started=time.time()
+with (run/'stdout').open('wb') as so,(run/'stderr').open('wb') as se:p=subprocess.run(cmd,cwd=r,env=env,stdout=so,stderr=se)
+files=[out,Path(str(out)+'.deployment.policypack'),roll,state];(run/'result.json').write_text(json.dumps({'exit_code':p.returncode,'elapsed_seconds':time.time()-started,'files':{str(x):{'size':x.stat().st_size,'sha256':sha(x)} for x in files if x.exists()}},indent=2)+'\n');print('toe update 01 exit',p.returncode,flush=True)

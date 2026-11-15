@@ -1,0 +1,7 @@
+from pathlib import Path
+import json,hashlib
+r=Path('/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114')
+paths={'baseline':r/'neural-v5-slow-update01-long-development-20310129-v5-slow-update01-1000/replay.json','zero':r/'neural-toe-action-parity-20310129-300/replay.json','probe':r/'neural-toe-action-probe-20310129-300/replay.json'}
+p={k:json.loads(v.read_bytes())['payload']['frames'] for k,v in paths.items()};b=p['baseline'][:300];z=p['zero'];t=p['probe']; fields=('q','v','actor_observation','accepted_actions'); parity={k:all(x[k]==y[k] for x,y in zip(b,z)) for k in fields};assert all(parity.values()) and len(z)==len(t)==300
+qdiff=[y-x for x,y in zip(z[0]['q'],t[0]['q'])];result={'input_sha256':{k:hashlib.sha256(v.read_bytes()).hexdigest() for k,v in paths.items()},'zero_matches_baseline_all_300':parity,'probe_first_interval_action_slots_4_7':t[0]['accepted_actions'][4:8],'zero_first_interval_action_slots_4_7':z[0]['accepted_actions'][4:8],'first_interval_q_differences_rad':qdiff,'first_interval_max_abs_toe_q_difference_rad':max(map(abs,qdiff[23:39])),'first_interval_max_abs_other_q_difference':max(map(abs,qdiff[:23]+qdiff[39:])), 'first_done':{k:next((i+1 for i,f in enumerate(p[k]) if f['done']),None) for k in ('zero','probe')},'tilt_rad_at_235_before_probe_done':{'zero':z[234]['tilt'],'probe':t[234]['tilt']}}
+assert result['first_interval_max_abs_toe_q_difference_rad']>0.001;print(json.dumps(result,indent=2))
