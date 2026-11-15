@@ -1,0 +1,3 @@
+# Long evaluation archive verification
+
+Each of the four long-evaluation tarballs was independently fetched from the GitHub evidence branch into a separate bare Git repository, SHA-256 checked against `long-evaluation-sha256.txt`, and read successfully with `tar -tzf`. All 28 files in the remote machine's four original run directories were individually hashed and matched against their corresponding files inside the verified archives; the manifest is `long-remote-file-manifest.json`. The local archive also includes four additional generated first-episode analyses. No open handles were reported for the four completed remote run directories. This verification permits retiring only those redundant completed remote copies; it does not authorize deleting other research data.

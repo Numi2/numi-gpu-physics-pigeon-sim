@@ -1,0 +1,114 @@
+{
+  "neural-long-20310201-initial-1000/command.json": {
+    "sha256": "65d74fa730daadc4759310fcfaaf0555bfa8994ca22ab540b45a39de5ff68472",
+    "size": 1373
+  },
+  "neural-long-20310201-initial-1000/inputs.json": {
+    "sha256": "ae42d41f61fc6863cd94083fcca55a663c6f8bdb5ad546ab8b1aad0f9b56dc68",
+    "size": 404
+  },
+  "neural-long-20310201-initial-1000/replay.json": {
+    "sha256": "c04c1cc68666dc83424814487bde65b18db8fdba5dbc311ef30cacdb50eccc27",
+    "size": 35584762
+  },
+  "neural-long-20310201-initial-1000/result.json": {
+    "sha256": "81868a6e94ffc0178bf833deb1c9013d9fab4ee95ddb876a5e8ec4f1d26376d2",
+    "size": 21
+  },
+  "neural-long-20310201-initial-1000/stderr.gz": {
+    "sha256": "e4759def7fbe3f2bc3abe45b823986f2c81b318437e6b4d5822ea4bbadc9b685",
+    "size": 27287030
+  },
+  "neural-long-20310201-initial-1000/stdout": {
+    "sha256": "ecbec24d68fb66a9676443209d1778eb54fbc8ccd2f674c50a19af405cd2570f",
+    "size": 11976
+  },
+  "neural-long-20310201-initial-1000/trace.tsv": {
+    "sha256": "47441eb09df0db9bb2a087b390e1677013437e46561f2aed91241f94dba7b0d6",
+    "size": 840216
+  },
+  "neural-long-20310201-trained-1000/command.json": {
+    "sha256": "1a1033193355d97d51a9ced4df7e1e3246def62f42d003c806fc8f9391fe7355",
+    "size": 1369
+  },
+  "neural-long-20310201-trained-1000/inputs.json": {
+    "sha256": "45d5ade71be3ca0e1e4e3a24cf93f1b59b528c4802f8b7cefd315d804d8d2b06",
+    "size": 404
+  },
+  "neural-long-20310201-trained-1000/replay.json": {
+    "sha256": "f95c81b56007aa819c734e079cd222296a6c5a09e73d57b8b780926a3749ef44",
+    "size": 35704949
+  },
+  "neural-long-20310201-trained-1000/result.json": {
+    "sha256": "81868a6e94ffc0178bf833deb1c9013d9fab4ee95ddb876a5e8ec4f1d26376d2",
+    "size": 21
+  },
+  "neural-long-20310201-trained-1000/stderr.gz": {
+    "sha256": "bd121b5a693801f3e66a1fc67e9fd4735bd09504a09d7dd96adf50c9057582bc",
+    "size": 26773340
+  },
+  "neural-long-20310201-trained-1000/stdout": {
+    "sha256": "6ebbcdfe8c458f2b89a8ec276c43f90c30d3175405a537c6d8f4532387fcf662",
+    "size": 11959
+  },
+  "neural-long-20310201-trained-1000/trace.tsv": {
+    "sha256": "51f4d0bc2412ac9b24de9c82cad6d1b91ca17e12dd992a704836b5822f4122ee",
+    "size": 838905
+  },
+  "neural-long-20310221-initial-1000/command.json": {
+    "sha256": "eb88832ed2faa3d8c94c069d0ca91c7efa4a1635aff467e2b854d82bb853f6c1",
+    "size": 1373
+  },
+  "neural-long-20310221-initial-1000/inputs.json": {
+    "sha256": "ae42d41f61fc6863cd94083fcca55a663c6f8bdb5ad546ab8b1aad0f9b56dc68",
+    "size": 404
+  },
+  "neural-long-20310221-initial-1000/replay.json": {
+    "sha256": "c0df603ac3b0498e55182e68c84fc8018c15e8e30ea175e8e8f116530632c01b",
+    "size": 35716274
+  },
+  "neural-long-20310221-initial-1000/result.json": {
+    "sha256": "81868a6e94ffc0178bf833deb1c9013d9fab4ee95ddb876a5e8ec4f1d26376d2",
+    "size": 21
+  },
+  "neural-long-20310221-initial-1000/stderr.gz": {
+    "sha256": "8989e374d0cbf8350d0def8168b8fda181a53d33fcb8eda0a676c32e216204e2",
+    "size": 25709127
+  },
+  "neural-long-20310221-initial-1000/stdout": {
+    "sha256": "c748a2d47725ada6ae6f011db14ae409d99086a4edfbc310200bce5eec5bfd71",
+    "size": 11962
+  },
+  "neural-long-20310221-initial-1000/trace.tsv": {
+    "sha256": "ae71357dc0590ccc942c432a9062b66209fd7164ff14257237f9a6bf13af9110",
+    "size": 837884
+  },
+  "neural-long-20310221-trained-1000/command.json": {
+    "sha256": "759843f982f123ef1a61eeba1c14dd8ee5cb5f048ea322110b734d27184c098a",
+    "size": 1369
+  },
+  "neural-long-20310221-trained-1000/inputs.json": {
+    "sha256": "45d5ade71be3ca0e1e4e3a24cf93f1b59b528c4802f8b7cefd315d804d8d2b06",
+    "size": 404
+  },
+  "neural-long-20310221-trained-1000/replay.json": {
+    "sha256": "cccca7671c552daa2d5950868aefb936d14b268f7df30009fa8ebdd0c22fc1df",
+    "size": 35796214
+  },
+  "neural-long-20310221-trained-1000/result.json": {
+    "sha256": "81868a6e94ffc0178bf833deb1c9013d9fab4ee95ddb876a5e8ec4f1d26376d2",
+    "size": 21
+  },
+  "neural-long-20310221-trained-1000/stderr.gz": {
+    "sha256": "6e3742d919917d62487fa8e5a060ab81ce93d1c2ea9820dc174767bebbf4a973",
+    "size": 26398453
+  },
+  "neural-long-20310221-trained-1000/stdout": {
+    "sha256": "8bf87f4f5de14e2a7a92934af56c7bd2c61125be1bd105c1a94ccb95bf88421d",
+    "size": 11972
+  },
+  "neural-long-20310221-trained-1000/trace.tsv": {
+    "sha256": "515b657456a8e52c6e27ae493712a0d00f8d5acd2659c2d81c85fa2232971fae",
+    "size": 837226
+  }
+}
