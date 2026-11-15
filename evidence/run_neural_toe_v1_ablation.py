@@ -1,6 +1,6 @@
 from pathlib import Path
 import gzip,hashlib,json,os,subprocess,threading,sys
-seed=20310201;name='learned-v1-zero-toes';assert len(sys.argv)==1
+seed=int(sys.argv[1]);name='learned-v1-zero-toes';assert seed in (20310129,20310201)
 r=Path('/Users/n/Developer/numi-crow-rl-20261107');a=r/'artifacts/crow-v15-recorded-restart-20261114';b=r/'build/crow-v15-recorded-restart-20261114';run=a/(f'neural-toe-action-v1-zero-toes-{seed}-1000');run.mkdir(exist_ok=False)
 cmd=json.loads((a/'round-position-aligned-valid-toe-400/command.json').read_text());i=cmd.index('--base-policy-pack');del cmd[i:i+2]
 pack=b/'neural-toe-action-v1-zero-toes.policypack'
