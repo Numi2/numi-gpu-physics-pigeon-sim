@@ -1,0 +1,5 @@
+# Sequential knee-feedback screen results
+
+All fifteen 300-interval one-lane development trials matched the retained original's q, v, actor observations and accepted actions for the first 50 frames, before the knee correction began. The zero-gain variant matched q, v, observations and accepted actions for all 300 recorded frames. Each trial's full replay, substep contacts, resets, commands and per-file hashes are archived.
+
+The unmodified control first terminated at interval 263 with a longest strict support/opposed-toe-contact/tilt/speed streak of 139 intervals. The best first-termination time in the screen was 266 intervals, and the longest strict streak was 141. Every setting terminated within the 300-interval horizon. At the three tested nonpositive pitch gains, positive pitch-rate gain produced earlier terminations at intervals 190–192; the other settings' first terminations ranged from 258–266. No setting materially improved the hard start and no candidate is promoted. These are exploratory privileged knee corrections on one reconstructed, forced-perch, scripted-carrier development start, not learned autonomous balance or a landing qualification.
