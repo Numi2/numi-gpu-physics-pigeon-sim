@@ -1,0 +1,5 @@
+# Continued attitude-and-contact learning
+
+One update fell on development seed 20370113, so a single update has not solved the observed tilt failure. Continue the trained residual for four fixed-rate PPO updates with training seeds 20271301–20271304, four environments, 512 steps, gamma .999, lambda .995 and separate clipping. Resume the matching optimizer; the saved first and second moments outside the residual mask have been checked exactly zero. Use an isolated worker with the residual-only resume guard narrowly relaxed, and verify every protected actor parameter and contract after every update. Abort on drift. Archive each rollout, checkpoint, optimizer and failure, retain the initial and earlier direct-contact policies, and compare on consumed development starts before considering fresh qualification layouts.
+
+This is a continuation experiment, not a success criterion. The partial reconstructed arrival, physical toe-actuation gate and scripted carrier remain; no adaptive learning-rate search is involved.
