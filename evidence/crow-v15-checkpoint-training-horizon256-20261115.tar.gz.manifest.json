@@ -1,0 +1,51 @@
+{
+  "archive_sha256": "4846a1c2e49c848cc1bd11272b0dda643ec8a3ecf2e86d64ec17e8576bb5c20e",
+  "archive_size": 19046400,
+  "parts": [
+    {
+      "name": "crow-v15-checkpoint-training-horizon256-20261115.tar.gz",
+      "sha256": "4846a1c2e49c848cc1bd11272b0dda643ec8a3ecf2e86d64ec17e8576bb5c20e"
+    }
+  ],
+  "remote_root": "/Users/n/Developer/numi-crow-rl-20261107",
+  "files": {
+    "artifacts/crow-v15-recorded-restart-20261114/crow_v15_checkpoint_training_256.py": "6849e52a8b9e3b381760b1baf1df61e93eff6899ae4e4ce8db650883d99d34da",
+    "artifacts/crow-v15-recorded-restart-20261114/crow_v15_checkpoint_training_256_verify.py": "7026876f5a59f81dc5b726fbf59c1ef938154d95b2078bcb4b6c237664b5dbc9",
+    "artifacts/crow-v15-recorded-restart-20261114/crow_v15_checkpoint_training_256_evaluate.py": "f2bd292e85713f603592f5b241ebc335fd46b7f9fc15d9b515311ca0004a11c0",
+    "artifacts/crow-v15-recorded-restart-20261114/crow_v15_checkpoint_advantage.py": "7fce6a1b228a4c3867c010a497681d543bde84889167878cd353facc1d8ea397",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-checkpoint-training-20370127-horizon256/advantage-vs-return.json": "70d51aec849cdd7f20034ce00eb19e1c8a67887dff3c5a7c6513afebb37cf415",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-checkpoint-training-20370127-horizon256/result.json": "3c93b453e96f8d31235f604f581734d8a87f614cf0f20ac161f2a5023cbf2da7",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-checkpoint-training-20370127-horizon256/stdout": "f2a9a8f490faad452bb020cb9f0667036f967b64955f19e11147eadf67ee4f2a",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-checkpoint-training-20370127-horizon256/stderr": "079484bbdbf0498bf37541fb494204d3f90cd2956c70da3dced0e1ed52af5cde",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-checkpoint-training-20370127-horizon256/command.json": "811acd8508f7866a1e202d4761187276d6a761c366fbf6e1bcea4355aaf0f9a0",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-checkpoint-training-20370127-horizon256/inputs.json": "c74d893f8f6d2c9356709ce4dff1a328bc48324e4417c10b6d821c9ab8720af0",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-checkpoint-training-20370127-horizon256/verification.json": "c783bfd8608b9b84ef3177309f7af7ed09ff33baeba689b4474d9ce8fa48e7b2",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-checkpoint-training-20370127-horizon256/environment.json": "053da6b2f2d4fccf773749c44b0db1a212522e9aa87fe7157a69d1fd88456a40",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-checkpoint-horizon256-evaluation-20370127-250/baseline.command.json": "777cfb1d5638159b555f94bbbaef6a8d09ea729a8061fd9a1848921a2b3c1ea2",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-checkpoint-horizon256-evaluation-20370127-250/candidate.json": "92f80a7e3d70d16a05e109fd82ae419f2fa65c777b35e7ed606918a3ab2d5082",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-checkpoint-horizon256-evaluation-20370127-250/baseline.tsv": "f8bb1ac8cb23539ff62facd5d15d6cd7581f8d65b0dfedba3e69cb63fba61dd2",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-checkpoint-horizon256-evaluation-20370127-250/comparison.json": "f7c0992399a17aec7c7d27124d9dc4bc673ca53c63dc2cef8d9b31c26b361ce3",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-checkpoint-horizon256-evaluation-20370127-250/candidate.stderr": "338c63285721e26777c215eeefe3a7d0984663095787dfceabe4988282b6b7af",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-checkpoint-horizon256-evaluation-20370127-250/baseline.json": "0f5bd58c1187f4016deaadd126c4609bb924ef371bb07922a61d91b816705da4",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-checkpoint-horizon256-evaluation-20370127-250/candidate.tsv": "0651ca0ea810e303a5973cd8dd8c530f20271b6e4819ab9bc1ede61d72c8310a",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-checkpoint-horizon256-evaluation-20370127-250/baseline.stdout": "a5c013a68138d24e647eb0cfd22ea1ca5936b0c7b562b526165c6b37758e713f",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-checkpoint-horizon256-evaluation-20370127-250/baseline.stderr": "338c63285721e26777c215eeefe3a7d0984663095787dfceabe4988282b6b7af",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-checkpoint-horizon256-evaluation-20370127-250/candidate.command.json": "8c5e75c7cd7a327f1a60ff2f2d4fda81c40a0e3a5eb91527b5722622aaf7916f",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-checkpoint-horizon256-evaluation-20370127-250/candidate.stdout": "4487cd961934a4eb47730c6d9293734016df49015a85b6da1ab36ea102b85873",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-checkpoint-horizon256-evaluation-20370113-250/baseline.command.json": "4a30d3d603b918fbfaed54aea4bb0a0e1077ce656ae762e8533346ba283e9d0c",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-checkpoint-horizon256-evaluation-20370113-250/candidate.json": "deef6e6d30bf0008aa04779c11b637ba089e0d87d101236abfd9b3de72e1b681",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-checkpoint-horizon256-evaluation-20370113-250/baseline.tsv": "e2d439fc1109fb281f58ec462f778f42afca442bb6898a9f87ad18d9e1ccc651",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-checkpoint-horizon256-evaluation-20370113-250/comparison.json": "19eee6c05a33e45c6c049c322bc220c26f079c5cc90cd7ee17c1ce5709060f8c",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-checkpoint-horizon256-evaluation-20370113-250/candidate.stderr": "338c63285721e26777c215eeefe3a7d0984663095787dfceabe4988282b6b7af",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-checkpoint-horizon256-evaluation-20370113-250/baseline.json": "f09321d289fde9a0f6a3c8f1a4620e25b9f073cbb0a8be79f0743457a9cab609",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-checkpoint-horizon256-evaluation-20370113-250/candidate.tsv": "dbbb6aff6084832ef1f5b3ece7afd6c3a8ee4ca58de59332f83ba790302e8004",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-checkpoint-horizon256-evaluation-20370113-250/baseline.stdout": "cee331858d6ff2750f7aed0afe5852bce5edd857fd195a72cd582e312620863a",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-checkpoint-horizon256-evaluation-20370113-250/baseline.stderr": "338c63285721e26777c215eeefe3a7d0984663095787dfceabe4988282b6b7af",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-checkpoint-horizon256-evaluation-20370113-250/candidate.command.json": "f613acf377ba0748b7ab07b1ddc1f4717e06bd97db815e28cd75164592aeae4c",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-checkpoint-horizon256-evaluation-20370113-250/candidate.stdout": "d7fc626bb0ebf48b738729be2543d96f43b1d5237ffc9150934c76e7419057bf",
+    "build/crow-v15-recorded-restart-20261114/v15-checkpoint-training-20370127-horizon256.policypack": "102624a3e706dd788a04cea52ef78b814504739e3dd17edadad943cad7cd37b5",
+    "build/crow-v15-recorded-restart-20261114/v15-checkpoint-training-20370127-horizon256.policypack.deployment.policypack": "048b63b565cc88640fa180dc966a13a7b3a687fec3159b2539c564dca1510369",
+    "build/crow-v15-recorded-restart-20261114/v15-checkpoint-training-20370127-horizon256.rollout": "ce11e7e93b13cbc26cb15839632f6c617fda0c24acc45251900112ddacf93d94",
+    "build/crow-v15-recorded-restart-20261114/v15-checkpoint-training-20370127-horizon256.safetensors": "897e70c8bb504305084377d101917f2690c0699e3c1c91f454cd2fa9eaee3039"
+  }
+}
