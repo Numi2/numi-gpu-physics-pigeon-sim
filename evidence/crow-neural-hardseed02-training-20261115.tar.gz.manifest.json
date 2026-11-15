@@ -1,0 +1,22 @@
+{
+  "archive_sha256": "5e687eea5f6feceab83775ef8730e060fb6bbef30fd7fdc89cdffbc5e04dbb93",
+  "archive_size": 12728320,
+  "remote_root": "/Users/n/Developer/numi-crow-rl-20261107",
+  "files": {
+    "artifacts/crow-v15-recorded-restart-20261114/neural-hard-seed-continuation-01/command.json": "8772dfb96c5a061dd91f43a00187ad09d17a851f16d27d60ecbe96c5e4201fb7",
+    "artifacts/crow-v15-recorded-restart-20261114/neural-hard-seed-continuation-01/result.json": "f11147cec96be58e263a8ccfd7ac7ef081813b470ef34b1c5b86e2e79c810974",
+    "artifacts/crow-v15-recorded-restart-20261114/neural-hard-seed-continuation-01/stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "artifacts/crow-v15-recorded-restart-20261114/neural-hard-seed-continuation-01/stderr": "503a2c554828a4595a0a027e2376db89dd21ab6916972cbd5e0e713ce2865a7f",
+    "artifacts/crow-v15-recorded-restart-20261114/neural-hard-seed-continuation-02/command.json": "c707bba03d867e72b6980a08b12e18667543d31c0c409ed6cc4a6cc7f5735832",
+    "artifacts/crow-v15-recorded-restart-20261114/neural-hard-seed-continuation-02/environment.json": "715620ec147e19bde9f8575e1a1ea0a0f15fa326aace6853ed6e6da396e4fde8",
+    "artifacts/crow-v15-recorded-restart-20261114/neural-hard-seed-continuation-02/inputs.json": "ed633ba46425a024d14fd1ad0271fe1369ab5daa06044883f3c4e4843699fba6",
+    "artifacts/crow-v15-recorded-restart-20261114/neural-hard-seed-continuation-02/result.json": "9ed781291adf113c0c2669e761c37cfc52e16b25f6e0553c801b631a00408a63",
+    "artifacts/crow-v15-recorded-restart-20261114/neural-hard-seed-continuation-02/verification.json": "d9298a2a8f9f450adab6a5536aeb7fb2b93a6c70eed63bd50b457f1b605ecfd2",
+    "artifacts/crow-v15-recorded-restart-20261114/neural-hard-seed-continuation-02/stdout": "f1f12229f84ce086b78049098ac85c9507d52dabb1c6723be252a7430a0e6c77",
+    "artifacts/crow-v15-recorded-restart-20261114/neural-hard-seed-continuation-02/stderr": "fbe182320de409dcfdafee3b58a5aa612d807ede8d743f06e23a6ce5e7bb8a34",
+    "build/crow-v15-recorded-restart-20261114/neural-hard-seed-continuation-02.policypack": "be94cfc6a5bc82e412c8f7f8eed23a2e8a46a686cadc8d54bf7b92b2ad3bc68e",
+    "build/crow-v15-recorded-restart-20261114/neural-hard-seed-continuation-02.policypack.deployment.policypack": "9e5761b79896af359833377d59f03c85742520b46fc78a64e86a6fb4a6c003ac",
+    "build/crow-v15-recorded-restart-20261114/neural-hard-seed-continuation-02.rollout": "8a9247842f46e5d11565287a0677640c53f5b7fc337deb0171ad310c0d140437",
+    "build/crow-v15-recorded-restart-20261114/neural-hard-seed-continuation-02.safetensors": "cc02d3751e4797a5ebdbd3610b568c0aa17fe1a44d840f8603cf8512e02721b7"
+  }
+}
