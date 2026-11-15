@@ -1,0 +1,43 @@
+{
+  "archive_sha256": "147ccc8380339aac5e05eb7ab8b34c6f32ac9c106047c14535489cea3e2e1cb6",
+  "archive_size": 71516160,
+  "parts": [
+    {
+      "name": "crow-v15-coupled-wing-hip-followup-20261115.tar.gz.part00",
+      "sha256": "b4a16564a6cad828e6cdc443ccb5e7a0b25a67e2e4e12f666549cbd4f1d15901"
+    },
+    {
+      "name": "crow-v15-coupled-wing-hip-followup-20261115.tar.gz.part01",
+      "sha256": "a737603a6336ea6494a22a25a7b975caed537d9d5314ed48fad6e4cbb920c663"
+    }
+  ],
+  "remote_root": "/Users/n/Developer/numi-crow-rl-20261107",
+  "files": {
+    "artifacts/crow-v15-recorded-restart-20261114/v15-coupled-wing-hip-followup-20261115/20370127-hip_minus090-500.tsv": "a0c11e242065f039da710e43bfa2c1df45004da2b47f9d2dd5b8bf8254d45804",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-coupled-wing-hip-followup-20261115/setup-failure.txt": "6ea10e0aa9f3affe5760d33d87a74a4ed0530956e7a3410f93977572ec81f855",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-coupled-wing-hip-followup-20261115/20370113-hip_minus090-1500.stdout": "b86090e3851fedc09b75a5cb8615b7b1a2a76282553150e9e1395fb442e93314",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-coupled-wing-hip-followup-20261115/20370113-hip_minus090-1500.stderr": "d648fa6adaf14ccf8f5d25ab4c08cde0a402ba82b2e49caac223490e1f292069",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-coupled-wing-hip-followup-20261115/20370113-hip_minus090-1500.command.json": "7d0dcba929a8a8dcca8fb44d75377c6e4523a2534e07d99f09a41d9111e12470",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-coupled-wing-hip-followup-20261115/20370113-hip_minus090-1500.inputs.json": "30279b5a03d8452882d2bdc3549fbc05942578cc1a545696ac34e87a78a4bf30",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-coupled-wing-hip-followup-20261115/easy.chk": "91426655ce48f8f185ad1195d5f171771ca2bd1da6709384a94777ad756b756a",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-coupled-wing-hip-followup-20261115/hard-contact-summary.json": "0594d895e140c05cbd340e2ff58bf4b4e8033e628b789fbdebbd269992d44659",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-coupled-wing-hip-followup-20261115/20370127-hip_minus090-500.command.json": "a92d6ad30adf7f2917c91f8d4b885ef06f97ce23112a23e901798ebc49804c07",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-coupled-wing-hip-followup-20261115/easy-prefix.json": "2d279b09c5d82ae21a9fed03a0f3549a79ba088faf7dd04e7309d30bb9e0281f",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-coupled-wing-hip-followup-20261115/easy-prefix.command.json": "28f1db2a1fd8bee8f10869e3ab8a2f157dcdd66e08b340094349af6a59b22730",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-coupled-wing-hip-followup-20261115/20370113-hip_minus090-1500.tsv": "a297104aeeb92936f88b600e3f3806e6e7a4bd4d7aaee6a8fb26bc905d338372",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-coupled-wing-hip-followup-20261115/20370113-hip_minus090-1500.json": "9143966bd2c286aa4eb9f5edbf3cde5808147e9d568145ef87b55b629310f9cc",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-coupled-wing-hip-followup-20261115/followup.py": "e7124b40b7116f35481949dca21d43da67f75acadc4536eb83d3edede2f5a2f4",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-coupled-wing-hip-followup-20261115/easy-prefix-parity.json": "a8cef61c4127b835a45c8d35ce52231b14bb007204a26854bc344ff78a4739bb",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-coupled-wing-hip-followup-20261115/20370127-hip_minus090-500.stdout": "b117ea7fbdea3f4e7ad731180f36e267d91c8c7c76a95cfd1872f014e10bec6a",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-coupled-wing-hip-followup-20261115/followup_analyze.py": "f0d2c476396956d52d213b75acfa1af87ce05f79773cd8b2dda19582e1ec64e2",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-coupled-wing-hip-followup-20261115/easy-prefix.stdout": "92e8585443dc833ffac0b427010108da0759d96fd48c3415911527fd8f833527",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-coupled-wing-hip-followup-20261115/analysis.json": "35c9fa1fdd9f5bec6d9a6ff387386cf32e2d28eef2ee02d0c25dbb8553bbe066",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-coupled-wing-hip-followup-20261115/easy-prefix.stderr": "338c63285721e26777c215eeefe3a7d0984663095787dfceabe4988282b6b7af",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-coupled-wing-hip-followup-20261115/20370127-hip_minus090-500.json": "21c556277dc1e8a985f2ed304ede2ae023762bf31b2bdc7cb51bf638eee56748",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-coupled-wing-hip-followup-20261115/20370127-hip_minus090-500.inputs.json": "3f5e316119e385067240287a805007ae5e79954166f270af045fc5fd7d380b2b",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-coupled-wing-hip-followup-20261115/easy-prefix.tsv": "64acfc04b4106b7ab1d6e296a858c48f35469d825ae22cbf180aea89ccfcd4b7",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-coupled-wing-hip-followup-20261115/hard-contact-summary.py": "c6aaa9c6803b5e0d49e99fe851c490a545cc1018e400cb4bc79ea3bd329f30e2",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-coupled-wing-hip-followup-20261115/20370127-hip_minus090-500.stderr": "ed38c069c0f6497bb69ca7743e63c630706ac5a9f004185df282550edafdc062",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-coupled-wing-hip-followup-20261115/runs.json": "de4aec239a38a455bd1e6cd8b1f5f44884758e854e913bd3168dd7fef14ad4f2"
+  }
+}
