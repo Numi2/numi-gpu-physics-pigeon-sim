@@ -1,0 +1,24 @@
+{
+  "state_sha256": "765a33a321e8261d356488af9129bafd54f1ebaf703683741708aa43a0006ad0",
+  "protected_nonzero_by_moment": {
+    "optimizer.log_standard_deviation.m": 0,
+    "optimizer.actor.layers.4.weight.v": 0,
+    "optimizer.actor.layers.6.bias.v": 0,
+    "optimizer.actor.layers.4.weight.m": 0,
+    "optimizer.actor.layers.4.bias.v": 0,
+    "optimizer.actor.layers.6.weight.v": 0,
+    "optimizer.actor.layers.6.weight.m": 0,
+    "optimizer.actor.layers.2.weight.v": 0,
+    "optimizer.actor.layers.2.weight.m": 0,
+    "optimizer.actor.layers.2.bias.m": 0,
+    "optimizer.actor.layers.2.bias.v": 0,
+    "optimizer.actor.layers.0.bias.m": 0,
+    "optimizer.actor.layers.6.bias.m": 0,
+    "optimizer.actor.layers.0.weight.v": 0,
+    "optimizer.actor.layers.4.bias.m": 0,
+    "optimizer.log_standard_deviation.v": 0,
+    "optimizer.actor.layers.0.weight.m": 0,
+    "optimizer.actor.layers.0.bias.v": 0
+  },
+  "all_protected_moments_zero": true
+}
