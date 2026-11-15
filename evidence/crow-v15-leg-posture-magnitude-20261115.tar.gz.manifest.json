@@ -1,0 +1,44 @@
+{
+  "archive_sha256": "cafee37243a2a507452977c91c93753d75490736dad94b0ec4501257cefe3bc2",
+  "archive_size": 55767040,
+  "parts": [
+    {
+      "name": "crow-v15-leg-posture-magnitude-20261115.tar.gz.part00",
+      "sha256": "2e5b740ebdb0e0efbad57ce634d2c85d94ad50180a461f921d6b3fb3776d9923"
+    },
+    {
+      "name": "crow-v15-leg-posture-magnitude-20261115.tar.gz.part01",
+      "sha256": "374d78210b91d048fa2935bc65a597594ab4a4a0ac09a78b8ea1132bf02aa233"
+    }
+  ],
+  "remote_root": "/Users/n/Developer/numi-crow-rl-20261107",
+  "files": {
+    "artifacts/crow-v15-recorded-restart-20261114/v15-leg-posture-magnitude-20261115/screen.py": "b1f005d6e83f506d3f70ad8a34dfc55ceadefb8ab423a8059d831c5405b7b2c7",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-leg-posture-magnitude-20261115/hip_minus075.policypack": "b22db5aa83ffcb10a49512bfe4841e353340af9b9008f59f52ccafc3df04c9d4",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-leg-posture-magnitude-20261115/summary.json": "8cbced8917d2579ddbb64d35b1ada1dc5dde43041f9df99889826268e1f68cd6",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-leg-posture-magnitude-20261115/contact_summary.py": "7d4ca553762312581b98fb6c2e5d6b8f8766069f8275c60a2e4d8c66ab116773",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-leg-posture-magnitude-20261115/hip_minus075.json": "7fa1e7bf5e3dd0698645ada8cb62c0623d7408b391a1198477d29287d707b8ac",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-leg-posture-magnitude-20261115/hip_minus025.stdout": "4086ea1ea955d9d49d385fb22a72eea9082d0895a92e9f7dd09d45a4815c44cf",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-leg-posture-magnitude-20261115/hip_minus075.tsv": "4e4064012e1abb0615b37bc4372a360768dd4395a6694fb2e4bcee10b598abc9",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-leg-posture-magnitude-20261115/hip_minus100.tsv": "eb7021f588e5ba3f3cedceae4e03128152cfba95fa5fe16282a68447850c6076",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-leg-posture-magnitude-20261115/hip_minus025.policypack": "0b43a0352d023be416877f50a94a93ecf412b31324f2197eae179afca972bdf0",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-leg-posture-magnitude-20261115/hip_minus100.json": "8375f175a139deb5bdcb8a1397be7a1a649b64938ff1b6002a69a79a1ee0e634",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-leg-posture-magnitude-20261115/hip_minus100.environment.json": "0f69bfd7dab157327736cf9edef9a1b16520024cd650d01596e76c384f782c96",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-leg-posture-magnitude-20261115/hip_minus025.stderr": "e4c42937bf2a61ed4217d7b8a1f98a31a65c1998ef6ed48ba0d4c8880b9ee7aa",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-leg-posture-magnitude-20261115/hip_minus100.command.json": "d259686f0c17d23aad39550b64d2bae783b939628c00678d9def158951d54d85",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-leg-posture-magnitude-20261115/hip_minus025.command.json": "a6f67135d7983c368511cd31aa26a0abb6660fe104986dd800d1d26c8ddd8cd9",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-leg-posture-magnitude-20261115/hip_minus025.json": "49f7712bde67989455fb5f70fe19435acc70306f19439376c5c9bd1ffe8799b1",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-leg-posture-magnitude-20261115/hip_minus100.stdout": "042c1973b9a52e23437524326f99ad6d0a7950f16ac2429624e8ca80a6997779",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-leg-posture-magnitude-20261115/hip_minus025.tsv": "9e9ac843a5e139d1bf988bfda37680213195877b23e2715a8a0d3c957ca8e3e7",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-leg-posture-magnitude-20261115/hip_minus075.command.json": "b164ab350c09e62a9490ef2cb3314833d2228854e89222b1b0b1dd41d712aac5",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-leg-posture-magnitude-20261115/hip_minus075.stderr": "f8356a325b9bd68270aea41a521ef808bb08e94b12420824bb3605727010f045",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-leg-posture-magnitude-20261115/inputs.json": "1617fa37f4833b77eebb40ba9443a3256a8f9b49687d1d0a2229a13c2a7d7634",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-leg-posture-magnitude-20261115/contact-summary.json": "c6f9048726a0b70ec89ed9d6c1ec2bc647fce52001109bdd28b629a31e820f61",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-leg-posture-magnitude-20261115/hip_minus075.environment.json": "08a4b14a75960db88e0a9b42f2096e09d45e5303a7af3eb6340bda0eed76449f",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-leg-posture-magnitude-20261115/hip_minus025.environment.json": "6c7e2efc90b923d05b92b6ed6cab42c1a01563b59bd2ca8124e9b3c68d155759",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-leg-posture-magnitude-20261115/hip_minus100.policypack": "9f44dec2b72b71440a371221d2c0ec5dce2c934286faa2fdebb66013f740e660",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-leg-posture-magnitude-20261115/hip_minus075.stdout": "c2abab904293257b5f0fc30010f5af99a9326d41564ae46296ff64a3cfcb1e7e",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-leg-posture-magnitude-20261115/hip_minus100.stderr": "df517ffd31b2c581e1db6894d480a1b8e1ba5e4995a681c90c3b40f08eb3cc3f",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-leg-posture-magnitude-20261115/interim-075-contact-summary.json": "42cce591555ea043108241cf12d00592a5f07e6a51069bfa85669beb858a84af"
+  }
+}
