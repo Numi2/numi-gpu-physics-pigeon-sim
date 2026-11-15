@@ -1,0 +1,52 @@
+{
+  "source_sha256": "f694fd63847ca4fecced33809b37eda724489dddc22a99c655c3feb0b0db575a",
+  "updated_sha256": "ee08943f093116d1f0ab44ce50456b5a23d4fb9311981f7a8ba0ff75b2e16e48",
+  "rollout_sha256": "49d45adf09715850d9c954ef67875b6c562b278c6d7ca49016661958e3b40759",
+  "protected_checks": {
+    "logstd": true,
+    "mean": true,
+    "scale": true,
+    "contract": true,
+    "layer_0_protected": true,
+    "layer_0_bias": true,
+    "layer_1_protected": true,
+    "layer_1_bias": true,
+    "layer_2_protected": true,
+    "layer_2_bias": true,
+    "layer_3_protected": true,
+    "layer_3_bias": true
+  },
+  "layers": {
+    "layer_0": {
+      "permitted_changed": 288,
+      "permitted_l2": 0.004116919357329607,
+      "protected_changed": 0
+    },
+    "layer_1": {
+      "permitted_changed": 576,
+      "permitted_l2": 0.00587582029402256,
+      "protected_changed": 0
+    },
+    "layer_2": {
+      "permitted_changed": 576,
+      "permitted_l2": 0.0059198373928666115,
+      "protected_changed": 0
+    },
+    "layer_3": {
+      "permitted_changed": 192,
+      "permitted_l2": 0.003151313401758671,
+      "protected_changed": 0
+    }
+  },
+  "action_joint_target_delta_rms_rad": [
+    8.399657508724048e-05,
+    2.9769823490800306e-05,
+    7.385132089710441e-06,
+    2.1138948752075065e-05,
+    0.0001886355677278198,
+    2.7455895638375382e-05,
+    6.218916414078065e-05,
+    0.0001739247756756343
+  ],
+  "scope": "identical retained observations; target change is not physical success, gated toe targets are upper bounds"
+}

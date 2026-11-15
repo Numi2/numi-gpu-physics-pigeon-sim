@@ -1,0 +1,20 @@
+{
+  "archive_sha256": "9e82ca95731af47f223a106a638eefc33dffcae72e101f9da5ceb49c13137447",
+  "archive_size": 35471360,
+  "parts": [
+    {
+      "name": "crow-toe-perfoot-cont04-development-20370127-20261115.tar.gz",
+      "sha256": "9e82ca95731af47f223a106a638eefc33dffcae72e101f9da5ceb49c13137447"
+    }
+  ],
+  "remote_files": {
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-perfoot-cont04-development-20370127-1000/command.json": "b685d75966f8f21052aa1a6f4e330bb0d58c36158bc5b9beef1fca77d40d37b2",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-perfoot-cont04-development-20370127-1000/inputs.json": "5909073840ea3801c953efd0636e324249b1189fa6dc928b81f091718501cc1f",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-perfoot-cont04-development-20370127-1000/result.json": "81868a6e94ffc0178bf833deb1c9013d9fab4ee95ddb876a5e8ec4f1d26376d2",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-perfoot-cont04-development-20370127-1000/stdout": "69981adc0c0ffc15f197e49ea66d3b1a0d3dc500c5669aa1c289e7b112e191ca",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-perfoot-cont04-development-20370127-1000/stderr.gz": "2f438d785594d7b087992be0d2605db3465ce053a978c85c29f403787424ab7a",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-perfoot-cont04-development-20370127-1000/replay.json": "ebeb1a892a5524ab11e9c1b4d097de1d3a77a399dceba55b3d5249f457bd2699",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-perfoot-cont04-development-20370127-1000/trace.tsv": "efdfd72a321e7a374d5465f264bf02d70493b11de9752f47449005e1175576aa",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-perfoot-cont04-development-20370127-1000/first-episode-analysis.json": "880e25ea3323ad03a99afeeb22c4e1ff67f4cb5f2a4a35c6bc624047e9922367"
+  }
+}
