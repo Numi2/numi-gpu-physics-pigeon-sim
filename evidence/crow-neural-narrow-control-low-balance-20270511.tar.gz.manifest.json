@@ -1,0 +1,14 @@
+{
+  "archive_sha256": "1cad933137c7329a6a72420f05f5dc35073f62f7ca53e203bfbd623891700efc",
+  "remote_files": {
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-exploration-control-low-balance.policypack": "3755edf97cf4d7be27cacb08c8f70f3693a95e2a1ea96f98e7a5d71952932cd1",
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-narrow-result-low-balance.policypack": "56a39992f9f6859db538f1eee2e994cce8b120a55258d8c0391b73d897c6f667",
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-narrow-result-low-balance.policypack.deployment.policypack": "bbfa5b6dbf676a04f8ea9a4e6807f01e8b21760f26f8d45d636ef981a75dec17",
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-narrow-result-low-balance.rollout": "0b9124dfa3c6914dd6b9da4323a8703959568e4a179768a34c3cb465e707f3d9",
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-narrow-result-low-balance.safetensors": "a7163e166639ebb8f55933743784a2680c891a64b61777cb2a3a1b6073b36183",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-narrow-control-low-balance-20270511/command.json": "7d3d4227ee98962baa1d4637c754ad54906e329f3c262b0af4cf6cc0d1a0afa0",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-narrow-control-low-balance-20270511/stdout": "2d239d7ae20fb1f3f35a50b6f5d2db8442458ed173cf34e1c75adfb93e0a9a46",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-narrow-control-low-balance-20270511/stderr": "32402736b72a57de64ad4ffbd434a08258c1be3a2f5618311a74eff12fd1dfb2",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-narrow-control-low-balance-20270511/result.json": "2509d73c2abd187e2b3a1fe00f5f926f33ec51d6ae3c2808481b4cac6d058b8f"
+  }
+}
