@@ -1,0 +1,33 @@
+{
+  "archive_sha256": "4f63e7024f462c8fe18ad23a9721d4b5da044571808e0c4c6c84feab22bd4294",
+  "archive_size": 11468800,
+  "parts": [
+    {
+      "name": "crow-v15-resetfixed-continuation-render-20261115.tar.gz",
+      "sha256": "4f63e7024f462c8fe18ad23a9721d4b5da044571808e0c4c6c84feab22bd4294"
+    }
+  ],
+  "remote_root": "/Users/n/Developer/numi-crow-rl-20261107",
+  "files": {
+    "artifacts/crow-v15-recorded-restart-20261114/crow_v15_checkpoint_prefix_render_splice.swift": "d9680c3442715af10e1519b086301923d9407479e93fed95fcb145bb517e3555",
+    "artifacts/crow-v15-recorded-restart-20261114/render_v15_lr30x_continuation_five_views.sh": "48ba4cf9ce251226fc8fb9f7729ba3cdb398a380d66e6834f9c183a30159a4fd",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-resetfixed-lr30x-continuation04-render-20370113/frames-front/numi-crow-replay-audit.json": "049261780ce100c8f7c4b2b52c4dcb581ca14c9644c078cb457f4f989a1a2736",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-resetfixed-lr30x-continuation04-render-20370113/frames-above/numi-crow-replay-audit.json": "333fa98c879cbad1ca73c178a143ac6a84a0a1f0ef7515c5e6ecb2a4da61af98",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-resetfixed-lr30x-continuation04-render-20370113/front.mp4": "9fc8416556758d1379fbc8d4697686f33d00fcc3a412037acb80814d6889635f",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-resetfixed-lr30x-continuation04-render-20370113/frames-feet/numi-crow-replay-audit.json": "b4b31288d82383bcc5a8bd357a20534dc0b0343356401ccd7e5ccbcaef58cba8",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-resetfixed-lr30x-continuation04-render-20370113/below.mp4": "4c325f1608f5bcffd49c483c65b56e188dbe560c84b2146526f4437b739e11b1",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-resetfixed-lr30x-continuation04-render-20370113/back.log": "287002983c25128735032761096e6be9d9ea606bf459e5aa3386af9809e68303",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-resetfixed-lr30x-continuation04-render-20370113/front.log": "287002983c25128735032761096e6be9d9ea606bf459e5aa3386af9809e68303",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-resetfixed-lr30x-continuation04-render-20370113/back.mp4": "f6ccc3995ec7961d4c1fda0a2f384b188c0599f0fdfd44f328a4840c00fd544c",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-resetfixed-lr30x-continuation04-render-20370113/below.log": "287002983c25128735032761096e6be9d9ea606bf459e5aa3386af9809e68303",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-resetfixed-lr30x-continuation04-render-20370113/frames-back/numi-crow-replay-audit.json": "ea584c4b80588da1cc443b21b85eb6851539f9777995c0c6f0c4b00ef96c52ce",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-resetfixed-lr30x-continuation04-render-20370113/video-sha256.txt": "201013c32b24086982820e98bc4867f2775df6684af2e8505b53e5c58586d783",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-resetfixed-lr30x-continuation04-render-20370113/frames-below/numi-crow-replay-audit.json": "1c58d777c59a744f547955b610a10a7b9943f79c4740684867f6db326bb89e65",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-resetfixed-lr30x-continuation04-render-20370113/presentation-splice.json": "f271e76aff03de83d92f367f40b97f6ed1722553bcf308be17c8091d39a4c10c",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-resetfixed-lr30x-continuation04-render-20370113/above.log": "287002983c25128735032761096e6be9d9ea606bf459e5aa3386af9809e68303",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-resetfixed-lr30x-continuation04-render-20370113/splice.log": "fa9648cf250545bd3d96606c7d01d765dfe829b19ed1d5558dde1ca22d194895",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-resetfixed-lr30x-continuation04-render-20370113/above.mp4": "e1ee47feb52eba585051c4310f01283ad3d910c1cb7e3c78dd3e13f25285dc75",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-resetfixed-lr30x-continuation04-render-20370113/feet.log": "287002983c25128735032761096e6be9d9ea606bf459e5aa3386af9809e68303",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-resetfixed-lr30x-continuation04-render-20370113/feet.mp4": "c7b8075b0c8847abd9a22017fe385adedc3cb61ffd69817dbfd920e6014a4efe"
+  }
+}
