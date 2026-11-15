@@ -1,0 +1,20 @@
+{
+  "files": [
+    {
+      "path": "artifacts/crow-v15-recorded-restart-20261114/v15-coupled-wing-hip-20261115/hip_minus090.stderr",
+      "sha256": "fb92047a4539fdf5ec9cea3e73a19595b52f563a92e081e1fedcb74cab187060",
+      "bytes": 51058270
+    },
+    {
+      "path": "artifacts/crow-v15-recorded-restart-20261114/v15-coupled-wing-hip-20261115/hip_minus100.stderr",
+      "sha256": "911feb943a56d767f71cd9e7d459e7ffdcba4c8d5a366c41eae31abe30180dc0",
+      "bytes": 40521023
+    },
+    {
+      "path": "artifacts/crow-v15-recorded-restart-20261114/v15-coupled-wing-hip-followup-20261115/20370127-hip_minus090-500.stderr",
+      "sha256": "ed38c069c0f6497bb69ca7743e63c630706ac5a9f004185df282550edafdc062",
+      "bytes": 40524186
+    }
+  ],
+  "bytes_retired": 132103479
+}
