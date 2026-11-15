@@ -1,0 +1,25 @@
+{
+  "files": [
+    {
+      "path": "artifacts/crow-v15-recorded-restart-20261114/v15-biased-wholebody-evaluation-20261115/20370113-trained-500.stderr",
+      "sha256": "b09baf371b78937b79072061b832a2d82fe62f37ac9afec6ffb2552cd6e6daf5",
+      "bytes": 49382491
+    },
+    {
+      "path": "artifacts/crow-v15-recorded-restart-20261114/v15-biased-wholebody-evaluation-20261115/20370127-trained-400.stderr",
+      "sha256": "8b2713e5bd393cba4d71ee9d76b8acaaad872030d8f459d3cea2d2d6a3e09e45",
+      "bytes": 33716316
+    },
+    {
+      "path": "artifacts/crow-v15-recorded-restart-20261114/v15-reactive-tilt-eval-v2-20261115/20370113-hip_pos-750.stderr",
+      "sha256": "35d1e4e50152a3913282e346082abb99165d7bdf097d34d037763bac8cb2d0b9",
+      "bytes": 53690280
+    },
+    {
+      "path": "artifacts/crow-v15-recorded-restart-20261114/v15-reactive-tilt-eval-v2-20261115/20370113-hip_neg-750.stderr",
+      "sha256": "5a730c7edf177868e912b90f359cb604282e80556c0478d26577e18adcaec1b5",
+      "bytes": 55267862
+    }
+  ],
+  "bytes_retired": 192056949
+}
