@@ -1,0 +1,14 @@
+{
+  "archive_sha256": "aed4b777a0feb8536dfa2445acf6925e2f41cdfa76405bf87318182f21c3652e",
+  "remote_files": {
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-toe-sensor-continuation-update-03.policypack": "4fdcade87fafbf31a1ce2eb79c9d5bd107cb5ebc6adbe12c9371e3af794e4eba",
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-toe-sensor-continuation-update-03.policypack.deployment.policypack": "35e1411e78eaa2d7dda38269fc162d802ff3037a70fc42c399d6b0287461882c",
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-toe-sensor-continuation-update-03.rollout": "8b7c03fbbb330768e89cd9dab071217af4de9373389a2f830de3cd3fad9486a7",
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-toe-sensor-continuation-update-03.safetensors": "c2809039e262d9e03f7133f45019042fa83a4c2b6b7ef0307b839260f2b93787",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-sensor-continuation/update-03/command.json": "ceae3f6c926d6216467f41dd7f8c1f1ddb9f174dc0247b267a552fa2cd6eef9f",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-sensor-continuation/update-03/inputs.json": "08214b73366c1f66f29982ffba79976935242ff3fd8f3e102d950f6768d24eb4",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-sensor-continuation/update-03/stdout": "326caf27a0a5c1e05cbd4edd5536b21d8e23d8c618eb261d3a4d4baa19513691",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-sensor-continuation/update-03/stderr": "b2ca2757db14b54d079870b4d37983544167eb0395535a13d67d14a789630796",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-sensor-continuation/update-03/result.json": "2e46411ae003d3ec01c2037b50ff0e9d131782726e5c1b4eb48ea2d102c34e20"
+  }
+}
