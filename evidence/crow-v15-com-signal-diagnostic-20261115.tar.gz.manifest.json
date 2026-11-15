@@ -1,0 +1,36 @@
+{
+  "archive_sha256": "3cc7c9b72582d873040d6bdaed3e153d6db3bd14214b99a6b8b9253f658fd616",
+  "archive_size": 24258560,
+  "parts": [
+    {
+      "name": "crow-v15-com-signal-diagnostic-20261115.tar.gz",
+      "sha256": "3cc7c9b72582d873040d6bdaed3e153d6db3bd14214b99a6b8b9253f658fd616"
+    }
+  ],
+  "remote_root": "/Users/n/Developer/numi-crow-rl-20261107",
+  "files": {
+    "artifacts/crow-v15-recorded-restart-20261114/v15-com-signal-diagnostic-20261115/build.py": "1cc27d9209164d97a66b8c60f3d3c297a3a8c61bf4e91b25825fb4602168da9f",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-com-signal-diagnostic-20261115/com_signal_diagnostic.metal": "f6149c1d3c3df870320b46164e31e8185e9df24778ea432009d8e8541d956e93",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-com-signal-diagnostic-20261115/com_signal_diagnostic.chk": "be9004f5ec81982b1c8522df239a29d3cf8f59019758b65c3fee6d219bd7c928",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-com-signal-diagnostic-20261115/com_signal_diagnostic-prefix.tsv": "95e37996efd9c9bb93de5da3a43654a348422f255c2c3c5158e4f025f2a573ea",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-com-signal-diagnostic-20261115/com_signal_diagnostic-prefix.stdout": "fed92742ec710d92f67f17b43488d4371c5d022a9f98d77d02a8d61042361d58",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-com-signal-diagnostic-20261115/evaluate.py": "f64c1039128532de1519eb09fd0c4e12bcf6cd047090945945807d91d8690e4f",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-com-signal-diagnostic-20261115/com_signal_diagnostic-prefix.command.json": "ae4f97c41191f2e4864062d00b9b7b8d094d4da916198aab6e46cd7dc32f3572",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-com-signal-diagnostic-20261115/prepare.py": "43a9435a1a3d8c21cafe578dcdb818c567ee747e2be887d1f5c84d8e8214c396",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-com-signal-diagnostic-20261115/com_signal_diagnostic-prefix.json": "436e5120105ccb33a00b8c3198133a4579940c866d80323ee55db7b32952160b",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-com-signal-diagnostic-20261115/analyze.py": "01ffc923a061b9b109380541e4dd210086e672af3494733094114173a10ab659",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-com-signal-diagnostic-20261115/com_signal_diagnostic-prefix-result.json": "82ab3a0be90fa085ef9e4471d8eeb7f7c870e95787f8d2b007991da1f0683351",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-com-signal-diagnostic-20261115/build.json": "3ef1acf9a2973b852db9b7d9708d81e8fc0adef5a8ef23937386b8350ef6c7f0",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-com-signal-diagnostic-20261115/com_signal_diagnostic-prefix.stderr": "338c63285721e26777c215eeefe3a7d0984663095787dfceabe4988282b6b7af",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-com-signal-diagnostic-eval-20261115/20370113-com_signal_diagnostic-620.stdout": "255907afbce9b9553c4d70994db7e2687a459b2cc86b2624aa8f42f01b8b9877",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-com-signal-diagnostic-eval-20261115/20370113-com_signal_diagnostic-620.tsv": "29d4a934324e10e7485ac632412a9a479acdaf5fa1432b5e1c3a58b198c41a23",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-com-signal-diagnostic-eval-20261115/parity-telemetry.json": "7cbc537087adef6d938df326b48e5dd5fe8e0e291c4882642862a8f1506c8fe0",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-com-signal-diagnostic-eval-20261115/20370113-com_signal_diagnostic-620.stderr": "a07072bbaf91367929f13a38d8dc1e4e2486dd839ee2082978acab561423cdb6",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-com-signal-diagnostic-eval-20261115/20370113-com_signal_diagnostic-620.json": "cd46547b0527e0a83d6b4808c345afafe1194c590fbbd83b58030ce12adc02b6",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-com-signal-diagnostic-eval-20261115/20370113-com_signal_diagnostic-620.command.json": "c8fdb474fa78752dccd7211429fbf6cc4d6a3f4aa23e0478570464d65eac6f2a",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-com-signal-diagnostic-eval-20261115/20370113-com_signal_diagnostic-620.inputs.json": "ccc51d6ea4645bac1d01d90a21fcff864e43115af9fbfbab8ff0d935ca630823",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-com-signal-diagnostic-eval-20261115/runs.json": "2594d10d6b9c5732023f25a7fbbf7e7c5eadeb05b7aa219aa428cbe30b985921",
+    "build/crow-v15-recorded-restart-20261114/v15-com-signal-diagnostic-20261115/com_signal_diagnostic.metallib": "c945d5579664d3fdd5445c041003bb6aaf4588d0d1b1f5bb1e22b9b83a8b9e6a",
+    "build/crow-v15-recorded-restart-20261114/v15-com-signal-diagnostic-20261115/com_signal_diagnostic.air": "b28026ecd01d95d90eba797c720377bf4c6b7b36591e3b26bade04ffb036b025"
+  }
+}
