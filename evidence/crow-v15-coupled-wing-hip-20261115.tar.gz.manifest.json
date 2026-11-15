@@ -1,0 +1,34 @@
+{
+  "archive_sha256": "1bfe48a197a1f09fd28e5747ce357211375cf08337b4b24171e4406396ef0656",
+  "archive_size": 36864000,
+  "parts": [
+    {
+      "name": "crow-v15-coupled-wing-hip-20261115.tar.gz",
+      "sha256": "1bfe48a197a1f09fd28e5747ce357211375cf08337b4b24171e4406396ef0656"
+    }
+  ],
+  "remote_root": "/Users/n/Developer/numi-crow-rl-20261107",
+  "files": {
+    "artifacts/crow-v15-recorded-restart-20261114/v15-coupled-wing-hip-20261115/screen.py": "caf58aca2d561f6e90826f3f62c8dedcc97875a6c38ba78a5c995be452649a18",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-coupled-wing-hip-20261115/hip_minus090.command.json": "edd06d0879158750d88085effb1492680b51eb38de8f1750cba4f92b8fdaff9e",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-coupled-wing-hip-20261115/summary.json": "1cae0cffa6cd847887177bdcdc05a5e9667ad812e8018480b0484ca67d35608f",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-coupled-wing-hip-20261115/contact_summary.py": "5c08d5f16af054f24e074a3d864ddf49fef32f9727388f32fce3f7524d4babc5",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-coupled-wing-hip-20261115/hip_minus100.tsv": "5990e36e51f0da96fc8c46b862dd8514d6ee2bc0564dcfd4014bd7b41b862018",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-coupled-wing-hip-20261115/hip_minus090.json": "f489b9caba9b40ac4ee170076123bceec8f64509973d4150a7c67d5017105aef",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-coupled-wing-hip-20261115/hip_minus100.json": "f23b8ba830c4b44d092f043f0340fb5cb40b8e8fc06af0bc4046ceee1de45f94",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-coupled-wing-hip-20261115/hip_minus100.environment.json": "e5e2116d5788cd224f210df829f0acd4130bbaf175c8f2a24b40174511986acd",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-coupled-wing-hip-20261115/hip_minus100.command.json": "d11ba0184469aee1ae27619f33ae3fa50f3a36433379340a652a5b4ce8b7cb96",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-coupled-wing-hip-20261115/hip_minus090.environment.json": "02f74390cbc76402ddb2445468e9c4e193023971973a8ff2ddb3336b4f2f0869",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-coupled-wing-hip-20261115/hip_minus100.stdout": "ed5ff3d5a59f1491bcf89d87c1ff267b38a623ca72f8ffb5e02b04a59afe3ad0",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-coupled-wing-hip-20261115/hip_minus090.stdout": "7d9d2143b017f053646879a25f89fe6e9ac1c3da705326458efdc8436065f625",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-coupled-wing-hip-20261115/inputs.json": "be2427bc67a0a9a3f79a8f81837c527b07f5dfe9cb0b81ad75bd196ef131f716",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-coupled-wing-hip-20261115/contact-summary-both.json": "16d39240abcae8d36586b040071d2b01f5a839a3302c9ba7e8fffb7da815cd5c",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-coupled-wing-hip-20261115/hip_minus090.tsv": "0c9ae529fe0294c97b25f272127196731c624cf6814f9c7da8ef9ffce9e4902e",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-coupled-wing-hip-20261115/contact-summary-090.json": "7f53aedfe9e6875d421349ed9c8a6c57c852c51dd5446c8d9242c4bf3728a1d1",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-coupled-wing-hip-20261115/contact_summary_both.py": "dc2efb0034d98bd9cc22c6cffd62d31c0ea94ffea1c0c6e1da4f3a18fb719083",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-coupled-wing-hip-20261115/hip_minus090.policypack": "dc82f37b5a5c46b854d77fd4e45585538d7cc9a54690a3661bb0d1b120b8b29f",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-coupled-wing-hip-20261115/hip_minus090.stderr": "fb92047a4539fdf5ec9cea3e73a19595b52f563a92e081e1fedcb74cab187060",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-coupled-wing-hip-20261115/hip_minus100.policypack": "9f44dec2b72b71440a371221d2c0ec5dce2c934286faa2fdebb66013f740e660",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-coupled-wing-hip-20261115/hip_minus100.stderr": "911feb943a56d767f71cd9e7d459e7ffdcba4c8d5a366c41eae31abe30180dc0"
+  }
+}
