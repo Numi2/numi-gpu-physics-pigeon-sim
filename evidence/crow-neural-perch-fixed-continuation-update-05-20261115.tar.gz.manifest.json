@@ -1,0 +1,14 @@
+{
+  "archive_sha256": "e57bfe6e81e883f270d888a5a2c9b88680ba5178e17eef1447eaa985543a6e35",
+  "remote_files": {
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-perch-fixed-continuation-update-05.policypack": "27e788f83c441124496bbf976159a829048f77d9fdd77604c001e82590459298",
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-perch-fixed-continuation-update-05.policypack.deployment.policypack": "9b3ae22156d3af89b52d389f988ff4ce12cda4b6454a166126eca4aa672ca855",
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-perch-fixed-continuation-update-05.rollout": "5b7f60a5af49bd53d03f815f43e08ef593d79c8b1c769028a931f01923fce772",
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-perch-fixed-continuation-update-05.safetensors": "dac9b5d3c3655a1fa442dd901b2567c0cfb951443aeedacbad3453525cae6456",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-perch-fixed-continuation/update-05/command.json": "14e117894465e51dd97500c8f8536a80f05e7d3f75cb4b46ed189f66bf3f137b",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-perch-fixed-continuation/update-05/inputs.json": "dd833afd4a51e39772b8acae936ff1a4a9a776d29ec8b819ad5d5342a5793876",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-perch-fixed-continuation/update-05/stdout": "6087d6f2b8471d62571ef1ad64d7d0e26f17c90a794b991dea96b14472655d1b",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-perch-fixed-continuation/update-05/stderr": "dce119fc3e5c376ca2f7cc0b5c6f2469da1d6903e8a3c277ff4df675ba3b5073",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-perch-fixed-continuation/update-05/result.json": "6eb927123913e03a2a0db3536d3f17571d9fc03676d9de1a436a4682efb3e07b"
+  }
+}
