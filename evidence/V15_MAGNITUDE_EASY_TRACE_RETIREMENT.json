@@ -1,0 +1,45 @@
+{
+  "files": [
+    {
+      "path": "artifacts/crow-v15-recorded-restart-20261114/v15-leg-posture-magnitude-20261115/hip_minus025.stderr",
+      "sha256": "e4c42937bf2a61ed4217d7b8a1f98a31a65c1998ef6ed48ba0d4c8880b9ee7aa",
+      "bytes": 44040736
+    },
+    {
+      "path": "artifacts/crow-v15-recorded-restart-20261114/v15-leg-posture-magnitude-20261115/hip_minus025.tsv",
+      "sha256": "9e9ac843a5e139d1bf988bfda37680213195877b23e2715a8a0d3c957ca8e3e7",
+      "bytes": 422339
+    },
+    {
+      "path": "artifacts/crow-v15-recorded-restart-20261114/v15-leg-posture-magnitude-20261115/hip_minus100.stderr",
+      "sha256": "df517ffd31b2c581e1db6894d480a1b8e1ba5e4995a681c90c3b40f08eb3cc3f",
+      "bytes": 41544136
+    },
+    {
+      "path": "artifacts/crow-v15-recorded-restart-20261114/v15-leg-posture-magnitude-20261115/hip_minus100.tsv",
+      "sha256": "eb7021f588e5ba3f3cedceae4e03128152cfba95fa5fe16282a68447850c6076",
+      "bytes": 420595
+    },
+    {
+      "path": "artifacts/crow-v15-recorded-restart-20261114/v15-leg-posture-minus075-easy-20261115/20370127-control-400.stderr",
+      "sha256": "c87faa9d81d03533389a9fb987c7ddcfe1ba06a89438c60dee9229804804ef09",
+      "bytes": 34923376
+    },
+    {
+      "path": "artifacts/crow-v15-recorded-restart-20261114/v15-leg-posture-minus075-easy-20261115/20370127-control-400.tsv",
+      "sha256": "20277738892a217deeea67575e919389034576f2aa007b1a92d959048e1bc360",
+      "bytes": 336709
+    },
+    {
+      "path": "artifacts/crow-v15-recorded-restart-20261114/v15-leg-posture-minus075-easy-20261115/20370127-hip_negative-400.stderr",
+      "sha256": "c9556826f91db51720874bcc2f929d1cbe761d656dcdbc67ccc38857b3f4e331",
+      "bytes": 33682932
+    },
+    {
+      "path": "artifacts/crow-v15-recorded-restart-20261114/v15-leg-posture-minus075-easy-20261115/20370127-hip_negative-400.tsv",
+      "sha256": "7ebe5f7f063df30cf1c35ee0f31c35fdc581e4cc8401dda399cdb987acbe3999",
+      "bytes": 336526
+    }
+  ],
+  "bytes_retired": 155707349
+}
