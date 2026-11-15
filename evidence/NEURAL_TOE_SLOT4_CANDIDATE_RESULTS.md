@@ -1,0 +1,3 @@
+# Extended V1 left-front ablation: rejected
+
+On the previously consumed 20310129 start the V1 policy with only its left-front toe output zeroed did not terminate through 1000 intervals and had a 960-interval longest strict contact streak. On the consumed 20310201 start it first terminated for tilt at interval 371 (7.42 s), with longest strict streak 253; full V1 and all-toe-zero V1 had held that start for 1000 intervals. Per plan the candidate was rejected, and the other two starts were not tested. Later automatic resets are preserved in raw evidence and excluded from these numbers. The reconstructed, relocated-perch experiment remains distinct from an autonomous landing.
