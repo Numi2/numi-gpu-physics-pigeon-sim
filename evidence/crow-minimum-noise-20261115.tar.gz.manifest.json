@@ -1,0 +1,15 @@
+{
+  "archive_sha256": "9dd653b54180537279e23329e7e7acdecb8cfb791498d9494c1928653c1551ab",
+  "remote_files": {
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-exploration-control-minimum-balance.policypack": "c13ded4c888c742b7e5597b0d7667696fd209cece76ba6ed8ecccdfb7222e1a2",
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-exploration-result-minimum-balance.policypack": "ac04b814a84b4efe9b3fbf70e59c4058e1d4b2e9940fe7f5db05ebfb0e482af4",
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-exploration-result-minimum-balance.policypack.deployment.policypack": "48be2409e75112feea7abea0fbdc5a0841157705f0916aee85ba036e8d12dc91",
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-exploration-result-minimum-balance.rollout": "0a3c978abcc7d9768b549557d14a39087a305a39b0c2b33d2a4ef81cb92e9f00",
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-exploration-result-minimum-balance.safetensors": "8b4198b8dd16ceb02c279fded367c94a68446b620a556e6bed382ccb32ae0ae4",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-exploration-control-minimum-balance-20270511/command.json": "6ae6d922d74909719b60ed669081112613cc916d4f37ef9b09bcd1de38940f63",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-exploration-control-minimum-balance-20270511/stdout": "6cc23bb8734a10bcc80285b5af30ea1a35f54240210a94ee8eb5cef7d24171ab",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-exploration-control-minimum-balance-20270511/stderr": "5df4e16b61a4d57ee9594c5d964ec39b4a5e4be4a2f8ca6d53f84dd49be44f3d",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-exploration-control-minimum-balance-20270511/result.json": "531d20e2ad16b1ec24bf0ef307e14b68aea5b015275973c96c3105cfcba12172",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-minimum-noise-control-pack.json": "826d6e85488b9f646209e71541a36986ab706db8d09ddfcca4eb10ac148a15b5"
+  }
+}
