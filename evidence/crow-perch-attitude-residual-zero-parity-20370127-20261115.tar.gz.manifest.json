@@ -1,0 +1,19 @@
+{
+  "archive_sha256": "81d8dc20eaeef0aca2edd0b7e994af5cafcdbfac5cd192f56c45f9f7b72f44d7",
+  "archive_size": 9185280,
+  "parts": [
+    {
+      "name": "crow-perch-attitude-residual-zero-parity-20370127-20261115.tar.gz",
+      "sha256": "81d8dc20eaeef0aca2edd0b7e994af5cafcdbfac5cd192f56c45f9f7b72f44d7"
+    }
+  ],
+  "remote_files": {
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-perch-attitude-residual-zero-parity-20370127-300/command.json": "bb7b047e7b92467db9949287814167659c8dd8e30ffb99176ef3088f5c44204e",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-perch-attitude-residual-zero-parity-20370127-300/inputs.json": "2ed1e9bc259e1825133732516b09da6b63057afed1c84f71e9e743160f0462e0",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-perch-attitude-residual-zero-parity-20370127-300/result.json": "81868a6e94ffc0178bf833deb1c9013d9fab4ee95ddb876a5e8ec4f1d26376d2",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-perch-attitude-residual-zero-parity-20370127-300/stdout": "d86a5fd442842039bc49bf0ccd914832f30a2e9ad47c8c74810f6069877db106",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-perch-attitude-residual-zero-parity-20370127-300/stderr.gz": "3e46301389f52b244ed7c261f276e49ac333d5e06b18ff5ee3e4f8b442e8d45b",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-perch-attitude-residual-zero-parity-20370127-300/replay.json": "6436ae0cdefa1f271eebc22c14716fbe29f396481186537f01ead6621c1ed54d",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-perch-attitude-residual-zero-parity-20370127-300/trace.tsv": "17a6d41552f4865b1ab8f2f314c4d36bc08d9bdb355744826989614dde90b6eb"
+  }
+}

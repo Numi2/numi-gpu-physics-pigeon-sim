@@ -1,0 +1,33 @@
+{
+  "replay_sha256": {
+    "old": "0b1450045c653adb8cbd2926a97c6b70c081435b103a2b7ac54a682ac302e8d6",
+    "new": "6436ae0cdefa1f271eebc22c14716fbe29f396481186537f01ead6621c1ed54d"
+  },
+  "fields": {
+    "q": {
+      "exact": true,
+      "first_different_step": null,
+      "maximum_absolute_difference": 0.0
+    },
+    "v": {
+      "exact": true,
+      "first_different_step": null,
+      "maximum_absolute_difference": 0.0
+    },
+    "actor_observation": {
+      "exact": true,
+      "first_different_step": null,
+      "maximum_absolute_difference": 0.0
+    },
+    "accepted_actions": {
+      "exact": true,
+      "first_different_step": null,
+      "maximum_absolute_difference": 0.0
+    }
+  },
+  "first_done": {
+    "old": null,
+    "new": null
+  },
+  "result": "pass"
+}
