@@ -1,0 +1,16 @@
+{
+  "crow-v4-evaluation-a.tar.gz": {
+    "sha256": "d1014da0f38c939761ffe0cdd81cd773d6ea7d3eb938336c1a690257301dcaf6",
+    "parts": [
+      "crow-v4-evaluation-a.tar.gz.part00",
+      "crow-v4-evaluation-a.tar.gz.part01"
+    ]
+  },
+  "crow-v4-evaluation-b.tar.gz": {
+    "sha256": "2c8dcacc8a1d893d2419d73f90161912bd61b04250bdc4812052f02e8301be81",
+    "parts": [
+      "crow-v4-evaluation-b.tar.gz.part00",
+      "crow-v4-evaluation-b.tar.gz.part01"
+    ]
+  }
+}
