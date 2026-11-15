@@ -1,0 +1,13 @@
+{
+  "archive_sha256": "991cb0570813e4d9eadacaa85ac07f6f507f2878ceb777f1f14d2b79684f955b",
+  "remote_files": {
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-balance-v4-update-06.policypack": "fc6d60bcc6850eadd45756abec57bfd558ef2f1962a0c9abfa430c9cd2d59c27",
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-balance-v4-update-06.policypack.deployment.policypack": "b26b7b8ccd41ecb51e08e6c5faf687e5231e1ed460a99bd23c46e8dc988962b5",
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-balance-v4-update-06.rollout": "3b6b01dc455666f4f4c0637009c816e87a1930177e3b4f7256743ff4c0a88eda",
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-balance-v4-update-06.safetensors": "482cd8bd05e36d4c16fae00827e3a208aa36e8bc6ef5062db217d1bd0487afa2",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-balance-training-v4/update-06/command.json": "8416a602d8c8507a17ae682e20e030aaea3a65cfc188addd8e7b0ef9f93104ac",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-balance-training-v4/update-06/stdout": "5bb7614e93bae3441e7d5e446003c95cb17cdd87fcb53fd9353948c8e4314e05",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-balance-training-v4/update-06/stderr": "35a78a3bc05e6acdfecbe21712c3b5c84ffe6a441095216bd1acb61e45c8ed81",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-balance-training-v4/update-06/result.json": "eed5f19b194e441f2ee3dee07081c7dbfaef203eb264dd40fe445237ec1505eb"
+  }
+}
