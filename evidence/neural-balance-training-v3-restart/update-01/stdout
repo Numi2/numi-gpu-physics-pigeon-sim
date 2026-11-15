@@ -1,0 +1,398 @@
+{
+  "action_carrier" : "v15_goal_memory_hierarchical_rgbd_history",
+  "birdflow_journey_student_authority" : 0,
+  "birdflow_journey_teacher" : false,
+  "birdflow_journey_variant" : "v15-hierarchical-navigation",
+  "birdflow_navigation_curriculum" : false,
+  "birdflow_navigation_curriculum_stage" : -1,
+  "candidate_deployment_policy_pack" : "\/Users\/n\/Developer\/numi-crow-rl-20261107\/build\/crow-v15-recorded-restart-20261114\/neural-balance-v3-restart-update-01.policypack.deployment.policypack",
+  "checkpoint_directory" : "",
+  "checkpoint_interval" : 0,
+  "control_steps_per_submission" : 1,
+  "deployment_policy_pack" : "\/Users\/n\/Developer\/numi-crow-rl-20261107\/build\/crow-v15-recorded-restart-20261114\/neural-balance-v3-restart-update-01.policypack.deployment.policypack",
+  "deployment_selection_performed" : false,
+  "device" : "Apple M4 Pro",
+  "difficulty_sampling_exponent_override" : 0,
+  "elapsed_seconds" : 60.883955583999999,
+  "end_to_end_environment_steps_per_second" : 33.637761875941649,
+  "environments" : 4,
+  "failed_environment_steps" : 0,
+  "final_physical_evidence" : {
+    "control_steps" : 512,
+    "evidence_windows" : 0,
+    "last_balance_failure_rate" : 0,
+    "last_clean_miss_rate" : 0,
+    "last_completed_episode_count" : 0,
+    "last_contact_rate" : 0,
+    "last_mean_tracking_per_million" : 0,
+    "pending_completed_episode_count" : 13,
+    "pending_timeout_episode_count" : 0
+  },
+  "final_policy_revision" : 7,
+  "gpu_milliseconds" : 60335.526334354654,
+  "host_requested_resets" : 0,
+  "incumbent_policy_pack" : "\/Users\/n\/Developer\/numi-crow-rl-20261107\/build\/crow-v15-recorded-restart-20261114\/neural-balance-v3-restart-update-01.policypack.incumbent.policypack",
+  "independent_cued_lifetimes" : false,
+  "independent_lifetime_history" : [
+
+  ],
+  "initial_policy_revision" : 6,
+  "last_learning_update" : {
+    "actor_clipped_gradient_norm" : 0.85994232026860118,
+    "actor_gradient_norm" : 2.0115035623311996,
+    "approximate_kl" : 0.007569912122562528,
+    "behavior_logprob_max_abs_error" : 6.198883056640625e-06,
+    "behavior_policy_fingerprint" : 5281195031069234597,
+    "clip_fraction" : 0.106201171875,
+    "critic_clipped_gradient_norm" : 0.30948046455159783,
+    "critic_gradient_norm" : 2.9894650485366583,
+    "deployment_policy_pack" : "\/Users\/n\/Developer\/numi-crow-rl-20261107\/build\/crow-v15-recorded-restart-20261114\/neural-balance-v3-restart-update-01.policypack.deployment.policypack",
+    "done_count" : 13,
+    "entropy" : -2.315513402223587,
+    "final_balance_actor_mean_shift_rms" : 0.0071493820287287235,
+    "final_balance_kl" : 0.005563747137784958,
+    "final_balance_kl_action_0" : 0.0011933757923543453,
+    "final_balance_kl_action_1" : 0.0009448628406971693,
+    "final_balance_kl_action_2" : 0.00032943172845989466,
+    "final_balance_kl_action_3" : 0.003096076427027583,
+    "gradient_norm" : 4.5515631437301636,
+    "imagination_fraction" : 0,
+    "imagination_loss" : 0,
+    "impact_sequence_metrics" : [
+
+    ],
+    "kl_divergence" : 0.007530061207944527,
+    "learner_state" : "\/Users\/n\/Developer\/numi-crow-rl-20261107\/build\/crow-v15-recorded-restart-20261114\/neural-balance-v3-restart-update-01.safetensors",
+    "learning_rate" : 0.0003000000142492354,
+    "loss" : 6.0111395716667175,
+    "maximum_reward" : 0.048715289682149887,
+    "mean_action_standard_deviation" : 0.13539804518222809,
+    "mean_contact_reward" : 0,
+    "mean_dodge_cbf_buffer_reward" : 0,
+    "mean_dodge_cbf_correction_reward" : 0,
+    "mean_dodge_evasion_reward" : 0,
+    "mean_dodge_link_clearance_reward" : 0,
+    "mean_dodge_miss_reward" : 0,
+    "mean_dodge_predicted_clearance_reward" : 0,
+    "mean_dodge_safe_action_rate_reward" : 0,
+    "mean_dodge_safe_stillness_reward" : 0,
+    "mean_reward" : -0.009749564342200756,
+    "mean_root_height" : 0.41363456845283508,
+    "mean_task_reward" : 0.061326067894697189,
+    "mean_tilt" : 0,
+    "mean_tracking_score" : 0.6273045539855957,
+    "minibatch_updates" : 8,
+    "minimum_reward" : -2.1298549175262451,
+    "mlx_active_memory_bytes" : 9693724,
+    "mlx_cache_memory_bytes" : 0,
+    "mlx_cache_released_bytes" : 70001214,
+    "mlx_peak_memory_bytes" : 76097252,
+    "outcomes" : {
+      "approach_pitch_full_envelope_fraction" : {
+        "direction" : 2,
+        "mean" : 0.60546875,
+        "unit" : "ratio"
+      },
+      "approach_pitch_warning_fraction" : {
+        "direction" : 2,
+        "mean" : 0.8818359375,
+        "unit" : "ratio"
+      },
+      "done" : {
+        "direction" : 2,
+        "mean" : 0.00634765625,
+        "unit" : "bool"
+      },
+      "figure_eight_tracking" : {
+        "direction" : 1,
+        "mean" : 0,
+        "unit" : "ratio"
+      },
+      "forward_flight_tracking" : {
+        "direction" : 1,
+        "mean" : 0.036814227700233459,
+        "unit" : "ratio"
+      },
+      "ground_support" : {
+        "direction" : 1,
+        "mean" : 0.010415038093924522,
+        "unit" : "ratio"
+      },
+      "liftoff" : {
+        "direction" : 1,
+        "mean" : 0.019819173961877823,
+        "unit" : "ratio"
+      },
+      "navigation_completion" : {
+        "direction" : 1,
+        "mean" : 0,
+        "unit" : "ratio"
+      },
+      "navigation_progress" : {
+        "direction" : 1,
+        "mean" : 0,
+        "unit" : "m"
+      },
+      "navigation_waypoints_reached" : {
+        "direction" : 1,
+        "mean" : 5,
+        "unit" : "count"
+      },
+      "physics_error" : {
+        "direction" : 2,
+        "mean" : 0,
+        "unit" : "bool"
+      },
+      "push_off" : {
+        "direction" : 1,
+        "mean" : -0.008159894496202469,
+        "unit" : "m\/s"
+      },
+      "reward" : {
+        "direction" : 1,
+        "mean" : -0.009749564342200756,
+        "unit" : "reward"
+      },
+      "root_height" : {
+        "direction" : 0,
+        "mean" : 0.41363456845283508,
+        "unit" : "m"
+      },
+      "task_reward" : {
+        "direction" : 1,
+        "mean" : 0.061326067894697189,
+        "unit" : "reward"
+      },
+      "timeout" : {
+        "direction" : 0,
+        "mean" : 0,
+        "unit" : "bool"
+      },
+      "tracking" : {
+        "direction" : 1,
+        "mean" : 0.6273045539855957,
+        "unit" : "ratio"
+      },
+      "walking_contact" : {
+        "direction" : 1,
+        "mean" : 0.010529297403991222,
+        "unit" : "ratio"
+      }
+    },
+    "policy_loss" : -0.0002130628563463688,
+    "policy_pack" : "\/Users\/n\/Developer\/numi-crow-rl-20261107\/build\/crow-v15-recorded-restart-20261114\/neural-balance-v3-restart-update-01.policypack",
+    "policy_revision" : 7,
+    "policy_revision_after" : 7,
+    "policy_revision_before" : 6,
+    "recovery_phase_rates_by_difficulty_band" : {
+      "10" : {
+        "brace" : 0,
+        "foot_support" : 0,
+        "mean_root_height" : 0.41363456845283508,
+        "mean_tilt" : 0,
+        "quiet_stand" : 0,
+        "restored" : 0,
+        "rise" : 0,
+        "standing" : 0,
+        "support_transfer" : 0,
+        "transition_count" : 2048,
+        "trunk_clear" : 0
+      }
+    },
+    "reward_standard_deviation" : 0.17015893757343292,
+    "samples" : 2048,
+    "status" : "updated",
+    "task_fingerprint" : 679085549117120167,
+    "termination_reason_counts" : {
+      "3" : 13
+    },
+    "timeout_count" : 0,
+    "update_seconds" : 0.042229583952575922,
+    "value_loss" : 6.0090371370315552
+  },
+  "learner" : "mlx",
+  "learner_execution_identity" : "",
+  "learner_state" : "\/Users\/n\/Developer\/numi-crow-rl-20261107\/build\/crow-v15-recorded-restart-20261114\/neural-balance-v3-restart-update-01.safetensors",
+  "learner_state_restored" : false,
+  "learning_update_history" : [
+    {
+      "actor_gradient_norm" : 2.0115035623311996,
+      "approximate_kl" : 0.007569912122562528,
+      "clip_fraction" : 0.106201171875,
+      "critic_gradient_norm" : 2.9894650485366583,
+      "done_count" : 13,
+      "gradient_norm" : 4.5515631437301636,
+      "kl_divergence" : 0.007530061207944527,
+      "learning_rate" : 0.0003000000142492354,
+      "maximum_reward" : 0.048715289682149887,
+      "mean_action_standard_deviation" : 0.13539804518222809,
+      "mean_reward" : -0.009749564342200756,
+      "minibatch_updates" : 8,
+      "minimum_reward" : -2.1298549175262451,
+      "mlx_peak_memory_bytes" : 76097252,
+      "outcomes" : {
+        "approach_pitch_full_envelope_fraction" : {
+          "direction" : 2,
+          "mean" : 0.60546875,
+          "unit" : "ratio"
+        },
+        "approach_pitch_warning_fraction" : {
+          "direction" : 2,
+          "mean" : 0.8818359375,
+          "unit" : "ratio"
+        },
+        "done" : {
+          "direction" : 2,
+          "mean" : 0.00634765625,
+          "unit" : "bool"
+        },
+        "figure_eight_tracking" : {
+          "direction" : 1,
+          "mean" : 0,
+          "unit" : "ratio"
+        },
+        "forward_flight_tracking" : {
+          "direction" : 1,
+          "mean" : 0.036814227700233459,
+          "unit" : "ratio"
+        },
+        "ground_support" : {
+          "direction" : 1,
+          "mean" : 0.010415038093924522,
+          "unit" : "ratio"
+        },
+        "liftoff" : {
+          "direction" : 1,
+          "mean" : 0.019819173961877823,
+          "unit" : "ratio"
+        },
+        "navigation_completion" : {
+          "direction" : 1,
+          "mean" : 0,
+          "unit" : "ratio"
+        },
+        "navigation_progress" : {
+          "direction" : 1,
+          "mean" : 0,
+          "unit" : "m"
+        },
+        "navigation_waypoints_reached" : {
+          "direction" : 1,
+          "mean" : 5,
+          "unit" : "count"
+        },
+        "physics_error" : {
+          "direction" : 2,
+          "mean" : 0,
+          "unit" : "bool"
+        },
+        "push_off" : {
+          "direction" : 1,
+          "mean" : -0.008159894496202469,
+          "unit" : "m\/s"
+        },
+        "reward" : {
+          "direction" : 1,
+          "mean" : -0.009749564342200756,
+          "unit" : "reward"
+        },
+        "root_height" : {
+          "direction" : 0,
+          "mean" : 0.41363456845283508,
+          "unit" : "m"
+        },
+        "task_reward" : {
+          "direction" : 1,
+          "mean" : 0.061326067894697189,
+          "unit" : "reward"
+        },
+        "timeout" : {
+          "direction" : 0,
+          "mean" : 0,
+          "unit" : "bool"
+        },
+        "tracking" : {
+          "direction" : 1,
+          "mean" : 0.6273045539855957,
+          "unit" : "ratio"
+        },
+        "walking_contact" : {
+          "direction" : 1,
+          "mean" : 0.010529297403991222,
+          "unit" : "ratio"
+        }
+      },
+      "policy_revision_after" : 7,
+      "policy_revision_before" : 6,
+      "samples" : 2048,
+      "timeout_count" : 0,
+      "update_seconds" : 0.042229583952575922
+    }
+  ],
+  "life_checkpoint_count" : 0,
+  "life_checkpoint_enabled" : false,
+  "life_checkpoint_seconds" : 0,
+  "life_state_restored" : false,
+  "lifetime_updates_completed" : 1,
+  "maximum_active_contacts" : 32,
+  "maximum_episode_steps" : 5000,
+  "maximum_manifolds" : 14,
+  "minibatch_size" : 512,
+  "minibatches_per_epoch" : 4,
+  "motion_minibatch_size" : 0,
+  "native_submission_count" : 512,
+  "navigation_return_weighted_self_imitation" : false,
+  "navigation_self_imitation_minimum_waypoint" : 5,
+  "object_push_curriculum" : "",
+  "operation" : "swift_native_policy_training",
+  "physics" : "metal",
+  "policy_pack" : "\/Users\/n\/Developer\/numi-crow-rl-20261107\/build\/crow-v15-recorded-restart-20261114\/neural-balance-v3-restart-update-01.policypack",
+  "resumed_exploration_overridden" : false,
+  "resumed_learning_rate_overridden" : false,
+  "retained_buffer_bytes" : 9621366,
+  "retention_maximum_difficulty_band" : -1,
+  "retention_policy_pack" : "",
+  "retention_protected_actor_only" : false,
+  "retention_rollout_teacher_blend" : 0,
+  "rollout_pack" : "\/Users\/n\/Developer\/numi-crow-rl-20261107\/build\/crow-v15-recorded-restart-20261114\/neural-balance-v3-restart-update-01.rollout",
+  "samples_per_update" : 2048,
+  "scheduler" : "swift",
+  "stage_high_water" : {
+    "articulation_point_queries" : 0,
+    "candidate_pairs" : 55,
+    "ccd_candidates" : 0,
+    "ccd_events" : 0,
+    "constraint_blocks" : 32,
+    "constraint_rows" : 96,
+    "dynamic_nodes" : 0,
+    "endpoint_runtime_records" : 0,
+    "hard_convex_pairs" : 0,
+    "island_constraint_references" : 0,
+    "island_node_references" : 0,
+    "islands" : 1,
+    "manifolds" : 14,
+    "mesh_triangle_candidates" : 0,
+    "operator_velocity_elements" : 0,
+    "quality_direct_tiles" : 0,
+    "quality_generalized_velocities" : 0,
+    "quality_krylov_vectors" : 0,
+    "quality_rows" : 0,
+    "raw_contacts" : 32,
+    "rod_candidate_pairs" : 0,
+    "rod_ccd_events" : 0,
+    "rod_factor_blocks" : 0,
+    "rod_manifolds" : 0,
+    "rod_raw_contacts" : 0,
+    "solver_tiles" : 1,
+    "spill_rows" : 0
+  },
+  "steps_per_update" : 512,
+  "submission_milliseconds" : 60436.39370000003,
+  "training_samples" : 2048,
+  "transient_private_bytes" : 2518236,
+  "updates" : 1,
+  "visual_observation" : true,
+  "visual_observation_config" : "\/Users\/n\/Developer\/numi-crow-rl-20261107\/artifacts\/crow-v15-hip-roll-journey-integration-20261111\/crow-navigation.hip-roll.visual-observation.json",
+  "visual_scene_fingerprint" : 10426923738543932648,
+  "world_source" : "american_crow_v15_goal_memory_navigation_development_v1"
+}

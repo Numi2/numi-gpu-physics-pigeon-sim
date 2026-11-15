@@ -1,0 +1,8 @@
+43bd380ea2fc7719da888293e75281967f349edb1290bff49247667cf60d797e  crow-neural-v3-restart-update-01-20261115.tar.gz
+1ab0231379e4395e2e6d506f00f96ce0060b0acb9b3139e8a9b36e0876305936  crow-neural-v3-restart-update-02-20261115.tar.gz
+41a33fe4fa4c69ab8b16f370cd03a94648c594e07dcd76a383d98fd98a3addc3  crow-neural-v3-restart-update-03-20261115.tar.gz
+0839edb786bcb9018521daf97eefc5eef3b23863460e9dce460ebdd5d19523e6  crow-neural-v3-restart-update-04-20261115.tar.gz
+82b7afa090969b6734737400b92d7a7df1996069aab6619ab5a3cdece0498a11  crow-neural-v3-restart-update-05-20261115.tar.gz
+2848ee843da474bc3bbae7d304535d18a80dbf40402cf92a059252595ade0d2c  crow-neural-v3-restart-update-06-20261115.tar.gz
+d7fd88c76996f77fee4135378a4a0a0e406129f7ca3fc82e5c1e4f0a14e97f2a  crow-neural-v3-restart-update-07-20261115.tar.gz
+54f49a299572a1aa84d0793d30303c0fde086671b12d7fa782b4a134a94fd937  crow-neural-v3-restart-update-08-20261115.tar.gz
