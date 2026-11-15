@@ -1,0 +1,1 @@
+Independent Git restoration first attempt: both 17-file renderer bundles passed archive and member hash checks, then local delivered video read raised TimeoutError [Errno 60]. Nothing was deleted. A separate shasum of the video immediately afterward succeeded; the complete independent verification is rerun and retained separately.
