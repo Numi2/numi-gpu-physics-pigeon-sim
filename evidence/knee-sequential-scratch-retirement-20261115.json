@@ -1,0 +1,82 @@
+{
+  "verified_git_commit": "c4ee27481a09f127c0ba8fe73ddec946315b09be",
+  "free_before": 5785145344,
+  "free_after": 6056960000,
+  "removed": [
+    {
+      "directory": "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-knee-sequential-screen-20370113/variant-00",
+      "file_count": 8,
+      "logical_bytes": 18192971
+    },
+    {
+      "directory": "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-knee-sequential-screen-20370113/variant-01",
+      "file_count": 8,
+      "logical_bytes": 18190526
+    },
+    {
+      "directory": "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-knee-sequential-screen-20370113/variant-02",
+      "file_count": 8,
+      "logical_bytes": 17957436
+    },
+    {
+      "directory": "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-knee-sequential-screen-20370113/variant-03",
+      "file_count": 8,
+      "logical_bytes": 18249503
+    },
+    {
+      "directory": "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-knee-sequential-screen-20370113/variant-04",
+      "file_count": 8,
+      "logical_bytes": 18172942
+    },
+    {
+      "directory": "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-knee-sequential-screen-20370113/variant-05",
+      "file_count": 8,
+      "logical_bytes": 17966780
+    },
+    {
+      "directory": "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-knee-sequential-screen-20370113/variant-06",
+      "file_count": 8,
+      "logical_bytes": 18172773
+    },
+    {
+      "directory": "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-knee-sequential-screen-20370113/variant-07",
+      "file_count": 8,
+      "logical_bytes": 18407601
+    },
+    {
+      "directory": "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-knee-sequential-screen-20370113/variant-08",
+      "file_count": 8,
+      "logical_bytes": 17919633
+    },
+    {
+      "directory": "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-knee-sequential-screen-20370113/variant-09",
+      "file_count": 8,
+      "logical_bytes": 18187131
+    },
+    {
+      "directory": "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-knee-sequential-screen-20370113/variant-10",
+      "file_count": 8,
+      "logical_bytes": 18149217
+    },
+    {
+      "directory": "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-knee-sequential-screen-20370113/variant-11",
+      "file_count": 8,
+      "logical_bytes": 17865781
+    },
+    {
+      "directory": "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-knee-sequential-screen-20370113/variant-12",
+      "file_count": 8,
+      "logical_bytes": 18129536
+    },
+    {
+      "directory": "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-knee-sequential-screen-20370113/variant-13",
+      "file_count": 8,
+      "logical_bytes": 18037416
+    },
+    {
+      "directory": "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-knee-sequential-screen-20370113/variant-14",
+      "file_count": 8,
+      "logical_bytes": 17828340
+    }
+  ]
+}
