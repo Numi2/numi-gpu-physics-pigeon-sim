@@ -1,0 +1,41 @@
+{
+  "first_done": [
+    265,
+    2
+  ],
+  "all_done": [
+    [
+      265,
+      2
+    ]
+  ],
+  "root_jumps": [
+    {
+      "before": 266,
+      "after": 267,
+      "distance_m": 0.37220158711002405
+    }
+  ],
+  "audited_first_episode_intervals": 264,
+  "streaks": [
+    [
+      45,
+      45,
+      1
+    ],
+    [
+      47,
+      185,
+      139
+    ]
+  ],
+  "failed_gates": {
+    "both_up": 16,
+    "left_opposed": 90,
+    "right_opposed": 79,
+    "speed": 51,
+    "tilt": 79
+  },
+  "continuous_all_steps": false,
+  "note": "Only intervals strictly before the first replay done are analyzed; sample state index is interval+1."
+}

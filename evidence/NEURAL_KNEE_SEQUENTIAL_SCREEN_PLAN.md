@@ -1,0 +1,5 @@
+# Sequential knee-feedback development screen
+
+Because the common-q/v parallel lanes still had different initial visual observations and actions, this screen evaluates each bounded feedback setting in its own one-lane run with the same seed and actor as the original hard-start control. It explores pitch gains -0.18, -0.12, -0.06, 0 and 0.06 crossed with pitch-rate gains -0.06, 0 and 0.06, all limited to +/-0.04 rad and applied to physical knee targets after 50 intervals. It is privileged scripted feedback, not a trained neural policy.
+
+Each 300-interval trial must match the original retained q, v, actor observations and accepted actions for all first 50 frames or the screen stops. A 300-interval nontermination is censored and not a success. Record first termination and strict support/tilt/speed/opposed-toe-contact streak; retain entire replay and reset episodes. Select candidates only for longer matched physical testing on both already-consumed starts; no setting qualifies until it survives strict full-length tests, and no reserved layout or seed is used for tuning. The model, forced perch and scripted carrier remain exploratory reconstruction limits.

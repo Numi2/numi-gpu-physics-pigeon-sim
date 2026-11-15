@@ -1,0 +1,43 @@
+{
+  "archive_sha256": "1a6b44ac8e5fd20b7bbca162eda997ceee095a3382201560087fd881668f5bc1",
+  "archive_size": 39034880,
+  "parts": [
+    {
+      "name": "crow-neural-knee-sequential-build-20261115.tar.gz",
+      "sha256": "1a6b44ac8e5fd20b7bbca162eda997ceee095a3382201560087fd881668f5bc1"
+    }
+  ],
+  "remote_files": {
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-knee-sequential-screen-00.metal": "a9c283d7c94655412809a654c71db435427f36843cb68379b189a233c5af600a",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-knee-sequential-screen-01.metal": "89349803b6a513c834712e67158d80210282b5bb3e57591639b3a103ad9aede4",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-knee-sequential-screen-02.metal": "43eea2b1bab0e61c1ebf4ae2677d09fe839fd36581edeeb9df6afa3a217d0a3c",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-knee-sequential-screen-03.metal": "5a89c1a2fc33f5de00c0f66ef9a2f38ece708236e4425807b2b5407155eb969b",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-knee-sequential-screen-04.metal": "1071b6986892575fbe3bd23f2dd310dfa63e7b3f4fcf97b57ca49b95c0a9c557",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-knee-sequential-screen-05.metal": "f1e21aa889bdef8e57b35a30c79f24be309d87a50d842cfc8244e11775ba86ad",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-knee-sequential-screen-06.metal": "fef18d5ef5fc0b63b89c292ae6d7da6472f690676d2ca0900953372314a75609",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-knee-sequential-screen-07.metal": "613291d7b4297ecbb849b7538bd94db9ea0660afdde679942f89d1cf347028d1",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-knee-sequential-screen-08.metal": "42b3fe11c8cbd356e045a8aad84d1df3fb5cf9da427d43e8d0cbf2d5ac989cf6",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-knee-sequential-screen-09.metal": "0fa7eaa2b306db87f1988b235e6156e1658c3ffbd6db1f338ed25ab7a7f6e3f2",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-knee-sequential-screen-10.metal": "1c9d2327bec1050e239d7477ee0ee0e6d2170bea416079b6a39c3861edcc0aa8",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-knee-sequential-screen-11.metal": "241ecc0ae3b75f4ffe658dda231269a0c716d127199c0e2814ec6f458ef2fcd6",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-knee-sequential-screen-12.metal": "8e8d1ab4d0fa9488112c201e73f120a92d6143b9b3939a63d55f03af994c7864",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-knee-sequential-screen-13.metal": "91341af98718f9d3c3b2a2b02e69d55c67b0fea0aee47e6d4fe20dfab8b69fac",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-knee-sequential-screen-14.metal": "f6bd04c37729765a81e89c558eebd3be5998655e0967d0cf8463258940d24b0a",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-knee-sequential-screen-build.json": "70d68c4c6678307c18c426a9ead4edd83327d5e294cf2ae55dc959fcb40fea95",
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-knee-sequential-screen-00.metallib": "6dc136580d6fc52890109b1650c1c6498b21ddfe6df6b1486d8fb0f975240fff",
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-knee-sequential-screen-01.metallib": "445893b052bf5c5f38c7cc9296ea9bf66bfd5b6f75a068527ff3459b452f27ca",
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-knee-sequential-screen-02.metallib": "e1e3f044a78303d8aa0890377b82bbd628e36faf99c41a210445023dd49f1b77",
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-knee-sequential-screen-03.metallib": "9bc3bc44760e2a8c2f09e2ace44bdb1fe4d6f4b42a4f835b0fa07757fb3770dc",
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-knee-sequential-screen-04.metallib": "84b396c9b9b4b4087b0481d20f2a0d0cc5a0b34d1eade71209fb315ade9551ea",
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-knee-sequential-screen-05.metallib": "22cb4928c0d120ce46e9c5a3acf9b91ef64cfd68aea62cc68b90597884f2f99e",
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-knee-sequential-screen-06.metallib": "d622465d7a78950387597ec11208d52fa078206a1ed9bded3e0e1b2750b4d5a1",
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-knee-sequential-screen-07.metallib": "5cb60cd9566af98800093b554e5636bceeb97f3c3a486aa10adcc75a290bc468",
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-knee-sequential-screen-08.metallib": "6079c1c55b20c8c25cc40e7b014bd375eade857ce9f81c5564b0a691ec05e81e",
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-knee-sequential-screen-09.metallib": "5a3671ebb08904f2ddd4d40c71ceeb4cd8ddf364e3c96575bec92439604c84cb",
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-knee-sequential-screen-10.metallib": "39d2a034db5c0e662132d78fe64d37d89b935e9e040142797fb5abb23b5b82b4",
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-knee-sequential-screen-11.metallib": "96a46b2bb56ac2f5d6b42a82e84771d925d440d443ffe9c79115dd3d36376754",
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-knee-sequential-screen-12.metallib": "f50edb57c1a39c20ec670eac93f9a479112acdf0f74d239c0cd68e8158fa8e5b",
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-knee-sequential-screen-13.metallib": "7a6f3d6f5a4588be2383b08417608364210e437abf8910c674c83520c9e66ce6",
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-knee-sequential-screen-14.metallib": "d3b1dde7a4c7b861ad68ec3d0729a022c5cf65162babfc593e8159dd465a0e6c"
+  }
+}
