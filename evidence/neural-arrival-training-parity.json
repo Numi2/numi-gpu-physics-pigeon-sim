@@ -1,0 +1,13 @@
+{
+  "input_sha256": {
+    "baseline": "4cddbb581cdc3f325a88e4d739c5e91701a9dcf7958e0d2c7295dc847d105ab3",
+    "gated": "4e4d2ad8effa39298f630ae45bedf202064e01769735e5cfce629a1fdfd2bca5"
+  },
+  "arrival_physics_parity": {
+    "q": true,
+    "v": true,
+    "actor_observation": true,
+    "accepted_actions": true
+  },
+  "first_done": null
+}

@@ -1,0 +1,19 @@
+{
+  "archive_sha256": "db665ed1913ba3229fd74b44abeed57bb5186c63f7597b785a453d3247f3d278",
+  "archive_size": 9338880,
+  "parts": [
+    {
+      "name": "crow-arrival-training-parity-20310129-20261115.tar.gz",
+      "sha256": "db665ed1913ba3229fd74b44abeed57bb5186c63f7597b785a453d3247f3d278"
+    }
+  ],
+  "remote_files": {
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-arrival-training-parity-20310129-300/command.json": "2bf243074556fc9d0fff10cd879eb06b670fc650f4ccc5ea582b3d7a97f4b54c",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-arrival-training-parity-20310129-300/inputs.json": "2e52ad0d0ac8227c8c6413b31207445a7516034fb6f4f647ecc373c893c2dd66",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-arrival-training-parity-20310129-300/result.json": "81868a6e94ffc0178bf833deb1c9013d9fab4ee95ddb876a5e8ec4f1d26376d2",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-arrival-training-parity-20310129-300/stdout": "f12a1a906e8416794cfa818a0e0dc1b7bd85f1777a265aa95d3dc4183c91d086",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-arrival-training-parity-20310129-300/stderr.gz": "781316a7973b0105492a73d0ee883a74bdb3aa950c2cf919915cb293eeadf6d7",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-arrival-training-parity-20310129-300/replay.json": "4e4d2ad8effa39298f630ae45bedf202064e01769735e5cfce629a1fdfd2bca5",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-arrival-training-parity-20310129-300/trace.tsv": "abe62c0c431e33756967dc4894ec7e5ef1bab110f7c1960ae666719a6bab75f9"
+  }
+}
