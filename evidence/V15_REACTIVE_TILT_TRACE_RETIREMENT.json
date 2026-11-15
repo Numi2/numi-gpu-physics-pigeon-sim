@@ -1,0 +1,25 @@
+{
+  "files": [
+    {
+      "path": "artifacts/crow-v15-recorded-restart-20261114/v15-reactive-tilt-corrected-eval-20261115/20370113-hip_pos-750.stderr",
+      "sha256": "46bfb4e3e4de72d9b08fe346df1ab315851c0664bbd74d0467e71da8e15a4998",
+      "bytes": 70392232
+    },
+    {
+      "path": "artifacts/crow-v15-recorded-restart-20261114/v15-reactive-tilt-corrected-eval-20261115/20370113-hip_neg-750.stderr",
+      "sha256": "5ba8e634fcbcc3d7535b2d86259b064534c57978ef9db756e4031bb472a3e712",
+      "bytes": 71435516
+    },
+    {
+      "path": "artifacts/crow-v15-recorded-restart-20261114/v15-reactive-tilt-corrected-eval-20261115/20370113-wing_pos-750.stderr",
+      "sha256": "d1b3c3675c10b20a96f72ead5297168676d9e05cba39f4c8ee3a81d7e61a73ef",
+      "bytes": 71933314
+    },
+    {
+      "path": "artifacts/crow-v15-recorded-restart-20261114/v15-reactive-tilt-corrected-eval-20261115/20370113-wing_neg-750.stderr",
+      "sha256": "a5666e66af53766a0788e9f3e9d381453bde8ddbc2eac3e42c13fccb380a671f",
+      "bytes": 72576958
+    }
+  ],
+  "bytes_retired": 286338020
+}
