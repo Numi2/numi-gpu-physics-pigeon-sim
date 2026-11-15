@@ -1,0 +1,71 @@
+{
+  "files": [
+    {
+      "path": "artifacts/crow-v15-recorded-restart-20261114/v15-joint-wholebody-evaluation-20261115/20370113-joint-400.stderr",
+      "sha256": "b11d5fe0d28b5067fd04cfa04b0208b33e2a84bbb3557d1e74b5d3372a53c1d2",
+      "size": 34821682
+    },
+    {
+      "path": "artifacts/crow-v15-recorded-restart-20261114/v15-joint-wholebody-evaluation-20261115/20370127-joint-400.json",
+      "sha256": "7debe110e1ad7a938e93e3c213341a176dfd895e5c098142024ec53f11c7535e",
+      "size": 14158919
+    },
+    {
+      "path": "artifacts/crow-v15-recorded-restart-20261114/v15-joint-wholebody-evaluation-20261115/20370127-joint-400.stderr",
+      "sha256": "761769471fc315e9295131e444de70a04302b0a63767068369336f2de8fd352a",
+      "size": 34970407
+    },
+    {
+      "path": "artifacts/crow-v15-recorded-restart-20261114/v15-joint-wholebody-evaluation-20261115/20370113-joint-400.tsv",
+      "sha256": "d1f41e70b7427ec416722622b3e049b728750ee40ef1cc04847dc4d5c050edec",
+      "size": 337947
+    },
+    {
+      "path": "artifacts/crow-v15-recorded-restart-20261114/v15-joint-wholebody-evaluation-20261115/20370113-joint-400.json",
+      "sha256": "df8affe9808e6b20e60cb39ff9e90ba6fc80c4c61e5bf8b0c6ed4e1a2d3a2422",
+      "size": 14446427
+    },
+    {
+      "path": "artifacts/crow-v15-recorded-restart-20261114/v15-joint-wholebody-evaluation-20261115/20370127-joint-400.tsv",
+      "sha256": "ef2f867436a853739436c0a6f28db7c8b1d97766ef1e068c57da495d41c801da",
+      "size": 336959
+    },
+    {
+      "path": "artifacts/crow-v15-recorded-restart-20261114/v15-joint-mc-evaluation-20261115/20370113-gae-300.tsv",
+      "sha256": "e7d77ab8d8ecb616cdd84923513abe3653b1c5184a6255e96799e676c5b3ef6e",
+      "size": 252796
+    },
+    {
+      "path": "artifacts/crow-v15-recorded-restart-20261114/v15-joint-mc-evaluation-20261115/20370113-mc-300.json",
+      "sha256": "081f3e993c6862a3df6cf2b94fbb47e49712881ffd44abfa99e39d5265259b5e",
+      "size": 10862913
+    },
+    {
+      "path": "artifacts/crow-v15-recorded-restart-20261114/v15-joint-mc-evaluation-20261115/20370113-gae-300.json",
+      "sha256": "a80abc854f3cd4c730af86482f74a08a62dd724fc9dc0d35df8c25778866b4c4",
+      "size": 10863442
+    },
+    {
+      "path": "artifacts/crow-v15-recorded-restart-20261114/v15-joint-mc-evaluation-20261115/20370113-mc-300.stderr",
+      "sha256": "5531d51c429eed58eede2b7ee28eb3b95181dd6b88094b573b009d812663b4c6",
+      "size": 24576339
+    },
+    {
+      "path": "artifacts/crow-v15-recorded-restart-20261114/v15-joint-mc-evaluation-20261115/20370113-mc-300.tsv",
+      "sha256": "fd79d70bbfebc0cc3ee31b03ca59890cc0e7d9f2d1f7c8774fb14942b8631b9c",
+      "size": 252332
+    },
+    {
+      "path": "artifacts/crow-v15-recorded-restart-20261114/v15-joint-mc-evaluation-20261115/20370113-gae-300.stderr",
+      "sha256": "820210017096e8089d26802aa8d5d0c50e4e65bd0f82503b9a51c822b2104cc7",
+      "size": 23811492
+    }
+  ],
+  "bytes_retired": 169691655,
+  "archives": [
+    "crow-v15-joint-wholebody-evaluation-20261115.tar.gz",
+    "crow-v15-joint-mc-credit-20261115.tar.gz"
+  ],
+  "independent_git_commit": "806f3fe",
+  "restore": "Concatenate archive parts in manifest order if needed, verify archive SHA-256, extract under remote_root, and verify each file SHA-256."
+}
