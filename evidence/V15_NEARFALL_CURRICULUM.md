@@ -1,0 +1,7 @@
+# Near-fall branch curriculum
+
+For a shorter credit-assignment horizon, the baseline controller reached 150 physical steps on the consumed hard-start seed 20370113 before a resident checkpoint was saved. The continuous and resumed trajectory matched on the recorded state, action, observations, bodies, reward, termination and outcomes through 200 steps. The training-shader prefix matched the evaluation shader's physical state and actions. Four fresh-optimizer/continuation PPO updates used 128-step single-lane rollouts, 0.0003 fixed learning rate, gamma 0.999, lambda 0.995, and two epochs. Each exploratory rollout fell, at steps 98, 101, 100 and 98 after the checkpoint; reset samples after those falls are not continuous balance. Protected actor parameters and observation/exploration contracts remained unchanged.
+
+From the earlier step-49 evaluation checkpoint, both baseline and candidate fell at absolute step 257 on seed 20370113. From the step-50 checkpoint on seed 20370127 neither fell during the 250-step comparison; maximum tilts were 0.12947 and 0.12941 rad respectively. This candidate is not promoted. The environment is a reconstructed branch start with a forced phase and scripted carrier; both seeds are consumed development cases and the results do not establish autonomous landing or robust balance.
+
+Exact checkpoints, failed samples, traces, policy packs, optimizer states, commands and source are in the split `crow-v15-nearfall-curriculum-20261115.tar.gz` archive. Reassemble the parts in order and verify against the manifest.
