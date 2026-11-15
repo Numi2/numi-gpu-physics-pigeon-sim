@@ -1,0 +1,14 @@
+{
+  "archive_sha256": "df540c64292f7e972767015ae681eb1e69bb3bb1bcc511fd74d18d406e3c0f5c",
+  "remote_files": {
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-perch-fixed-continuation-update-03.policypack": "8b43e26ed28896e7cad53e0f2960c0bdfc7915a713f8a9704d4cfc1955181377",
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-perch-fixed-continuation-update-03.policypack.deployment.policypack": "bdaa052b38def43e838e0fab3a70f7ed3a29538fc11bc2749935acae7903a28a",
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-perch-fixed-continuation-update-03.rollout": "78dcdcdc523bb4426381dcf86acac2f124b70c4698ba285e5fc6443bfbe22443",
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-perch-fixed-continuation-update-03.safetensors": "e2b179f0df2c57b4cede37df920d34592d7cdabbfafa64a1cd67f2a72f9032b6",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-perch-fixed-continuation/update-03/command.json": "f16ec5d06de59dd14b9657539c69ca24ac448446c841764160ca13208b4c4a61",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-perch-fixed-continuation/update-03/inputs.json": "6c65afaafe67d5cbcec2f837dce40d2d4b1120d866588313ace2d830eba063f3",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-perch-fixed-continuation/update-03/stdout": "a076776b1ea2e893b69dead7fefd59f66fce0db6f7e4b893c79dbc5b906166c0",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-perch-fixed-continuation/update-03/stderr": "dd4ad8d2e3b6db0aab1dca7a3307be8e42dfa7c0729f562c87222bff7a398c17",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-perch-fixed-continuation/update-03/result.json": "9a0916a484d650476be70c55c55d0a0ab8bde13d5c242104908dda9b00650f1f"
+  }
+}
