@@ -1,0 +1,29 @@
+{
+  "archive_sha256": "d0d905bbdfaf24714d98d8307a794fad32d6271ea99f8c0acf2c897aafd275f0",
+  "archive_size": 18022400,
+  "parts": [
+    {
+      "name": "crow-toe-residual-development-renderer-bundle-20370127.tar.gz",
+      "sha256": "d0d905bbdfaf24714d98d8307a794fad32d6271ea99f8c0acf2c897aafd275f0"
+    }
+  ],
+  "remote_files": {
+    "/tmp/crow-48s-multiview-20261114/render-phase-comparison-neural-toe-sensor-development-20370127-residual01-1000/frames-front/numi-crow-replay-audit.json": "c744b329f8614e11f7ec70017993bb32160eaa50b48af3b194c1f7821b3ea638",
+    "/tmp/crow-48s-multiview-20261114/render-phase-comparison-neural-toe-sensor-development-20370127-residual01-1000/frames-above/numi-crow-replay-audit.json": "514793bd8d7eab6c7307efa4d3a45b7df42524186f7889977bd8748964bb98a3",
+    "/tmp/crow-48s-multiview-20261114/render-phase-comparison-neural-toe-sensor-development-20370127-residual01-1000/front.mp4": "1d992805dc03247afb9578a8918cf80a502b92eb06e9b853304000b45297886a",
+    "/tmp/crow-48s-multiview-20261114/render-phase-comparison-neural-toe-sensor-development-20370127-residual01-1000/frames-feet/numi-crow-replay-audit.json": "d1f4e235525e2d7f9c6384ceefa00dee6557474344daa61ea6f79fa43fdecf63",
+    "/tmp/crow-48s-multiview-20261114/render-phase-comparison-neural-toe-sensor-development-20370127-residual01-1000/below.mp4": "cf5e134f72acabead1c9bd4e4539e1d3fa7ff32527ee20e9236fdac0b66242e7",
+    "/tmp/crow-48s-multiview-20261114/render-phase-comparison-neural-toe-sensor-development-20370127-residual01-1000/back.log": "07fc9a263d52a35fa9ce6f832500dbc444af7264f1dd1426a596f383c7ce2d93",
+    "/tmp/crow-48s-multiview-20261114/render-phase-comparison-neural-toe-sensor-development-20370127-residual01-1000/front.log": "07fc9a263d52a35fa9ce6f832500dbc444af7264f1dd1426a596f383c7ce2d93",
+    "/tmp/crow-48s-multiview-20261114/render-phase-comparison-neural-toe-sensor-development-20370127-residual01-1000/back.mp4": "edd5db39642402d16534229422206b81abb51cdec20a92fcb0d949b41f8f89d8",
+    "/tmp/crow-48s-multiview-20261114/render-phase-comparison-neural-toe-sensor-development-20370127-residual01-1000/below.log": "07fc9a263d52a35fa9ce6f832500dbc444af7264f1dd1426a596f383c7ce2d93",
+    "/tmp/crow-48s-multiview-20261114/render-phase-comparison-neural-toe-sensor-development-20370127-residual01-1000/frames-back/numi-crow-replay-audit.json": "e483f5b3f5c01a06f341f2a2599ccf40b6c204f8ea1e4e868e8932c1d65ff761",
+    "/tmp/crow-48s-multiview-20261114/render-phase-comparison-neural-toe-sensor-development-20370127-residual01-1000/frames-below/numi-crow-replay-audit.json": "47b135555196c6f2613751c98e908375ffd09dcbbe74064835c194043c0b32a2",
+    "/tmp/crow-48s-multiview-20261114/render-phase-comparison-neural-toe-sensor-development-20370127-residual01-1000/presentation-splice.json": "59e6dc87dafc4366515bbfb0cdab9c1f9c428386d8fe5d4815b997b22404c906",
+    "/tmp/crow-48s-multiview-20261114/render-phase-comparison-neural-toe-sensor-development-20370127-residual01-1000/above.log": "07fc9a263d52a35fa9ce6f832500dbc444af7264f1dd1426a596f383c7ce2d93",
+    "/tmp/crow-48s-multiview-20261114/render-phase-comparison-neural-toe-sensor-development-20370127-residual01-1000/splice.log": "8a4960375ed0e73ca74510f3e786b4cb4b04cb70c5c361ee912e274b6f703434",
+    "/tmp/crow-48s-multiview-20261114/render-phase-comparison-neural-toe-sensor-development-20370127-residual01-1000/above.mp4": "ea155d3778527b576fad749cb56287a580b337e50b9c4d4c1af7875c3d782171",
+    "/tmp/crow-48s-multiview-20261114/render-phase-comparison-neural-toe-sensor-development-20370127-residual01-1000/feet.log": "07fc9a263d52a35fa9ce6f832500dbc444af7264f1dd1426a596f383c7ce2d93",
+    "/tmp/crow-48s-multiview-20261114/render-phase-comparison-neural-toe-sensor-development-20370127-residual01-1000/feet.mp4": "c2a89d1b630140806d3a376483f3bb452bc36a9193e3bebeab7688483fe7f11d"
+  }
+}
