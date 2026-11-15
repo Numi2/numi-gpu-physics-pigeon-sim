@@ -1,0 +1,7 @@
+# Four-update perch continuation
+
+Three PPO updates continued the fresh-optimizer high-rate diagnostic, starting from the same hard-seed checkpoint on each update with different learner seeds. These are consumed development starts, not new test layouts. The retained records include every rollout, optimizer, incumbent and updated policy, commands, hashes, full traces and failure outcomes. The resulting actor changed only the 1,632 permitted residual weights; protected actor weights and all biases, normalization and log standard deviation remained unchanged.
+
+On the same reconstructed seed 20370113 checkpoint, baseline and update-04 first terminated at absolute step 257; the initial observation matched. On seed 20370127, neither terminated in the 250-step test; maximum tilt was 0.129 rad baseline and 0.135 rad update-04. No policy is promoted: the difficult start still falls and the other test is only five seconds. Physical interpretation is limited by the forced terminal phase, relocated branch, and scripted carrier. Source inspection shows that the current neural toe residual is gated on bilateral load and both grip ramps, so it is disabled if either prerequisite is absent; whether this causes the fall requires a controlled measurement.
+
+The archive `crow-v15-resetfixed-lr30x-continuation-20261115.tar.gz` is split into numbered parts. Reassemble in part order and verify its full SHA-256 and every member against the manifest.
