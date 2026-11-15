@@ -1,0 +1,34 @@
+{
+  "archive_sha256": "fa2fb5fd2e07ea1e339a551b73e99397c17abe4ff85cafb88d43fe046e797451",
+  "archive_size": 21626880,
+  "parts": [
+    {
+      "name": "crow-v15-reactive-knee-render-20261115.tar.gz",
+      "sha256": "fa2fb5fd2e07ea1e339a551b73e99397c17abe4ff85cafb88d43fe046e797451"
+    }
+  ],
+  "remote_root": "/Users/n/Developer/numi-crow-rl-20261107",
+  "files": {
+    "artifacts/crow-v15-recorded-restart-20261114/v15-reactive-knee-neg-render-20370113-20261115/frames-front/numi-crow-replay-audit.json": "454eaace91796cab21b482f5b9b3d4cf97c520f8e8d23b4e9c70eca1d074b591",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-reactive-knee-neg-render-20370113-20261115/frames-above/numi-crow-replay-audit.json": "06b77130bd7f97d8863a7f8cc7c0b21b1e0f825d679ee1f43c7fffe2705934f1",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-reactive-knee-neg-render-20370113-20261115/front.mp4": "315597019a3d3d6cc666956f8090cfec04e70493c69f4e3aae97e2f33bca2ecc",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-reactive-knee-neg-render-20370113-20261115/frames-feet/numi-crow-replay-audit.json": "026b7c6d4aa1c967c34e23d2c70be1a84092e32264ae397346029265e22245b4",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-reactive-knee-neg-render-20370113-20261115/below.mp4": "6e1d1cfb0569f42a4ae5a7b52d6352a2bc0afc46ccfe95b4c9dae2d94e5ec861",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-reactive-knee-neg-render-20370113-20261115/back.log": "54be8a792a11a6e50dd7122469e32140d3ba1ec7c1223440d995af0180e8c774",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-reactive-knee-neg-render-20370113-20261115/front.log": "54be8a792a11a6e50dd7122469e32140d3ba1ec7c1223440d995af0180e8c774",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-reactive-knee-neg-render-20370113-20261115/back.mp4": "5dd492b1e9ff998c3c18eb63fb2a2f395d3e4bfc7a485584c656073266a89af7",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-reactive-knee-neg-render-20370113-20261115/below.log": "54be8a792a11a6e50dd7122469e32140d3ba1ec7c1223440d995af0180e8c774",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-reactive-knee-neg-render-20370113-20261115/frames-back/numi-crow-replay-audit.json": "f93990f3ee020eaec1575811103a51c6992be68bce9135d30580d513a4ea5582",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-reactive-knee-neg-render-20370113-20261115/video-sha256.txt": "15cf4ad425586b14ac109b59405a1e584343d0a1c732ebf47e73f1abcf18834e",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-reactive-knee-neg-render-20370113-20261115/frames-below/numi-crow-replay-audit.json": "0d39788af5d2147de73f748f91a6dfa7ef2dd795441113e267ef017846aed2bc",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-reactive-knee-neg-render-20370113-20261115/presentation-splice.json": "b0d9420c85687dc67fd7539fcb723566e7d004b8a4da44a5ba011710f8ff6755",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-reactive-knee-neg-render-20370113-20261115/render.sh": "c7a866667edb146380d2a153dcc244ff3babde1d2c9355586382bb01f3cd3a7f",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-reactive-knee-neg-render-20370113-20261115/splice.swift": "b91954d15d7a9d36313f129738108cf947b81e45bbf6beddee20b10cef68d823",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-reactive-knee-neg-render-20370113-20261115/above.log": "54be8a792a11a6e50dd7122469e32140d3ba1ec7c1223440d995af0180e8c774",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-reactive-knee-neg-render-20370113-20261115/window.txt": "f508083f589fbdf32967c17f23f2a1381acc1cbe5a9742cce11f23f0d007df5a",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-reactive-knee-neg-render-20370113-20261115/splice.log": "9b61211b74e7ad9686a1fc1b76f6b3c24b64ae6f8ccce1d52f7128e192a9b1af",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-reactive-knee-neg-render-20370113-20261115/above.mp4": "e76a2e44dd4794d24057477e8b8d96b3d02e5010dc69896deaf583904552be22",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-reactive-knee-neg-render-20370113-20261115/feet.log": "54be8a792a11a6e50dd7122469e32140d3ba1ec7c1223440d995af0180e8c774",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-reactive-knee-neg-render-20370113-20261115/feet.mp4": "d9c63effde2c7925c96613230d8498d1bd4ecfbb5fd2a550e108da3010706397"
+  }
+}
