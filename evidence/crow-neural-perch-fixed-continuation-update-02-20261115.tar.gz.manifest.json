@@ -1,0 +1,14 @@
+{
+  "archive_sha256": "43c2282659044e38d2f3d4a9ad6644df7aeb0a4422abc2a73bcfc0eaf354b1e4",
+  "remote_files": {
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-perch-fixed-continuation-update-02.policypack": "8c2ca53d9c052ec954d29286aeb8e02da60066bacecf20882414a67da7aba595",
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-perch-fixed-continuation-update-02.policypack.deployment.policypack": "ef15d39b870cf894ef6b9d6cb0d7c10d2d38bd63495bd04ac7295c6f68295879",
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-perch-fixed-continuation-update-02.rollout": "d50f938ed95222f8dbe282e1f557265d201399de42fc3092d84a91b06692e4e0",
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-perch-fixed-continuation-update-02.safetensors": "a2a550b69fc4f51fd342ac40f54a79a620af1a7122c082f0c302b2c3883fdd0b",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-perch-fixed-continuation/update-02/command.json": "39c4043feb71ceb323b1f2596394ab19579b413220323db4e959dce9eef82aa7",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-perch-fixed-continuation/update-02/inputs.json": "17ebda7680afe6056fc30a28bdc25f806420e288e57d8e9bb562d7d7b5b14006",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-perch-fixed-continuation/update-02/stdout": "258c95b87c5289e340488489012055ac0efd8e72ffe785e7a5d3a35628e85616",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-perch-fixed-continuation/update-02/stderr": "058045f396e256742c0018f04dc98333e12bfba7e783be08b0ba683bda595c73",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-perch-fixed-continuation/update-02/result.json": "003e369612ae9527060e833cfef3369e2e2614407bf98afb71d720c33c6edbb9"
+  }
+}
