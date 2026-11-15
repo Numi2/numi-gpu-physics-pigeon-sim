@@ -1,0 +1,5 @@
+# Scripted release control
+
+A research-only shader disables the one-shot contact-gated weight-transfer and toe-release sequence, leaving the same contact solver, actor, actuators, branch and remaining controller. It was tested as an ablation, not as a proposed replacement for physical release. Both baseline and four-update policies were run from matched reconstructed starts on the two consumed development seeds. For all four 250-step comparisons, q, v, body states, observations, accepted actions, reward, termination and outcomes were exactly equal to the ordinary shader. The baseline and candidate on seed 20370113 fell at absolute step 257; neither on seed 20370127 fell during this five-second continuation. This script is not responsible for the tested fall over this interval. No assertion is made about other states or later intervals.
+
+The archived build, checkpoint round trips, per-file hashes, commands, outcomes and comparison script are in `crow-v15-scripted-release-control-20261115.tar.gz`. The fixture retains a relocated branch, forced phase, and scripted carrier. This is not a release or autonomous landing qualification.
