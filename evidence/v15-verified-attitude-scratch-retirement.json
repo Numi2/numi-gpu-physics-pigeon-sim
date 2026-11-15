@@ -1,0 +1,62 @@
+{
+  "verified_git_commit": "50384efefec02176f23dae52a0576388df64e178",
+  "free_before": 4743512064,
+  "free_after": 4978208768,
+  "removed": [
+    {
+      "directory": "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/v15-resetfixed-lr100x-fresh-evaluation-20370113-250",
+      "file_count": 11,
+      "logical_bytes": 18492130
+    },
+    {
+      "directory": "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/v15-resetfixed-lr100x-fresh-evaluation-20370127-250",
+      "file_count": 11,
+      "logical_bytes": 18100253
+    },
+    {
+      "directory": "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/v15-resetfixed-lr1000x-fresh-v2-evaluation-20370113-250",
+      "file_count": 11,
+      "logical_bytes": 18488369
+    },
+    {
+      "directory": "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/v15-resetfixed-lr1000x-fresh-v2-evaluation-20370127-250",
+      "file_count": 11,
+      "logical_bytes": 18259713
+    },
+    {
+      "directory": "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/v15-reflected-lr1000x-evaluation-20370113-250",
+      "file_count": 11,
+      "logical_bytes": 18489156
+    },
+    {
+      "directory": "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/v15-reflected-lr1000x-evaluation-20370127-250",
+      "file_count": 11,
+      "logical_bytes": 18170763
+    },
+    {
+      "directory": "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/v15-resetfixed-effort-diagnostic-20370113-210",
+      "file_count": 15,
+      "logical_bytes": 51398910
+    },
+    {
+      "directory": "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/v15-resetfixed-attitude-baseline-zero-evaluation-20370113-250",
+      "file_count": 11,
+      "logical_bytes": 18497978
+    },
+    {
+      "directory": "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/v15-resetfixed-attitude-baseline-zero-evaluation-20370127-250",
+      "file_count": 11,
+      "logical_bytes": 18018893
+    },
+    {
+      "directory": "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/v15-attitude-balanced-resume-update04-evaluation-20370113-250",
+      "file_count": 11,
+      "logical_bytes": 18498198
+    },
+    {
+      "directory": "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/v15-attitude-balanced-resume-update04-evaluation-20370127-250",
+      "file_count": 11,
+      "logical_bytes": 18020171
+    }
+  ]
+}
