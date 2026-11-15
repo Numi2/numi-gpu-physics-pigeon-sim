@@ -1,0 +1,5 @@
+# Phase-corrected stochastic training diagnostic
+
+The four first episodes on used seed 20270511 terminated for tilt at intervals 146, 149, 146 and 142; there were 12 terminations in the 512-step four-lane rollout. The matched earlier narrow arrival-state control with the same v3 weights and -3.5 balance-action log standard deviations terminated at 174/tilt, 195/tilt, 194/tilt and 189/contact, with 10 total terminations. These diagnostics use different physical reset states and cannot isolate phase or exploration as the cause. The partial reconstruction does not supply a stable stochastic curriculum yet.
+
+The fixed-rate diagnostic update was not selected. Final combined balance KL was 0.03471, with per-action values 0.00526, 0.00563, 0.02278 and 0.00103. Unclipped actor and critic gradient norms were 17.11 and 3.13; the clipped actor norm was 0.953. These learner aggregates do not measure physical success. Full rollout, input/output policies, learner state, shader, compiler metadata, commands, logs and per-file hashes are in `crow-settled-training-diagnostic-20261115.tar.gz` and its manifest.
