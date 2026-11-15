@@ -1,0 +1,14 @@
+{
+  "archive_sha256": "7553741ba3c9937358a6ec2b4844abc44125e324af6bfb44db4ad3b8529d19a1",
+  "remote_files": {
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-toe-perfoot-continuation-update-02.policypack": "ac5d8f544658da3c788d40903f51d8f7b1602028803ad0162613bc3422feafea",
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-toe-perfoot-continuation-update-02.policypack.deployment.policypack": "5f1571220092fa71faf377944262568f602c9a665088b314adce7b95c644cef6",
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-toe-perfoot-continuation-update-02.rollout": "48c3ddd2f1ef5fb56fce445df25c2dbcba9a27fd1826c3889fa06832e11d3111",
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-toe-perfoot-continuation-update-02.safetensors": "8c0e92d436fc394f6cbed2168f184727f2e024ff8ab3aef3236d0df72814252b",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-perfoot-continuation/update-02/command.json": "45c8a3daeb554c6422114dc2fcc41e66a400b5d586b6111bc241f04733638a26",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-perfoot-continuation/update-02/inputs.json": "fb7b8372db5f7f049b19f578cc83d68676968f095e82fcb723451031125d7109",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-perfoot-continuation/update-02/stdout": "f589b460f738ff63f4fdc852c1d6b39bb2839cc4c561f2c94043b985182bc682",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-perfoot-continuation/update-02/stderr": "5a4769c227822ea9d9b7f8cf07ba48138fa49c7fc6d40cab94fa9251482ce994",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-perfoot-continuation/update-02/result.json": "cc2f62a5b74d7f7301a36d14da946bb13d084b8139e9b5a76dfa3fb6e4606f7b"
+  }
+}

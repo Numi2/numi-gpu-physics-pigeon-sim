@@ -1,0 +1,14 @@
+{
+  "archive_sha256": "6c61ec9a422752f705c4279df2f46afad071731eb10f6ce19aea57f48813f085",
+  "remote_files": {
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-toe-perfoot-continuation-update-03.policypack": "677fba49994bcffa558fd757efbfbea0c0d5fd9f62948ab58591bd0dbbd5e618",
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-toe-perfoot-continuation-update-03.policypack.deployment.policypack": "ca5d3928ff9ad86875151e0a80c392165ce441562f2d7105343ecdb486c26b3d",
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-toe-perfoot-continuation-update-03.rollout": "ee0ed4b9846905384259e387dc36ae9431f1d87c397fe4c9f6b14c0cb04a61ad",
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-toe-perfoot-continuation-update-03.safetensors": "a5efe80448e082bd9eeda6a17834921947cda49ca94d419fdeed743a571a5140",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-perfoot-continuation/update-03/command.json": "a3babd802d4dc3a5290e474a37768a5c1b7d28ea1aff3f3a60dc7b0ddffdab9b",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-perfoot-continuation/update-03/inputs.json": "8a7ff011b9c4160c22159a11fbe5aff27a46ba3d20346a21a8eedb2b3c2791f7",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-perfoot-continuation/update-03/stdout": "b56acb09adf167f6901f10c1a2d18be87d36d75215e48439d0e758b3b2b8c4ac",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-perfoot-continuation/update-03/stderr": "62974357cd41d04f99febee4608d3ce0a70fe17fcc773322641f51adf3574221",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-perfoot-continuation/update-03/result.json": "dee651802371a6b8faa2b5495d943916802f0713a6210ed7743de4f14644e2d8"
+  }
+}

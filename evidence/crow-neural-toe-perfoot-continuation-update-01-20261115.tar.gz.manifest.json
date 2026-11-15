@@ -1,0 +1,14 @@
+{
+  "archive_sha256": "9edacb173ac9a85fff10fff3a7519629ba8ab39a38649b2af13b0ce22469f541",
+  "remote_files": {
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-toe-perfoot-continuation-update-01.policypack": "293ec7db0987c575f5d99d56e0e18d68fec0f33ba26612f9b6d32c54932fe3af",
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-toe-perfoot-continuation-update-01.policypack.deployment.policypack": "43f7bb1f652395d0fc4638e2f9d4a9250d7f3312eaef064110bdc063b1445f65",
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-toe-perfoot-continuation-update-01.rollout": "75baa95bbd37d4a5d1c7fc952213c330db3cdb471e87c829502bd2f3294cbbc1",
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-toe-perfoot-continuation-update-01.safetensors": "d3af690cc693cc65b45bc355e54cd2a81ec82b05995337008f7a21966d7aa04a",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-perfoot-continuation/update-01/command.json": "b4b513f730e4ebf65b6da0776860f226eec94685210d9ec43382f6d26e09f156",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-perfoot-continuation/update-01/inputs.json": "ae6e536e6252d67a2581976d611c60e2753cc78682b20394da034e4a95aaea2a",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-perfoot-continuation/update-01/stdout": "b0e63ab0e4563a7a61d506da6e6a6274dc62a11ca4ecec74835079fed610c261",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-perfoot-continuation/update-01/stderr": "dee1bee92a4b0cb503b6bfe129ba26043ddb7fe8f9c9d8de7c3ab0f3225da496",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-perfoot-continuation/update-01/result.json": "0f4183c6e464d98b384657a776164c810a8b23070e03bf8bfc49105700aebe0e"
+  }
+}
