@@ -1,0 +1,27 @@
+{
+  "commit": "5490fde94c3f503d1aeceb11a82aaecce43b4828",
+  "archives": [
+    {
+      "remote_files": {
+        "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-arrival-phase-history-hardseed02-development-20370113-1000/command.json": "e2d5e3426dfff7223c191b835ac7e4868d50527543de41fa111ecce0c4acca13",
+        "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-arrival-phase-history-hardseed02-development-20370113-1000/inputs.json": "89b7d3a15c35b9f1ab832a65d9eb7c579094af0fed0d9cc3ae329049d0928669",
+        "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-arrival-phase-history-hardseed02-development-20370113-1000/result.json": "81868a6e94ffc0178bf833deb1c9013d9fab4ee95ddb876a5e8ec4f1d26376d2",
+        "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-arrival-phase-history-hardseed02-development-20370113-1000/stdout": "bf81ff646ffcad0f6119142d4c7da146bfafee569a3d222e938be0f918ba80c8",
+        "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-arrival-phase-history-hardseed02-development-20370113-1000/stderr.gz": "b49f34e6728b5e7cfafc4dac7a0bea0e3226d7ffff0209bf848c1f2887054dc3",
+        "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-arrival-phase-history-hardseed02-development-20370113-1000/replay.json": "efb7d7c4c6e8796bc63554cf2ff3c56fd5a62a40fc604efcf4c3c8f8213b568a",
+        "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-arrival-phase-history-hardseed02-development-20370113-1000/trace.tsv": "6a7d43b1ee8f94087d819aceedc380f79d3a9af845a2b6a4c04767e95d28d28e"
+      }
+    },
+    {
+      "remote_files": {
+        "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-arrival-phase-history-hardseed02-development-20370127-1000/command.json": "07b25b701f166c49f26fa739e1c0b241c1d10dcb852b37b6ab8483c4cf6e45cc",
+        "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-arrival-phase-history-hardseed02-development-20370127-1000/inputs.json": "89b7d3a15c35b9f1ab832a65d9eb7c579094af0fed0d9cc3ae329049d0928669",
+        "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-arrival-phase-history-hardseed02-development-20370127-1000/result.json": "81868a6e94ffc0178bf833deb1c9013d9fab4ee95ddb876a5e8ec4f1d26376d2",
+        "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-arrival-phase-history-hardseed02-development-20370127-1000/stdout": "cf83668adc671f65dcd91100c3ec490f7e29a4231424dfaefc44b60f17c3a06b",
+        "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-arrival-phase-history-hardseed02-development-20370127-1000/stderr.gz": "c4f1c116a7676a246069da5631abf09dae85534d3e962c57201c9efd91f80826",
+        "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-arrival-phase-history-hardseed02-development-20370127-1000/replay.json": "cf2f79a816f64e0fdd2a43e270fbd036c884743c3089b7265701e8a0537e74c6",
+        "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-arrival-phase-history-hardseed02-development-20370127-1000/trace.tsv": "27b3dbff42103d6d9ea84736da921f5268cd34d011fd791a8ea75263b4b44e7a"
+      }
+    }
+  ]
+}

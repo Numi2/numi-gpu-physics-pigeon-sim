@@ -1,0 +1,17 @@
+{
+  "verified_git_commit": "5490fde94c3f503d1aeceb11a82aaecce43b4828",
+  "free_before": 5690458112,
+  "free_after": 5817798656,
+  "removed": [
+    {
+      "directory": "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-arrival-phase-history-hardseed02-development-20370113-1000",
+      "file_count": 7,
+      "logical_bytes": 63890462
+    },
+    {
+      "directory": "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-arrival-phase-history-hardseed02-development-20370127-1000",
+      "file_count": 7,
+      "logical_bytes": 63418196
+    }
+  ]
+}
