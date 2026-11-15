@@ -1,0 +1,14 @@
+{
+  "archive_sha256": "a7acdb041655aa55a6132af7c3fd755afcec2dbeb5c041e43db1aeda222a319a",
+  "remote_files": {
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-toe-sensor-separate-clip-update-01.policypack": "e7ee08b56684d9d2bc6b222ed7c53cec402e0de32da9a7eb902d09f44d9f6464",
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-toe-sensor-separate-clip-update-01.policypack.deployment.policypack": "979b1b3fcee2f07eb4eeb0e1bf74b3eb47dd600fb89577ecdd73ba2dd9062b53",
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-toe-sensor-separate-clip-update-01.rollout": "40cf459e4897d0c4dd8493a6aedcfaeb7cbfe1a69b59e6ceaf079c8ee4b8a9f8",
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-toe-sensor-separate-clip-update-01.safetensors": "35bbd87ce85533b20a7655eb03e6e5177f9c336ad2b3d398b452ae50dbeba670",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-sensor-separate-clip-update-01/command.json": "e72515c249add921291b62270e0e1c22f6325fbfc6392fa3b507ad5a5bb90234",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-sensor-separate-clip-update-01/inputs.json": "02f821c76141b08df16a0726f0c225d35bbc12591dd997a2c3412c57229d7b21",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-sensor-separate-clip-update-01/stdout": "3e2b4b339607f6ab789043caad457c47b5833d305282c32fe2b9130f65c09c67",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-sensor-separate-clip-update-01/stderr": "6e3e4cb3e21cc1a3b130e41d5564f4f273616402efd00d137179b7443e8d45a8",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-sensor-separate-clip-update-01/result.json": "a3ecc25434fd63a03a030b4d7e736d0f9d1c658d22f35df204b48037fd4236d8"
+  }
+}

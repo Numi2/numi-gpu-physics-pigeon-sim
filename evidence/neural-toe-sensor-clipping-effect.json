@@ -1,0 +1,62 @@
+{
+  "rollout_sha256": "40cf459e4897d0c4dd8493a6aedcfaeb7cbfe1a69b59e6ceaf079c8ee4b8a9f8",
+  "policy_sha256": {
+    "start": "7951114824facfd8b94d59939f368b453283ae91dd77079da917b2c6e0bad6a9",
+    "combined": "496d56be478967d2de9897a314b03b4753a6925c94050be14dde55878e1013a3",
+    "separate": "e7ee08b56684d9d2bc6b222ed7c53cec402e0de32da9a7eb902d09f44d9f6464"
+  },
+  "comparisons": {
+    "combined": {
+      "extension_delta_l2": 0.007695069536566734,
+      "extension_max_abs": 0.0002265213697683066,
+      "action_joint_target_delta_rms_rad": [
+        1.5128643808388533e-06,
+        1.8892258349677643e-07,
+        3.481600368376474e-07,
+        6.625996478445128e-07,
+        1.1585074229788666e-07,
+        1.4987671037713808e-07,
+        2.973764560732281e-08,
+        9.77440261389331e-08
+      ]
+    },
+    "separate": {
+      "extension_delta_l2": 0.007891670800745487,
+      "extension_max_abs": 0.00023308534582611173,
+      "action_joint_target_delta_rms_rad": [
+        1.5577518670777783e-06,
+        2.4087264072602366e-07,
+        3.8242966243874264e-07,
+        6.504588283352217e-07,
+        1.1837305645902394e-07,
+        1.5061360373332033e-07,
+        2.8287905775056138e-08,
+        1.035547568382859e-07
+      ]
+    },
+    "separate_minus_combined": {
+      "extension_weight_l2": 0.0011418737703934312,
+      "action_joint_target_delta_rms_rad": [
+        5.601914675495094e-08,
+        1.3882509361731538e-07,
+        4.08607413573493e-08,
+        1.7136159562742763e-08,
+        3.1006576208962494e-09,
+        2.4448271371549274e-09,
+        1.5673293540566186e-09,
+        6.560186043882154e-09
+      ],
+      "action_joint_target_delta_max_abs_rad": [
+        2.494454383850098e-07,
+        3.9339065551757816e-07,
+        1.4394521713256836e-07,
+        1.0848045349121094e-07,
+        1.5093974070623517e-08,
+        2.1773303160443902e-08,
+        3.768946044147015e-09,
+        2.278829924762249e-08
+      ]
+    }
+  },
+  "scope": "deterministic actions at identical recorded states; toe scaling is an upper bound when gate is closed; not physical success"
+}
