@@ -1,0 +1,7 @@
+# Extended first-episode balance training
+
+Eight more first-episode-only PPO updates continued the same actor and optimizer from the four-update filtered experiment. They alternated the same physically reached development states (20370113 step 150 and 20370127 step 50); 256 steps were collected per update, retaining samples through the first done for the learner. Learning rate was 0.0003, gamma 0.999, lambda 0.995. The retained episode lengths were 101, 147, 101, 151, 100, 153, 100 and 148, so all eight exploratory episodes ended before 256. Protected actor weights and optimizer moments passed their guards.
+
+The final policy fell at absolute step 254 (5.08 s) on the difficult development start, versus step 257 (5.14 s) for the original actor. Neither policy fell over 250 resumed steps on the easier development start, but peak tilt rose from 0.12947 to 0.14022 radians. Baseline traces were reused from the previous matched evaluation only after verifying the exact source checkpoint and original policy hashes; copied trace hashes and paths are retained in each evaluation. The first actor observation matched on both starts. Reject this candidate as a balance improvement.
+
+These are consumed development starts in a reconstructed, relocated branch fixture with a forced terminal phase and scripted carrier; neither outcome proves independent learned toe grip or autonomous landing. Exact commands, source, complete rollouts, actor checkpoints, optimizer states, guard checks and evaluation traces are preserved in the accompanying archive.
