@@ -1,0 +1,62 @@
+{
+  "source_sha256": "86f9cb37037d5699ca9b3a75a721aea4bf62ad2594c56b0b9320b6ed62edf175",
+  "updated_sha256": "4d4acd1a7158d34b3757409d9fab50009e1a6e88877f4c4dd9fb6026390d43e5",
+  "rollout_sha256": "40cf459e4897d0c4dd8493a6aedcfaeb7cbfe1a69b59e6ceaf079c8ee4b8a9f8",
+  "protected_checks": {
+    "logstd": true,
+    "observation_mean": true,
+    "observation_inverse_std": true,
+    "contract": true,
+    "layer_0_protected": true,
+    "layer_0_bias": true,
+    "layer_1_protected": true,
+    "layer_1_bias": true,
+    "layer_2_protected": true,
+    "layer_2_bias": true,
+    "layer_3_protected": true,
+    "layer_3_bias": true
+  },
+  "layers": {
+    "layer_0": {
+      "permitted_changed": 5628,
+      "permitted_l2": 0.007046394515782595,
+      "protected_changed": 0
+    },
+    "layer_1": {
+      "permitted_changed": 1764,
+      "permitted_l2": 0.003926028031855822,
+      "protected_changed": 0
+    },
+    "layer_2": {
+      "permitted_changed": 1764,
+      "permitted_l2": 0.0039233737625181675,
+      "protected_changed": 0
+    },
+    "layer_3": {
+      "permitted_changed": 336,
+      "permitted_l2": 0.0019322592997923493,
+      "protected_changed": 0
+    }
+  },
+  "action_joint_target_delta_rms_rad": [
+    2.8161649440301396e-05,
+    5.2637858644227643e-05,
+    3.303103735619853e-05,
+    4.7306912281961875e-06,
+    4.860028501508052e-05,
+    7.357017221662817e-05,
+    0.00010502761852966119,
+    5.409017590988394e-05
+  ],
+  "sensor_ablation_joint_target_delta_rms_rad": [
+    1.4015154926289825e-05,
+    3.0003056134021856e-05,
+    1.4504423639552534e-05,
+    4.8708639763109865e-06,
+    1.2577685288637685e-05,
+    4.938168792134718e-05,
+    4.3041541819294844e-05,
+    3.19621583670166e-05
+  ],
+  "scope": "identical retained observations; ablation changes only toe contact features; target magnitude is not physical success and gated toe targets are upper bounds"
+}

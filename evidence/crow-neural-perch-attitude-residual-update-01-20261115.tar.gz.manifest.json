@@ -1,0 +1,14 @@
+{
+  "archive_sha256": "f6801a94a92c17f972f8d261269a8704058d2c1a32c71e96c022d4ca9ae3c8e0",
+  "remote_files": {
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-perch-attitude-residual-update-01.policypack": "4d4acd1a7158d34b3757409d9fab50009e1a6e88877f4c4dd9fb6026390d43e5",
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-perch-attitude-residual-update-01.policypack.deployment.policypack": "efd2a527081ce05234cb9aab0abacbcf5589a8a969ce1244a89973f09e49793e",
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-perch-attitude-residual-update-01.rollout": "05c339a78b40af1bd77fe6e1f035b11be785a842c9374e251de3a40b27f94710",
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-perch-attitude-residual-update-01.safetensors": "5b1e152cc83263bb427fc3c7fc356de7fcaa3d55a2607fcb278f2f732d15de0c",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-perch-attitude-residual-update-01/command.json": "b19568dd7d7e8327cd4c68e55383b0f53097c9e78186425f0ea5977c1b945ef1",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-perch-attitude-residual-update-01/inputs.json": "c511baa6b9b6eca9e8043f7dba2ede0f0f91bfa46162f17d2d9d4954cbd83243",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-perch-attitude-residual-update-01/stdout": "10e28b6b141a324f72be6be1ab77fc676db029286e62a6e18befb933473ba7a5",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-perch-attitude-residual-update-01/stderr": "0552869ad157674673603d3405266f8d287e4634bdbc57f030ce33b118364c12",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-perch-attitude-residual-update-01/result.json": "1fedebe23c84c64e491b46c738847df4d0d21cda4732a9663a8ad48ecac47b67"
+  }
+}
