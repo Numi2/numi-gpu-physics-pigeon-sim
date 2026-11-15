@@ -1,0 +1,5 @@
+# Hip feedback after induced tilt: both variants failed
+
+Neither signed ideal-state hip correction recovered the used hard-start fixture after the positive hip pulse. The positive and negative feedback arms first terminated at intervals 665 and 676, compared with interval 693 for the same pulse without feedback. Their first target changes were interval 562, with q/v exactly matching the disturbed control beforehand; first changes were +0.0413 and -0.0413 radians respectively on both intended physical hip targets. Neither met the preregistered return-to-reference gate. Both experienced more than one radian of pitch deviation before first termination.
+
+The first-episode bilateral net upward impulse was present for 664/665 and 673/676 intervals; the opposed-toe-normal proxy was present for 614/665 and 622/676. This proxy is not independently validated grasp. These are diagnostic ideal-state joint targets after an internal pulse, not a learned controller, external push, or autonomous landing. Full native builds, shader-bound checkpoints, inputs, commands, untrimmed state and contact traces and analysis are in the adjacent archive.
