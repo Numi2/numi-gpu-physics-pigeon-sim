@@ -1,0 +1,29 @@
+{
+  "archive_sha256": "3844307e40db244b1b296434f8d58154541962b33662af2e15997f01f06d187f",
+  "archive_size": 7905280,
+  "parts": [
+    {
+      "name": "crow-toe-gated-reserved-renderer-bundle-20360117.tar.gz",
+      "sha256": "3844307e40db244b1b296434f8d58154541962b33662af2e15997f01f06d187f"
+    }
+  ],
+  "remote_files": {
+    "/tmp/crow-48s-multiview-20261114/render-phase-comparison-neural-toe-gated-reserved-20360117-gated-1000/frames-front/numi-crow-replay-audit.json": "fc36fa377276aeaf8f027f169746da4f2e353e0eb714b1ef317060ce34d43f76",
+    "/tmp/crow-48s-multiview-20261114/render-phase-comparison-neural-toe-gated-reserved-20360117-gated-1000/frames-above/numi-crow-replay-audit.json": "a87ee59f8e476f2fb415297acd8ae35ccd60d2e9b002d179969b4275c08aa548",
+    "/tmp/crow-48s-multiview-20261114/render-phase-comparison-neural-toe-gated-reserved-20360117-gated-1000/front.mp4": "d76e1ea294e3f0a089e995b15c415737712f594bf20f00ad2fc1b9f4d173844e",
+    "/tmp/crow-48s-multiview-20261114/render-phase-comparison-neural-toe-gated-reserved-20360117-gated-1000/frames-feet/numi-crow-replay-audit.json": "55fa2d040ce2b16efc06c24451b576f29e0ef243f7686214108e363c4fe5c17b",
+    "/tmp/crow-48s-multiview-20261114/render-phase-comparison-neural-toe-gated-reserved-20360117-gated-1000/below.mp4": "1737821569697e33e9be971613e81c9aa236ca3c05af921acd4db2e95b770a35",
+    "/tmp/crow-48s-multiview-20261114/render-phase-comparison-neural-toe-gated-reserved-20360117-gated-1000/back.log": "d2b62c08790e76e955419e6acb0e216b30dd6272d615ba73e416db83c2a3533c",
+    "/tmp/crow-48s-multiview-20261114/render-phase-comparison-neural-toe-gated-reserved-20360117-gated-1000/front.log": "d2b62c08790e76e955419e6acb0e216b30dd6272d615ba73e416db83c2a3533c",
+    "/tmp/crow-48s-multiview-20261114/render-phase-comparison-neural-toe-gated-reserved-20360117-gated-1000/back.mp4": "7f33be6ac894df0a9d69cd829d7b830827ebf755db46ff735d54112b092af331",
+    "/tmp/crow-48s-multiview-20261114/render-phase-comparison-neural-toe-gated-reserved-20360117-gated-1000/below.log": "d2b62c08790e76e955419e6acb0e216b30dd6272d615ba73e416db83c2a3533c",
+    "/tmp/crow-48s-multiview-20261114/render-phase-comparison-neural-toe-gated-reserved-20360117-gated-1000/frames-back/numi-crow-replay-audit.json": "35ae38324a592f3d89f8cc76cfebdcd51b388751ec32c33fe0aa54daf0d2c633",
+    "/tmp/crow-48s-multiview-20261114/render-phase-comparison-neural-toe-gated-reserved-20360117-gated-1000/frames-below/numi-crow-replay-audit.json": "889631be214ae5caeb08431ee02a9e3743cc74263fcc74a9ae2eccb0fb846ede",
+    "/tmp/crow-48s-multiview-20261114/render-phase-comparison-neural-toe-gated-reserved-20360117-gated-1000/presentation-splice.json": "fe81f29922b10bcbdb07042bf540672a178a81cedc2b6cbea9baab7e4d4097d0",
+    "/tmp/crow-48s-multiview-20261114/render-phase-comparison-neural-toe-gated-reserved-20360117-gated-1000/above.log": "d2b62c08790e76e955419e6acb0e216b30dd6272d615ba73e416db83c2a3533c",
+    "/tmp/crow-48s-multiview-20261114/render-phase-comparison-neural-toe-gated-reserved-20360117-gated-1000/splice.log": "8ef70e812646c5a13c41f002831d7360d219ce806fbafaa306f00d475ce8fb8c",
+    "/tmp/crow-48s-multiview-20261114/render-phase-comparison-neural-toe-gated-reserved-20360117-gated-1000/above.mp4": "367489938dfa96656704a7b290f7a1e0ffa26e4187ad00607ca337c509fc0a02",
+    "/tmp/crow-48s-multiview-20261114/render-phase-comparison-neural-toe-gated-reserved-20360117-gated-1000/feet.log": "d2b62c08790e76e955419e6acb0e216b30dd6272d615ba73e416db83c2a3533c",
+    "/tmp/crow-48s-multiview-20261114/render-phase-comparison-neural-toe-gated-reserved-20360117-gated-1000/feet.mp4": "c3dd6ed96de4b5813f3908c42f16f9a85c5a5b9d636c6ebdf719044443623f7d"
+  }
+}
