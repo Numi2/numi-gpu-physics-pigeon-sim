@@ -1,0 +1,14 @@
+{
+  "archive_sha256": "8ef14a4fa2eabc4e70b58f19ef9eb11df0945357f6d0a21f66ff366c39dc465b",
+  "remote_files": {
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-toe-perfoot-continuation-update-04.policypack": "ee08943f093116d1f0ab44ce50456b5a23d4fb9311981f7a8ba0ff75b2e16e48",
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-toe-perfoot-continuation-update-04.policypack.deployment.policypack": "0fd5d07e7cfe50e05f1b46db93dff5d5a789a83def574ced0ef40f6f99c67fe4",
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-toe-perfoot-continuation-update-04.rollout": "49d45adf09715850d9c954ef67875b6c562b278c6d7ca49016661958e3b40759",
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-toe-perfoot-continuation-update-04.safetensors": "0c691412c799c48e6edc1c3c1a76998b3460fee25a6d2214dbd06f8eee417777",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-perfoot-continuation/update-04/command.json": "98b2c2619e96a652ae10bf5d141464fb3e7c0fa0d8379dc8d9bb9333208be747",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-perfoot-continuation/update-04/inputs.json": "ab743d806a3bb6d4d0da4a0e2699ca907a348398010716f40a70493b6901ab5d",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-perfoot-continuation/update-04/stdout": "d3cf27f9aa33739bc6dd5bb8689877edc59c4109604a1922e67f7837e3a8519d",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-perfoot-continuation/update-04/stderr": "9fd4e62737fde609491cd418b6843c4410e9e199d400045b273fd60be071b963",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-perfoot-continuation/update-04/result.json": "b3077ba4c28433ea735b5791239e6f0a415c0a53c36adbd1fcb93a9d76dfa262"
+  }
+}
