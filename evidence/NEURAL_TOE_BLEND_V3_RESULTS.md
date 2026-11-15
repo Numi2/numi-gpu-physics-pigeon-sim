@@ -1,0 +1,3 @@
+# Midpoint of learned toe rows: rejected
+
+The predeclared 50/50 interpolation preserved the common actor trunk and all non-toe output rows exactly. On previously consumed seed 20310129 it had no termination in 1000 intervals and a 960-interval strict grip-and-support streak. On seed 20310201 it first terminated for tilt at 372 intervals (7.44 s), with a longest strict streak of 254 intervals. The latter is a regression from the v1 and zero-toe variants, both of which survived 1000 on that start; the midpoint was rejected per plan. Later automatic resets are retained in the raw traces and excluded. No further seeds were spent on this candidate.
