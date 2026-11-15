@@ -1,0 +1,5 @@
+# Earlier coordinated leg feedback: failed
+
+All four bounded physical joint-target diagnostics failed on the same consumed hard-start checkpoint. The hip/knee positive, hip/knee negative, knee/ankle positive and knee/ankle negative variants first terminated at control intervals 200, 341, 178 and 326 respectively, against 625 for the fixed -0.75-hip baseline. None returned below 0.20 radians for 50 intervals after exceeding 0.24. Each first changed the intended opposing drive targets at interval 26 after pitch crossed 0.18 radians; initial observations and q/v preceding activation were identical to control.
+
+Both feet had net upward impulse in every first-episode interval, but the front/rear toe-normal opposition proxy was lost before termination in every arm. This proxy does not prove a stable grasp. The perturbations were handcrafted ideal-state diagnostics around a scripted carrier and reconstructed perch, not neural learning or autonomous landing. No candidate is promoted. Full shader variants, checkpoint checks, builds, commands, 16-substep logs, trajectories, and result summaries are in the adjacent verified archive and manifest.
