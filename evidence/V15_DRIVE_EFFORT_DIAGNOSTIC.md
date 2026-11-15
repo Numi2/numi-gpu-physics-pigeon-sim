@@ -1,0 +1,7 @@
+# Native substep drive evidence
+
+The baseline and high-rate policy were replayed from the same step-49 reconstructed hard-start checkpoint with the native substep observer enabled. Every recorded q, v, actor observation, accepted action, body state, reward, done, termination reason and outcome matched the respective uninstrumented 210-step run exactly. The traces retain all 16 substeps for each control step and the one-step target vector.
+
+The high-rate policy's first target differed from baseline by +0.01649 rad at the left hip, +0.00443 rad at the left ankle, +0.00360 rad at the right hip and +0.00687 rad at the right ankle; knee targets were unchanged. Front toe target differences ranged to -0.04706 rad. At the first substep, with identical starting state, the recorded left hip effort was 0.750 versus 0.0171 for baseline. Subsequent trajectory differences include feedback after the initial divergence. The network update therefore reached the physical drive path; it was not merely a difference in an unused output. The high-rate policy nevertheless fell earlier on both development starts.
+
+The trace has not established the actuator limits or biological appropriateness, so the observed 0.750 value is not by itself called saturation. The first analyzer launch used the system Python without NumPy and failed before analysis; that failure and the successful project-venv run are retained. The experiment uses the reconstructed relocated branch and scripted carrier, not continuous autonomous landing.

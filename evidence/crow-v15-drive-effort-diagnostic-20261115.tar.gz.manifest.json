@@ -1,0 +1,30 @@
+{
+  "archive_sha256": "3fac8a6e2628a07828820e3841bdf8a1a3565b5fe9bed2042bdaa8bbce1d9cd0",
+  "archive_size": 13824000,
+  "parts": [
+    {
+      "name": "crow-v15-drive-effort-diagnostic-20261115.tar.gz",
+      "sha256": "3fac8a6e2628a07828820e3841bdf8a1a3565b5fe9bed2042bdaa8bbce1d9cd0"
+    }
+  ],
+  "remote_root": "/Users/n/Developer/numi-crow-rl-20261107",
+  "files": {
+    "artifacts/crow-v15-recorded-restart-20261114/crow_v15_drive_effort_diagnostic.py": "f836c9978c7012d4d4ea7e006d2e96001b1df5af064d1420280c5ea2abf6434b",
+    "artifacts/crow-v15-recorded-restart-20261114/crow_v15_drive_effort_analyze.py": "c100cfec2f860bc2ac953af48a108702aee95406f5f58fe086abb639bfc43983",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-resetfixed-effort-diagnostic-20370113-210/high_rate.tsv": "e718de8095e8cbb3f3822dcf1e0f79a50c44d8a302fb776f34bbaee5b593b56b",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-resetfixed-effort-diagnostic-20370113-210/baseline.command.json": "839e448785c3a3249887c28e793ae5d45cbed403676d26c66c91c59bed0cc9aa",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-resetfixed-effort-diagnostic-20370113-210/effort-analysis.json": "67c503b30ddbfcca12f85efbaa0ea87f826418e26ac6ef316412d7c1b2cbf299",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-resetfixed-effort-diagnostic-20370113-210/high_rate.parity.json": "a8cef61c4127b835a45c8d35ce52231b14bb007204a26854bc344ff78a4739bb",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-resetfixed-effort-diagnostic-20370113-210/baseline.parity.json": "a8cef61c4127b835a45c8d35ce52231b14bb007204a26854bc344ff78a4739bb",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-resetfixed-effort-diagnostic-20370113-210/high_rate.stdout": "9aaf97d3f6726d02fb8a32b0542beeae4a025f8ec1bd20346d0c029984f74bd8",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-resetfixed-effort-diagnostic-20370113-210/analyzer-first-attempt.txt": "865fba614356695a1567a4da7933c425b9b954e9c4f86f9fe8629d068ed40f08",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-resetfixed-effort-diagnostic-20370113-210/high_rate.stderr": "21b14fee74d642732f70ff1e0577c9b9e1e3b7ccfa57c792b8e7d6b65e4037be",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-resetfixed-effort-diagnostic-20370113-210/high_rate.command.json": "ca1b6030f3403e3f437e8859df5046f1c27cf51a1c0bd4cdc97f0a86f3df219e",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-resetfixed-effort-diagnostic-20370113-210/results.json": "27fe2879a0b2c161b95050794b8c30e0465fbe1b9bd78dd62875feb2fe3f5456",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-resetfixed-effort-diagnostic-20370113-210/baseline.tsv": "34e63561a80a14795b707d44fdeec1e3f6525fe5fcbe1cb9ad643db21c62c308",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-resetfixed-effort-diagnostic-20370113-210/baseline.json": "73bf2e242c6f8c626865557517556c77e310d7640a7f507f6d66227362602bb3",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-resetfixed-effort-diagnostic-20370113-210/baseline.stdout": "2adedf814e14cd94dbd31486b9dba9cff7b96112bf06de70ae38260b70600da8",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-resetfixed-effort-diagnostic-20370113-210/baseline.stderr": "4988f65ad2e7b845938f2321a7160c1aa8eb94374bf408653f7d4c17f08d4eb4",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-resetfixed-effort-diagnostic-20370113-210/high_rate.json": "102b9b6d998a6a9d7fd11972dc6473fce9591b49a6b71d4586d3b9f5e9485fe8"
+  }
+}
