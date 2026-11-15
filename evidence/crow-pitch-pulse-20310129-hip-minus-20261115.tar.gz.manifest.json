@@ -1,0 +1,19 @@
+{
+  "archive_sha256": "fc9df1e4bb114d87af61f8bf69aa5d6f5e2f2ba13a09f62edd067e427734ab86",
+  "archive_size": 9584640,
+  "parts": [
+    {
+      "name": "crow-pitch-pulse-20310129-hip-minus-20261115.tar.gz",
+      "sha256": "fc9df1e4bb114d87af61f8bf69aa5d6f5e2f2ba13a09f62edd067e427734ab86"
+    }
+  ],
+  "remote_files": {
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-pitch-pulse-20310129-hip-minus-300/command.json": "75c1beab7a365d1676c302e8e3670660c4795b5673a5993c28a81003ebcbf8f6",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-pitch-pulse-20310129-hip-minus-300/inputs.json": "8ec1fdfe309811d75aa7f5f5749dab260322233cdd4ace582697d646f5b030fa",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-pitch-pulse-20310129-hip-minus-300/result.json": "81868a6e94ffc0178bf833deb1c9013d9fab4ee95ddb876a5e8ec4f1d26376d2",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-pitch-pulse-20310129-hip-minus-300/stdout": "f39200996aed0acaf6bcd193f89d49c64205d37199cfafdaf00c9995e6613da1",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-pitch-pulse-20310129-hip-minus-300/stderr.gz": "3a29c98781eb493ff19097e1fbc3c0bde281406cd1db8898b05e157bd2d26a05",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-pitch-pulse-20310129-hip-minus-300/replay.json": "684232e37d038d25f02156e78f4cdf7ca4e29b53542e29822af71ec638ad3760",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-pitch-pulse-20310129-hip-minus-300/trace.tsv": "e1cf4e482ed2e8cc6c71b72b2e7ae41546df10447f29dd50009e6a3b13a441e7"
+  }
+}
