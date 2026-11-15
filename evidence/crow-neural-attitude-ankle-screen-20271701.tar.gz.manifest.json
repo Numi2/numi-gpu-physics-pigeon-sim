@@ -1,0 +1,18 @@
+{
+  "archive_sha256": "622bcf263603bba398db5d8cc18e2bcb6eb86598dfadbf0fc1c788a4464b5174",
+  "archive_size": 21381120,
+  "parts": [
+    {
+      "name": "crow-neural-attitude-ankle-screen-20271701.tar.gz",
+      "sha256": "622bcf263603bba398db5d8cc18e2bcb6eb86598dfadbf0fc1c788a4464b5174"
+    }
+  ],
+  "remote_files": {
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-attitude-ankle-screen-20271701/command.json": "706d6290ac6c362b3bdce051ff2c8d13dc30abd2d38d73d7cb3916578d7a4228",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-attitude-ankle-screen-20271701/inputs.json": "a3c8218a3192b616b420d1cacbdaffd41cd9e55fc1db5efb114f2c61df0c091f",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-attitude-ankle-screen-20271701/result.json": "f8510b4f860d285e3acbd4ffcdc12ecaf94e5307b7a17ec06c347fc8208817eb",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-attitude-ankle-screen-20271701/stdout": "d764de7a27f897a1579f784ac8cf8e46b14e105c65c570a60a77d7e9eca06485",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-attitude-ankle-screen-20271701/stderr": "338c63285721e26777c215eeefe3a7d0984663095787dfceabe4988282b6b7af",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-attitude-ankle-screen-20271701/screen.rollout": "ca53d76cca20c2a7b3b86c229cd734a11a72112e35dc8fd67a6526ac2b56b466"
+  }
+}
