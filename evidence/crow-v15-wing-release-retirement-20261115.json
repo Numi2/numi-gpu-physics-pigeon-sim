@@ -1,0 +1,15 @@
+{
+  "files": [
+    {
+      "path": "artifacts/crow-v15-recorded-restart-20261114/v15-wing-release-ablation-eval-20261115/20370113-release_hold_pos-1000.stderr",
+      "sha256": "7af7c9f478232e50e3f542e46fcdac3f0b5b0b8ae2a7e426abaf761b23af43b8",
+      "bytes": 97869831
+    },
+    {
+      "path": "artifacts/crow-v15-recorded-restart-20261114/v15-wing-release-ablation-eval-20261115/20370113-release_hold_neg-1000.stderr",
+      "sha256": "e955255de66484c45646b50279757ecd9d954f3599123999328ba2e671a0e8a9",
+      "bytes": 99188395
+    }
+  ],
+  "bytes_retired": 197058226
+}
