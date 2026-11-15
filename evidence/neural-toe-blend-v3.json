@@ -1,0 +1,9 @@
+{
+  "v1_sha256": "cfb4e7063e17b29c036ffc2e89e61828f5c4b33633e6a61f6afc53ecbe98b6ed",
+  "v2_sha256": "997b7085fef5739a21cc1b851d512e171b0e0795ff2762bff63ce05c89d8f022",
+  "blend_sha256": "513614a76e44c17d164363f2224d76ba4075a02dbf0b27f0c25fb0a9b7dbab02",
+  "toe_weight_v1_l2": 0.0018879515118896961,
+  "toe_weight_v2_l2": 0.002176349749788642,
+  "toe_weight_blend_l2": 0.0014589003985747695,
+  "shared_actor_except_toe_rows": true
+}
