@@ -1,0 +1,20 @@
+{
+  "archive_sha256": "ea976f884fd5d5efa2e9599a681b7678be8feed9a6d8927955b1616e0e30f1de",
+  "archive_size": 36096000,
+  "parts": [
+    {
+      "name": "crow-arrival-phase-history-update01-development-20370113-20261115.tar.gz",
+      "sha256": "ea976f884fd5d5efa2e9599a681b7678be8feed9a6d8927955b1616e0e30f1de"
+    }
+  ],
+  "remote_files": {
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-arrival-phase-history-update01-development-20370113-1000/command.json": "7a9505a4c9c8ddd6063f26b3facd3f624e55a7ba42c4dc35690d3e17004c023e",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-arrival-phase-history-update01-development-20370113-1000/inputs.json": "083ea9f7bdd2425f371af3e8bf2b0f29eab26c47fc54214ee0042970a25adaef",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-arrival-phase-history-update01-development-20370113-1000/result.json": "81868a6e94ffc0178bf833deb1c9013d9fab4ee95ddb876a5e8ec4f1d26376d2",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-arrival-phase-history-update01-development-20370113-1000/stdout": "f16e7000c659938157d56b9b7bddc655f0ef14442ddcc022ea029b89c9b5e812",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-arrival-phase-history-update01-development-20370113-1000/stderr.gz": "96ac16f0fce373de47c148f057d409209624488592f6308fe93114d52aa4c278",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-arrival-phase-history-update01-development-20370113-1000/replay.json": "ba1af48aa17050e67d0c41fb989c2d678a5c2f299bbf89a304511715b3c6de61",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-arrival-phase-history-update01-development-20370113-1000/trace.tsv": "f1f831b30ac8f5ffb60623b45d36c370d91049d286bfff06899f7e2bf7cb12f1",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-arrival-phase-history-update01-development-20370113-1000/first-episode-analysis.json": "de2053045c8d31702b97480f2a8fcbe056354b013fbdd8a0dba44623e7de37f7"
+  }
+}
