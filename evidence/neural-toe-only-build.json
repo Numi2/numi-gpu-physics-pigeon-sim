@@ -1,0 +1,5 @@
+{
+  "source_sha256": "d6262f1210334fe8b43e2d5255177ca667e9a96f36cf1403e5ffc53c1670624c",
+  "learner_sha256": "954b6ac49390471e4873d38eaaadffbe0cdabba0cd099088bbf612a5b6b9106d",
+  "scope": "only toe output rows 4-7 updated; actor trunk, other rows, all logstd fixed; critic trainable"
+}
