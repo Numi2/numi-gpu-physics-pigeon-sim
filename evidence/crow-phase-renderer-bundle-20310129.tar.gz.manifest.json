@@ -1,0 +1,22 @@
+{
+  "archive_sha256": "e455ef4a26fdd2e483dc056c7c8ebc8ebc62b524f3adc76726e0951ba925e7b0",
+  "remote_files": {
+    "/tmp/crow-48s-multiview-20261114/render-phase-comparison-neural-v3-settled-reset-20310129-action-history-phase-500/frames-front/numi-crow-replay-audit.json": "8861b9843e8ffeeba3ad87d545e3040237ec8f52342a3a032380c2800f32bcb1",
+    "/tmp/crow-48s-multiview-20261114/render-phase-comparison-neural-v3-settled-reset-20310129-action-history-phase-500/frames-above/numi-crow-replay-audit.json": "e2c21a7458d75d4f50f9ff512f96e91c902a1dd26afbd2f9b0ea0fee9bd98a19",
+    "/tmp/crow-48s-multiview-20261114/render-phase-comparison-neural-v3-settled-reset-20310129-action-history-phase-500/front.mp4": "1d344426c7fc84a135d03c79901b8e76f6598ac865c91de113c90e36afcd006e",
+    "/tmp/crow-48s-multiview-20261114/render-phase-comparison-neural-v3-settled-reset-20310129-action-history-phase-500/frames-feet/numi-crow-replay-audit.json": "8642057fbefe52c76e41aaa9cd382c2325be05a1c1913891567fa2bd0c16df17",
+    "/tmp/crow-48s-multiview-20261114/render-phase-comparison-neural-v3-settled-reset-20310129-action-history-phase-500/below.mp4": "88ead66b3d48300371e85269b979d601687ffdc3a40fdbe97837c235e3bc59b1",
+    "/tmp/crow-48s-multiview-20261114/render-phase-comparison-neural-v3-settled-reset-20310129-action-history-phase-500/back.log": "54be8a792a11a6e50dd7122469e32140d3ba1ec7c1223440d995af0180e8c774",
+    "/tmp/crow-48s-multiview-20261114/render-phase-comparison-neural-v3-settled-reset-20310129-action-history-phase-500/front.log": "54be8a792a11a6e50dd7122469e32140d3ba1ec7c1223440d995af0180e8c774",
+    "/tmp/crow-48s-multiview-20261114/render-phase-comparison-neural-v3-settled-reset-20310129-action-history-phase-500/back.mp4": "c2acdc509a4e76cf62ee6e60d2f91fd19ff17dfe6beff0209a0158085f38fc72",
+    "/tmp/crow-48s-multiview-20261114/render-phase-comparison-neural-v3-settled-reset-20310129-action-history-phase-500/below.log": "54be8a792a11a6e50dd7122469e32140d3ba1ec7c1223440d995af0180e8c774",
+    "/tmp/crow-48s-multiview-20261114/render-phase-comparison-neural-v3-settled-reset-20310129-action-history-phase-500/frames-back/numi-crow-replay-audit.json": "4bb6336fa53b1e8119f551409d145b4536d42bf6d179603b230c32e87f64f90a",
+    "/tmp/crow-48s-multiview-20261114/render-phase-comparison-neural-v3-settled-reset-20310129-action-history-phase-500/frames-below/numi-crow-replay-audit.json": "2e4c5ea96cc4e0acbf0317e47f902233131fead05c8628b13d0cac2aa4eee6bb",
+    "/tmp/crow-48s-multiview-20261114/render-phase-comparison-neural-v3-settled-reset-20310129-action-history-phase-500/presentation-splice.json": "52637dffbcf209dd800bf2f1fa95edfe544639a91dfb5859f0713193ab6c2a92",
+    "/tmp/crow-48s-multiview-20261114/render-phase-comparison-neural-v3-settled-reset-20310129-action-history-phase-500/above.log": "54be8a792a11a6e50dd7122469e32140d3ba1ec7c1223440d995af0180e8c774",
+    "/tmp/crow-48s-multiview-20261114/render-phase-comparison-neural-v3-settled-reset-20310129-action-history-phase-500/splice.log": "7ab097f890ce19fbb326a25392d9e1ceef6611589ddd85f54f889b40887f0b31",
+    "/tmp/crow-48s-multiview-20261114/render-phase-comparison-neural-v3-settled-reset-20310129-action-history-phase-500/above.mp4": "ab2d149b206c0ff11c0303f0226563ebefc78f119a711cbb4f7381954b508ec7",
+    "/tmp/crow-48s-multiview-20261114/render-phase-comparison-neural-v3-settled-reset-20310129-action-history-phase-500/feet.log": "54be8a792a11a6e50dd7122469e32140d3ba1ec7c1223440d995af0180e8c774",
+    "/tmp/crow-48s-multiview-20261114/render-phase-comparison-neural-v3-settled-reset-20310129-action-history-phase-500/feet.mp4": "04a62acfdd4b62f6df72b348b4899dc27d3c239c804ef1b85b0af54f786a52bd"
+  }
+}
