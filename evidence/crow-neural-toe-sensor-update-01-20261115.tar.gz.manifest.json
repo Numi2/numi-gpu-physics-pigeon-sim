@@ -1,0 +1,14 @@
+{
+  "archive_sha256": "b438a0559b55f1d04120886510d3b01f5d12ace35b4496aa80f5e757791e6257",
+  "remote_files": {
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-toe-sensor-update-01.policypack": "496d56be478967d2de9897a314b03b4753a6925c94050be14dde55878e1013a3",
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-toe-sensor-update-01.policypack.deployment.policypack": "f89dac88a588bbf8da9e4c8df37e9115dcbcaf131d760afbae69222838080e1b",
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-toe-sensor-update-01.rollout": "40cf459e4897d0c4dd8493a6aedcfaeb7cbfe1a69b59e6ceaf079c8ee4b8a9f8",
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-toe-sensor-update-01.safetensors": "55336e2d46c85892b4d23325dd803cb0f25084d06becde7a1c38effe17b90066",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-sensor-update-01/command.json": "6e77aa94a6c3deff77255f9df43325317baea9dbfa79dd0148e904e04a700fb5",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-sensor-update-01/inputs.json": "a9cf06a6f779ef5aa006b3b294175084725bb7ac896cd28e1e0e912191c7c092",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-sensor-update-01/stdout": "e7105de000ef8e3b58bdf45993c7c364d3802551a5895ed3b0b5f7b4bba1e986",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-sensor-update-01/stderr": "0e90d98654abe70aaba65d3c50bc1dfc4e02425ce16bbe1e89b46a9089228a7c",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-sensor-update-01/result.json": "986330fb4ceb37bca911158f1258e718587104187e1dc7f5c68ebc2d300b22e4"
+  }
+}

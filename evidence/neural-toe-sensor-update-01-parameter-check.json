@@ -1,0 +1,17 @@
+{
+  "source_sha256": "7951114824facfd8b94d59939f368b453283ae91dd77079da917b2c6e0bad6a9",
+  "updated_sha256": "496d56be478967d2de9897a314b03b4753a6925c94050be14dde55878e1013a3",
+  "protected_actor_checks": {
+    "first_layer_prefix": true,
+    "first_layer_suffix": true,
+    "first_layer_bias": true,
+    "other_actor_layers": true,
+    "logstd": true,
+    "observation_mean": true,
+    "observation_inverse_std": true,
+    "contract": true
+  },
+  "new_columns_nonzero_count": 6144,
+  "new_columns_delta_l2": 0.007695069536566734,
+  "new_columns_max_abs": 0.0002265213697683066
+}
