@@ -1,0 +1,57 @@
+{
+  "parity": {
+    "full": {
+      "q": {
+        "equal": true,
+        "first_mismatch": null
+      },
+      "v": {
+        "equal": true,
+        "first_mismatch": null
+      },
+      "actor_observation": {
+        "equal": true,
+        "first_mismatch": null
+      },
+      "accepted_actions": {
+        "equal": true,
+        "first_mismatch": null
+      },
+      "frames_compared": 100
+    },
+    "ablated": {
+      "q": {
+        "equal": true,
+        "first_mismatch": null
+      },
+      "v": {
+        "equal": true,
+        "first_mismatch": null
+      },
+      "actor_observation": {
+        "equal": true,
+        "first_mismatch": null
+      },
+      "accepted_actions": {
+        "equal": true,
+        "first_mismatch": null
+      },
+      "frames_compared": 100
+    }
+  },
+  "target_comparison": {
+    "toe": {
+      "first_changed_trace_step_gt_1e-8": 41,
+      "changed_steps": 61,
+      "logged_steps": 101,
+      "max_absolute_target_difference_rad": 0.0001068099999999017
+    },
+    "legs": {
+      "first_changed_trace_step_gt_1e-8": 42,
+      "changed_steps": 60,
+      "logged_steps": 101,
+      "max_absolute_target_difference_rad": 2.4914999999986476e-05
+    }
+  },
+  "note": "Trace step is the observer counter, which is not assumed identical to replay frame index. After trajectory divergence, target differences include feedback effects."
+}

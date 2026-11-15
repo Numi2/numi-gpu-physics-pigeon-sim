@@ -1,0 +1,44 @@
+{
+  "20370113": {
+    "frames_before_first_done": 262,
+    "comparison": {
+      "toe_q": {
+        "first_difference_gt_1e-9_frame": 39,
+        "max_absolute_difference": 0.03208941966295242
+      },
+      "all_q": {
+        "first_difference_gt_1e-9_frame": 39,
+        "max_absolute_difference": 0.03208941966295242
+      },
+      "leg_action": {
+        "first_difference_gt_1e-9_frame": 40,
+        "max_absolute_difference": 0.0017615798860788345
+      },
+      "toe_action": {
+        "first_difference_gt_1e-9_frame": 10,
+        "max_absolute_difference": 0.0010143663239432499
+      }
+    }
+  },
+  "20370127": {
+    "frames_before_first_done": 1000,
+    "comparison": {
+      "toe_q": {
+        "first_difference_gt_1e-9_frame": 35,
+        "max_absolute_difference": 0.00923621654510498
+      },
+      "all_q": {
+        "first_difference_gt_1e-9_frame": 35,
+        "max_absolute_difference": 0.00923621654510498
+      },
+      "leg_action": {
+        "first_difference_gt_1e-9_frame": 36,
+        "max_absolute_difference": 0.0004872530698776245
+      },
+      "toe_action": {
+        "first_difference_gt_1e-9_frame": 9,
+        "max_absolute_difference": 0.0009328153682872653
+      }
+    }
+  }
+}
