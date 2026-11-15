@@ -1,0 +1,13 @@
+{
+  "checks": {
+    "actor_hidden_unchanged": true,
+    "other_output_weights_unchanged": true,
+    "other_output_bias_unchanged": true,
+    "exploration_unchanged": true,
+    "observation_and_action_contract_unchanged": true
+  },
+  "toe_weight_l2": 0.002176349749788642,
+  "toe_bias_l2": 0.00010707206092774868,
+  "source_sha256": "64055eb9e7fc3668d7fcee1464091eb54feb8a3c4a30569b31e404f6b89e3c37",
+  "updated_sha256": "997b7085fef5739a21cc1b851d512e171b0e0795ff2762bff63ce05c89d8f022"
+}
