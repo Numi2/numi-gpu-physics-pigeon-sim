@@ -1,0 +1,46 @@
+{
+  "archive_sha256": "12d88e28d2cc4f5708f36757b972fd372e950f54e11cc3b4884c5ae2521fb5a0",
+  "archive_size": 49848320,
+  "parts": [
+    {
+      "name": "crow-v15-wholebody-matched-rate-evaluation-20261115.tar.gz.part00",
+      "sha256": "9bedf40c56711e1682059c1a74a376c591ffd1de56d460c147d50c0d96b47ab6"
+    },
+    {
+      "name": "crow-v15-wholebody-matched-rate-evaluation-20261115.tar.gz.part01",
+      "sha256": "76791fe721e7f9a404d29c57aa47541b063566d019519531cfc2bde83b402cc6"
+    }
+  ],
+  "remote_root": "/Users/n/Developer/numi-crow-rl-20261107",
+  "files": {
+    "artifacts/crow-v15-recorded-restart-20261114/v15-wholebody-matched-rate-evaluation/summary.json": "127410467b6d85ab3b2d28438f047539b58d38898b3ef53ecb1869e187abce77",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-wholebody-matched-rate-evaluation/20370127-high-400.stderr": "aebbf8e8a7ae79eda8b1ed01c57ef1371398141a333a1471bcb3d0c5c659ad3c",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-wholebody-matched-rate-evaluation/20370113-low-400.command.json": "5294b4a131a055b031db76ab3d12c623154cf0724642aae22c83849732c35fa2",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-wholebody-matched-rate-evaluation/20370113-low-400.json": "39d1bb0a225d7c377c7eae2e2eb70f42739ffdcc5ee0830c2a7b3565f388661d",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-wholebody-matched-rate-evaluation/20370113-low-400.tsv": "e4a3b79a9794fb474cbd5607165b716312a4eb77b3a66f269a13523aeba9e680",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-wholebody-matched-rate-evaluation/20370127-low-400.stdout": "b63be18ff5d79012805a72338a68d7bab117e2e6acd295c9bdcb3d7be3471959",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-wholebody-matched-rate-evaluation/20370127-high-400.tsv": "5d59fe2e4a1151ce5fde18ed26bf7d64d4681861cdff76b99186bf99f4723d4c",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-wholebody-matched-rate-evaluation/20370113-high-400.inputs.json": "f748fb4781cdc3c79ffc397aa8d2fe01fa745785775c306e9924ba6c6b0fe6e6",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-wholebody-matched-rate-evaluation/20370113-high-400.stdout": "33054ae2ebfa2c9ca5b4a7cb223d53e103a447d927c9ae6b2cd7648770a58159",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-wholebody-matched-rate-evaluation/20370113-high-400.stderr": "e058948c761a4e7ce6a359cbbd9456d9e2f4acad8ae2c7504b263111e42a4770",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-wholebody-matched-rate-evaluation/20370127-low-400.tsv": "9afe99160ca1c51f1389974e7fc32cf87782a02dd4b7e78840723c9d343e6192",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-wholebody-matched-rate-evaluation/20370113-low-400.inputs.json": "e33764e5601127f1dfb290bb5feb1673f40ac3dc54e93fdddb14b7ce5adc7066",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-wholebody-matched-rate-evaluation/20370127-low-400.stderr": "1a7817c1f9a4622915906d6473953a90e977047bed1c0878264b0bb429080f3d",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-wholebody-matched-rate-evaluation/20370127-high-400.stdout": "cbc2fc2aaba170b104f61a78acbc685782ed7ee163c432371dd6557e2be12fb9",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-wholebody-matched-rate-evaluation/20370113-high-400.json": "ef16e4d20a245efb7430f004804a363f655adc4fec8023644ccc869e1d208ce3",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-wholebody-matched-rate-evaluation/20370113-high-400.command.json": "eaf775b73bda7cf3fcf679f074b560e71be0a60135018dcac9598347ba4673c2",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-wholebody-matched-rate-evaluation/20370113-low-400.stderr": "7e6386b2b7f78fc3c57c1b3335280dcb2ebea845bb8707227223d826ff539a7f",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-wholebody-matched-rate-evaluation/contact-summary.json": "24e4573ffba9e3825e053353f9a4105dc49c507d3b5e6834cf110a40df95a438",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-wholebody-matched-rate-evaluation/20370127-low-400.inputs.json": "b3a9b69c0a535243cc2d23247e34716e8c79103883c18cd528205a9f6a77044c",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-wholebody-matched-rate-evaluation/20370127-high-400.inputs.json": "915064a507e4ba2f28fcc1c7a2299e99fc407371300e86e6111882af8203d6bd",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-wholebody-matched-rate-evaluation/20370127-high-400.json": "e50db1003da6b3b470d7cdd374f599fd11b645f1bcbb38198e925d468408a065",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-wholebody-matched-rate-evaluation/20370113-high-400.tsv": "2acac03f24511add6a58b7feaa254d14bd657826e1ce5130c125d91285116fbb",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-wholebody-matched-rate-evaluation/first-frame-parity.json": "35841bd7376dec14c124b2d292f16615f339cb68caece11d72dff191c0362304",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-wholebody-matched-rate-evaluation/20370127-low-400.json": "d7e2cf02c947306453c41e63b77efbf35bb020d80528ee920fbf54e0c44f5494",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-wholebody-matched-rate-evaluation/20370113-low-400.stdout": "ddf06fca304a992498829b40a02ed98c421e0e05d9785173c2bd8dec0098beee",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-wholebody-matched-rate-evaluation/runs.json": "ed5bc8f7de9149b7b3ccff4fa32733616a8c466817c48b93f104b3c6d85dcb0e",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-wholebody-matched-rate-evaluation/20370127-low-400.command.json": "29789dd55130a89114a79314c71550f64b2a5c50637dd232cafa38435ed0b785",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-wholebody-matched-rate-evaluation/20370127-high-400.command.json": "37b3d47985717b446846ab325e62a4baa33cb7d423ad2cbb5d9de0fe5c10f0b3",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-wholebody-v3-training/matched_contact_summary.py": "f36909165c053779702f8d7d310f4b4f5efba4070dff37806d41c40527833404"
+  }
+}
