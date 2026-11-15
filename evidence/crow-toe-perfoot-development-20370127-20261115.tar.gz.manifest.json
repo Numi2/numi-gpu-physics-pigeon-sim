@@ -1,0 +1,20 @@
+{
+  "archive_sha256": "c3c92c415256a510a091dc2e34adf3e3029c956418cec2057e483adef82f691f",
+  "archive_size": 35440640,
+  "parts": [
+    {
+      "name": "crow-toe-perfoot-development-20370127-20261115.tar.gz",
+      "sha256": "c3c92c415256a510a091dc2e34adf3e3029c956418cec2057e483adef82f691f"
+    }
+  ],
+  "remote_files": {
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-perfoot-development-20370127-1000/command.json": "78172ff37d037bc34911741914ccea264b0203451b057776459e66653290b2ef",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-perfoot-development-20370127-1000/inputs.json": "f88e1f42f6ee9794ea0a8f0b85eddf52a1bc7b070140c58c9124bf6ca1acb8c1",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-perfoot-development-20370127-1000/result.json": "81868a6e94ffc0178bf833deb1c9013d9fab4ee95ddb876a5e8ec4f1d26376d2",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-perfoot-development-20370127-1000/stdout": "39347e8892978cdeddf4544703969b221e14a955df396348f72fa86ef5b31af2",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-perfoot-development-20370127-1000/stderr.gz": "a1bb724b2c98ab2b59b6c38924707631e54dd244cb34a6c42122af6f82c3b177",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-perfoot-development-20370127-1000/replay.json": "2dbc703d1590376c4b9b9c90ec26ba58c6c9871cffd11f7fab271ff9a0b93fcb",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-perfoot-development-20370127-1000/trace.tsv": "e2ebdd285d45cdee4a1dc93ce063807787f5c2159b6fa55bea9d55a490893a1b",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-perfoot-development-20370127-1000/first-episode-analysis.json": "8c00838a8cdf2739c5d83b8714f6733c3622a467f7968c43edff3c050a218e18"
+  }
+}
