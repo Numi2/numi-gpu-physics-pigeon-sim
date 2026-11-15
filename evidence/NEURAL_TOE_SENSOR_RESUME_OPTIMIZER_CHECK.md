@@ -1,0 +1,3 @@
+# Resume safety check
+
+Before permitting the isolated sensor-only resume, loaded `neural-toe-sensor-separate-clip-update-01.safetensors` with MLX and checked every Adam first and second moment belonging to the actor and exploration parameter. All protected elements were exactly zero; the twelve permitted first-layer columns were excluded from that zero test. Thus restoring this matching optimizer cannot move frozen actor parameters through stale Adam momentum at the start of the continuation. Each resulting checkpoint is also checked directly against the reference actor and training stops if any protected value drifts. This check does not establish policy quality.
