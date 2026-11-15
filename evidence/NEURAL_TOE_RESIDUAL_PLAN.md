@@ -1,0 +1,7 @@
+# Direct toe-contact residual experiment
+
+The current extension-only learner changes the toe-related joint targets by less than about 0.000002 radians RMS on retained observations even after five updates. It is connected to the actions through the inherited, frozen network. This suggests testing a more direct representation; it does not prove that small changes caused the observed falls, nor that a larger change will help.
+
+Build a paired-sign 24-unit residual path from the twelve existing toe-group contact-force inputs through the existing policy's ELU hidden layers, with its final action projection initially zero. Preserve the actor, critic, normalization, exploration and semantic contract; verify on random and retained observations and then a 300-step physical replay before training. Native inference and simulation parity must be measured, not assumed from the architecture. Archive any parity failure.
+
+If parity is acceptable, run a fixed-rate, fresh-optimizer, separately clipped PPO update with the same arrival fixture and training seed as the previous sensor-only experiment. Restrict the residual output to the four leg and four toe action components, leave the original carrier unchanged, and compare actual action changes on identical observations and first-episode physical outcomes on the two consumed development starts. Do not choose success by KL or use the reserved starts for tuning. Strict branch-contact analysis, scripted-carrier and reconstructed-arrival limitations still apply.
