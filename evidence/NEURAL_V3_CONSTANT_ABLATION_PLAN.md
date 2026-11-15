@@ -1,0 +1,5 @@
+# Test whether v3 uses live feedback
+
+V3's four executed outputs were nearly constant in the two successful 400-step development runs. Test whether that success requires the continuously evaluated neural output. On the same two consumed development seeds, use the same v3 policy and physical plant but replace only its four terminal residual actions with the fixed values [-0.025, -0.026, 0.025, 0.018], approximately its values after initial contact on seed 20310111. Keep the ordinary scripted carrier, 400-step duration, 16-substep contact observer, and all failure gates. Compare to the recorded live v3 runs; retain both failures and passes.
+
+This is a causal control for these specific starts, not a deployable policy or a claim about other states. The replay still records the network's unused inferred actions, so the fixed applied residual is established by the shader source and must not be inferred from `accepted_actions`. If fixed actions match the neural hold, further physical disturbance and sensory-ablation experiments are required before claiming feedback balance. Reserve all unseen seeds for a later registered test.
