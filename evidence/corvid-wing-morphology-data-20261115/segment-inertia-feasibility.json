@@ -1,0 +1,24 @@
+{
+  "assumptions": "equal segment masses at midpoints along a straight wing; raven bone lengths cube-root scaled by body mass; point masses neglect all intrinsic moments",
+  "not_measured": "crow segment masses, centroids, specimen-specific scaling, three-dimensional joint locations",
+  "raven_bone_lengths_m": [
+    0.1003,
+    0.1144,
+    0.1091
+  ],
+  "body_mass_scale": 0.833091907417664,
+  "scaled_lengths_m": [
+    0.08355911831399171,
+    0.09530571420858076,
+    0.09089032709926714
+  ],
+  "segment_centers_m": [
+    0.041779559156995855,
+    0.13121197541828208,
+    0.22430999607220603
+  ],
+  "point_mass_minimum_Ixx_kg_m2": 0.0001984964780301794,
+  "independent_pairwise_Ixx_kg_m2": 0.00019849647803017942,
+  "current_Ixx_kg_m2": 3.68627297576e-05,
+  "lower_bound_to_current_ratio": 5.3847471235972515
+}
