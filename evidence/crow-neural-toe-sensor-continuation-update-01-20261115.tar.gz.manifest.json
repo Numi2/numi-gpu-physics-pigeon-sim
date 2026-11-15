@@ -1,0 +1,14 @@
+{
+  "archive_sha256": "aecd5309f2a9d2d1afd43d2cec86451ec8be4938cc7fbe258703e6597e6c1b9d",
+  "remote_files": {
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-toe-sensor-continuation-update-01.policypack": "106285e0f209af34cc2b0fcbf472d9f47bfcd851b5f9c17abe6e4609d8ac2837",
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-toe-sensor-continuation-update-01.policypack.deployment.policypack": "e90e2c02628735de6605a1ca62e3fab53e15bb0035cc6f0b587b989189b7327c",
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-toe-sensor-continuation-update-01.rollout": "a5c6bb5c196d390b7186e1b10f61f63fc43ed334022fdaa6ab302b44e7974a82",
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-toe-sensor-continuation-update-01.safetensors": "7f3cf9d73e11a3e11b7e6a4e70dbd46d856821743e25026734827b0e0ff39572",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-sensor-continuation/update-01/command.json": "edcc66ec9eabd3534aa41c4cb0a95b35b0c7659e5211f427d71c2f97f0dcbffa",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-sensor-continuation/update-01/inputs.json": "ad92b9e6cedbeb9425c6fdf3cee431703919bc8f75742057e9c083a440d6f1e4",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-sensor-continuation/update-01/stdout": "360001fe61080d267bda861d80f68637db81c7f094d6fd7c85253bdcc7e9ca18",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-sensor-continuation/update-01/stderr": "a8429c21b5f9f93914f642cfdb8692d9748e3ba249eeead93214137c20bb2640",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-sensor-continuation/update-01/result.json": "10d76e03d09735a357e99c3e25fcd6495dba7ef5b9ffbcdc3be78070f176bc8e"
+  }
+}
