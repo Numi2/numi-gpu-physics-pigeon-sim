@@ -1,0 +1,8 @@
+{
+  "archive_sha256": "670d14b0a93aaf7fa5094f3657800b1b2f8a160f508090f30a5228c11744e838",
+  "remote_files": {
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-perch-attitude-residual-zero-stochastic.policypack": "86f9cb37037d5699ca9b3a75a721aea4bf62ad2594c56b0b9320b6ed62edf175",
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-perch-attitude-residual-zero-deterministic.policypack": "5b159c8911d83af3d64ee891941faa7b8b69aee90e3bb96b6174c2e3b5e595e5",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-perch-attitude-residual-zero-build.json": "7d29db0e3e0332f230878aa0e211d1bf2f403a9fd046bef8b4b56047522ba8bb"
+  }
+}
