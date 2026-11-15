@@ -1,0 +1,38 @@
+{
+  "sha256": [
+    "40cf459e4897d0c4dd8493a6aedcfaeb7cbfe1a69b59e6ceaf079c8ee4b8a9f8",
+    "cc4795d27ed7afda66a27ae016a16e558133f3b4d2baec0e54000c6bbda4a111"
+  ],
+  "fields_equal": {
+    "actor_observations": false,
+    "critic_observations": false,
+    "motion_features": true,
+    "latents": false,
+    "old_log_probabilities": false,
+    "old_values": false,
+    "bootstrap_values": false,
+    "transitions": false
+  },
+  "outcomes_equal": {
+    "approach_pitch_full_envelope_fraction": false,
+    "approach_pitch_warning_fraction": false,
+    "done": false,
+    "figure_eight_tracking": true,
+    "forward_flight_tracking": false,
+    "ground_support": false,
+    "liftoff": false,
+    "navigation_completion": true,
+    "navigation_progress": true,
+    "navigation_waypoints_reached": true,
+    "physics_error": true,
+    "push_off": false,
+    "reward": false,
+    "root_height": false,
+    "task_reward": false,
+    "timeout": true,
+    "tracking": false,
+    "walking_contact": false
+  },
+  "task_fingerprints_equal": true,
+  "policy_fingerprints_equal": false
+}

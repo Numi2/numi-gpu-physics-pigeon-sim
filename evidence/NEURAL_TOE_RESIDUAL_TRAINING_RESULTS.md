@@ -1,0 +1,7 @@
+# Direct toe-contact residual: first update
+
+The separately clipped update completed with the original carrier weights and all protected connections, biases, normalization, exploration and semantic fingerprints unchanged. The new residual path changed, and on the same retained observations it produced per-action RMS target changes up to 0.000031 rad for leg commands and 0.000051 rad for toe commands. Zeroing the twelve contact inputs removed those differences on those observations. This establishes dependence on the supplied contact features, not successful control or a physically applied toe displacement: toe corrections remain gated.
+
+The training run used the same configured seed as the earlier sensor-input experiment, but the rollout bytes and several decoded fields differed, including sampled latents and physical observations. Therefore it is not a matched-rollout comparison; differing policy fingerprints and architecture are present, and no cause for divergence is asserted. The first rollout comparison attempt lacked an explicit native library path and failed; it was rerun successfully with the recorded experimental library. The full run, checkpoint, optimizer, rollout and comparison are retained.
+
+First-episode physical evaluation on the two consumed development states is in progress. A 20-second branch hold, opposing contact and stability remain necessary for promotion.
