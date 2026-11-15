@@ -1,0 +1,5 @@
+# Head and beak noise on the phase-corrected fixture
+
+On the same used seed and partial perch reconstruction, reducing first-four balance-action log standard deviation from -3.5 to -5 improved first-episode survival from 142-149 intervals to 197-220, but all lanes still fell for tilt. The head and beak action slots 15-17 remained stochastic at -2 and can physically actuate. In the earlier arrival-state test reducing those slots alone had little effect; the present perched state differs.
+
+Run one additional matched 512-step four-lane stochastic rollout with the exact same input v3 actor/critic and task, except set the first-four balance and head/beak slots 15-17 to -5. Keep other sampled actions, seed, noise generator, reset, pushes, reward, solver and termination unchanged. Compare first done and total terminations with the already archived minimum-balance-only run. Record likelihood parity and final KL; do not select the generated optimizer update. This is one used-seed diagnostic, not a generalization result.
