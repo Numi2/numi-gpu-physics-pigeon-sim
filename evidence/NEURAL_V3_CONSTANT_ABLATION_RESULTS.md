@@ -1,0 +1,3 @@
+# Fixed residual control from the initial state
+
+With four v3 residual outputs replaced by fixed values from the beginning, seed 20310111 had 309 qualifying intervals (38–346) but failed the terminal-hold gate; seed 20310129 had 176 qualifying intervals (42–217) and terminated for tilt at step 295. The live v3 actor held through 400 on both starts. This control changed actions during capture, so these outcomes alone do not isolate the importance of live output after contact. A separately registered post-contact ablation preserves the first 50 steps to address that confound. The replay's accepted actions are network outputs and do not represent the constant applied targets for this control. All later resets are excluded.

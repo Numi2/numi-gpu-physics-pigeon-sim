@@ -1,0 +1,5 @@
+# V3 20-second development holds
+
+On the two previously used development starts, the final v3 policy ran all 1000 × 0.02 s intervals with no termination, root jump or reset. Seed 20310111 had a continuous qualifying grip/support/posture streak of 963 intervals (38–1000, 19.26 s). Seed 20310129 had 960 intervals (41–1000, 19.20 s). Both pass the terminal hold gate. The first 400 trace rows of each long run match its corresponding original 400-step v3 evaluation exactly, confirming that the timeout-only test shader preserved the earlier dynamics over that period.
+
+These are reconstructed, forced-landing starts at a relocated branch using a scripted carrier. They are development seeds and do not demonstrate original-course autonomy, unused-layout performance, recovery from disturbances, or real crow biomechanics. Fixed-action and post-contact ablation controls, and matched v1 long baselines, are separate tests; preserve their outcomes rather than inferring feedback or causation from these holds.
