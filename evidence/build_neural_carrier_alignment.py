@@ -1,0 +1,9 @@
+from pathlib import Path
+import hashlib,json,subprocess
+r=Path('/Users/n/Developer/numi-crow-rl-20261107');a=r/'artifacts/crow-v15-recorded-restart-20261114';b=r/'build/crow-v15-recorded-restart-20261114'
+s=(a/'restart-round-neural-balance-v4-training.metal').read_text()
+changes=[('const bool privilegedCommand = (dispatch.sampling.w != 0u && dispatch.assistance.x < 0.5f);','const bool privilegedCommand = (dispatch.sampling.w != 0u && dispatch.assistance.x < 0.5f && !(state.episode.z==10u && state.navigation.z>=5.0f));'),('if (dispatch.sampling.w==0u && fixedFlightController && state.navigation.z>=5.0f &&','if ((dispatch.sampling.w==0u || state.episode.z==10u) && fixedFlightController && state.navigation.z>=5.0f &&'),('if (dispatch.sampling.w==0u) state.nutrition.xy=footLoads;','if (dispatch.sampling.w==0u || state.navigation.z>=5.0f) state.nutrition.xy=footLoads;'),('if (dispatch.sampling.w==0u && state.navigation.z>=5.0f && state.threatTeacher.w>=1.5f) {','if ((dispatch.sampling.w==0u || state.episode.z==10u) && state.navigation.z>=5.0f && state.threatTeacher.w>=1.5f) {')]
+for i,(old,new) in enumerate(changes):
+ assert s.count(old)==(2 if i==1 else 1),(i,s.count(old));s=s.replace(old,new)
+src=a/'neural-carrier-aligned-training.metal';src.write_text(s);air=b/'neural-carrier-aligned-training.air';lib=b/'neural-carrier-aligned-training.metallib';build=json.loads((a/'shader-build.json').read_text());cc=build['compile'].copy();cc[cc.index('-c')+1]=str(src);cc[cc.index('-o')+1]=str(air);subprocess.run(cc,check=True);link=build['link'].copy();link[link.index(str(b/'restart.air'))]=str(air);link[link.index('-o')+1]=str(lib);subprocess.run(link,check=True)
+(a/'neural-carrier-aligned-build.json').write_text(json.dumps({'compile':cc,'link':link,'changes':changes,'sha256':{str(p):hashlib.sha256(p.read_bytes()).hexdigest() for p in (src,air,lib)}},indent=2)+'\n')
