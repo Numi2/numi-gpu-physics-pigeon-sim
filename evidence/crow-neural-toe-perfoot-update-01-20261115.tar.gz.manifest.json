@@ -1,0 +1,21 @@
+{
+  "archive_sha256": "87f593318cb7f501b13b31c5f0e20a56d707f87ef8fc6f54dd6cb47deb94b1c8",
+  "archive_size": 12687360,
+  "parts": [
+    {
+      "name": "crow-neural-toe-perfoot-update-01-20261115.tar.gz",
+      "sha256": "87f593318cb7f501b13b31c5f0e20a56d707f87ef8fc6f54dd6cb47deb94b1c8"
+    }
+  ],
+  "remote_files": {
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-toe-perfoot-update-01.policypack": "f694fd63847ca4fecced33809b37eda724489dddc22a99c655c3feb0b0db575a",
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-toe-perfoot-update-01.policypack.deployment.policypack": "aeaa7ef825102703c0d5b53207b4b810f4e2ea66aed4f3ff99d2a1fcd95e3958",
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-toe-perfoot-update-01.rollout": "602a5058d17a0c5f1e89041176ee6f6e9384214688b51d8d13c468a5d15acce5",
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-toe-perfoot-update-01.safetensors": "f32a20e104cf02947b4cb3551277656ed42cf2a9b9a82bd269c9c41f5840c3b5",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-perfoot-update-01/command.json": "f2fd553de2e6cc029d389ed0719edac7f15da5fd23545b47640b7822b828511a",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-perfoot-update-01/inputs.json": "ac7464681df22e1f333d585d61f65c1976ae69c2abe691bad87e73266cbf7aac",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-perfoot-update-01/stdout": "6335abf00fc31fb213b2380c57f1476c61aff2bbe907fcae008920c9217bb6a4",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-perfoot-update-01/stderr": "927cad556809f1b42091a55d22a9711b3009ad56d38e91a6fce10e62a97b4c7d",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-perfoot-update-01/result.json": "9647658448fed149393fd905128539b7670b94bba7da429a873750799b593c5c"
+  }
+}

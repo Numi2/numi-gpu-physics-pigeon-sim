@@ -1,9 +1,10 @@
 from pathlib import Path
 import gzip,hashlib,json,os,subprocess,threading,sys
 seed=int(sys.argv[1]); assert seed in (20370113,20370127)
-r=Path('/Users/n/Developer/numi-crow-rl-20261107');a=r/'artifacts/crow-v15-recorded-restart-20261114';b=r/'build/crow-v15-recorded-restart-20261114';run=a/f'neural-toe-perfoot-development-{seed}-1000';run.mkdir(exist_ok=False)
+variant=sys.argv[2] if len(sys.argv)>2 else 'baseline'; assert variant in ('baseline','update01')
+r=Path('/Users/n/Developer/numi-crow-rl-20261107');a=r/'artifacts/crow-v15-recorded-restart-20261114';b=r/'build/crow-v15-recorded-restart-20261114';run=a/(f'neural-toe-perfoot-development-{seed}-1000' if variant=='baseline' else f'neural-toe-perfoot-update01-development-{seed}-1000');run.mkdir(exist_ok=False)
 cmd=json.loads((a/'round-position-aligned-valid-toe-400/command.json').read_text());i=cmd.index('--base-policy-pack');del cmd[i:i+2]
-pack=b/'neural-toe-residual-update-01.policypack.deployment.policypack';shader=b/'neural-toe-perfoot-eval.metallib';host=b/'toe-sensing-experiment-host/libmetalrobo.dylib'
+pack=b/('neural-toe-residual-update-01.policypack.deployment.policypack' if variant=='baseline' else 'neural-toe-perfoot-update-01.policypack.deployment.policypack');shader=b/'neural-toe-perfoot-eval.metallib';host=b/'toe-sensing-experiment-host/libmetalrobo.dylib'
 for k,v in [('--birdflow-journey-variant','v15-hierarchical-navigation'),('--steps','1000'),('--envs','1'),('--seed',str(seed)),('--state-trace',str(run/'trace.tsv')),('--crow-replay-pack',str(run/'replay.json')),('--policy-pack',str(pack)),('--metallib',str(shader))]:cmd[cmd.index(k)+1]=v
 env=dict(os.environ,DYLD_LIBRARY_PATH=str(host.parent),CROW_RESTART_RESET_AUDIT='1',CROW_SUBSTEP_TRACE='1',CROW_CONTACT_TRACE='1',CROW_SUPPORT_TRACE='1',CROW_EXPERIMENT_GAIT_SMOOTH='1');env.pop('CROW_RECORDED_STATE_RESTART',None)
 (run/'command.json').write_text(json.dumps(cmd,indent=2)+'\n');(run/'inputs.json').write_text(json.dumps({'sha256':{str(p):hashlib.sha256(p.read_bytes()).hexdigest() for p in (pack,shader,host)},'scope':'consumed development paired start; new per-foot contact gate, reconstructed forced perch and scripted carrier'},indent=2)+'\n')
