@@ -1,0 +1,14 @@
+{
+  "archive_sha256": "1d8095a78c4bb052b076d73b32601db73e79ef2c825b84da1697ac1ee29ad9bc",
+  "remote_files": {
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-toe-sensor-continuation-update-02.policypack": "e2851929f136f0a5da4befbce6adbc922ab32b4e9688b2100cc80d587693bc66",
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-toe-sensor-continuation-update-02.policypack.deployment.policypack": "90400c5eaf77008c6fefa67c9658d37f53aa32c04a9a1da545f5ef99a7d28415",
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-toe-sensor-continuation-update-02.rollout": "965622667c91456cb1c83e2a4e32464c6e3b783b73183e0b5fa1cd0539bfcfb9",
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-toe-sensor-continuation-update-02.safetensors": "24d7e4b7286023a0c3c29122897059eb945820f7dfcfcb6c15594e70cd3ed2f4",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-sensor-continuation/update-02/command.json": "7eb648d1cb16d2c3608facab3a0267eff340b4ac5b02d4b867d7164b23d7d7b2",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-sensor-continuation/update-02/inputs.json": "494af50382a1436705e0a37d99a0b4148d2900fa0333076b04ce6fae5e0027ee",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-sensor-continuation/update-02/stdout": "5bc77b8bdb55263c8a3379a82fba92e7a41ba05c965e5dcd915bc1358c62a46c",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-sensor-continuation/update-02/stderr": "2be13e9b83e5c38d481fae0bccca502d3a0e4f0e86c762a2134cdaa2d0eb8ded",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-sensor-continuation/update-02/result.json": "2e3520e5fd3fa961f8a07a2291a8482e9d1f24b073f6fdfb8e42d7ad32cc6264"
+  }
+}
