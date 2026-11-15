@@ -1,0 +1,44 @@
+{
+  "archive_sha256": "27e89747e30e70332bbd160c9f27b09d0928b9abfae776551075bd179193c1f0",
+  "archive_size": 13885440,
+  "parts": [
+    {
+      "name": "crow-v15-attitude-baseline-parity-20261115.tar.gz",
+      "sha256": "27e89747e30e70332bbd160c9f27b09d0928b9abfae776551075bd179193c1f0"
+    }
+  ],
+  "remote_root": "/Users/n/Developer/numi-crow-rl-20261107",
+  "files": {
+    "artifacts/crow-v15-recorded-restart-20261114/crow_v15_attitude_baseline_build.py": "a3491035f815237c55ec974282a739bd2f3e986a13f985a1ce8073437a6bfd49",
+    "artifacts/crow-v15-recorded-restart-20261114/crow_v15_attitude_baseline_evaluate.py": "62baa7f348babaab60878e553402ff13c35157cfc689e0b1d04eebaf32b80892",
+    "artifacts/crow-v15-recorded-restart-20261114/crow_v15_attitude_baseline_check.py": "bee1509ff2942f0a52ea408cd55b26a634f46ed938b2186e4b77abe55b02797c",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-resetfixed-attitude-baseline-zero-build.json": "387698de010e0158a9e8af19edcdaaa8bbac18fa20d32a06feeb4e031e69dc8a",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-resetfixed-attitude-baseline-zero-parity.json": "2972e65108add93fcda9a0ecb84ead250d772fc4a954e5eb5748227fb9c555b0",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-resetfixed-attitude-baseline-zero-evaluation-20370113-250/baseline.command.json": "e68b8081010a84156daae12269a92a0b9fc6f7beb166377826f8f2194eaf1dda",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-resetfixed-attitude-baseline-zero-evaluation-20370113-250/candidate.json": "b6773705a2338236db74f741745c83ff845976e8d5aa174e279fdde95662aaec",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-resetfixed-attitude-baseline-zero-evaluation-20370113-250/baseline.tsv": "f1773dd0295763f2a20f2730bb80bb54b7e322b2107c9f693e78a180acbae8ab",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-resetfixed-attitude-baseline-zero-evaluation-20370113-250/comparison.json": "990d75c523ef1a1aa3afea1e6293785bc6274612d8d601220cf38c7e975095fc",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-resetfixed-attitude-baseline-zero-evaluation-20370113-250/candidate.stderr": "338c63285721e26777c215eeefe3a7d0984663095787dfceabe4988282b6b7af",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-resetfixed-attitude-baseline-zero-evaluation-20370113-250/baseline.json": "53002fea8d5dc4069dff2abb5930b2a84e56a872ec15c04aefd53eacab90fb8d",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-resetfixed-attitude-baseline-zero-evaluation-20370113-250/candidate.tsv": "f1773dd0295763f2a20f2730bb80bb54b7e322b2107c9f693e78a180acbae8ab",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-resetfixed-attitude-baseline-zero-evaluation-20370113-250/baseline.stdout": "a171e33b8abb934dbf9dca8fa881ddb6c6ba720f45a51e6fe45b34a26c8d716c",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-resetfixed-attitude-baseline-zero-evaluation-20370113-250/baseline.stderr": "338c63285721e26777c215eeefe3a7d0984663095787dfceabe4988282b6b7af",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-resetfixed-attitude-baseline-zero-evaluation-20370113-250/candidate.command.json": "fbe323193a22bd2e32e954e21e3987d51406b30457c5586e4be54354996336b4",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-resetfixed-attitude-baseline-zero-evaluation-20370113-250/candidate.stdout": "7e6e74ad9f71ae2d2978c7df4d34353bef83a75982ef03b58cecd53198a9af2e",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-resetfixed-attitude-baseline-zero-evaluation-20370127-250/baseline.command.json": "1d6b9e3db7188db5a6229d3c8a6ea61f0ef4f3976cf601e76d3934463ee320e2",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-resetfixed-attitude-baseline-zero-evaluation-20370127-250/candidate.json": "03d1522ecffedfc1eb2887631f1f029fd9ed1ccaefaa0c95fcd41ebe8e73d8bb",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-resetfixed-attitude-baseline-zero-evaluation-20370127-250/baseline.tsv": "da2fffa8e3df6b3b150b354b462c34788f3c78c1d566c826f76db77b40cb2c4a",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-resetfixed-attitude-baseline-zero-evaluation-20370127-250/comparison.json": "cde5e22262b6ff6aecd346b57d5fd7bcaa9e0da2886e94c22f8db48fa0b8f3a6",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-resetfixed-attitude-baseline-zero-evaluation-20370127-250/candidate.stderr": "338c63285721e26777c215eeefe3a7d0984663095787dfceabe4988282b6b7af",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-resetfixed-attitude-baseline-zero-evaluation-20370127-250/baseline.json": "6741ed07f95f65acdbd22b6ec7365a95b1747e0e45fdcd25016af1d9e276978c",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-resetfixed-attitude-baseline-zero-evaluation-20370127-250/candidate.tsv": "da2fffa8e3df6b3b150b354b462c34788f3c78c1d566c826f76db77b40cb2c4a",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-resetfixed-attitude-baseline-zero-evaluation-20370127-250/baseline.stdout": "0cc7a7c3be20d89a13feb2f8426885cf012647968aa4cf9d4b7b8c8c603de2fc",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-resetfixed-attitude-baseline-zero-evaluation-20370127-250/baseline.stderr": "338c63285721e26777c215eeefe3a7d0984663095787dfceabe4988282b6b7af",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-resetfixed-attitude-baseline-zero-evaluation-20370127-250/candidate.command.json": "72e140b3fda52acb299b0f7c1d50a5fe61d824eb66d8657851fd8807bbc6bcf4",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-resetfixed-attitude-baseline-zero-evaluation-20370127-250/candidate.stdout": "89070f2f8efb2dd51cf91c8110dc08d1b8b32bbdd572613cac4214d70282f14e",
+    "build/crow-v15-recorded-restart-20261114/v15-resetfixed-attitude-baseline-zero-stochastic.policypack": "dd8daabc089e5c40267fddbb9e046a7738e112cd1b37554efd6b3ceba648ad7b",
+    "build/crow-v15-recorded-restart-20261114/v15-resetfixed-attitude-baseline-zero-deterministic.policypack": "abc9f5f07d1ca6580f8b87c969148dee1a6d82d9d91973a8f9dd9af1bc765849",
+    "build/crow-v15-recorded-restart-20261114/neural-perch-attitude-residual-python/metalrobo/mlx_policy_worker.py": "68555d0f99aaeb226b01f69569f23ca3f2844a4799ab251954c9cfaf624a6a0d",
+    "build/crow-v15-recorded-restart-20261114/neural-perch-attitude-residual-python/metalrobo/mlx_policy_learning.py": "e4a59fa52672f6b2ec1727baf8c5c65598042a133dab1d4b35aca58ab6c86c56"
+  }
+}
