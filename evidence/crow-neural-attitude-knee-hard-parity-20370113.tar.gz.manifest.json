@@ -1,0 +1,18 @@
+{
+  "archive_sha256": "c6865aee0ff565e8edd86def1957cc62c6c0ba9175a317bc7d03b712be9d687f",
+  "archive_size": 1064960,
+  "parts": [
+    {
+      "name": "crow-neural-attitude-knee-hard-parity-20370113.tar.gz",
+      "sha256": "c6865aee0ff565e8edd86def1957cc62c6c0ba9175a317bc7d03b712be9d687f"
+    }
+  ],
+  "remote_files": {
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-attitude-knee-hard-parity-20370113/command.json": "7afeb8a03eff6711c97cd8056a26afe7713807ce49075054b3a5161046216fd1",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-attitude-knee-hard-parity-20370113/inputs.json": "4a6f37f57e899d6bae809f6bd48915aff638cf9c0636b7c0291352f9ebcbeb59",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-attitude-knee-hard-parity-20370113/result.json": "0eb5a7535e7a2cd2aa72d63af56e544dc95ff4cc8cd55e831bcc1770a55647d7",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-attitude-knee-hard-parity-20370113/stdout": "0ee0e96d0eb772ba6502c58636374ff3a56a602bd33431acbd82062ec7d305b4",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-attitude-knee-hard-parity-20370113/stderr": "338c63285721e26777c215eeefe3a7d0984663095787dfceabe4988282b6b7af",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-attitude-knee-hard-parity-20370113/screen.rollout": "55b079dc0c9482330217bc4cbc342313934f66b1761df3361d847b2b49452f2a"
+  }
+}

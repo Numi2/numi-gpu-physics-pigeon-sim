@@ -1,0 +1,102 @@
+{
+  "rows": [
+    {
+      "lane": 0,
+      "first_observation_difference_from_lane_zero": null,
+      "first_action_difference_from_lane_zero": null,
+      "done_in_first_40": false
+    },
+    {
+      "lane": 1,
+      "first_observation_difference_from_lane_zero": 0,
+      "first_action_difference_from_lane_zero": 0,
+      "done_in_first_40": false
+    },
+    {
+      "lane": 2,
+      "first_observation_difference_from_lane_zero": 0,
+      "first_action_difference_from_lane_zero": 0,
+      "done_in_first_40": false
+    },
+    {
+      "lane": 3,
+      "first_observation_difference_from_lane_zero": 0,
+      "first_action_difference_from_lane_zero": 0,
+      "done_in_first_40": false
+    },
+    {
+      "lane": 4,
+      "first_observation_difference_from_lane_zero": 0,
+      "first_action_difference_from_lane_zero": 0,
+      "done_in_first_40": false
+    },
+    {
+      "lane": 5,
+      "first_observation_difference_from_lane_zero": 0,
+      "first_action_difference_from_lane_zero": 0,
+      "done_in_first_40": false
+    },
+    {
+      "lane": 6,
+      "first_observation_difference_from_lane_zero": 0,
+      "first_action_difference_from_lane_zero": 0,
+      "done_in_first_40": false
+    },
+    {
+      "lane": 7,
+      "first_observation_difference_from_lane_zero": 0,
+      "first_action_difference_from_lane_zero": 0,
+      "done_in_first_40": false
+    },
+    {
+      "lane": 8,
+      "first_observation_difference_from_lane_zero": 0,
+      "first_action_difference_from_lane_zero": 0,
+      "done_in_first_40": false
+    },
+    {
+      "lane": 9,
+      "first_observation_difference_from_lane_zero": 0,
+      "first_action_difference_from_lane_zero": 0,
+      "done_in_first_40": false
+    },
+    {
+      "lane": 10,
+      "first_observation_difference_from_lane_zero": 0,
+      "first_action_difference_from_lane_zero": 0,
+      "done_in_first_40": false
+    },
+    {
+      "lane": 11,
+      "first_observation_difference_from_lane_zero": 0,
+      "first_action_difference_from_lane_zero": 0,
+      "done_in_first_40": false
+    },
+    {
+      "lane": 12,
+      "first_observation_difference_from_lane_zero": 0,
+      "first_action_difference_from_lane_zero": 0,
+      "done_in_first_40": false
+    },
+    {
+      "lane": 13,
+      "first_observation_difference_from_lane_zero": 0,
+      "first_action_difference_from_lane_zero": 0,
+      "done_in_first_40": false
+    },
+    {
+      "lane": 14,
+      "first_observation_difference_from_lane_zero": 0,
+      "first_action_difference_from_lane_zero": 0,
+      "done_in_first_40": false
+    },
+    {
+      "lane": 15,
+      "first_observation_difference_from_lane_zero": 0,
+      "first_action_difference_from_lane_zero": 0,
+      "done_in_first_40": false
+    }
+  ],
+  "first_40_observations_equal_across_all_lanes": false,
+  "scope": "same seed, common randomized q/v, no claim of identical unobserved state"
+}
