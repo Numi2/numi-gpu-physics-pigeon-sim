@@ -1,0 +1,2 @@
+05c980f65b587b10444f3909a6b5a0a50763019a569209edfa6464af340ec0a9  evidence/neural-v3-long-challenge-20261115.tar.gz
+069d5d545a8b3e97f54d3a520d7db1d25b0908f9fa51393a722cb03f9b394d00  evidence/neural-v3-disturbance-20261115.tar.gz
