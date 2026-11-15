@@ -1,0 +1,43 @@
+{
+  "git_commit": "50384efefec02176f23dae52a0576388df64e178",
+  "archives": [
+    {
+      "archive": "crow-v15-resetfixed-lr100x-training-20261115",
+      "sha256": "b7986a33b5887dbc914f36c164edd02837f8ba9fe2a1be159d51a364ef78d99f",
+      "restored_files": 46,
+      "appledouble_metadata_entries": 4
+    },
+    {
+      "archive": "crow-v15-resetfixed-lr1000x-training-20261115",
+      "sha256": "1745cd41ce1420400e0bba45da349a38119ba5c0f0740447c0944d3aa3f227b0",
+      "restored_files": 37,
+      "appledouble_metadata_entries": 4
+    },
+    {
+      "archive": "crow-v15-reflected-update-control-20261115",
+      "sha256": "43f44f19ae2744b5e661ecdd12baae7806e6259150ff4e536c6a51c39c3b4959",
+      "restored_files": 30,
+      "appledouble_metadata_entries": 4
+    },
+    {
+      "archive": "crow-v15-drive-effort-diagnostic-20261115",
+      "sha256": "3fac8a6e2628a07828820e3841bdf8a1a3565b5fe9bed2042bdaa8bbce1d9cd0",
+      "restored_files": 17,
+      "appledouble_metadata_entries": 2
+    },
+    {
+      "archive": "crow-v15-attitude-baseline-parity-20261115",
+      "sha256": "27e89747e30e70332bbd160c9f27b09d0928b9abfae776551075bd179193c1f0",
+      "restored_files": 31,
+      "appledouble_metadata_entries": 4
+    },
+    {
+      "archive": "crow-v15-attitude-balanced-training-20261115",
+      "sha256": "1d993d2179471014df415b59fb68a8ac55c8b8682ebded55ade459e043f439ce",
+      "restored_files": 90,
+      "appledouble_metadata_entries": 4
+    }
+  ],
+  "video_sha256": "b1502af90942fce6e5f6f7e447110a78a962634fe9099513368da58b99463c8d",
+  "method": "Independently fetched Git remote; hash each archive part, full reconstructed archive and every unique regular-file member; check exact member sets apart from macOS AppleDouble metadata whose data-file counterparts are present. No simulator claims."
+}
