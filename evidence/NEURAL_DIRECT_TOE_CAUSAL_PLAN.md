@@ -1,0 +1,5 @@
+# Direct residual toe-output ablation
+
+The direct-contact residual held development seed 20370127 for 20 seconds but failed seed 20370113 at 5.26 seconds. The zero-residual source also held the former start, so that hold does not show a benefit from learned toe output. To test the toe part separately, create a deterministic copy of the direct residual policy with only the new residual network's final projection into action rows 4–7 zeroed; preserve the inherited toe outputs, the four leg residual rows, all other weights, observations and the scripted physical carrier. Verify the protected rows and zeroed projection numerically.
+
+After the current training block, compare first episodes on those same two consumed starts against the already retained full-policy trials. Record all 16 substep contacts, strict grip and support, first failure and terminal streak. This ablation can establish a causal effect on these simulated starts if outcomes differ, but cannot establish that the toe network is useful generally, that the scripted carrier is learned, or that an uninterrupted landing has succeeded. Keep the ablation and both failures even if outcomes regress.
