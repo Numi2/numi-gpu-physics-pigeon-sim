@@ -1,0 +1,31 @@
+{
+  "archive_sha256": "bb5703acc8b1c7c408e07e46a7771103f1ac02451f960813a5c5ff09f593be92",
+  "archive_size": 11550720,
+  "parts": [
+    {
+      "name": "crow-v15-joint-wholebody-render-20261115.tar.gz",
+      "sha256": "bb5703acc8b1c7c408e07e46a7771103f1ac02451f960813a5c5ff09f593be92"
+    }
+  ],
+  "remote_root": "/Users/n/Developer/numi-crow-rl-20261107",
+  "files": {
+    "artifacts/crow-v15-recorded-restart-20261114/v15-joint-wholebody-render-20370113/frames-front/numi-crow-replay-audit.json": "e7d27784e53f986e903577732c5d9b91baf68e15cc16946c99a6e3e3a39a1305",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-joint-wholebody-render-20370113/frames-above/numi-crow-replay-audit.json": "325bf87621130257ab78abef81a66bc040eec48f3f242183ad4bf4911093aae6",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-joint-wholebody-render-20370113/front.mp4": "b543a40749cf2f7fc8079a072fc8119ac7df03c66b598301bbabec26dd90da44",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-joint-wholebody-render-20370113/frames-feet/numi-crow-replay-audit.json": "17c395f2ab00a5db30c97243a0c6ae5de4630d3a12e276d6c60691d9a5c76adb",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-joint-wholebody-render-20370113/below.mp4": "f9abba278af43cc7be7bd9e3b421315a1d44f8013e850abd1bb4f8fb44385b24",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-joint-wholebody-render-20370113/back.log": "669e3c10377908d5a6e155391c3a401e443e0bd36c96ee0719c4d6f172792dde",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-joint-wholebody-render-20370113/front.log": "669e3c10377908d5a6e155391c3a401e443e0bd36c96ee0719c4d6f172792dde",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-joint-wholebody-render-20370113/back.mp4": "91a684983ddb9b2b4e3ae807ce1a4847534752496758ef1512467b3c08cf4f22",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-joint-wholebody-render-20370113/below.log": "669e3c10377908d5a6e155391c3a401e443e0bd36c96ee0719c4d6f172792dde",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-joint-wholebody-render-20370113/frames-back/numi-crow-replay-audit.json": "4fd5deb9bd45c21285e153aec5f3c0932e98757fc062431b03f4bfad0b0d8332",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-joint-wholebody-render-20370113/video-sha256.txt": "19d5cee600f0ba48dc0b49b2fd851dc0a2703bf7ebf16953bcf6fcc3f7e88947",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-joint-wholebody-render-20370113/frames-below/numi-crow-replay-audit.json": "ce073ce75747c2ebb6a791254d5192f7c4cf5a445c3d8daa2844c5867b374aa6",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-joint-wholebody-render-20370113/presentation-splice.json": "8272b61527465e1330982f8a07f845ccc57cea34d543162316ba33847ee406b2",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-joint-wholebody-render-20370113/above.log": "669e3c10377908d5a6e155391c3a401e443e0bd36c96ee0719c4d6f172792dde",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-joint-wholebody-render-20370113/splice.log": "f2ca8581d00a573b253d48876eed2848de764dcfc18cc34df1e06048aa44c08c",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-joint-wholebody-render-20370113/above.mp4": "4bc0a371fc906eacb0961f8bd7f3a1053b497cce62662af037de62b071b8bad2",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-joint-wholebody-render-20370113/feet.log": "669e3c10377908d5a6e155391c3a401e443e0bd36c96ee0719c4d6f172792dde",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-joint-wholebody-render-20370113/feet.mp4": "74b02650dd93e711d3c8798c374c919b3bbc0f91d3070e5878a2e42bac205241"
+  }
+}
