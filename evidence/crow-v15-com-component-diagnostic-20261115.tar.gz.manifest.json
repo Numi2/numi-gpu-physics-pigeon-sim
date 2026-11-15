@@ -1,0 +1,36 @@
+{
+  "archive_sha256": "90d1de39445e8755805be8b78b4ce6cd44423bbc3334a38cf52bc604403b4539",
+  "archive_size": 24268800,
+  "parts": [
+    {
+      "name": "crow-v15-com-component-diagnostic-20261115.tar.gz",
+      "sha256": "90d1de39445e8755805be8b78b4ce6cd44423bbc3334a38cf52bc604403b4539"
+    }
+  ],
+  "remote_root": "/Users/n/Developer/numi-crow-rl-20261107",
+  "files": {
+    "artifacts/crow-v15-recorded-restart-20261114/v15-com-component-diagnostic-20261115/build.py": "aedb174d550a39e72762ed540adbcbeb6736728abaaa0b8ac3ba57a0c8a3e952",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-com-component-diagnostic-20261115/com_component_diagnostic.chk": "3cf7a7daf3766d493f7917c5272b94dd12ac76a9684b34ffd298a73fe3dfb18f",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-com-component-diagnostic-20261115/com_component_diagnostic-prefix.command.json": "52f200adeb4e2160dec4144b71ecb736ecf74987c61ffccf0586bfa861d6874e",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-com-component-diagnostic-20261115/com_component_diagnostic-prefix.json": "436e5120105ccb33a00b8c3198133a4579940c866d80323ee55db7b32952160b",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-com-component-diagnostic-20261115/com_component_diagnostic-prefix.tsv": "95e37996efd9c9bb93de5da3a43654a348422f255c2c3c5158e4f025f2a573ea",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-com-component-diagnostic-20261115/com_component_diagnostic-prefix.stderr": "338c63285721e26777c215eeefe3a7d0984663095787dfceabe4988282b6b7af",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-com-component-diagnostic-20261115/com_component_diagnostic-prefix-result.json": "826fe7ed80f17a398ffa2b3fdf6126bfd51f470e6051178c761d76a6880edb23",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-com-component-diagnostic-20261115/com_component_diagnostic.metal": "a5a7ff6fcc948edcbcd4c7f9e3ce57916d0114e4f8ef3be567d8e3a40b4839c5",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-com-component-diagnostic-20261115/evaluate.py": "f8e8585960cd6b98a415fbe978c6f12dcd7c3ee65861a4adc83bf0bc254a78d8",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-com-component-diagnostic-20261115/com_component_diagnostic-prefix.stdout": "4ac8f292393a3b244af9979a483b7031eec3e0691e15ae14e499a7ec65e1fe8b",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-com-component-diagnostic-20261115/prepare.py": "deba9e9b8eeb76a972d1ee4d7bd3ae9a79c26f8eee6a1ee3f0e01a80fffb9f88",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-com-component-diagnostic-20261115/analyze.py": "b67d4578594a33d87a129cc05b76b83efe210f1e7b9139488507e0c4209a4b24",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-com-component-diagnostic-20261115/build.json": "301684a309fbccb966111ae4076c8307c37adc906b360fa3d7e51fba3df7e879",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-com-component-diagnostic-eval-20261115/20370113-com_component_diagnostic-620.command.json": "52fd487859579098c162d8a9f856c819becc6411249b97fd0e7484a162b11031",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-com-component-diagnostic-eval-20261115/component-telemetry-check.json": "c6ebe51ba99ebdac473e195739d37920f239ad6218916d31c07d9acced27d933",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-com-component-diagnostic-eval-20261115/20370113-com_component_diagnostic-620.tsv": "29d4a934324e10e7485ac632412a9a479acdaf5fa1432b5e1c3a58b198c41a23",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-com-component-diagnostic-eval-20261115/20370113-com_component_diagnostic-620.json": "877b892cce1945780a52772659ad186c544351ee06bf945bc70f5931c4a0214a",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-com-component-diagnostic-eval-20261115/20370113-com_component_diagnostic-620.stdout": "ff905f85350dd96caa0c31d17106fa98b39067132b6ebf71e676370dd215b3e3",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-com-component-diagnostic-eval-20261115/runs.json": "100f61b25c348e535721bbe2d0eaee11f9a978c2822a693249bec483ca9ecccf",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-com-component-diagnostic-eval-20261115/20370113-com_component_diagnostic-620.stderr": "a07072bbaf91367929f13a38d8dc1e4e2486dd839ee2082978acab561423cdb6",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-com-component-diagnostic-eval-20261115/20370113-com_component_diagnostic-620.inputs.json": "46e317dfbf082cb8cd5bdb783cc8f1f4f46277ad23cac4ab338d69054902f767",
+    "build/crow-v15-recorded-restart-20261114/v15-com-component-diagnostic-20261115/com_component_diagnostic.metallib": "b2952315b00b26d0a063f1189ef611957271ec61ee07d893a41fca5fb6e3cbee",
+    "build/crow-v15-recorded-restart-20261114/v15-com-component-diagnostic-20261115/com_component_diagnostic.air": "fb08f6920e3ebb122169b913ec8bbe92afdd2945bb679e452a217d16df5b37db"
+  }
+}
