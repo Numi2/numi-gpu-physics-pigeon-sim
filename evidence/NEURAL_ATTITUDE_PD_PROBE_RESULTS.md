@@ -1,0 +1,5 @@
+# Bounded privileged pitch/rate probe
+
+On the original toe gate and earlier direct-residual policy, an isolated diagnostic added `clamp(0.12*(pitch-0.13)+0.04*pitch_rate,-0.04,0.04)` radians to both physical hip targets after the settling period. This used simulator state directly and was not a neural policy. It was motivated by early tilt loss during supported grip and prior short hip-pulse response, not assumed to be a working controller.
+
+Seed 20370113 ended on contact at interval 204 (4.08 s), with a longest strict grip streak of 81 intervals; its original no-feedback run tilted out at 263 with a streak of 139. Seed 20370127 ended on contact at interval 208 (4.16 s), with a 94-interval streak; the original run did not terminate within 1000 intervals and had a 962-interval streak. The first tilt failure in these probes preceded loss of toe opposition. This diagnostic regressed both starts and is not suitable as a teacher. The source, build, exact inputs, complete raw traces and subsequent resets are archived. The fixture is reconstructed and uses a scripted carrier; no autonomous landing or generalization is claimed.

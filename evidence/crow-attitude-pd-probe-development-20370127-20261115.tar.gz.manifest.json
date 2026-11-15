@@ -1,0 +1,20 @@
+{
+  "archive_sha256": "ea82d7522b9fe726faf4ba5e868d668c46bcc2a1d3167b94354c404d51a08375",
+  "archive_size": 33658880,
+  "parts": [
+    {
+      "name": "crow-attitude-pd-probe-development-20370127-20261115.tar.gz",
+      "sha256": "ea82d7522b9fe726faf4ba5e868d668c46bcc2a1d3167b94354c404d51a08375"
+    }
+  ],
+  "remote_files": {
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-attitude-pd-probe-development-20370127-1000/command.json": "42e5807c49cc796cd12adf3c872bd449fa8a2cada55a5673ede25b1e0ee81c80",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-attitude-pd-probe-development-20370127-1000/inputs.json": "173676ac4d620baf210c1296a2db35b95bda4d6e4c3e49b2e86e8ec82bebb93b",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-attitude-pd-probe-development-20370127-1000/result.json": "81868a6e94ffc0178bf833deb1c9013d9fab4ee95ddb876a5e8ec4f1d26376d2",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-attitude-pd-probe-development-20370127-1000/stdout": "6eabf141f91363b9adf885c4270a68f393acae7e3a1abee952fe35c0927d7b66",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-attitude-pd-probe-development-20370127-1000/stderr.gz": "64dce3d1b428036bea4469c317bfae6222575722ffb76042af5ae3a28efbf599",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-attitude-pd-probe-development-20370127-1000/replay.json": "db315557269f0606758ffb6ff5efcca65d236a8be8ea3095d669bdf17c561b84",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-attitude-pd-probe-development-20370127-1000/trace.tsv": "f4efbdda4e3e08192e4b00074a6daae8afcb7cff4b582f3ad5c6f13c3df8ef36",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-attitude-pd-probe-development-20370127-1000/first-episode-analysis.json": "f9e96ae534b5ba5e3203c7077ef23ffe8af0ee8f779157eea4907fc769a7fec2"
+  }
+}
