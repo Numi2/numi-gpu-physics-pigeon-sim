@@ -1,0 +1,6 @@
+{
+  "source_sha256": "d6262f1210334fe8b43e2d5255177ca667e9a96f36cf1403e5ffc53c1670624c",
+  "learner_sha256": "e4a59fa52672f6b2ec1727baf8c5c65598042a133dab1d4b35aca58ab6c86c56",
+  "worker_sha256": "4f119bd2e548b20807e8465e052dd60d69ef6301f84ac826c44961cf94ca18b7",
+  "scope": "separate actor/critic gradient clipping; same loss and protected actor mask"
+}
