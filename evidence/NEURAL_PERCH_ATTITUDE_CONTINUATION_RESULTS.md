@@ -1,0 +1,3 @@
+# Continued attitude-and-contact residual training
+
+Four fixed-rate updates finished with every protected actor weight, bias, normalization, exploration and contract fingerprint unchanged. Their physical training rollouts contained 8, 10, 8 and 9 done events respectively, including automatic resets. The actor gradient norms before clipping were approximately 5.80, 5.25, 5.98 and 6.08; these are training diagnostics, not proof of stability. Each checkpoint, optimizer and rollout is archived. Physical development tests of the final checkpoint are underway, and earlier checkpoints remain preserved.
