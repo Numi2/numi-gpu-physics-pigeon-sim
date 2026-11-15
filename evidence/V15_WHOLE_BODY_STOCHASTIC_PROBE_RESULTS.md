@@ -1,0 +1,5 @@
+# Stochastic whole-body output probe
+
+Both v2 training-shader checkpoints reproduced the original training prefix exactly: 150 hard-start frames and 50 easy-start frames across q, v, observations, accepted actions, body states, rewards, outcomes and termination. With the same hard initial observation, a native stochastic fork produced nonzero outputs in slots 8–17 and changed the corresponding physical joint targets. However, the first neck yaw and pitch targets also included the old native head-action contribution: yaw moved -0.01920 rad for action -0.02696, exceeding the planned 0.08-times-action residual. Slot 17 also overlaps the old beak action, although that sample was negative and the beak stayed clamped closed. V2 fails the isolated-authority condition and was not trained. The native episode-10 code zeros body-wrench requests, but no independent whole-system wrench trace was collected here.
+
+Both shader sources, native stochastic/reference commands and traces, checkpoint parity results, worker source and binaries are retained with the companion archive. V3 was preregistered to remove the overlapping head/beak paths before training.
