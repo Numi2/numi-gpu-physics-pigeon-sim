@@ -1,0 +1,35 @@
+{
+  "files": [
+    {
+      "path": "artifacts/crow-v15-recorded-restart-20261114/v15-perturbed-checkpoint-screen-20261115/neck_negative.stderr",
+      "sha256": "06fd9d7f09c8169b48bd4a25e5a50dc89882636d3a6b4d26852e048173222141",
+      "bytes": 14054176
+    },
+    {
+      "path": "artifacts/crow-v15-recorded-restart-20261114/v15-perturbed-checkpoint-screen-20261115/neck_positive.stderr",
+      "sha256": "961e38950f836323fa5758b70cbb44cc77c27173d66275db3a93bf0938b2d18d",
+      "bytes": 13597369
+    },
+    {
+      "path": "artifacts/crow-v15-recorded-restart-20261114/v15-perturbed-checkpoint-screen-20261115/prefix.stderr",
+      "sha256": "45666db61d5da66d5638b6cb125653cb71c550a0dc45624bd662b133e2742c6d",
+      "bytes": 59371071
+    },
+    {
+      "path": "artifacts/crow-v15-recorded-restart-20261114/v15-perturbed-checkpoint-screen-20261115/knees_negative.stderr",
+      "sha256": "f816fd672a1767133c0fc8d162a5e01caa9d2a938e71ba38c567219158f4dd68",
+      "bytes": 13770673
+    },
+    {
+      "path": "artifacts/crow-v15-recorded-restart-20261114/v15-perturbed-checkpoint-screen-20261115/knees_positive.stderr",
+      "sha256": "762b784a54dd36f238f8a48f458b68dc639238f72f6437143a8eab2f66da5e0b",
+      "bytes": 13197966
+    },
+    {
+      "path": "artifacts/crow-v15-recorded-restart-20261114/v15-perturbed-checkpoint-screen-20261115/control.stderr",
+      "sha256": "569d3cbabe57da09d9a76bca7da8f96dcc90c5ee586e3a9faf9e3f675a7a63a7",
+      "bytes": 13583059
+    }
+  ],
+  "bytes_retired": 127574314
+}
