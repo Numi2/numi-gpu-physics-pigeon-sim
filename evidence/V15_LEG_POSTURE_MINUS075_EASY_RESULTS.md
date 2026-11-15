@@ -1,0 +1,5 @@
+# Matched easy-start result for hip bias -0.75
+
+Both the fixed -0.75 candidate and the zero-output control completed 400 consecutive resumed intervals without a termination from the same physically reached v3 seed-20370127 step-50 development checkpoint. The initial actor observations and non-hip initial accepted actions were exactly equal. Both feet showed net upward branch impulse and the opposed front/rear normal-x proxy on every interval in both arms.
+
+The first-250 peak tilt was 0.15765794 rad for the candidate versus 0.12947138 rad for the control. Because this exceeds the preregistered 0.15-rad limit, the candidate **fails** this cross-start check and must not be promoted as a general fixed controller. Both source traces, commands, policy/checkpoint hashes and contact analysis are retained in the evidence archive. This is a forced-perch fixture with a reconstructed branch and scripted carrier, not evidence of a successful autonomous landing, trained whole-body balance, or validated grasp.
