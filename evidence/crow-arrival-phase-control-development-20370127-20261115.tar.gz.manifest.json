@@ -1,0 +1,20 @@
+{
+  "archive_sha256": "ab434e46e5597f780a8fff233b25d8042810c14bf740cae209d4bec7eee97e0f",
+  "archive_size": 35932160,
+  "parts": [
+    {
+      "name": "crow-arrival-phase-control-development-20370127-20261115.tar.gz",
+      "sha256": "ab434e46e5597f780a8fff233b25d8042810c14bf740cae209d4bec7eee97e0f"
+    }
+  ],
+  "remote_files": {
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-arrival-phase-control-development-20370127-1000/command.json": "8cc20a64a5d8d898f12336bc8a3b7b1a091f623a0d092f1478ed79054e1d6ce4",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-arrival-phase-control-development-20370127-1000/inputs.json": "5e4c0627a8601a6861d8332643a70fe6984d5e4ad57db10b06936622df61ba22",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-arrival-phase-control-development-20370127-1000/result.json": "81868a6e94ffc0178bf833deb1c9013d9fab4ee95ddb876a5e8ec4f1d26376d2",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-arrival-phase-control-development-20370127-1000/stdout": "5ee4351d93f5fe862075da9edd8e1c5983b40461fe3f5e76299c2fd54fdee3a8",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-arrival-phase-control-development-20370127-1000/stderr.gz": "535ed648b8040bea6387f50fe0b0749187671685b333ad261f46b7575b0d8240",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-arrival-phase-control-development-20370127-1000/replay.json": "499477903f0b0361db367f5375c357f3db61eaed1ea023e2ef08383f88cf2dfd",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-arrival-phase-control-development-20370127-1000/trace.tsv": "6238e4134f290c86f05f8da22f5f5082438df75c739ce0e018dbbe402d2bec5d",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-arrival-phase-control-development-20370127-1000/first-episode-analysis.json": "b042d09ba7ac419c52c190d7c511f87021a24e00c191b22e08414e6cf0ece30d"
+  }
+}
