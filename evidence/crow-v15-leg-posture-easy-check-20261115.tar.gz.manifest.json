@@ -1,0 +1,29 @@
+{
+  "archive_sha256": "30541bc0f39994a68a40c853f354b2585c447a6e04c1267236cb98050726640e",
+  "archive_size": 23889920,
+  "parts": [
+    {
+      "name": "crow-v15-leg-posture-easy-check-20261115.tar.gz",
+      "sha256": "30541bc0f39994a68a40c853f354b2585c447a6e04c1267236cb98050726640e"
+    }
+  ],
+  "remote_root": "/Users/n/Developer/numi-crow-rl-20261107",
+  "files": {
+    "artifacts/crow-v15-recorded-restart-20261114/v15-leg-posture-easy-check-20261115/20370127-hip_negative-400.json": "8a3bb01d82fc332f621d088e3141f6a45154d92e06629b0e8e595dc1536cdb72",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-leg-posture-easy-check-20261115/summary.json": "7f094ffb777c9c7e3b15165885c2523f3da50ac98ae43aa283a74b6ff478ec1c",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-leg-posture-easy-check-20261115/20370127-hip_negative-400.stdout": "06c429ad9264ebdc63558829cb0771e27081846b9e1b866189d6d71fa233f728",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-leg-posture-easy-check-20261115/parity.json": "3dd4e625bea1535ee5b554fd19a40c2fbd292d0ae16175296a38f5b078a1c196",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-leg-posture-easy-check-20261115/20370127-hip_negative-400.stderr": "214c1c4dc20b485797f7895806f732f005b07895cf3de190d06df2a44556136a",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-leg-posture-easy-check-20261115/20370127-hip_negative-400.tsv": "f53cd1b65a9c5f3cec6f765c4731c2cd69f510a986a7dbc1c192e2f3d3c70fd4",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-leg-posture-easy-check-20261115/20370127-control-400.inputs.json": "f206c1387516af4ad40b39792404fbb4ae831f7a87729052de4da3af630b4de7",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-leg-posture-easy-check-20261115/20370127-control-400.tsv": "20277738892a217deeea67575e919389034576f2aa007b1a92d959048e1bc360",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-leg-posture-easy-check-20261115/contact-summary.json": "aa0e1b7a295507e80785efee98d4bd709d51808cb2a763d4d519c6835d2c6033",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-leg-posture-easy-check-20261115/20370127-control-400.stdout": "4083e7e755700ed1f3360f45ea8034dcbf1d0a9e51fbfa1e5312164733450e5e",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-leg-posture-easy-check-20261115/20370127-hip_negative-400.inputs.json": "f0321ed4c90367f168a016938c09808beb4950e7c63750fc96bb54a7ce8ccbc7",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-leg-posture-easy-check-20261115/20370127-hip_negative-400.command.json": "408ebd644d329d3b6a4e1ba29de16afb8652b5abbc58b13b3775333731b2b725",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-leg-posture-easy-check-20261115/20370127-control-400.command.json": "20036d67e9f45692036e64fab780c19e5d5f5f2cfeac2a91160ee2830e2ff121",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-leg-posture-easy-check-20261115/20370127-control-400.json": "58b2aad4f026416d38c946d6c11d2276ef8f9b0158bda152e46b04882b81f7a4",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-leg-posture-easy-check-20261115/20370127-control-400.stderr": "c87faa9d81d03533389a9fb987c7ddcfe1ba06a89438c60dee9229804804ef09",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-leg-posture-easy-check-20261115/runs.json": "6f79a261208c8766f6fb1918ad213795c39504712800b738604a9a6beb54989e"
+  }
+}

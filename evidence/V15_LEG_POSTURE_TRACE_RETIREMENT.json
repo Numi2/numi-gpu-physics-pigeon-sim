@@ -1,0 +1,53 @@
+{
+  "files": [
+    {
+      "path": "artifacts/crow-v15-recorded-restart-20261114/v15-leg-posture-direction-20261115/hip_positive.json",
+      "sha256": "3e4f2e425f0f1497765e9f96a75199fdc16f3d75f155cd26f1e4acc37b44a144",
+      "size": 10619303
+    },
+    {
+      "path": "artifacts/crow-v15-recorded-restart-20261114/v15-leg-posture-direction-20261115/ankle_positive.tsv",
+      "sha256": "06510213847f15c22714620c1cf673b8d0b507827e8fc53ba2109404096c5a6e",
+      "size": 252446
+    },
+    {
+      "path": "artifacts/crow-v15-recorded-restart-20261114/v15-leg-posture-direction-20261115/ankle_negative.stderr",
+      "sha256": "81adf89195f31a59fb39aca0b99a10a9f24430c800083813c655926ab3dbf393",
+      "size": 24693511
+    },
+    {
+      "path": "artifacts/crow-v15-recorded-restart-20261114/v15-leg-posture-direction-20261115/ankle_positive.stderr",
+      "sha256": "19adbb7ef265306298f928c412f4a92b7ffcfc07b3b434c9f5079cfd84310427",
+      "size": 24738427
+    },
+    {
+      "path": "artifacts/crow-v15-recorded-restart-20261114/v15-leg-posture-direction-20261115/ankle_negative.tsv",
+      "sha256": "b163960486ec612d4f8a1c6e2b41da273436eca58115a3f4a29ddd9fd26b7ec4",
+      "size": 252368
+    },
+    {
+      "path": "artifacts/crow-v15-recorded-restart-20261114/v15-leg-posture-direction-20261115/hip_positive.tsv",
+      "sha256": "5a568034cb6ac41301bb035455c312b582a62d3b43af479df4ee6644f8413262",
+      "size": 251692
+    },
+    {
+      "path": "artifacts/crow-v15-recorded-restart-20261114/v15-leg-posture-direction-20261115/hip_positive.stderr",
+      "sha256": "a267bf43ae10ae397c2e0f52508db392fa4d4a722ea26d6565caf1f93b958f7e",
+      "size": 20289792
+    },
+    {
+      "path": "artifacts/crow-v15-recorded-restart-20261114/v15-leg-posture-direction-20261115/ankle_positive.json",
+      "sha256": "3b548dde818436d6599f4c7899f24c27534cd401a88a01e20566ec43cb98c78a",
+      "size": 10786359
+    },
+    {
+      "path": "artifacts/crow-v15-recorded-restart-20261114/v15-leg-posture-direction-20261115/ankle_negative.json",
+      "sha256": "fe16e2e966b3869c23f549246ae5670c64606665781d26bdc57728584774f5bd",
+      "size": 10806510
+    }
+  ],
+  "bytes_retired": 102690408,
+  "archive": "crow-v15-leg-posture-direction-20261115.tar.gz",
+  "independent_git_commit": "4b7ff5b",
+  "restore": "Concatenate archive parts in manifest order, verify archive SHA-256, extract under remote_root, and verify each file SHA-256."
+}

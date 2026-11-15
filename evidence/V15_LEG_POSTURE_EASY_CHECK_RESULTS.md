@@ -1,0 +1,5 @@
+# Negative hip posture: matched easy-start check
+
+The v3 zero control and the -0.5 bilateral hip action-bias candidate began from the same seed-20370127 step-50 checkpoint with identical initial actor observation. Both avoided termination for all 400 resumed 0.02-second intervals. Bilateral branch contact, positive upward impulse and the opposing-normal proxy held throughout both first episodes. The candidate's maximum tilt over its first 250 intervals was 0.15996 rad, compared with 0.12947 for control, and exceeded the preregistered 0.15-rad limit. The fixed -0.5 candidate therefore fails the easy-start criterion and is not accepted as a general controller, even though it delayed the hard-start fall.
+
+The seed was used in development. This trial used a reconstructed relocated branch, forced perching phase and scripted carrier, and the proxy is not a validated grasp measurement. It neither establishes autonomous landing nor proves generality. Commands, identities, policy, per-substep contacts, action targets, initial observation parity and all failures remain in the accompanying hash-manifested archive.
