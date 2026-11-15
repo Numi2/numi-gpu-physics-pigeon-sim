@@ -1,0 +1,27 @@
+{
+  "seed": 20310201,
+  "note": "gate status inferred from CROW_PHASE_SAMPLE packed status; temporal association and q differences are not proof of benefit",
+  "pre_first_done_intervals": 1000,
+  "first_open_sample": 38,
+  "open_samples": 963,
+  "closed_samples": 37,
+  "first_q_difference_from_zero_toe": 38,
+  "toe_action_ranges": [
+    [
+      -0.0013104580575600266,
+      -0.000932987779378891
+    ],
+    [
+      0.0007862992351874709,
+      0.001622527721337974
+    ],
+    [
+      0.00022066150268074125,
+      0.0008609684300608933
+    ],
+    [
+      -0.0005033152992837131,
+      -0.00014443988038692623
+    ]
+  ]
+}
