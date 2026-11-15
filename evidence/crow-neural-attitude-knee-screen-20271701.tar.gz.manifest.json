@@ -1,0 +1,18 @@
+{
+  "archive_sha256": "08e9b825896b218fc657bfe0e15e191da7965b55bd40f4c217943f215e6f512d",
+  "archive_size": 20848640,
+  "parts": [
+    {
+      "name": "crow-neural-attitude-knee-screen-20271701.tar.gz",
+      "sha256": "08e9b825896b218fc657bfe0e15e191da7965b55bd40f4c217943f215e6f512d"
+    }
+  ],
+  "remote_files": {
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-attitude-knee-screen-20271701/command.json": "f0298571276f77a350ccf68a2f953f538762e9b00ed7f8190867f5b0777c0c72",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-attitude-knee-screen-20271701/inputs.json": "678c29ec557ab7e6ff2145734f65e3f04cf2f487584a38596e742494ef12cbd6",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-attitude-knee-screen-20271701/result.json": "739a335d6415e17c3450e8f35e25d697fa70accdff1c5cc51394a5bba1f05cbc",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-attitude-knee-screen-20271701/stdout": "f9226715dde1860fbf59b4a517fd951eb6986c1ffeea11f8145fa5b1f76829e5",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-attitude-knee-screen-20271701/stderr": "338c63285721e26777c215eeefe3a7d0984663095787dfceabe4988282b6b7af",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-attitude-knee-screen-20271701/screen.rollout": "88df9e34667e1726fbe6f31e90aa67ad923e2d4575d830e7a710a91e26b3632b"
+  }
+}

@@ -1,0 +1,3 @@
+# Invalid knee-feedback screen
+
+The exploratory knee screen is invalid. The candidate knee condition was inserted inside an enclosing branch restricted to hip and ankle actions; therefore it could never run for knee actions 8 or 11. It was initially described as knee feedback, but code inspection caught the error. The comparison is actually hip-feedback versus no added feedback, and says nothing about knee efficacy. The complete unmodified failed test, rollout, source, inputs, logs and hash are preserved. A corrected implementation must place knee feedback outside the hip/ankle action branch and verify that it physically changes knee targets before interpretation.

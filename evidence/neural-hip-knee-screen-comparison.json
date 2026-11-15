@@ -1,0 +1,215 @@
+{
+  "lanes": [
+    {
+      "lane": 0,
+      "first_observation_difference_index": null,
+      "first_action_latent_difference_index": null,
+      "hip": {
+        "step": 202,
+        "reason": 2
+      },
+      "knee": {
+        "step": 202,
+        "reason": 2
+      }
+    },
+    {
+      "lane": 1,
+      "first_observation_difference_index": 51,
+      "first_action_latent_difference_index": 51,
+      "hip": {
+        "step": 188,
+        "reason": 2
+      },
+      "knee": {
+        "step": 724,
+        "reason": 2
+      }
+    },
+    {
+      "lane": 2,
+      "first_observation_difference_index": 51,
+      "first_action_latent_difference_index": 51,
+      "hip": {
+        "step": 283,
+        "reason": 2
+      },
+      "knee": {
+        "step": 315,
+        "reason": 2
+      }
+    },
+    {
+      "lane": 3,
+      "first_observation_difference_index": 51,
+      "first_action_latent_difference_index": 51,
+      "hip": {
+        "step": 181,
+        "reason": 3
+      },
+      "knee": {
+        "step": 175,
+        "reason": 3
+      }
+    },
+    {
+      "lane": 4,
+      "first_observation_difference_index": 51,
+      "first_action_latent_difference_index": 51,
+      "hip": {
+        "step": 179,
+        "reason": 3
+      },
+      "knee": {
+        "step": null,
+        "reason": null
+      }
+    },
+    {
+      "lane": 5,
+      "first_observation_difference_index": 51,
+      "first_action_latent_difference_index": 51,
+      "hip": {
+        "step": 163,
+        "reason": 3
+      },
+      "knee": {
+        "step": 240,
+        "reason": 2
+      }
+    },
+    {
+      "lane": 6,
+      "first_observation_difference_index": 51,
+      "first_action_latent_difference_index": 51,
+      "hip": {
+        "step": 189,
+        "reason": 2
+      },
+      "knee": {
+        "step": 281,
+        "reason": 2
+      }
+    },
+    {
+      "lane": 7,
+      "first_observation_difference_index": 51,
+      "first_action_latent_difference_index": 51,
+      "hip": {
+        "step": 497,
+        "reason": 2
+      },
+      "knee": {
+        "step": 942,
+        "reason": 2
+      }
+    },
+    {
+      "lane": 8,
+      "first_observation_difference_index": 51,
+      "first_action_latent_difference_index": 51,
+      "hip": {
+        "step": 300,
+        "reason": 2
+      },
+      "knee": {
+        "step": 286,
+        "reason": 2
+      }
+    },
+    {
+      "lane": 9,
+      "first_observation_difference_index": 51,
+      "first_action_latent_difference_index": 51,
+      "hip": {
+        "step": 340,
+        "reason": 2
+      },
+      "knee": {
+        "step": 350,
+        "reason": 3
+      }
+    },
+    {
+      "lane": 10,
+      "first_observation_difference_index": 51,
+      "first_action_latent_difference_index": 51,
+      "hip": {
+        "step": 162,
+        "reason": 3
+      },
+      "knee": {
+        "step": 242,
+        "reason": 2
+      }
+    },
+    {
+      "lane": 11,
+      "first_observation_difference_index": 51,
+      "first_action_latent_difference_index": 51,
+      "hip": {
+        "step": 191,
+        "reason": 2
+      },
+      "knee": {
+        "step": 235,
+        "reason": 2
+      }
+    },
+    {
+      "lane": 12,
+      "first_observation_difference_index": 51,
+      "first_action_latent_difference_index": 51,
+      "hip": {
+        "step": 246,
+        "reason": 2
+      },
+      "knee": {
+        "step": 280,
+        "reason": 2
+      }
+    },
+    {
+      "lane": 13,
+      "first_observation_difference_index": 51,
+      "first_action_latent_difference_index": 51,
+      "hip": {
+        "step": null,
+        "reason": null
+      },
+      "knee": {
+        "step": null,
+        "reason": null
+      }
+    },
+    {
+      "lane": 14,
+      "first_observation_difference_index": 51,
+      "first_action_latent_difference_index": 51,
+      "hip": {
+        "step": 173,
+        "reason": 2
+      },
+      "knee": {
+        "step": 231,
+        "reason": 2
+      }
+    },
+    {
+      "lane": 15,
+      "first_observation_difference_index": 51,
+      "first_action_latent_difference_index": 51,
+      "hip": {
+        "step": 168,
+        "reason": 3
+      },
+      "knee": {
+        "step": 252,
+        "reason": 2
+      }
+    }
+  ],
+  "same_first_40_observation_steps_all_lanes": true,
+  "control_lane_observations_all_equal": true,
+  "note": "Matched seed and same lane, checked by retained actor observations; no strict all-substep grip metric in screen."
+}
