@@ -1,0 +1,49 @@
+{
+  "git_commit": "153e0a6d66ba5a3e1f8561c1cf2b8eaf5a65491a",
+  "archives": [
+    {
+      "archive": "crow-v15-resetfixed-checkpoint-training-20261115",
+      "sha256": "17333043b1ef3c07db0c20fb60bc9157528b77ce31559d4bf742ee093f6df638",
+      "restored_files": 121,
+      "appledouble_metadata_entries": 15
+    },
+    {
+      "archive": "crow-v15-resetfixed-lr30x-training-20261115",
+      "sha256": "aeefa2c19cc77dbeec694a944979ed46d38eb454659d3c0da2b5015aa3d83b76",
+      "restored_files": 54,
+      "appledouble_metadata_entries": 4
+    },
+    {
+      "archive": "crow-v15-resetfixed-lr30x-continuation-20261115",
+      "sha256": "eded314158562bb4bd4428d70f3823483a278ad524f261c1b30a43f19721dc77",
+      "restored_files": 59,
+      "appledouble_metadata_entries": 4
+    },
+    {
+      "archive": "crow-v15-resetfixed-continuation-render-20261115",
+      "sha256": "4f63e7024f462c8fe18ad23a9721d4b5da044571808e0c4c6c84feab22bd4294",
+      "restored_files": 20,
+      "appledouble_metadata_entries": 0
+    },
+    {
+      "archive": "crow-v15-toe-gate-telemetry-20261115",
+      "sha256": "db689fef4ee676ea7b36083e3197a4d2808064e53da43d1e525a4dc59d71c0ab",
+      "restored_files": 76,
+      "appledouble_metadata_entries": 10
+    },
+    {
+      "archive": "crow-v15-scripted-release-control-20261115",
+      "sha256": "49c628229a35bdfeed94b93bc64f105ef80603408e3058820990c0860404789c",
+      "restored_files": 71,
+      "appledouble_metadata_entries": 10
+    },
+    {
+      "archive": "crow-v15-balanced-two-seed-training-20261115",
+      "sha256": "f1df00d62eef1f3f3f8e70bf5e66c265e11d887a71ae7cb1afb41f02b886c4ae",
+      "restored_files": 80,
+      "appledouble_metadata_entries": 5
+    }
+  ],
+  "video_sha256": "b1502af90942fce6e5f6f7e447110a78a962634fe9099513368da58b99463c8d",
+  "method": "Independently fetched Git remote; hash each archive part, full reconstructed archive and every unique regular-file member; check exact member sets apart from macOS AppleDouble metadata whose data-file counterparts are present. No simulator claims."
+}
