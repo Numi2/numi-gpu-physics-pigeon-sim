@@ -1,0 +1,173 @@
+{
+  "commit": "770fbeb3a80bb803c83815bf1cbc478688740e52",
+  "archives": [
+    {
+      "archive": "crow-toe-perfoot-development-20370113-20261115.tar.gz",
+      "archive_sha256": "4449738d00adc8aae4ef89025bba78edb67902b36b05c3823d0c610741b72a33",
+      "remote_files": {
+        "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-perfoot-development-20370113-1000/command.json": "a00b269335db063cb4b0de93c6d4d83146cd42bcb2a6a100b6d7e6ee78a61eb8",
+        "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-perfoot-development-20370113-1000/inputs.json": "f88e1f42f6ee9794ea0a8f0b85eddf52a1bc7b070140c58c9124bf6ca1acb8c1",
+        "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-perfoot-development-20370113-1000/result.json": "81868a6e94ffc0178bf833deb1c9013d9fab4ee95ddb876a5e8ec4f1d26376d2",
+        "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-perfoot-development-20370113-1000/stdout": "5143fc0ab05fc671e3ab5c2377657caed8be1c932aa97bc4398243d969157a03",
+        "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-perfoot-development-20370113-1000/stderr.gz": "092065d2b28069f1e89d97b155e76046b83889d10d26a044265ac0683634ae4c",
+        "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-perfoot-development-20370113-1000/replay.json": "fd74278bdec34804ccdec289532c95d56ed43834692f576f06354dd9a1219ad6",
+        "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-perfoot-development-20370113-1000/trace.tsv": "c3d8091334eb2887af8f93e76789e29ed5b3b162730cc682ed2235649be1f4e4",
+        "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-perfoot-development-20370113-1000/first-episode-analysis.json": "0e463ed6d58512b5bee171adf8e4211c2b1fb76d1ed56cec2018cd1481aaab15"
+      }
+    },
+    {
+      "archive": "crow-toe-perfoot-development-20370127-20261115.tar.gz",
+      "archive_sha256": "c3c92c415256a510a091dc2e34adf3e3029c956418cec2057e483adef82f691f",
+      "remote_files": {
+        "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-perfoot-development-20370127-1000/command.json": "78172ff37d037bc34911741914ccea264b0203451b057776459e66653290b2ef",
+        "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-perfoot-development-20370127-1000/inputs.json": "f88e1f42f6ee9794ea0a8f0b85eddf52a1bc7b070140c58c9124bf6ca1acb8c1",
+        "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-perfoot-development-20370127-1000/result.json": "81868a6e94ffc0178bf833deb1c9013d9fab4ee95ddb876a5e8ec4f1d26376d2",
+        "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-perfoot-development-20370127-1000/stdout": "39347e8892978cdeddf4544703969b221e14a955df396348f72fa86ef5b31af2",
+        "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-perfoot-development-20370127-1000/stderr.gz": "a1bb724b2c98ab2b59b6c38924707631e54dd244cb34a6c42122af6f82c3b177",
+        "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-perfoot-development-20370127-1000/replay.json": "2dbc703d1590376c4b9b9c90ec26ba58c6c9871cffd11f7fab271ff9a0b93fcb",
+        "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-perfoot-development-20370127-1000/trace.tsv": "e2ebdd285d45cdee4a1dc93ce063807787f5c2159b6fa55bea9d55a490893a1b",
+        "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-perfoot-development-20370127-1000/first-episode-analysis.json": "8c00838a8cdf2739c5d83b8714f6733c3622a467f7968c43edff3c050a218e18"
+      }
+    },
+    {
+      "archive": "crow-toe-perfoot-update01-development-20370113-20261115.tar.gz",
+      "archive_sha256": "0f32108373068d1eb9524f4322fb518401fee1088884c13ef43786eeff2bfce3",
+      "remote_files": {
+        "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-perfoot-update01-development-20370113-1000/command.json": "da7b9b6cc024cbc9b1a0e7e89bd3a0afbd30e2bddc8a23c5aa52cdecbf8a9af1",
+        "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-perfoot-update01-development-20370113-1000/inputs.json": "cd8a52b2af0d5f29a61384a36aa8b99f4ee6d0416c6ce007331a1f63d6a3e554",
+        "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-perfoot-update01-development-20370113-1000/result.json": "81868a6e94ffc0178bf833deb1c9013d9fab4ee95ddb876a5e8ec4f1d26376d2",
+        "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-perfoot-update01-development-20370113-1000/stdout": "16aa49152247f1d93ffa02476b94503ba8e095f3bb098434c4224fb6fdc85cf5",
+        "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-perfoot-update01-development-20370113-1000/stderr.gz": "db405fe5ee7820659ca89bef7b5e9bb2f2a96e90aded3f6b0cbed8ca56f5cbf5",
+        "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-perfoot-update01-development-20370113-1000/replay.json": "486101332ebd1f6a59ecfe554f8e7bf0ffc80dcf99bbbca602409870a70af15b",
+        "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-perfoot-update01-development-20370113-1000/trace.tsv": "757ac0e53bb3b244078e045c08ce69f6dacde0a2e32172b362f9cf12151c9875",
+        "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-perfoot-update01-development-20370113-1000/first-episode-analysis.json": "dfec364c71f9e92ef7c21b51c3d2d8d724a00ae0bd585a057ff8e8208956d50f"
+      }
+    },
+    {
+      "archive": "crow-toe-perfoot-update01-development-20370127-20261115.tar.gz",
+      "archive_sha256": "bcb4f31ecc33f7bb63ee40e326c239e95e223cd9de4b787aa36291174b400db6",
+      "remote_files": {
+        "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-perfoot-update01-development-20370127-1000/command.json": "0f8179e3990c69d28054f0bd094e70124542712cc2c55a9f0265f8db35d39c3e",
+        "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-perfoot-update01-development-20370127-1000/inputs.json": "cd8a52b2af0d5f29a61384a36aa8b99f4ee6d0416c6ce007331a1f63d6a3e554",
+        "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-perfoot-update01-development-20370127-1000/result.json": "81868a6e94ffc0178bf833deb1c9013d9fab4ee95ddb876a5e8ec4f1d26376d2",
+        "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-perfoot-update01-development-20370127-1000/stdout": "8b92fa3bc0b2719f052f36b4ef6594a2f7b98ef2e8f1de9ac96735491b7c0b80",
+        "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-perfoot-update01-development-20370127-1000/stderr.gz": "9ec13f8f6af08ed25c4b90e45655dfbdb2dddd6f5fcbe8d5a4c70caa4144044f",
+        "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-perfoot-update01-development-20370127-1000/replay.json": "c42d07962e30ece9412f9d9cd6c1dc1c7cfe6d8c240c4ce0710a57456a417a50",
+        "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-perfoot-update01-development-20370127-1000/trace.tsv": "40b95beaa78e6c58f3c5a0089c29a2d586629da36c816c2ec46502d0828bb5a8",
+        "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-perfoot-update01-development-20370127-1000/first-episode-analysis.json": "ef0094b848d88a6268fd9abf62d800dc0d9a8c0915fbf56e700fc32d7905aa11"
+      }
+    },
+    {
+      "archive": "crow-toe-perfoot-cont04-development-20370113-20261115.tar.gz",
+      "archive_sha256": "cc38eb79727eddfd8f42f3583289ec6922360e0fa3cdca898946e41c5ab051ff",
+      "remote_files": {
+        "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-perfoot-cont04-development-20370113-1000/command.json": "b4a61b5822059da296a2b813bc55e9b5997ed73e2e7c59bca9db14165496f56c",
+        "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-perfoot-cont04-development-20370113-1000/inputs.json": "5909073840ea3801c953efd0636e324249b1189fa6dc928b81f091718501cc1f",
+        "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-perfoot-cont04-development-20370113-1000/result.json": "81868a6e94ffc0178bf833deb1c9013d9fab4ee95ddb876a5e8ec4f1d26376d2",
+        "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-perfoot-cont04-development-20370113-1000/stdout": "19a3316fbf313563d99e768b45712d33f0690b37645179f25d31aae72eccf1d6",
+        "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-perfoot-cont04-development-20370113-1000/stderr.gz": "c9dff020c41f1a94f3ab09c40f049e29c960e135c29798fcadcd1a5a154b5ddc",
+        "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-perfoot-cont04-development-20370113-1000/replay.json": "1dc6c457bf46d2422b8328afe4c5eaae06d58a6dd8bb7ccad2f760f04cf2536c",
+        "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-perfoot-cont04-development-20370113-1000/trace.tsv": "4d28813482caa8fa2523ef48e8b2344cac30081a6c20923a9b544335e6748973",
+        "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-perfoot-cont04-development-20370113-1000/first-episode-analysis.json": "6e995c0e5fe0412b612adb06b437377f7ba3a327ec9e047595baed68c0d117b5"
+      }
+    },
+    {
+      "archive": "crow-toe-perfoot-cont04-development-20370127-20261115.tar.gz",
+      "archive_sha256": "9e82ca95731af47f223a106a638eefc33dffcae72e101f9da5ceb49c13137447",
+      "remote_files": {
+        "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-perfoot-cont04-development-20370127-1000/command.json": "b685d75966f8f21052aa1a6f4e330bb0d58c36158bc5b9beef1fca77d40d37b2",
+        "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-perfoot-cont04-development-20370127-1000/inputs.json": "5909073840ea3801c953efd0636e324249b1189fa6dc928b81f091718501cc1f",
+        "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-perfoot-cont04-development-20370127-1000/result.json": "81868a6e94ffc0178bf833deb1c9013d9fab4ee95ddb876a5e8ec4f1d26376d2",
+        "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-perfoot-cont04-development-20370127-1000/stdout": "69981adc0c0ffc15f197e49ea66d3b1a0d3dc500c5669aa1c289e7b112e191ca",
+        "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-perfoot-cont04-development-20370127-1000/stderr.gz": "2f438d785594d7b087992be0d2605db3465ce053a978c85c29f403787424ab7a",
+        "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-perfoot-cont04-development-20370127-1000/replay.json": "ebeb1a892a5524ab11e9c1b4d097de1d3a77a399dceba55b3d5249f457bd2699",
+        "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-perfoot-cont04-development-20370127-1000/trace.tsv": "efdfd72a321e7a374d5465f264bf02d70493b11de9752f47449005e1175576aa",
+        "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-perfoot-cont04-development-20370127-1000/first-episode-analysis.json": "880e25ea3323ad03a99afeeb22c4e1ff67f4cb5f2a4a35c6bc624047e9922367"
+      }
+    },
+    {
+      "archive": "crow-attitude-pd-probe-development-20370113-20261115.tar.gz",
+      "archive_sha256": "0cd386c68b87668008560e035762432b2a7edc4ee5b801dda3a28ca5f82e5ac8",
+      "remote_files": {
+        "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-attitude-pd-probe-development-20370113-1000/command.json": "8e922e0a232c4446847764ffddcbf7e901f21ade67b69de54664aa6952809f1f",
+        "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-attitude-pd-probe-development-20370113-1000/inputs.json": "173676ac4d620baf210c1296a2db35b95bda4d6e4c3e49b2e86e8ec82bebb93b",
+        "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-attitude-pd-probe-development-20370113-1000/result.json": "81868a6e94ffc0178bf833deb1c9013d9fab4ee95ddb876a5e8ec4f1d26376d2",
+        "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-attitude-pd-probe-development-20370113-1000/stdout": "0d244246bf6a9837f7f52e1a620fb19e63f57bebb7a6b6eea7a311809dc0bd1b",
+        "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-attitude-pd-probe-development-20370113-1000/stderr.gz": "4059d26100ced7ed59f3331505b076932abd0534f161c2c1dc626916f60413db",
+        "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-attitude-pd-probe-development-20370113-1000/replay.json": "b2eb83870c0eac4017a537578e313303265587704abc4b095aff671b123082b3",
+        "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-attitude-pd-probe-development-20370113-1000/trace.tsv": "ed119ceca9466609e49e8f7059b2349b36d20711f3358ff93c2a0a025325ff16",
+        "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-attitude-pd-probe-development-20370113-1000/first-episode-analysis.json": "8ebdb6c0ecfafda1d410ab0913d57e80b79c39ca3a5ec058db4e6b7cf25ab991"
+      }
+    },
+    {
+      "archive": "crow-attitude-pd-probe-development-20370127-20261115.tar.gz",
+      "archive_sha256": "ea82d7522b9fe726faf4ba5e868d668c46bcc2a1d3167b94354c404d51a08375",
+      "remote_files": {
+        "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-attitude-pd-probe-development-20370127-1000/command.json": "42e5807c49cc796cd12adf3c872bd449fa8a2cada55a5673ede25b1e0ee81c80",
+        "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-attitude-pd-probe-development-20370127-1000/inputs.json": "173676ac4d620baf210c1296a2db35b95bda4d6e4c3e49b2e86e8ec82bebb93b",
+        "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-attitude-pd-probe-development-20370127-1000/result.json": "81868a6e94ffc0178bf833deb1c9013d9fab4ee95ddb876a5e8ec4f1d26376d2",
+        "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-attitude-pd-probe-development-20370127-1000/stdout": "6eabf141f91363b9adf885c4270a68f393acae7e3a1abee952fe35c0927d7b66",
+        "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-attitude-pd-probe-development-20370127-1000/stderr.gz": "64dce3d1b428036bea4469c317bfae6222575722ffb76042af5ae3a28efbf599",
+        "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-attitude-pd-probe-development-20370127-1000/replay.json": "db315557269f0606758ffb6ff5efcca65d236a8be8ea3095d669bdf17c561b84",
+        "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-attitude-pd-probe-development-20370127-1000/trace.tsv": "f4efbdda4e3e08192e4b00074a6daae8afcb7cff4b582f3ad5c6f13c3df8ef36",
+        "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-attitude-pd-probe-development-20370127-1000/first-episode-analysis.json": "f9e96ae534b5ba5e3203c7077ef23ffe8af0ee8f779157eea4907fc769a7fec2"
+      }
+    },
+    {
+      "archive": "crow-attitude-pd-reverse-development-20370113-20261115.tar.gz",
+      "archive_sha256": "bb82d93e23245fd8f39e789a653023c8070f36894ac681fbd8b693eebb7c93e0",
+      "remote_files": {
+        "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-attitude-pd-reverse-development-20370113-1000/command.json": "c46f8c7707c26ae8d6c581147168b6c6e11499a6cb30606caedccba99d1812f2",
+        "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-attitude-pd-reverse-development-20370113-1000/inputs.json": "d9d5bbcb74843d3715e8c63f3f40a996ec36ea3a44d71ec85bf05dbe7f402dbb",
+        "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-attitude-pd-reverse-development-20370113-1000/result.json": "81868a6e94ffc0178bf833deb1c9013d9fab4ee95ddb876a5e8ec4f1d26376d2",
+        "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-attitude-pd-reverse-development-20370113-1000/stdout": "2bde382c307729e0dc833f472e7e4d58a6a7631a2bae6fb5f42f810a826e7160",
+        "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-attitude-pd-reverse-development-20370113-1000/stderr.gz": "67ebde4fcd9a2071b7294758b93ee6c064a3725639c62be971b111cebf850221",
+        "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-attitude-pd-reverse-development-20370113-1000/replay.json": "55642a906cb0d09219f53e3405e6ed4c5b848ff60f2faf2f2abd4ab2cd98140c",
+        "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-attitude-pd-reverse-development-20370113-1000/trace.tsv": "51f12df77e2965c8ddcd1a61d7578ebc089e3a20deafc2e69ec1eb37d6f509cc",
+        "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-attitude-pd-reverse-development-20370113-1000/first-episode-analysis.json": "b609523449660c85995db3c46fb80374e64aa05dd93a9200a597ade09ba3dfb4"
+      }
+    },
+    {
+      "archive": "crow-attitude-pd-reverse-development-20370127-20261115.tar.gz",
+      "archive_sha256": "bf336081b5aba269f95116f010c6550113439746c44cac639b80b3731f883371",
+      "remote_files": {
+        "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-attitude-pd-reverse-development-20370127-1000/command.json": "eed1befa941ed2386af06e00b3f65a3f7ef72fe8ae96bc7dec4d8cd41d558b60",
+        "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-attitude-pd-reverse-development-20370127-1000/inputs.json": "d9d5bbcb74843d3715e8c63f3f40a996ec36ea3a44d71ec85bf05dbe7f402dbb",
+        "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-attitude-pd-reverse-development-20370127-1000/result.json": "81868a6e94ffc0178bf833deb1c9013d9fab4ee95ddb876a5e8ec4f1d26376d2",
+        "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-attitude-pd-reverse-development-20370127-1000/stdout": "c1d6b9971af8253e943eabe7a339de8c141314ef7885c9c437e873128103f511",
+        "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-attitude-pd-reverse-development-20370127-1000/stderr.gz": "24f4efce67d76aaa0df1a2e171adac04499279a8178a919882af9d7217e105d0",
+        "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-attitude-pd-reverse-development-20370127-1000/replay.json": "43cb9643b36f6c348ffd0ffb7cb012ddf0b383207ab126066b9a9061bece0ed1",
+        "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-attitude-pd-reverse-development-20370127-1000/trace.tsv": "8be31e668035fbf40320e2f4a4d6543de04e98df88a3a3610f61eef29f6deaf5",
+        "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-attitude-pd-reverse-development-20370127-1000/first-episode-analysis.json": "eb8dd66e2666d7c56293081b73f0ab94b4b91ee074042ae5cdb43ee5f3578641"
+      }
+    },
+    {
+      "archive": "crow-attitude-pd-reverse2x-development-20370113-20261115.tar.gz",
+      "archive_sha256": "ff2dcb288512101f24b8e46fb96c5ab8b82e2b646ae081c1a6033bb113c83a8f",
+      "remote_files": {
+        "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-attitude-pd-reverse2x-development-20370113-1000/command.json": "b39eb4863c43c714b177b16f10d2b254884115543897655f9af2475b8718765f",
+        "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-attitude-pd-reverse2x-development-20370113-1000/inputs.json": "7ec0706bed89b8fdaa7fa95ca626d59c20c14eef15ab19a95e92f6c3c1e7fd93",
+        "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-attitude-pd-reverse2x-development-20370113-1000/result.json": "81868a6e94ffc0178bf833deb1c9013d9fab4ee95ddb876a5e8ec4f1d26376d2",
+        "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-attitude-pd-reverse2x-development-20370113-1000/stdout": "3d045ab279e669e2a335d543a2dec52676da77f95c76037789fb1f9a803ced26",
+        "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-attitude-pd-reverse2x-development-20370113-1000/stderr.gz": "55a97d09071b2b2043b15be07cc8bc757648fba8ba67c4d9142a7d9d0b83cb42",
+        "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-attitude-pd-reverse2x-development-20370113-1000/replay.json": "49e4d819ea89243b33d36a5b9fb9029e4feeafbecf572fd5227e5e3d369db21e",
+        "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-attitude-pd-reverse2x-development-20370113-1000/trace.tsv": "725c946346b2c593968992003c3e031ef3c40ab3432459bcdf80392f466f0401",
+        "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-attitude-pd-reverse2x-development-20370113-1000/first-episode-analysis.json": "c735fa3631cdb8bf8238f58a2195a99029f05ab5f05e5e9e91e4db21936c8786"
+      }
+    },
+    {
+      "archive": "crow-attitude-pd-reverse2x-development-20370127-20261115.tar.gz",
+      "archive_sha256": "8aced3beef9eceb3a1cc79ddf116dc73bc90d5cd560ea0647866c8d590d1d920",
+      "remote_files": {
+        "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-attitude-pd-reverse2x-development-20370127-1000/command.json": "4e6bbd55802d3e856db9b0f7ae30927492bcedec62cc3a0c493da502c59bd652",
+        "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-attitude-pd-reverse2x-development-20370127-1000/inputs.json": "7ec0706bed89b8fdaa7fa95ca626d59c20c14eef15ab19a95e92f6c3c1e7fd93",
+        "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-attitude-pd-reverse2x-development-20370127-1000/result.json": "81868a6e94ffc0178bf833deb1c9013d9fab4ee95ddb876a5e8ec4f1d26376d2",
+        "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-attitude-pd-reverse2x-development-20370127-1000/stdout": "c6a1e4ae8b72911d3e60e168a897119c6a9410085da37ecf48631f7048528817",
+        "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-attitude-pd-reverse2x-development-20370127-1000/stderr.gz": "0974dd98a901351e31178558f6f909d26ce86c8462230b9a3cc5612d29746223",
+        "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-attitude-pd-reverse2x-development-20370127-1000/replay.json": "8f5c7da16c35234a8967e1f0e61df02fa8af8860e753f06ec5adc8c3d79b2f0e",
+        "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-attitude-pd-reverse2x-development-20370127-1000/trace.tsv": "6d914ec399e4dda5c0827e7d773438e81c0cbe5ec172b3ef3a62256a5d50728c",
+        "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-attitude-pd-reverse2x-development-20370127-1000/first-episode-analysis.json": "0221ff459963626076bc56532b1e9913a61a5e95c5ac2a70b2b20eb5b29b593d"
+      }
+    }
+  ]
+}

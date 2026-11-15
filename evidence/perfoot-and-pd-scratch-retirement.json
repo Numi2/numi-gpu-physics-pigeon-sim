@@ -1,0 +1,67 @@
+{
+  "verified_git_commit": "770fbeb3a80bb803c83815bf1cbc478688740e52",
+  "free_before": 6493720576,
+  "free_after": 7257350144,
+  "removed": [
+    {
+      "directory": "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-perfoot-development-20370113-1000",
+      "file_count": 8,
+      "logical_bytes": 64329709
+    },
+    {
+      "directory": "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-perfoot-development-20370127-1000",
+      "file_count": 8,
+      "logical_bytes": 63712760
+    },
+    {
+      "directory": "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-perfoot-update01-development-20370113-1000",
+      "file_count": 8,
+      "logical_bytes": 64436778
+    },
+    {
+      "directory": "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-perfoot-update01-development-20370127-1000",
+      "file_count": 8,
+      "logical_bytes": 63568699
+    },
+    {
+      "directory": "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-perfoot-cont04-development-20370113-1000",
+      "file_count": 8,
+      "logical_bytes": 64427044
+    },
+    {
+      "directory": "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-perfoot-cont04-development-20370127-1000",
+      "file_count": 8,
+      "logical_bytes": 63793500
+    },
+    {
+      "directory": "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-attitude-pd-probe-development-20370113-1000",
+      "file_count": 8,
+      "logical_bytes": 63304423
+    },
+    {
+      "directory": "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-attitude-pd-probe-development-20370127-1000",
+      "file_count": 8,
+      "logical_bytes": 61829842
+    },
+    {
+      "directory": "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-attitude-pd-reverse-development-20370113-1000",
+      "file_count": 8,
+      "logical_bytes": 64506671
+    },
+    {
+      "directory": "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-attitude-pd-reverse-development-20370127-1000",
+      "file_count": 8,
+      "logical_bytes": 60828862
+    },
+    {
+      "directory": "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-attitude-pd-reverse2x-development-20370113-1000",
+      "file_count": 8,
+      "logical_bytes": 64412967
+    },
+    {
+      "directory": "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-attitude-pd-reverse2x-development-20370127-1000",
+      "file_count": 8,
+      "logical_bytes": 64020750
+    }
+  ]
+}
