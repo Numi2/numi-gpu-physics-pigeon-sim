@@ -1,0 +1,9 @@
+# v15 whole-body joint authority screen
+
+The v1 modified shader was correctly rejected against an older checkpoint because shader identity is part of the checkpoint contract; the rejected attempt is retained. Native body diagnostics also showed v15 includes neck yaw and pitch DOFs 19 and 20, correcting the v1 plan's mistaken assumption.
+
+V2 generated a separate checkpoint for each shader with new controls gated until tick 2450. All three hard-start 49-frame prefixes exactly matched the original in q, v, actor observation, accepted action, body state, reward, termination and outcomes. The null shader's 50 resumed frames exactly matched the old physical trajectory in those same fields. At the first active step of a known +0.5 pulse, the observed drive targets changed by +0.05 rad at both flap joints and tail, +0.04 rad at both sweep, both pronation, both knee and both neck joints, and +0.04/-0.04 rad at coupled hip-roll joints. Full substep actuator and contact traces are retained. This shows physical target access, not successful control or biological accuracy.
+
+The existing deterministic policy produced zeros on all ten new action channels. Over 400 resumed intervals its hard-start first termination was unchanged at absolute step 257, and the easy start did not terminate; its first-250-step maximum tilt exactly matched the original, 0.12947 rad. The easy 50-frame prefix also exactly matched. These are consumed development starts on a relocated reconstructed branch, with a forced landing phase and scripted carrier; they do not establish independently learned toe grip, general balance, or autonomous landing. The action mapping couples left/right sweep, pronation and roll; it is not independent control of every joint.
+
+Plans, compiled shaders, owner commands, checkpoints, failed runtime-identity rejection, complete traces, parity checks and input hashes are in the companion archive.
