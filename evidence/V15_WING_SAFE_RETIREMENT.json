@@ -1,0 +1,35 @@
+{
+  "files": [
+    {
+      "path": "artifacts/crow-v15-recorded-restart-20261114/v15-coordinated-early-eval-20261115/20370113-hip_knee_neg-750.stderr",
+      "sha256": "efa8f821fe43123c5ffef2d54fd8b56b188925c239eca2b5e021c91ace1be874",
+      "bytes": 61287700
+    },
+    {
+      "path": "artifacts/crow-v15-recorded-restart-20261114/v15-coordinated-early-eval-20261115/20370113-hip_knee_pos-750.stderr",
+      "sha256": "dc5ea34030ef933b822310c5b414a7d964ee1f823d9fb650e51fb75e45ee4e32",
+      "bytes": 56960457
+    },
+    {
+      "path": "artifacts/crow-v15-recorded-restart-20261114/v15-coordinated-early-eval-20261115/20370113-knee_ankle_pos-750.stderr",
+      "sha256": "f51172694a7dda490bfb9fd98a87fe43dcce8116c0dd9de9ebaad3c2196dc260",
+      "bytes": 56725279
+    },
+    {
+      "path": "artifacts/crow-v15-recorded-restart-20261114/v15-coordinated-early-eval-20261115/20370113-knee_ankle_neg-750.stderr",
+      "sha256": "1e4d59b5b675ed0491482756da3e2f8d32a4502ed574eb9eb9b634a7f5f8e5a2",
+      "bytes": 60812035
+    },
+    {
+      "path": "artifacts/crow-v15-recorded-restart-20261114/v15-supported-wing-posture-eval-20261115/20370113-lower08-500.stderr",
+      "sha256": "2876e0c7ebd62e80dad629c559f28f9726caf9633c28fcc131e3892f8faebee1",
+      "bytes": 42046040
+    },
+    {
+      "path": "artifacts/crow-v15-recorded-restart-20261114/v15-supported-wing-posture-eval-20261115/20370113-lower04-500.stderr",
+      "sha256": "66fd6044e138a4a10e05b7787dd3da98c0b84b63f05acc2bfb89315568117a92",
+      "bytes": 45853096
+    }
+  ],
+  "bytes_retired": 323684607
+}
