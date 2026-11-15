@@ -23,7 +23,7 @@ for idx in range(4):
  with (run/'stdout').open('wb') as so,(run/'stderr').open('wb') as se:p=subprocess.run(cmd,cwd=r,env=env,stdout=so,stderr=se)
  files=[out,Path(str(out)+'.deployment.policypack'),roll,state];result={'exit_code':p.returncode,'elapsed_seconds':time.time()-started,'files':{str(x):{'size':x.stat().st_size,'sha256':sha(x)} for x in files if x.exists()}}
  if p.returncode==0:
-  policy=read_policy_pack(out,library_path=lib);checks={'normalization_mean':np.array_equal(reference.effective_observation_mean,policy.effective_observation_mean),'normalization_scale':np.array_equal(reference.effective_observation_inverse_standard_deviation,policy.effective_observation_inverse_standard_deviation),'logstd':np.array_equal(reference.log_standard_deviation,policy.log_standard_deviation)}
+  policy=read_policy_pack(out,library_path=lib);checks={'normalization_mean':np.array_equal(reference.effective_observation_mean,policy.effective_observation_mean),'normalization_scale':np.array_equal(reference.effective_observation_inverse_standard_deviation,policy.effective_observation_inverse_standard_deviation),'logstd':np.array_equal(reference.action_log_standard_deviation,policy.action_log_standard_deviation)}
   for i,(x,y) in enumerate(zip(reference.layers,policy.layers)):
    checks[f'layer_{i}_bias']=np.array_equal(x.bias,y.bias)
    checks[f'layer_{i}_protected_weights']=np.array_equal(np.delete(x.weights,np.s_[216:228],axis=1),np.delete(y.weights,np.s_[216:228],axis=1)) if i==0 else np.array_equal(x.weights,y.weights)
