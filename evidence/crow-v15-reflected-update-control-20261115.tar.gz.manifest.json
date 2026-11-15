@@ -1,0 +1,43 @@
+{
+  "archive_sha256": "43f44f19ae2744b5e661ecdd12baae7806e6259150ff4e536c6a51c39c3b4959",
+  "archive_size": 10915840,
+  "parts": [
+    {
+      "name": "crow-v15-reflected-update-control-20261115.tar.gz",
+      "sha256": "43f44f19ae2744b5e661ecdd12baae7806e6259150ff4e536c6a51c39c3b4959"
+    }
+  ],
+  "remote_root": "/Users/n/Developer/numi-crow-rl-20261107",
+  "files": {
+    "artifacts/crow-v15-recorded-restart-20261114/crow_v15_reflect_policy_update.py": "c73710b5f4edc4e7e0b5e8e5251c42ab199dad62091d5f2ebb622494810cf753",
+    "artifacts/crow-v15-recorded-restart-20261114/crow_v15_reflect_policy_update_v2.py": "3f58d93acf4565be76d5b3d8611a19f8aefcd0e4025226f5c769f0357081cfc3",
+    "artifacts/crow-v15-recorded-restart-20261114/crow_v15_reflected_policy_evaluate.py": "c4e02cc8e4b063ecb520013b5c04b687010750c6756d99977ff37386103592ee",
+    "artifacts/crow-v15-recorded-restart-20261114/crow_v15_reflected_policy_verify.py": "b2e1426ec0ba4d342077d7bf02ecb6bde75fad2a45fe596987c3fb6f6aef343e",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-reflected-policy-first-attempt.txt": "ae0206ac8dedb8005faae4799aab19e095a2d6d029a2a94a2b29c12bf9930096",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-reflected-lr1000x-policy.json": "6b309c0b56bdf696f13ebc3480da65a5e88f789e925b1d5cfbca308cee4d2802",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-reflected-lr1000x-policy-verification.json": "2ef225bac40034ecf6d16817d0cce7813c2f911d1e56cae20b58166a14ee3e3e",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-reflected-lr1000x-evaluation-20370113-250/baseline.command.json": "e016dbe3bf550e4dfda45df8d0eb55a0252a41d9b7fbfe7650f8f96488421cb1",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-reflected-lr1000x-evaluation-20370113-250/candidate.json": "6d26c2f94e188063430475ee4fe94c8f75264a8e26ec843def99b3c6f0f114ba",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-reflected-lr1000x-evaluation-20370113-250/baseline.tsv": "f1773dd0295763f2a20f2730bb80bb54b7e322b2107c9f693e78a180acbae8ab",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-reflected-lr1000x-evaluation-20370113-250/comparison.json": "2ffcaab5bda7104c79f0ff9276e5d867d664003753d89d6d7dfff708f9312a50",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-reflected-lr1000x-evaluation-20370113-250/candidate.stderr": "338c63285721e26777c215eeefe3a7d0984663095787dfceabe4988282b6b7af",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-reflected-lr1000x-evaluation-20370113-250/baseline.json": "53002fea8d5dc4069dff2abb5930b2a84e56a872ec15c04aefd53eacab90fb8d",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-reflected-lr1000x-evaluation-20370113-250/candidate.tsv": "5a9cf4fcd818bcd09992675b03290aa92312013826296a7d63134951461ba23f",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-reflected-lr1000x-evaluation-20370113-250/baseline.stdout": "fd60c89d4827b9b4a175714172b0a020d0c7578717281c4d14d67c8bd3456bca",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-reflected-lr1000x-evaluation-20370113-250/baseline.stderr": "338c63285721e26777c215eeefe3a7d0984663095787dfceabe4988282b6b7af",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-reflected-lr1000x-evaluation-20370113-250/candidate.command.json": "bf3bb8d8a523e029082919655b0cace591461cd4c7469e711e73a7e71983290f",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-reflected-lr1000x-evaluation-20370113-250/candidate.stdout": "4358a7f9b5bebd6fb60c11d23dcfcb49dba51e7135274ad3dabd83cd3aaf4935",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-reflected-lr1000x-evaluation-20370127-250/baseline.command.json": "c66d773e8794d21523f0404db7ddfe586f44ea62796cd285f3252fc7237d77ef",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-reflected-lr1000x-evaluation-20370127-250/candidate.json": "4895571f2a7fb329ff95bece0eb193af7034580c9adadc840290f288588ec8fa",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-reflected-lr1000x-evaluation-20370127-250/baseline.tsv": "da2fffa8e3df6b3b150b354b462c34788f3c78c1d566c826f76db77b40cb2c4a",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-reflected-lr1000x-evaluation-20370127-250/comparison.json": "7e278210fc8b3aacd98f4474ab167430994be4f4927d5a93be8606db5bdc93fe",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-reflected-lr1000x-evaluation-20370127-250/candidate.stderr": "338c63285721e26777c215eeefe3a7d0984663095787dfceabe4988282b6b7af",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-reflected-lr1000x-evaluation-20370127-250/baseline.json": "6741ed07f95f65acdbd22b6ec7365a95b1747e0e45fdcd25016af1d9e276978c",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-reflected-lr1000x-evaluation-20370127-250/candidate.tsv": "86ccd488a5030010fdd8250c638e59ee5ee62c5b25c969c2029333aeaef0469d",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-reflected-lr1000x-evaluation-20370127-250/baseline.stdout": "06a6058b13da8834f32a464de06e9ed787f760adf7ffce057304ebca0421f49b",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-reflected-lr1000x-evaluation-20370127-250/baseline.stderr": "338c63285721e26777c215eeefe3a7d0984663095787dfceabe4988282b6b7af",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-reflected-lr1000x-evaluation-20370127-250/candidate.command.json": "5f7e26d351c27d26c92ba81f20cbc484cb7db984c3a5bb415a1028aa097ba15b",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-reflected-lr1000x-evaluation-20370127-250/candidate.stdout": "7d0a5c0db980205dbfa142f84a797c3c3564654fd666599d15c1f1debc2fc6ce",
+    "build/crow-v15-recorded-restart-20261114/v15-reflected-lr1000x-policy.policypack": "b177a6460db4730ed7d3456c8fe6621d2cff877ef918bd02fe9fa87bcec2ab18"
+  }
+}
