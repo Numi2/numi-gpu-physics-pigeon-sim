@@ -1,0 +1,14 @@
+{
+  "archive_sha256": "235520ba5d49f709a7f3ca1003db374deda57a1de644c2b004b22e67e60babec",
+  "remote_files": {
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-toe-sensor-continuation-update-04.policypack": "bcc927dd959e038188158ed46f872ee10afeffdc33e82a551888f41be1e89909",
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-toe-sensor-continuation-update-04.policypack.deployment.policypack": "556d792c12bacfbb3eec211e894a08229058ff31fd6a8097ddf6ac2104a39332",
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-toe-sensor-continuation-update-04.rollout": "083235ed7173466e921a41bd5d1e7f18a575f82585215460e0dfb027f0fb481e",
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-toe-sensor-continuation-update-04.safetensors": "e9b4e2c1accb9a2bca6d4fcdb4cdd8e5de13bce2c47575f14aabd966266dc8a2",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-sensor-continuation/update-04/command.json": "3fe1387c18b34044bbae8742469c1dbc50e97ab0f5d97936d97ea2e7dd7a1bb2",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-sensor-continuation/update-04/inputs.json": "587f141b9cd72ecea818813c4ff7ae5804fb597240e5b784f6e5adb16a68df95",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-sensor-continuation/update-04/stdout": "472aa6b99057f40b03cb6074ea68bfa43ea3d867c1d7e151badb902d237afc5d",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-sensor-continuation/update-04/stderr": "6a07a803b18460d9b26daf37123e812105b8f0b400e7010e94eca2b906b44d29",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-toe-sensor-continuation/update-04/result.json": "d16bdafd1938085ba09d3df756818d5e8b9fdbb38a1cf97cea9ddfdbd6b48e7f"
+  }
+}
