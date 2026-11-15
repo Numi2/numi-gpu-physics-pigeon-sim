@@ -1,0 +1,31 @@
+{
+  "archive_sha256": "6a08b86e62163076fab96441c14c1ae66b5d38fdb32186ff0669d8f55f26612a",
+  "archive_size": 40960,
+  "parts": [
+    {
+      "name": "crow-v15-perch-mass-observer-20261115.tar.gz",
+      "sha256": "6a08b86e62163076fab96441c14c1ae66b5d38fdb32186ff0669d8f55f26612a"
+    }
+  ],
+  "remote_root": "/Users/n/Developer/numi-crow-rl-20261107",
+  "files": {
+    "artifacts/crow-v15-recorded-restart-20261114/v15-perch-mass-observer-20261115/model-metadata-parity.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-perch-mass-observer-20261115/model-mass-second-failure.cpp": "2f2000d3a18b5c04178b825256180e1b54a3bfb4cd97b3542458d7a3638bd05c",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-perch-mass-observer-20261115/sha256.txt": "d3fb31603a9e25687b4b988bf275ffd79fa72f26e664ffa925bcb9d4256b2cef",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-perch-mass-observer-20261115/mass.txt": "ee49d6a57e70acea5358d17456d65c39d5df9b2b60b95cd0cdf543929ba699e5",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-perch-mass-observer-20261115/model-mass-initial-failure.cpp": "fb3f0b89fa6bd98679d3883fa8a579a006d6a013e18ce1a220d6f5f467d021a9",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-perch-mass-observer-20261115/build.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-perch-mass-observer-20261115/model-initial-failure.stderr": "16631255d3e4a2ac1d004d8f997ac03874ef334af6321c3606405f509a2c1abc",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-perch-mass-observer-20261115/comparison.json": "0685b7e0fe617ebc5d1b0aed3138e9049389b4083a148d10f53ccbb2fe4be4e9",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-perch-mass-observer-20261115/model-second-failure.stderr": "01846d54e0204423dc513aa45c6aaa6349564f4f9b2b7275b60ff5fa5990b099",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-perch-mass-observer-20261115/model-mass": "44637d2d5efb667a477cd6ddcc71ca96656bc809bc96957d9a1aab08353378d2",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-perch-mass-observer-20261115/com_compare.py": "59d0be956fd66abdbfdafd506d651c178b361c42afeaf6099edbd5cef17cbb48",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-perch-mass-observer-20261115/model.stderr": "c30279825a993d65048d5a897ae3448e14c93d27af7f630af91a57177f11718a",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-perch-mass-observer-20261115/build.command.txt": "7578512cb71f2916288b8418d3ec36d707afe972bee3afea29d6b6cf01ec1b21",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-perch-mass-observer-20261115/model-metadata-parity.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-perch-mass-observer-20261115/wing_model.hpp": "ed2e2e09e260404eaf15a707882c098bdd17b294c3ccd055dcbe331057bd22c4",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-perch-mass-observer-20261115/model-mass.cpp": "9b66e246a875d1f1b140b283837c475f1c5640718ee65a9d1bddf817537f888e",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-perch-mass-observer-20261115/build-initial-failure.stderr": "f9c27bbc821b3b17555dd380793ff9c986cb332a8a0553f584e27f6cec028670",
+    "artifacts/crow-v15-recorded-restart-20261114/v15-perch-mass-observer-20261115/comparison.stdout": "0685b7e0fe617ebc5d1b0aed3138e9049389b4083a148d10f53ccbb2fe4be4e9"
+  }
+}
