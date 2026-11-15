@@ -1,0 +1,61 @@
+{
+  "scope": "full optimizer transaction parameter displacement, not individual optimizer steps; separate actor/critic layer weights and biases; log standard deviation reported separately",
+  "updates": [
+    {
+      "update": 1,
+      "input_sha256": "3755edf97cf4d7be27cacb08c8f70f3693a95e2a1ea96f98e7a5d71952932cd1",
+      "output_sha256": "356accf849d564f8f203e23f25da3fd301baa2dd783b162ee37fae5e0dad7464",
+      "actor_layers": {
+        "parameter_delta_l2": 0.05733684885136902,
+        "prior_parameter_l2": 17.343644337121905
+      },
+      "critic_layers": {
+        "parameter_delta_l2": 0.08816904761900152,
+        "prior_parameter_l2": 17.524923978544038
+      },
+      "log_standard_deviation_delta_l2": 0.00028629048028960824
+    },
+    {
+      "update": 2,
+      "input_sha256": "356accf849d564f8f203e23f25da3fd301baa2dd783b162ee37fae5e0dad7464",
+      "output_sha256": "a0d0e007d8db4a644adfb0e8a36cb1ee5bdcd3f9637aa26067b9169df73de93c",
+      "actor_layers": {
+        "parameter_delta_l2": 0.04036738576173757,
+        "prior_parameter_l2": 17.342806709582995
+      },
+      "critic_layers": {
+        "parameter_delta_l2": 0.07845493938070838,
+        "prior_parameter_l2": 17.52846746797243
+      },
+      "log_standard_deviation_delta_l2": 0.00021477504924405366
+    },
+    {
+      "update": 3,
+      "input_sha256": "a0d0e007d8db4a644adfb0e8a36cb1ee5bdcd3f9637aa26067b9169df73de93c",
+      "output_sha256": "8f10f5426955ea867ef4c9cd5c2b4464b5d30232f3368119190cf06612f06f82",
+      "actor_layers": {
+        "parameter_delta_l2": 0.03449333766069814,
+        "prior_parameter_l2": 17.34293581012465
+      },
+      "critic_layers": {
+        "parameter_delta_l2": 0.08632702948365772,
+        "prior_parameter_l2": 17.534123022604813
+      },
+      "log_standard_deviation_delta_l2": 0.0002209525409853086
+    },
+    {
+      "update": 4,
+      "input_sha256": "8f10f5426955ea867ef4c9cd5c2b4464b5d30232f3368119190cf06612f06f82",
+      "output_sha256": "bb649d269b94a3099c061d9ac07f858727020859dfe68c0b7b47147011e71e23",
+      "actor_layers": {
+        "parameter_delta_l2": 0.03307418878642472,
+        "prior_parameter_l2": 17.342799277065872
+      },
+      "critic_layers": {
+        "parameter_delta_l2": 0.07732009345193015,
+        "prior_parameter_l2": 17.540765091196572
+      },
+      "log_standard_deviation_delta_l2": 0.00018626367091201246
+    }
+  ]
+}
