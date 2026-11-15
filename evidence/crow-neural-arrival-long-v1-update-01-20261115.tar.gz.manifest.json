@@ -1,0 +1,14 @@
+{
+  "archive_sha256": "c8d5178063377f89a6ffb2bc3e0f73fd282c2c376763742cd0c09c8655b285e0",
+  "remote_files": {
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-arrival-long-v1-update-01.policypack": "fcfaaead50fc4258ef88d482784d8df672d4f92d0a06b79331ccbf23a71311c9",
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-arrival-long-v1-update-01.policypack.deployment.policypack": "a2c9545d2fa8fdfe728d49a79b1b7d3e540ce1a64b37133dc70ca3e3844b6309",
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-arrival-long-v1-update-01.rollout": "2f6a91f9f35274135d2e1e831c310174f60f75e3cbe21c2d3705f929de751f17",
+    "/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/neural-arrival-long-v1-update-01.safetensors": "de0eec26d14f4597fed532c614b2fea2bcf6487ab4ad9d8c95ffa63a89f95b15",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-arrival-long-v1-update-01/command.json": "9fb6deac385a796149f8a17bed2d3d43a7d31cb03d5c7c2ac17b9cbcfea0390b",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-arrival-long-v1-update-01/inputs.json": "1ca56a96b93ff9b103072da2e8a191251766c8e24af2de383fcaedc5704cd786",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-arrival-long-v1-update-01/stdout": "4ea211b34eedb488ed3897f6545813ed11b994cc7134d4f7d44388d7de1b18a8",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-arrival-long-v1-update-01/stderr": "640fe54aae8c1b4d9cc4dc3e9c936f00fb2120bbefa2362828c2ce42987a5b9b",
+    "/Users/n/Developer/numi-crow-rl-20261107/artifacts/crow-v15-recorded-restart-20261114/neural-arrival-long-v1-update-01/result.json": "640c90ad9e7afa80ae49d06cee9c7a7b76f5dd709d60e18576a077573eaa4404"
+  }
+}
