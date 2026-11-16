@@ -1,0 +1,2 @@
+from pathlib import Path
+p=Path('src/metal/MetalWorld.mm');s=p.read_text();name='@"MetalWorld canonical generalized ConstraintIR solve"';pos=s.index(name);start=s.rfind('context.boundContactDispatch.authoredConstraintCount != 0u &&',0,pos);segment=s[start:pos];assert segment.count('            !useQuality &&\n')==1;segment=segment.replace('            !useQuality &&\n','',1);s=s[:start]+segment+s[pos:];p.write_text(s)
