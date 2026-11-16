@@ -1,0 +1,5 @@
+# Calibrate the force-balance measurement
+
+The exact start-state candidate's damping-100 free-node force-balance error was 0.0103203 N, exceeding the preregistered 0.01 N bound. That observation remains a failure. The measured force came from a central energy difference at 1e-9 m; determine whether that numerical instrument is resolved before interpreting the cause.
+
+Use the exact already-recorded final positions, velocities, and twists from the damping-0 and damping-100 runs. Re-evaluate the native CPU rod energy without rerunning dynamics, at central-difference steps 1e-8, 3e-9, 1e-9, 3e-10, 1e-10 and 3e-11 m on every free node. The force instrument is considered resolved at a node only if the 3e-9, 1e-9 and 3e-10 estimates span no more than 0.001 N. Recalculate the preregistered force-balance residual at each scale and report all values; no change to the original 0.01 N criterion. If resolved and above the bound, the dynamics remain contradicted; if unresolved, the physical verdict is inconclusive pending a better force instrument. This calibration does not alter the live solver, physical timestep, or observed state.
