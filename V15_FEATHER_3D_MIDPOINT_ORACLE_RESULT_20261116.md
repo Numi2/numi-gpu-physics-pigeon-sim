@@ -1,0 +1,3 @@
+# Unrestricted centerline midpoint oracle: narrow energy screen passed
+
+The FP64 native-energy research oracle advanced all 27 centerline coordinates freely while retaining fixed zero material twists. All eight nonlinear solves converged in two or three iterations with residual below 1.5e-8 N; the minimum total-energy ratio was 0.9999103, center velocity reversed repeatedly, and net momentum components remained below 6e-15 kg m/s. This meets the preregistered energy, oscillation and momentum criteria. It does not establish phase or frequency accuracy, general twist dynamics, GPU performance, damping, 3D feather vanes, moving attachments, contacts or biological validity. Complete native input and output records are archived.
