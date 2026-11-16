@@ -1,0 +1,5 @@
+# Constrained implicit KKT reference
+
+The preregistered linearized one-step control passed for both node orders and both zero and nonzero initial free-node velocities. A double-precision dense Schur complement agreed with a direct full KKT solve to 2e-19 m or better. Maximum hard-support error was 3.4e-20 m, maximum dynamic force residual 4.9e-14 N, and mapped node-order differences below 6.1e-20 m. The matrix condition numbers were approximately 6778 for the implicit operator and 35 for its three-row Schur complement. Full states, forces, code and hashed source Hessian are in `evidence/crow-feather-rachis-20261116/constrained-kkt/`.
+
+The equations are `(M/h^2 + K)x = (M/h^2)(x0 + h v0) + J^T lambda` and `Jx = target`, with `lambda` being force on the rod from the prescribed supports; force on each support is its negative. The reference uses a single planar linearized 9-node segment, a dense FP64 solve, and no contacts, material damping, twist, articulated bodies or aerodynamic loads. It is an independently checked numerical target, not a Metal implementation, a full feather, or a real-flight qualification.
