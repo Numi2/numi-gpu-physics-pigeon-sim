@@ -1,0 +1,222 @@
+[
+  {
+    "damping": 0,
+    "free_sha256": "db42659a226d42ea80ea4e07443d6c2b444b0c828ec9d99c8c5c9766458be142",
+    "attached_sha256": "87036bbc93cf3a82b18b1ceb7fba375163a7e2afd41d3af3bc59a56800693176",
+    "max_free_relation_error_m_s": 1.2951204553246498e-09,
+    "max_attached_prediction_error_m_s": 2.346932888031006e-06,
+    "max_position_corrected_error_m_s": 4.5272372517501935e-09,
+    "measurements": [
+      {
+        "node": 0,
+        "axis": 0,
+        "free_position": -2.3501460777453076e-09,
+        "free_velocity": -2.350145905438694e-06,
+        "attached_position": 5.5782045649266365e-12,
+        "attached_velocity": 5.578158379648812e-09,
+        "predicted_free_velocity": -2.3501460777453076e-06,
+        "predicted_attached_velocity": -0.0,
+        "observed_position_corrected_prediction": 5.578376871540058e-09
+      },
+      {
+        "node": 0,
+        "axis": 1,
+        "free_position": 1.5420455383718945e-05,
+        "free_velocity": 0.015420454554259777,
+        "attached_position": -1.6916601452976465e-09,
+        "attached_velocity": -1.691281795501709e-06,
+        "predicted_free_velocity": 0.015420455383718945,
+        "predicted_attached_velocity": 0.0,
+        "observed_position_corrected_prediction": -1.6924896044656634e-06
+      },
+      {
+        "node": 0,
+        "axis": 2,
+        "free_position": 0,
+        "free_velocity": 0,
+        "attached_position": 0,
+        "attached_velocity": 0,
+        "predicted_free_velocity": 0.0,
+        "predicted_attached_velocity": 0.0,
+        "observed_position_corrected_prediction": 0.0
+      },
+      {
+        "node": 4,
+        "axis": 0,
+        "free_position": 0.012499997392296791,
+        "free_velocity": -2.79396749647276e-06,
+        "attached_position": 0.012500000186264515,
+        "attached_velocity": 4.527464625425637e-09,
+        "predicted_free_velocity": -2.7939677238464355e-06,
+        "predicted_attached_velocity": -0.0,
+        "observed_position_corrected_prediction": 2.2737367544323206e-13
+      },
+      {
+        "node": 4,
+        "axis": 1,
+        "free_position": 1.5435234672622755e-05,
+        "free_velocity": -0.009564763866364956,
+        "attached_position": 2.4998607841553167e-05,
+        "attached_velocity": -1.391395926475525e-06,
+        "predicted_free_velocity": -0.009564764695824124,
+        "predicted_attached_velocity": -0.0,
+        "observed_position_corrected_prediction": -1.3906974345445633e-06
+      },
+      {
+        "node": 4,
+        "axis": 2,
+        "free_position": 0,
+        "free_velocity": 0,
+        "attached_position": 0,
+        "attached_velocity": 0,
+        "predicted_free_velocity": 0.0,
+        "predicted_attached_velocity": 0.0,
+        "observed_position_corrected_prediction": 0.0
+      },
+      {
+        "node": 8,
+        "axis": 0,
+        "free_position": 0.024999994784593582,
+        "free_velocity": -5.58793499294552e-06,
+        "attached_position": 0.02500000037252903,
+        "attached_velocity": 2.488832251401618e-09,
+        "predicted_free_velocity": -5.587935447692871e-06,
+        "predicted_attached_velocity": -0.0,
+        "observed_position_corrected_prediction": 4.547473508864641e-13
+      },
+      {
+        "node": 8,
+        "axis": 1,
+        "free_position": 1.5421095667988993e-05,
+        "free_velocity": 0.015421094372868538,
+        "attached_position": -2.346496330574155e-09,
+        "attached_velocity": -2.346932888031006e-06,
+        "predicted_free_velocity": 0.015421095667988993,
+        "predicted_attached_velocity": 0.0,
+        "observed_position_corrected_prediction": -2.3477914510294795e-06
+      },
+      {
+        "node": 8,
+        "axis": 2,
+        "free_position": 0,
+        "free_velocity": 0,
+        "attached_position": 0,
+        "attached_velocity": 0,
+        "predicted_free_velocity": 0.0,
+        "predicted_attached_velocity": 0.0,
+        "observed_position_corrected_prediction": 0.0
+      }
+    ],
+    "passes_prespecified_diagnostic": true
+  },
+  {
+    "damping": 100,
+    "free_sha256": "e31eeb321357d2b8d19c6d457d42696800f368d32da4f6c01693ecbb4d39ef66",
+    "attached_sha256": "84326be60bc9bebdc823bbdf477feb88c8afb4d950e7cef6aeb464586b7abe45",
+    "max_free_relation_error_m_s": 1.0724938402650874e-09,
+    "max_attached_prediction_error_m_s": 2.8498512825575473e-06,
+    "max_position_corrected_error_m_s": 1.8808350432664156e-09,
+    "measurements": [
+      {
+        "node": 0,
+        "axis": 0,
+        "free_position": -2.3501460777453076e-09,
+        "free_velocity": -2.126500021404354e-06,
+        "attached_position": -3.784972335552084e-12,
+        "attached_velocity": 2.1986102183291223e-07,
+        "predicted_free_velocity": -2.1265001089944013e-06,
+        "predicted_attached_velocity": 2.236459595389804e-07,
+        "observed_position_corrected_prediction": 2.198610840054016e-07
+      },
+      {
+        "node": 0,
+        "axis": 1,
+        "free_position": 1.5420455383718945e-05,
+        "free_velocity": 0.013953004032373428,
+        "attached_position": 1.2369127944111824e-09,
+        "attached_velocity": -0.0014662137255072594,
+        "predicted_free_velocity": 0.013953005034342962,
+        "predicted_attached_velocity": -0.0014674502439979281,
+        "observed_position_corrected_prediction": -0.0014662144385511056
+      },
+      {
+        "node": 0,
+        "axis": 2,
+        "free_position": 0,
+        "free_velocity": 0,
+        "attached_position": 0,
+        "attached_velocity": 0,
+        "predicted_free_velocity": 0.0,
+        "predicted_attached_velocity": -0.0,
+        "observed_position_corrected_prediction": 0.0
+      },
+      {
+        "node": 4,
+        "axis": 0,
+        "free_position": 0.012499997392296791,
+        "free_velocity": -2.528086270103813e-06,
+        "attached_position": 0.012500000186264515,
+        "attached_velocity": 2.64000618699356e-07,
+        "predicted_free_velocity": -2.5280865413210155e-06,
+        "predicted_attached_velocity": 2.6588115400125795e-07,
+        "observed_position_corrected_prediction": 2.658814537426224e-07
+      },
+      {
+        "node": 4,
+        "axis": 1,
+        "free_position": 1.5435234672622755e-05,
+        "free_velocity": -0.00865455623716116,
+        "attached_position": 2.5002849724842235e-05,
+        "attached_velocity": 0.0009130574762821198,
+        "predicted_free_velocity": -0.008654556991491,
+        "predicted_attached_velocity": 0.0009102076249995622,
+        "observed_position_corrected_prediction": 0.0009130588150583208
+      },
+      {
+        "node": 4,
+        "axis": 2,
+        "free_position": 0,
+        "free_velocity": 0,
+        "attached_position": 0,
+        "attached_velocity": 0,
+        "predicted_free_velocity": 0.0,
+        "predicted_attached_velocity": -0.0,
+        "observed_position_corrected_prediction": 0.0
+      },
+      {
+        "node": 8,
+        "axis": 0,
+        "free_position": 0.024999994784593582,
+        "free_velocity": -5.056172540207626e-06,
+        "attached_position": 0.02500000037252903,
+        "attached_velocity": 5.317078830557875e-07,
+        "predicted_free_velocity": -5.056173082642031e-06,
+        "predicted_attached_velocity": 5.317623080025159e-07,
+        "observed_position_corrected_prediction": 5.317629074852448e-07
+      },
+      {
+        "node": 8,
+        "axis": 1,
+        "free_position": 1.5421095667988993e-05,
+        "free_velocity": 0.01395358331501484,
+        "attached_position": 1.4551915228366852e-09,
+        "attached_velocity": -0.0014660563319921494,
+        "predicted_free_velocity": 0.01395358438750868,
+        "predicted_attached_velocity": -0.0014675111676851504,
+        "observed_position_corrected_prediction": -0.0014660571614513174
+      },
+      {
+        "node": 8,
+        "axis": 2,
+        "free_position": 0,
+        "free_velocity": 0,
+        "attached_position": 0,
+        "attached_velocity": 0,
+        "predicted_free_velocity": 0.0,
+        "predicted_attached_velocity": -0.0,
+        "observed_position_corrected_prediction": 0.0
+      }
+    ],
+    "passes_prespecified_diagnostic": true
+  }
+]
