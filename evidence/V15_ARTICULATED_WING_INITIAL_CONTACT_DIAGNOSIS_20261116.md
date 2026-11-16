@@ -1,0 +1,5 @@
+# Initial-contact comparison
+
+The contact-solver candidate admitted both matched ten-step runs, but the zero-input zero-gravity control itself developed elbow q=0.02068 rad and v=5.78 rad/s, with 108 to 182 reported contacts. It therefore fails the physically quiet rest requirement, even though its wrist passes the narrow limit screen. The solver status alone is not physical validation.
+
+Compare the unchanged v15 fixture and articulated-wing fixture from their own default states under zero gravity, zero effort and no task, policy, teacher or aerodynamics. Each is given exactly one 0.000125 s temporal-cone step, corresponding to one microstep of the earlier run. Capture all reported manifold pairs and individual signed contact separations, per-step solver status, q/v and model hashes. Identify new wing-related overlapping pairs separately from contacts already present in v15. Prediction: the candidate introduces non-adjacent wing-related initial intersections; if it does not, preserve the disconfirmation. This is diagnostic and makes no claim about which contacts caused later motion. Do not mask pairs or adjust bodies for this test.
