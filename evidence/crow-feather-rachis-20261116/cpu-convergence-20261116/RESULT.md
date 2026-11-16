@@ -1,0 +1,5 @@
+# Nonlinear stopping diagnostic: prediction contradicted
+
+At tolerances 1e-8 and 1e-10 m, the native CPU control reported success after 34 and 76 sweeps, but free-node configuration-force residual was 0.809893 and 0.805850 N, respectively. Both final elastic energies exceeded the 7.86246505e-6 J starting energy. At 1e-12 and 1e-14 m, the solver returned failure after all 4,096 sweeps in both damping arms; its transactional state is the original state, so the reported 0.107934 N residual in those failed rows is the residual of the restored state, not a converged candidate. Do not use the `after` diagnostics in failed rows as a published state. Increasing iterations through a stricter position-stop threshold did not satisfy the preregistered 0.01 N force condition. Timestep remained 0.001 s throughout.
+
+These results reveal an inadequately qualified CPU control and do not uniquely identify the root cause. In particular, native energy, local projection gradients, model properties and double-precision convergence require independent reconciliation before using this as an oracle. The retained source and eight complete raw rows are in this directory.
