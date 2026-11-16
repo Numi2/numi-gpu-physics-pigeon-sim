@@ -1,0 +1,7 @@
+# Restore the historical crow long-perch development directory
+
+The archive contains the exact captured `build/crow-v15-long-perch-host-20261110` directory from macmini `/Users/n/Developer/numi-crow-rl-20261107`, source checkout revision `4ab800743a06cc955774b1812849c720ae19d24f`. These are historical development outputs and policy/build files, not proof of an autonomous landing. Current v15 source and the recorded-restart checkpoint are separate and were not retired as part of this archive.
+
+Download the assets from the private `Numi2/workstation-checkpoint-archive` release `macmini-crow-cold-20261116`, verify the SHA-256 listed in the versioned receipt, and extract into a new empty directory on macOS with `/usr/bin/tar -xpf`. Run `python3 manifest.py EXTRACTED_DIR/crow-v15-long-perch-host-20261110 > restored-manifest.json` followed by `python3 verify_manifest.py source-manifest.json restored-manifest.json`. The verifier requires all original file content hashes, sizes, modes, nanosecond mtimes and original extended attributes to match. It permits only a receiver-added `com.apple.provenance` attribute, which macOS automatically adds on this machine. It rejects other extra, changed or missing metadata.
+
+The original files remain authoritative until the independent download and full restore pass, a final source recheck succeeds and the retirement receipt records removal. Restoring to the old directory should only be done after checking the active project and ensuring the path is absent; never overwrite a current directory.
