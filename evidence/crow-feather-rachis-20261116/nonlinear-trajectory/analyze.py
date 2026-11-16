@@ -1,0 +1,3 @@
+import hashlib,json
+from pathlib import Path
+p=Path(__file__).with_name('crow-nonlinear-trajectory.jsonl');rows=[json.loads(s) for s in p.read_text().splitlines()];force=max(rows,key=lambda x:x['max_force_residual_N']);energy=max(rows,key=lambda x:x['relative_total_energy_error']);print(json.dumps({'input_sha256':hashlib.sha256(p.read_bytes()).hexdigest(),'samples':len(rows),'max_force_residual_N':force['max_force_residual_N'],'max_force_step':force['step'],'max_force_coordinate':force['max_index'],'max_relative_energy_error':energy['relative_total_energy_error'],'max_energy_step':energy['step'],'passed':force['max_force_residual_N']<.01 and energy['relative_total_energy_error']<.01},indent=2))

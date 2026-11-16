@@ -1,0 +1,10 @@
+{
+  "input_sha256": "d49a6a395ebcecad0235565d8bb0768543c02b3400bc175063690fc92af4e85f",
+  "samples": 80,
+  "max_force_residual_N": 0.034515932178555024,
+  "max_force_step": 69,
+  "max_force_coordinate": 0,
+  "max_relative_energy_error": 0.0005965423270349002,
+  "max_energy_step": 31,
+  "passed": false
+}

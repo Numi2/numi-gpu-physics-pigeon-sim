@@ -1,0 +1,5 @@
+# Native nonlinear check of the 3D modal trajectory
+
+The preregistered joint gate failed. Across the 80 retained samples, native nonlinear total-energy deviation reached 0.0597% (step 31), within the 1% limit, but the maximum per-coordinate dynamic force residual was 0.03452 N (step 69, coordinate 0), above the 0.01 N limit. The force residual uses native elastic-energy central differences at 1e-9 m and the GPU's recorded accelerations with rod and attached point-mass inertias. The nominal linearized reference therefore cannot be called a nonlinear physical solution merely because its linear energy and phase checks passed. The complete per-coordinate residuals, nonlinear energies, native code, input identity and hashes are in `evidence/crow-feather-rachis-20261116/nonlinear-trajectory/`.
+
+This numerical check examines sampled states of one short, fixed-twist surrogate and the stated gradient approximation; it does not measure the unobserved motion between samples or qualify contact, wings, aerodynamics or the crow. Follow-up gradient-step controls are required before assigning a cause to the residual.
