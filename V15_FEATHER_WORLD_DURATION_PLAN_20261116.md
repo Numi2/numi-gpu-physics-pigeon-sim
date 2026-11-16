@@ -1,0 +1,3 @@
+# Preregistered multi-step fixed-support check
+
+Use the same pre-shaped nine-node rod and qualityNewton world fixture, independently initialized for each duration. Run 10 and 100 one-millisecond control steps without gravity, actuation, collision or aerodynamics. Save full final state and solver diagnostics. Predict success, all three fixed targets within 1 µm, final elastic plus kinetic energy at most initial + 1e-10 J, maximum free-node internal force under 0.01 N, and magnitude of the midpoint internal force within 5% of the 9-node beam reference of 0.62905 N. Accept or reject every duration separately. No flight or feather qualification follows from this check.
