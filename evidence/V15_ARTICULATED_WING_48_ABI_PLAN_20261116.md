@@ -1,0 +1,5 @@
+# Isolated 48-coordinate admission retry
+
+The pre-registered 40-capacity native fixture was rejected before simulation: 41 bodies and 46 velocity coordinates exceed its 40-body/40-DoF/41-q ABI. The experimental retry uses a separately built 48-body/48-DoF/49-q host, Metal shaders and coupled Matter ABI, with new world and Matter ABI identifiers; it is not a replacement for production. Retain the failed 40-capacity result and the initial 48-capacity build rejection that exposed Matter's matching capacity and the bounded-drive diagnostic size.
+
+Before seeing a result, attempt one environment for ten control steps and 16 substeps using the development task with its matching freshly built shader, no saved state and no policy. No aerodynamic wing program is installed. Require a complete finite trace, matching new coordinate counts, and no solver failure to pass admission; record termination independently. Any initialization, shader-resource, contract or solver failure remains a failed trial. No actual wing-fold, aerodynamics, realism, balance or flight claim follows from a pass.
