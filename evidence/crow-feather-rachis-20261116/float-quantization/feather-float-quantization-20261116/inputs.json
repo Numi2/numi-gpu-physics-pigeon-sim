@@ -1,0 +1,5 @@
+{
+  "/Users/n/Developer/numi-crow-articulated-wing-20261116/build/wing-capacity-48/crow-feather-float-quantization": "2c06bc842f92faba9fe25480b9bb77a183e40cb0ce97c2e6013cd0de619fc196",
+  "/Users/n/Developer/numi-crow-articulated-wing-20261116/build/wing-capacity-48/lib/libmetalrobo.dylib": "31584364fc45986f2f127ba6c680b2b92ca8c64a34c65728efc7debdad0ea56a",
+  "/Users/n/Developer/numi-crow-articulated-wing-20261116/tests/crow_v15_wing_fixture/feather-float-quantization.cpp": "d8cc4a73a5526231dd6dd345a4abf2c92cb82cf1f85b95b74f8dae73a7843ad0"
+}
