@@ -1,0 +1,5 @@
+# Articulated-wing asset-binding retry
+
+The 48-capacity trial rejected the old navigation visual pack before stepping because adding six wing bodies shifts scene-body indices. Preserve that rejection. Generate new copies of the five course visual packs by mapping their verified v15 bindings 36..40 to 42..46, validating both packed instance and symbolic bindings on read and after write. Preserve geometry and original inputs, recompute content hashes, and make a separate visual config referencing those copies and the unchanged robot/ground assets. The robot visual is still the old presentation and is not evidence of articulated wing rendering.
+
+Retry the same ten-step, one-environment, 16-substep no-policy/no-aerodynamics fixture with the new config. Require all ten accepted finite q/v/body frames, q length 47, v length 46, and zero solver failures; record all terminations. This is a runtime admission diagnostic only, not evidence of actual folding or flight. Retain the new assets, exact inputs, commands and all failures.
