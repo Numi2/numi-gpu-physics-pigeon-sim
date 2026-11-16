@@ -1,0 +1,84 @@
+{
+  "hessian_symmetry_relative": 0.0,
+  "eigenvalues_rad2_s2": [
+    -221.63720860058464,
+    -206.95099439033302,
+    2307539707.1856875,
+    15240722879.686998,
+    49032242186.747856,
+    107485697876.16739,
+    183917931007.1557,
+    261749216909.84857,
+    320095985811.8831
+  ],
+  "frequencies_hz": [
+    0.0,
+    0.0,
+    7645.303369287372,
+    19648.20654496706,
+    35242.03745173887,
+    52178.966388373374,
+    68254.63805247017,
+    81425.9486815488,
+    90045.13335214314
+  ],
+  "reconstructed_initial_max_error_m": 1.9364453260805222e-20,
+  "steps": [
+    {
+      "step": 1,
+      "time_s": 0.000125,
+      "max_displacement_error_um": 26.933043966914486,
+      "center_expected_um": 24.629634488959226,
+      "center_midpoint_um": 7.770968711929299
+    },
+    {
+      "step": 2,
+      "time_s": 0.00025,
+      "max_displacement_error_um": 8.619145593404651,
+      "center_expected_um": 23.592441083086747,
+      "center_midpoint_um": 18.117458445466
+    },
+    {
+      "step": 3,
+      "time_s": 0.000375,
+      "max_displacement_error_um": 5.0017257741282455,
+      "center_expected_um": 21.768532808779398,
+      "center_midpoint_um": 18.785843801671
+    },
+    {
+      "step": 4,
+      "time_s": 0.0005,
+      "max_displacement_error_um": 19.440738459305607,
+      "center_expected_um": 19.77002924666913,
+      "center_midpoint_um": 7.3720712577975
+    },
+    {
+      "step": 5,
+      "time_s": 0.000625,
+      "max_displacement_error_um": 12.348093105521585,
+      "center_expected_um": 16.99684302905907,
+      "center_midpoint_um": 24.966653277408
+    },
+    {
+      "step": 6,
+      "time_s": 0.00075,
+      "max_displacement_error_um": 9.808950428805039,
+      "center_expected_um": 14.569963082722976,
+      "center_midpoint_um": 8.2284615749789
+    },
+    {
+      "step": 7,
+      "time_s": 0.000875,
+      "max_displacement_error_um": 8.720426326640938,
+      "center_expected_um": 11.828178312178956,
+      "center_midpoint_um": 17.410694511478
+    },
+    {
+      "step": 8,
+      "time_s": 0.001,
+      "max_displacement_error_um": 15.820315983830323,
+      "center_expected_um": 9.572768958252434,
+      "center_midpoint_um": 19.470850534529003
+    }
+  ]
+}

@@ -1,0 +1,5 @@
+# Midpoint phase versus linearized native-energy reference: failed
+
+The FP64 finite-difference transverse Hessian was exactly symmetric at stored precision. The two nominal rigid modes had small negative eigenvalues (-222 and -207 rad²/s² versus maximum 3.20e11 rad²/s², below 7e-10 of the maximum), treated as zero; initial-state reconstruction error was below 2e-20 m. The first non-rigid mode was approximately 7.65 kHz. Using exact propagation of this linearized system, the eight saved midpoint states deviated by 5.0–26.9 µm in maximum node position, exceeding the preregistered 1 µm threshold at every step. The initial maximum deflection was 25 µm.
+
+This strongly limits the energy-preserving candidate at this operating point: it preserves energy but not the linearized phase trajectory. The reference is a small-deflection linearization and uses the same native potential, so this is not an independent biological measurement or proof about nonlinear flight. Full Hessian, exact input states, analysis code and per-step errors are archived; no physical feather or GPU qualification follows.
