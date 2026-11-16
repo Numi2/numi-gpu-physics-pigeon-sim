@@ -1,0 +1,9 @@
+{
+  "/Users/n/Developer/numi-crow-articulated-wing-20261116/build/wing-capacity-48/crow-wing-contact-stop": "991e0be19de45e1b95ac2818ae03ef980c9fe6b1326be68f06e9999e30248f0e",
+  "/Users/n/Developer/numi-crow-articulated-wing-20261116/build/wing-capacity-48/crow-audit-wing-fold-path": "f12ccc832a2f088fc88be9be13054ad3a18b656b126df175a826c42f195e15f8",
+  "/Users/n/Developer/numi-crow-articulated-wing-20261116/build/wing-capacity-48/shaders/MetalRobo.metallib": "af62f910b0426453d419bc88aa4b8db52375070ba4fc4c1e89d7cdcdde1acfc2",
+  "/Users/n/Developer/numi-crow-articulated-wing-20261116/build/wing-aero-element-20261116/wing-aero.metallib": "8e9496eefbe116a93824fc565dc53d507866da3439ce1fe701e82531b4b15a68",
+  "/Users/n/Developer/numi-crow-articulated-wing-20261116/tests/crow_v15_wing_fixture/wing-contact-stop.mm": "090e7918df4430b13cd6d6e0a20f62b3ed790a45fb7d6d2382cbfb6a25c13f1a",
+  "/Users/n/Developer/numi-crow-articulated-wing-20261116/tests/crow_v15_wing_fixture/audit-wing-fold-path.cpp": "862fcd3ded9d0ef45b9270c5380b0e64b670d1867b13d9999fc889b5e7c3e6a6",
+  "/Users/n/Developer/numi-crow-articulated-wing-20261116/build/wing-capacity-48/lib/libmetalrobo.dylib": "31584364fc45986f2f127ba6c680b2b92ca8c64a34c65728efc7debdad0ea56a"
+}
