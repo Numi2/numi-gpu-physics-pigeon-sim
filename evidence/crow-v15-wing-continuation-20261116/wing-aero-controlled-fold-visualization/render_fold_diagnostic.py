@@ -25,7 +25,7 @@ def panel(draw,frame,x0,y0,label,view):
     x1,y1=x0+460,y0+345
     draw.rounded_rectangle((x0,y0,x1,y1),14,fill='#202a35',outline='#536273',width=2)
     draw.text((x0+14,y0+10),label+'  |  '+view,font=font,fill='#eef4f8')
-    root=np.asarray(frame[0][:3]); center=np.array([x0+230,y0+198]); scale=600
+    root=np.asarray(frame[0][:3]); center=np.array([x0+230,y0+198]); scale=540
     def proj(p):
         v=np.asarray(p)-root
         p2=np.array([v[1],-v[0]]) if view=='above' else np.array([v[1],-v[2]])
