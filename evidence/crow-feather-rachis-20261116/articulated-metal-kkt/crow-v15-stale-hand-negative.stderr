@@ -1,0 +1,4 @@
+Traceback (most recent call last):
+  File "/Users/n/Developer/numi-crow-articulated-wing-20261116/tests/crow_v15_wing_fixture/test-articulated-kkt.py", line 17, in <module>
+    assert abs(actual-expected)<=1e-6*max(1.0,abs(expected)),('stale mass',k,i,j,actual,expected)
+AssertionError: ('stale mass', 0, 0, 0, 28803840.0, 29443839.6332413)
