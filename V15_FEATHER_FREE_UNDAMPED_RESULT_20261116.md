@@ -1,0 +1,3 @@
+# Undamped standalone rod dynamics: failed energy diagnostic
+
+Both native backends returned success and remained within 0.0444 µm of each other after eight steps, but the first-step energy retained only 2.6846% of the 7.8625 µJ initial value despite zero material damping. After eight steps the CPU and GPU retained approximately 0.0000020% and 0.0000428%, respectively. The preregistered 5% energy-loss criterion therefore failed decisively. Agreement between backends is not physical dynamic validation. This result is specific to the chosen stiff short-segment state and 0.125 ms step; it does not identify every cause or qualify a different integration method.
