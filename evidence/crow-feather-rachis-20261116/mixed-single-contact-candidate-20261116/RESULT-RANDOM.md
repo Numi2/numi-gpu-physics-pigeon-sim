@@ -1,0 +1,3 @@
+# Batched mixed scalar follow-up
+
+All 192 preregistered float32-input cases published on the bounded mixed scalar path and met the independent FP64 reference and KKT bounds. Across the 2-, 4- and 8-coordinate batches, maximum velocity difference was 1.556e-7, maximum impulse difference 7.683e-6, normalized momentum residual 2.030e-7, hard-row residual 9.836e-8, and normal complementarity 1.383e-7. Raw binary inputs, seed and generator, native driver/output, independent reference and every per-case analysis are retained. No numerical warnings occurred in this analysis. These are algebraic controls, not physical trajectories, runtime throughput, friction cones or multi-contact qualification.

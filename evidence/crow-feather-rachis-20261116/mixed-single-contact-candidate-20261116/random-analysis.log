@@ -1,0 +1,9 @@
+{
+  "cases": 192,
+  "failures": [],
+  "max_velocity_gap": 1.5557458049597628e-07,
+  "max_impulse_gap": 7.682203822412248e-06,
+  "max_momentum": 2.02907399795434e-07,
+  "max_hard": 9.835179701211949e-08,
+  "max_complementarity": 1.382076108238617e-07
+}
