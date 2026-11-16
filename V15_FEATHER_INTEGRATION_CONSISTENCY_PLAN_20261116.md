@@ -1,0 +1,5 @@
+# Prediction: constrained position/velocity consistency and damping
+
+Source trace: the rod kernel computes final free velocity as `(x_free - x_start) * exp(-damping*h) / h` while retaining `x_free`. The world integration applies `h * (v_constrained - v_free)` to `x_free`. Thus, absent a distinct later integration, the published `x - x_start - h*v` equals `(1 - exp(-damping*h)) * (x_free - x_start)`, rather than zero. With nonzero elastic free motion this could let a constrained support drift even when the velocity solve is correct.
+
+Before execution, compare the same pre-shaped supported qualityNewton fixture after exactly one 1 ms step with linear damping 0 and 100 per second, independently initialized. Compute `x_final - x_initial - h*v_final` for all node y components from published state. Predict the zero-damping maximum absolute residual is below 0.01 µm while 100/s has at least one residual above 0.1 µm. If observed, this supports a position/velocity contract mismatch, but does not alone establish that the mismatch is the only support error or justify a proposed code change. No feather or flight qualification follows.
