@@ -1,0 +1,5 @@
+# Damping consistency control
+
+The preregistered hypothesis failed. With 100/s damping, maximum free-node force was 0.0715607 N, the midpoint force was -0.680198 N and endpoint forces were +0.327359/+0.268322 N. With zero damping they were 0.0717185 N, -0.680113 N and +0.327310/+0.268279 N respectively. Both complete runs used the same initial state, 1 ms control step, eight physics substeps and 10 ms duration. Removing the configured damping barely changed the imbalance, so its different treatment in the free stage and factor is not the dominant explanation in this case. The control does not prove the two damping formulations generally equivalent.
+
+The test used the previously archived fixed-world nine-row Schur prototype and temporarily bypassed the later hard-equality gate solely to reproduce that older rejected experiment; the committed gate and production source were restored after the trials. This prototype remains unqualified for hard constraints, mixed contacts or moving wing supports. Source, exact commands, binary/shader hashes, output states, failed results and settings are retained under `evidence/crow-feather-rachis-20261116/damping-coupling/`.
