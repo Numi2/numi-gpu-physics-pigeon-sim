@@ -1,0 +1,158 @@
+[
+  {
+    "pose": "0.6",
+    "name": "rest_forward",
+    "path": 3,
+    "finite": true,
+    "force_residual": 9.469740875900357e-07,
+    "equality_error": 2.3404460642672176e-12,
+    "max_reference_difference": 5.93711181258482e-11,
+    "pass": true
+  },
+  {
+    "pose": "0.6",
+    "name": "rest_reverse",
+    "path": 3,
+    "finite": true,
+    "force_residual": 1.3351853391796453e-06,
+    "equality_error": 3.3476024194075674e-12,
+    "max_reference_difference": 1.572111883423456e-11,
+    "pass": true
+  },
+  {
+    "pose": "0.6",
+    "name": "incoming_forward",
+    "path": 3,
+    "finite": true,
+    "force_residual": 3.975269112999058e-06,
+    "equality_error": 1.1664918108553029e-12,
+    "max_reference_difference": 7.581292078425133e-11,
+    "pass": true
+  },
+  {
+    "pose": "0.6",
+    "name": "incoming_reverse",
+    "path": 3,
+    "finite": true,
+    "force_residual": 6.106570015873558e-06,
+    "equality_error": 4.125257538588889e-12,
+    "max_reference_difference": 2.0546159019204247e-11,
+    "pass": true
+  },
+  {
+    "pose": "0.6",
+    "permutation": "rest",
+    "max_difference": 4.364999999973318e-11,
+    "pass": true
+  },
+  {
+    "pose": "0.6",
+    "permutation": "incoming",
+    "max_difference": 6.36600000009568e-11,
+    "pass": true
+  },
+  {
+    "pose": "1.2",
+    "name": "rest_forward",
+    "path": 3,
+    "finite": true,
+    "force_residual": 7.288630450297262e-07,
+    "equality_error": 4.607770014795626e-12,
+    "max_reference_difference": 5.6176768183140375e-11,
+    "pass": true
+  },
+  {
+    "pose": "1.2",
+    "name": "rest_reverse",
+    "path": 3,
+    "finite": true,
+    "force_residual": 2.726122809160181e-06,
+    "equality_error": 5.83869713255632e-13,
+    "max_reference_difference": 1.0309280517003844e-11,
+    "pass": true
+  },
+  {
+    "pose": "1.2",
+    "name": "incoming_forward",
+    "path": 3,
+    "finite": true,
+    "force_residual": 2.0498361457121916e-06,
+    "equality_error": 1.2326844587171119e-11,
+    "max_reference_difference": 8.730939339833977e-11,
+    "pass": true
+  },
+  {
+    "pose": "1.2",
+    "name": "incoming_reverse",
+    "path": 3,
+    "finite": true,
+    "force_residual": 2.4332426024065157e-06,
+    "equality_error": 9.001036294343301e-13,
+    "max_reference_difference": 1.811819790742018e-11,
+    "pass": true
+  },
+  {
+    "pose": "1.2",
+    "permutation": "rest",
+    "max_difference": 6.003000000028274e-11,
+    "pass": true
+  },
+  {
+    "pose": "1.2",
+    "permutation": "incoming",
+    "max_difference": 8.186000000006159e-11,
+    "pass": true
+  },
+  {
+    "pose": "1.8",
+    "name": "rest_forward",
+    "path": 3,
+    "finite": true,
+    "force_residual": 2.118201869238945e-06,
+    "equality_error": 6.62707834555572e-12,
+    "max_reference_difference": 5.349225730199919e-11,
+    "pass": true
+  },
+  {
+    "pose": "1.8",
+    "name": "rest_reverse",
+    "path": 3,
+    "finite": true,
+    "force_residual": 1.1830167380155743e-06,
+    "equality_error": 1.085754413531012e-12,
+    "max_reference_difference": 9.83225798684411e-12,
+    "pass": true
+  },
+  {
+    "pose": "1.8",
+    "name": "incoming_forward",
+    "path": 3,
+    "finite": true,
+    "force_residual": 3.0830965864411808e-06,
+    "equality_error": 6.0420010884641466e-12,
+    "max_reference_difference": 9.348947735621704e-11,
+    "pass": true
+  },
+  {
+    "pose": "1.8",
+    "name": "incoming_reverse",
+    "path": 3,
+    "finite": true,
+    "force_residual": 2.2997920439138397e-06,
+    "equality_error": 3.2641904040679053e-12,
+    "max_reference_difference": 1.927893759077256e-11,
+    "pass": true
+  },
+  {
+    "pose": "1.8",
+    "permutation": "rest",
+    "max_difference": 4.36599999995577e-11,
+    "pass": true
+  },
+  {
+    "pose": "1.8",
+    "permutation": "incoming",
+    "max_difference": 8.003999999811823e-11,
+    "pass": true
+  }
+]

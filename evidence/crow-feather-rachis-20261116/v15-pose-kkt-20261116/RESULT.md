@@ -1,0 +1,5 @@
+# Frozen v15 pose KKT results
+
+All twelve preregistered frozen-pose cases passed against an independently assembled dense FP64 KKT solve, including all six forward/reverse checks. Maximum force/torque residual was 6.107e-6 in source units, maximum equality error 1.233e-11, maximum coordinate difference 9.349e-11, and maximum reversed-node gap 8.186e-11. The solver used its bounded exact equality path. Inputs use the actual v15 hand Jacobian and mass matrix recomputed at the three specified elbow/wrist angles, combined with the existing rod fixture. Raw pose data, exact float32 inputs, source, logs, analyses and executable hash are archived.
+
+The first analysis invocation emitted NumPy matmul floating-point warnings despite finite output; it was rerun using Python compensated sums for independent residual/equality calculations, with empty stderr. The threshold results above use the compensated analysis. This is not live dynamic wing coupling, a feather aerodynamics test, contact or flight qualification.
