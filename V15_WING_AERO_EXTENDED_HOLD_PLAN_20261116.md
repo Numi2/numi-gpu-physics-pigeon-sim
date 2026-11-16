@@ -1,0 +1,5 @@
+# Preregistered extended-hold follow-up
+
+The preceding two-second controlled fold missed its target while joint motion continued. Test whether more settling time alone resolves the error without changing any force, contact, drive, limit, trajectory, or wind setting. Repeat the exact three-lane, 32-microstep experiment for 960 control steps (four seconds): the same 360-step smooth ramp, then 600 steps of target hold. Compare the first 480 samples with the preceding two-second run to check reproduction. The root remains free; it is not a wind-tunnel test.
+
+Prediction: all 2,880 lane-steps succeed; all four elbow and wrist angles in each lane end within 0.01 rad of their targets with absolute joint speeds below 0.05 rad/s. The first 480 observations reproduce their corresponding preceding run within 1e-4 in every coordinate. Sample every second output pose, 480 per lane, with the same static collision audit; reject any sampled contact deeper than 0.5 mm. Save all results even on failure. This is a troubleshooting test, not a flight or biological qualification. It cannot establish continuous clearance or feather collisions.
