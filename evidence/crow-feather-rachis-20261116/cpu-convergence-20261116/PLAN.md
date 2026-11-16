@@ -1,0 +1,3 @@
+# Nonlinear stopping-criterion diagnostic
+
+Before running: repeat the exact same CPU fixed-support input and 1 ms step, and vary only the existing maximum position correction tolerance from 1e-8 to 1e-10, 1e-12, and 1e-14 m, keeping the 4096 sweep cap and both zero/100 s^-1 damping. Prediction: if the large 0.80585 N residual is just premature sweep termination, tightening the tolerance will reduce the maximum free-node force residual below the existing 0.01 N benchmark without increasing total energy in the zero-damping case. Record solver status and iterations even when it fails to converge. This is a solver-iteration diagnostic and does not change or propose reducing the physics timestep. It does not establish rod contact, feather, flight or landing qualification.
