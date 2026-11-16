@@ -1,0 +1,57 @@
+{
+  "metal": {
+    "argv": [
+      "xcrun",
+      "-sdk",
+      "macosx",
+      "metal",
+      "-std=metal3.1",
+      "-O2",
+      "-I/Users/n/Developer/numi-crow-articulated-wing-20261116/include",
+      "-c",
+      "/Users/n/Developer/numi-crow-articulated-wing-20261116/tests/crow_v15_wing_fixture/articulated-wing-aero.metal",
+      "-o",
+      "/Users/n/Developer/numi-crow-articulated-wing-20261116/build/wing-aero-element-20261116/wing-aero.air"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  "metallib": {
+    "argv": [
+      "xcrun",
+      "-sdk",
+      "macosx",
+      "metallib",
+      "/Users/n/Developer/numi-crow-articulated-wing-20261116/build/wing-aero-element-20261116/wing-aero.air",
+      "-o",
+      "/Users/n/Developer/numi-crow-articulated-wing-20261116/build/wing-aero-element-20261116/wing-aero.metallib"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  "host": {
+    "argv": [
+      "/usr/bin/clang++",
+      "-std=c++23",
+      "-fobjc-arc",
+      "-O2",
+      "-I/Users/n/Developer/numi-crow-articulated-wing-20261116/include",
+      "-I/Users/n/Developer/numi-crow-articulated-wing-20261116/matter/include",
+      "/Users/n/Developer/numi-crow-articulated-wing-20261116/tests/crow_v15_wing_fixture/aero-wing-probe.mm",
+      "-L/Users/n/Developer/numi-crow-articulated-wing-20261116/build/wing-capacity-48/lib",
+      "-lmetalrobo",
+      "-framework",
+      "Foundation",
+      "-framework",
+      "Metal",
+      "-Wl,-rpath,/Users/n/Developer/numi-crow-articulated-wing-20261116/build/wing-capacity-48/lib",
+      "-o",
+      "/Users/n/Developer/numi-crow-articulated-wing-20261116/build/wing-aero-element-20261116/aero-wing-probe"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": ""
+  }
+}
