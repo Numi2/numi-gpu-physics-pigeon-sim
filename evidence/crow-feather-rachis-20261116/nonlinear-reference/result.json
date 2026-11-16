@@ -1,0 +1,18 @@
+{
+  "numpy": "2.2.5",
+  "scipy": "1.15.3",
+  "host": "arm64",
+  "bridge_sha256": "493b60dd3c164a9163d3f55216d6e4f0f5d5cdd885d839c8de55a056cbecd5f5",
+  "input_sha256": {
+    "coupled-3d/input.bin": "bbd78c778c2f3ab31f7709bb54c37fb80faaa5ff7f5b0ef7b7a97a2d09b2831d",
+    "coupled-3d/crow-3d-modal-output.bin": "76ca5c3da480b69eb16be7ab52d7fef42cffa78fe8144cc6a39bc88604786012",
+    "nonlinear-split/crow-nonlinear-split.jsonl": "e4be0398b09d42f2f0f26a31e5cda890884223a53e2dde9edc79a3b92815c55d"
+  },
+  "reference_position_gap_m": 3.030870552269228e-10,
+  "standard_energy_error": 2.2164467862888566e-06,
+  "tight_energy_error": 1.237672101143512e-07,
+  "gpu_linear_position_error_m": 7.226238577641132e-08,
+  "split_position_error_m": 4.421800408783272e-07,
+  "reference_passed": true,
+  "candidate_prediction_passed": false
+}

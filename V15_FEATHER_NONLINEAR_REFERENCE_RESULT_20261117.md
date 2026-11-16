@@ -1,0 +1,7 @@
+# Independent nonlinear trajectory reference
+
+The reference convergence check passed: the two DOP853 tolerance levels differed by at most 3.04e-10 m (0.000304 micrometres) across 80 sampled states, with maximum native total-energy drift of 2.22e-6 and 1.24e-7 respectively. The calculation ran on the local arm64 Mac using the same hashed native energy library built on the Mac mini; the source, bridge, input, tolerances, full states, evaluation counts and results are retained under `evidence/crow-feather-rachis-20261116/nonlinear-reference/`.
+
+Against the tighter reference, the uncorrected linear GPU trajectory's maximum position error was 0.0723 micrometres. The nonlinear split candidate's was 0.4422 micrometres, approximately 6.1 times larger. The prediction that the split would improve the linear result by at least 20% failed, even though both stayed below 1 micrometre in this particular 10 ms sample. Combined with its 4.06% energy drift, the split is rejected as the proposed nonlinear repair. Tightened runs share the same DOP853 method and numerical native gradient; their agreement is a convergence check, not independent validation of the biological model.
+
+Adaptive internal evaluation was used solely to construct the measurement reference. It is not a production timestep change. This remains one short, fixed-twist, linear-support surrogate without contacts, aerodynamics or an articulated crow.
