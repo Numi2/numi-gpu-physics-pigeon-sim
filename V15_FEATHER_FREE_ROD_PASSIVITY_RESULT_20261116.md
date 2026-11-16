@@ -1,0 +1,5 @@
+# Free rod passive-energy isolation
+
+Both declared node resolutions passed the one-step screen: the CPU and Metal results were accepted, dissipated energy, and agreed in position within 5.3e-9 m. For the three-node rod, total energy fell from 5.3961e-6 J to approximately 6.61e-9 J; for nine nodes it fell from 7.8625e-6 J to approximately 2.78e-9 J. The substantial one-step dissipation under this very stiff, heavily damped and implicit numerical setup is itself not a calibrated dynamic response.
+
+Unlike the fixed-support experiment, these free rods did not show energy gain. This narrows attention to the constrained configuration, its trajectory and/or its measurement, but it does not prove a specific defect or general solver passivity. These tests represent only one model, one displacement, one timestep and one step, with no contacts, attachments, feathers or flow. All complete node and twist states, energies, statuses, source, commands and hashes are retained in `evidence/crow-feather-rachis-20261116/feather-free-passivity-20261116/` and adjacent source files.
