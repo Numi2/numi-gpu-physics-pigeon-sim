@@ -1,0 +1,9 @@
+{
+  "argv": [
+    "/tmp/crow-correction-control-20261116/build/crow-correction-stop",
+    "/tmp/crow-correction-control-20261116/build/shaders/MetalRobo.metallib",
+    "1e-12"
+  ],
+  "exit": "timeout",
+  "elapsed_s": 180.01270833400002
+}
