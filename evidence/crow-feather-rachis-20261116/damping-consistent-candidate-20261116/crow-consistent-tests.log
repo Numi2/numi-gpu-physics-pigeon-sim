@@ -1,0 +1,36 @@
+Test project /Users/n/Developer/numi-crow-articulated-wing-20261116/build/wing-capacity-48
+    Start 53: metalrobo.crow.quality_mixed_scalar_analytic
+1/7 Test #53: metalrobo.crow.quality_mixed_scalar_analytic ............   Passed    3.70 sec
+    Start 54: metalrobo.crow.quality_refinement_hard_equality_guard
+2/7 Test #54: metalrobo.crow.quality_refinement_hard_equality_guard ...   Passed    0.03 sec
+    Start 60: metalrobo.crow.quality_mixed_scalar_random
+3/7 Test #60: metalrobo.crow.quality_mixed_scalar_random ..............   Passed    0.09 sec
+    Start 61: metalrobo.crow.quality_exact_v15_bilateral
+4/7 Test #61: metalrobo.crow.quality_exact_v15_bilateral ..............   Passed    0.08 sec
+    Start 62: metalrobo.crow.quality_exact_v15_poses
+5/7 Test #62: metalrobo.crow.quality_exact_v15_poses ..................   Passed    0.18 sec
+    Start 68: metalrobo.crow.rod_free_local_frame
+6/7 Test #68: metalrobo.crow.rod_free_local_frame .....................   Passed    0.34 sec
+    Start 69: metalrobo.crow.rod_hard_equality_guard
+7/7 Test #69: metalrobo.crow.rod_hard_equality_guard ..................***Failed    0.24 sec
+Traceback (most recent call last):
+  File "/Users/n/Developer/numi-crow-articulated-wing-20261116/tests/crow_v15_wing_fixture/test-equality-guard.py", line 16, in <module>
+    assert code!=0 and not r['ok'] and r['status']==11 and r['steps']==0 and r['failed']==1,(damping,code,r)
+AssertionError: ('0', 0, {'event': 'run', 'mode': 'qualityNewton', 'damping': 0, 'ok': True, 'succeeded': True, 'dispatched': True, 'published': True, 'steps': 1, 'failed': 0, 'status': 0, 'message': '', 'rod_statuses': [{'code': 0, 'environment': 0, 'iterations': 242, 'failing_index': 4294967295, 'diagnostics': [9.8661996617011e-07, 9.6406445326824e-11, 0, 0]}], 'quality_statuses': [{'code': 0, 'newton_iterations': 3, 'certificates0': [7.8481809939746e-10, 0, 2.346579094592e-06, 0], 'certificates1': [7.8481809939746e-10, 0, 0, 7.8430457506329e-06], 'numerics': [0, 0, 0, 0]}], 'before': 7.8624650500662e-06, 'after': 7.8494259108945e-06, 'kinetic': 5.7712906783869e-13, 'node_forces': [0.3140730276509, -5.2495110004541e-05, -7.5960546751556e-05, -6.6190892454847e-05, -0.62783137002327, -3.5261690214863e-05, -8.0756392241768e-06, 1.9136435159748e-05, 0.31397718982094], 'state': [[5.5782045649266e-12, -1.6916601452976e-09, 0, 5.5781583796488e-09, -1.6912817955017e-06, 0], [0.0031250000465661, 9.0896483015968e-06, 0, 1.1627480489551e-07, -9.0038869529963e-05, 0], [0.0062500000931323, 1.7044430933311e-05, 0, 2.092251634167e-07, -0.00014306930825114, 0], [0.009375000372529, 2.2726189854438e-05, 0, -1.5277669263014e-07, -0.00012537138536572, 0], [0.012500000186265, 2.4998607841553e-05, 0, 4.5274646254256e-09, -1.3913959264755e-06, 0], [0.015625, 2.2725533199264e-05, 0, 6.7006158133154e-07, -0.00012602843344212, 0], [0.018750000745058, 1.7043386833393e-05, 0, 4.4849980440631e-07, -0.00014411273878068, 0], [0.021875001490116, 9.0886369434884e-06, 0, 1.1579134024942e-06, -9.1050751507282e-05, 0], [0.025000000372529, -2.3464963305742e-09, 0, 2.4888322514016e-09, -2.346932888031e-06, 0]], 'twists': [[0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0]]})
+
+
+86% tests passed, 1 tests failed out of 7
+
+Label Time Summary:
+crow            =   4.67 sec*proc (7 tests)
+experimental    =   4.67 sec*proc (7 tests)
+precision       =   0.34 sec*proc (1 test)
+reference       =   4.06 sec*proc (4 tests)
+rod             =   4.67 sec*proc (7 tests)
+rollback        =   3.98 sec*proc (3 tests)
+
+Total Test time (real) =   4.67 sec
+
+The following tests FAILED:
+	 69 - metalrobo.crow.rod_hard_equality_guard (Failed)   crow experimental rod rollback
+Errors while running CTest

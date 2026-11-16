@@ -1,0 +1,32 @@
+[
+  {
+    "damping": 0,
+    "state_count": 100,
+    "exit": "0",
+    "sha256": "87036bbc93cf3a82b18b1ceb7fba375163a7e2afd41d3af3bc59a56800693176",
+    "max_support_error_m": 5.245968061758593e-09,
+    "max_support_speed_m_s": 5.070121509252326e-06,
+    "max_energy_ratio": 0.9983424630180323,
+    "free_y_residual_step1_n": 7.411012408596262e-05,
+    "force_resolution_step1_n": 2.117582368135751e-11,
+    "free_y_residual_step100_n": 7.071141850217543e-05,
+    "force_resolution_step100_n": 1.0164395367051604e-11,
+    "kinematic_energy_screen": true,
+    "step1_force_screen": true
+  },
+  {
+    "damping": 100,
+    "state_count": 100,
+    "exit": "0",
+    "sha256": "c983643de4ec5b634976af25ff40c4f14d58f00ed2396bcb6eeb214fc141ebee",
+    "max_support_error_m": 6.370997153033608e-09,
+    "max_support_speed_m_s": 4.077330598430905e-06,
+    "max_energy_ratio": 0.9984123234158792,
+    "free_y_residual_step1_n": 6.815065049985036e-05,
+    "force_resolution_step1_n": 2.061113505041933e-11,
+    "free_y_residual_step100_n": 6.524348956947368e-05,
+    "force_resolution_step100_n": 2.0328790734103208e-11,
+    "kinematic_energy_screen": true,
+    "step1_force_screen": true
+  }
+]
