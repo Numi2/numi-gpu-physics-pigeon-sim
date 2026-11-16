@@ -1,0 +1,5 @@
+# Restore historical crow route-development evidence
+
+This archive contains the complete historical `build/crow-v15-integrated-route-baseline-20261110` directory from macmini `/Users/n/Developer/numi-crow-rl-20261107` at source checkout revision `4ab800743a06cc955774b1812849c720ae19d24f`. It includes old development and diagnostic route results, policies and build files; these are not current flight or landing qualification.
+
+Download all assets from the private `Numi2/workstation-checkpoint-archive` release `macmini-crow-route-20261116`. Verify `archive.sha256`, extract the archive into a new empty directory with `/usr/bin/tar -xpf`, and run `python3 manifest.py EXTRACTED_DIR/crow-v15-integrated-route-baseline-20261110 > restored-manifest.json`, then `python3 verify_manifest.py source-manifest.json restored-manifest.json`. The verifier checks the original paths, file hashes, sizes, modes, nanosecond mtimes and original extended attributes; it permits only extra `com.apple.provenance` attributes automatically added by the receiving macOS. Never overwrite a current directory; recover to a new location first.

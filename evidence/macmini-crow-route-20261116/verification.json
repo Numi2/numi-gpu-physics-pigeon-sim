@@ -1,0 +1,7 @@
+{
+  "pass": true,
+  "expected_entries": 71,
+  "actual_entries": 71,
+  "extra_receiver_provenance_attributes": 71,
+  "errors": []
+}

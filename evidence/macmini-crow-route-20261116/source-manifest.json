@@ -1,0 +1,700 @@
+{
+  "entries": [
+    {
+      "mode": 493,
+      "mtime_ns": 1794299077256254420,
+      "path": ".",
+      "size": 0,
+      "type": "directory",
+      "xattrs": {}
+    },
+    {
+      "mode": 420,
+      "mtime_ns": 1794288827726125952,
+      "path": "c_api.cpp",
+      "sha256": "b13e6283d4779dfed3f8df75ab6f1c9562f6947c0aae76797aa8949ff0570d98",
+      "size": 293825,
+      "type": "file",
+      "xattrs": {}
+    },
+    {
+      "mode": 420,
+      "mtime_ns": 1794288831799241628,
+      "path": "c_api.cpp.o",
+      "sha256": "3c798bac39e9165a82c4cc540fcf830202f7225f2152db58925a0fb8abce8527",
+      "size": 728456,
+      "type": "file",
+      "xattrs": {}
+    },
+    {
+      "mode": 420,
+      "mtime_ns": 1794288831799799294,
+      "path": "c_api.cpp.o.d",
+      "sha256": "5557145fa61db3bbccc9a1745df0a52bcf51e0956e4ac4ea9728c5f925de352d",
+      "size": 159624,
+      "type": "file",
+      "xattrs": {}
+    },
+    {
+      "mode": 493,
+      "mtime_ns": 1794288907758285397,
+      "path": "contract-debug-integrated",
+      "size": 0,
+      "type": "directory",
+      "xattrs": {}
+    },
+    {
+      "mode": 420,
+      "mtime_ns": 1794288903605533612,
+      "path": "contract-debug-integrated/c_api.cpp",
+      "sha256": "66701d63de9c91ba8cb436d9bee2d3cacca73b713d1b10db1c7ec7f0c8d0bae9",
+      "size": 295317,
+      "type": "file",
+      "xattrs": {}
+    },
+    {
+      "mode": 420,
+      "mtime_ns": 1794288907682009617,
+      "path": "contract-debug-integrated/c_api.cpp.o",
+      "sha256": "c535716b1e52b35870951da7ba22092b0115044c7c4c8893febc31736dadc2f2",
+      "size": 731168,
+      "type": "file",
+      "xattrs": {}
+    },
+    {
+      "mode": 420,
+      "mtime_ns": 1794288907682565408,
+      "path": "contract-debug-integrated/c_api.cpp.o.d",
+      "sha256": "e7bca71a5a2fde958209a1c1dea1cb9ee5919768d015dcbafaa6db902afef57b",
+      "size": 159676,
+      "type": "file",
+      "xattrs": {}
+    },
+    {
+      "mode": 493,
+      "mtime_ns": 1794288907758573272,
+      "path": "contract-debug-integrated/libmetalrobo.dylib",
+      "sha256": "0af7394257dea3d940298a92f9b32c5b4115ac266c5ee3b93a4b9bd448fdf306",
+      "size": 5763888,
+      "type": "file",
+      "xattrs": {}
+    },
+    {
+      "mode": 420,
+      "mtime_ns": 1794298771425795849,
+      "path": "diagnostic-reserved-final-i-candidate-original.json",
+      "sha256": "964be207a0e41a11a896ddd926a4933ce41d60e1b683ccfd74b54e0c9fecca22",
+      "size": 151592926,
+      "type": "file",
+      "xattrs": {}
+    },
+    {
+      "mode": 420,
+      "mtime_ns": 1794298768294043944,
+      "path": "diagnostic-reserved-final-i-candidate-original.tsv",
+      "sha256": "3744cd9534cfa164a4d47d7245d847f9f9992c083a39d00cd08bcc71acf0c46a",
+      "size": 3279269,
+      "type": "file",
+      "xattrs": {
+        "com.apple.TextEncoding": "dXRmLTg7MTM0MjE3OTg0"
+      }
+    },
+    {
+      "mode": 420,
+      "mtime_ns": 1794293170190810645,
+      "path": "diagnostic-reserved-final-i-ilayout.json",
+      "sha256": "8e9879cdbba6e49a58976549a1fee20865aabc227a9b429857cae0b7536c2722",
+      "size": 100017377,
+      "type": "file",
+      "xattrs": {}
+    },
+    {
+      "mode": 420,
+      "mtime_ns": 1794293168125897351,
+      "path": "diagnostic-reserved-final-i-ilayout.tsv",
+      "sha256": "79e0ab97899eeefb8eac28c5a0a586612591ff21f5f83701d515bff70c9367fa",
+      "size": 2186641,
+      "type": "file",
+      "xattrs": {
+        "com.apple.TextEncoding": "dXRmLTg7MTM0MjE3OTg0"
+      }
+    },
+    {
+      "mode": 420,
+      "mtime_ns": 1794298939800045287,
+      "path": "diagnostic-reserved-final-i-sustained-original.json",
+      "sha256": "9a9b7337d3b34ac0ffd2f79e08f7f222bf8d9153d5f664d77009a38a69dbb30d",
+      "size": 150591393,
+      "type": "file",
+      "xattrs": {}
+    },
+    {
+      "mode": 420,
+      "mtime_ns": 1794298936688443545,
+      "path": "diagnostic-reserved-final-i-sustained-original.tsv",
+      "sha256": "ca7e59e903b11ad6a24b8a6c04ab8048841e41a341ddb09b978428d8d1b4b36a",
+      "size": 3272794,
+      "type": "file",
+      "xattrs": {
+        "com.apple.TextEncoding": "dXRmLTg7MTM0MjE3OTg0"
+      }
+    },
+    {
+      "mode": 420,
+      "mtime_ns": 1794298730098683005,
+      "path": "diagnostic-reserved-final-j-candidate-newstart.json",
+      "sha256": "93c003434b7776ca870d16e72b20d0d9d3fa5ec6b730805921102fede1457dd7",
+      "size": 152593243,
+      "type": "file",
+      "xattrs": {}
+    },
+    {
+      "mode": 420,
+      "mtime_ns": 1794298726961616575,
+      "path": "diagnostic-reserved-final-j-candidate-newstart.tsv",
+      "sha256": "5b287afed3bf8c0857b77c4561bbb1fdea923d2aad6f508ef4bd1654f661d038",
+      "size": 3294579,
+      "type": "file",
+      "xattrs": {
+        "com.apple.TextEncoding": "dXRmLTg7MTM0MjE3OTg0"
+      }
+    },
+    {
+      "mode": 420,
+      "mtime_ns": 1794298686815301709,
+      "path": "diagnostic-reserved-final-j-candidate-original.json",
+      "sha256": "e80b68648407cd78c981992aae04653fe2d8b28266d51178d442f9fa6afae36e",
+      "size": 153284269,
+      "type": "file",
+      "xattrs": {}
+    },
+    {
+      "mode": 420,
+      "mtime_ns": 1794298683679819495,
+      "path": "diagnostic-reserved-final-j-candidate-original.tsv",
+      "sha256": "677888c093debdbd36f8bd34eaa48e2ceffa847a34d2708eb15f7c3aa4f35133",
+      "size": 3298226,
+      "type": "file",
+      "xattrs": {
+        "com.apple.TextEncoding": "dXRmLTg7MTM0MjE3OTg0"
+      }
+    },
+    {
+      "mode": 420,
+      "mtime_ns": 1794293457744971297,
+      "path": "diagnostic-reserved-final-j-control.json",
+      "sha256": "f2952395d1cd80ff8340af12b6d61aed8eb039357e822d9ec6c914d78dc87246",
+      "size": 98937989,
+      "type": "file",
+      "xattrs": {}
+    },
+    {
+      "mode": 420,
+      "mtime_ns": 1794293455729829374,
+      "path": "diagnostic-reserved-final-j-control.tsv",
+      "sha256": "9e8c8b906c89813c3e251629b625ddcbf825c315f3c82f1fd9f2a328b7dec5e3",
+      "size": 2172619,
+      "type": "file",
+      "xattrs": {
+        "com.apple.TextEncoding": "dXRmLTg7MTM0MjE3OTg0"
+      }
+    },
+    {
+      "mode": 420,
+      "mtime_ns": 1794296012212312715,
+      "path": "diagnostic-reserved-final-j-hold-newstart.json",
+      "sha256": "af9eeff03830e7f51fd8e271234b2395826ac989480b1745782059921139e738",
+      "size": 149160819,
+      "type": "file",
+      "xattrs": {}
+    },
+    {
+      "mode": 420,
+      "mtime_ns": 1794296009172227388,
+      "path": "diagnostic-reserved-final-j-hold-newstart.tsv",
+      "sha256": "3937da0c448a3af6b308aae2def7195014b3f9ee2ed547f46d3a46f147f51493",
+      "size": 3280981,
+      "type": "file",
+      "xattrs": {
+        "com.apple.TextEncoding": "dXRmLTg7MTM0MjE3OTg0"
+      }
+    },
+    {
+      "mode": 420,
+      "mtime_ns": 1794295974242165981,
+      "path": "diagnostic-reserved-final-j-hold-original.json",
+      "sha256": "5e74292baa4c92d8887360849df2df8aeffae13a25b3e0ee12174666bac2e9e6",
+      "size": 150478672,
+      "type": "file",
+      "xattrs": {}
+    },
+    {
+      "mode": 420,
+      "mtime_ns": 1794295971126171764,
+      "path": "diagnostic-reserved-final-j-hold-original.tsv",
+      "sha256": "3c703589a3cb02703c73d7bce0a4b69d041f868f7f0673946ac7607b3882c912",
+      "size": 3277088,
+      "type": "file",
+      "xattrs": {
+        "com.apple.TextEncoding": "dXRmLTg7MTM0MjE3OTg0"
+      }
+    },
+    {
+      "mode": 420,
+      "mtime_ns": 1794292764660325498,
+      "path": "diagnostic-reserved-final-j-jnew-observer.json",
+      "sha256": "387782831f1565dbcedbd395f6fdca73dabcd0336bcf355dff97d84a277c1635",
+      "size": 99568348,
+      "type": "file",
+      "xattrs": {}
+    },
+    {
+      "mode": 420,
+      "mtime_ns": 1794292762605873115,
+      "path": "diagnostic-reserved-final-j-jnew-observer.tsv",
+      "sha256": "a40483c556ec8a50230b1f51a8bca923cbe959229379c8874eec9cc50202c988",
+      "size": 2187891,
+      "type": "file",
+      "xattrs": {
+        "com.apple.TextEncoding": "dXRmLTg7MTM0MjE3OTg0"
+      }
+    },
+    {
+      "mode": 420,
+      "mtime_ns": 1794296150616355645,
+      "path": "diagnostic-reserved-final-j-landing-observer.json",
+      "sha256": "830af32422893f90c1f24292936ae05329b16a3a7d9ce32eda9cc19157cc29b4",
+      "size": 100316069,
+      "type": "file",
+      "xattrs": {}
+    },
+    {
+      "mode": 420,
+      "mtime_ns": 1794296148527606016,
+      "path": "diagnostic-reserved-final-j-landing-observer.tsv",
+      "sha256": "cdd82ed5ba2acd95fae136e63ba44aff97b292a275cd75320266804f861cbef9",
+      "size": 2182269,
+      "type": "file",
+      "xattrs": {
+        "com.apple.TextEncoding": "dXRmLTg7MTM0MjE3OTg0"
+      }
+    },
+    {
+      "mode": 420,
+      "mtime_ns": 1794298518037355366,
+      "path": "diagnostic-reserved-final-j-m08h30.json",
+      "sha256": "f421b39b8784c75556a47c31d5fd3426cb168448127696aa847d219c9142cda1",
+      "size": 34494294,
+      "type": "file",
+      "xattrs": {}
+    },
+    {
+      "mode": 420,
+      "mtime_ns": 1794298517264263113,
+      "path": "diagnostic-reserved-final-j-m08h30.tsv",
+      "sha256": "a600a925bf3e698562504166896d5ff03c3743c4a98cef71ba73c5896e144398",
+      "size": 733604,
+      "type": "file",
+      "xattrs": {
+        "com.apple.TextEncoding": "dXRmLTg7MTM0MjE3OTg0"
+      }
+    },
+    {
+      "mode": 420,
+      "mtime_ns": 1794298497130806686,
+      "path": "diagnostic-reserved-final-j-m08h50.json",
+      "sha256": "373287c13236031a6bcf6e41f205f087330548946e341a8d81251c73d758fa6b",
+      "size": 34430203,
+      "type": "file",
+      "xattrs": {}
+    },
+    {
+      "mode": 420,
+      "mtime_ns": 1794298496358651979,
+      "path": "diagnostic-reserved-final-j-m08h50.tsv",
+      "sha256": "4fa18520f9311252ce36473b756f8904e5ec439548bc0e91d4227dd4b9a415cc",
+      "size": 733636,
+      "type": "file",
+      "xattrs": {
+        "com.apple.TextEncoding": "dXRmLTg7MTM0MjE3OTg0"
+      }
+    },
+    {
+      "mode": 420,
+      "mtime_ns": 1794298528566611837,
+      "path": "diagnostic-reserved-final-j-m12h30.json",
+      "sha256": "f7e500f980c1b8c5e0bd65f537f4ed21e7e7da1ccbb7227d941e0cd42ac917e2",
+      "size": 34534652,
+      "type": "file",
+      "xattrs": {}
+    },
+    {
+      "mode": 420,
+      "mtime_ns": 1794298527795435385,
+      "path": "diagnostic-reserved-final-j-m12h30.tsv",
+      "sha256": "f17f20b6a83f1a99e57580b1f21d8b433db2a50c0a0e665e1a8c9670422e9e6f",
+      "size": 733497,
+      "type": "file",
+      "xattrs": {
+        "com.apple.TextEncoding": "dXRmLTg7MTM0MjE3OTg0"
+      }
+    },
+    {
+      "mode": 420,
+      "mtime_ns": 1794298507598859283,
+      "path": "diagnostic-reserved-final-j-m12h50.json",
+      "sha256": "68b7e2d109f2692bb70b878c1c726c4391c0fc9cc537bac0ccab6faf2d216509",
+      "size": 34479779,
+      "type": "file",
+      "xattrs": {}
+    },
+    {
+      "mode": 420,
+      "mtime_ns": 1794298506826026324,
+      "path": "diagnostic-reserved-final-j-m12h50.tsv",
+      "sha256": "46c81eb35479fbe34f1f145f98572e48eb3c8ba769599952e1c259f5d1d2a652",
+      "size": 733467,
+      "type": "file",
+      "xattrs": {
+        "com.apple.TextEncoding": "dXRmLTg7MTM0MjE3OTg0"
+      }
+    },
+    {
+      "mode": 420,
+      "mtime_ns": 1794298595029030972,
+      "path": "diagnostic-reserved-final-j-m16h30.json",
+      "sha256": "652f796238a0f19184d1e699fede784747befe612fc2d01a87cf11fd4597b7bb",
+      "size": 34545007,
+      "type": "file",
+      "xattrs": {}
+    },
+    {
+      "mode": 420,
+      "mtime_ns": 1794298594252698120,
+      "path": "diagnostic-reserved-final-j-m16h30.tsv",
+      "sha256": "88b2ec9c553217b3c5796c73386e6d69668434745eae2ae86174e3eaefab9722",
+      "size": 733739,
+      "type": "file",
+      "xattrs": {
+        "com.apple.TextEncoding": "dXRmLTg7MTM0MjE3OTg0"
+      }
+    },
+    {
+      "mode": 420,
+      "mtime_ns": 1794298574053034338,
+      "path": "diagnostic-reserved-final-j-m16h50.json",
+      "sha256": "91cb62e12c9d4a3a24c54322ef8cdff57f7c83cdfd894c5cee48c764f33b1620",
+      "size": 34481954,
+      "type": "file",
+      "xattrs": {}
+    },
+    {
+      "mode": 420,
+      "mtime_ns": 1794298573281872094,
+      "path": "diagnostic-reserved-final-j-m16h50.tsv",
+      "sha256": "a8aae0466768e2baa989ecdcb5d6c8da3924f1822d95ae75a0fd82b4c55f7b30",
+      "size": 733745,
+      "type": "file",
+      "xattrs": {
+        "com.apple.TextEncoding": "dXRmLTg7MTM0MjE3OTg0"
+      }
+    },
+    {
+      "mode": 420,
+      "mtime_ns": 1794298605442638519,
+      "path": "diagnostic-reserved-final-j-m20h30.json",
+      "sha256": "bbf8da9307b42041b2a4015c0fa11f7656743d8181e956e0ca1e1e089812cfa1",
+      "size": 34551645,
+      "type": "file",
+      "xattrs": {}
+    },
+    {
+      "mode": 420,
+      "mtime_ns": 1794298604669896852,
+      "path": "diagnostic-reserved-final-j-m20h30.tsv",
+      "sha256": "e0c95d506582f6ce3772ce1bd7fd90805bc34e9b631000bacc3feeae97810207",
+      "size": 733832,
+      "type": "file",
+      "xattrs": {
+        "com.apple.TextEncoding": "dXRmLTg7MTM0MjE3OTg0"
+      }
+    },
+    {
+      "mode": 420,
+      "mtime_ns": 1794298584483623174,
+      "path": "diagnostic-reserved-final-j-m20h50.json",
+      "sha256": "1bd18cdd37552266dba121457b7d6b89eb389cd4c77a22bfa8767ae899f83eef",
+      "size": 34483398,
+      "type": "file",
+      "xattrs": {}
+    },
+    {
+      "mode": 420,
+      "mtime_ns": 1794298583712402139,
+      "path": "diagnostic-reserved-final-j-m20h50.tsv",
+      "sha256": "bef8c924cbed78bdb0236af0fa770a9c875aef1e1b471e4845cb95c38291deb3",
+      "size": 733850,
+      "type": "file",
+      "xattrs": {
+        "com.apple.TextEncoding": "dXRmLTg7MTM0MjE3OTg0"
+      }
+    },
+    {
+      "mode": 420,
+      "mtime_ns": 1794298436734651091,
+      "path": "diagnostic-reserved-final-j-negative.json",
+      "sha256": "6ef79603af4cc82abce40372e0dfe31546d27295998ea35399dfcf77f4b7c8e4",
+      "size": 34498567,
+      "type": "file",
+      "xattrs": {}
+    },
+    {
+      "mode": 420,
+      "mtime_ns": 1794298435965574316,
+      "path": "diagnostic-reserved-final-j-negative.tsv",
+      "sha256": "3bad978e97122dde4548a4b4bfb64372fe645e617ac99628ac71220904c2ea9c",
+      "size": 733852,
+      "type": "file",
+      "xattrs": {
+        "com.apple.TextEncoding": "dXRmLTg7MTM0MjE3OTg0"
+      }
+    },
+    {
+      "mode": 420,
+      "mtime_ns": 1794296564712304409,
+      "path": "diagnostic-reserved-final-j-newstart.json",
+      "sha256": "948aabcf8e2e3de7ad2c1a25b5a2bdd4b94e375811858be0939eb180ce7374e6",
+      "size": 147985049,
+      "type": "file",
+      "xattrs": {}
+    },
+    {
+      "mode": 420,
+      "mtime_ns": 1794296561719856179,
+      "path": "diagnostic-reserved-final-j-newstart.tsv",
+      "sha256": "f9b4a0e51a0797fd83a3255e6668e0f7463107dd4137fe0220039682dfd5592e",
+      "size": 3284867,
+      "type": "file",
+      "xattrs": {
+        "com.apple.TextEncoding": "dXRmLTg7MTM0MjE3OTg0"
+      }
+    },
+    {
+      "mode": 420,
+      "mtime_ns": 1794296519746255631,
+      "path": "diagnostic-reserved-final-j-original.json",
+      "sha256": "4895619e4ea91460cad77dda8502275efca5810c829fc1b87ec662cfcab8d856",
+      "size": 148527947,
+      "type": "file",
+      "xattrs": {}
+    },
+    {
+      "mode": 420,
+      "mtime_ns": 1794296516769357578,
+      "path": "diagnostic-reserved-final-j-original.tsv",
+      "sha256": "dc500daef15d4ddb8f605a85c9c0b17305aee9246d92f4e11af0fa0f1ec3fbed",
+      "size": 3285377,
+      "type": "file",
+      "xattrs": {
+        "com.apple.TextEncoding": "dXRmLTg7MTM0MjE3OTg0"
+      }
+    },
+    {
+      "mode": 420,
+      "mtime_ns": 1794298987393895912,
+      "path": "diagnostic-reserved-final-j-plus25-original.json",
+      "sha256": "eba71872875d8c9ce208e8aa99059a65ae24d85507bc181e1bbfed579847ee60",
+      "size": 151928791,
+      "type": "file",
+      "xattrs": {}
+    },
+    {
+      "mode": 420,
+      "mtime_ns": 1794298984206373828,
+      "path": "diagnostic-reserved-final-j-plus25-original.tsv",
+      "sha256": "c9e33c7160bc85317fc2765cc8dc697e427d995016d51557c036daa8b1a078ea",
+      "size": 3286220,
+      "type": "file",
+      "xattrs": {
+        "com.apple.TextEncoding": "dXRmLTg7MTM0MjE3OTg0"
+      }
+    },
+    {
+      "mode": 420,
+      "mtime_ns": 1794299032317650360,
+      "path": "diagnostic-reserved-final-j-plus35-original.json",
+      "sha256": "bec673e3c975ea2b767b37d2152ad80f1c3e2ee9fb07a351f4d17f96788441c1",
+      "size": 153447416,
+      "type": "file",
+      "xattrs": {}
+    },
+    {
+      "mode": 420,
+      "mtime_ns": 1794299029134972434,
+      "path": "diagnostic-reserved-final-j-plus35-original.tsv",
+      "sha256": "9a9fd77f92c1a4aeef08b6bb95304d7912c79a4b8ba2297338b451b51a20b6fb",
+      "size": 3297311,
+      "type": "file",
+      "xattrs": {
+        "com.apple.TextEncoding": "dXRmLTg7MTM0MjE3OTg0"
+      }
+    },
+    {
+      "mode": 420,
+      "mtime_ns": 1794299077255161339,
+      "path": "diagnostic-reserved-final-j-plus45-original.json",
+      "sha256": "ad4127ca4334497ac937943826a9de66a1df11e6e5df3e261b08c8e659346a37",
+      "size": 153892944,
+      "type": "file",
+      "xattrs": {}
+    },
+    {
+      "mode": 420,
+      "mtime_ns": 1794299074059846982,
+      "path": "diagnostic-reserved-final-j-plus45-original.tsv",
+      "sha256": "ec547f70d11dc6140c6d681a3f5241b6063ac209e09227961528f0276fea7646",
+      "size": 3291796,
+      "type": "file",
+      "xattrs": {
+        "com.apple.TextEncoding": "dXRmLTg7MTM0MjE3OTg0"
+      }
+    },
+    {
+      "mode": 420,
+      "mtime_ns": 1794298426276932126,
+      "path": "diagnostic-reserved-final-j-positive.json",
+      "sha256": "e714a50fa6b81fab4a177ef54d95f5eb9c5053eb1d22ffc7cefa7b959c467029",
+      "size": 34140442,
+      "type": "file",
+      "xattrs": {}
+    },
+    {
+      "mode": 420,
+      "mtime_ns": 1794298425515619554,
+      "path": "diagnostic-reserved-final-j-positive.tsv",
+      "sha256": "b9674ad24d49b04d24517cc2f6de03d7a5f333df8414d7b587ee6d1572c46e32",
+      "size": 733497,
+      "type": "file",
+      "xattrs": {
+        "com.apple.TextEncoding": "dXRmLTg7MTM0MjE3OTg0"
+      }
+    },
+    {
+      "mode": 420,
+      "mtime_ns": 1794295935203149735,
+      "path": "diagnostic-reserved-final-j-soft-newstart.json",
+      "sha256": "2b2f17f7c2811fb581060a4184b3a7902aa8f959d9843a7ede456b8e75a2bb79",
+      "size": 149211031,
+      "type": "file",
+      "xattrs": {}
+    },
+    {
+      "mode": 420,
+      "mtime_ns": 1794295932156376527,
+      "path": "diagnostic-reserved-final-j-soft-newstart.tsv",
+      "sha256": "9c39138d67246abef4f74d9eebe34ea23211d2fb68ae70e31dcb340bd6eeb75b",
+      "size": 3280348,
+      "type": "file",
+      "xattrs": {
+        "com.apple.TextEncoding": "dXRmLTg7MTM0MjE3OTg0"
+      }
+    },
+    {
+      "mode": 420,
+      "mtime_ns": 1794295897318939728,
+      "path": "diagnostic-reserved-final-j-soft-original.json",
+      "sha256": "100699dba284ba560c5c09c4ff170efe52eb999f3add78d121a873b79abc011d",
+      "size": 150484487,
+      "type": "file",
+      "xattrs": {}
+    },
+    {
+      "mode": 420,
+      "mtime_ns": 1794295894238324530,
+      "path": "diagnostic-reserved-final-j-soft-original.tsv",
+      "sha256": "01e97331187fa243a049152fa8b3b05344442bc41fc4e349c87bb5996291e5a5",
+      "size": 3277053,
+      "type": "file",
+      "xattrs": {
+        "com.apple.TextEncoding": "dXRmLTg7MTM0MjE3OTg0"
+      }
+    },
+    {
+      "mode": 420,
+      "mtime_ns": 1794298898251868403,
+      "path": "diagnostic-reserved-final-j-sustained-newstart.json",
+      "sha256": "918d035cc79b549a3bc5aba80c659a9cd213b8005bb32bfaee7e5fbf43743674",
+      "size": 152678940,
+      "type": "file",
+      "xattrs": {}
+    },
+    {
+      "mode": 420,
+      "mtime_ns": 1794298895092504632,
+      "path": "diagnostic-reserved-final-j-sustained-newstart.tsv",
+      "sha256": "b8acc5b5ec0a5e5471e48e4e5bb13a1f908f3d300bfbfeedec6ffdd41df9479f",
+      "size": 3293685,
+      "type": "file",
+      "xattrs": {
+        "com.apple.TextEncoding": "dXRmLTg7MTM0MjE3OTg0"
+      }
+    },
+    {
+      "mode": 420,
+      "mtime_ns": 1794298854797584877,
+      "path": "diagnostic-reserved-final-j-sustained-original.json",
+      "sha256": "e27307ad0d43cb9e0801a0b1072a2597c139a3a3e126955e6e04917877e488b1",
+      "size": 153493042,
+      "type": "file",
+      "xattrs": {}
+    },
+    {
+      "mode": 420,
+      "mtime_ns": 1794298851621467075,
+      "path": "diagnostic-reserved-final-j-sustained-original.tsv",
+      "sha256": "291919c7ff9e1f06e43948672d2dbf29af235465f492688331da96f8b6bb184e",
+      "size": 3296940,
+      "type": "file",
+      "xattrs": {
+        "com.apple.TextEncoding": "dXRmLTg7MTM0MjE3OTg0"
+      }
+    },
+    {
+      "mode": 384,
+      "mtime_ns": 1794288999634737125,
+      "path": "landing-diagnostic.policypack",
+      "sha256": "7d52ccc7f488e8d4d7b42654f472fb91a93d441a9b42a7e133071a47f17464b3",
+      "size": 5996464,
+      "type": "file",
+      "xattrs": {}
+    },
+    {
+      "mode": 493,
+      "mtime_ns": 1794288831876621533,
+      "path": "libmetalrobo.dylib",
+      "sha256": "9e745472159b32a41d25b59ccaebb51693a0773ddb2c168bb0e4f0f5fdd2e8da",
+      "size": 5763888,
+      "type": "file",
+      "xattrs": {}
+    },
+    {
+      "mode": 493,
+      "mtime_ns": 1794288999232642289,
+      "path": "rebind",
+      "sha256": "4ffc9de52ea3b7488cf4c26c171e5547a76061c33209309c1fcba0a76696ac0f",
+      "size": 39016,
+      "type": "file",
+      "xattrs": {}
+    },
+    {
+      "mode": 384,
+      "mtime_ns": 1794288999702946874,
+      "path": "route-diagnostic.policypack",
+      "sha256": "a38a4429ad0ec1c8e8a6ef82906da6ed5f73e8740699f1ce3bd751f50d884b83",
+      "size": 17228718,
+      "type": "file",
+      "xattrs": {}
+    }
+  ],
+  "schema": 1
+}

@@ -1,0 +1,7 @@
+# Mac mini historical crow route archive verification
+
+The old `build/crow-v15-integrated-route-baseline-20261110` directory contained 69 files, 3,115,353,406 logical bytes, including historical route diagnostics, results and build files. Source checkout revision: `4ab800743a06cc955774b1812849c720ae19d24f`. Git reports no tracked files under this directory. It is distinct from the active articulated-wing worktree and recorded-restart checkpoint.
+
+A complete archive was uploaded as an asset to the private [workstation recovery repository](https://github.com/Numi2/workstation-checkpoint-archive/releases/tag/macmini-crow-route-20261116). This large asset is not a Git object; this versioned manifest and record link to it. The independently downloaded 900,691,500-byte archive SHA-256 is `8e23acd778049070b3d5fccd94895429f7e39d54eb54f9f8b52e9e231869cdb4`. The independently downloaded source manifest SHA-256 is `296810dc5b0b3af6bfa182181929c8110f7dcdd9a5ab5b7d250de22e9952a2a0`.
+
+A full extraction from the independently downloaded asset into a new empty directory matched all 71 manifest entries, including hashes, sizes, modes, nanosecond mtimes and original extended attributes. The receiving macOS added `com.apple.provenance` to all 71 entries. A fresh source manifest matched byte-for-byte and lsof found no open handles. Follow RESTORE.md for recovery. This is a pre-retirement record; an actual-removal receipt must be recorded separately.
