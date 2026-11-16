@@ -1,0 +1,17 @@
+metal_unified_quality=ok device="Apple M4 Pro" environments=2 nv=12 rows=15 blocks=5 direct_pcg_error=1.71661e-05 optimality=7.6183e-06 feasibility=1.07288e-06 newton=5 pcg=9 capped_newton_optimality=3.3296e-08 frictionless_scalar_oracle=ok allocated_bytes=12384 large_rows=300 large_pcg=2 large_allocated_bytes=173060
+Test project /Users/n/Developer/numi-crow-articulated-wing-20261116/build/wing-capacity-48
+    Start 53: metalrobo.crow.quality_refinement_hard_equality_guard
+1/2 Test #53: metalrobo.crow.quality_refinement_hard_equality_guard ...   Passed    0.25 sec
+    Start 59: metalrobo.crow.quality_exact_v15_bilateral
+2/2 Test #59: metalrobo.crow.quality_exact_v15_bilateral ..............   Passed    0.26 sec
+
+100% tests passed out of 2
+
+Label Time Summary:
+crow            =   0.51 sec*proc (2 tests)
+experimental    =   0.51 sec*proc (2 tests)
+reference       =   0.26 sec*proc (1 test)
+rod             =   0.51 sec*proc (2 tests)
+rollback        =   0.25 sec*proc (1 test)
+
+Total Test time (real) =   0.51 sec

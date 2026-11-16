@@ -1,0 +1,23 @@
+[1/23] Building CXX object matter/CMakeFiles/numi_matter_runtime_objects.dir/src/metal_world.cpp.o
+[2/23] Generating shaders/MetalRobo.metallib
+[3/23] Building CXX object CMakeFiles/metalrobo.dir/src/core/CrowArticulatedWing.cpp.o
+[4/23] Building CXX object CMakeFiles/metalrobo.dir/src/core/CrowEmbodiment.cpp.o
+[5/23] Building CXX object CMakeFiles/metalrobo.dir/src/core/FrankaWorld.cpp.o
+[6/23] Building CXX object CMakeFiles/metalrobo.dir/src/core/CrowManipulation.cpp.o
+[7/23] Building CXX object CMakeFiles/metalrobo.dir/src/core/CrowForaging.cpp.o
+[8/23] Building CXX object CMakeFiles/metalrobo.dir/src/core/RunProgram.cpp.o
+[9/23] Building CXX object CMakeFiles/metalrobo.dir/src/core/VisualPlatform.cpp.o
+[10/23] Building OBJCXX object CMakeFiles/metalrobo.dir/src/metal/FiniteResource.mm.o
+[11/23] Building CXX object CMakeFiles/metalrobo.dir/src/core/LocomotionWorld.cpp.o
+[12/23] Building CXX object CMakeFiles/metalrobo.dir/src/core/TaskProgram.cpp.o
+[13/23] Building OBJCXX object CMakeFiles/metalrobo.dir/src/metal/RetinalObserver.mm.o
+[14/23] Building OBJCXX object CMakeFiles/metalrobo.dir/src/metal/MetalUnifiedQualitySolver.mm.o
+[15/23] Building OBJCXX object CMakeFiles/metalrobo.dir/src/metal/MetalRunInspector.mm.o
+[16/23] Building CXX object CMakeFiles/metalrobo_metal_unified_quality_probe.dir/apps/metal_unified_quality_probe.cpp.o
+[17/23] Building OBJCXX object CMakeFiles/metalrobo.dir/src/metal/MetalHybridRenderer.mm.o
+[18/23] Building CXX object CMakeFiles/crow_quality_refinement_guard.dir/tests/crow_v15_wing_fixture/quality-refinement-guard.cpp.o
+[19/23] Building OBJCXX object CMakeFiles/metalrobo.dir/src/metal/MetalWorld.mm.o
+[20/23] Building CXX object CMakeFiles/metalrobo.dir/src/c_api.cpp.o
+[21/23] Linking CXX shared library lib/libmetalrobo.dylib
+[22/23] Linking CXX executable crow_quality_refinement_guard
+[23/23] Linking CXX executable bin/metalrobo_metal_unified_quality_probe

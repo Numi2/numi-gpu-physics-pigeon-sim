@@ -1,0 +1,34 @@
+[
+  {
+    "name": "rest_forward",
+    "path": 3,
+    "force_residual": 1.9630246259616513e-06,
+    "equality": 5.731089262574352e-12,
+    "difference": 1.7305508242100543e-09,
+    "pass": true
+  },
+  {
+    "name": "rest_reverse",
+    "path": 3,
+    "force_residual": 1.8692432162126238e-06,
+    "equality": 3.015614724957143e-12,
+    "difference": 1.7742108262086098e-09,
+    "pass": true
+  },
+  {
+    "name": "incoming_forward",
+    "path": 3,
+    "force_residual": 3.225421188801647e-06,
+    "equality": 1.0238904460028584e-11,
+    "difference": 1.6601797461352201e-09,
+    "pass": true
+  },
+  {
+    "name": "incoming_reverse",
+    "path": 3,
+    "force_residual": 2.8732199623959787e-06,
+    "equality": 3.0035420502249385e-12,
+    "difference": 1.7201997480906304e-09,
+    "pass": true
+  }
+]

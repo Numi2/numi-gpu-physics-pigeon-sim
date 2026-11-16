@@ -1,0 +1,15 @@
+[0/1] Re-running CMake...
+-- MetalRobo Python tests disabled: no interpreter with NumPy and SciPy
+-- Configuring done (0.1s)
+-- Generating done (0.1s)
+-- Build files have been written to: /Users/n/Developer/numi-crow-articulated-wing-20261116/build/wing-capacity-48
+[1/7] Building CXX object CMakeFiles/crow_quality_refinement_guard.dir/tests/crow_v15_wing_fixture/quality-refinement-guard.cpp.o
+FAILED: [code=1] CMakeFiles/crow_quality_refinement_guard.dir/tests/crow_v15_wing_fixture/quality-refinement-guard.cpp.o 
+/usr/bin/c++  -I/Users/n/Developer/numi-crow-articulated-wing-20261116/include -I/Users/n/Developer/numi-crow-articulated-wing-20261116/matter/include -O3 -DNDEBUG -std=c++23 -arch arm64 -fPIE -MD -MT CMakeFiles/crow_quality_refinement_guard.dir/tests/crow_v15_wing_fixture/quality-refinement-guard.cpp.o -MF CMakeFiles/crow_quality_refinement_guard.dir/tests/crow_v15_wing_fixture/quality-refinement-guard.cpp.o.d -o CMakeFiles/crow_quality_refinement_guard.dir/tests/crow_v15_wing_fixture/quality-refinement-guard.cpp.o -c /Users/n/Developer/numi-crow-articulated-wing-20261116/tests/crow_v15_wing_fixture/quality-refinement-guard.cpp
+/Users/n/Developer/numi-crow-articulated-wing-20261116/tests/crow_v15_wing_fixture/quality-refinement-guard.cpp:30:11: error: template arguments deduced as 'array<float, 1 + sizeof...(_Args)>' in declaration of 'mass' and deduced as 'array<float, 1 + sizeof...(_Args)>' in declaration of 'jacobian'
+   30 |     const std::array mass{1.0f}, jacobian{1.0f, 0.0f}, biases{bias, 0.0f}, zero{0.0f, 0.0f};
+      |           ^              ~~~~~~          ~~~~~~~~~~~~
+1 error generated.
+[2/7] Building CXX object CMakeFiles/crow_quality_exact_v15.dir/tests/crow_v15_wing_fixture/quality-exact-v15.cpp.o
+[3/7] Building CXX object CMakeFiles/crow_articulated_hand_response.dir/tests/crow_v15_wing_fixture/articulated-hand-response.cpp.o
+ninja: build stopped: subcommand failed.

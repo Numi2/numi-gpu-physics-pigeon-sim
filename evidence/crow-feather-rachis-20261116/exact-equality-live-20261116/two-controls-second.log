@@ -1,0 +1,20 @@
+[1/4] Linking CXX executable crow_quality_exact_v15
+[2/4] Linking CXX executable crow_articulated_hand_response
+[3/4] Building CXX object CMakeFiles/crow_quality_refinement_guard.dir/tests/crow_v15_wing_fixture/quality-refinement-guard.cpp.o
+[4/4] Linking CXX executable crow_quality_refinement_guard
+Test project /Users/n/Developer/numi-crow-articulated-wing-20261116/build/wing-capacity-48
+    Start 53: metalrobo.crow.quality_refinement_hard_equality_guard
+1/2 Test #53: metalrobo.crow.quality_refinement_hard_equality_guard ...   Passed    0.44 sec
+    Start 59: metalrobo.crow.quality_exact_v15_bilateral
+2/2 Test #59: metalrobo.crow.quality_exact_v15_bilateral ..............   Passed    0.69 sec
+
+100% tests passed out of 2
+
+Label Time Summary:
+crow            =   1.13 sec*proc (2 tests)
+experimental    =   1.13 sec*proc (2 tests)
+reference       =   0.69 sec*proc (1 test)
+rod             =   1.13 sec*proc (2 tests)
+rollback        =   0.44 sec*proc (1 test)
+
+Total Test time (real) =   1.14 sec
