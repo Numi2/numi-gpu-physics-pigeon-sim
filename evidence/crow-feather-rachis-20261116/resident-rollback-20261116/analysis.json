@@ -1,0 +1,36 @@
+{
+  "input_sha256": {
+    "crow-rollback-injected.jsonl": "66001bef997cb01d513dcddfd4b70dcf7b93ae01a09cd146309204fa9e6707bf",
+    "crow-rollback-control.jsonl": "9d52e3116f1e24f0ed8773adb7c96bf0f338dbf9f45cdedb107f9c36fa098cfc"
+  },
+  "rollback_equal": {
+    "q": true,
+    "v": true,
+    "bodies": true,
+    "rod_nodes": true,
+    "rod_edges": true
+  },
+  "recovery_equal": {
+    "q": true,
+    "v": true,
+    "bodies": true,
+    "rod_nodes": true,
+    "rod_edges": true
+  },
+  "control_first_equal": {
+    "q": true,
+    "v": true,
+    "bodies": true,
+    "rod_nodes": true,
+    "rod_edges": true
+  },
+  "state_sizes_bytes": {
+    "q": 188,
+    "v": 184,
+    "bodies": 0,
+    "rod_nodes": 288,
+    "rod_edges": 128
+  },
+  "injected_failure_status": 11,
+  "passed": true
+}
