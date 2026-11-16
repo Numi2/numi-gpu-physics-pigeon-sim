@@ -1,0 +1,6 @@
+[1/2] Building CXX object CMakeFiles/metalrobo_metal_unified_quality_probe.dir/apps/metal_unified_quality_probe.cpp.o
+[2/2] Linking CXX executable bin/metalrobo_metal_unified_quality_probe
+metal_unified_quality=ok device="Apple M4 Pro" environments=2 nv=12 rows=15 blocks=5 direct_pcg_error=1.71661e-05 optimality=7.6183e-06 feasibility=1.07288e-06 newton=5 pcg=9 capped_newton_optimality=3.3296e-08 frictionless_scalar_oracle=ok allocated_bytes=12384 large_rows=300 large_pcg=2 large_allocated_bytes=173060
+hard=1 bias=0.08 rejected=7 transactional=1
+hard=0 bias=0.08 status=0 path=0 equality=0
+hard=1 bias=0 status=0 path=0 equality=0

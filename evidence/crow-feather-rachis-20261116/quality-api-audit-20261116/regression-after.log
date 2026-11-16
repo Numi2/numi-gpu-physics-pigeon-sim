@@ -1,0 +1,27 @@
+[0/1] Re-running CMake...
+-- MetalRobo Python tests disabled: no interpreter with NumPy and SciPy
+-- Configuring done (0.1s)
+-- Generating done (0.1s)
+-- Build files have been written to: /Users/n/Developer/numi-crow-articulated-wing-20261116/build/wing-capacity-48
+[1/4] Generating shaders/MetalRobo.metallib
+[2/4] Building CXX object CMakeFiles/crow_quality_refinement_guard.dir/tests/crow_v15_wing_fixture/quality-refinement-guard.cpp.o
+[3/4] Linking CXX executable crow_quality_refinement_guard
+Test project /Users/n/Developer/numi-crow-articulated-wing-20261116/build/wing-capacity-48
+    Start 53: metalrobo.crow.quality_refinement_hard_equality_guard
+1/1 Test #53: metalrobo.crow.quality_refinement_hard_equality_guard ...***Failed    3.84 sec
+quality_refinement_guard=failed reason=native quality dispatch failed
+
+
+0% tests passed, 1 tests failed out of 1
+
+Label Time Summary:
+crow            =   3.84 sec*proc (1 test)
+experimental    =   3.84 sec*proc (1 test)
+rod             =   3.84 sec*proc (1 test)
+rollback        =   3.84 sec*proc (1 test)
+
+Total Test time (real) =   3.84 sec
+
+The following tests FAILED:
+	 53 - metalrobo.crow.quality_refinement_hard_equality_guard (Failed) crow experimental rod rollback
+Errors while running CTest

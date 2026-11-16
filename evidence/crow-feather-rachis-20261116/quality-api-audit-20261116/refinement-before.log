@@ -1,0 +1,2 @@
+quality_refinement_guard=failed reason=refinement accepted an inaccurate hard equality
+exit_code=1
