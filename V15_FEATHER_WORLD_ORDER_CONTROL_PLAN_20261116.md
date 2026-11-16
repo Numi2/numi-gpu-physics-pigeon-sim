@@ -1,0 +1,3 @@
+# Followup prediction: fresh-context, reversed-order control
+
+The first world-mode comparison used a single MetalWorldContext sequentially. Before repeating, test whether its mode difference is reproducible without cross-run context state. Run qualityNewton first and temporalCone second, each with its own newly constructed context, same model, exact initial state, and otherwise unchanged configuration. Preserve all output and statuses. Prediction: each mode reproduces its first-test final state to within 1 µm at every node and retains its previous pass/fail result. An order or context effect invalidates the mode attribution until resolved. This remains a single-step fixed-support diagnostic, not a feather-flight test.
