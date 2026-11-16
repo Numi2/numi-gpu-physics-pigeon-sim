@@ -1,0 +1,7 @@
+# v15 free-hand rigid attachment reference in owner tests
+
+Research source commit: `80b18e8ca` on `agent/crow-articulated-wing-20261116` in Numi2/numi-lab. This registers the one-step rigid-hand-and-rod reference from the preregistered experiment and result in `V15_FEATHER_RIGID_WING_KKT_PLAN_20261117.md` and `V15_FEATHER_RIGID_WING_KKT_RESULT_20261117.md`. The fixture uses the configured v15 hand mass and inertia; the hand is free, detached from the shoulder/elbow/wrist, and coupled to a linearized rod at a synthetic anchor. This is not an articulated wing, a nonlinear feather, an aerodynamic or contact solver, or a qualification of flight or landing.
+
+On macmini, building `crow-feather-rigid-kkt` succeeded (the Metal compiler emitted the documented `fastMathEnabled` deprecation warning). Ten targeted native CTests passed, including four existing wing checks, the equality rollback guard, local frame control, and four experimental reference tests. `rigid-wing-kkt/owner-ctest-last.log` preserves the test output. The checked-in oracle regenerates byte-for-byte with `rigid-wing-kkt/generate_oracle.py`: SHA-256 `456b675038e154ccd123578e3d46e03c7008c96080fa1f5487f4dc153f02d2f3`.
+
+The previous trial and its initial numerical-analysis warnings remain retained alongside the corrected independent residual evaluation. Passing this isolated gate does not establish that production MetalWorld hard constraints are repaired.
