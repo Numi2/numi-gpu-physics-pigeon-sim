@@ -1,0 +1,3 @@
+# Fixed-world multi-step component result
+
+After correcting the separately archived input-packing failure, all six 1/20/100-step cases completed continuously with zero failed steps and met the preregistered final-state criteria. Maximum final support error was 5.246e-9 m (undamped 100-step); energy ratios across the six trials were 0.998342 to 0.998416. The same 1 ms step was retained. These are fixed-world supports on a nine-node surrogate, and the test captures only final states: intermediate energy spikes are unobserved. The experiment does not establish moving wing attachment, mixed contacts, CCD, aerodynamic forces, physically complete feathers, full flight, or landing. All raw output, native stderr and both versions of the harness remain in Git.
