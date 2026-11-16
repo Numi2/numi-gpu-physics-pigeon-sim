@@ -1,0 +1,5 @@
+# Prediction: experimental hard-equality gate and native quality API
+
+Source branch `agent/crow-articulated-wing-20261116`, revision `2eeee007e`. The native `metalrobo_metal_unified_quality_probe` marks a scalar block as `HARD_EQUALITY` while giving it a nonzero regularization of 0.02. The recent experimental gate rejects a converged result when the row velocity exceeds the constraint tolerance, regardless of that regularization. Prediction: this existing native probe may now reject its mixed contact case, revealing a compatibility or fixture-contract discrepancy that the crow-only targeted tests do not establish. Build and run the existing probe unchanged, capture its exit status and output. A pass refutes this prediction for the fixture; a failure will be diagnosed against the owning quality API and its independent physical residual rather than addressed by relaxing the hard-equality gate or reducing timestep.
+
+This is an API regression check, not evidence that physical feathers, flight, or landing are qualified.
