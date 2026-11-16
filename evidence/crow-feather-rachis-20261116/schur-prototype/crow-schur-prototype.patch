@@ -1,0 +1,167 @@
+diff --git a/src/metal/MetalWorld.metal b/src/metal/MetalWorld.metal
+index 05bb574b8..e61d51eb1 100644
+--- a/src/metal/MetalWorld.metal
++++ b/src/metal/MetalWorld.metal
+@@ -995,8 +995,8 @@ kernel void mr_world_latch_rod_contact_status(
+ kernel void mr_world_integrate_constrained_rod_state(
+     device const MRMetalWorldContactDispatchGPU& dispatch [[buffer(0)]],
+     device const MRCCDEventStateGPU* eventStates [[buffer(1)]],
+-    device const float4* freeVelocities [[buffer(2)]],
+-    device const float* freeTwistRates [[buffer(3)]],
++    device const float4* startPositions [[buffer(2)]],
++    device const float* startTwists [[buffer(3)]],
+     device MRRodNodeStateGPU* candidateNodes [[buffer(4)]],
+     device MRRodEdgeStateGPU* candidateEdges [[buffer(5)]],
+     device MRMetalWorldContactStatusGPU* statuses [[buffer(6)]],
+@@ -1043,10 +1043,10 @@ kernel void mr_world_integrate_constrained_rod_state(
+     for (uint node = 0u; node < dispatch.rodNodeCount; ++node) {
+         const uint index = nodeBase + node;
+         MRRodNodeStateGPU state = candidateNodes[index];
+-        const float3 velocityDelta =
+-            state.velocity.xyz - freeVelocities[index].xyz;
+-        const float3 positionCorrection = duration * velocityDelta;
+-        state.position.xyz += positionCorrection;
++        const float3 correctedPosition =
++            startPositions[index].xyz + duration * state.velocity.xyz;
++        const float3 positionCorrection = correctedPosition - state.position.xyz;
++        state.position.xyz = correctedPosition;
+         if (!all(isfinite(state.position)) ||
+             !all(isfinite(state.velocity)) ||
+             !all(isfinite(positionCorrection))) {
+@@ -1070,10 +1070,10 @@ kernel void mr_world_integrate_constrained_rod_state(
+     for (uint edge = 0u; edge < dispatch.rodEdgeCount; ++edge) {
+         const uint index = edgeBase + edge;
+         MRRodEdgeStateGPU state = candidateEdges[index];
+-        const float twistCorrection = duration * (
+-            state.twistAndRate.y - freeTwistRates[index]
+-        );
+-        state.twistAndRate.x += twistCorrection;
++        const float correctedTwist =
++            startTwists[index] + duration * state.twistAndRate.y;
++        const float twistCorrection = correctedTwist - state.twistAndRate.x;
++        state.twistAndRate.x = correctedTwist;
+         if (!all(isfinite(state.twistAndRate)) ||
+             !isfinite(twistCorrection)) {
+             status.code = MR_STEP_NONFINITE_RESULT;
+diff --git a/src/metal/MetalWorld.mm b/src/metal/MetalWorld.mm
+index 9b8ab89bf..2957d5148 100644
+--- a/src/metal/MetalWorld.mm
++++ b/src/metal/MetalWorld.mm
+@@ -13537,8 +13537,8 @@ bool encodeRodConstrainedIntegration(
+         {
+             {0u, kContactDispatch},
+             {1u, eventStates},
+-            {2u, kRodOutputVelocities},
+-            {3u, kRodOutputTwistRates},
++            {2u, kRodInputPositions},
++            {3u, kRodInputTwists},
+             {4u, candidateRodNodes},
+             {5u, candidateRodEdges},
+             {6u, kContactStatuses},
+@@ -14856,6 +14856,7 @@ bool encodeParallelManifoldCompile(
+                 {16u, kCandidateBodies},
+                 {17u, candidateRodNodes},
+                 {18u, candidateRodEdges},
++                {19u, kRodInputPositions},
+             },
+             nullptr,
+             0u,
+@@ -16817,7 +16818,6 @@ bool encodeContactSubstep(
+         ) ||
+         (
+             context.boundContactDispatch.authoredConstraintCount != 0u &&
+-            !useQuality &&
+             !encodeContactThreadKernel(
+                 context,
+                 commandBuffer,
+diff --git a/src/metal/MetalWorldContact.metal b/src/metal/MetalWorldContact.metal
+index 1df7cdb01..9fed9eeaa 100644
+--- a/src/metal/MetalWorldContact.metal
++++ b/src/metal/MetalWorldContact.metal
+@@ -4692,6 +4692,7 @@ kernel void mr_world_seed_authored_constraint_ir(
+     device const MRBodyStateGPU* candidateBodies [[buffer(16)]],
+     device const MRRodNodeStateGPU* candidateRodNodes [[buffer(17)]],
+     device const MRRodEdgeStateGPU* candidateRodEdges [[buffer(18)]],
++    device const float4* startRodPositions [[buffer(19)]],
+     const uint environment [[thread_position_in_grid]]
+ ) {
+     if (environment >= dispatch.environmentCount ||
+@@ -5039,10 +5040,9 @@ kernel void mr_world_seed_authored_constraint_ir(
+                     sourceEndpoints[source.endpointOffset];
+                 const MRConstraintIREndpointGPU targetEndpoint =
+                     sourceEndpoints[source.endpointOffset + 1u];
+-                const float3 rodPosition =
+-                    candidateRodNodes[
+-                        rodNodeBase + rodEndpoint.objectIndex
+-                    ].position.xyz;
++                const float3 rodPosition = targetEndpoint.role == MR_CONSTRAINT_IR_ENDPOINT_WORLD
++                    ? startRodPositions[rodNodeBase + rodEndpoint.objectIndex].xyz
++                    : candidateRodNodes[rodNodeBase + rodEndpoint.objectIndex].position.xyz;
+                 float3 targetPosition =
+                     targetEndpoint.anchor.xyz;
+                 if (targetEndpoint.role !=
+@@ -10210,6 +10210,64 @@ kernel void mr_world_solve_generalized_constraints(
+             }
+         }
+     }
++    // RESEARCH PROTOTYPE ONLY: one 9-node rod, nine fixed-world scalar
++    // rows, no contact rows. Project the coupled rows together using cached
++    // inverse-factor response columns. This is not a mixed-contact solver.
++    if (dispatch.rodCount == 1u && dispatch.rodNodeCount == 9u &&
++        dispatch.authoredConstraintCount == 9u && status.requiredConstraints == 9u) {
++        MRRodFactorCacheGPU cache = rodFactorCaches[environment * dispatch.rodCount];
++        const uint factorStride = rodFactorElementStride(dispatch);
++        const uint envBase = environment * dispatch.operatorVelocityCapacity;
++        const uint responseBase = envBase + 2u * factorStride +
++            3u * dispatch.rodNodeCount + dispatch.rodEdgeCount;
++        const uint stride = 3u * dispatch.rodNodeCount;
++        uint node[9]; float3 direction[9]; float target[9]; float mat[81]; float rhs[9]; float lambda[9];
++        bool valid = cache.velocityOffset == 0u && cache.velocityCount == 9u &&
++            cache.code == MR_ROD_GPU_SUCCESS && (cache.flags & MR_ROD_FACTOR_CACHE_VALID) != 0u &&
++            responseBase + 9u * stride <= envBase + dispatch.operatorVelocityCapacity;
++        for (uint i=0u; i<9u; ++i) {
++            const MRConstraintIRBlockGPU block = blocks[constraintBase+i];
++            const MRConstraintIREndpointGPU a = endpoints[endpointBase+block.endpointOffset];
++            const MRConstraintIREndpointGPU b = endpoints[endpointBase+block.endpointOffset+1u];
++            const MREvaluatedConstraintIRRowGPU row = evaluatedRows[rowBase+block.rowOffset];
++            valid = valid && block.dimension == 1u && block.endpointCount == 2u &&
++                (block.flags & MR_CONSTRAINT_IR_BLOCK_ROD_ATTACHMENT) != 0u &&
++                a.role == MR_CONSTRAINT_IR_ENDPOINT_A && a.jacobianKind == MR_CONSTRAINT_IR_JACOBIAN_ROD_NODE &&
++                a.objectIndex < 9u && b.role == MR_CONSTRAINT_IR_ENDPOINT_WORLD && row.regularization == 0.0f;
++            node[i] = a.objectIndex; direction[i] = row.direction.xyz; target[i] = row.targetVelocity;
++            rhs[i] = target[i] + dot(direction[i],candidateRodNodes[rodNodeBase+node[i]].velocity.xyz);
++        }
++        if (!valid) { status.code = MR_STEP_UNSUPPORTED; statuses[environment] = status; return; }
++        for (uint i=0u; i<9u; ++i) for (uint j=0u; j<9u; ++j) {
++            const uint b = responseBase+j*stride+3u*node[i];
++            mat[i*9u+j] = -dot(direction[i],float3(rodOperatorArena[b],rodOperatorArena[b+1u],rodOperatorArena[b+2u]));
++        }
++        // Cholesky of the symmetric Schur matrix, preserving no hidden floor.
++        for (uint i=0u; i<9u; ++i) {
++            for (uint j=0u; j<=i; ++j) {
++                float value=0.5f*(mat[i*9u+j]+mat[j*9u+i]);
++                for (uint k=0u; k<j; ++k) value-=mat[i*9u+k]*mat[j*9u+k];
++                if (i==j) {
++                    if (!(value>0.0f) || !isfinite(value)) { status.code=MR_STEP_FACTORIZATION_FAILED; statuses[environment]=status; return; }
++                    mat[i*9u+i]=sqrt(value);
++                } else mat[i*9u+j]=value/mat[j*9u+j];
++            }
++        }
++        for (uint i=0u; i<9u; ++i) { float v=rhs[i]; for(uint j=0u;j<i;++j)v-=mat[i*9u+j]*lambda[j]; lambda[i]=v/mat[i*9u+i]; }
++        for (int i=8; i>=0; --i) { float v=lambda[i]; for(uint j=uint(i)+1u;j<9u;++j)v-=mat[j*9u+uint(i)]*lambda[j]; lambda[i]=v/mat[uint(i)*9u+uint(i)]; }
++        for (uint j=0u; j<9u; ++j) {
++            if (!isfinite(lambda[j])) { status.code=MR_STEP_NONFINITE_RESULT; statuses[environment]=status; return; }
++            contacts[constraintBase+j].impulses.x += lambda[j];
++            for (uint n=0u;n<9u;++n) {
++                const uint b=responseBase+j*stride+3u*n;
++                candidateRodNodes[rodNodeBase+n].velocity.xyz += lambda[j]*float3(rodOperatorArena[b],rodOperatorArena[b+1u],rodOperatorArena[b+2u]);
++            }
++        }
++        float actual=0.0f;
++        for(uint i=0u;i<9u;++i) actual=max(actual,abs(-dot(direction[i],candidateRodNodes[rodNodeBase+node[i]].velocity.xyz)-target[i]));
++        if (!isfinite(actual) || actual>2.0e-5f) { status.code=MR_STEP_FACTORIZATION_FAILED; status.diagnostics.x=actual; statuses[environment]=status; return; }
++        maximumResidual=actual;
++    }
+     status.solverIterations = max(
+         status.solverIterations,
+         iterations
