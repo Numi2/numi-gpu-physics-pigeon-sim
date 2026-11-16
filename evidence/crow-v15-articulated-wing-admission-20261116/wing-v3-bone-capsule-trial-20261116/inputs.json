@@ -1,0 +1,13 @@
+{
+  "/Users/n/Developer/numi-crow-articulated-wing-20261116/build/wing-capacity-48/crow-initial-wing-contacts": "64f3c857300a07256b2ab60dfa3dc9994ab22a62af2c223f7c884ae5357c255e",
+  "/Users/n/Developer/numi-crow-articulated-wing-20261116/build/wing-capacity-48/crow_v15_wing_dynamics_check": "924fc8b55ed693bebcc059995f888916585e0b38f500d3de9dcf444a64341907",
+  "/Users/n/Developer/numi-crow-articulated-wing-20261116/build/wing-capacity-48/crow-wing-fold-sweep": "7986bb2ed2cbad1e91884ac8fcc333baa8ebe0a247eeb9e4255bddf09deb939a",
+  "/Users/n/Developer/numi-crow-articulated-wing-20261116/build/wing-capacity-48/shaders/MetalRobo.metallib": "af62f910b0426453d419bc88aa4b8db52375070ba4fc4c1e89d7cdcdde1acfc2",
+  "/Users/n/Developer/numi-crow-articulated-wing-20261116/build/wing-capacity-48/lib/libmetalrobo.dylib": "31584364fc45986f2f127ba6c680b2b92ca8c64a34c65728efc7debdad0ea56a",
+  "/Users/n/Developer/numi-crow-articulated-wing-20261116/tests/crow_v15_wing_fixture/initial-wing-contacts.cpp": "e384bd30b3132c41f65aaf7d54fe90360e7f45665d140a356dae2d329b20f0ca",
+  "/Users/n/Developer/numi-crow-articulated-wing-20261116/tests/crow_v15_wing_fixture/direct-wing-dynamics.cpp": "1067b60d3b781f3e8594ce024b2ee4edfd0268511f23432d6dae281d659f65fe",
+  "/Users/n/Developer/numi-crow-articulated-wing-20261116/tests/crow_v15_wing_fixture/wing-fold-sweep.cpp": "f3e82dadceadfb8fb98544805bbf526044ed22d857c189e8ea5a657a8269c1fb",
+  "/Users/n/Developer/numi-crow-articulated-wing-20261116/tests/crow_v15_wing_fixture/v15_fixture.hpp": "a86d4e2bc72492014f917f60b46ca32b8ade107064eb661d7e3ef8ac1e5981ff",
+  "/Users/n/Developer/numi-crow-articulated-wing-20261116/tests/crow_v15_wing_fixture/wing_model.hpp": "ed2e2e09e260404eaf15a707882c098bdd17b294c3ccd055dcbe331057bd22c4",
+  "/Users/n/Developer/numi-crow-articulated-wing-20261116/src/core/CrowArticulatedWing.cpp": "9749bbae3bd0659514428491eb580590d3a8c4724dd40264bef9748143d53503"
+}

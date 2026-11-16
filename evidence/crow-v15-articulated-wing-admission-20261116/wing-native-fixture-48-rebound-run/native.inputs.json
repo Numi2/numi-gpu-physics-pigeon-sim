@@ -1,0 +1,15 @@
+{
+  "/Users/n/Developer/numi-crow-articulated-wing-20261116/build/wing-capacity-48/crow-rebind-wing-visuals": "cea2904e937853b066e48f46e7b85dda907758a3aa85e43247f1cea96b4a5b6a",
+  "/Users/n/Developer/numi-crow-articulated-wing-20261116/build/wing-native-fixture-48-rebound-run/visual-observation.json": "e3156cbeb682e6fb6da4ebaad728d2d5eedad9273f2b9856c7dde8fba86d445a",
+  "/Users/n/Developer/numi-crow-rl-20261107/environments/american-crow/object-push-v1/robot.mrvpack": "04b9cf3b0a17d1b1026e827b84b0083d6f79da6397156eecd973e798a4894dda",
+  "/Users/n/Developer/numi-crow-rl-20261107/assets/crow_journey_window/room.mrvpack": "726b26b8508170b0106f0dfeb8e17a877c5656c0134fef900f0132bfc62bd083",
+  "/Users/n/Developer/numi-crow-articulated-wing-20261116/build/wing-native-fixture-48-rebound-run/gate-left.wing-fixture.mrvpack": "917bfd5994c5e66830ba6b781b7f8e7f098a3df01297770f68edf003e5c2912c",
+  "/Users/n/Developer/numi-crow-articulated-wing-20261116/build/wing-native-fixture-48-rebound-run/gate-right.wing-fixture.mrvpack": "ac44ae218e647a73c74d5bae1ef604e1ab2f6cefab7405003d99ba8f08195643",
+  "/Users/n/Developer/numi-crow-articulated-wing-20261116/build/wing-native-fixture-48-rebound-run/slalom-a.wing-fixture.mrvpack": "cf08da6d151a5bf659866ea8051e26f229623d65ffd32bc2c5f46bb15f1203b5",
+  "/Users/n/Developer/numi-crow-articulated-wing-20261116/build/wing-native-fixture-48-rebound-run/slalom-b.wing-fixture.mrvpack": "df85d9026002e6fbda195dfec746eb2b1e1ccf2c2483f0a25e51bfdbba686186",
+  "/Users/n/Developer/numi-crow-articulated-wing-20261116/build/wing-native-fixture-48-rebound-run/perch.wing-fixture.mrvpack": "7dcabe5441b0ae1be5d666765040bc5a9a829153f0072c54fce4594426fcc0dd",
+  "/Users/n/Developer/numi-crow-articulated-wing-20261116/build/wing-native-fixture-48/metalrobo_task_rollout": "9235fce3e9970fcebee06648a31753266d38ac3c6bd7d33eb5b8c95fa14e48b9",
+  "/Users/n/Developer/numi-crow-articulated-wing-20261116/build/wing-native-fixture-48/libcrow-wing-48-fixture.dylib": "d6317dcef7f45eeebd222c1f88b6d52d6b8f62232eb1808132e30aaa8d722bae",
+  "/Users/n/Developer/numi-crow-articulated-wing-20261116/build/wing-capacity-48/lib/libmetalrobo.dylib": "1c4e5568dfec5d7f627469a3e22153a90edb37f2640c937de2114c58bbc86847",
+  "/Users/n/Developer/numi-crow-articulated-wing-20261116/build/wing-capacity-48/shaders/MetalRobo.metallib": "af62f910b0426453d419bc88aa4b8db52375070ba4fc4c1e89d7cdcdde1acfc2"
+}

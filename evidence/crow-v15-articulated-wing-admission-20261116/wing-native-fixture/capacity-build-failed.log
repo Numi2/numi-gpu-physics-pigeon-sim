@@ -1,0 +1,31 @@
+[1/99] Building CXX object CMakeFiles/metalrobo.dir/src/core/FrankaEngine.cpp.o
+FAILED: [code=1] CMakeFiles/metalrobo.dir/src/core/FrankaEngine.cpp.o 
+/usr/bin/c++ -DMETALROBO_BUILDING_LIBRARY=1 -DMETALROBO_DEFAULT_METALLIB=\"/Users/n/Developer/numi-crow-articulated-wing-20261116/build/wing-capacity-48/shaders/MetalRobo.metallib\" -Dmetalrobo_EXPORTS -I/Users/n/Developer/numi-crow-articulated-wing-20261116/include -I/Users/n/Developer/numi-crow-articulated-wing-20261116/matter/include -I/Users/n/Developer/numi-crow-articulated-wing-20261116/src -I/Users/n/Developer/numi-crow-articulated-wing-20261116/build/wing-capacity-48/generated -F/Applications/Xcode-26.6.0.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/Frameworks -isystem /Library/Developer/CommandLineTools/SDKs/MacOSX26.sdk/usr/include/libxml2 -O3 -DNDEBUG -std=c++23 -arch arm64 -fPIC -Wall -Wextra -Wpedantic -MD -MT CMakeFiles/metalrobo.dir/src/core/FrankaEngine.cpp.o -MF CMakeFiles/metalrobo.dir/src/core/FrankaEngine.cpp.o.d -o CMakeFiles/metalrobo.dir/src/core/FrankaEngine.cpp.o -c /Users/n/Developer/numi-crow-articulated-wing-20261116/src/core/FrankaEngine.cpp
+In file included from /Users/n/Developer/numi-crow-articulated-wing-20261116/src/core/FrankaEngine.cpp:1:
+In file included from /Users/n/Developer/numi-crow-articulated-wing-20261116/include/metalrobo/Franka.hpp:3:
+In file included from /Users/n/Developer/numi-crow-articulated-wing-20261116/include/metalrobo/EngineModel.hpp:3:
+In file included from /Users/n/Developer/numi-crow-articulated-wing-20261116/include/metalrobo/Collision.hpp:3:
+/Users/n/Developer/numi-crow-articulated-wing-20261116/include/metalrobo/engine_types.h:1772:15: error: static assertion failed due to requirement 'sizeof(MRBoundedDriveFailureGPU) == 14288'
+ 1772 | static_assert(sizeof(MRBoundedDriveFailureGPU) == 14288);
+      |               ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/Users/n/Developer/numi-crow-articulated-wing-20261116/include/metalrobo/engine_types.h:1772:48: note: expression evaluates to '20208 == 14288'
+ 1772 | static_assert(sizeof(MRBoundedDriveFailureGPU) == 14288);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~
+1 error generated.
+[2/99] Building CXX object CMakeFiles/metalrobo.dir/src/core/Model.cpp.o
+[3/99] Building CXX object CMakeFiles/metalrobo.dir/src/core/Franka.cpp.o
+[4/99] Building CXX object CMakeFiles/metalrobo.dir/src/core/FrankaHand.cpp.o
+FAILED: [code=1] CMakeFiles/metalrobo.dir/src/core/FrankaHand.cpp.o 
+/usr/bin/c++ -DMETALROBO_BUILDING_LIBRARY=1 -DMETALROBO_DEFAULT_METALLIB=\"/Users/n/Developer/numi-crow-articulated-wing-20261116/build/wing-capacity-48/shaders/MetalRobo.metallib\" -Dmetalrobo_EXPORTS -I/Users/n/Developer/numi-crow-articulated-wing-20261116/include -I/Users/n/Developer/numi-crow-articulated-wing-20261116/matter/include -I/Users/n/Developer/numi-crow-articulated-wing-20261116/src -I/Users/n/Developer/numi-crow-articulated-wing-20261116/build/wing-capacity-48/generated -F/Applications/Xcode-26.6.0.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/Frameworks -isystem /Library/Developer/CommandLineTools/SDKs/MacOSX26.sdk/usr/include/libxml2 -O3 -DNDEBUG -std=c++23 -arch arm64 -fPIC -Wall -Wextra -Wpedantic -MD -MT CMakeFiles/metalrobo.dir/src/core/FrankaHand.cpp.o -MF CMakeFiles/metalrobo.dir/src/core/FrankaHand.cpp.o.d -o CMakeFiles/metalrobo.dir/src/core/FrankaHand.cpp.o -c /Users/n/Developer/numi-crow-articulated-wing-20261116/src/core/FrankaHand.cpp
+In file included from /Users/n/Developer/numi-crow-articulated-wing-20261116/src/core/FrankaHand.cpp:1:
+In file included from /Users/n/Developer/numi-crow-articulated-wing-20261116/include/metalrobo/Franka.hpp:3:
+In file included from /Users/n/Developer/numi-crow-articulated-wing-20261116/include/metalrobo/EngineModel.hpp:3:
+In file included from /Users/n/Developer/numi-crow-articulated-wing-20261116/include/metalrobo/Collision.hpp:3:
+/Users/n/Developer/numi-crow-articulated-wing-20261116/include/metalrobo/engine_types.h:1772:15: error: static assertion failed due to requirement 'sizeof(MRBoundedDriveFailureGPU) == 14288'
+ 1772 | static_assert(sizeof(MRBoundedDriveFailureGPU) == 14288);
+      |               ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/Users/n/Developer/numi-crow-articulated-wing-20261116/include/metalrobo/engine_types.h:1772:48: note: expression evaluates to '20208 == 14288'
+ 1772 | static_assert(sizeof(MRBoundedDriveFailureGPU) == 14288);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~
+1 error generated.
+ninja: build stopped: subcommand failed.

@@ -1,0 +1,11 @@
+{
+  "/Users/n/Developer/numi-crow-articulated-wing-20261116/build/wing-continuous-fold-20261116/stdout.json": "791ffd4600d818c5a310d7ef184ebb6c56b8540980487ef961786792724ee7e3",
+  "/Users/n/Developer/numi-crow-articulated-wing-20261116/build/wing-fold-path-audit-20261116/recorded_q.tsv": "2f3550f31fd5325e5d8cb2e90fdda6a1b94fcd5623c99e99e936743a4a14fa46",
+  "/Users/n/Developer/numi-crow-articulated-wing-20261116/build/wing-capacity-48/crow-audit-wing-fold-path": "f12ccc832a2f088fc88be9be13054ad3a18b656b126df175a826c42f195e15f8",
+  "/Users/n/Developer/numi-crow-articulated-wing-20261116/build/wing-capacity-48/shaders/MetalRobo.metallib": "af62f910b0426453d419bc88aa4b8db52375070ba4fc4c1e89d7cdcdde1acfc2",
+  "/Users/n/Developer/numi-crow-articulated-wing-20261116/build/wing-capacity-48/lib/libmetalrobo.dylib": "31584364fc45986f2f127ba6c680b2b92ca8c64a34c65728efc7debdad0ea56a",
+  "/Users/n/Developer/numi-crow-articulated-wing-20261116/tests/crow_v15_wing_fixture/audit-wing-fold-path.cpp": "862fcd3ded9d0ef45b9270c5380b0e64b670d1867b13d9999fc889b5e7c3e6a6",
+  "/Users/n/Developer/numi-crow-articulated-wing-20261116/tests/crow_v15_wing_fixture/v15_fixture.hpp": "a86d4e2bc72492014f917f60b46ca32b8ade107064eb661d7e3ef8ac1e5981ff",
+  "/Users/n/Developer/numi-crow-articulated-wing-20261116/tests/crow_v15_wing_fixture/wing_model.hpp": "ed2e2e09e260404eaf15a707882c098bdd17b294c3ccd055dcbe331057bd22c4",
+  "/Users/n/Developer/numi-crow-articulated-wing-20261116/src/core/CrowArticulatedWing.cpp": "9749bbae3bd0659514428491eb580590d3a8c4724dd40264bef9748143d53503"
+}

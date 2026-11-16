@@ -1,0 +1,1 @@
+task_rollout failed: BirdFlow journey V9/V10 rollout requires --visual-observation-config; masked-depth inputs cannot be silently zero-filled.

@@ -1,0 +1,9 @@
+{
+  "/Users/n/Developer/numi-crow-articulated-wing-20261116/build/wing-capacity-48/crow_v15_wing_dynamics_check": "924fc8b55ed693bebcc059995f888916585e0b38f500d3de9dcf444a64341907",
+  "/Users/n/Developer/numi-crow-articulated-wing-20261116/build/wing-capacity-48/shaders/MetalRobo.metallib": "af62f910b0426453d419bc88aa4b8db52375070ba4fc4c1e89d7cdcdde1acfc2",
+  "/Users/n/Developer/numi-crow-articulated-wing-20261116/build/wing-capacity-48/lib/libmetalrobo.dylib": "1c4e5568dfec5d7f627469a3e22153a90edb37f2640c937de2114c58bbc86847",
+  "/Users/n/Developer/numi-crow-articulated-wing-20261116/tests/crow_v15_wing_fixture/direct-wing-dynamics.cpp": "1067b60d3b781f3e8594ce024b2ee4edfd0268511f23432d6dae281d659f65fe",
+  "/Users/n/Developer/numi-crow-articulated-wing-20261116/tests/crow_v15_wing_fixture/v15_fixture.hpp": "a86d4e2bc72492014f917f60b46ca32b8ade107064eb661d7e3ef8ac1e5981ff",
+  "/Users/n/Developer/numi-crow-articulated-wing-20261116/tests/crow_v15_wing_fixture/wing_model.hpp": "ed2e2e09e260404eaf15a707882c098bdd17b294c3ccd055dcbe331057bd22c4",
+  "/Users/n/Developer/numi-crow-articulated-wing-20261116/src/core/CrowArticulatedWing.cpp": "4dbe77f25648fa4d0939fb4ec0a2638e897d413420d8d06e5a294658776a7a5e"
+}

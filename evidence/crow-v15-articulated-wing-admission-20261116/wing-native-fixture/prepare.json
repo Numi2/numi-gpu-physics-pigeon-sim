@@ -1,0 +1,26 @@
+[
+  {
+    "argv": [
+      "install_name_tool",
+      "-change",
+      "@rpath/libmetalrobo.dylib",
+      "@rpath/libcrow-wing-fixture.dylib",
+      "/Users/n/Developer/numi-crow-articulated-wing-20261116/build/wing-native-fixture/metalrobo_task_rollout"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "codesign",
+      "-f",
+      "-s",
+      "-",
+      "/Users/n/Developer/numi-crow-articulated-wing-20261116/build/wing-native-fixture/metalrobo_task_rollout"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": "/Users/n/Developer/numi-crow-articulated-wing-20261116/build/wing-native-fixture/metalrobo_task_rollout: replacing existing signature\n"
+  }
+]

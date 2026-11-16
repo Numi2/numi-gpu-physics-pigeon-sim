@@ -1,0 +1,25 @@
+{
+  "argv": [
+    "/usr/bin/clang++",
+    "-std=c++23",
+    "-arch",
+    "arm64",
+    "-dynamiclib",
+    "-Wl,-headerpad_max_install_names",
+    "-install_name",
+    "@rpath/libcrow-wing-fixture.dylib",
+    "/Users/n/Developer/numi-crow-articulated-wing-20261116/build/wing-native-fixture/c_api.o",
+    "/Users/n/Developer/numi-crow-articulated-wing-20261116/build/wing-native-fixture/CrowArticulatedWing.o",
+    "-L/Users/n/Developer/numi-crow-rl-20261107/build/crow-v15-recorded-restart-20261114/v15-checkpoint-effort-prototype",
+    "-lmetalrobo",
+    "-framework",
+    "Foundation",
+    "-framework",
+    "Metal",
+    "-o",
+    "/Users/n/Developer/numi-crow-articulated-wing-20261116/build/wing-native-fixture/libcrow-wing-fixture.dylib"
+  ],
+  "exit": 0,
+  "stdout": "",
+  "stderr": ""
+}
