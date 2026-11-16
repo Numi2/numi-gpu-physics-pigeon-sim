@@ -1,0 +1,5 @@
+# Owner research-test registration
+
+The isolated two-way linearized Metal reference and its input/oracle are registered as `metalrobo.crow.rod_two_way_kkt_reference` in experimental source commit `2bdde054d` on `agent/crow-articulated-wing-20261116`. The test checks each case's dynamic force residual, equality error, FP64 reference difference, momentum balance, finite result and node-order invariance using Python's standard library. Its oracle was independently regenerated from the archived fixture with an identical SHA-256 digest `09d443751d0fe752b05a50948bf127826e17e7d22c62d8cba74d351202c6ab68`; the generator is retained alongside this report's native-two-way evidence. CTest passed seven of seven targeted reference, local-frame, rollback and v15 structural/dynamics checks; the retained log is `native-two-way/owner-ctest-last.log`.
+
+The test uses a standalone research kernel and does not replace, patch, or qualify MetalWorld, the hard-constraint solver, nonlinear feathers, physical wing articulation, or the full flight/landing mission. No cross-suite or biological qualification follows from these seven checks.
