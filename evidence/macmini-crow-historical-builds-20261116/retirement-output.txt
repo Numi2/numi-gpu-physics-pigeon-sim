@@ -1,0 +1,8 @@
+{"validated_roots": ["crow-deterministic-dagger-20261109", "crow-gate-recovery-dagger-20261109", "crow-v15-branch-perch-20261109", "crow-v15-grip-search-20261109", "crow-v15-heavy-wing-route-20261110", "crow-v15-toe-reactive-20261109", "crow-v15-toe-support-20261109"], "files": 296, "logical_bytes": 3714547434}
+BEFORE
+Filesystem   1024-blocks      Used Available Capacity iused     ifree %iused  Mounted on
+/dev/disk3s5   482797652 445687348  10614192    98% 3615032 106141920    3%   /System/Volumes/Data
+{"retired_roots": ["crow-deterministic-dagger-20261109", "crow-gate-recovery-dagger-20261109", "crow-v15-branch-perch-20261109", "crow-v15-grip-search-20261109", "crow-v15-heavy-wing-route-20261110", "crow-v15-toe-reactive-20261109", "crow-v15-toe-support-20261109"], "files": 296, "logical_bytes": 3714547434}
+AFTER
+Filesystem   1024-blocks      Used Available Capacity iused     ifree %iused  Mounted on
+/dev/disk3s5   482797652 442059256  14242284    97% 3614687 142422840    2%   /System/Volumes/Data
