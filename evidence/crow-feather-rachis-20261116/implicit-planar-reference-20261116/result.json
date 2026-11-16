@@ -1,0 +1,131 @@
+{
+  "host": "arm64",
+  "numpy": "2.2.5",
+  "scipy": "1.15.3",
+  "library_sha256": "8ac6e6f4ed10412e1fdfc58f78d94e6c26c00f9f53ccdefa238be9dbd786c7f2",
+  "bridge_sha256": "44b60513d6511f7dcc218faf9f932db992af897961b82d5af803887c28a49b29",
+  "dt_s": 0.001,
+  "initial_elastic_j": 7.862465050066151e-06,
+  "max_reference_gap_m": 5.599770389681964e-14,
+  "runs": [
+    {
+      "gradient_step_m": 1e-09,
+      "optimizer_success": false,
+      "message": "Desired error not necessarily achieved due to precision loss.",
+      "iterations": 11,
+      "evaluations": 61,
+      "objective_joule": 7.848832160230776e-06,
+      "elastic_joule": 7.848831595166904e-06,
+      "kinetic_joule": 5.650638722390769e-13,
+      "max_free_force_residual_n": 1.0273730977951105e-07,
+      "max_other_step_force_residual_n": 1.0274210963287883e-07,
+      "positions_m": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0031249942332002676,
+          9.090859872952514e-06,
+          0.0
+        ],
+        [
+          0.006249991516864892,
+          1.704538859436916e-05,
+          0.0
+        ],
+        [
+          0.009374993661878018,
+          2.272723346962532e-05,
+          0.0
+        ],
+        [
+          0.0125,
+          2.5e-05,
+          0.0
+        ],
+        [
+          0.015625006338119037,
+          2.2727233469179056e-05,
+          0.0
+        ],
+        [
+          0.018750008483131016,
+          1.7045388593950458e-05,
+          0.0
+        ],
+        [
+          0.021875005766797302,
+          9.090859873555013e-06,
+          0.0
+        ],
+        [
+          0.025,
+          0.0,
+          0.0
+        ]
+      ]
+    },
+    {
+      "gradient_step_m": 3e-10,
+      "optimizer_success": false,
+      "message": "Desired error not necessarily achieved due to precision loss.",
+      "iterations": 13,
+      "evaluations": 84,
+      "objective_joule": 7.84883216023077e-06,
+      "elastic_joule": 7.848831595167172e-06,
+      "kinetic_joule": 5.650635982771389e-13,
+      "max_free_force_residual_n": 7.040515398746704e-08,
+      "max_other_step_force_residual_n": 7.041362431693958e-08,
+      "positions_m": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0031249942332060186,
+          9.090859928950218e-06,
+          0.0
+        ],
+        [
+          0.006249991516871317,
+          1.7045388631394397e-05,
+          0.0
+        ],
+        [
+          0.009374993661890523,
+          2.2727233466287225e-05,
+          0.0
+        ],
+        [
+          0.0125,
+          2.5e-05,
+          0.0
+        ],
+        [
+          0.015625006338117257,
+          2.2727233504926425e-05,
+          0.0
+        ],
+        [
+          0.0187500084831394,
+          1.7045388631471395e-05,
+          0.0
+        ],
+        [
+          0.021875005766801535,
+          9.090859890462228e-06,
+          0.0
+        ],
+        [
+          0.025,
+          0.0,
+          0.0
+        ]
+      ]
+    }
+  ],
+  "predeclared_checks_pass": true
+}
