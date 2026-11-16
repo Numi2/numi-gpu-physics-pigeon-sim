@@ -1,0 +1,7 @@
+{
+  "published": true,
+  "succeeded": false,
+  "failed_steps": 1,
+  "max_rod_position_difference_m": 7.450580037569616e-10,
+  "max_rod_speed_m_s": 0.0
+}
