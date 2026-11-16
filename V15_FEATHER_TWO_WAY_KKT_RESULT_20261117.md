@@ -1,0 +1,5 @@
+# Native Metal two-way support control
+
+The preregistered one-step surrogate passed on the M4 Pro GPU. All four cases solved. Across them, maximum independently evaluated force residual was 4.37e-6 N, equality error 1.01e-11 m, deviation from the direct FP64 KKT result 3.30e-10 m, mapped node-order difference 3.55e-11 m, and momentum-balance error 1.05e-9 kg m/s. The three finite support masses moved and received the exact opposite of each corresponding rod constraint force as represented by the same equality row. Inputs, native source, device and command records, hashes, outputs and independently computed residuals are retained under `evidence/crow-feather-rachis-20261116/native-two-way/`.
+
+This is a planar linearized rod with one-dimensional point-mass supports over a single step. It does not implement articulated rigid bodies, 3D bending/twist, actual feather geometry, contacts, aerodynamics, stable multi-step integration, or a production MetalWorld solver. It is a verified mathematical building block, not qualification of the crow or its flight.

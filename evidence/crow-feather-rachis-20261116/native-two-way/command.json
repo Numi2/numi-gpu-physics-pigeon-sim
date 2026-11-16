@@ -1,0 +1,9 @@
+{
+  "host_build": ["clang++", "-std=c++17", "-O2", "-fobjc-arc", "/tmp/crow-two-way.mm", "-framework", "Foundation", "-framework", "Metal", "-o", "/tmp/crow-two-way"],
+  "run": ["/tmp/crow-two-way", "/tmp/crow-two-way.metal", "/tmp/crow-two-way-input.bin", "/tmp/crow-two-way-output.bin"],
+  "host_binary_sha256": "5872fa2f57fff60f7ff84ff9fe61758b5bf934222cb1758b394b884ec439b432",
+  "metal_source_sha256": "72eea7a51b15b08567a7949b21e813da475c9f36d7a7b60f0e8caf16144590ff",
+  "input_sha256": "79ab04ba857e228f5584fde638d81d28d1a66562bede4b1f88286e49bf00fd87",
+  "runtime_compiled_metal_fast_math": false,
+  "exit": 0
+}
