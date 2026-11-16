@@ -1,0 +1,4 @@
+9b4bf3b06f8d598e9c23952009eaf0ac3d83aaa8d2d6f04e61176ea34132d9a0  build/wing-capacity-48/crow-feather-local-curvature
+78239e16273a647124f0f369f54dd17e098fd09fc05161356146d0eff5aaeb8f  src/core/DiscreteElasticRod.cpp
+39f41d6c2971cb0f171ec54ff6a0cbe712b36c1ead4fdca204087e4735e98add  tests/crow_v15_wing_fixture/feather-local-curvature.cpp
+0e8432e153136ae6726f651d4bf8c4e71f07a681eeaf0a956a8ccdc792ee7402  build/feather-local-curvature-20261116/input.txt
