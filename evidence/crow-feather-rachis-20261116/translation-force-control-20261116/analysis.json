@@ -1,0 +1,110 @@
+[
+  {
+    "damping": 0,
+    "translation": "center",
+    "accepted_frames": 10,
+    "exit": 0,
+    "failures": [],
+    "trajectory_sha256": "8ea72148bd2b00767c454de2df9f050f68407e4a0247731505ef392ad86c1026",
+    "force_sha256": "fa379af5a86e212479340735c78df5f14fe96cd77cc3aba4c477eeef5decb8cb",
+    "origin_max_10": {
+      "step": 2,
+      "node": 2,
+      "axis": 0,
+      "force_n": -0.012518177166139226,
+      "residual_n": 0.012518177507782693,
+      "force_step_spread_n": 2.54109927544377e-12
+    },
+    "maximum": {
+      "step": 9,
+      "node": 2,
+      "axis": 0,
+      "force_n": -0.011972816416747533,
+      "residual_n": 0.011972816392612067,
+      "force_spread_n": 2.992849891525484e-11
+    },
+    "resolved_worst": true,
+    "prediction_holds": true
+  },
+  {
+    "damping": 0,
+    "translation": "far",
+    "accepted_frames": 10,
+    "exit": 0,
+    "failures": [],
+    "trajectory_sha256": "d05d4013472674278e8ab393105c6c51715dfc10666052243c9cae9357ff5c5c",
+    "force_sha256": "68db4687962f743db3e3fc705156de3e5ea552619e173c7dc20221bdad7a3cc8",
+    "origin_max_10": {
+      "step": 2,
+      "node": 2,
+      "axis": 0,
+      "force_n": -0.012518177166139226,
+      "residual_n": 0.012518177507782693,
+      "force_step_spread_n": 2.54109927544377e-12
+    },
+    "maximum": {
+      "step": 6,
+      "node": 2,
+      "axis": 0,
+      "force_n": -0.29153544495076894,
+      "residual_n": 0.2915354446252583,
+      "force_spread_n": 3.179394642005562e-08
+    },
+    "resolved_worst": true,
+    "prediction_holds": true
+  },
+  {
+    "damping": 100,
+    "translation": "center",
+    "accepted_frames": 10,
+    "exit": 0,
+    "failures": [],
+    "trajectory_sha256": "24eabbb69a241b0f488d14f385ecdc696f54e02707f1416ee4d4e39778340457",
+    "force_sha256": "df284febdf7c807700e8531a7167979ecb2bc6a2fd03faff5953c700ea7a3be2",
+    "origin_max_10": {
+      "step": 8,
+      "node": 5,
+      "axis": 0,
+      "force_n": 0.012041982065196214,
+      "residual_n": -0.012041981335397238,
+      "force_step_spread_n": 2.2305199354200056e-11
+    },
+    "maximum": {
+      "step": 6,
+      "node": 2,
+      "axis": 0,
+      "force_n": -0.011973749256673443,
+      "residual_n": 0.011973749013489588,
+      "force_spread_n": 1.327018356311882e-11
+    },
+    "resolved_worst": true,
+    "prediction_holds": true
+  },
+  {
+    "damping": 100,
+    "translation": "far",
+    "accepted_frames": 10,
+    "exit": 0,
+    "failures": [],
+    "trajectory_sha256": "9b87eaa9beedb2c212b61161a3e73c2e1d355d7dae58d7927134ab3a2bbd10be",
+    "force_sha256": "2b9bb3b38a79fe219877e1bc77afc2e1f35a8ff63d8c6f725756aa6cb1cb3ec3",
+    "origin_max_10": {
+      "step": 8,
+      "node": 5,
+      "axis": 0,
+      "force_n": 0.012041982065196214,
+      "residual_n": -0.012041981335397238,
+      "force_step_spread_n": 2.2305199354200056e-11
+    },
+    "maximum": {
+      "step": 1,
+      "node": 2,
+      "axis": 0,
+      "force_n": -0.2915360371572422,
+      "residual_n": 0.29153641142400355,
+      "force_spread_n": 3.190914282802382e-08
+    },
+    "resolved_worst": true,
+    "prediction_holds": true
+  }
+]
