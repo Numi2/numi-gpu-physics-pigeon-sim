@@ -1,0 +1,9 @@
+[1/5] Building CXX object CMakeFiles/crow_quality_refinement_guard.dir/tests/crow_v15_wing_fixture/quality-refinement-guard.cpp.o
+[2/5] Building OBJCXX object CMakeFiles/metalrobo.dir/src/metal/MetalUnifiedQualitySolver.mm.o
+[3/5] Linking CXX shared library lib/libmetalrobo.dylib
+[4/5] Linking CXX executable crow_quality_refinement_guard
+[5/5] Linking CXX executable bin/metalrobo_metal_unified_quality_probe
+hard=1 bias=0.08 rejected=7 transactional=1
+hard=0 bias=0.08 status=0 path=0 equality=0
+hard=1 bias=0 status=0 path=0 equality=0
+metal_unified_quality=ok device="Apple M4 Pro" environments=2 nv=12 rows=15 blocks=5 direct_pcg_error=1.71661e-05 optimality=7.6183e-06 feasibility=1.07288e-06 newton=5 pcg=9 capped_newton_optimality=3.3296e-08 frictionless_scalar_oracle=ok allocated_bytes=12384 large_rows=300 large_pcg=2 large_allocated_bytes=173060
