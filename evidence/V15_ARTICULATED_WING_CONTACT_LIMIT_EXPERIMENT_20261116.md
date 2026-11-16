@@ -1,0 +1,5 @@
+# Contact-solver joint-limit screen
+
+The preregistered free-motion screen published ten accepted steps, with elbow q rising by 0.000340802 rad and v by 0.0568723 rad/s from a 0.001 N m input. The neighboring wrist reached -0.000193782 rad despite an authored zero lower bound. That is a free-motion observation, not proof that the contact solver enforces limits.
+
+Repeat the matched zero-gravity, 1 ms, eight-substep, ten-step zero-versus-left-elbow-effort experiment with temporal-cone contact enabled and no task, policy, flight aerodynamics, or teacher. Use the actual candidate colliders and no scene bodies. Record native admission, all per-step statuses, final states, contact diagnostics and the wrist q; no reset, pose adjustment, collision masking, or limit modification is allowed. Predict 10 finite accepted steps for both and wrist flexion no lower than -0.0001 rad. A rejection, failed step or greater violation is a failed screen and must remain visible. If it passes, this short particular test does not qualify the folding range, resting or dynamic self-contact, energy behavior, or real-world anatomy.
