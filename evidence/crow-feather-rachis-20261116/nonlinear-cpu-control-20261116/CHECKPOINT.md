@@ -1,0 +1,3 @@
+# Safety checkpoint
+
+The live-world candidate has been saved verbatim as `unqualified-world-only.patch` against source base 7c9657d461312ba74261033e42f37ba1daef70a5. Its start-state integration changes all rods even though only world-fixed support cases were tested; its damped free-node force residual failed the fixed bound. This patch is research evidence and must not be promoted as a physical fix. It is removed from the active research checkout after successful archival. The bounded standalone exact all-bilateral linear solver and its independent controls remain under test separately. Restoring the patch is not recommended without addressing the nonlinear and damping semantics, mixed contact, moving supports, CCD and transactionality.
