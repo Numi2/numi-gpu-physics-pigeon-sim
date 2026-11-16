@@ -1,0 +1,36 @@
+[
+  {
+    "damping": 0,
+    "source_sha256": "87036bbc93cf3a82b18b1ceb7fba375163a7e2afd41d3af3bc59a56800693176",
+    "force_sha256": "8730aadf1c6f1c50d6eb823ce594f2db9a816e2c8fbcbb311a30ee15ff1ca5d5",
+    "components": 1800,
+    "maximum": {
+      "step": 2,
+      "node": 2,
+      "axis": 0,
+      "force_n": -0.012518177166139226,
+      "residual_n": 0.012518177507782693,
+      "force_step_spread_n": 2.54109927544377e-12
+    },
+    "max_force_spread_any_n": 5.675120963444247e-11,
+    "resolved_worst": true,
+    "passes": false
+  },
+  {
+    "damping": 100,
+    "source_sha256": "c983643de4ec5b634976af25ff40c4f14d58f00ed2396bcb6eeb214fc141ebee",
+    "force_sha256": "479825678923e55cb69c8e78daa547fa2af31cdad9caeb711062183665634577",
+    "components": 1800,
+    "maximum": {
+      "step": 94,
+      "node": 5,
+      "axis": 0,
+      "force_n": 0.012042039849783876,
+      "residual_n": -0.012042039043759218,
+      "force_step_spread_n": 2.7952085090987566e-11
+    },
+    "max_force_spread_any_n": 5.590417538614556e-11,
+    "resolved_worst": true,
+    "passes": false
+  }
+]
