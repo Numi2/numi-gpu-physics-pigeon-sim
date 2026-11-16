@@ -1,0 +1,9 @@
+{
+  "argv": [
+    "/Users/n/Developer/numi-crow-articulated-wing-20261116/build/wing-capacity-48/crow-audit-wing-fold-path",
+    "/Users/n/Developer/numi-crow-articulated-wing-20261116/build/wing-capacity-48/shaders/MetalRobo.metallib",
+    "/Users/n/Developer/numi-crow-articulated-wing-20261116/build/wing-aero-drive-response-20261116/poses-0.txt"
+  ],
+  "exit": 0,
+  "elapsed_s": 1.0020214169999946
+}
