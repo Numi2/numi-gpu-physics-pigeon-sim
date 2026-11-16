@@ -1,0 +1,3 @@
+# Unloaded attachment correction direction: passed
+
+Both temporalCone and qualityNewton were tested separately for positive and negative rigid translations of an initially straight, unstressed rod. All four dispatched and returned status 0. All three attached nodes moved toward their fixed targets, from 25.000 µm displacement to approximately 22.222–22.225 µm, with corrective velocity approximately 2.775–2.778 mm/s. Positive and negative trials were mirror symmetric to the stored precision. This falsifies a general reversal of the fixed-support correction sign in this unloaded one-step case; it does not validate elastic-load response, sustained support, physical feathers, or flight. Complete states and inputs are archived.
