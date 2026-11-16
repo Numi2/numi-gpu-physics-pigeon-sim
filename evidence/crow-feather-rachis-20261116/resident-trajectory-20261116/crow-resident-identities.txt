@@ -1,0 +1,4 @@
+f5605c1c950e4ac212a9fe8f68fa484943324b6668d4b87536173d3694260e84  /tmp/crow-resident-trajectory.mm
+143ebe95c326051cbcdf4d2ac6bae0bced470e95745891f6081b5f8dd1999a22  /tmp/crow-resident-trajectory
+c6c74d28562c25bea654fb90324e65cbb3ca88c1b9bfd330fce73a5f3e2c7288  build/wing-capacity-48/lib/libmetalrobo.dylib
+a19066b765182e105d886384a71ea7a0dbacbc48b97363d1c33b34f0fe60dcc2  build/wing-capacity-48/shaders/MetalRobo.metallib

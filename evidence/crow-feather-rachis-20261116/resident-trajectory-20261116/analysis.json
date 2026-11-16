@@ -1,0 +1,26 @@
+[
+  {
+    "damping": 0,
+    "frames": 100,
+    "failure_events": [],
+    "max_support_error_m": 5.245968061758593e-09,
+    "max_energy_ratio": 0.9983424630180323,
+    "final_position_gap_m": 4.85722573273506e-16,
+    "final_velocity_gap_m_s": 4.573977915173222e-20,
+    "initial_energy": 7.862465050066151e-06,
+    "exit": "0",
+    "preregistered_pass": true
+  },
+  {
+    "damping": 100,
+    "frames": 100,
+    "failure_events": [],
+    "max_support_error_m": 4.689622456920188e-09,
+    "max_energy_ratio": 0.9984161218651102,
+    "final_position_gap_m": 4.85722573273506e-16,
+    "final_velocity_gap_m_s": 4.358492733391728e-17,
+    "initial_energy": 7.862465050066151e-06,
+    "exit": "0",
+    "preregistered_pass": true
+  }
+]

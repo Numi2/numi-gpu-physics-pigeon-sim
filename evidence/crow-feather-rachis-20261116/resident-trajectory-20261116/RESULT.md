@@ -1,0 +1,5 @@
+# Accepted-state fixed-support trajectories
+
+Both preregistered arms completed 100 native resident steps without failure. Across all accepted frames, maximum support errors were 5.246e-9 m (damping 0) and 4.690e-9 m (damping 100); maximum total energy ratios were 0.9983425 and 0.9984162 respectively. Initial native energy was 7.862465050066151e-6 J. The final resident states matched the archived 100-step monolithic batch positions to <5e-16 m and velocities to <4.4e-17 m/s in parsed output. No published state was fed back as an initial state. Both predeclared physical-screen and observation-consistency bounds passed for these deterministic fixed-world fixtures.
+
+The complete 200 accepted states, energies, twists, native stderr, source, device-library hashes and comparison metrics are retained. The accepted state is sampled at each 1 ms control step; intra-step maxima are not observed. This is a supported uniform rod surrogate, not a complete feather. It does not establish moving articulated-wing attachment, wing reaction, mixed contact, CCD, aerodynamics, flight or landing.
