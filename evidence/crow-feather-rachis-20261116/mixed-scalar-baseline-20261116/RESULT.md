@@ -1,0 +1,3 @@
+# Mixed scalar baseline: feasible cases rejected
+
+The native solver rejected all three analytically feasible mixed problems transactionally with GPU status 7. Reported hard-equality violations were 0.001961, 0.001961 and 0.003874, exceeding the fixed 2e-5 tolerance; outputs retained their sentinel values. The deliberately contradictory hard-row case also rejected transactionally, with violation 0.051485. The feasible failures show that the all-hard exact path is not enough when an active or inactive scalar contact is present. No contact cone, world state, feather trajectory or flight claim follows. Original plan plus preregistered mathematical correction, exact fixture code, stdout and stderr are retained.
