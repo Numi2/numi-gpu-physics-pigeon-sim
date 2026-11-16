@@ -1,0 +1,4 @@
+{"mode":0,"succeeded":true,"dispatched":true,"published":true,"status":0,"message":"","velocity":[0.10000000149011612,0.19607841968536377],"impulses":[0.10000000149011612,0.19607841968536377]}
+{"mode":1,"succeeded":true,"dispatched":true,"published":true,"status":0,"message":"","velocity":[0.10000000149011612,0],"impulses":[0.10000000149011612,0]}
+{"mode":2,"succeeded":true,"dispatched":true,"published":true,"status":0,"message":"","velocity":[0.10000002384185791,0.19509801268577576],"impulses":[0.19754903018474579,0.24509802460670471]}
+{"mode":3,"succeeded":false,"dispatched":true,"published":false,"status":7,"message":"unified quality solve failed in problem 0 with GPU code 7 block=1 iterations=1/0 certificates=0.000001/0.000000 hard_equality=0.051485 objective=0.136139","velocity":[123],"impulses":[456]}

@@ -1,0 +1,3 @@
+# Initial analytic screen
+
+The experimental bounded one-normal solver passed the three previously failed feasible analytic cases: [0.1000000015, 0.1960784197], [0.1000000015, 0], and [0.1000000238, 0.1950980127]. The inconsistent hard-row control remained a transactional rejection with the sentinel outputs intact. All six targeted owner tests passed. The exact experimental patch and raw native build/test/output logs are retained; this is only an initial screen. The implementation handles one compliant scalar normal and independent hard rows; it does not handle friction cones, multiple normal contacts, general world coupling, trajectory physics or flight.

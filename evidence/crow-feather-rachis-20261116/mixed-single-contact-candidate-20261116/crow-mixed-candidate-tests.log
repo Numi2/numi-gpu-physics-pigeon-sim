@@ -1,0 +1,25 @@
+Test project /Users/n/Developer/numi-crow-articulated-wing-20261116/build/wing-capacity-48
+    Start 53: metalrobo.crow.quality_refinement_hard_equality_guard
+1/6 Test #53: metalrobo.crow.quality_refinement_hard_equality_guard ...   Passed    0.34 sec
+    Start 54: metalrobo.crow.v15_articulated_hand_response
+2/6 Test #54: metalrobo.crow.v15_articulated_hand_response ............   Passed    0.29 sec
+    Start 59: metalrobo.crow.quality_exact_v15_bilateral
+3/6 Test #59: metalrobo.crow.quality_exact_v15_bilateral ..............   Passed    0.44 sec
+    Start 60: metalrobo.crow.quality_exact_v15_poses
+4/6 Test #60: metalrobo.crow.quality_exact_v15_poses ..................   Passed    0.20 sec
+    Start 66: metalrobo.crow.rod_free_local_frame
+5/6 Test #66: metalrobo.crow.rod_free_local_frame .....................   Passed    0.34 sec
+    Start 67: metalrobo.crow.rod_hard_equality_guard
+6/6 Test #67: metalrobo.crow.rod_hard_equality_guard ..................   Passed    4.77 sec
+
+100% tests passed out of 6
+
+Label Time Summary:
+crow            =   6.37 sec*proc (6 tests)
+experimental    =   6.37 sec*proc (6 tests)
+precision       =   0.34 sec*proc (1 test)
+reference       =   0.92 sec*proc (3 tests)
+rod             =   6.37 sec*proc (6 tests)
+rollback        =   5.11 sec*proc (2 tests)
+
+Total Test time (real) =   6.37 sec

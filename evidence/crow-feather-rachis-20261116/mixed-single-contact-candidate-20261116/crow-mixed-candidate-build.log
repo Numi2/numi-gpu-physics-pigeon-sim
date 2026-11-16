@@ -1,0 +1,35 @@
+[1/31] Building CXX object matter/CMakeFiles/numi_matter_runtime_objects.dir/src/metal_world.cpp.o
+[2/31] Generating shaders/MetalRobo.metallib
+[3/31] Building CXX object CMakeFiles/metalrobo.dir/src/core/CrowArticulatedWing.cpp.o
+[4/31] Building CXX object CMakeFiles/metalrobo.dir/src/core/CrowEmbodiment.cpp.o
+[5/31] Building CXX object CMakeFiles/metalrobo.dir/src/core/FrankaWorld.cpp.o
+[6/31] Building CXX object CMakeFiles/metalrobo.dir/src/core/CrowManipulation.cpp.o
+[7/31] Building CXX object CMakeFiles/metalrobo.dir/src/core/CrowForaging.cpp.o
+[8/31] Building CXX object CMakeFiles/metalrobo.dir/src/core/RunProgram.cpp.o
+[9/31] Building CXX object CMakeFiles/metalrobo.dir/src/core/VisualPlatform.cpp.o
+[10/31] Building OBJCXX object CMakeFiles/metalrobo.dir/src/metal/FiniteResource.mm.o
+[11/31] Building CXX object CMakeFiles/metalrobo.dir/src/core/LocomotionWorld.cpp.o
+[12/31] Building CXX object CMakeFiles/metalrobo.dir/src/core/TaskProgram.cpp.o
+[13/31] Building OBJCXX object CMakeFiles/metalrobo.dir/src/metal/RetinalObserver.mm.o
+[14/31] Building OBJCXX object CMakeFiles/metalrobo.dir/src/metal/MetalUnifiedQualitySolver.mm.o
+/Users/n/Developer/numi-crow-articulated-wing-20261116/src/metal/MetalUnifiedQualitySolver.mm:505:67: warning: comparison of integers of different signs: 'typename iterator_traits<std::__wrap_iter<const MRUnifiedQualityBlockGPU *>>::difference_type' (aka 'long') and 'size_type' (aka 'unsigned long') [-Wsign-compare]
+  505 |         const bool oneSoftScalar = hardCount > 0 && hardCount + 1 == problem.blocks.size() &&
+      |                                                     ~~~~~~~~~~~~~ ^  ~~~~~~~~~~~~~~~~~~~~~
+1 warning generated.
+[15/31] Building OBJCXX object CMakeFiles/metalrobo.dir/src/metal/MetalRunInspector.mm.o
+[16/31] Building OBJCXX object CMakeFiles/metalrobo.dir/src/metal/MetalHybridRenderer.mm.o
+[17/31] Building CXX object CMakeFiles/crow_articulated_hand_response.dir/tests/crow_v15_wing_fixture/articulated-hand-response.cpp.o
+[18/31] Building CXX object CMakeFiles/metalrobo_metal_unified_quality_probe.dir/apps/metal_unified_quality_probe.cpp.o
+[19/31] Building CXX object CMakeFiles/crow_quality_refinement_guard.dir/tests/crow_v15_wing_fixture/quality-refinement-guard.cpp.o
+[20/31] Building OBJCXX object CMakeFiles/crow-feather-equality-gate.dir/tests/crow_v15_wing_fixture/feather-equality-gate.mm.o
+[21/31] Building OBJCXX object CMakeFiles/crow-feather-predicted-position.dir/tests/crow_v15_wing_fixture/feather-predicted-position.mm.o
+[22/31] Building OBJCXX object CMakeFiles/metalrobo.dir/src/metal/MetalWorld.mm.o
+[23/31] Building CXX object CMakeFiles/metalrobo.dir/src/c_api.cpp.o
+[24/31] Linking CXX shared library lib/libmetalrobo.dylib
+[25/31] Linking OBJCXX executable crow-feather-equality-gate
+[26/31] Linking CXX executable crow_articulated_hand_response
+[27/31] Linking CXX executable bin/metalrobo_metal_unified_quality_probe
+[28/31] Linking CXX executable crow_quality_refinement_guard
+[29/31] Linking OBJCXX executable crow-feather-predicted-position
+[30/31] Building CXX object CMakeFiles/crow_quality_exact_v15.dir/tests/crow_v15_wing_fixture/quality-exact-v15.cpp.o
+[31/31] Linking CXX executable crow_quality_exact_v15
