@@ -1,0 +1,5 @@
+# Force instrument calibration result
+
+The exact same retained end states were evaluated with the native CPU elastic-energy function; no simulation was rerun. Across 3e-9, 1e-9 and 3e-10 m central-difference steps, the largest per-node force spread was 3.14e-11 N for damping 0 and 1.44e-11 N for damping 100. The independent force instrument meets its preregistered 0.001 N resolution bound. The damping-100 maximum free-node y force-balance residual remains 0.010320275 N across scales and exceeds the fixed 0.01 N bound. Thus the candidate is contradicted for that control; the energy and support-position improvement must not be promoted as physical qualification. Raw force vectors, all six step sizes, and analysis are retained alongside the source instrument.
+
+The exact equality solver enforces the linear velocity rows against the assembled world operator; it does not by itself certify the nonlinear rod force at the final constrained position. The native world rollback test also has a changed premise and remains failing. Both issues require resolution; no inference is made about real feathers, contact cones or flight.
