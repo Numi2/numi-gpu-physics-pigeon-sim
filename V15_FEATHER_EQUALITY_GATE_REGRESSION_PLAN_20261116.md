@@ -1,0 +1,3 @@
+# Fail-closed equality gate regression screen
+
+The narrow gate experiment caught two false-success loaded rod cases and preserved rollback, while a stationary control passed. Before retaining that guard on the isolated research branch, rerun it on the current baseline shader with the same loaded and stationary cases and execute the four existing v15 wing structure, free-dynamics, quiet-contact and CPU/GPU reference checks. Record all statuses, binary and shader hashes, and logs. Prediction: loaded solves fail with retained pre-step rod state; stationary control and all four v15 checks pass. This is not broad certification of the shared quality solver; other robots, contact, mixed moving attachments, CCD and production rollback remain required before promotion.
