@@ -1,0 +1,5 @@
+# Native GPU constrained KKT prototype
+
+Implement a research-only native Metal dense Cholesky/Schur solver for the same 9-node planar linearized local-coordinate system and three prescribed support positions. Dispatch the four retained rest/incoming-velocity and forward/reversed-order cases on the Mac mini GPU. Upload the previously archived native-energy Hessian, masses and inputs; compute FP32 positions and support forces on device. This isolated prototype does not change the shared MetalWorld or bypass its safety guard.
+
+Preregister: every GPU case must report successful positive-definite factorization; maximum independently evaluated double-precision dynamic force residual <0.01 N; support error <1e-9 m; position error versus direct FP64 KKT <0.05 micrometres; and physically mapped node-order gap <0.05 micrometres. Record Metal device, native source, compilation options, input identity, all outputs and failures. Even a pass only validates this tiny planar linearized test: nonlinear 3D rods, moving two-way articulated attachments, mixed contacts, timestep-independent physical dynamics and production performance remain separate required work.
