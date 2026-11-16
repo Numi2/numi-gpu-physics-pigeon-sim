@@ -1,0 +1,7 @@
+# Continuous actuated wing-fold trial
+
+The v3 bone-proxy contact screen had no penetration beyond 0.5 mm at 22 of 25 sampled poses and has a grid-connected route to (1.8,1.575) radians; three poses still failed, including upper-wing/hand or torso/hand intersections. The proxies are speculative, include deliberate gaps around the wrist and do not model feather surfaces.
+
+Use the v3 mechanics fixture with temporal-cone contact, zero gravity, no aerodynamics, no task, no teacher and no policy. Execute a single uninterrupted 480-step run at 240 Hz and four substeps per step, using native bounded implicit position drives. Hold every scalar driven joint at its authored default except left/right elbow and wrist, whose targets follow a smoothstep ramp from zero to 1.8 and 1.575 rad over 1.5 seconds and then hold for 0.5 seconds. Start once at default q/v; no intermediate resets or checkpoint jumps. The existing per-joint drive and effort limits apply, and the floating root is not pinned. Save all q/v observations, per-step contact/status counts, target commands, and final contact evidence.
+
+Predict: all 480 steps are accepted and finite, both elbows and wrists end within 0.2 rad of their targets, and no generalized velocity exceeds its authored limit by more than 0.5 rad/s. Report contacts and any failures, and do not assert swept clearance merely from accepted solver steps. This is a bounded rigid-body mechanics experiment, not a trained controller, anatomy calibration, feather rig, perch balance, or flight qualification.
