@@ -1,0 +1,80 @@
+[
+  {
+    "offset_m": 0.0,
+    "mode": "float",
+    "maximum": {
+      "node": 6,
+      "axis": 0,
+      "force_error_n": -0.004376707901636724,
+      "error_spread_n": 1.8352379511921146e-11
+    },
+    "max_error_spread_n": 1.8352379511921146e-11,
+    "passes_split_bound": null,
+    "passes_float_one_meter_prediction": null
+  },
+  {
+    "offset_m": 0.0,
+    "mode": "split",
+    "maximum": {
+      "node": 6,
+      "axis": 0,
+      "force_error_n": 7.284483259650809e-11,
+      "error_spread_n": 3.3881335237406773e-12
+    },
+    "max_error_spread_n": 2.4846299788384898e-11,
+    "passes_split_bound": true,
+    "passes_float_one_meter_prediction": null
+  },
+  {
+    "offset_m": -0.0125,
+    "mode": "float",
+    "maximum": {
+      "node": 7,
+      "axis": 0,
+      "force_error_n": -0.0010941755127950384,
+      "error_spread_n": 2.2305201088923532e-11
+    },
+    "max_error_spread_n": 2.4281611155752654e-11,
+    "passes_split_bound": null,
+    "passes_float_one_meter_prediction": null
+  },
+  {
+    "offset_m": -0.0125,
+    "mode": "split",
+    "maximum": {
+      "node": 6,
+      "axis": 0,
+      "force_error_n": -2.964615358758138e-11,
+      "error_spread_n": 1.2705494642495374e-11
+    },
+    "max_error_spread_n": 2.90814645246564e-11,
+    "passes_split_bound": true,
+    "passes_float_one_meter_prediction": null
+  },
+  {
+    "offset_m": 1.0,
+    "mode": "float",
+    "maximum": {
+      "node": 3,
+      "axis": 0,
+      "force_error_n": 0.28011000866755764,
+      "error_spread_n": 3.116064806185648e-08
+    },
+    "max_error_spread_n": 3.116093039157164e-08,
+    "passes_split_bound": null,
+    "passes_float_one_meter_prediction": true
+  },
+  {
+    "offset_m": 1.0,
+    "mode": "split",
+    "maximum": {
+      "node": 3,
+      "axis": 0,
+      "force_error_n": -4.699338791366858e-09,
+      "error_spread_n": 4.235164302590633e-12
+    },
+    "max_error_spread_n": 2.202285662861181e-11,
+    "passes_split_bound": true,
+    "passes_float_one_meter_prediction": null
+  }
+]

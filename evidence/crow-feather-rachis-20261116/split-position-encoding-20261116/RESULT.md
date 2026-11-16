@@ -1,0 +1,5 @@
+# Coordinate encoding control
+
+For the identical unstepped shaped rod at +1 m, ordinary FP32 absolute-coordinate encoding changed the maximum free-node elastic force by 0.280110 N relative to the double-input reference. Reconstructing a separately stored FP32 high and low part in CPU double reduced the maximum encoding difference to 4.70e-9 N. At offsets 0 and -0.0125 m, the high/low differences were 7.29e-11 and 2.97e-11 N. All declared encoding predictions and difference-step resolution bounds passed.
+
+This isolates a representational effect in the independent force calculation. It does not show that the GPU can use a two-float representation correctly: every difference, norm, collision point, transform, constraint and state update would need compensated treatment, and collapsing high plus low to one float would lose the benefit. The results do not recover lost bits in earlier trajectories, establish nonlinear dynamics or qualify feathers, flight or landing. All encoded values, forces, analysis and native instrument identities are retained; no simulation was rerun or timestep changed.
