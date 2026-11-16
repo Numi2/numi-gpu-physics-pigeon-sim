@@ -1,0 +1,7 @@
+# Mac mini historical crow builds: pre-retirement verification
+
+Source host: `macmini`; source worktree `/Users/n/Developer/numi-crow-rl-20261107`, commit `4ab800743a06cc955774b1812849c720ae19d24f`. The selected seven `build` roots are listed in `selection.json`; they were untracked and had no open handles at selection. The active recorded-restart checkpoint and articulated-wing worktree are outside the selection.
+
+The archive contains 296 files, 3,714,547,434 logical file bytes and 345 entries including directories. The private release is <https://github.com/Numi2/workstation-checkpoint-archive/releases/tag/macmini-crow-historical-builds-20261116>. Its payload is a release asset, not a Git object; these verification records and restore tools are stored in Git. The asset is 1,220,902,631 bytes, SHA-256 `d898ba887415e5fbcadd45fcb87608dc08aebd419ddd91944e405949288f7f42`. The original manifest SHA-256 is `07a497d8a64087d7b50d27cc569a229f6182fc769f048a5cbad6c7bc126f3b72`.
+
+An independent download of the release passed its SHA-256, full extraction to a fresh directory and a per-entry comparison of content hashes, sizes, modes, modification timestamps and original extended attributes. macOS added its own `com.apple.provenance` attribute on 345 restored entries; the verifier allows this extra receiver attribute without relaxing any recorded source attribute. The source was independently re-manifested with the original hash before this record. Deletion is conditional on a fresh source, open-handle and Git-tracking recheck.

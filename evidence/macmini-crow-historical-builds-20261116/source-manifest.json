@@ -1,0 +1,3192 @@
+{
+  "roots": {
+    "crow-deterministic-dagger-20261109": {
+      "entries": [
+        {
+          "mode": 493,
+          "mtime_ns": 1794202673647534956,
+          "path": ".",
+          "size": 0,
+          "type": "directory",
+          "xattrs": {}
+        },
+        {
+          "mode": 384,
+          "mtime_ns": 1794202646601417839,
+          "path": "held-out-a.rollout",
+          "sha256": "747857fc16d690323ca6f01b9025d782f5b2e6068364bc7937c5bd1bb811ef50",
+          "size": 95424956,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794202646483116496,
+          "path": "held-out-a.tsv",
+          "sha256": "c5379337015ff30f714b85f4e31b8d988aa8f87cc457fa2e85c171e0467241a9",
+          "size": 1831174,
+          "type": "file",
+          "xattrs": {
+            "com.apple.TextEncoding": "dXRmLTg7MTM0MjE3OTg0"
+          }
+        },
+        {
+          "mode": 384,
+          "mtime_ns": 1794202673646377818,
+          "path": "held-out-b.rollout",
+          "sha256": "a75d6421cedf0bf65146f70ae94b75f8c4537e18066fe2a6e496c1f0d1f4ef29",
+          "size": 95424956,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794202673528131143,
+          "path": "held-out-b.tsv",
+          "sha256": "853fa49db3bb240022b0fe3f8d285d302b918911a8013dd5b7597156e1487127",
+          "size": 1830479,
+          "type": "file",
+          "xattrs": {
+            "com.apple.TextEncoding": "dXRmLTg7MTM0MjE3OTg0"
+          }
+        },
+        {
+          "mode": 384,
+          "mtime_ns": 1794202617777350305,
+          "path": "training.rollout",
+          "sha256": "0d85c6897fd3d89e499588e164d7e5ca31738dc4623ba014fca78babd9a6cbd2",
+          "size": 95424956,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794202617658272202,
+          "path": "training.tsv",
+          "sha256": "de034ea19cc96044783894e7b737fc3f29b48c1d841642059221c24e48d08b24",
+          "size": 1827984,
+          "type": "file",
+          "xattrs": {
+            "com.apple.TextEncoding": "dXRmLTg7MTM0MjE3OTg0"
+          }
+        }
+      ],
+      "schema": 1
+    },
+    "crow-gate-recovery-dagger-20261109": {
+      "entries": [
+        {
+          "mode": 493,
+          "mtime_ns": 1794203654289594671,
+          "path": ".",
+          "size": 0,
+          "type": "directory",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794203563884501308,
+          "path": "full-student.air",
+          "sha256": "be9db23daebc74e7cbc416cc6860dbb9a40cf4404dde62351136cfa2ba37b850",
+          "size": 194832,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794203563566913872,
+          "path": "full-student.metal",
+          "sha256": "00207356dc064839ea5b9960f51ed78320924138272e8316b581931b4313e03d",
+          "size": 403207,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794203564192142090,
+          "path": "full-student.metallib",
+          "sha256": "aa13c49c121c9c48113918f5b8e174a907136dbe4e81c4f541acb9138b09564c",
+          "size": 4464384,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 384,
+          "mtime_ns": 1794203623500588492,
+          "path": "held-out-a.rollout",
+          "sha256": "e5291296c35780f9eaa0f0a7087a8f868699976aa7592b3e98d3980489a39dd3",
+          "size": 95424956,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794203623379413825,
+          "path": "held-out-a.tsv",
+          "sha256": "c895ce6a2788a5128d2cf12207a4e5742d77ec1b62cff5c932a9c27cbe9fbe6b",
+          "size": 1826782,
+          "type": "file",
+          "xattrs": {
+            "com.apple.TextEncoding": "dXRmLTg7MTM0MjE3OTg0"
+          }
+        },
+        {
+          "mode": 384,
+          "mtime_ns": 1794203654288489534,
+          "path": "held-out-b.rollout",
+          "sha256": "064fbd1015bcfbfb506cd3ca5d1d32196b78f03be4620c09a66ef7d372285e17",
+          "size": 95424956,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794203654168889177,
+          "path": "held-out-b.tsv",
+          "sha256": "7bb06445c0c9af4599ba4df24149e8c4fb4fb1c5f17bafd639419bbba1071e6b",
+          "size": 1825695,
+          "type": "file",
+          "xattrs": {
+            "com.apple.TextEncoding": "dXRmLTg7MTM0MjE3OTg0"
+          }
+        },
+        {
+          "mode": 384,
+          "mtime_ns": 1794203593405360975,
+          "path": "training.rollout",
+          "sha256": "4c855c4e0a93bc71b0495ef058bc2ee033ea03df7d633a81533d8a8244bdf1e8",
+          "size": 95424956,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794203593282027117,
+          "path": "training.tsv",
+          "sha256": "7ac3e00684529b2f6c8c83094a9c3f511670d5ebe5fd7cb4d12ebbb53115003c",
+          "size": 1828984,
+          "type": "file",
+          "xattrs": {
+            "com.apple.TextEncoding": "dXRmLTg7MTM0MjE3OTg0"
+          }
+        }
+      ],
+      "schema": 1
+    },
+    "crow-v15-branch-perch-20261109": {
+      "entries": [
+        {
+          "mode": 493,
+          "mtime_ns": 1794263113478121967,
+          "path": ".",
+          "size": 0,
+          "type": "directory",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794263020894543170,
+          "path": "active.metallib",
+          "sha256": "d087a2db395d6c8bffbd7b7d4f74ec3f304ff57604e8166cf777d70d2a6912ae",
+          "size": 4469456,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794262961935898662,
+          "path": "c_api.cpp",
+          "sha256": "5f4f18eac5667237a744c39c190156d1019968c6127a1907ac543879f65e4a4a",
+          "size": 288543,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794262965994480407,
+          "path": "c_api.cpp.o",
+          "sha256": "fe00f1fe30b7809f5c378df7f9b1268928dbc105b1f3f74917bceaf2c4a30fa1",
+          "size": 717048,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794262965995027036,
+          "path": "c_api.cpp.o.d",
+          "sha256": "a9f30ad821d1bbcc9ae2d7c44718c95d4133d2404ef2cbe9c40bd35a5e236ec1",
+          "size": 159598,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 493,
+          "mtime_ns": 1794262981415673521,
+          "path": "contract-debug-branch",
+          "size": 0,
+          "type": "directory",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794262977291458514,
+          "path": "contract-debug-branch/c_api.cpp",
+          "sha256": "31df2a115a5ef96ecb8d2ae551c59396bd83081e3c03e0b85a9d535eaaa89a1a",
+          "size": 290190,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794262981339386225,
+          "path": "contract-debug-branch/c_api.cpp.o",
+          "sha256": "b6e1c023e56300c2209a333ca80958d4dc18882e0bf3c1f3605ddf56e7bc02aa",
+          "size": 721160,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794262981339949604,
+          "path": "contract-debug-branch/c_api.cpp.o.d",
+          "sha256": "fb78d4f755d255c19377af2349334afc12c0eed0fef3fede0b49fa1d1773b61f",
+          "size": 159642,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 493,
+          "mtime_ns": 1794262981415980690,
+          "path": "contract-debug-branch/libmetalrobo.dylib",
+          "sha256": "5d109ce08dd380817bdeacab80d154868aab21c7312afa4492534d1caca4b673",
+          "size": 5763536,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 493,
+          "mtime_ns": 1794262985564633831,
+          "path": "contract-debug-reactive",
+          "size": 0,
+          "type": "directory",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794262981418972044,
+          "path": "contract-debug-reactive/c_api.cpp",
+          "sha256": "197012f80ee9cb4b6ca41c0bbe8a060421eabe5cf2ccb8c002e2920468c35658",
+          "size": 289301,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794262985487197276,
+          "path": "contract-debug-reactive/c_api.cpp.o",
+          "sha256": "ca116ad74850425e7c0d7b70b583bd2acc4d73e4c12d5950e16acf3e378c1959",
+          "size": 720032,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794262985487756947,
+          "path": "contract-debug-reactive/c_api.cpp.o.d",
+          "sha256": "97dcff9209bdd3a15cbbe780029104160f9efa292005d7f0054ee87ad8a4c728",
+          "size": 159646,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 493,
+          "mtime_ns": 1794262985564935333,
+          "path": "contract-debug-reactive/libmetalrobo.dylib",
+          "sha256": "25bb5c0ea3cd4b7428c512c1dbbe379790399c77bad4ae4a23bf5404d45c137d",
+          "size": 5763536,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794263040224520707,
+          "path": "full-reserved-final-i-active.json",
+          "sha256": "7eb20b0c53d2d3a15caf1ae83fc40fbb26a4c3e2687ae1870f6903022a9ad708",
+          "size": 97364904,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794263038194025867,
+          "path": "full-reserved-final-i-active.tsv",
+          "sha256": "07dd47ffde2d87249b502767a4b2b21a5f2b80ba1f800e6322fb62540f8a62da",
+          "size": 2165472,
+          "type": "file",
+          "xattrs": {
+            "com.apple.TextEncoding": "dXRmLTg7MTM0MjE3OTg0"
+          }
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794263064570836725,
+          "path": "full-reserved-final-i-sensor-zero.json",
+          "sha256": "e978f509fdcb107b07b0923ac41c3152eaad274fc54055eb15e6a0bd363a14ad",
+          "size": 97296393,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794263062536005604,
+          "path": "full-reserved-final-i-sensor-zero.tsv",
+          "sha256": "b90d88b60dd2cbad4cd4182833217d66bd28cc45e1fd1e63e041809fa0d13881",
+          "size": 2165182,
+          "type": "file",
+          "xattrs": {
+            "com.apple.TextEncoding": "dXRmLTg7MTM0MjE3OTg0"
+          }
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794263089012551594,
+          "path": "full-reserved-final-j-active.json",
+          "sha256": "220bcf2614cbf9798fca5dfcc5860c8327b336381b5e2b78c46ce252a65e4281",
+          "size": 97476177,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794263086974731119,
+          "path": "full-reserved-final-j-active.tsv",
+          "sha256": "5864b5ef85e71d9f7135c353cc0e0c82280962cb7f9f7b6f4d024705eb10906e",
+          "size": 2165530,
+          "type": "file",
+          "xattrs": {
+            "com.apple.TextEncoding": "dXRmLTg7MTM0MjE3OTg0"
+          }
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794263113476797625,
+          "path": "full-reserved-final-j-sensor-zero.json",
+          "sha256": "b5dcf823107f99e9ceee8b33116896c3d8fc46136dd12c2237e52c364ae4945b",
+          "size": 97344682,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794263111432454019,
+          "path": "full-reserved-final-j-sensor-zero.tsv",
+          "sha256": "e9aced50f69e8d99071f7864f115d01fba602d2387d5c8d8d5dcad25ba603115",
+          "size": 2166577,
+          "type": "file",
+          "xattrs": {
+            "com.apple.TextEncoding": "dXRmLTg7MTM0MjE3OTg0"
+          }
+        },
+        {
+          "mode": 384,
+          "mtime_ns": 1794263008460260414,
+          "path": "landing.policypack",
+          "sha256": "31cb9a75dcd1e4359beb0b1dae83dc876723e2f3d54b2d2a7947b0668146c9f9",
+          "size": 5996436,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 493,
+          "mtime_ns": 1794262966071917004,
+          "path": "libmetalrobo.dylib",
+          "sha256": "78f6b3562284563a7f998809d7e1063a0f14538171e6969c1e7e18a2ee05d370",
+          "size": 5747024,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 384,
+          "mtime_ns": 1794263008216739670,
+          "path": "route.policypack",
+          "sha256": "b88816da503d43b78a64bceae95d9423c013752fa16033df9c613bd74667bb42",
+          "size": 17228690,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794263020898384572,
+          "path": "sensor-zero.metallib",
+          "sha256": "8c8c17caec772b9a34acc8e2767fd24a1b201841600a007157bebb06f8680d5b",
+          "size": 4469136,
+          "type": "file",
+          "xattrs": {}
+        }
+      ],
+      "schema": 1
+    },
+    "crow-v15-grip-search-20261109": {
+      "entries": [
+        {
+          "mode": 493,
+          "mtime_ns": 1794262410004415967,
+          "path": ".",
+          "size": 0,
+          "type": "directory",
+          "xattrs": {}
+        },
+        {
+          "mode": 493,
+          "mtime_ns": 1794260749063919677,
+          "path": "complete-observer",
+          "size": 0,
+          "type": "directory",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794260739582309226,
+          "path": "complete-observer/MetalWorld.mm",
+          "sha256": "1078d9b93cef4b4002674c86000a6c4cb8fa7a23abfd0be68982b0fe4519c04a",
+          "size": 857696,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794260748973607618,
+          "path": "complete-observer/MetalWorld.mm.o",
+          "sha256": "9b77f7396e74f09387cabd28bcb88afcc617e78cef247a1d1bd1c47ac60ddc60",
+          "size": 941856,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794260748974447808,
+          "path": "complete-observer/MetalWorld.mm.o.d",
+          "sha256": "5c3be72468d89805b5a4d8e154d99befe6e523e6faf93278df347b3bdd6058ae",
+          "size": 266821,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794260739583228764,
+          "path": "complete-observer/c_api.cpp",
+          "sha256": "3952079afc1407ba20431d2582007c64ef5d39c07ced5214365baf9e21e8df67",
+          "size": 282980,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794260744123774447,
+          "path": "complete-observer/c_api.cpp.o",
+          "sha256": "1fd44347bfc0b4c8f86760da91c92fe16106b19f6101c01f18f6c94a9a5cb1ca",
+          "size": 696768,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794260744124365445,
+          "path": "complete-observer/c_api.cpp.o.d",
+          "sha256": "4751b6e9f2c48d0b9416fe588b15ca8cf40b099feb334355750a7c1ff950d8f2",
+          "size": 159632,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 493,
+          "mtime_ns": 1794260749064232487,
+          "path": "complete-observer/libmetalrobo.dylib",
+          "sha256": "e935492b70dd3b42c4cce5c3ea45c0869b14df7f4d7fd9e6433545419e1fc630",
+          "size": 5746032,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 493,
+          "mtime_ns": 1794262029044306223,
+          "path": "contract-debug-envelope",
+          "size": 0,
+          "type": "directory",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794262024402850387,
+          "path": "contract-debug-envelope/c_api.cpp",
+          "sha256": "0d0883e153159a2a04e58bddcdd487316e5a09420b0f066ace194f24aab1367a",
+          "size": 288805,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794262028959800188,
+          "path": "contract-debug-envelope/c_api.cpp.o",
+          "sha256": "7569daf0a8b427e04ce4d7ed4cca7131058a002974ad5f8c3aefe8c65b19d2ff",
+          "size": 714976,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794262028960387895,
+          "path": "contract-debug-envelope/c_api.cpp.o.d",
+          "sha256": "544cc1124244b65dab2d61bd925f5495bbd8bce51cd3e6cac55534622d882d07",
+          "size": 159644,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 493,
+          "mtime_ns": 1794262029044605222,
+          "path": "contract-debug-envelope/libmetalrobo.dylib",
+          "sha256": "305e6baa80a1925db1e479d9d357a5116f866cee3c2480022684904c789221d4",
+          "size": 5746976,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 493,
+          "mtime_ns": 1794261967957928338,
+          "path": "contract-debug-original",
+          "size": 0,
+          "type": "directory",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794261963471887391,
+          "path": "contract-debug-original/c_api.cpp",
+          "sha256": "7083c960b3067a7600c68794e96abb649fca9a6849c374b10b208635fbd132b5",
+          "size": 284472,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794261967875088217,
+          "path": "contract-debug-original/c_api.cpp.o",
+          "sha256": "4e420aba4e9e301e943f0f2ee6a524dffa19b0f9aa5b72c882b9d87dc92020ef",
+          "size": 699360,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794261967875713549,
+          "path": "contract-debug-original/c_api.cpp.o.d",
+          "sha256": "d11935da8374aaacc16125e874fe089c7554d90a62cfe48f27b67e5dd4ac977d",
+          "size": 159644,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 493,
+          "mtime_ns": 1794261967958222962,
+          "path": "contract-debug-original/libmetalrobo.dylib",
+          "sha256": "70bf53fd44073d58cd9a88cccb4a33cf17937b1775a0a48f2f5e80db3389a6a7",
+          "size": 5746032,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 493,
+          "mtime_ns": 1794261972550317234,
+          "path": "contract-debug-toe",
+          "size": 0,
+          "type": "directory",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794261967962487079,
+          "path": "contract-debug-toe/c_api.cpp",
+          "sha256": "d2d89b20d5c7bfc1dfca38d536fd97ab532b46bd3bac6310d1da8d026ae73781",
+          "size": 288862,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794261972469181401,
+          "path": "contract-debug-toe/c_api.cpp.o",
+          "sha256": "4f79a8c68ee07671ca2236ce567f20be205657f2038531f688b6ccecba15bf06",
+          "size": 715008,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794261972469771983,
+          "path": "contract-debug-toe/c_api.cpp.o.d",
+          "sha256": "ec1fe6a58c319df273c6967f40966c44b4e9f804dcc8d7e375b8069e5260381a",
+          "size": 159634,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 493,
+          "mtime_ns": 1794261972550619109,
+          "path": "contract-debug-toe/libmetalrobo.dylib",
+          "sha256": "e985099d5ee7262a00d7b8c86087564c2e134b99a36a734345fe87be30b57b04",
+          "size": 5746976,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794260527108741841,
+          "path": "crouch65-wings-off.air",
+          "sha256": "2dc0b706b5178a91fa40745c04ed4e653c48933657da4e0cbca6b92dece52853",
+          "size": 196080,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794260529928359072,
+          "path": "crouch65-wings-off.json",
+          "sha256": "1c9b49b91b9488b27a51f8766ea93127f3586e9cd3d563707222c0503c55cc87",
+          "size": 10827369,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794260526813186048,
+          "path": "crouch65-wings-off.metal",
+          "sha256": "0a17f84b0d06370cb74746253d4adf8ec0bab7c931b5635febb747dcf1810eca",
+          "size": 407159,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794260527400497814,
+          "path": "crouch65-wings-off.metallib",
+          "sha256": "71c918642a26d466b486db9221a2ad93e2b49177bd6e62d91a50cff810517e00",
+          "size": 4467520,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794260529637538011,
+          "path": "crouch65-wings-off.tsv",
+          "sha256": "53641a7e043339f106e60aa81c9f7557308cef01fbb33d8c72d6de26ef3ecf3c",
+          "size": 215065,
+          "type": "file",
+          "xattrs": {
+            "com.apple.TextEncoding": "dXRmLTg7MTM0MjE3OTg0"
+          }
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794260530821570756,
+          "path": "crouch85-wings-off.air",
+          "sha256": "fdd475e5a4afd98807c9f627e37b63ca3423540fc3da99a87fab4f608a05e27c",
+          "size": 196080,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794260533639018203,
+          "path": "crouch85-wings-off.json",
+          "sha256": "a339d638abf6091932de0723449efafb145ccd1844cb3bc8ab76647a5a4ec1ae",
+          "size": 10830939,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794260530524125888,
+          "path": "crouch85-wings-off.metal",
+          "sha256": "747084ed51ca9c53403caf55414d925d7f447feaa46ededbb5de87f582696236",
+          "size": 407159,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794260531110518157,
+          "path": "crouch85-wings-off.metallib",
+          "sha256": "52ce0b8070909b3ce22b4e0cd0ae89bb86b122504a81c6e5cd70558105d717f1",
+          "size": 4467520,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794260533347430604,
+          "path": "crouch85-wings-off.tsv",
+          "sha256": "c97db79030a91a63875ece58e90ef84df9c4518092df230234b87c8ab5e5054b",
+          "size": 215128,
+          "type": "file",
+          "xattrs": {
+            "com.apple.TextEncoding": "dXRmLTg7MTM0MjE3OTg0"
+          }
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794260491015242334,
+          "path": "extension100-wings-off.air",
+          "sha256": "294380b0890277991f36ce1109c5ba0fe55f122ad846b9ac3a1261ee9e58a004",
+          "size": 196080,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794260493827555134,
+          "path": "extension100-wings-off.json",
+          "sha256": "fdc316f45a30872c4506fa721333262ff15559e79b3c65bbb70720f2ef029de0",
+          "size": 10596377,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794260490718243089,
+          "path": "extension100-wings-off.metal",
+          "sha256": "882a46e8013487cab5c861d8503378198f901b8aa9e396a342acb5c69d110117",
+          "size": 407159,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794260491306149186,
+          "path": "extension100-wings-off.metallib",
+          "sha256": "385645dfbaadcc782c982dd65b8a7d18e2865d0de54db5a76a3c4481d9c6390c",
+          "size": 4467504,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794260493537705695,
+          "path": "extension100-wings-off.tsv",
+          "sha256": "67756cc6a195f6d263f086b35d590856d17e877b695b4007c8468bb421e63ec9",
+          "size": 214871,
+          "type": "file",
+          "xattrs": {
+            "com.apple.TextEncoding": "dXRmLTg7MTM0MjE3OTg0"
+          }
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794260486894792970,
+          "path": "extension70-wings-off.air",
+          "sha256": "21a2fa734f75bbf976d2373f2978c198c500715f70cbf7211b32d843d329e6e0",
+          "size": 196080,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794260490142819904,
+          "path": "extension70-wings-off.json",
+          "sha256": "c860604b8c682b14d36c4a7c67cb7ca38ce93f65dab4128b1fb691e6e77ff5d9",
+          "size": 10596469,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794260486593378241,
+          "path": "extension70-wings-off.metal",
+          "sha256": "ab120fffb87bc4a5a5bce931945689c3b3827139cd35a93bea92ff7f3947ddb4",
+          "size": 407159,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794260487187504773,
+          "path": "extension70-wings-off.metallib",
+          "sha256": "9faf8d553839c0a59a10a5665b12a44a51261e0dc4ffe7681a5a0aa5fbcb6d09",
+          "size": 4467504,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794260489855994120,
+          "path": "extension70-wings-off.tsv",
+          "sha256": "c89accfc1e09a10e6efc8fa7ba9ed1db9f6365a8771f5e430e5c1971660fc2c9",
+          "size": 214902,
+          "type": "file",
+          "xattrs": {
+            "com.apple.TextEncoding": "dXRmLTg7MTM0MjE3OTg0"
+          }
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794260771779155503,
+          "path": "launch-perturb-control-complete.json",
+          "sha256": "c1b38021f128350c2bc4779f9f9a575e6cb55691443bdcab0179e589947f402c",
+          "size": 10891659,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794260771477422345,
+          "path": "launch-perturb-control-complete.tsv",
+          "sha256": "d80c4f4f7db69f73a21d8b221e41f9edfc12d5910d21b12f121ed9083fedd871",
+          "size": 215632,
+          "type": "file",
+          "xattrs": {
+            "com.apple.TextEncoding": "dXRmLTg7MTM0MjE3OTg0"
+          }
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794260640773940291,
+          "path": "launch-perturb-control.air",
+          "sha256": "754c0d77296cdf2f85dbfe50c5b4157384f69a4322e16adcd92c0b1ec1aa3f9b",
+          "size": 196480,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794260644245913290,
+          "path": "launch-perturb-control.json",
+          "sha256": "c1b38021f128350c2bc4779f9f9a575e6cb55691443bdcab0179e589947f402c",
+          "size": 10891659,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794260640474308265,
+          "path": "launch-perturb-control.metal",
+          "sha256": "e7119846d3ba43d30ef7340d8f09465a34d831210343fc8f91abb2049bfd25b8",
+          "size": 407373,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794260641069573375,
+          "path": "launch-perturb-control.metallib",
+          "sha256": "ea67703a212059848ae7a2c1860cf99da55de52d95db3e72c73dfd4d049b9272",
+          "size": 4467920,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794260643955731936,
+          "path": "launch-perturb-control.tsv",
+          "sha256": "d80c4f4f7db69f73a21d8b221e41f9edfc12d5910d21b12f121ed9083fedd871",
+          "size": 215632,
+          "type": "file",
+          "xattrs": {
+            "com.apple.TextEncoding": "dXRmLTg7MTM0MjE3OTg0"
+          }
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794260775195088651,
+          "path": "launch-perturb-push-complete.json",
+          "sha256": "28fc6f8ce8fc1172b3ccebbc216bf30f69483f309a4e9243da0e16d4bfeb9996",
+          "size": 10886092,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794260774896415368,
+          "path": "launch-perturb-push-complete.tsv",
+          "sha256": "6b8aa5a829d906ca04f5f0664e62ac21657ff9116d0db2476d44c9b0bc4ad1a2",
+          "size": 215622,
+          "type": "file",
+          "xattrs": {
+            "com.apple.TextEncoding": "dXRmLTg7MTM0MjE3OTg0"
+          }
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794260645236944686,
+          "path": "launch-perturb-push.air",
+          "sha256": "a0f36258676ab97735f5f18fc4a4e22ebf10c180fb4959bb30b827571b2a356e",
+          "size": 196848,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794260648140009224,
+          "path": "launch-perturb-push.json",
+          "sha256": "28fc6f8ce8fc1172b3ccebbc216bf30f69483f309a4e9243da0e16d4bfeb9996",
+          "size": 10886092,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794260644937287826,
+          "path": "launch-perturb-push.metal",
+          "sha256": "08baaab9eef4e28acf7642f4efb67bbcbe30a1d77a25b0e4bfea3364bab9b3ca",
+          "size": 408270,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794260645527790079,
+          "path": "launch-perturb-push.metallib",
+          "sha256": "e4238f7f34eda4224978e78d346ca9d926dec7fd7c99d1de8bcc08c175bc4b3b",
+          "size": 4468272,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794260647844187975,
+          "path": "launch-perturb-push.tsv",
+          "sha256": "6b8aa5a829d906ca04f5f0664e62ac21657ff9116d0db2476d44c9b0bc4ad1a2",
+          "size": 215622,
+          "type": "file",
+          "xattrs": {
+            "com.apple.TextEncoding": "dXRmLTg7MTM0MjE3OTg0"
+          }
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794260844675593056,
+          "path": "launch-wing-on-control.air",
+          "sha256": "b8373d833c4df7a49cdf00ded584c0d5b28776b0ce56de5864cf05350fcc3be1",
+          "size": 196384,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794260847552197700,
+          "path": "launch-wing-on-control.json",
+          "sha256": "8bcb9e49722272985d3ccaa475d425318220511eb53259866da1be7fdb40c3e3",
+          "size": 10850701,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794260844323682836,
+          "path": "launch-wing-on-control.metal",
+          "sha256": "4a05817bbf5f23d1d54ca7f96a8287f4b93d9146da718d7c4cc67e6a9ab5ed87",
+          "size": 407141,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794260844967896109,
+          "path": "launch-wing-on-control.metallib",
+          "sha256": "fbfa3109807081b23551761c3f2c8ad47ce91dc19becd302ae4bb3e2a67b1fae",
+          "size": 4467824,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794260847257386018,
+          "path": "launch-wing-on-control.tsv",
+          "sha256": "dcb194cbe29f179505aa3a461488c1afe1f51003a8d74c4a7698f1beecb6daab",
+          "size": 215528,
+          "type": "file",
+          "xattrs": {
+            "com.apple.TextEncoding": "dXRmLTg7MTM0MjE3OTg0"
+          }
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794260848585324925,
+          "path": "launch-wing-on-push.air",
+          "sha256": "0a0310c28f737350eb00242f504a0265e180b7a1cbc0d99a0894550bf6b1bbee",
+          "size": 196768,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794260851564676006,
+          "path": "launch-wing-on-push.json",
+          "sha256": "bbbd14f3d5e7d7770b46b1a7a88c12ed76ad1cb52921ef1c1337bb18a31c1ee0",
+          "size": 10873400,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794260848272076324,
+          "path": "launch-wing-on-push.metal",
+          "sha256": "7db1259b7da10765c772abb348cd59cad88e80ca2f26d5ef03bab5ed823cf0d5",
+          "size": 408038,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794260848877545641,
+          "path": "launch-wing-on-push.metallib",
+          "sha256": "340ca7a6fb7f2ca90f67593ced8987a0fe7c13672dd30c0c07ef5e216e1dea91",
+          "size": 4468192,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794260851262139958,
+          "path": "launch-wing-on-push.tsv",
+          "sha256": "f82064578d3ea02fff97e5039c14e081d31b19fe4b611794e6152a4cfbd5d5e9",
+          "size": 215389,
+          "type": "file",
+          "xattrs": {
+            "com.apple.TextEncoding": "dXRmLTg7MTM0MjE3OTg0"
+          }
+        },
+        {
+          "mode": 493,
+          "mtime_ns": 1794260486511171888,
+          "path": "materialized",
+          "size": 0,
+          "type": "directory",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794260486523899089,
+          "path": "materialized/libmetalrobo.dylib",
+          "sha256": "2e46bc91c575a536330579e754715252a29f6f78066aebe9adeda378e7c199b1",
+          "size": 5746032,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794261052632975527,
+          "path": "symmetric-launch-wings-off-control.air",
+          "sha256": "a9eb246da828b32d83e147c1ddb159bfb5579fad9d3eca8408a15e2d2f6b57b6",
+          "size": 196736,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794261055585048876,
+          "path": "symmetric-launch-wings-off-control.json",
+          "sha256": "ed52ed0ffda2af1208453768f2526df2805273afba31bf6712f1e124bd2dc36a",
+          "size": 10855131,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794261052317800717,
+          "path": "symmetric-launch-wings-off-control.metal",
+          "sha256": "8d52454deaa19854d3a75969f1436116e7b5d26a0599de7d9279c35e6b0ef6ed",
+          "size": 408163,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794261052925014302,
+          "path": "symmetric-launch-wings-off-control.metallib",
+          "sha256": "d15360f7bbca8992b9a549ce8883cf0b2deaaff52266f20a187250b9f78f4d8e",
+          "size": 4468128,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794261055293210517,
+          "path": "symmetric-launch-wings-off-control.tsv",
+          "sha256": "3317d264c8ec0a9ade0ad9a626debdcd3d7a04eec11493f5f8b33c8313ea7d97",
+          "size": 215255,
+          "type": "file",
+          "xattrs": {
+            "com.apple.TextEncoding": "dXRmLTg7MTM0MjE3OTg0"
+          }
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794261056614182593,
+          "path": "symmetric-launch-wings-off-push.air",
+          "sha256": "cad17ae78f4bcce302c63b0f5bfd4d0eda8d10d29e2adac6a2285d1c5f28f612",
+          "size": 197072,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794261059563110740,
+          "path": "symmetric-launch-wings-off-push.json",
+          "sha256": "bc1e7c996be63dc73168bcdd5725783c918af2a581e5150f57e808e5266f95cb",
+          "size": 10852897,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794261056299797573,
+          "path": "symmetric-launch-wings-off-push.metal",
+          "sha256": "5c2293bebad6796977a4901bf871711f091fdb459a835c9561410a37456c5e71",
+          "size": 409042,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794261056904698204,
+          "path": "symmetric-launch-wings-off-push.metallib",
+          "sha256": "090c994d0eca6ec0fd5c4bf54db11865ae42d7fc8ff45115ebb5419ff457dec9",
+          "size": 4468448,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794261059264400854,
+          "path": "symmetric-launch-wings-off-push.tsv",
+          "sha256": "3fb5ba133f44a5374053a3f54e3320584e70e712abfaf445e0f572461bbb2f11",
+          "size": 215287,
+          "type": "file",
+          "xattrs": {
+            "com.apple.TextEncoding": "dXRmLTg7MTM0MjE3OTg0"
+          }
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794261060591140335,
+          "path": "symmetric-launch-wings-on-control.air",
+          "sha256": "215eae6e9a2a020539b253f09ced480a817b9684940f4c45256057d8a376f8c2",
+          "size": 196656,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794261063502536935,
+          "path": "symmetric-launch-wings-on-control.json",
+          "sha256": "f22865401a9e478fdcc19c249bbe0ecb6ba4652f027427f9d7d8bffb8ddf70bf",
+          "size": 10810862,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794261060274716111,
+          "path": "symmetric-launch-wings-on-control.metal",
+          "sha256": "ccbcad8c3277074d24bfe41b771eec79e5d525ae922d57c214ad0f03ef6a0295",
+          "size": 407931,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794261060882971402,
+          "path": "symmetric-launch-wings-on-control.metallib",
+          "sha256": "438a145bc19c6160f438c5de5ed73d84054911b89ffb88bd6c07bdd0e41545c7",
+          "size": 4468048,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794261063195190107,
+          "path": "symmetric-launch-wings-on-control.tsv",
+          "sha256": "f9e126dab19ccdcff2ae2e0a83e4b0c682a376fa3e501b610923685e473acb92",
+          "size": 215209,
+          "type": "file",
+          "xattrs": {
+            "com.apple.TextEncoding": "dXRmLTg7MTM0MjE3OTg0"
+          }
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794261064527765078,
+          "path": "symmetric-launch-wings-on-push.air",
+          "sha256": "9dbbd7b2f18efc30d80701c56ae76d0d7f67c7a417344de57c16c77278d1ecf8",
+          "size": 196992,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794261067436627432,
+          "path": "symmetric-launch-wings-on-push.json",
+          "sha256": "2138dd08a4070077f99b3ef77da69c8ba062df1eeb7615fe99eed25a8770add8",
+          "size": 10851307,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794261064213307932,
+          "path": "symmetric-launch-wings-on-push.metal",
+          "sha256": "a109a831be7e7c81a6aa18c25e133b5f815417d0ca89d6b09133adabd5748ba2",
+          "size": 408810,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794261064819642936,
+          "path": "symmetric-launch-wings-on-push.metallib",
+          "sha256": "995b2e1e3dfe067e70418f488a43b6217e85bf3b92a1109263cc778f81c8fc24",
+          "size": 4468368,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794261067143299784,
+          "path": "symmetric-launch-wings-on-push.tsv",
+          "sha256": "6dd3babe74cff480ab0d72bef1cd7a5a3b553c0b295f9943edff3cd8b80e6837",
+          "size": 215118,
+          "type": "file",
+          "xattrs": {
+            "com.apple.TextEncoding": "dXRmLTg7MTM0MjE3OTg0"
+          }
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794261207368283593,
+          "path": "symmetric-route-reserved-final-i-control.json",
+          "sha256": "250e1ad237ffb1046fd08fc2a41ee44c110ea21f2702d7e93f3d13cd7e87d170",
+          "size": 86823765,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794261205580608393,
+          "path": "symmetric-route-reserved-final-i-control.tsv",
+          "sha256": "2f7ee6fb6d8b70d684395e4cbed4e652ef1cafd100b185fae375ffba2243c8ba",
+          "size": 1830545,
+          "type": "file",
+          "xattrs": {
+            "com.apple.TextEncoding": "dXRmLTg7MTM0MjE3OTg0"
+          }
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794261228173750785,
+          "path": "symmetric-route-reserved-final-i-push.json",
+          "sha256": "f834a895221145b235d03eaae647d1f33dffaaf374c0be50739205ad66cdf518",
+          "size": 86561763,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794261226402716343,
+          "path": "symmetric-route-reserved-final-i-push.tsv",
+          "sha256": "6c06c9a9743beeb1702e1f01792d79fd2a51844410be71725557a07ec086feb7",
+          "size": 1824023,
+          "type": "file",
+          "xattrs": {
+            "com.apple.TextEncoding": "dXRmLTg7MTM0MjE3OTg0"
+          }
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794261249563115947,
+          "path": "symmetric-route-reserved-final-j-control.json",
+          "sha256": "a9df8b9a7e9774dc7cb67ec7cdeb2ba1f1b13182ca305a5be8a8d03d3071487f",
+          "size": 87071993,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794261247729570675,
+          "path": "symmetric-route-reserved-final-j-control.tsv",
+          "sha256": "253650449bf17d27350e99fa2ce1ed293b97faa2422c67115bb84378898be57d",
+          "size": 1833779,
+          "type": "file",
+          "xattrs": {
+            "com.apple.TextEncoding": "dXRmLTg7MTM0MjE3OTg0"
+          }
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794261271088789035,
+          "path": "symmetric-route-reserved-final-j-push.json",
+          "sha256": "80947c7bc55e1474dc1ce56f77038e627518a3fa79d767de2a4c3e5a7b8fd4d6",
+          "size": 86961739,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794261269265794740,
+          "path": "symmetric-route-reserved-final-j-push.tsv",
+          "sha256": "e5b1739164cbeff9fa0e45e20514558e2ed7f02db729f13c30fae23c117f8db5",
+          "size": 1832946,
+          "type": "file",
+          "xattrs": {
+            "com.apple.TextEncoding": "dXRmLTg7MTM0MjE3OTg0"
+          }
+        },
+        {
+          "mode": 493,
+          "mtime_ns": 1794262091563534622,
+          "path": "toe-envelope",
+          "size": 0,
+          "type": "directory",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794262333600321920,
+          "path": "toe-envelope-neutral.json",
+          "sha256": "73ad4eebc9d803c0d8be26cf9590c530318ce214811c34f7d459006fd1a46c2d",
+          "size": 11561943,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794262333274749166,
+          "path": "toe-envelope-neutral.tsv",
+          "sha256": "822e945f736eddb3165daaca3e4399133bdd91588d6acf17506a766cde8de4ea",
+          "size": 255240,
+          "type": "file",
+          "xattrs": {
+            "com.apple.TextEncoding": "dXRmLTg7MTM0MjE3OTg0"
+          }
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794262016894709107,
+          "path": "toe-envelope/c_api.cpp",
+          "sha256": "481f91a63079be13cd2c642b2298757d6afb6763c7957bcfb5baaf13f59f2bf0",
+          "size": 287313,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794262021434182029,
+          "path": "toe-envelope/c_api.cpp.o",
+          "sha256": "4c8ed9ffc4cb2218b5ab41e06ce23192376b7ac8bc31d8588faaa387b2e318a8",
+          "size": 712280,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794262021434740319,
+          "path": "toe-envelope/c_api.cpp.o.d",
+          "sha256": "00c92cf4165738d9c4ea1c506ce5029915100f62c2494b21c44e67e7b0040a17",
+          "size": 159622,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 384,
+          "mtime_ns": 1794262091562363624,
+          "path": "toe-envelope/landing.policypack",
+          "sha256": "c2a18b6f93134e67e936e4e16a31de49714257d1e1fedd81fc53c46cd35c57c9",
+          "size": 5996436,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 493,
+          "mtime_ns": 1794262021517790357,
+          "path": "toe-envelope/libmetalrobo.dylib",
+          "sha256": "6220097a8f0bee303386226deb5c59cb728a4d55bc5cd15d5b491d0e27171ffd",
+          "size": 5746976,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 384,
+          "mtime_ns": 1794262091293641343,
+          "path": "toe-envelope/route.policypack",
+          "sha256": "159a4f38eb9043b96464337525c4ed9e8222f0eb1d50f895027869b754d89cef",
+          "size": 17228690,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 493,
+          "mtime_ns": 1794261652786976928,
+          "path": "toe-integration",
+          "size": 0,
+          "type": "directory",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794261648166983755,
+          "path": "toe-integration/c_api.cpp",
+          "sha256": "260830ebce9a938cc4d42494c9b89366b6b4ee15f42e54b1cbc21fc289422b40",
+          "size": 287370,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794261652703671932,
+          "path": "toe-integration/c_api.cpp.o",
+          "sha256": "e815130b3f552e517d0125a9d6314856907d164cf3ce0b6b4f4cc5e36b0973f2",
+          "size": 712312,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794261652704291681,
+          "path": "toe-integration/c_api.cpp.o.d",
+          "sha256": "f1b07f9dcc673e404b771605f5802730dd948c5404a41915e6ddcb3b720cf666",
+          "size": 159628,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 493,
+          "mtime_ns": 1794261652787301302,
+          "path": "toe-integration/libmetalrobo.dylib",
+          "sha256": "dc6d3e5528d9f63d302063da12fa40cc4c18bf86741215f4ee28be3bcfc9eef6",
+          "size": 5746976,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794262382761628457,
+          "path": "toe-neutral-route-reserved-final-i.json",
+          "sha256": "bd7dda853893aeb2ab3635bd7033efe5ef79b756ae6cefcd6d4045ee1931d6ec",
+          "size": 97521366,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794262380625487774,
+          "path": "toe-neutral-route-reserved-final-i.tsv",
+          "sha256": "079dbcc34bdd61f8184109b558eaa7fc2d1329ea7c701221f22985af89041ffb",
+          "size": 2169596,
+          "type": "file",
+          "xattrs": {
+            "com.apple.TextEncoding": "dXRmLTg7MTM0MjE3OTg0"
+          }
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794262410003140874,
+          "path": "toe-neutral-route-reserved-final-j.json",
+          "sha256": "6c5a10a55190d1d5944090ce120bb37074c7a093a43df213d95a0d981e0eca37",
+          "size": 96870754,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794262407870631634,
+          "path": "toe-neutral-route-reserved-final-j.tsv",
+          "sha256": "718b28e9a94086427a8e3c21f4e862d1d44c5ac7c6700a3d968e11f68bb6112a",
+          "size": 2172633,
+          "type": "file",
+          "xattrs": {
+            "com.apple.TextEncoding": "dXRmLTg7MTM0MjE3OTg0"
+          }
+        },
+        {
+          "mode": 493,
+          "mtime_ns": 1794262289501262123,
+          "path": "video-full-sections",
+          "size": 0,
+          "type": "directory",
+          "xattrs": {}
+        },
+        {
+          "mode": 493,
+          "mtime_ns": 1794261937468916660,
+          "path": "video-full-sections/i-0000-audit",
+          "size": 0,
+          "type": "directory",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794261937468495952,
+          "path": "video-full-sections/i-0000-audit/numi-crow-replay-audit.json",
+          "sha256": "706b66994897728a0969b87b7a298364b0e3a819b34d28313c19b8c5aeeef357",
+          "size": 2202,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794261972348398608,
+          "path": "video-full-sections/i-0000.mp4",
+          "sha256": "171ca5918003d255f9e0c7f7033217575c958728e64f98a18140930a522cd151",
+          "size": 4918690,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 493,
+          "mtime_ns": 1794261975631244445,
+          "path": "video-full-sections/i-0600-audit",
+          "size": 0,
+          "type": "directory",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794261975630831946,
+          "path": "video-full-sections/i-0600-audit/numi-crow-replay-audit.json",
+          "sha256": "a5290ee1a328d5a4d958acef23dccb871b16c16e9848c51c284b8a587fbfbeaf",
+          "size": 2205,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794262011552644502,
+          "path": "video-full-sections/i-0600.mp4",
+          "sha256": "8b26c4c534c40c07a602a5cbdbe0695477a527bdd1525276859d77d690e189bd",
+          "size": 5737167,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 493,
+          "mtime_ns": 1794262014824565028,
+          "path": "video-full-sections/i-1200-audit",
+          "size": 0,
+          "type": "directory",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794262014824147695,
+          "path": "video-full-sections/i-1200-audit/numi-crow-replay-audit.json",
+          "sha256": "d13d264987ba9b224ccbb63bb67f97810003c222371d3609f88d7a48845d6304",
+          "size": 2206,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794262051590014059,
+          "path": "video-full-sections/i-1200.mp4",
+          "sha256": "2db4b08c9ce824d0fcefb6a735192583d6552890afb6edab1a744bad0b3d6b76",
+          "size": 5626206,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 493,
+          "mtime_ns": 1794262054919652799,
+          "path": "video-full-sections/i-1800-audit",
+          "size": 0,
+          "type": "directory",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794262054919272050,
+          "path": "video-full-sections/i-1800-audit/numi-crow-replay-audit.json",
+          "sha256": "85c8202b9a911dab51630252b373709aa23e5cabdfdc6b157fb9119354fa99ce",
+          "size": 2206,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794262091096399123,
+          "path": "video-full-sections/i-1800.mp4",
+          "sha256": "da1ea717bcd6ada85dc92aeded9e5ac7de7c95c80060e9061f3291738948a59a",
+          "size": 5628326,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 493,
+          "mtime_ns": 1794262094449152984,
+          "path": "video-full-sections/i-2400-audit",
+          "size": 0,
+          "type": "directory",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794262094449023026,
+          "path": "video-full-sections/i-2400-audit/numi-crow-replay-audit.json",
+          "sha256": "e6af44d5101cbda5129a0de1c61375ac4777a743040c62f2b6c0a2d2dcf08ee9",
+          "size": 2206,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794262129639201710,
+          "path": "video-full-sections/i-2400.mp4",
+          "sha256": "17969540a4a89daf396f7e99fb1c631c0dd5f2d1bc0812b299f8322ed549c2c0",
+          "size": 750817,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 493,
+          "mtime_ns": 1794262132798922175,
+          "path": "video-full-sections/j-0000-audit",
+          "size": 0,
+          "type": "directory",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794262132798498718,
+          "path": "video-full-sections/j-0000-audit/numi-crow-replay-audit.json",
+          "sha256": "a93674bb97686a3c82fae038618dc216a43bb0c9513a7da74d8625c9a7f9a7c2",
+          "size": 2200,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794262168746436889,
+          "path": "video-full-sections/j-0000.mp4",
+          "sha256": "10251c4910ca1242508dcc33fae62b345af4f568e4633e4e91cc1b04ec1c4060",
+          "size": 4982078,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 493,
+          "mtime_ns": 1794262171939863153,
+          "path": "video-full-sections/j-0600-audit",
+          "size": 0,
+          "type": "directory",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794262171939450259,
+          "path": "video-full-sections/j-0600-audit/numi-crow-replay-audit.json",
+          "sha256": "e8d33ff82a8afebac280d119a0d8fb8ede52ccb44a095f5826504885bd25281a",
+          "size": 2203,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794262208504553110,
+          "path": "video-full-sections/j-0600.mp4",
+          "sha256": "e085ccebbf76dcac3e372ab960c332e6ab1105880860a68ea3e432efcd2c4cfe",
+          "size": 5635967,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 493,
+          "mtime_ns": 1794262211665771522,
+          "path": "video-full-sections/j-1200-audit",
+          "size": 0,
+          "type": "directory",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794262211665348088,
+          "path": "video-full-sections/j-1200-audit/numi-crow-replay-audit.json",
+          "sha256": "1de6c52cbdc972fcfd672594118e7d5881d36f849d7d596e6cfde3be763b067d",
+          "size": 2204,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794262248085905631,
+          "path": "video-full-sections/j-1200.mp4",
+          "sha256": "09b4dbb0a97d75a14477b4609f3f0d3f9702cef87ab85bb1794b20dd2154da51",
+          "size": 4411792,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 493,
+          "mtime_ns": 1794262251257719777,
+          "path": "video-full-sections/j-1800-audit",
+          "size": 0,
+          "type": "directory",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794262251257303190,
+          "path": "video-full-sections/j-1800-audit/numi-crow-replay-audit.json",
+          "sha256": "43b8cc353ff102a08da6c1de9b78663ac86a2d9dbd0edb43534ced3bc113fa30",
+          "size": 2204,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794262286324866494,
+          "path": "video-full-sections/j-1800.mp4",
+          "sha256": "0a9081840b608f573c3dd95431b0e0eaadb8878b6b568ac938af55f7080582df",
+          "size": 420308,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 493,
+          "mtime_ns": 1794262289512636749,
+          "path": "video-full-sections/j-2400-audit",
+          "size": 0,
+          "type": "directory",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794262289512226204,
+          "path": "video-full-sections/j-2400-audit/numi-crow-replay-audit.json",
+          "sha256": "a1b001605f40bebc765ebcbd49a8d185f6fd58ff035da12c85bc6d90ccc217db",
+          "size": 2204,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794262324820371978,
+          "path": "video-full-sections/j-2400.mp4",
+          "sha256": "dcea864c112e6583e3ccd9fd809c6374c58d87e9562044cadc1310e7b228da48",
+          "size": 420351,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794261525167088851,
+          "path": "video-i-25fps.json",
+          "sha256": "12c02fbb1a5cee3998eef1189ff3f3bf1047eac9f23a1e551ed514896c9304ad",
+          "size": 43315810,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794261455761262355,
+          "path": "video-i-canonical.json",
+          "sha256": "b1d92ab5d977c17f4687b3cdc0a6cb844caf51ff0d9efcd6206c018e45269400",
+          "size": 86562169,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794261528012287255,
+          "path": "video-j-25fps.json",
+          "sha256": "7b18ce63d346d28d1c66a47ebe097651102d49a5cb5b04fb7e230649b894a6b0",
+          "size": 43522408,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794261460331375672,
+          "path": "video-j-canonical.json",
+          "sha256": "838ff6d744813f8c02a317042fbb7e5a2bb1219cb1c5d6bb9ef9035e24853842",
+          "size": 86962148,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 493,
+          "mtime_ns": 1794261891969649618,
+          "path": "video-preview",
+          "size": 0,
+          "type": "directory",
+          "xattrs": {}
+        },
+        {
+          "mode": 493,
+          "mtime_ns": 1794261485420403781,
+          "path": "video-preview/audit",
+          "size": 0,
+          "type": "directory",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794261485420322448,
+          "path": "video-preview/audit/numi-crow-replay-audit.json",
+          "sha256": "b41996ccef3a6081ddd4e599df878f5c1015fe249a99e0f2938649d087ee9fab",
+          "size": 2203,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 493,
+          "mtime_ns": 1794261865141224375,
+          "path": "video-preview/landing-audit",
+          "size": 0,
+          "type": "directory",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794261865140800293,
+          "path": "video-preview/landing-audit/numi-crow-replay-audit.json",
+          "sha256": "e71ca18fc02d1005c723eab1db4ec823733d554425c9e13ec6093a8860c63e2b",
+          "size": 2205,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 493,
+          "mtime_ns": 1794261891980633429,
+          "path": "video-preview/landing-full-audit",
+          "size": 0,
+          "type": "directory",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794261891980216596,
+          "path": "video-preview/landing-full-audit/numi-crow-replay-audit.json",
+          "sha256": "a2fdbfd18585abe284587e9ef0f97478538ebd9038f68217a918924482b3707d",
+          "size": 2205,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794261892592062964,
+          "path": "video-preview/landing-full.mp4",
+          "sha256": "4b36909c8df47d5c0a4ed1dcc5896e65fa869b00832d5cd357f390ea4a218c39",
+          "size": 18327,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794261865767743713,
+          "path": "video-preview/landing.mp4",
+          "sha256": "5f72b449abe9180bf0a06e74a0f6a23a65a6645907954f62d07eb3a9084139ce",
+          "size": 20023,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794261486039223050,
+          "path": "video-preview/preview.mp4",
+          "sha256": "33aeb7ef5eb8c4911d7f1ef8ac6cf204507f4764ba634e99a26ef2e37cba67c3",
+          "size": 21141,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 493,
+          "mtime_ns": 1794261725031554507,
+          "path": "video-sections",
+          "size": 0,
+          "type": "directory",
+          "xattrs": {}
+        },
+        {
+          "mode": 493,
+          "mtime_ns": 1794261530030715440,
+          "path": "video-sections/i-0000-audit",
+          "size": 0,
+          "type": "directory",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794261530030307732,
+          "path": "video-sections/i-0000-audit/numi-crow-replay-audit.json",
+          "sha256": "6debd69fb7c8510ee34914a1234935224a36938c496904350319e633d4c4400e",
+          "size": 2202,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794261547110951674,
+          "path": "video-sections/i-0000.mp4",
+          "sha256": "2028adde840534432bd1a14ba5217f7be98ea51477d10eb938ba342f25cc689c",
+          "size": 2661654,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 493,
+          "mtime_ns": 1794261548755110295,
+          "path": "video-sections/i-0300-audit",
+          "size": 0,
+          "type": "directory",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794261548754695963,
+          "path": "video-sections/i-0300-audit/numi-crow-replay-audit.json",
+          "sha256": "0828385876f0b8a357f80095c7bec4aa37faae2e04e96cdb830bc4c851914ab8",
+          "size": 2204,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794261566240647862,
+          "path": "video-sections/i-0300.mp4",
+          "sha256": "93e8bd158b0ae6a92f65d7e1a35dc576e1bea1dc27e0bb7333869f186a3d3a25",
+          "size": 3888004,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 493,
+          "mtime_ns": 1794261567932646386,
+          "path": "video-sections/i-0600-audit",
+          "size": 0,
+          "type": "directory",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794261567932231803,
+          "path": "video-sections/i-0600-audit/numi-crow-replay-audit.json",
+          "sha256": "35833e1ea569f0c6b3e784e8ffd1d5d050b03ceeee1b2ec3ba7b181def8d7d3d",
+          "size": 2204,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794261585668931313,
+          "path": "video-sections/i-0600.mp4",
+          "sha256": "9d34806059aea0109f276bddacbd4d283bafb2487e0b6ad8416e57b5d77a5cb6",
+          "size": 3614977,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 493,
+          "mtime_ns": 1794261587336189345,
+          "path": "video-sections/i-0900-audit",
+          "size": 0,
+          "type": "directory",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794261587335774471,
+          "path": "video-sections/i-0900-audit/numi-crow-replay-audit.json",
+          "sha256": "4c63f83c71c11a8a1022cb15fa92196eb577d9ed2b0640aae43cba63d5c5157b",
+          "size": 2205,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794261605051963855,
+          "path": "video-sections/i-0900.mp4",
+          "sha256": "443694944966302036c4e86a6398cd6dc60e10263d97c7556f5cecb8dff86611",
+          "size": 3430335,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 493,
+          "mtime_ns": 1794261606751424863,
+          "path": "video-sections/i-1200-audit",
+          "size": 0,
+          "type": "directory",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794261606751013406,
+          "path": "video-sections/i-1200-audit/numi-crow-replay-audit.json",
+          "sha256": "fcc5fcdc130843847bef342ecee88c35eaba8779c279c21996eae255dd48c967",
+          "size": 2206,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794261624337860974,
+          "path": "video-sections/i-1200.mp4",
+          "sha256": "73a53e1c26bfba628822b1ad7e44bab424471bf5ef63f926d06b3973f5afc308",
+          "size": 549911,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 493,
+          "mtime_ns": 1794261626056713399,
+          "path": "video-sections/i-1500-audit",
+          "size": 0,
+          "type": "directory",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794261626056299400,
+          "path": "video-sections/i-1500-audit/numi-crow-replay-audit.json",
+          "sha256": "01ddf909d9e00ebe124f84362c4810fe70768cd1eafc645112489684a509914f",
+          "size": 2204,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794261626174713448,
+          "path": "video-sections/i-1500.mp4",
+          "sha256": "29f685a369ecd0c46b5654a58f35ad2891abb4dae8e4dc1d01f8a6605792d91f",
+          "size": 8286,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 493,
+          "mtime_ns": 1794261627802715312,
+          "path": "video-sections/j-0000-audit",
+          "size": 0,
+          "type": "directory",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794261627802336729,
+          "path": "video-sections/j-0000-audit/numi-crow-replay-audit.json",
+          "sha256": "ef5413aad1e5e3844ae68d4a06ddf06c6408e86a49ce6892a2a5113ca1ab2ac0",
+          "size": 2200,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794261645379097943,
+          "path": "video-sections/j-0000.mp4",
+          "sha256": "fa0669f7f4ac3f103511d4926c08d5965105e7cc24f1904c7066178aaaebc99d",
+          "size": 2704001,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 493,
+          "mtime_ns": 1794261646984490435,
+          "path": "video-sections/j-0300-audit",
+          "size": 0,
+          "type": "directory",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794261646984097561,
+          "path": "video-sections/j-0300-audit/numi-crow-replay-audit.json",
+          "sha256": "dc0e394c53a8c6f8d10b821c0a39c3ab013b33ecff2c3838e81a92a63bd3846d",
+          "size": 2202,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794261665088539731,
+          "path": "video-sections/j-0300.mp4",
+          "sha256": "beb88c49aee760c6f5b31cbbc3852349eeeb42e2ba39f9910ecc458241c84143",
+          "size": 3840316,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 493,
+          "mtime_ns": 1794261666721473292,
+          "path": "video-sections/j-0600-audit",
+          "size": 0,
+          "type": "directory",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794261666721060002,
+          "path": "video-sections/j-0600-audit/numi-crow-replay-audit.json",
+          "sha256": "85fafe22f003ab7deb4d9a3ba8c7aa3c3cbc5ab31766a0de8cfb72942c337cf7",
+          "size": 2202,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794261684596288935,
+          "path": "video-sections/j-0600.mp4",
+          "sha256": "e3b076ebfa0fcdf9ef6690c14c2da3ae983707b29b321eab3c02de3347c27b97",
+          "size": 2793048,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 493,
+          "mtime_ns": 1794261686231692949,
+          "path": "video-sections/j-0900-audit",
+          "size": 0,
+          "type": "directory",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794261686231279991,
+          "path": "video-sections/j-0900-audit/numi-crow-replay-audit.json",
+          "sha256": "2874505ab4fb719a0304bbeeebdb18dd84fc13d7ffae90f52a79c379bf7af568",
+          "size": 2203,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794261703969285790,
+          "path": "video-sections/j-0900.mp4",
+          "sha256": "9a7d2832af074c4cef1f7120b13d44eff26b294a90c04bcae75c4cc7e5593122",
+          "size": 392787,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 493,
+          "mtime_ns": 1794261705598339568,
+          "path": "video-sections/j-1200-audit",
+          "size": 0,
+          "type": "directory",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794261705597927235,
+          "path": "video-sections/j-1200-audit/numi-crow-replay-audit.json",
+          "sha256": "fa73320a62150a54f4b1aabf0552762fa58d83ac4c8830ccf0ae1a51d6aa7994",
+          "size": 2204,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794261723389980340,
+          "path": "video-sections/j-1200.mp4",
+          "sha256": "8aabaea39053e29372d3bcec8a4e169b24e3995354b38696052b20d2c03fa9a8",
+          "size": 392116,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 493,
+          "mtime_ns": 1794261725042856942,
+          "path": "video-sections/j-1500-audit",
+          "size": 0,
+          "type": "directory",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794261725042470943,
+          "path": "video-sections/j-1500-audit/numi-crow-replay-audit.json",
+          "sha256": "21385d65ca790d68e2162026c0308ea30891367af143deeac5b911776b011407",
+          "size": 2202,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794261725158789871,
+          "path": "video-sections/j-1500.mp4",
+          "sha256": "2764023a0047fae0b07d2632d9e17f7763c5cee02cc1426638d17ab5967b7cf5",
+          "size": 8149,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794260918498936992,
+          "path": "walk-launch-wings-off-control.air",
+          "sha256": "4f530573c271bdd4ce13b4433531f773fb033002ad797fd39733c71021c7ab8f",
+          "size": 196720,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794260921451635313,
+          "path": "walk-launch-wings-off-control.json",
+          "sha256": "ea4718eb592fe3ff7736c3b1c5d05476e0d09003d2f7305c59f787adeb435383",
+          "size": 10841056,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794260918182815265,
+          "path": "walk-launch-wings-off-control.metal",
+          "sha256": "acc05f5cfd0424fe08b6884939821a783ce9149111ddccfad19bc720d5b5bd64",
+          "size": 408163,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794260918791301185,
+          "path": "walk-launch-wings-off-control.metallib",
+          "sha256": "dd241493f0524f9a0555d66b7383a1cc3a7c6c8767a1258d5ca762b8306c022c",
+          "size": 4468128,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794260921154845255,
+          "path": "walk-launch-wings-off-control.tsv",
+          "sha256": "908487d1e69433b796fd4ca495571ea6543aea59ca779a18fb21e2842d4af2c6",
+          "size": 215280,
+          "type": "file",
+          "xattrs": {
+            "com.apple.TextEncoding": "dXRmLTg7MTM0MjE3OTg0"
+          }
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794260922478349623,
+          "path": "walk-launch-wings-off-push.air",
+          "sha256": "7aeb1d8fb3afeb63d6ae88214ed694226c6eca2043a53446fc8135a1cd7a6b8e",
+          "size": 197040,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794260925395955512,
+          "path": "walk-launch-wings-off-push.json",
+          "sha256": "0499ace80610fce3a44db860310110c90ecf814b45c0eb7f882163747e9d4f3a",
+          "size": 10771747,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794260922164351851,
+          "path": "walk-launch-wings-off-push.metal",
+          "sha256": "9067d28a50231202e5eecbc384bf99acab8c3061a90a2ea7f693c6cfc8d4580b",
+          "size": 409060,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794260922770501274,
+          "path": "walk-launch-wings-off-push.metallib",
+          "sha256": "18afe9ebe1f578a2c91fbf761047b0a9d49a39787695f4fc491f18d3a022f89b",
+          "size": 4468448,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794260925094554381,
+          "path": "walk-launch-wings-off-push.tsv",
+          "sha256": "2fae39af766595eeef1df1e14c280974b4399f504c78e761de533df641d3cf17",
+          "size": 215308,
+          "type": "file",
+          "xattrs": {
+            "com.apple.TextEncoding": "dXRmLTg7MTM0MjE3OTg0"
+          }
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794260926410059764,
+          "path": "walk-launch-wings-on-control.air",
+          "sha256": "f431fd9b087f729e6d4bb29775e3019c7ba9524b28bc1e8c31d44a2c794746da",
+          "size": 196640,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794260929311663476,
+          "path": "walk-launch-wings-on-control.json",
+          "sha256": "16af5a28ce430715dcf4533a6d097acf121ef8c3a86613ab7e6e6cc711efdb83",
+          "size": 10799210,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794260926097493448,
+          "path": "walk-launch-wings-on-control.metal",
+          "sha256": "e97661aeea11e92d31120d3597b0c28263acf04c44df93172146c2183b1c91a0",
+          "size": 407931,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794260926701359208,
+          "path": "walk-launch-wings-on-control.metallib",
+          "sha256": "ea12a354a450e0850eb9153e2a04ea04a489aa5e18aa469bcac738a1da47c751",
+          "size": 4468048,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794260929015193043,
+          "path": "walk-launch-wings-on-control.tsv",
+          "sha256": "3256a18dfc238504dc8660e93b5a716acf8daed52fc53c2f8063d8c1e2bdcdd3",
+          "size": 215258,
+          "type": "file",
+          "xattrs": {
+            "com.apple.TextEncoding": "dXRmLTg7MTM0MjE3OTg0"
+          }
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794260930339268366,
+          "path": "walk-launch-wings-on-push.air",
+          "sha256": "eb486cebfaeec0467ac31b9dc6b4694076900212261183b48801bc91ba883a54",
+          "size": 196960,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794260933210675012,
+          "path": "walk-launch-wings-on-push.json",
+          "sha256": "c33fb9b514c340d98fd7f2d527290fbf204ca803681ecb6c8a804f505fdbc8df",
+          "size": 10754352,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794260930023258223,
+          "path": "walk-launch-wings-on-push.metal",
+          "sha256": "ec830965f6a1a7591bb32d96181b3a9e99e625a02d554fddb0de7c6bea829ee5",
+          "size": 408828,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794260930629519520,
+          "path": "walk-launch-wings-on-push.metallib",
+          "sha256": "91d0f8dbd951f3d06ee28d7ad41d478eac2d63152bb54684f80d43966805b933",
+          "size": 4468368,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794260932916735365,
+          "path": "walk-launch-wings-on-push.tsv",
+          "sha256": "b94c2764622e0278b166f80889fa5f6163a3a357c1f64b760d2331dd1a431e8b",
+          "size": 215047,
+          "type": "file",
+          "xattrs": {
+            "com.apple.TextEncoding": "dXRmLTg7MTM0MjE3OTg0"
+          }
+        }
+      ],
+      "schema": 1
+    },
+    "crow-v15-heavy-wing-route-20261110": {
+      "entries": [
+        {
+          "mode": 493,
+          "mtime_ns": 1794301676017460419,
+          "path": ".",
+          "size": 0,
+          "type": "directory",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794301412802263588,
+          "path": "c_api.cpp",
+          "sha256": "7d2bbcd08caaf16404bec568ceac78ea1086cbbb1f24aec711a69359087190ea",
+          "size": 293922,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794301417135897331,
+          "path": "c_api.cpp.o",
+          "sha256": "6b3caceee87a76209c830f096e8ba472484e2b258ce49ec1c54d9be77d160435",
+          "size": 731160,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794301417136461163,
+          "path": "c_api.cpp.o.d",
+          "sha256": "077481682cd8c74b47246d3a081e83084e2a513feb36dfb424ca0f789663669f",
+          "size": 159717,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794301676016523787,
+          "path": "diagnostic-reserved-final-i-development-original.json",
+          "sha256": "7b1ac170f1f572565d446b77efb69e298015ab46fa2e94e62cfd0341b8abd23e",
+          "size": 151782061,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794301672935686001,
+          "path": "diagnostic-reserved-final-i-development-original.tsv",
+          "sha256": "30ed112077e0bd8895bb21124540227b3caee74c2678538d4463c27f10cce4f8",
+          "size": 3261673,
+          "type": "file",
+          "xattrs": {
+            "com.apple.TextEncoding": "dXRmLTg7MTM0MjE3OTg0"
+          }
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794301641708465134,
+          "path": "diagnostic-reserved-final-j-development-newstart.json",
+          "sha256": "3715607244810928b5fa79d2dc342814dd62f89105e62ce6c1de39f0a9b3a503",
+          "size": 149354000,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794301638703383267,
+          "path": "diagnostic-reserved-final-j-development-newstart.tsv",
+          "sha256": "bb1eebbe9aefd332f75ad20978e1d5e1bdbd6e7c4e70e1974453202d5eabd153",
+          "size": 3283628,
+          "type": "file",
+          "xattrs": {
+            "com.apple.TextEncoding": "dXRmLTg7MTM0MjE3OTg0"
+          }
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794301603156742994,
+          "path": "diagnostic-reserved-final-j-development-original.json",
+          "sha256": "5f563633a3474d9e2a5b2d4d33f0cd17362f401583c793441ae9bd5f62b48747",
+          "size": 150033407,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794301600156697710,
+          "path": "diagnostic-reserved-final-j-development-original.tsv",
+          "sha256": "f47028fecf59878fb6000fe3a1231881a199e1c8f07e0c80394518f012dc48a0",
+          "size": 3285649,
+          "type": "file",
+          "xattrs": {
+            "com.apple.TextEncoding": "dXRmLTg7MTM0MjE3OTg0"
+          }
+        },
+        {
+          "mode": 384,
+          "mtime_ns": 1794301549686170252,
+          "path": "landing.policypack",
+          "sha256": "5aefc2dcee421c6e3bdca39a024191fa243404b06190952ef02bf9f9e479eced",
+          "size": 5996441,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 493,
+          "mtime_ns": 1794301417215052143,
+          "path": "libmetalrobo.dylib",
+          "sha256": "ac8ba413b89cbd13eb4c04a7837450f2699825fddbf4c73249f4b03567f006a6",
+          "size": 5764256,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794301518274880548,
+          "path": "route.air",
+          "sha256": "a92fab42c0597d2af074d124fc933cef51e5625bbf0a7011c42a395907552939",
+          "size": 202080,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794301517948801745,
+          "path": "route.metal",
+          "sha256": "0a17989720785ca353654ec4632329621ee92721a45c49e1a89f10d4263be2d4",
+          "size": 417609,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794301518567067574,
+          "path": "route.metallib",
+          "sha256": "0ddfc0c75d955e58397500381bd8333c7a07c5c52eaed79db09313594dd67e3e",
+          "size": 4473280,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 384,
+          "mtime_ns": 1794301549736542980,
+          "path": "route.policypack",
+          "sha256": "9a7ad3d578153f77c1d1d657978f313cb4bb1220404ca724196a1a43b08d4830",
+          "size": 17228695,
+          "type": "file",
+          "xattrs": {}
+        }
+      ],
+      "schema": 1
+    },
+    "crow-v15-toe-reactive-20261109": {
+      "entries": [
+        {
+          "mode": 493,
+          "mtime_ns": 1794262867292629773,
+          "path": ".",
+          "size": 0,
+          "type": "directory",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794262625279161843,
+          "path": "active.air",
+          "sha256": "27a485089b96db2587ea8bbb40cbe047afc405e08a08e35602c79bc04df00aa1",
+          "size": 197936,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794262624296364134,
+          "path": "active.metal",
+          "sha256": "69bb852fd381c5b40938fe21dec87ecc2ff40c1a7f6f2b04e761a23e55eadb54",
+          "size": 410484,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794262625784322878,
+          "path": "active.metallib",
+          "sha256": "d087a2db395d6c8bffbd7b7d4f74ec3f304ff57604e8166cf777d70d2a6912ae",
+          "size": 4469456,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794262590349044515,
+          "path": "c_api.cpp",
+          "sha256": "66d08e96c97aa9b494ff956599fcc301e1e2c9e3ce32bf92d2851856f6a5c0e4",
+          "size": 287654,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794262594467391442,
+          "path": "c_api.cpp.o",
+          "sha256": "652d1e89fa886f3b2be1c324f86ac765b36139fd06f5b8031cb16fb86fc6ce0c",
+          "size": 715936,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794262594467944321,
+          "path": "c_api.cpp.o.d",
+          "sha256": "32b51fb9204729b22f7f86796d7a52a16791fbfa9fd069e456875c0c9a52e968",
+          "size": 159598,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 493,
+          "mtime_ns": 1794262685390793677,
+          "path": "contract-debug-envelope2",
+          "size": 0,
+          "type": "directory",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794262681216541934,
+          "path": "contract-debug-envelope2/c_api.cpp",
+          "sha256": "f54d2ea953ffb40d81f35731d6d9e16aa386891f2d33546c1cc755837e34e015",
+          "size": 288960,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794262685313191705,
+          "path": "contract-debug-envelope2/c_api.cpp.o",
+          "sha256": "b1e39ed018f63fad75a9acdbb59dbedb735bcb64fc468b856beeb2e0be3a916c",
+          "size": 716376,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794262685313752042,
+          "path": "contract-debug-envelope2/c_api.cpp.o.d",
+          "sha256": "77ea090ace3fd4cfbec82b41f644fffbe66767a8f3d87b9629c65366f47384ba",
+          "size": 159648,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 493,
+          "mtime_ns": 1794262685391070763,
+          "path": "contract-debug-envelope2/libmetalrobo.dylib",
+          "sha256": "8527c0f87e8c6e56eaa01b0247d80acc2beef71fa377417105ee1df939a1ed4c",
+          "size": 5763488,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 493,
+          "mtime_ns": 1794262655318159077,
+          "path": "contract-debug-reactive",
+          "size": 0,
+          "type": "directory",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794262651138884007,
+          "path": "contract-debug-reactive/c_api.cpp",
+          "sha256": "c9165239ce3e03ebc19c282a0ce3fedfd6d42c9cf070e775f493b1ca227fe404",
+          "size": 289146,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794262655241139109,
+          "path": "contract-debug-reactive/c_api.cpp.o",
+          "sha256": "e92bf98899594597f79601491364bffb6cb1bb46136b750272004484ea2bde5d",
+          "size": 718648,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794262655241702571,
+          "path": "contract-debug-reactive/c_api.cpp.o.d",
+          "sha256": "b82a9a40b7f944d83d553a33be4a09332d5347164959383f63581fc4feaae095",
+          "size": 159646,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 493,
+          "mtime_ns": 1794262655318457954,
+          "path": "contract-debug-reactive/libmetalrobo.dylib",
+          "sha256": "6aaafef7e2615ebbe936f44bf6f7cc0c8994f26302836ddc0b511772dd74df33",
+          "size": 5763536,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 493,
+          "mtime_ns": 1794262681213367078,
+          "path": "contract-debug-reactive2",
+          "size": 0,
+          "type": "directory",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794262677014268158,
+          "path": "contract-debug-reactive2/c_api.cpp",
+          "sha256": "197012f80ee9cb4b6ca41c0bbe8a060421eabe5cf2ccb8c002e2920468c35658",
+          "size": 289301,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794262681136365402,
+          "path": "contract-debug-reactive2/c_api.cpp.o",
+          "sha256": "ca116ad74850425e7c0d7b70b583bd2acc4d73e4c12d5950e16acf3e378c1959",
+          "size": 720032,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794262681136930864,
+          "path": "contract-debug-reactive2/c_api.cpp.o.d",
+          "sha256": "8b9da34634b90dad3008d5c8091be50d92f80d0136766b3129eda745d096cb46",
+          "size": 159648,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 493,
+          "mtime_ns": 1794262681213648247,
+          "path": "contract-debug-reactive2/libmetalrobo.dylib",
+          "sha256": "25bb5c0ea3cd4b7428c512c1dbbe379790399c77bad4ae4a23bf5404d45c137d",
+          "size": 5763536,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794262797413725857,
+          "path": "full-reserved-final-i-active.json",
+          "sha256": "4a95ae091ebf8b030058fe36b55bc806720dabe86c3cd9dd08fbcfe633b80b7f",
+          "size": 97357842,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794262795384613777,
+          "path": "full-reserved-final-i-active.tsv",
+          "sha256": "f23463952c9c69605cf5434e851e37dc9ab97525f1379db7ff6f9b407e1d8031",
+          "size": 2165119,
+          "type": "file",
+          "xattrs": {
+            "com.apple.TextEncoding": "dXRmLTg7MTM0MjE3OTg0"
+          }
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794262821749125631,
+          "path": "full-reserved-final-i-sensor-zero.json",
+          "sha256": "b5b565c124f791a01e09caaf0fc2bb63268c5c26e1972f2cd6cb50e873ec9126",
+          "size": 97314340,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794262819706227077,
+          "path": "full-reserved-final-i-sensor-zero.tsv",
+          "sha256": "140432c2dc8e1e00bc2ab367d6e9f4b51699664a613402528e955f428fb5b92a",
+          "size": 2165452,
+          "type": "file",
+          "xattrs": {
+            "com.apple.TextEncoding": "dXRmLTg7MTM0MjE3OTg0"
+          }
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794262844419350141,
+          "path": "full-reserved-final-j-active.json",
+          "sha256": "0909e5c718dcaf666659c131e1c5836fd807581f81fa50e40f484e6e42ec18b2",
+          "size": 98703847,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794262842328170909,
+          "path": "full-reserved-final-j-active.tsv",
+          "sha256": "8553a38648e1a26d6391a1ff97b70c3f8820972fc5dc4411285b0751c8f7adb6",
+          "size": 2161367,
+          "type": "file",
+          "xattrs": {
+            "com.apple.TextEncoding": "dXRmLTg7MTM0MjE3OTg0"
+          }
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794262867291288347,
+          "path": "full-reserved-final-j-sensor-zero.json",
+          "sha256": "e294e68252d0d3bb46e216fbde488222730b3a6dcbd5aeb71499a7bf6593d59f",
+          "size": 98632651,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794262865184632253,
+          "path": "full-reserved-final-j-sensor-zero.tsv",
+          "sha256": "befe2eca32685df2abfa3d7e1eec2cd2b2c01077800c98aa223d36b30c974b9e",
+          "size": 2161550,
+          "type": "file",
+          "xattrs": {
+            "com.apple.TextEncoding": "dXRmLTg7MTM0MjE3OTg0"
+          }
+        },
+        {
+          "mode": 384,
+          "mtime_ns": 1794262725953456736,
+          "path": "landing.policypack",
+          "sha256": "6ae0ff277832a92f99980d525c9631fdce3cb58ff9fbb421f67c64210825a072",
+          "size": 5996436,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 493,
+          "mtime_ns": 1794262594545822421,
+          "path": "libmetalrobo.dylib",
+          "sha256": "469c8e069195fc25778e73d66b4ebbe0315604f4a2f3177099ca506c6af5127e",
+          "size": 5747024,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 384,
+          "mtime_ns": 1794262725707446348,
+          "path": "route.policypack",
+          "sha256": "ae5762db2d031c6ef374a10b91783b5f2b143b00c0eac58db8070d93b04fe8e3",
+          "size": 17228690,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794262626137369033,
+          "path": "sensor-zero.air",
+          "sha256": "8938d2b2a89670d684b72f9d6bef5f655c61cebfeb4d318e5b8b82de1d493eac",
+          "size": 197632,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794262625806528995,
+          "path": "sensor-zero.metal",
+          "sha256": "301e7faf490d991fcbc4cde56e6ca81d7af78f079569c2ad3f193b1392d49ebe",
+          "size": 410485,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794262626442262343,
+          "path": "sensor-zero.metallib",
+          "sha256": "8c8c17caec772b9a34acc8e2767fd24a1b201841600a007157bebb06f8680d5b",
+          "size": 4469136,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794262757065077685,
+          "path": "smoke-training-active.json",
+          "sha256": "a184308d3b1e98a3f5a11e0f68bd6446e0a97a8164bb3a8d32f18c1ee846e053",
+          "size": 11561941,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794262756755918345,
+          "path": "smoke-training-active.tsv",
+          "sha256": "822e945f736eddb3165daaca3e4399133bdd91588d6acf17506a766cde8de4ea",
+          "size": 255240,
+          "type": "file",
+          "xattrs": {
+            "com.apple.TextEncoding": "dXRmLTg7MTM0MjE3OTg0"
+          }
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794262762191426790,
+          "path": "smoke-training-sensor-zero.json",
+          "sha256": "a184308d3b1e98a3f5a11e0f68bd6446e0a97a8164bb3a8d32f18c1ee846e053",
+          "size": 11561941,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794262761881246900,
+          "path": "smoke-training-sensor-zero.tsv",
+          "sha256": "822e945f736eddb3165daaca3e4399133bdd91588d6acf17506a766cde8de4ea",
+          "size": 255240,
+          "type": "file",
+          "xattrs": {
+            "com.apple.TextEncoding": "dXRmLTg7MTM0MjE3OTg0"
+          }
+        }
+      ],
+      "schema": 1
+    },
+    "crow-v15-toe-support-20261109": {
+      "entries": [
+        {
+          "mode": 493,
+          "mtime_ns": 1794263296974213258,
+          "path": ".",
+          "size": 0,
+          "type": "directory",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794263203718535519,
+          "path": "active.metallib",
+          "sha256": "d087a2db395d6c8bffbd7b7d4f74ec3f304ff57604e8166cf777d70d2a6912ae",
+          "size": 4469456,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794263134571557305,
+          "path": "c_api.cpp",
+          "sha256": "0f5d1f85aa09e0d0a07703723b776fc2fde184ed863b9d2f0a47431c16b3a9cf",
+          "size": 288988,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794263138645859080,
+          "path": "c_api.cpp.o",
+          "sha256": "650f5e150a49c491a6a1d9d7bc2d5e04b8188b06d38af48b808315b89711e218",
+          "size": 721096,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794263138646427626,
+          "path": "c_api.cpp.o.d",
+          "sha256": "a3c9e079fed902c30c771f88c664d17fec7782b4e2538c28acad610dbaf8e62b",
+          "size": 159596,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 493,
+          "mtime_ns": 1794263158921343058,
+          "path": "contract-debug-branch",
+          "size": 0,
+          "type": "directory",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794263154760417746,
+          "path": "contract-debug-branch/c_api.cpp",
+          "sha256": "31df2a115a5ef96ecb8d2ae551c59396bd83081e3c03e0b85a9d535eaaa89a1a",
+          "size": 290190,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794263158844708717,
+          "path": "contract-debug-branch/c_api.cpp.o",
+          "sha256": "b6e1c023e56300c2209a333ca80958d4dc18882e0bf3c1f3605ddf56e7bc02aa",
+          "size": 721160,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794263158845262138,
+          "path": "contract-debug-branch/c_api.cpp.o.d",
+          "sha256": "b62ffcbd5567d0ca409734a6c4c8d4542f5ea2eb8180ecdbc0a79704e29b7a0b",
+          "size": 159640,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 493,
+          "mtime_ns": 1794263158921634768,
+          "path": "contract-debug-branch/libmetalrobo.dylib",
+          "sha256": "5d109ce08dd380817bdeacab80d154868aab21c7312afa4492534d1caca4b673",
+          "size": 5763536,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 493,
+          "mtime_ns": 1794263154757183348,
+          "path": "contract-debug-support",
+          "size": 0,
+          "type": "directory",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794263150558129471,
+          "path": "contract-debug-support/c_api.cpp",
+          "sha256": "d5b19aa3d56bc4a4cc6ef14c8b4293e8d97255db8198c4eac73f2f7013baefb0",
+          "size": 290635,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794263154678364699,
+          "path": "contract-debug-support/c_api.cpp.o",
+          "sha256": "774f3f18ebd69f94a0f877ad0d1dcc371c743bffbfadad70cbe03027088b0a0a",
+          "size": 725216,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794263154678932162,
+          "path": "contract-debug-support/c_api.cpp.o.d",
+          "sha256": "622afbc3aaa7834f5af511c967f4256cc23230a39d5c7624bd24e6eaffe7c371",
+          "size": 159642,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 493,
+          "mtime_ns": 1794263154757481641,
+          "path": "contract-debug-support/libmetalrobo.dylib",
+          "sha256": "4af6d729b7457f3c34a63a501feeaef5988877503a384ea8aabf61c53e55bc3a",
+          "size": 5763536,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794263222998379780,
+          "path": "full-reserved-final-i-active.json",
+          "sha256": "672f4d177482f7fdaf7e50e46be68500e316cdd6efab3b87819efd9952d4e162",
+          "size": 97465819,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794263220958796292,
+          "path": "full-reserved-final-i-active.tsv",
+          "sha256": "cb50f64c19d1b4733adfa609a4fbfadeec6e61b9a7df25ae3fc980d92eb53a90",
+          "size": 2166865,
+          "type": "file",
+          "xattrs": {
+            "com.apple.TextEncoding": "dXRmLTg7MTM0MjE3OTg0"
+          }
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794263247154030808,
+          "path": "full-reserved-final-i-sensor-zero.json",
+          "sha256": "0d2e812876dbcab2341b6c09dcc3c0dec284c7a16f64d0573117bd5202281dba",
+          "size": 97467044,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794263245090666649,
+          "path": "full-reserved-final-i-sensor-zero.tsv",
+          "sha256": "d109a457d93819a138d322ff878d07feda591e3918afc1414e0b58e454a00244",
+          "size": 2167000,
+          "type": "file",
+          "xattrs": {
+            "com.apple.TextEncoding": "dXRmLTg7MTM0MjE3OTg0"
+          }
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794263272627125441,
+          "path": "full-reserved-final-j-active.json",
+          "sha256": "3780d430c883f7ca304b186a1deed26633baee95e5fdac7d5e988466e6311f8c",
+          "size": 98465988,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794263270553402584,
+          "path": "full-reserved-final-j-active.tsv",
+          "sha256": "63847ff155eb48d86d57b3630d16bdc2792245718f3c5ce38ffbece34e9d33d5",
+          "size": 2165301,
+          "type": "file",
+          "xattrs": {
+            "com.apple.TextEncoding": "dXRmLTg7MTM0MjE3OTg0"
+          }
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794263296972901582,
+          "path": "full-reserved-final-j-sensor-zero.json",
+          "sha256": "94997c3050b11817753c64e3122d42f1f1b675519a2d5ebcc9991025ff4260b4",
+          "size": 97459550,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794263294923128521,
+          "path": "full-reserved-final-j-sensor-zero.tsv",
+          "sha256": "0ea75343526710961144304ad6e692201816e60281d19446d558fc5492bf94fe",
+          "size": 2167681,
+          "type": "file",
+          "xattrs": {
+            "com.apple.TextEncoding": "dXRmLTg7MTM0MjE3OTg0"
+          }
+        },
+        {
+          "mode": 384,
+          "mtime_ns": 1794263190340722671,
+          "path": "landing.policypack",
+          "sha256": "cfe0fce093baddcd41e7547fb5ebe0486280c84882a1a38c1a72fc59d3bc4cc4",
+          "size": 5996435,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 493,
+          "mtime_ns": 1794263138723360636,
+          "path": "libmetalrobo.dylib",
+          "sha256": "610d2f96d96ee1886871eaea576c578ab0b2de59cd5b024de25ec08dc64e557e",
+          "size": 5763536,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 384,
+          "mtime_ns": 1794263190096155127,
+          "path": "route.policypack",
+          "sha256": "c4fc084d6ba9fd526f8ec0687766d0efa83b8ebddc1edcd288e92d129ab345bc",
+          "size": 17228689,
+          "type": "file",
+          "xattrs": {}
+        },
+        {
+          "mode": 420,
+          "mtime_ns": 1794263203722492256,
+          "path": "sensor-zero.metallib",
+          "sha256": "8c8c17caec772b9a34acc8e2767fd24a1b201841600a007157bebb06f8680d5b",
+          "size": 4469136,
+          "type": "file",
+          "xattrs": {}
+        }
+      ],
+      "schema": 1
+    }
+  },
+  "schema": 1
+}
