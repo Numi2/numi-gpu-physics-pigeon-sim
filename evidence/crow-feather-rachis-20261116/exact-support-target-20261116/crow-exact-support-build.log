@@ -1,0 +1,29 @@
+[1/29] Building CXX object matter/CMakeFiles/numi_matter_runtime_objects.dir/src/metal_world.cpp.o
+[2/29] Generating shaders/MetalRobo.metallib
+[3/29] Building CXX object CMakeFiles/metalrobo.dir/src/core/CrowArticulatedWing.cpp.o
+[4/29] Building CXX object CMakeFiles/metalrobo.dir/src/core/CrowEmbodiment.cpp.o
+[5/29] Building CXX object CMakeFiles/metalrobo.dir/src/core/FrankaWorld.cpp.o
+[6/29] Building CXX object CMakeFiles/metalrobo.dir/src/core/CrowManipulation.cpp.o
+[7/29] Building CXX object CMakeFiles/metalrobo.dir/src/core/CrowForaging.cpp.o
+[8/29] Building CXX object CMakeFiles/metalrobo.dir/src/core/RunProgram.cpp.o
+[9/29] Building CXX object CMakeFiles/metalrobo.dir/src/core/VisualPlatform.cpp.o
+[10/29] Building OBJCXX object CMakeFiles/metalrobo.dir/src/metal/FiniteResource.mm.o
+[11/29] Building CXX object CMakeFiles/metalrobo.dir/src/core/LocomotionWorld.cpp.o
+[12/29] Building CXX object CMakeFiles/metalrobo.dir/src/core/TaskProgram.cpp.o
+[13/29] Building OBJCXX object CMakeFiles/metalrobo.dir/src/metal/RetinalObserver.mm.o
+[14/29] Building OBJCXX object CMakeFiles/metalrobo.dir/src/metal/MetalUnifiedQualitySolver.mm.o
+[15/29] Building OBJCXX object CMakeFiles/metalrobo.dir/src/metal/MetalRunInspector.mm.o
+[16/29] Building OBJCXX object CMakeFiles/metalrobo.dir/src/metal/MetalHybridRenderer.mm.o
+[17/29] Building CXX object CMakeFiles/crow_articulated_hand_response.dir/tests/crow_v15_wing_fixture/articulated-hand-response.cpp.o
+[18/29] Building CXX object CMakeFiles/crow_quality_refinement_guard.dir/tests/crow_v15_wing_fixture/quality-refinement-guard.cpp.o
+[19/29] Building OBJCXX object CMakeFiles/crow-feather-equality-gate.dir/tests/crow_v15_wing_fixture/feather-equality-gate.mm.o
+[20/29] Building OBJCXX object CMakeFiles/crow-feather-predicted-position.dir/tests/crow_v15_wing_fixture/feather-predicted-position.mm.o
+[21/29] Building OBJCXX object CMakeFiles/metalrobo.dir/src/metal/MetalWorld.mm.o
+[22/29] Building CXX object CMakeFiles/metalrobo.dir/src/c_api.cpp.o
+[23/29] Linking CXX shared library lib/libmetalrobo.dylib
+[24/29] Linking CXX executable crow_articulated_hand_response
+[25/29] Linking OBJCXX executable crow-feather-predicted-position
+[26/29] Linking OBJCXX executable crow-feather-equality-gate
+[27/29] Linking CXX executable crow_quality_refinement_guard
+[28/29] Building CXX object CMakeFiles/crow_quality_exact_v15.dir/tests/crow_v15_wing_fixture/quality-exact-v15.cpp.o
+[29/29] Linking CXX executable crow_quality_exact_v15

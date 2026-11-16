@@ -1,0 +1,112 @@
+diff --git a/include/metalrobo/unified_quality_shared.h b/include/metalrobo/unified_quality_shared.h
+index 557c8553e..d12f92c4e 100644
+--- a/include/metalrobo/unified_quality_shared.h
++++ b/include/metalrobo/unified_quality_shared.h
+@@ -39,6 +39,7 @@ enum MRUnifiedQualityBlockKind : mr_u32 {
+ enum MRUnifiedQualityBlockFlags : mr_u32 {
+     MR_UNIFIED_QUALITY_BLOCK_HARD_EQUALITY = 1u << 0u,
+     MR_UNIFIED_QUALITY_BLOCK_REPORT_FLOOR = 1u << 1u,
++    MR_UNIFIED_QUALITY_BLOCK_INACTIVE = 1u << 2u,
+ };
+ 
+ enum MRUnifiedQualitySolvePath : mr_u32 {
+diff --git a/src/metal/MetalUnifiedQualitySolver.metal b/src/metal/MetalUnifiedQualitySolver.metal
+index 244435ee3..ff18ccaa3 100644
+--- a/src/metal/MetalUnifiedQualitySolver.metal
++++ b/src/metal/MetalUnifiedQualitySolver.metal
+@@ -802,7 +802,8 @@ inline bool validBlockTopology(
+                 block.layout.w &
+                 (
+                     MR_UNIFIED_QUALITY_BLOCK_HARD_EQUALITY |
+-                    MR_UNIFIED_QUALITY_BLOCK_REPORT_FLOOR
++                    MR_UNIFIED_QUALITY_BLOCK_REPORT_FLOOR |
++                    MR_UNIFIED_QUALITY_BLOCK_INACTIVE
+                 )
+             ) &&
+         dimension > 0u &&
+@@ -2444,6 +2445,17 @@ inline bool mrUnifiedQualityExactEquality(
+         bool applicable = true;
+         for (uint i = 0u; i < dispatch.blockCount && applicable; ++i) {
+             const MRUnifiedQualityBlockGPU b = blocks[i];
++            if ((b.layout.w & MR_UNIFIED_QUALITY_BLOCK_INACTIVE) != 0u) {
++                applicable = b.layout.w == MR_UNIFIED_QUALITY_BLOCK_INACTIVE &&
++                    b.layout.x <= dispatch.rowCount && b.layout.y <= dispatch.rowCount - b.layout.x;
++                for (uint r = 0u; r < b.layout.y && applicable; ++r) {
++                    const uint row = b.layout.x + r;
++                    applicable = bias[row] == 0.0f;
++                    for (uint k = 0u; k < n && applicable; ++k)
++                        applicable = jacobian[row*n+k] == 0.0f;
++                }
++                continue;
++            }
+             applicable = b.layout.z == MR_UNIFIED_QUALITY_SCALAR_INTERVAL &&
+                 b.layout.y == 1u &&
+                 (b.layout.w & MR_UNIFIED_QUALITY_BLOCK_HARD_EQUALITY) != 0u &&
+diff --git a/src/metal/MetalWorld.mm b/src/metal/MetalWorld.mm
+index 9b8ab89bf..ad9dd3c9f 100644
+--- a/src/metal/MetalWorld.mm
++++ b/src/metal/MetalWorld.mm
+@@ -4787,14 +4787,19 @@ MetalWorldDiagnostics validateAndBuildLayout(
+             config.quality.directMaximumRows;
+         quality.derivativeStride =
+             qualityBlockCount * 36u;
+-        quality.hessianStride = std::max(
++        quality.hessianStride = std::max({
+             (generalizedVelocityCount <= MR_UNIFIED_QUALITY_MAX_ADJACENT_VELOCITIES ||
+              (generalizedVelocityCount <=
+                     config.quality.directMaximumGeneralizedVelocities &&
+               qualityRowCount <= config.quality.directMaximumRows))
+                 ? generalizedVelocityCount * generalizedVelocityCount : 1u,
+             mrUnifiedQualityRefinementScratchFloats(
+-                generalizedVelocityCount, qualityRowCount, qualityBlockCount));
++                generalizedVelocityCount, qualityRowCount, qualityBlockCount),
++            contact.authoredConstraintCount > 0u
++                ? mrUnifiedQualityExactEqualityScratchFloats(
++                    generalizedVelocityCount,
++                    std::min(contact.authoredConstraintCount, generalizedVelocityCount))
++                : 0u});
+         quality.blockStride = qualityBlockCount;
+         quality.tolerances = {
+             config.quality.optimalityTolerance,
+diff --git a/src/metal/MetalWorldContact.metal b/src/metal/MetalWorldContact.metal
+index 1df7cdb01..1dd138874 100644
+--- a/src/metal/MetalWorldContact.metal
++++ b/src/metal/MetalWorldContact.metal
+@@ -5039,10 +5039,9 @@ kernel void mr_world_seed_authored_constraint_ir(
+                     sourceEndpoints[source.endpointOffset];
+                 const MRConstraintIREndpointGPU targetEndpoint =
+                     sourceEndpoints[source.endpointOffset + 1u];
+-                const float3 rodPosition =
+-                    candidateRodNodes[
+-                        rodNodeBase + rodEndpoint.objectIndex
+-                    ].position.xyz;
++                const MRRodNodeStateGPU rodState =
++                    candidateRodNodes[rodNodeBase + rodEndpoint.objectIndex];
++                const float3 rodPosition = rodState.position.xyz;
+                 float3 targetPosition =
+                     targetEndpoint.anchor.xyz;
+                 if (targetEndpoint.role !=
+@@ -5083,6 +5082,15 @@ kernel void mr_world_seed_authored_constraint_ir(
+                     row.direction.xyz,
+                     targetPosition - rodPosition
+                 );
++                if (targetEndpoint.role == MR_CONSTRAINT_IR_ENDPOINT_WORLD &&
++                    rodEndpoint.role == MR_CONSTRAINT_IR_ENDPOINT_A &&
++                    dispatch.ccdMode != MR_WORLD_CCD_HYBRID &&
++                    row.compliance == 0.0f && row.dissipation == 0.0f) {
++                    const float h = dispatch.timestepAndBias.x;
++                    row.targetVelocity =
++                        -row.positionError / h - dot(row.direction.xyz, rodState.velocity.xyz);
++                    row.flags &= ~MR_CONSTRAINT_IR_ROW_POSITION_STABILIZED;
++                }
+             } else if (
+                 slot < source.dimension &&
+                 (source.flags &
+@@ -12803,6 +12811,7 @@ kernel void mr_world_prepare_unified_quality(
+             }
+             }
+         } else {
++            qualityBlock.layout.w = MR_UNIFIED_QUALITY_BLOCK_INACTIVE;
+             for (uint axis = 0u; axis < 3u; ++axis) {
+                 biasVectors[
+                     vectorBase +
