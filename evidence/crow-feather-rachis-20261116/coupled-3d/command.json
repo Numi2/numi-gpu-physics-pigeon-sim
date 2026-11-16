@@ -1,0 +1,14 @@
+{
+  "source_owner_commit": "ee1f3e32a5e0ed7dfcf165785465bda0def8909d",
+  "native_energy_library_sha256": "bc563d8e678393b8b497497bc52c9a4775c4639fcb53ecb95a3b5de79f352429",
+  "native_hessian_binary_sha256": "2fd6635467654a74f8c24b28b1636b61b4f02a3875e266b6708075f238951af1",
+  "native_hessian_source_sha256": "2412d8ead567c1f5d6bf2f2968d6d4153b3791d23b1d611acb3178309caf0b5b",
+  "native_hessian_result_sha256": "0a746a62d3ef9b66c58e63404e91f2e424b1875115839a07d0ac6065ae8c09b9",
+  "gpu_host_build": ["clang++", "-std=c++17", "-O2", "-fobjc-arc", "/tmp/crow-3d-modal.mm", "-framework", "Foundation", "-framework", "Metal", "-o", "/tmp/crow-3d-modal"],
+  "gpu_run": ["/tmp/crow-3d-modal", "/tmp/crow-3d-modal.metal", "/tmp/crow-3d-modal-input.bin", "/tmp/crow-3d-modal-output.bin"],
+  "gpu_host_binary_sha256": "4fc23ca5e3b859907421f7e062b0a28ca9670654f5c869215a6df4699ff794f3",
+  "metal_source_sha256": "e9723b51db1b390d49268a2d7716be535f7d9d30719f46dd5e1de3595ccd3e1c",
+  "input_sha256": "bbd78c778c2f3ab31f7709bb54c37fb80faaa5ff7f5b0ef7b7a97a2d09b2831d",
+  "runtime_compiled_metal_fast_math": false,
+  "exit": 0
+}
