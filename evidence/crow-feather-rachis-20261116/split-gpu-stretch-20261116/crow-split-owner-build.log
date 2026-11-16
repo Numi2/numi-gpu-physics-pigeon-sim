@@ -1,0 +1,14 @@
+[0/1] Re-running CMake...
+-- MetalRobo Python tests disabled: no interpreter with NumPy and SciPy
+-- Configuring done (0.1s)
+-- Generating done (0.1s)
+-- Build files have been written to: /Users/n/Developer/numi-crow-articulated-wing-20261116/build/wing-capacity-48
+[1/3] Building OBJCXX object CMakeFiles/crow-feather-split-stretch.dir/tests/crow_v15_wing_fixture/split-stretch-driver.mm.o
+/Users/n/Developer/numi-crow-articulated-wing-20261116/tests/crow_v15_wing_fixture/split-stretch-driver.mm:9:61: warning: 'fastMathEnabled' is deprecated: first deprecated in macOS 15.0 - Use mathMode instead [-Wdeprecated-declarations]
+    9 |  MTLCompileOptions* options=[MTLCompileOptions new];options.fastMathEnabled=NO;id<MTLLibrary> lib=[dev newLibraryWithSource:source options:options error:&err];if(!lib){fprintf(stderr,"shader: %s\n",err.localizedDescription.UTF8String);return 4;}
+      |                                                             ^
+/Applications/Xcode-26.6.0.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/Frameworks/Metal.framework/Headers/MTLLibrary.h:308:39: note: 'fastMathEnabled' has been explicitly marked deprecated here
+  308 | @property (readwrite, nonatomic) BOOL fastMathEnabled API_DEPRECATED("Use mathMode instead", macos(10.11, 15.0), ios(8.0, 18.0));
+      |                                       ^
+1 warning generated.
+[2/3] Linking OBJCXX executable crow-feather-split-stretch
