@@ -1,0 +1,10 @@
+{
+  "argv": [
+    "/Users/n/Developer/numi-crow-articulated-wing-20261116/build/wing-capacity-48/crow-aero-timestep",
+    "/Users/n/Developer/numi-crow-articulated-wing-20261116/build/wing-capacity-48/shaders/MetalRobo.metallib",
+    "/Users/n/Developer/numi-crow-articulated-wing-20261116/build/wing-aero-element-20261116/wing-aero.metallib",
+    "8"
+  ],
+  "exit": 2,
+  "elapsed_s": 4.1740235409999995
+}
