@@ -1,0 +1,5 @@
+diagnostic direct code=0 path=2 optimality=7.81059e-08 feasibility=8.88178e-16 equality=0.0643502
+diagnostic direct code=0 path=2 optimality=9.23253e-08 feasibility=1.07288e-06 equality=0.0650407
+diagnostic pcg code=0 path=2 optimality=7.81059e-08 feasibility=8.88178e-16 equality=0.0643502
+diagnostic pcg code=0 path=2 optimality=9.23253e-08 feasibility=1.07288e-06 equality=0.0650407
+metal_unified_quality=failed reason="direct solve selected the wrong path"

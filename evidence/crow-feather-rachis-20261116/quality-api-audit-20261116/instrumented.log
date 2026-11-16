@@ -1,0 +1,7 @@
+/private/tmp/crow-quality-api-audit-20261116/instrumented.cpp:452:1: error: expected expression
+  452 | ;
+      | ^
+/private/tmp/crow-quality-api-audit-20261116/instrumented.cpp:460:1: error: expected expression
+  460 | ;
+      | ^
+2 errors generated.
