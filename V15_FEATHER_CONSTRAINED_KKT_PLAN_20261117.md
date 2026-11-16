@@ -1,0 +1,5 @@
+# Constrained implicit linear dynamics Schur reference
+
+Use the archived native-energy Hessian and nodal masses to construct the linearized implicit-Euler KKT system with prescribed positions at nodes 0, 4 and 8. Implement an independent dense double-precision Schur complement for equality reactions and compare it with a direct full KKT solve across two node orderings, a displaced supported shape, and nonzero incoming free-node velocities. Use the existing 0.125 ms microstep. The reference must solve force equations and boundary conditions simultaneously; it is not a physical full-feather model or a GPU algorithm.
+
+Preregister numerical criteria: direct and Schur positions agree within 1e-12 m; prescribed position errors below 1e-12 m; maximum free-node dynamic force residual below 1e-8 N; reordered outputs map back within 1e-12 m; and nonzero velocity cases remain finite. Report full equations, inputs, reaction signs, residuals, conditioning, and results. A pass provides a controlled target for a production coupled implementation, not evidence that the Metal solver, wing, flight or landing is qualified.
