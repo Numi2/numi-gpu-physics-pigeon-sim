@@ -1,0 +1,7 @@
+/tmp/crow-coupled-modal.mm:6:119: warning: 'fastMathEnabled' is deprecated: first deprecated in macOS 15.0 - Use mathMode instead [-Wdeprecated-declarations]
+    6 |  id<MTLDevice> dev=MTLCreateSystemDefaultDevice();if(!dev)return 3;MTLCompileOptions* opt=[MTLCompileOptions new];opt.fastMathEnabled=NO;id<MTLLibrary> lib=[dev newLibraryWithSource:source options:opt error:&err];if(!lib){fprintf(stderr,"shader: %s\n",err.localizedDescription.UTF8String);return 4;}id<MTLFunction> fn=[lib newFunctionWithName:@"rod_modal"];id<MTLComputePipelineState> pipe=[dev newComputePipelineStateWithFunction:fn error:&err];if(!pipe){fprintf(stderr,"pipeline: %s\n",err.localizedDescription.UTF8String);return 5;}
+      |                                                                                                                       ^
+/Applications/Xcode-26.6.0.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/Frameworks/Metal.framework/Headers/MTLLibrary.h:308:39: note: 'fastMathEnabled' has been explicitly marked deprecated here
+  308 | @property (readwrite, nonatomic) BOOL fastMathEnabled API_DEPRECATED("Use mathMode instead", macos(10.11, 15.0), ios(8.0, 18.0));
+      |                                       ^
+1 warning generated.
