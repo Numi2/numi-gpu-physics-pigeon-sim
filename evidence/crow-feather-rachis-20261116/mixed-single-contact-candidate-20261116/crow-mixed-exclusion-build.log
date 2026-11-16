@@ -1,0 +1,41 @@
+[1/2] Building CXX object CMakeFiles/crow_quality_mixed_analytic.dir/tests/crow_v15_wing_fixture/quality-mixed-scalar-analytic.cpp.o
+FAILED: [code=1] CMakeFiles/crow_quality_mixed_analytic.dir/tests/crow_v15_wing_fixture/quality-mixed-scalar-analytic.cpp.o 
+/usr/bin/c++  -I/Users/n/Developer/numi-crow-articulated-wing-20261116/include -I/Users/n/Developer/numi-crow-articulated-wing-20261116/matter/include -O3 -DNDEBUG -std=c++23 -arch arm64 -fPIE -MD -MT CMakeFiles/crow_quality_mixed_analytic.dir/tests/crow_v15_wing_fixture/quality-mixed-scalar-analytic.cpp.o -MF CMakeFiles/crow_quality_mixed_analytic.dir/tests/crow_v15_wing_fixture/quality-mixed-scalar-analytic.cpp.o.d -o CMakeFiles/crow_quality_mixed_analytic.dir/tests/crow_v15_wing_fixture/quality-mixed-scalar-analytic.cpp.o -c /Users/n/Developer/numi-crow-articulated-wing-20261116/tests/crow_v15_wing_fixture/quality-mixed-scalar-analytic.cpp
+/Users/n/Developer/numi-crow-articulated-wing-20261116/tests/crow_v15_wing_fixture/quality-mixed-scalar-analytic.cpp:17:12: error: no viable overloaded '='
+   17 |  p.dynamics={1,0,0,0,1,0,0,0,1};p.jacobian={1,0,0,0,1,0,0,0,1};p.bias={-.1f,-.2f,-.3f};
+      |  ~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~
+/Applications/Xcode-26.6.0.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/span:445:19: note: candidate function not viable: cannot convert initializer list argument to 'const span<const float>'
+  445 |   constexpr span& operator=(const span&) noexcept = default;
+      |                   ^         ~~~~~~~~~~~
+/Users/n/Developer/numi-crow-articulated-wing-20261116/tests/crow_v15_wing_fixture/quality-mixed-scalar-analytic.cpp:17:43: error: no viable overloaded '='
+   17 |  p.dynamics={1,0,0,0,1,0,0,0,1};p.jacobian={1,0,0,0,1,0,0,0,1};p.bias={-.1f,-.2f,-.3f};
+      |                                 ~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~
+/Applications/Xcode-26.6.0.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/span:445:19: note: candidate function not viable: cannot convert initializer list argument to 'const span<const float>'
+  445 |   constexpr span& operator=(const span&) noexcept = default;
+      |                   ^         ~~~~~~~~~~~
+/Users/n/Developer/numi-crow-articulated-wing-20261116/tests/crow_v15_wing_fixture/quality-mixed-scalar-analytic.cpp:17:70: error: no viable overloaded '='
+   17 |  p.dynamics={1,0,0,0,1,0,0,0,1};p.jacobian={1,0,0,0,1,0,0,0,1};p.bias={-.1f,-.2f,-.3f};
+      |                                                                ~~~~~~^~~~~~~~~~~~~~~~~
+/Applications/Xcode-26.6.0.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/span:445:19: note: candidate function not viable: cannot convert initializer list argument to 'const span<const float>'
+  445 |   constexpr span& operator=(const span&) noexcept = default;
+      |                   ^         ~~~~~~~~~~~
+/Users/n/Developer/numi-crow-articulated-wing-20261116/tests/crow_v15_wing_fixture/quality-mixed-scalar-analytic.cpp:18:16: error: no viable overloaded '='
+   18 |  p.freeVelocity={0,0,0};p.warmVelocity={0,0,0};p.warmImpulses={0,0,0};
+      |  ~~~~~~~~~~~~~~^~~~~~~~
+/Applications/Xcode-26.6.0.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/span:445:19: note: candidate function not viable: cannot convert initializer list argument to 'const span<const float>'
+  445 |   constexpr span& operator=(const span&) noexcept = default;
+      |                   ^         ~~~~~~~~~~~
+/Users/n/Developer/numi-crow-articulated-wing-20261116/tests/crow_v15_wing_fixture/quality-mixed-scalar-analytic.cpp:18:39: error: no viable overloaded '='
+   18 |  p.freeVelocity={0,0,0};p.warmVelocity={0,0,0};p.warmImpulses={0,0,0};
+      |                         ~~~~~~~~~~~~~~^~~~~~~~
+/Applications/Xcode-26.6.0.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/span:445:19: note: candidate function not viable: cannot convert initializer list argument to 'const span<const float>'
+  445 |   constexpr span& operator=(const span&) noexcept = default;
+      |                   ^         ~~~~~~~~~~~
+/Users/n/Developer/numi-crow-articulated-wing-20261116/tests/crow_v15_wing_fixture/quality-mixed-scalar-analytic.cpp:18:62: error: no viable overloaded '='
+   18 |  p.freeVelocity={0,0,0};p.warmVelocity={0,0,0};p.warmImpulses={0,0,0};
+      |                                                ~~~~~~~~~~~~~~^~~~~~~~
+/Applications/Xcode-26.6.0.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/span:445:19: note: candidate function not viable: cannot convert initializer list argument to 'const span<const float>'
+  445 |   constexpr span& operator=(const span&) noexcept = default;
+      |                   ^         ~~~~~~~~~~~
+6 errors generated.
+ninja: build stopped: subcommand failed.

@@ -1,0 +1,14 @@
+Test project /Users/n/Developer/numi-crow-articulated-wing-20261116/build/wing-capacity-48
+    Start 53: metalrobo.crow.quality_mixed_scalar_analytic
+1/1 Test #53: metalrobo.crow.quality_mixed_scalar_analytic ...   Passed    0.45 sec
+
+100% tests passed out of 1
+
+Label Time Summary:
+crow            =   0.45 sec*proc (1 test)
+experimental    =   0.45 sec*proc (1 test)
+reference       =   0.45 sec*proc (1 test)
+rod             =   0.45 sec*proc (1 test)
+rollback        =   0.45 sec*proc (1 test)
+
+Total Test time (real) =   0.45 sec

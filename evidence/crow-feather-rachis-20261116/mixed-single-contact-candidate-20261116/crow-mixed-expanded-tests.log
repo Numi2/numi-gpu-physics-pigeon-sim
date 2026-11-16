@@ -1,0 +1,48 @@
+Test project /Users/n/Developer/numi-crow-articulated-wing-20261116/build/wing-capacity-48
+      Start 53: metalrobo.crow.quality_mixed_scalar_analytic
+ 1/17 Test #53: metalrobo.crow.quality_mixed_scalar_analytic ............   Passed    0.05 sec
+      Start 54: metalrobo.crow.quality_refinement_hard_equality_guard
+ 2/17 Test #54: metalrobo.crow.quality_refinement_hard_equality_guard ...   Passed    0.03 sec
+      Start 55: metalrobo.crow.v15_articulated_hand_response
+ 3/17 Test #55: metalrobo.crow.v15_articulated_hand_response ............   Passed    0.00 sec
+      Start 56: metalrobo.crow.v15_wing_structure
+ 4/17 Test #56: metalrobo.crow.v15_wing_structure .......................   Passed    0.00 sec
+      Start 57: metalrobo.crow.v15_wing_free_dynamics
+ 5/17 Test #57: metalrobo.crow.v15_wing_free_dynamics ...................   Passed    0.13 sec
+      Start 58: metalrobo.crow.v15_wing_quiet_contact
+ 6/17 Test #58: metalrobo.crow.v15_wing_quiet_contact ...................   Passed    0.23 sec
+      Start 59: metalrobo.crow.v15_wing_cpu_gpu_reference
+ 7/17 Test #59: metalrobo.crow.v15_wing_cpu_gpu_reference ...............   Passed    0.02 sec
+      Start 60: metalrobo.crow.quality_mixed_scalar_random
+ 8/17 Test #60: metalrobo.crow.quality_mixed_scalar_random ..............   Passed    0.08 sec
+      Start 61: metalrobo.crow.quality_exact_v15_bilateral
+ 9/17 Test #61: metalrobo.crow.quality_exact_v15_bilateral ..............   Passed    0.07 sec
+      Start 62: metalrobo.crow.quality_exact_v15_poses
+10/17 Test #62: metalrobo.crow.quality_exact_v15_poses ..................   Passed    0.19 sec
+      Start 63: metalrobo.crow.rod_v15_articulated_reference
+11/17 Test #63: metalrobo.crow.rod_v15_articulated_reference ............   Passed    0.12 sec
+      Start 64: metalrobo.crow.rod_v15_rigid_hand_reference
+12/17 Test #64: metalrobo.crow.rod_v15_rigid_hand_reference .............   Passed    0.08 sec
+      Start 65: metalrobo.crow.rod_coupled_3d_modal_reference
+13/17 Test #65: metalrobo.crow.rod_coupled_3d_modal_reference ...........   Passed    0.06 sec
+      Start 66: metalrobo.crow.rod_free_modal_reference
+14/17 Test #66: metalrobo.crow.rod_free_modal_reference .................   Passed    0.05 sec
+      Start 67: metalrobo.crow.rod_two_way_kkt_reference
+15/17 Test #67: metalrobo.crow.rod_two_way_kkt_reference ................   Passed    0.05 sec
+      Start 68: metalrobo.crow.rod_free_local_frame
+16/17 Test #68: metalrobo.crow.rod_free_local_frame .....................   Passed    0.34 sec
+      Start 69: metalrobo.crow.rod_hard_equality_guard
+17/17 Test #69: metalrobo.crow.rod_hard_equality_guard ..................   Passed    0.48 sec
+
+100% tests passed out of 17
+
+Label Time Summary:
+crow            =   2.00 sec*proc (17 tests)
+experimental    =   2.00 sec*proc (17 tests)
+precision       =   0.34 sec*proc (1 test)
+reference       =   0.77 sec*proc (10 tests)
+rod             =   1.61 sec*proc (13 tests)
+rollback        =   0.56 sec*proc (3 tests)
+wing            =   0.39 sec*proc (4 tests)
+
+Total Test time (real) =   2.01 sec
