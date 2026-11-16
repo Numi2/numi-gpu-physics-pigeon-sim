@@ -1,0 +1,7 @@
+# Metal FP32 v15 articulated body and rod reference
+
+All four pre-registered one-step cases passed on Apple M4 Pro with fast math disabled, at the existing 0.125 ms macro step. The 73-coordinate (46 bird, 27 rod) dense-factor standalone Metal KKT kernel used the native v15 mass and hand Jacobian and native-energy rod Hessian. Maximum generalized force/torque residual was 5.55e-6, attachment error 2.33e-12 m, coordinate difference versus direct FP64 1.81e-9, and node-order gap 2.22e-10. There were no runtime or analysis warnings; compilation reports the retained `fastMathEnabled` deprecation warning.
+
+The full fixture, compiled shader source, driver, input, output, metrics and stderr are archived in `articulated-metal-kkt/`. Shader SHA-256 `3b5234444a9e4857c6e7808513be22172e08b5ed121d83a9e53ea3dba3698bc6`; input `8593c6d4b99775fdb43febb5ba2defbf1f3a5d9a43e289e8911283384a8b7e25`; output `c15fcbb9cfb086f306f5136bb3d909706f497c2fe576ad6ed2e1c84237e297c3`.
+
+This is a frozen-pose linearized reference with a synthetic attachment, no contact or aerodynamic forces, and no multi-step dynamics. Its dense factorization is not a proposed production performance implementation. The live MetalWorld generalized constraint path still needs a proper articulated endpoint, exact coupled equality/contact treatment, validation against this reference and nonlinear/trajectory qualification. This is not flight, landing or balance qualification.
