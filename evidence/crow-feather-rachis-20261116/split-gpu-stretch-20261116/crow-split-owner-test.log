@@ -1,0 +1,31 @@
+UpdateCTestConfiguration  from :/Users/n/Developer/numi-crow-articulated-wing-20261116/build/wing-capacity-48/DartConfiguration.tcl
+Parse Config file:/Users/n/Developer/numi-crow-articulated-wing-20261116/build/wing-capacity-48/DartConfiguration.tcl
+Test project /Users/n/Developer/numi-crow-articulated-wing-20261116/build/wing-capacity-48
+Constructing a list of tests
+Done constructing a list of tests
+Updating test list for fixtures
+Added 0 tests to meet fixture requirements
+Checking test dependency graph...
+Checking test dependency graph end
+test 60
+    Start 60: metalrobo.crow.rod_split_stretch_reference
+
+60: Test command: /usr/bin/python3 "/Users/n/Developer/numi-crow-articulated-wing-20261116/tests/crow_v15_wing_fixture/test-split-stretch.py" "/Users/n/Developer/numi-crow-articulated-wing-20261116/build/wing-capacity-48/crow-feather-split-stretch" "/Users/n/Developer/numi-crow-articulated-wing-20261116/tests/crow_v15_wing_fixture/split-stretch.metal"
+60: Working Directory: /Users/n/Developer/numi-crow-articulated-wing-20261116/build/wing-capacity-48
+60: Test timeout computed to be: 1500
+60: PASS: 96 cases, max error 6.4534405e-07 N, max naive error 2.44222735 N
+1/1 Test #60: metalrobo.crow.rod_split_stretch_reference ...   Passed    0.48 sec
+
+The following tests passed:
+	metalrobo.crow.rod_split_stretch_reference
+
+100% tests passed out of 1
+
+Label Time Summary:
+crow            =   0.48 sec*proc (1 test)
+experimental    =   0.48 sec*proc (1 test)
+precision       =   0.48 sec*proc (1 test)
+reference       =   0.48 sec*proc (1 test)
+rod             =   0.48 sec*proc (1 test)
+
+Total Test time (real) =   0.48 sec
