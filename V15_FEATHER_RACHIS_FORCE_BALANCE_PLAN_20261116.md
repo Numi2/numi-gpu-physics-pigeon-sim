@@ -1,0 +1,5 @@
+# Preregistered rachis force-balance diagnosis
+
+Use the already recorded nine-node positive-deflection CPU states at steps 0, 1 and 2 from the pre-shaped test; no new simulation and no parameter tuning. Reconstruct each saved position/velocity exactly, evaluate the native FP64 elastic energy, and estimate each node's y force by centered 1 nm and 0.1 nm perturbations of its y coordinate independently. Compare the two derivative resolutions and record all node values, their sum, the support and indenter elastic forces, the saved attachment reactions and momentum estimates.
+
+Prediction: finite-difference y-force estimates agree within 1% or 1e-5 N absolute between the two resolutions; the summed elastic y force is within 1e-4 N of zero. At step 2, if the rod is near static elastic equilibrium, every unconstrained-node elastic force is below 0.01 N and the midpoint force magnitude is within 15% of 0.64749 N. Otherwise identify the mismatch as out-of-equilibrium or unqualified force accounting; do not infer its cause solely from this analysis. Save the analyzer source, selected input rows and output. This diagnoses a short uniform related-crow surrogate only.
