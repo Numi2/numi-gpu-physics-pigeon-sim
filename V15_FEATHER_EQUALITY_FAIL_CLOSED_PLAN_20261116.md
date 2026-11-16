@@ -1,0 +1,3 @@
+# Experimental fail-closed equality gate
+
+Test an isolated owner-solver candidate that refuses success if the final measured hard-equality residual exceeds the existing feasibility tolerance. This is a validation/rollback safeguard, not a physical solution and not a claim that the tolerance certifies all constraints. Prediction: both original loaded rod cases now fail and roll back rather than publishing success, while the independently tested straight, initially stationary rod at its exact targets remains accepted. Record full status and compare committed state before and after rejection. A shared solver change remains experimental until unrelated robotic, contact, CCD, and rollback suites are qualified.
