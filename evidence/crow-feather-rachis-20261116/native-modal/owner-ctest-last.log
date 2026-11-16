@@ -1,0 +1,338 @@
+Start testing: Nov 16 06:06 CET
+----------------------------------------------------------
+53/96 Testing: metalrobo.crow.v15_wing_structure
+53/96 Test: metalrobo.crow.v15_wing_structure
+Command: "/Users/n/Developer/numi-crow-articulated-wing-20261116/build/wing-capacity-48/crow_v15_wing_structure_check"
+Directory: /Users/n/Developer/numi-crow-articulated-wing-20261116/build/wing-capacity-48
+"metalrobo.crow.v15_wing_structure" start time: Nov 16 06:06 CET
+Output:
+----------------------------------------------------------
+CROW_MODEL_DRIVE 8 9 8 800 8 2.99999992e-05 120
+CROW_MODEL_DRIVE_NEW 8 10 0.649999976 2.99999992e-05 120
+CROW_MODEL_DRIVE 9 10 9 800 8 2.99999992e-05 120
+CROW_MODEL_DRIVE_NEW 9 10 0.649999976 2.99999992e-05 120
+CROW_MODEL_DOF_LIMIT 6 6 62 15 crow_left_wing_sweep
+CROW_MODEL_DOF_LIMIT 7 7 62 15 crow_right_wing_sweep
+CROW_MODEL_DOF_LIMIT 8 8 62 90 crow_left_wing_flap
+CROW_MODEL_DOF_LIMIT 9 9 62 90 crow_right_wing_flap
+CROW_MODEL_DOF_LIMIT 10 10 62 25 crow_left_wing_pronation
+CROW_MODEL_DOF_LIMIT 11 11 62 25 crow_right_wing_pronation
+CROW_MODEL_DOF_LIMIT 12 12 62 18 crow_tail_pitch
+CROW_MODEL_DOF_LIMIT 13 13 62 18 crow_left_hip_pitch
+CROW_MODEL_DOF_LIMIT 14 14 62 22 crow_left_knee_pitch
+CROW_MODEL_DOF_LIMIT 15 15 62 24 crow_left_ankle_pitch
+CROW_MODEL_DOF_LIMIT 16 16 62 18 crow_right_hip_pitch
+CROW_MODEL_DOF_LIMIT 17 17 62 22 crow_right_knee_pitch
+CROW_MODEL_DOF_LIMIT 18 18 62 24 crow_right_ankle_pitch
+CROW_MODEL_DOF_LIMIT 19 19 62 8 crow_neck_yaw
+CROW_MODEL_DOF_LIMIT 20 20 62 8 crow_neck_pitch
+CROW_MODEL_DOF_LIMIT 21 21 62 10 crow_beak_open
+CROW_MODEL_DOF_LIMIT 22 22 62 12 crow_left_front_toe_1_proximal_flex
+CROW_MODEL_DOF_LIMIT 23 23 62 12 crow_left_front_toe_1_distal_flex
+CROW_MODEL_DOF_LIMIT 24 24 62 12 crow_left_front_toe_2_proximal_flex
+CROW_MODEL_DOF_LIMIT 25 25 62 12 crow_left_front_toe_2_distal_flex
+CROW_MODEL_DOF_LIMIT 26 26 62 12 crow_left_front_toe_3_proximal_flex
+CROW_MODEL_DOF_LIMIT 27 27 62 12 crow_left_front_toe_3_distal_flex
+CROW_MODEL_DOF_LIMIT 28 28 62 12 crow_left_rear_toe_proximal_flex
+CROW_MODEL_DOF_LIMIT 29 29 62 12 crow_left_rear_toe_distal_flex
+CROW_MODEL_DOF_LIMIT 30 30 62 12 crow_right_front_toe_1_proximal_flex
+CROW_MODEL_DOF_LIMIT 31 31 62 12 crow_right_front_toe_1_distal_flex
+CROW_MODEL_DOF_LIMIT 32 32 62 12 crow_right_front_toe_2_proximal_flex
+CROW_MODEL_DOF_LIMIT 33 33 62 12 crow_right_front_toe_2_distal_flex
+CROW_MODEL_DOF_LIMIT 34 34 62 12 crow_right_front_toe_3_proximal_flex
+CROW_MODEL_DOF_LIMIT 35 35 62 12 crow_right_front_toe_3_distal_flex
+CROW_MODEL_DOF_LIMIT 36 36 62 12 crow_right_rear_toe_proximal_flex
+CROW_MODEL_DOF_LIMIT 37 37 62 12 crow_right_rear_toe_distal_flex
+CROW_MODEL_DOF_LIMIT 38 38 62 8 crow_left_hip_roll
+CROW_MODEL_DOF_LIMIT 39 39 62 8 crow_right_hip_roll
+CROW_PRONATION_MODEL 10 62 45 0.449999988 1.99999995e-05 0 -0.349999994 0.349999994 25 0.150000006
+CROW_PRONATION_MODEL 11 62 45 0.449999988 1.99999995e-05 0 -0.349999994 0.349999994 25 0.150000006
+CROW_WING_FRAME 0 0 1 7 6 0 0 1 -0.00377425551 0.0371583328 0.0290732086 -0.0224249996 -0.0905762836 0.0119098602 0 0 0 1 0 0 0 1
+CROW_WING_FRAME 1 0 2 8 7 0 0 -1 -0.00377425551 -0.0371583328 0.0290732086 -0.0224249996 0.0905762836 0.0119098602 0 0 0 1 0 0 0 1
+CROW_WING_FRAME 2 1 3 9 8 1 0 0 -0.0224249996 -0.0905762836 0.0119098602 -0.0224249996 -0.081001021 0.0422462076 0 0 0 1 0 0 0 1
+CROW_WING_FRAME 3 2 4 10 9 -1 0 0 -0.0224249996 0.0905762836 0.0119098602 -0.0224249996 0.081001021 0.0422462076 0 0 0 1 0 0 0 1
+CROW_WING_FRAME 4 3 5 11 10 0 1 0 0 0 0 0 0 0 0 0 0 1 0 0 0 1
+CROW_WING_FRAME 5 4 6 12 11 0 1 0 0 0 0 0 0 0 0 0 0 1 0 0 0 1
+PASS versioned articulated wing structural checks; flight aerodynamics unavailable
+mass_before=0.45006 mass_after=0.45006 bodies=41 joints=40 shapes=33
+<end of output>
+Test time =   0.00 sec
+----------------------------------------------------------
+Test Passed.
+"metalrobo.crow.v15_wing_structure" end time: Nov 16 06:06 CET
+"metalrobo.crow.v15_wing_structure" time elapsed: 00:00:00
+----------------------------------------------------------
+
+54/96 Testing: metalrobo.crow.v15_wing_free_dynamics
+54/96 Test: metalrobo.crow.v15_wing_free_dynamics
+Command: "/Users/n/Developer/numi-crow-articulated-wing-20261116/build/wing-capacity-48/crow_v15_wing_dynamics_check" "/Users/n/Developer/numi-crow-articulated-wing-20261116/build/wing-capacity-48/shaders/MetalRobo.metallib"
+Directory: /Users/n/Developer/numi-crow-articulated-wing-20261116/build/wing-capacity-48
+"metalrobo.crow.v15_wing_free_dynamics" start time: Nov 16 06:06 CET
+Output:
+----------------------------------------------------------
+CROW_MODEL_DRIVE 8 9 8 800 8 2.99999992e-05 120
+CROW_MODEL_DRIVE_NEW 8 10 0.649999976 2.99999992e-05 120
+CROW_MODEL_DRIVE 9 10 9 800 8 2.99999992e-05 120
+CROW_MODEL_DRIVE_NEW 9 10 0.649999976 2.99999992e-05 120
+CROW_MODEL_DOF_LIMIT 6 6 62 15 crow_left_wing_sweep
+CROW_MODEL_DOF_LIMIT 7 7 62 15 crow_right_wing_sweep
+CROW_MODEL_DOF_LIMIT 8 8 62 90 crow_left_wing_flap
+CROW_MODEL_DOF_LIMIT 9 9 62 90 crow_right_wing_flap
+CROW_MODEL_DOF_LIMIT 10 10 62 25 crow_left_wing_pronation
+CROW_MODEL_DOF_LIMIT 11 11 62 25 crow_right_wing_pronation
+CROW_MODEL_DOF_LIMIT 12 12 62 18 crow_tail_pitch
+CROW_MODEL_DOF_LIMIT 13 13 62 18 crow_left_hip_pitch
+CROW_MODEL_DOF_LIMIT 14 14 62 22 crow_left_knee_pitch
+CROW_MODEL_DOF_LIMIT 15 15 62 24 crow_left_ankle_pitch
+CROW_MODEL_DOF_LIMIT 16 16 62 18 crow_right_hip_pitch
+CROW_MODEL_DOF_LIMIT 17 17 62 22 crow_right_knee_pitch
+CROW_MODEL_DOF_LIMIT 18 18 62 24 crow_right_ankle_pitch
+CROW_MODEL_DOF_LIMIT 19 19 62 8 crow_neck_yaw
+CROW_MODEL_DOF_LIMIT 20 20 62 8 crow_neck_pitch
+CROW_MODEL_DOF_LIMIT 21 21 62 10 crow_beak_open
+CROW_MODEL_DOF_LIMIT 22 22 62 12 crow_left_front_toe_1_proximal_flex
+CROW_MODEL_DOF_LIMIT 23 23 62 12 crow_left_front_toe_1_distal_flex
+CROW_MODEL_DOF_LIMIT 24 24 62 12 crow_left_front_toe_2_proximal_flex
+CROW_MODEL_DOF_LIMIT 25 25 62 12 crow_left_front_toe_2_distal_flex
+CROW_MODEL_DOF_LIMIT 26 26 62 12 crow_left_front_toe_3_proximal_flex
+CROW_MODEL_DOF_LIMIT 27 27 62 12 crow_left_front_toe_3_distal_flex
+CROW_MODEL_DOF_LIMIT 28 28 62 12 crow_left_rear_toe_proximal_flex
+CROW_MODEL_DOF_LIMIT 29 29 62 12 crow_left_rear_toe_distal_flex
+CROW_MODEL_DOF_LIMIT 30 30 62 12 crow_right_front_toe_1_proximal_flex
+CROW_MODEL_DOF_LIMIT 31 31 62 12 crow_right_front_toe_1_distal_flex
+CROW_MODEL_DOF_LIMIT 32 32 62 12 crow_right_front_toe_2_proximal_flex
+CROW_MODEL_DOF_LIMIT 33 33 62 12 crow_right_front_toe_2_distal_flex
+CROW_MODEL_DOF_LIMIT 34 34 62 12 crow_right_front_toe_3_proximal_flex
+CROW_MODEL_DOF_LIMIT 35 35 62 12 crow_right_front_toe_3_distal_flex
+CROW_MODEL_DOF_LIMIT 36 36 62 12 crow_right_rear_toe_proximal_flex
+CROW_MODEL_DOF_LIMIT 37 37 62 12 crow_right_rear_toe_distal_flex
+CROW_MODEL_DOF_LIMIT 38 38 62 8 crow_left_hip_roll
+CROW_MODEL_DOF_LIMIT 39 39 62 8 crow_right_hip_roll
+CROW_PRONATION_MODEL 10 62 45 0.449999988 1.99999995e-05 0 -0.349999994 0.349999994 25 0.150000006
+CROW_PRONATION_MODEL 11 62 45 0.449999988 1.99999995e-05 0 -0.349999994 0.349999994 25 0.150000006
+CROW_WING_FRAME 0 0 1 7 6 0 0 1 -0.00377425551 0.0371583328 0.0290732086 -0.0224249996 -0.0905762836 0.0119098602 0 0 0 1 0 0 0 1
+CROW_WING_FRAME 1 0 2 8 7 0 0 -1 -0.00377425551 -0.0371583328 0.0290732086 -0.0224249996 0.0905762836 0.0119098602 0 0 0 1 0 0 0 1
+CROW_WING_FRAME 2 1 3 9 8 1 0 0 -0.0224249996 -0.0905762836 0.0119098602 -0.0224249996 -0.081001021 0.0422462076 0 0 0 1 0 0 0 1
+CROW_WING_FRAME 3 2 4 10 9 -1 0 0 -0.0224249996 0.0905762836 0.0119098602 -0.0224249996 0.081001021 0.0422462076 0 0 0 1 0 0 0 1
+CROW_WING_FRAME 4 3 5 11 10 0 1 0 0 0 0 0 0 0 0 0 0 1 0 0 0 1
+CROW_WING_FRAME 5 4 6 12 11 0 1 0 0 0 0 0 0 0 0 0 0 1 0 0 0 1
+{"compile_ok":true,"compile_message":"","fingerprint":1891418384970266451,"nq":47,"nv":46,"elbow_q":41,"elbow_v":40,"runs":[{"succeeded":true,"dispatched":true,"published":true,"successful_steps":10,"failed_steps":0,"first_gpu_status":0,"message":"","contact_statuses":[],"q":[-0.0186507441,0,0.177351788,0,0,0,1,0,0,0.349999994,0.349999994,0,0,0,-0.119999997,0.280000001,-0.159999996,-0.119999997,0.280000001,-0.159999996,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"v":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"succeeded":true,"dispatched":true,"published":true,"successful_steps":10,"failed_steps":0,"first_gpu_status":0,"message":"","contact_statuses":[],"q":[-0.0186509807,1.65383213e-07,0.177351788,-1.07002307e-07,4.4166714e-07,2.72362346e-08,1,-9.03054315e-05,-5.57467786e-07,0.349999994,0.349999994,2.82344554e-05,-5.65383687e-07,-1.25243162e-06,-0.120002493,0.280000001,-0.159999013,-0.120002456,0.280000001,-0.159998998,-1.37546942e-06,-1.40963857e-06,3.82720572e-07,8.67927175e-10,2.24362626e-10,6.36281416e-10,1.66470615e-10,4.04635658e-10,1.08578459e-10,2.51336757e-10,5.53598452e-11,1.38884104e-09,3.53333696e-10,1.15719567e-09,2.95441699e-10,9.25549692e-10,2.37549619e-10,8.34942504e-10,2.02426409e-10,-3.2274616e-07,-3.2274616e-07,0.000350052898,-0.000210091224,-9.24715494e-07,2.34658742e-07,3.90072984e-07,-4.48904167e-08],"v":[-2.89279433e-05,2.64793744e-05,4.828496e-06,-2.132179e-05,0.000170913045,-5.54592134e-06,-0.0145788807,-4.6007237e-05,-0.000112864313,-4.06374602e-05,0.00474333996,-0.000139262498,-0.000208475045,-0.000290482712,5.13142768e-05,6.74346593e-05,-0.000297438499,5.49237884e-05,6.93825932e-05,-8.1500235e-05,-0.000345833832,0.000169183564,6.83880259e-08,1.7147185e-08,4.79834554e-08,1.20477521e-08,2.75789152e-08,6.94831304e-09,4.50969253e-08,1.12145706e-08,1.28373202e-07,3.22337037e-08,1.0796871e-07,2.71342682e-08,8.75641391e-08,2.2034838e-08,1.0016366e-07,2.48814267e-08,-2.5957992e-05,-2.5957992e-05,0.0597166047,-0.04047703,-9.11679381e-05,8.3693385e-06,6.40034923e-05,-3.03582647e-06]}]}
+<end of output>
+Test time =   0.13 sec
+----------------------------------------------------------
+Test Passed.
+"metalrobo.crow.v15_wing_free_dynamics" end time: Nov 16 06:06 CET
+"metalrobo.crow.v15_wing_free_dynamics" time elapsed: 00:00:00
+----------------------------------------------------------
+
+55/96 Testing: metalrobo.crow.v15_wing_quiet_contact
+55/96 Test: metalrobo.crow.v15_wing_quiet_contact
+Command: "/Users/n/Developer/numi-crow-articulated-wing-20261116/build/wing-capacity-48/crow_v15_wing_dynamics_check" "/Users/n/Developer/numi-crow-articulated-wing-20261116/build/wing-capacity-48/shaders/MetalRobo.metallib" "contact"
+Directory: /Users/n/Developer/numi-crow-articulated-wing-20261116/build/wing-capacity-48
+"metalrobo.crow.v15_wing_quiet_contact" start time: Nov 16 06:06 CET
+Output:
+----------------------------------------------------------
+CROW_MODEL_DRIVE 8 9 8 800 8 2.99999992e-05 120
+CROW_MODEL_DRIVE_NEW 8 10 0.649999976 2.99999992e-05 120
+CROW_MODEL_DRIVE 9 10 9 800 8 2.99999992e-05 120
+CROW_MODEL_DRIVE_NEW 9 10 0.649999976 2.99999992e-05 120
+CROW_MODEL_DOF_LIMIT 6 6 62 15 crow_left_wing_sweep
+CROW_MODEL_DOF_LIMIT 7 7 62 15 crow_right_wing_sweep
+CROW_MODEL_DOF_LIMIT 8 8 62 90 crow_left_wing_flap
+CROW_MODEL_DOF_LIMIT 9 9 62 90 crow_right_wing_flap
+CROW_MODEL_DOF_LIMIT 10 10 62 25 crow_left_wing_pronation
+CROW_MODEL_DOF_LIMIT 11 11 62 25 crow_right_wing_pronation
+CROW_MODEL_DOF_LIMIT 12 12 62 18 crow_tail_pitch
+CROW_MODEL_DOF_LIMIT 13 13 62 18 crow_left_hip_pitch
+CROW_MODEL_DOF_LIMIT 14 14 62 22 crow_left_knee_pitch
+CROW_MODEL_DOF_LIMIT 15 15 62 24 crow_left_ankle_pitch
+CROW_MODEL_DOF_LIMIT 16 16 62 18 crow_right_hip_pitch
+CROW_MODEL_DOF_LIMIT 17 17 62 22 crow_right_knee_pitch
+CROW_MODEL_DOF_LIMIT 18 18 62 24 crow_right_ankle_pitch
+CROW_MODEL_DOF_LIMIT 19 19 62 8 crow_neck_yaw
+CROW_MODEL_DOF_LIMIT 20 20 62 8 crow_neck_pitch
+CROW_MODEL_DOF_LIMIT 21 21 62 10 crow_beak_open
+CROW_MODEL_DOF_LIMIT 22 22 62 12 crow_left_front_toe_1_proximal_flex
+CROW_MODEL_DOF_LIMIT 23 23 62 12 crow_left_front_toe_1_distal_flex
+CROW_MODEL_DOF_LIMIT 24 24 62 12 crow_left_front_toe_2_proximal_flex
+CROW_MODEL_DOF_LIMIT 25 25 62 12 crow_left_front_toe_2_distal_flex
+CROW_MODEL_DOF_LIMIT 26 26 62 12 crow_left_front_toe_3_proximal_flex
+CROW_MODEL_DOF_LIMIT 27 27 62 12 crow_left_front_toe_3_distal_flex
+CROW_MODEL_DOF_LIMIT 28 28 62 12 crow_left_rear_toe_proximal_flex
+CROW_MODEL_DOF_LIMIT 29 29 62 12 crow_left_rear_toe_distal_flex
+CROW_MODEL_DOF_LIMIT 30 30 62 12 crow_right_front_toe_1_proximal_flex
+CROW_MODEL_DOF_LIMIT 31 31 62 12 crow_right_front_toe_1_distal_flex
+CROW_MODEL_DOF_LIMIT 32 32 62 12 crow_right_front_toe_2_proximal_flex
+CROW_MODEL_DOF_LIMIT 33 33 62 12 crow_right_front_toe_2_distal_flex
+CROW_MODEL_DOF_LIMIT 34 34 62 12 crow_right_front_toe_3_proximal_flex
+CROW_MODEL_DOF_LIMIT 35 35 62 12 crow_right_front_toe_3_distal_flex
+CROW_MODEL_DOF_LIMIT 36 36 62 12 crow_right_rear_toe_proximal_flex
+CROW_MODEL_DOF_LIMIT 37 37 62 12 crow_right_rear_toe_distal_flex
+CROW_MODEL_DOF_LIMIT 38 38 62 8 crow_left_hip_roll
+CROW_MODEL_DOF_LIMIT 39 39 62 8 crow_right_hip_roll
+CROW_PRONATION_MODEL 10 62 45 0.449999988 1.99999995e-05 0 -0.349999994 0.349999994 25 0.150000006
+CROW_PRONATION_MODEL 11 62 45 0.449999988 1.99999995e-05 0 -0.349999994 0.349999994 25 0.150000006
+CROW_WING_FRAME 0 0 1 7 6 0 0 1 -0.00377425551 0.0371583328 0.0290732086 -0.0224249996 -0.0905762836 0.0119098602 0 0 0 1 0 0 0 1
+CROW_WING_FRAME 1 0 2 8 7 0 0 -1 -0.00377425551 -0.0371583328 0.0290732086 -0.0224249996 0.0905762836 0.0119098602 0 0 0 1 0 0 0 1
+CROW_WING_FRAME 2 1 3 9 8 1 0 0 -0.0224249996 -0.0905762836 0.0119098602 -0.0224249996 -0.081001021 0.0422462076 0 0 0 1 0 0 0 1
+CROW_WING_FRAME 3 2 4 10 9 -1 0 0 -0.0224249996 0.0905762836 0.0119098602 -0.0224249996 0.081001021 0.0422462076 0 0 0 1 0 0 0 1
+CROW_WING_FRAME 4 3 5 11 10 0 1 0 0 0 0 0 0 0 0 0 0 1 0 0 0 1
+CROW_WING_FRAME 5 4 6 12 11 0 1 0 0 0 0 0 0 0 0 0 0 1 0 0 0 1
+{"compile_ok":true,"compile_message":"","fingerprint":1891418384970266451,"nq":47,"nv":46,"elbow_q":41,"elbow_v":40,"runs":[{"succeeded":true,"dispatched":true,"published":true,"successful_steps":10,"failed_steps":0,"first_gpu_status":0,"message":"","contact_statuses":[{"code":0,"step":0,"substep":7,"pairs":0,"contacts":0,"constraints":0,"first_failed_pair":4294967295},{"code":0,"step":1,"substep":7,"pairs":0,"contacts":0,"constraints":0,"first_failed_pair":4294967295},{"code":0,"step":2,"substep":7,"pairs":0,"contacts":0,"constraints":0,"first_failed_pair":4294967295},{"code":0,"step":3,"substep":7,"pairs":0,"contacts":0,"constraints":0,"first_failed_pair":4294967295},{"code":0,"step":4,"substep":7,"pairs":0,"contacts":0,"constraints":0,"first_failed_pair":4294967295},{"code":0,"step":5,"substep":7,"pairs":0,"contacts":0,"constraints":0,"first_failed_pair":4294967295},{"code":0,"step":6,"substep":7,"pairs":0,"contacts":0,"constraints":0,"first_failed_pair":4294967295},{"code":0,"step":7,"substep":7,"pairs":0,"contacts":0,"constraints":0,"first_failed_pair":4294967295},{"code":0,"step":8,"substep":7,"pairs":0,"contacts":0,"constraints":0,"first_failed_pair":4294967295},{"code":0,"step":9,"substep":7,"pairs":0,"contacts":0,"constraints":0,"first_failed_pair":4294967295}],"q":[-0.0186507441,0,0.177351788,0,0,0,1,0,0,0.349999994,0.349999994,0,0,0,-0.119999997,0.280000001,-0.159999996,-0.119999997,0.280000001,-0.159999996,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"v":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"succeeded":true,"dispatched":true,"published":true,"successful_steps":10,"failed_steps":0,"first_gpu_status":0,"message":"","contact_statuses":[{"code":0,"step":0,"substep":7,"pairs":0,"contacts":0,"constraints":0,"first_failed_pair":4294967295},{"code":0,"step":1,"substep":7,"pairs":0,"contacts":0,"constraints":0,"first_failed_pair":4294967295},{"code":0,"step":2,"substep":7,"pairs":0,"contacts":0,"constraints":0,"first_failed_pair":4294967295},{"code":0,"step":3,"substep":7,"pairs":0,"contacts":0,"constraints":0,"first_failed_pair":4294967295},{"code":0,"step":4,"substep":7,"pairs":0,"contacts":0,"constraints":0,"first_failed_pair":4294967295},{"code":0,"step":5,"substep":7,"pairs":0,"contacts":0,"constraints":0,"first_failed_pair":4294967295},{"code":0,"step":6,"substep":7,"pairs":0,"contacts":0,"constraints":0,"first_failed_pair":4294967295},{"code":0,"step":7,"substep":7,"pairs":0,"contacts":0,"constraints":0,"first_failed_pair":4294967295},{"code":0,"step":8,"substep":7,"pairs":0,"contacts":0,"constraints":0,"first_failed_pair":4294967295},{"code":0,"step":9,"substep":7,"pairs":0,"contacts":0,"constraints":0,"first_failed_pair":4294967295}],"q":[-0.0186510328,1.36891742e-07,0.177351788,-8.82239206e-08,4.19106698e-07,8.25751272e-08,1,-7.57879679e-05,-7.25882387e-07,0.349999994,0.349999994,2.37461772e-05,-4.42888165e-07,-1.26241071e-06,-0.120002985,0.280001044,-0.159999013,-0.120002888,0.280000329,-0.159998998,-1.34203594e-06,-9.72248927e-07,1.2873366e-07,9.45600154e-10,2.47176696e-10,7.57479579e-10,2.00162276e-10,5.69358782e-10,1.53147717e-10,1.96817437e-10,3.83323512e-11,1.36105205e-09,3.49722917e-10,1.17293142e-09,3.02708497e-10,9.84810344e-10,2.55694022e-10,6.78476331e-10,1.59988786e-10,-2.59450474e-07,-2.59450445e-07,0.000315986603,0,-7.44182898e-07,3.87223764e-07,4.49281856e-07,-3.76954858e-08],"v":[-4.75267625e-05,1.88775175e-05,4.1687681e-06,-1.30087474e-05,0.000155966947,2.76208812e-05,-0.0107074799,-9.98940886e-05,-8.32526421e-05,-2.71215267e-05,0.00349930162,-9.89212349e-05,-0.000212557672,-0.000421989505,0.000124588129,0.000128008382,-0.000411794521,0.000120417026,0.0001213348,-9.11869574e-05,-0.000221280337,4.81979405e-05,9.50956149e-08,2.46803076e-08,8.38068175e-08,2.1859055e-08,7.25179774e-08,1.90377847e-08,3.6583284e-08,8.22841972e-09,1.30267594e-07,3.35145991e-08,1.18978775e-07,3.06933465e-08,1.07689964e-07,2.78720886e-08,6.94700759e-08,1.64031402e-08,-1.31488132e-05,-1.31488105e-05,0.0506465547,0,-5.07111763e-05,4.97019319e-05,8.52429366e-05,-1.45515935e-06]}]}
+<end of output>
+Test time =   0.25 sec
+----------------------------------------------------------
+Test Passed.
+"metalrobo.crow.v15_wing_quiet_contact" end time: Nov 16 06:06 CET
+"metalrobo.crow.v15_wing_quiet_contact" time elapsed: 00:00:00
+----------------------------------------------------------
+
+56/96 Testing: metalrobo.crow.v15_wing_cpu_gpu_reference
+56/96 Test: metalrobo.crow.v15_wing_cpu_gpu_reference
+Command: "/Users/n/Developer/numi-crow-articulated-wing-20261116/build/wing-capacity-48/crow_v15_wing_reference_check" "/Users/n/Developer/numi-crow-articulated-wing-20261116/build/wing-capacity-48/shaders/MetalRobo.metallib"
+Directory: /Users/n/Developer/numi-crow-articulated-wing-20261116/build/wing-capacity-48
+"metalrobo.crow.v15_wing_cpu_gpu_reference" start time: Nov 16 06:06 CET
+Output:
+----------------------------------------------------------
+CROW_MODEL_DRIVE 8 9 8 800 8 2.99999992e-05 120
+CROW_MODEL_DRIVE_NEW 8 10 0.649999976 2.99999992e-05 120
+CROW_MODEL_DRIVE 9 10 9 800 8 2.99999992e-05 120
+CROW_MODEL_DRIVE_NEW 9 10 0.649999976 2.99999992e-05 120
+CROW_MODEL_DOF_LIMIT 6 6 62 15 crow_left_wing_sweep
+CROW_MODEL_DOF_LIMIT 7 7 62 15 crow_right_wing_sweep
+CROW_MODEL_DOF_LIMIT 8 8 62 90 crow_left_wing_flap
+CROW_MODEL_DOF_LIMIT 9 9 62 90 crow_right_wing_flap
+CROW_MODEL_DOF_LIMIT 10 10 62 25 crow_left_wing_pronation
+CROW_MODEL_DOF_LIMIT 11 11 62 25 crow_right_wing_pronation
+CROW_MODEL_DOF_LIMIT 12 12 62 18 crow_tail_pitch
+CROW_MODEL_DOF_LIMIT 13 13 62 18 crow_left_hip_pitch
+CROW_MODEL_DOF_LIMIT 14 14 62 22 crow_left_knee_pitch
+CROW_MODEL_DOF_LIMIT 15 15 62 24 crow_left_ankle_pitch
+CROW_MODEL_DOF_LIMIT 16 16 62 18 crow_right_hip_pitch
+CROW_MODEL_DOF_LIMIT 17 17 62 22 crow_right_knee_pitch
+CROW_MODEL_DOF_LIMIT 18 18 62 24 crow_right_ankle_pitch
+CROW_MODEL_DOF_LIMIT 19 19 62 8 crow_neck_yaw
+CROW_MODEL_DOF_LIMIT 20 20 62 8 crow_neck_pitch
+CROW_MODEL_DOF_LIMIT 21 21 62 10 crow_beak_open
+CROW_MODEL_DOF_LIMIT 22 22 62 12 crow_left_front_toe_1_proximal_flex
+CROW_MODEL_DOF_LIMIT 23 23 62 12 crow_left_front_toe_1_distal_flex
+CROW_MODEL_DOF_LIMIT 24 24 62 12 crow_left_front_toe_2_proximal_flex
+CROW_MODEL_DOF_LIMIT 25 25 62 12 crow_left_front_toe_2_distal_flex
+CROW_MODEL_DOF_LIMIT 26 26 62 12 crow_left_front_toe_3_proximal_flex
+CROW_MODEL_DOF_LIMIT 27 27 62 12 crow_left_front_toe_3_distal_flex
+CROW_MODEL_DOF_LIMIT 28 28 62 12 crow_left_rear_toe_proximal_flex
+CROW_MODEL_DOF_LIMIT 29 29 62 12 crow_left_rear_toe_distal_flex
+CROW_MODEL_DOF_LIMIT 30 30 62 12 crow_right_front_toe_1_proximal_flex
+CROW_MODEL_DOF_LIMIT 31 31 62 12 crow_right_front_toe_1_distal_flex
+CROW_MODEL_DOF_LIMIT 32 32 62 12 crow_right_front_toe_2_proximal_flex
+CROW_MODEL_DOF_LIMIT 33 33 62 12 crow_right_front_toe_2_distal_flex
+CROW_MODEL_DOF_LIMIT 34 34 62 12 crow_right_front_toe_3_proximal_flex
+CROW_MODEL_DOF_LIMIT 35 35 62 12 crow_right_front_toe_3_distal_flex
+CROW_MODEL_DOF_LIMIT 36 36 62 12 crow_right_rear_toe_proximal_flex
+CROW_MODEL_DOF_LIMIT 37 37 62 12 crow_right_rear_toe_distal_flex
+CROW_MODEL_DOF_LIMIT 38 38 62 8 crow_left_hip_roll
+CROW_MODEL_DOF_LIMIT 39 39 62 8 crow_right_hip_roll
+CROW_PRONATION_MODEL 10 62 45 0.449999988 1.99999995e-05 0 -0.349999994 0.349999994 25 0.150000006
+CROW_PRONATION_MODEL 11 62 45 0.449999988 1.99999995e-05 0 -0.349999994 0.349999994 25 0.150000006
+CROW_WING_FRAME 0 0 1 7 6 0 0 1 -0.00377425551 0.0371583328 0.0290732086 -0.0224249996 -0.0905762836 0.0119098602 0 0 0 1 0 0 0 1
+CROW_WING_FRAME 1 0 2 8 7 0 0 -1 -0.00377425551 -0.0371583328 0.0290732086 -0.0224249996 0.0905762836 0.0119098602 0 0 0 1 0 0 0 1
+CROW_WING_FRAME 2 1 3 9 8 1 0 0 -0.0224249996 -0.0905762836 0.0119098602 -0.0224249996 -0.081001021 0.0422462076 0 0 0 1 0 0 0 1
+CROW_WING_FRAME 3 2 4 10 9 -1 0 0 -0.0224249996 0.0905762836 0.0119098602 -0.0224249996 0.081001021 0.0422462076 0 0 0 1 0 0 0 1
+CROW_WING_FRAME 4 3 5 11 10 0 1 0 0 0 0 0 0 0 0 0 0 1 0 0 0 1
+CROW_WING_FRAME 5 4 6 12 11 0 1 0 0 0 0 0 0 0 0 0 0 1 0 0 0 1
+{"fingerprint":1891418384970266451,"cpu_ok":true,"cpu_status":0,"pre_invariants_ok":true,"post_invariants_ok":true,"gpu_ok":true,"gpu_steps":1,"gpu_failures":0,"gpu_message":"","elbow_v":40,"cpu_acceleration":[-0.00938366975098,0.00535218691511,0.00102852548913,-0.0145869359649,0.0153084403322,0.00768854942835,-2.76050177378,-0.0309515760555,-0.0158796814209,-0.0233649928246,0.381903367174,-0.000464550732923,-0.0345654312473,-0.124621163021,0.0483912320359,0.0349795440099,-0.116747496153,0.0424404440139,0.0423524820375,-0.136747332189,0.0145012179798,-0.0951611870787,8.64198527715e-05,2.33644561917e-05,6.89580215736e-05,1.90004567435e-05,5.14961903756e-05,1.46364572952e-05,-2.22879230784e-05,-7.33682984355e-06,0.000104533195624,2.72582111089e-05,8.70713644258e-05,2.28942116607e-05,6.96095332279e-05,1.85302122125e-05,2.85217167624e-05,5.9944047053e-06,-0.0258741879015,-0.0258741879015,9.5959651149,-3.57987194924,-0.0522823668332,0.0195830008305,0.00895378394164,-0.00359242163796],"gpu_acceleration":[-0.00938367005438,0.00535218510777,0.00102852575947,-0.0145869283006,0.0153084341437,0.00768854795024,-2.76050114632,-0.0309515893459,-0.0158797074109,-0.0233649872243,0.381901592016,-0.000464545126306,-0.0345654264092,-0.124621137977,0.0483911894262,0.0349795594811,-0.116747476161,0.0424404107034,0.0423524901271,-0.136747315526,0.014501253143,-0.0951612144709,8.64198736963e-05,2.33644605032e-05,6.89580556354e-05,1.90004648175e-05,5.14962230227e-05,1.46364664033e-05,-2.22879334615e-05,-7.33683236831e-06,0.000104533195554,2.72582128673e-05,8.70713847689e-05,2.28942153626e-05,6.96095521562e-05,1.85302178579e-05,2.8521682907e-05,5.99439545113e-06,-0.0258741863072,-0.0258741863072,9.59596347809,-3.57987236977,-0.052282333374,0.0195830129087,0.00895378645509,-0.00359241734259],"before":{"linear":[0,0,0],"angular":[0,0,0],"kinetic":0},"after":{"linear":[-2.3308261813e-13,-1.3416847164e-13,-4.13350575719e-14],"angular":[1.80536694108e-14,-5.4004783015e-14,3.58357653498e-14],"kinetic":4.79798078329e-11}}
+<end of output>
+Test time =   0.02 sec
+----------------------------------------------------------
+Test Passed.
+"metalrobo.crow.v15_wing_cpu_gpu_reference" end time: Nov 16 06:06 CET
+"metalrobo.crow.v15_wing_cpu_gpu_reference" time elapsed: 00:00:00
+----------------------------------------------------------
+
+57/96 Testing: metalrobo.crow.rod_free_modal_reference
+57/96 Test: metalrobo.crow.rod_free_modal_reference
+Command: "/usr/bin/python3" "/Users/n/Developer/numi-crow-articulated-wing-20261116/tests/crow_v15_wing_fixture/test-rod-modal.py" "/Users/n/Developer/numi-crow-articulated-wing-20261116/build/wing-capacity-48/crow-feather-modal-reference"
+Directory: /Users/n/Developer/numi-crow-articulated-wing-20261116/build/wing-capacity-48
+"metalrobo.crow.rod_free_modal_reference" start time: Nov 16 06:06 CET
+Output:
+----------------------------------------------------------
+{"device":"Apple M4 Pro","fast_math":false,"steps":80,"status":0}
+max_position_error_m 4.997662451622874e-10 max_relative_energy_error 8.726087407183768e-06 max_momentum_error 2.312734723918181e-12
+<end of output>
+Test time =   0.47 sec
+----------------------------------------------------------
+Test Passed.
+"metalrobo.crow.rod_free_modal_reference" end time: Nov 16 06:06 CET
+"metalrobo.crow.rod_free_modal_reference" time elapsed: 00:00:00
+----------------------------------------------------------
+
+58/96 Testing: metalrobo.crow.rod_two_way_kkt_reference
+58/96 Test: metalrobo.crow.rod_two_way_kkt_reference
+Command: "/usr/bin/python3" "/Users/n/Developer/numi-crow-articulated-wing-20261116/tests/crow_v15_wing_fixture/test-two-way-kkt.py" "/Users/n/Developer/numi-crow-articulated-wing-20261116/build/wing-capacity-48/crow-feather-two-way-kkt"
+Directory: /Users/n/Developer/numi-crow-articulated-wing-20261116/build/wing-capacity-48
+"metalrobo.crow.rod_two_way_kkt_reference" start time: Nov 16 06:06 CET
+Output:
+----------------------------------------------------------
+{"device":"Apple M4 Pro","fast_math":false,"cases":4}
+rest_forward force_residual 4.241939950824086e-06 equality_error 1.000444171950221e-11 reference_error 3.2055968204655464e-10 momentum_error 1.0176889325030533e-09
+rest_reverse force_residual 4.2381757711894286e-06 equality_error 1.8189894035458565e-12 reference_error 3.160722438240297e-10 momentum_error 1.0181190768147295e-09
+incoming_forward force_residual 3.217247799305184e-06 equality_error 8.185452315956354e-12 reference_error 3.296565481715859e-10 momentum_error 1.0392904771267488e-09
+incoming_reverse force_residual 4.360926978721341e-06 equality_error 2.7284841053187847e-12 reference_error 3.2366447296127635e-10 momentum_error 1.0477445962922354e-09
+rest order_gap 3.456079866737127e-11
+incoming order_gap 3.54702933691442e-11
+<end of output>
+Test time =   0.06 sec
+----------------------------------------------------------
+Test Passed.
+"metalrobo.crow.rod_two_way_kkt_reference" end time: Nov 16 06:06 CET
+"metalrobo.crow.rod_two_way_kkt_reference" time elapsed: 00:00:00
+----------------------------------------------------------
+
+59/96 Testing: metalrobo.crow.rod_free_local_frame
+59/96 Test: metalrobo.crow.rod_free_local_frame
+Command: "/usr/bin/python3" "/Users/n/Developer/numi-crow-articulated-wing-20261116/tests/crow_v15_wing_fixture/test-local-frame.py" "/Users/n/Developer/numi-crow-articulated-wing-20261116/build/wing-capacity-48"
+Directory: /Users/n/Developer/numi-crow-articulated-wing-20261116/build/wing-capacity-48
+"metalrobo.crow.rod_free_local_frame" start time: Nov 16 06:06 CET
+Output:
+----------------------------------------------------------
+PASS: local-frame free rods are translation invariant; attachments fail closed
+<end of output>
+Test time =   0.34 sec
+----------------------------------------------------------
+Test Passed.
+"metalrobo.crow.rod_free_local_frame" end time: Nov 16 06:06 CET
+"metalrobo.crow.rod_free_local_frame" time elapsed: 00:00:00
+----------------------------------------------------------
+
+60/96 Testing: metalrobo.crow.rod_hard_equality_guard
+60/96 Test: metalrobo.crow.rod_hard_equality_guard
+Command: "/usr/bin/python3" "/Users/n/Developer/numi-crow-articulated-wing-20261116/tests/crow_v15_wing_fixture/test-equality-guard.py" "/Users/n/Developer/numi-crow-articulated-wing-20261116/build/wing-capacity-48"
+Directory: /Users/n/Developer/numi-crow-articulated-wing-20261116/build/wing-capacity-48
+"metalrobo.crow.rod_hard_equality_guard" start time: Nov 16 06:06 CET
+Output:
+----------------------------------------------------------
+PASS: invalid equalities rejected and rolled back; stationary control accepted
+<end of output>
+Test time =   0.48 sec
+----------------------------------------------------------
+Test Passed.
+"metalrobo.crow.rod_hard_equality_guard" end time: Nov 16 06:06 CET
+"metalrobo.crow.rod_hard_equality_guard" time elapsed: 00:00:00
+----------------------------------------------------------
+
+End testing: Nov 16 06:06 CET
+
+crow =   1.76 sec*proc
+
+experimental =   1.76 sec*proc
+
+precision =   0.34 sec*proc
+
+reference =   0.52 sec*proc
+
+rod =   1.35 sec*proc
+
+rollback =   0.48 sec*proc
+
+wing =   0.41 sec*proc
+
