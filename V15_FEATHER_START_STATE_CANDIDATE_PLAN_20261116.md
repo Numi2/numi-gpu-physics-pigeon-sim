@@ -1,0 +1,5 @@
+# Experimental fixed-world constraint start-state candidate
+
+Hypothesis: the spurious reversal is caused by feeding free-predicted rod positions into the Baumgarte position term, then using that term to update velocity over the same interval. Test a second isolated candidate that (1) uses start-of-substep rod position for position error **only for fixed-world rod attachment rows**, and (2) uses the previously tested position/velocity-consistent integration. Moving-body targets, angular/twist constraints and CCD remain unqualified and are not claimed fixed. This is a diagnostic candidate, not a proposed general owner patch.
+
+Before execution, require all original incoming-velocity controls to remain within 0.1 µm and 0.1 mm/s without reversal over that magnitude; the displaced-at-rest sign controls must still pass; the one-step damping consistency control must stay within 0.01 µm; and all original 10/100 ms and 4/8 substep loaded support and energy criteria must pass. Record the exact candidate patch and all failures. Passing cannot justify promotion without moving-body and free-rod, collision, CCD, rollback and cross-suite qualification.
