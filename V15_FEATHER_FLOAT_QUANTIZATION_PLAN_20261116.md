@@ -1,0 +1,3 @@
+# Isolate input world-position float32 quantization
+
+The translation control's final GPU energy differs at ±1 m. To identify whether initial coordinate quantization alone contributes, round the identical initial positions to float32 (the GPU input representation) and evaluate the native FP64 potential on both original and rounded states at offsets 0, +1 and -1 m without advancing the solver. Prediction: rounding at +1 m adds nonnegative stored energy and at least half of the absolute final GPU energy difference seen in the prior +1 m versus zero comparison. Record the signed energy differences and exact rounded positions. This is only an input-quantization test; it does not isolate other solver arithmetic or prove a fix. Archive negative/inconclusive outcomes.
