@@ -1,0 +1,3 @@
+# Prerun correction to incompatible control and contact slack
+
+Before any trial, correct the initial plan: the contact is compliant, so its complementarity slack is `J_n v + bias + 0.02*lambda_n`, which must be nonnegative; the unregularized geometric gap alone need not be nonnegative. A reversed normal against x=0.1 can therefore be balanced by finite compliant force and is not mathematically infeasible. Replace that arm with two contradictory hard rows x=0.1 and x=0.2 plus the same inactive compliant normal; it must reject transactionally. Keep all feasible arms, tolerances and analytic references as planned. This amendment was committed before execution.
