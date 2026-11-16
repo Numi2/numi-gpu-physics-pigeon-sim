@@ -1,0 +1,7 @@
+# Fixed-support velocity audit
+
+The 100-frame retained trajectories passed the earlier position and energy criteria, but the additional stationary-velocity screen fails for damping 100. Maximum support speed is 0.001466214 m/s at node 0, step 1, versus the 0.00001 m/s screen. The largest frame-to-frame support-position secant speed in that arm is 0.000003273 m/s. These are different quantities; the result shows that position alone concealed a nonzero published instantaneous support velocity. For damping 0, the maximum support speed was 0.000005070 m/s, within this screen.
+
+This invalidates treating the position/energy pass as qualification of even these stationary constraints. The archived candidate was not promoted. The world kernel integrates the correction as `position += duration * (constrainedVelocity - freeVelocity)` after a rod predictor; the experimental row sets a target using predicted position and velocity. Their combined effect must be derived and tested against both position and velocity constraints, including damping, before promotion. These observations do not by themselves prove which stage causes the inconsistency. The separate 0.0103203 N damped force-balance failure also remains open; this audit does not establish its cause.
+
+Input SHA-256 hashes, every support sample, script and quantitative results are retained here. The audit is post-hoc, as noted in the plan.

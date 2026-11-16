@@ -1,0 +1,22 @@
+[
+  {
+    "damping": 0,
+    "input_sha256": "87036bbc93cf3a82b18b1ceb7fba375163a7e2afd41d3af3bc59a56800693176",
+    "max_speed_m_s": 5.070121509252326e-06,
+    "peak_speed_step": 25,
+    "peak_speed_node": 0,
+    "max_abs_component_m_s": 5.070120096206665e-06,
+    "max_secant_speed_m_s": 5.069524880802745e-06,
+    "pass_stationary_velocity_1e-5": true
+  },
+  {
+    "damping": 100,
+    "input_sha256": "84326be60bc9bebdc823bbdf477feb88c8afb4d950e7cef6aeb464586b7abe45",
+    "max_speed_m_s": 0.00146621374199151,
+    "peak_speed_step": 1,
+    "peak_speed_node": 0,
+    "max_abs_component_m_s": 0.0014662137255072594,
+    "max_secant_speed_m_s": 3.272362505214978e-06,
+    "pass_stationary_velocity_1e-5": false
+  }
+]
