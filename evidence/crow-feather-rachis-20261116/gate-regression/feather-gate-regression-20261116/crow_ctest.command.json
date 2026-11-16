@@ -1,0 +1,12 @@
+{
+  "argv": [
+    "/opt/homebrew/bin/ctest",
+    "--test-dir",
+    "/Users/n/Developer/numi-crow-articulated-wing-20261116/build/wing-capacity-48",
+    "-R",
+    "^metalrobo.crow.v15_wing",
+    "--output-on-failure"
+  ],
+  "exit": 0,
+  "elapsed_s": 0.395467
+}

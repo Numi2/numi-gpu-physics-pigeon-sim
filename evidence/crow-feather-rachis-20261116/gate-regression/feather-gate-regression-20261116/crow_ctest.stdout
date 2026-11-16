@@ -1,0 +1,18 @@
+Test project /Users/n/Developer/numi-crow-articulated-wing-20261116/build/wing-capacity-48
+    Start 53: metalrobo.crow.v15_wing_structure
+1/4 Test #53: metalrobo.crow.v15_wing_structure ...........   Passed    0.00 sec
+    Start 54: metalrobo.crow.v15_wing_free_dynamics
+2/4 Test #54: metalrobo.crow.v15_wing_free_dynamics .......   Passed    0.12 sec
+    Start 55: metalrobo.crow.v15_wing_quiet_contact
+3/4 Test #55: metalrobo.crow.v15_wing_quiet_contact .......   Passed    0.23 sec
+    Start 56: metalrobo.crow.v15_wing_cpu_gpu_reference
+4/4 Test #56: metalrobo.crow.v15_wing_cpu_gpu_reference ...   Passed    0.03 sec
+
+100% tests passed out of 4
+
+Label Time Summary:
+crow            =   0.39 sec*proc (4 tests)
+experimental    =   0.39 sec*proc (4 tests)
+wing            =   0.39 sec*proc (4 tests)
+
+Total Test time (real) =   0.39 sec

@@ -1,0 +1,3 @@
+# Hard-equality publication guard: narrow regression passed
+
+With the isolated research-branch guard, both loaded rod trials returned quality failure and rolled back their starting states; the stationary control completed. All four pre-existing v15 structure, free-dynamics, quiet-contact and CPU/GPU reference checks passed. A new automated rollback guard test was registered and the five-test CTest selection passed after rebuilding the test targets. This prevents the measured hard-equality false success in the tested paths; it does not make the equality exact or fix feather dynamics. Shared solver cross-suite, CCD, moving-body, contact, physical feather and flight qualification remain open. Native logs, commands and input hashes are archived.
