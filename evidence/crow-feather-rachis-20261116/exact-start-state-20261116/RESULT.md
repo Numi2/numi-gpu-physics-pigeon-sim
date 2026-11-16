@@ -1,0 +1,5 @@
+# Exact solve with start-state integration: first result
+
+Both damped and undamped bent-rod cases retained the same timestep and completed. Maximum support position error fell to 2.82e-9 m and support speed to 2.82e-6 m/s; total elastic plus kinetic energy remained below its initial value in both cases. The stationary and signed incoming-velocity controls were also retained. The six-free-node y force-balance error was 7.42e-5 N for damping 0 and 0.0103203 N for damping 100. The latter exceeds the preregistered 0.01 N bound, so this trial does not qualify the dynamics. See `analysis.json` and the individual raw runs.
+
+The existing native world rollback test expected the prior approximate solver to reject the bent-rod fixture. It now fails because the exact path accepts that fixture. This is a changed test premise, not a passing rollback test; a new actual-world failure injection must independently prove rollback before promotion. The standalone mixed-path guard still passes. The candidate changes remain experimental and cannot establish articulated attachment, moving-target, cone-contact, nonlinear or mission correctness.

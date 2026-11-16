@@ -1,0 +1,8 @@
+[1/8] Generating shaders/MetalRobo.metallib
+[2/8] Building OBJCXX object CMakeFiles/crow-feather-predicted-position.dir/tests/crow_v15_wing_fixture/feather-predicted-position.mm.o
+[3/8] Building OBJCXX object CMakeFiles/metalrobo.dir/src/metal/MetalWorld.mm.o
+[4/8] Linking CXX shared library lib/libmetalrobo.dylib
+[5/8] Linking OBJCXX executable crow-feather-predicted-position
+[6/8] Linking CXX executable crow_quality_refinement_guard
+[7/8] Linking OBJCXX executable crow-feather-equality-gate
+[8/8] Linking CXX executable crow_quality_exact_v15
