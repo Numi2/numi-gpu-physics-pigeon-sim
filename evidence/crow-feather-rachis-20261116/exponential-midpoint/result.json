@@ -1,0 +1,22 @@
+{
+  "input_sha256": {
+    "exponential-midpoint/crow-exponential-midpoint.jsonl": "c9719278b6d4488cfebf576a7515ee07e1d22e8586225f00d75939332738a4b0",
+    "nonlinear-reference/tight.json": "ba7555900524137fd5ecabc0cde58962af20bb07ca70473a9f54a89fef433b08"
+  },
+  "summaries": [
+    {
+      "event": "summary",
+      "mode": "linear",
+      "max_energy_error": 0.0005940255234325315,
+      "max_gpu_position_difference_m": 1.2189437735679641e-10
+    },
+    {
+      "event": "summary",
+      "mode": "exponential_midpoint",
+      "max_energy_error": 0.010169760427808967,
+      "max_gpu_position_difference_m": 0
+    }
+  ],
+  "max_position_error_m": 1.6517362180925406e-07,
+  "max_position_error_step": 79
+}
