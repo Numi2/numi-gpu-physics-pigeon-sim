@@ -1,0 +1,5 @@
+# Fixed-support tolerance sensitivity: failed
+
+The 1e-8 and 1e-10 m arms were accepted after 34 and 76 sweeps. They gained approximately 8.26e-7 J and 8.75e-7 J in reconstructed total energy, respectively, and had maximum free-node elastic y-forces of 0.810 N and 0.806 N. Their midpoint reaction magnitudes were 0.000301 N and 0.000698 N, versus a 0.64749 N analytical scale. The 1e-12 m arm failed to converge at the 4096-sweep ceiling. Therefore the preregistered strictest-arm prediction and monotonic-improvement interpretation failed.
+
+The rejected third arm's state remains the original transactional input; its reported candidate diagnostic energy is not a published result. No final force or energy from that rejected candidate is interpreted as accepted physics. This experiment does not identify the root cause. All source, identities, statuses, energies, reactions and node-level measurements are retained in `evidence/crow-feather-rachis-20261116/feather-constraint-tolerance-20261116/` and adjacent source. No whole-feather, flight or biological qualification follows.
