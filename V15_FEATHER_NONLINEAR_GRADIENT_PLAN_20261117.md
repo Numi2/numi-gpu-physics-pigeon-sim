@@ -1,0 +1,3 @@
+# Native force-gradient step sensitivity control
+
+Repeat the identical retained 80-state nonlinear trajectory residual calculation with central-difference perturbations of 1e-8 m and 1e-10 m, compared with the retained 1e-9 m result. The GPU trajectory, model, native energy implementation and timestep remain unchanged. Preregister: the maximum residual for each perturbation differs from 0.03452 N by less than 5% and remains above the 0.01 N limit. Record all states, source, native library and binary hashes; if the result changes more, the force diagnosis is numerically inconclusive and requires a better gradient. This is a derivative accuracy control, not a timestep change or a production physics fix.
