@@ -1,0 +1,5 @@
+# FP32 KKT feasibility control
+
+The constrained planar reference has implicit operator condition number approximately 6778. Test whether ordinary single-precision arithmetic can meet the existing small-segment force and geometry criteria in local coordinates. Repeat the exact dense Schur computation in NumPy float32 for the same forward and reversed orderings, with rest and nonzero-velocity starts; evaluate all resulting position, support and dynamic-force errors independently against the original double-precision inputs. Compare against the archived FP64 direct/Schur result. This is an arithmetic feasibility control on CPU, not a Metal kernel, performance measurement, nonlinear rod or moving wing solve.
+
+Preregister: for every case max dynamic-force residual below 0.01 N, support error below 1e-9 m, FP32-vs-FP64 position difference below 0.05 micrometres, and order-mapped FP32 position gap below 0.05 micrometres. Archive full outputs and input hashes; failure motivates a better conditioned or refined formulation, not a looser criterion. Passing does not by itself qualify the real GPU implementation.
