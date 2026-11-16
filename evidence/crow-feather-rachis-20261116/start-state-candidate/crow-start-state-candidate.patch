@@ -1,0 +1,94 @@
+diff --git a/src/metal/MetalWorld.metal b/src/metal/MetalWorld.metal
+index 05bb574b8..e61d51eb1 100644
+--- a/src/metal/MetalWorld.metal
++++ b/src/metal/MetalWorld.metal
+@@ -995,8 +995,8 @@ kernel void mr_world_latch_rod_contact_status(
+ kernel void mr_world_integrate_constrained_rod_state(
+     device const MRMetalWorldContactDispatchGPU& dispatch [[buffer(0)]],
+     device const MRCCDEventStateGPU* eventStates [[buffer(1)]],
+-    device const float4* freeVelocities [[buffer(2)]],
+-    device const float* freeTwistRates [[buffer(3)]],
++    device const float4* startPositions [[buffer(2)]],
++    device const float* startTwists [[buffer(3)]],
+     device MRRodNodeStateGPU* candidateNodes [[buffer(4)]],
+     device MRRodEdgeStateGPU* candidateEdges [[buffer(5)]],
+     device MRMetalWorldContactStatusGPU* statuses [[buffer(6)]],
+@@ -1043,10 +1043,10 @@ kernel void mr_world_integrate_constrained_rod_state(
+     for (uint node = 0u; node < dispatch.rodNodeCount; ++node) {
+         const uint index = nodeBase + node;
+         MRRodNodeStateGPU state = candidateNodes[index];
+-        const float3 velocityDelta =
+-            state.velocity.xyz - freeVelocities[index].xyz;
+-        const float3 positionCorrection = duration * velocityDelta;
+-        state.position.xyz += positionCorrection;
++        const float3 correctedPosition =
++            startPositions[index].xyz + duration * state.velocity.xyz;
++        const float3 positionCorrection = correctedPosition - state.position.xyz;
++        state.position.xyz = correctedPosition;
+         if (!all(isfinite(state.position)) ||
+             !all(isfinite(state.velocity)) ||
+             !all(isfinite(positionCorrection))) {
+@@ -1070,10 +1070,10 @@ kernel void mr_world_integrate_constrained_rod_state(
+     for (uint edge = 0u; edge < dispatch.rodEdgeCount; ++edge) {
+         const uint index = edgeBase + edge;
+         MRRodEdgeStateGPU state = candidateEdges[index];
+-        const float twistCorrection = duration * (
+-            state.twistAndRate.y - freeTwistRates[index]
+-        );
+-        state.twistAndRate.x += twistCorrection;
++        const float correctedTwist =
++            startTwists[index] + duration * state.twistAndRate.y;
++        const float twistCorrection = correctedTwist - state.twistAndRate.x;
++        state.twistAndRate.x = correctedTwist;
+         if (!all(isfinite(state.twistAndRate)) ||
+             !isfinite(twistCorrection)) {
+             status.code = MR_STEP_NONFINITE_RESULT;
+diff --git a/src/metal/MetalWorld.mm b/src/metal/MetalWorld.mm
+index 9b8ab89bf..788d091a4 100644
+--- a/src/metal/MetalWorld.mm
++++ b/src/metal/MetalWorld.mm
+@@ -13537,8 +13537,8 @@ bool encodeRodConstrainedIntegration(
+         {
+             {0u, kContactDispatch},
+             {1u, eventStates},
+-            {2u, kRodOutputVelocities},
+-            {3u, kRodOutputTwistRates},
++            {2u, kRodInputPositions},
++            {3u, kRodInputTwists},
+             {4u, candidateRodNodes},
+             {5u, candidateRodEdges},
+             {6u, kContactStatuses},
+@@ -14856,6 +14856,7 @@ bool encodeParallelManifoldCompile(
+                 {16u, kCandidateBodies},
+                 {17u, candidateRodNodes},
+                 {18u, candidateRodEdges},
++                {19u, kRodInputPositions},
+             },
+             nullptr,
+             0u,
+diff --git a/src/metal/MetalWorldContact.metal b/src/metal/MetalWorldContact.metal
+index 1df7cdb01..9e9212587 100644
+--- a/src/metal/MetalWorldContact.metal
++++ b/src/metal/MetalWorldContact.metal
+@@ -4692,6 +4692,7 @@ kernel void mr_world_seed_authored_constraint_ir(
+     device const MRBodyStateGPU* candidateBodies [[buffer(16)]],
+     device const MRRodNodeStateGPU* candidateRodNodes [[buffer(17)]],
+     device const MRRodEdgeStateGPU* candidateRodEdges [[buffer(18)]],
++    device const float4* startRodPositions [[buffer(19)]],
+     const uint environment [[thread_position_in_grid]]
+ ) {
+     if (environment >= dispatch.environmentCount ||
+@@ -5039,10 +5040,9 @@ kernel void mr_world_seed_authored_constraint_ir(
+                     sourceEndpoints[source.endpointOffset];
+                 const MRConstraintIREndpointGPU targetEndpoint =
+                     sourceEndpoints[source.endpointOffset + 1u];
+-                const float3 rodPosition =
+-                    candidateRodNodes[
+-                        rodNodeBase + rodEndpoint.objectIndex
+-                    ].position.xyz;
++                const float3 rodPosition = targetEndpoint.role == MR_CONSTRAINT_IR_ENDPOINT_WORLD
++                    ? startRodPositions[rodNodeBase + rodEndpoint.objectIndex].xyz
++                    : candidateRodNodes[rodNodeBase + rodEndpoint.objectIndex].position.xyz;
+                 float3 targetPosition =
+                     targetEndpoint.anchor.xyz;
+                 if (targetEndpoint.role !=

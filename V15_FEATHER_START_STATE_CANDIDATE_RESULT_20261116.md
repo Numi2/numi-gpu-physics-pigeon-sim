@@ -1,0 +1,5 @@
+# Start-state constraint candidate: partial result, rejected
+
+Using fixed-world rod start positions for the stabilization error, alongside the earlier position/velocity change, reduced the spurious incoming-velocity reversal to at most 0.010 mm/s and displacement to 0.010 µm in all four sign/mode controls, satisfying their preregistered thresholds. The displaced-at-rest direction controls also passed. This supports the suspected source of the reversal for this limited fixed-world case.
+
+The candidate nonetheless fails the loaded fixture. At 10 and 100 ms with one substep, maximum target errors were 1.854 and 2.432 µm and midpoint force magnitudes 0.535 and 0.507 N, versus a 1 µm maximum and 0.62905 N reference ±5%. With four and eight substeps, errors were 0.199 and 0.052 µm, but forces were 0.598 and 0.678 N; eight-substep force error increased above the preregistered limit rather than converging. All statuses reported success. The fixed-world-only diagnostic patch is rejected and archived; moving-body and CCD behavior were never tested. No physical feather or flight qualification follows.
