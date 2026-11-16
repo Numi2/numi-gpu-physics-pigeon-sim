@@ -1,0 +1,4 @@
+f606d609bd31c2c84e88414467ddcc085bb9783c95932e6ed688bc8dd96d00d4  build/wing-capacity-48/crow-feather-force-balance
+31584364fc45986f2f127ba6c680b2b92ca8c64a34c65728efc7debdad0ea56a  build/wing-capacity-48/lib/libmetalrobo.dylib
+8ea4f8f7353e0625d69811f55441d5f06f63b7fd33efa7bbd023a830bbe3b0f3  tests/crow_v15_wing_fixture/feather-force-balance.cpp
+0e8432e153136ae6726f651d4bf8c4e71f07a681eeaf0a956a8ccdc792ee7402  build/feather-force-balance-20261116/input.txt
