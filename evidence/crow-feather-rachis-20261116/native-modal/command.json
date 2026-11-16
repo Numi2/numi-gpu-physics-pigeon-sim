@@ -1,0 +1,9 @@
+{
+  "host_build": ["clang++", "-std=c++17", "-O2", "-fobjc-arc", "/tmp/crow-modal.mm", "-framework", "Foundation", "-framework", "Metal", "-o", "/tmp/crow-modal"],
+  "run": ["/tmp/crow-modal", "/tmp/crow-modal.metal", "/tmp/crow-modal-input.bin", "/tmp/crow-modal-output.bin"],
+  "host_binary_sha256": "3c4d0e87780e413edb5a820bc1d21db7376a1c5df653b1427863e31830b9afc5",
+  "metal_source_sha256": "f29a37a95542957da1446bd38c5eccdabdcadc47b5924f4bd9f0c7a185951b16",
+  "input_sha256": "fbaea682b209140ef4e92a56ac5230ee1dcb21d168d74c466f1d2681ff047dc6",
+  "runtime_compiled_metal_fast_math": false,
+  "exit": 0
+}
