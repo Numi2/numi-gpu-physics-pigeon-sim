@@ -77,6 +77,7 @@ BirdFlowMetal advances a D3Q19 fluid state on the GPU, evaluates articulated mov
 - [Deetjen through-flight](Docs/DEETJEN_DOVE_THROUGH_FLIGHT.md) — prescribed-motion CFD scope and artifact contract.
 - [American crow model](Docs/AMERICAN_CROW_MODEL.md) — model construction and explicitly simulated constraints.
 - [Numi crow journey](Docs/NUMI_CROW_JOURNEY.md) — locomotion/flight task, teacher distillation, held-out result, and render boundary.
+- [Numi Lab bird simulation research](Integrations/NumiLab/README.md) — imported Crow and Dove source, wing checks, and archived experiment provenance.
 - [Formation Flight Observatory](Docs/FORMATION_FLIGHT_OBSERVATORY.md) — visual/field observatory provenance.
 - [Visual progress archive](Docs/Media/Progress/README.md) — dated captures and their context.
 
