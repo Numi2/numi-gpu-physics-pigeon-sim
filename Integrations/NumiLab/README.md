@@ -4,14 +4,14 @@ BirdFlowMetal owns the Crow and Dove research collected here. The imported sourc
 
 ## Source and evidence
 
-| Numi Lab branch | Exact source revision |
-| --- | --- |
-| `agent/crow-articulated-wing-20261116` | [`20b8f43ab1b8`](https://github.com/Numi2/numi-lab/tree/20b8f43ab1b8bcfc8d2297a2118f56c823248912) |
-| `agent/crow-v15-flight-evidence-20261112` | [`fd2739e81654`](https://github.com/Numi2/numi-lab/tree/fd2739e81654bb72c09d4f9eeecc9d2e7e068907) |
-| `agent/american-crow-rl-20261107` | [`4ab800743a06`](https://github.com/Numi2/numi-lab/tree/4ab800743a06cc955774b1812849c720ae19d24f) |
-| `agent/crow-world-model-navigation` | [`577c54ff9075`](https://github.com/Numi2/numi-lab/tree/577c54ff90756f99b936a1d136c1768332022af5) |
-| `agent/crow-numi-integration` | [`cea10e9bfd2d`](https://github.com/Numi2/numi-lab/tree/cea10e9bfd2d36e8436c349e81d301ab13f26ca9) |
-| `agent/birdflow-dove-numi` | [`638874bf11a7`](https://github.com/Numi2/numi-lab/tree/638874bf11a74853d540b806fc874df635edd1e3) |
+| Former Numi Lab branch | Exact source revision | Numi Lab archive tag |
+| --- | --- | --- |
+| `agent/crow-articulated-wing-20261116` | [`20b8f43ab1b8`](https://github.com/Numi2/numi-lab/tree/20b8f43ab1b8bcfc8d2297a2118f56c823248912) | `archive/birdflow/20261125/crow-articulated-wing-20261116` |
+| `agent/crow-v15-flight-evidence-20261112` | [`fd2739e81654`](https://github.com/Numi2/numi-lab/tree/fd2739e81654bb72c09d4f9eeecc9d2e7e068907) | `archive/birdflow/20261125/crow-v15-flight-evidence-20261112` |
+| `agent/american-crow-rl-20261107` | [`4ab800743a06`](https://github.com/Numi2/numi-lab/tree/4ab800743a06cc955774b1812849c720ae19d24f) | `archive/birdflow/20261125/american-crow-rl-20261107` |
+| `agent/crow-world-model-navigation` | [`577c54ff9075`](https://github.com/Numi2/numi-lab/tree/577c54ff90756f99b936a1d136c1768332022af5) | `archive/birdflow/20261125/crow-world-model-navigation` |
+| `agent/crow-numi-integration` | [`cea10e9bfd2d`](https://github.com/Numi2/numi-lab/tree/cea10e9bfd2d36e8436c349e81d301ab13f26ca9) | `archive/birdflow/20261125/crow-numi-integration` |
+| `agent/birdflow-dove-numi` | [`638874bf11a7`](https://github.com/Numi2/numi-lab/tree/638874bf11a74853d540b806fc874df635edd1e3) | `archive/birdflow/20261125/birdflow-dove-numi` |
 
 The wing and flight revisions together contain all six histories. This import copies 265 files, including the [flight diagnostic package](artifacts/crow-v15-flight-diagnostic-state-isolation-20261112/) and selected [flight reports](artifacts/crow-v15-recorded-restart-20261114/), and records their original modes, paths and contents in the Git trees and [source manifest](source-files.tsv). The [evidence index](evidence-index.tsv) pins 2,379 source directories to exact Git tree IDs. The bulk flight evidence, including replay frames, videos, and model checkpoints, is preserved in [the original flight archive](https://github.com/Numi2/numi-lab/tree/fd2739e81654bb72c09d4f9eeecc9d2e7e068907/artifacts). Follow-up wing and balance experiments already live in [the separate BirdFlowMetal evidence history](https://github.com/Numi2/numi-gpu-physics-pigeon-sim/tree/7d1c6dbf5216fb86fe7e1b2e55670b746e6da386).
 
@@ -24,6 +24,18 @@ shasum -a 256 -c artifacts/crow-v15-flight-diagnostic-state-isolation-20261112/S
 ```
 
 To verify an indexed directory in a Numi Lab checkout, use `git ls-tree <source_revision> -- <path>` and compare its tree ID with the index. The source notices remain in [`sources/THIRD_PARTY_NOTICES.md`](sources/THIRD_PARTY_NOTICES.md).
+
+## Restore an original branch
+
+The archive tags preserve the original commits and their histories. You can reconstruct a branch from its tag in a fresh partial clone. Use the corresponding row above for other branches.
+
+```sh
+git init --bare crow-history.git
+archive_tag=archive/birdflow/20261125/crow-v15-flight-evidence-20261112
+git -C crow-history.git remote add origin https://github.com/Numi2/numi-lab.git
+git -C crow-history.git fetch --filter=blob:none --no-tags origin "refs/tags/$archive_tag:refs/tags/$archive_tag"
+git -C crow-history.git branch agent/crow-v15-flight-evidence-20261112 "refs/tags/$archive_tag"
+```
 
 ## Run the articulated wing checks
 

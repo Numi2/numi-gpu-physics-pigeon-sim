@@ -85,7 +85,7 @@ deterministic, reset-relative geometry offsets to both gate posts, both slalom
 posts, and the perch: `±(0.12, 0.12, 0.08) m`,
 `±(0.20, 0.18, 0.08) m`, and `±(0.25, 0.20, 0.08) m`, respectively.
 The owning Numi Lab implementation is commit `da118d4` on
-`agent/crow-world-model-navigation`.
+the `archive/birdflow/20261125/crow-world-model-navigation` tag.
 
 Revision 21 of the 409,600-sample training run was compared with its
 ABI-compatible transferred baseline across the training course and two
@@ -121,7 +121,7 @@ not a policy-training or robustness claim.
 ## Five-waypoint reliability development on 29 August 2026
 
 The next training iteration is implemented in Numi Lab commit `c5318a5` on
-`agent/crow-world-model-navigation`. The V10 actor now consumes 692 values and
+the `archive/birdflow/20261125/crow-world-model-navigation` tag. The V10 actor now consumes 692 values and
 the critic 92: current and next root-local route vectors, route fraction, and
 completion state are explicit instead of being inferred only from masked
 depth. An opt-in autonomous navigation curriculum can reset from accepted
